@@ -40,6 +40,8 @@ static void dump_regs(struct irq_regs *regs)
 
 	printf("EIP: %04x:[<%08lx>] EFLAGS: %08lx\n",
 			(u16)regs->xcs, regs->eip, regs->eflags);
+	if (gd->flags & GD_FLG_RELOC)
+		printf("reloc EIP : [<%08lx>]\n", regs->eip - gd->reloc_off);
 
 	printf("EAX: %08lx EBX: %08lx ECX: %08lx EDX: %08lx\n",
 		regs->eax, regs->ebx, regs->ecx, regs->edx);
