@@ -11,8 +11,6 @@
 
 #ifdef CONFIG_BCM2836
 #define BCM2835_GPIO_BASE		0x3f200000
-#else
-#define BCM2835_GPIO_BASE		0x20200000
 #endif
 #define BCM2835_GPIO_COUNT		54
 

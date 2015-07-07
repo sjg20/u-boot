@@ -19,15 +19,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-static const struct bcm2835_gpio_platdata gpio_platdata = {
-	.base = BCM2835_GPIO_BASE,
-};
-
-U_BOOT_DEVICE(bcm2835_gpios) = {
-	.name = "gpio_bcm2835",
-	.platdata = &gpio_platdata,
-};
-
 struct msg_get_arm_mem {
 	struct bcm2835_mbox_hdr hdr;
 	struct bcm2835_mbox_tag_get_arm_mem get_arm_mem;

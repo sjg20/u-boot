@@ -114,9 +114,29 @@ static int bcm2835_gpio_probe(struct udevice *dev)
 	return 0;
 }
 
+#ifdef CONFIG_OF_CONTROL
+static int bcm2835_gpio_ofdata_to_platdata(struct udevice *dev)
+{
+	struct bcm2835_gpio_platdata *plat = dev_get_platdata(dev);
+
+	plat->base = dev_get_addr(dev);
+	if (plat->base == FDT_ADDR_T_NONE)
+		return -EINVAL;
+
+	return 0;
+}
+
+static const struct udevice_id bcm2835_gpio_id[] = {
+	{.compatible = "brcm,bcm2835-gpio"},
+	{}
+};
+#endif
+
 U_BOOT_DRIVER(gpio_bcm2835) = {
 	.name	= "gpio_bcm2835",
 	.id	= UCLASS_GPIO,
+	.of_match = of_match_ptr(bcm2835_gpio_id),
+	.ofdata_to_platdata = of_match_ptr(bcm2835_gpio_ofdata_to_platdata),
 	.ops	= &gpio_bcm2835_ops,
 	.probe	= bcm2835_gpio_probe,
 	.priv_auto_alloc_size = sizeof(struct bcm2835_gpios),
