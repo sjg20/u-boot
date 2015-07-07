@@ -28,21 +28,6 @@ U_BOOT_DEVICE(bcm2835_gpios) = {
 	.platdata = &gpio_platdata,
 };
 
-static const struct pl01x_serial_platdata serial_platdata = {
-#ifdef CONFIG_BCM2836
-	.base = 0x3f201000,
-#else
-	.base = 0x20201000,
-#endif
-	.type = TYPE_PL011,
-	.clock = 3000000,
-};
-
-U_BOOT_DEVICE(bcm2835_serials) = {
-	.name = "serial_pl01x",
-	.platdata = &serial_platdata,
-};
-
 struct msg_get_arm_mem {
 	struct bcm2835_mbox_hdr hdr;
 	struct bcm2835_mbox_tag_get_arm_mem get_arm_mem;
