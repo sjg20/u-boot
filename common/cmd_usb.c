@@ -525,7 +525,12 @@ static void do_usb_start(void)
 		return;
 
 	/* Driver model will probe the devices as they are found */
-#ifndef CONFIG_DM_USB
+#ifdef CONFIG_DM_USB
+# ifndef CONFIG_DM_ETH
+	/* try to recognize ethernet devices immediately */
+	usb_ether_curr_dev = usb_host_eth_scan(1);
+# endif
+#else /* !CONFIG_DM_USB */
 # ifdef CONFIG_USB_STORAGE
 	/* try to recognize storage devices immediately */
 	usb_stor_curr_dev = usb_stor_scan(1);
