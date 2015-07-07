@@ -519,6 +519,7 @@ static int eth_post_probe(struct udevice *dev)
 	struct eth_device_priv *priv = dev->uclass_priv;
 	struct eth_pdata *pdata = dev->platdata;
 	unsigned char env_enetaddr[6];
+	const char *prefix;
 
 	priv->state = ETH_STATE_INIT;
 
@@ -526,7 +527,11 @@ static int eth_post_probe(struct udevice *dev)
 	if (eth_get_ops(dev)->read_rom_hwaddr)
 		eth_get_ops(dev)->read_rom_hwaddr(dev);
 
-	eth_getenv_enetaddr_by_index("eth", dev->seq, env_enetaddr);
+	prefix = device_get_uclass_id(dev->parent) == UCLASS_USB_HUB ?
+			"usbeth" : "eth";
+	debug("prefix=%s, uclass=%d\n", prefix,
+	      device_get_uclass_id(dev->parent));
+	eth_getenv_enetaddr_by_index(prefix, dev->seq, env_enetaddr);
 	if (!is_zero_ethaddr(env_enetaddr)) {
 		if (!is_zero_ethaddr(pdata->enetaddr) &&
 		    memcmp(pdata->enetaddr, env_enetaddr, 6)) {
