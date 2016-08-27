@@ -812,6 +812,14 @@ append = cat $(filter-out $< $(PHONY), $^) >> $@
 quiet_cmd_pad_cat = CAT     $@
 cmd_pad_cat = $(cmd_objcopy) && $(append) || rm -f $@
 
+cfg: u-boot.cfg $(if $(CONFIG_SPL),cfg-spl) $(if $(CONFIG_TPL),cfg-tpl)
+
+cfg-spl:
+	$(Q)$(MAKE) obj=spl -f $(srctree)/scripts/Makefile.spl cfg
+
+cfg-tpl:
+	$(Q)$(MAKE) obj=tpl -f $(srctree)/scripts/Makefile.spl cfg
+
 all:		$(ALL-y)
 ifeq ($(CONFIG_DM_I2C_COMPAT)$(CONFIG_SANDBOX),y)
 	@echo "===================== WARNING ======================"
