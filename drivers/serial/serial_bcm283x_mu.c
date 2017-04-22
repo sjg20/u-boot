@@ -128,7 +128,6 @@ static const struct dm_serial_ops bcm283x_mu_serial_ops = {
 	.setbrg = bcm283x_mu_serial_setbrg,
 };
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
 static const struct udevice_id bcm283x_mu_serial_id[] = {
 	{.compatible = "brcm,bcm2835-aux-uart"},
 	{}
@@ -188,7 +187,6 @@ static int bcm283x_mu_serial_probe(struct udevice *dev)
 
 	return 0;
 }
-#endif
 
 U_BOOT_DRIVER(serial_bcm283x_mu) = {
 	.name = "serial_bcm283x_mu",
