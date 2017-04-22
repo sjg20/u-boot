@@ -17,9 +17,7 @@
 #include <linux/delay.h>
 
 #include <asm/io.h>
-#ifdef CONFIG_DM_SERIAL
 #include <asm/arch/atmel_serial.h>
-#endif
 #include <asm/arch/clk.h>
 #include <asm/arch/hardware.h>
 
@@ -27,114 +25,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#ifndef CONFIG_DM_SERIAL
-static void atmel_serial_setbrg_internal(atmel_usart3_t *usart, int id,
-					 int baudrate)
-{
-	unsigned long divisor;
-	unsigned long usart_hz;
-
-	/*
-	 *              Master Clock
-	 * Baud Rate = --------------
-	 *                16 * CD
-	 */
-	usart_hz = get_usart_clk_rate(id);
-	divisor = (usart_hz / 16 + baudrate / 2) / baudrate;
-	writel(USART3_BF(CD, divisor), &usart->brgr);
-}
-
-static void atmel_serial_init_internal(atmel_usart3_t *usart)
-{
-	/*
-	 * Just in case: drain transmitter register
-	 * 1000us is enough for baudrate >= 9600
-	 */
-	if (!(readl(&usart->csr) & USART3_BIT(TXEMPTY)))
-		__udelay(1000);
-
-	writel(USART3_BIT(RSTRX) | USART3_BIT(RSTTX), &usart->cr);
-}
-
-static void atmel_serial_activate(atmel_usart3_t *usart)
-{
-	writel((USART3_BF(USART_MODE, USART3_USART_MODE_NORMAL)
-			   | USART3_BF(USCLKS, USART3_USCLKS_MCK)
-			   | USART3_BF(CHRL, USART3_CHRL_8)
-			   | USART3_BF(PAR, USART3_PAR_NONE)
-			   | USART3_BF(NBSTOP, USART3_NBSTOP_1)),
-			   &usart->mr);
-	writel(USART3_BIT(RXEN) | USART3_BIT(TXEN), &usart->cr);
-	/* 100us is enough for the new settings to be settled */
-	__udelay(100);
-}
-
-static void atmel_serial_setbrg(void)
-{
-	atmel_serial_setbrg_internal((atmel_usart3_t *)CONFIG_USART_BASE,
-				     CONFIG_USART_ID, gd->baudrate);
-}
-
-static int atmel_serial_init(void)
-{
-	atmel_usart3_t *usart = (atmel_usart3_t *)CONFIG_USART_BASE;
-
-	atmel_serial_init_internal(usart);
-	serial_setbrg();
-	atmel_serial_activate(usart);
-
-	return 0;
-}
-
-static void atmel_serial_putc(char c)
-{
-	atmel_usart3_t *usart = (atmel_usart3_t *)CONFIG_USART_BASE;
-
-	if (c == '\n')
-		serial_putc('\r');
-
-	while (!(readl(&usart->csr) & USART3_BIT(TXRDY)));
-	writel(c, &usart->thr);
-}
-
-static int atmel_serial_getc(void)
-{
-	atmel_usart3_t *usart = (atmel_usart3_t *)CONFIG_USART_BASE;
-
-	while (!(readl(&usart->csr) & USART3_BIT(RXRDY)))
-		 WATCHDOG_RESET();
-	return readl(&usart->rhr);
-}
-
-static int atmel_serial_tstc(void)
-{
-	atmel_usart3_t *usart = (atmel_usart3_t *)CONFIG_USART_BASE;
-	return (readl(&usart->csr) & USART3_BIT(RXRDY)) != 0;
-}
-
-static struct serial_device atmel_serial_drv = {
-	.name	= "atmel_serial",
-	.start	= atmel_serial_init,
-	.stop	= NULL,
-	.setbrg	= atmel_serial_setbrg,
-	.putc	= atmel_serial_putc,
-	.puts	= default_serial_puts,
-	.getc	= atmel_serial_getc,
-	.tstc	= atmel_serial_tstc,
-};
-
-void atmel_serial_initialize(void)
-{
-	serial_register(&atmel_serial_drv);
-}
-
-__weak struct serial_device *default_serial_console(void)
-{
-	return &atmel_serial_drv;
-}
-#endif
-
-#ifdef CONFIG_DM_SERIAL
 enum serial_clk_type {
 	CLK_TYPE_NORMAL = 0,
 	CLK_TYPE_DBGU,
@@ -334,4 +224,3 @@ static inline void _debug_uart_putc(int ch)
 }
 
 DEBUG_UART_FUNCS
-#endif
