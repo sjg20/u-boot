@@ -25,15 +25,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#ifndef CONFIG_DM_SERIAL
-
-static volatile unsigned char *const port[] = CONFIG_PL01x_PORTS;
-static enum pl01x_type pl01x_type __attribute__ ((section(".data")));
-static struct pl01x_regs *base_regs __attribute__ ((section(".data")));
-#define NUM_PORTS (sizeof(port)/sizeof(port[0]))
-
-#endif
-
 static int pl01x_putc(struct pl01x_regs *regs, char c)
 {
 	/* Wait until there is space in the FIFO */
@@ -184,100 +175,6 @@ static int pl01x_generic_setbrg(struct pl01x_regs *regs, enum pl01x_type type,
 	return 0;
 }
 
-#ifndef CONFIG_DM_SERIAL
-static void pl01x_serial_init_baud(int baudrate)
-{
-	int clock = 0;
-
-#if defined(CONFIG_PL010_SERIAL)
-	pl01x_type = TYPE_PL010;
-#elif defined(CONFIG_PL011_SERIAL)
-	pl01x_type = TYPE_PL011;
-	clock = CONFIG_PL011_CLOCK;
-#endif
-	base_regs = (struct pl01x_regs *)port[CONFIG_CONS_INDEX];
-
-	pl01x_generic_serial_init(base_regs, pl01x_type);
-	pl01x_generic_setbrg(base_regs, pl01x_type, clock, baudrate);
-}
-
-/*
- * Integrator AP has two UARTs, we use the first one, at 38400-8-N-1
- * Integrator CP has two UARTs, use the first one, at 38400-8-N-1
- * Versatile PB has four UARTs.
- */
-int pl01x_serial_init(void)
-{
-	pl01x_serial_init_baud(CONFIG_BAUDRATE);
-
-	return 0;
-}
-
-static void pl01x_serial_putc(const char c)
-{
-	if (c == '\n')
-		while (pl01x_putc(base_regs, '\r') == -EAGAIN);
-
-	while (pl01x_putc(base_regs, c) == -EAGAIN);
-}
-
-static int pl01x_serial_getc(void)
-{
-	while (1) {
-		int ch = pl01x_getc(base_regs);
-
-		if (ch == -EAGAIN) {
-			WATCHDOG_RESET();
-			continue;
-		}
-
-		return ch;
-	}
-}
-
-static int pl01x_serial_tstc(void)
-{
-	return pl01x_tstc(base_regs);
-}
-
-static void pl01x_serial_setbrg(void)
-{
-	/*
-	 * Flush FIFO and wait for non-busy before changing baudrate to avoid
-	 * crap in console
-	 */
-	while (!(readl(&base_regs->fr) & UART_PL01x_FR_TXFE))
-		WATCHDOG_RESET();
-	while (readl(&base_regs->fr) & UART_PL01x_FR_BUSY)
-		WATCHDOG_RESET();
-	pl01x_serial_init_baud(gd->baudrate);
-}
-
-static struct serial_device pl01x_serial_drv = {
-	.name	= "pl01x_serial",
-	.start	= pl01x_serial_init,
-	.stop	= NULL,
-	.setbrg	= pl01x_serial_setbrg,
-	.putc	= pl01x_serial_putc,
-	.puts	= default_serial_puts,
-	.getc	= pl01x_serial_getc,
-	.tstc	= pl01x_serial_tstc,
-};
-
-void pl01x_serial_initialize(void)
-{
-	serial_register(&pl01x_serial_drv);
-}
-
-__weak struct serial_device *default_serial_console(void)
-{
-	return &pl01x_serial_drv;
-}
-
-#endif /* nCONFIG_DM_SERIAL */
-
-#ifdef CONFIG_DM_SERIAL
-
 int pl01x_serial_setbrg(struct udevice *dev, int baudrate)
 {
 	struct pl01x_serial_platdata *plat = dev_get_platdata(dev);
@@ -383,8 +280,6 @@ U_BOOT_DRIVER(serial_pl01x) = {
 	.flags = DM_FLAG_PRE_RELOC,
 	.priv_auto_alloc_size = sizeof(struct pl01x_priv),
 };
-
-#endif
 
 #if defined(CONFIG_DEBUG_UART_PL010) || defined(CONFIG_DEBUG_UART_PL011)
 
