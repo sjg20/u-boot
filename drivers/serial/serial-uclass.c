@@ -337,9 +337,6 @@ int serial_getinfo(struct udevice *dev, struct serial_device_info *info)
 	return -EINVAL;
 }
 
-void serial_stdio_init(void)
-{
-}
 
 #if defined(CONFIG_DM_STDIO)
 

@@ -3,49 +3,7 @@
 
 #include <post.h>
 
-struct serial_device {
-	/* enough bytes to match alignment of following func pointer */
-	char	name[16];
-
-	int	(*start)(void);
-	int	(*stop)(void);
-	void	(*setbrg)(void);
-	int	(*getc)(void);
-	int	(*tstc)(void);
-	void	(*putc)(const char c);
-	void	(*puts)(const char *s);
-#if CONFIG_POST & CONFIG_SYS_POST_UART
-	void	(*loop)(int);
-#endif
-	struct serial_device	*next;
-};
-
-void default_serial_puts(const char *s);
-
-extern struct serial_device serial_smc_device;
-extern struct serial_device serial_scc_device;
-extern struct serial_device *default_serial_console(void);
-
-#if	defined(CONFIG_MPC83xx) || defined(CONFIG_MPC85xx) || \
-	defined(CONFIG_MPC86xx) || \
-	defined(CONFIG_ARCH_TEGRA) || defined(CONFIG_SYS_COREBOOT) || \
-	defined(CONFIG_MICROBLAZE)
-extern struct serial_device serial0_device;
-extern struct serial_device serial1_device;
-#endif
-
-extern struct serial_device eserial1_device;
-extern struct serial_device eserial2_device;
-extern struct serial_device eserial3_device;
-extern struct serial_device eserial4_device;
-extern struct serial_device eserial5_device;
-extern struct serial_device eserial6_device;
-
-extern void serial_register(struct serial_device *);
-extern void serial_initialize(void);
-extern void serial_stdio_init(void);
-extern int serial_assign(const char *name);
-extern void serial_reinit_all(void);
+void serial_initialize(void);
 
 /* For usbtty */
 #ifdef CONFIG_USB_TTY
@@ -318,15 +276,6 @@ int serial_setconfig(struct udevice *dev, uint config);
  */
 int serial_getinfo(struct udevice *dev, struct serial_device_info *info);
 
-void atmel_serial_initialize(void);
-void mcf_serial_initialize(void);
-void mpc85xx_serial_initialize(void);
-void mxc_serial_initialize(void);
-void ns16550_serial_initialize(void);
-void pl01x_serial_initialize(void);
-void pxa_serial_initialize(void);
-void sh_serial_initialize(void);
-
 /**
  * serial_printf() - Write a formatted string to the serial console
  *
@@ -341,7 +290,6 @@ int serial_printf(const char *fmt, ...)
 int serial_init(void);
 void serial_setbrg(void);
 void serial_putc(const char ch);
-void serial_putc_raw(const char ch);
 void serial_puts(const char *str);
 int serial_getc(void);
 int serial_tstc(void);

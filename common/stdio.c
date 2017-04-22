@@ -383,7 +383,6 @@ int stdio_add_devices(void)
 	drv_keyboard_init ();
 #endif
 	drv_system_init ();
-	serial_stdio_init ();
 #ifdef CONFIG_USB_TTY
 	drv_usbtty_init ();
 #endif

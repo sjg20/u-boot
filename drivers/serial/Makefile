@@ -12,17 +12,7 @@ obj-y += serial.o
 endif
 
 else
-
-ifdef CONFIG_DM_SERIAL
 obj-y += serial-uclass.o
-else
-obj-y += serial.o
-endif
-
-endif
-
-ifdef CONFIG_DM_SERIAL
-obj-$(CONFIG_PL01X_SERIAL) += serial_pl01x.o
 endif
 
 obj-$(CONFIG_ALTERA_UART) += altera_uart.o
@@ -41,6 +31,7 @@ obj-$(CONFIG_S5P) += serial_s5p.o
 obj-$(CONFIG_MXC_UART) += serial_mxc.o
 obj-$(CONFIG_PXA_SERIAL) += serial_pxa.o
 obj-$(CONFIG_MESON_SERIAL) += serial_meson.o
+obj-$(CONFIG_PL01X_SERIAL) += serial_pl01x.o
 obj-$(CONFIG_INTEL_MID_SERIAL) += serial_intel_mid.o
 ifdef CONFIG_SPL_BUILD
 obj-$(CONFIG_ROCKCHIP_SERIAL) += serial_rockchip.o
