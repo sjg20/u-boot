@@ -24,22 +24,6 @@ DECLARE_GLOBAL_DATA_PTR;
 #define UART_MCRVAL (UART_MCR_DTR | \
 		     UART_MCR_RTS)		/* RTS/DTR */
 
-#if !CONFIG_IS_ENABLED(DM_SERIAL)
-#ifdef CONFIG_SYS_NS16550_PORT_MAPPED
-#define serial_out(x, y)	outb(x, (ulong)y)
-#define serial_in(y)		inb((ulong)y)
-#elif defined(CONFIG_SYS_NS16550_MEM32) && (CONFIG_SYS_NS16550_REG_SIZE > 0)
-#define serial_out(x, y)	out_be32(y, x)
-#define serial_in(y)		in_be32(y)
-#elif defined(CONFIG_SYS_NS16550_MEM32) && (CONFIG_SYS_NS16550_REG_SIZE < 0)
-#define serial_out(x, y)	out_le32(y, x)
-#define serial_in(y)		in_le32(y)
-#else
-#define serial_out(x, y)	writeb(x, y)
-#define serial_in(y)		readb(y)
-#endif
-#endif /* !CONFIG_DM_SERIAL */
-
 #if defined(CONFIG_SOC_KEYSTONE)
 #define UART_REG_VAL_PWREMU_MGMT_UART_DISABLE   0
 #define UART_REG_VAL_PWREMU_MGMT_UART_ENABLE ((1 << 14) | (1 << 13) | (1 << 0))
@@ -88,8 +72,6 @@ static inline int serial_in_shift(void *addr, int shift)
 	return readb(addr);
 #endif
 }
-
-#if CONFIG_IS_ENABLED(DM_SERIAL)
 
 #ifndef CONFIG_SYS_NS16550_CLK
 #define CONFIG_SYS_NS16550_CLK  0
@@ -198,12 +180,6 @@ static u32 ns16550_getfcr(NS16550_t port)
 #define serial_in(addr) \
 	ns16550_readb(com_port, \
 		(unsigned char *)addr - (unsigned char *)com_port)
-#else
-static u32 ns16550_getfcr(NS16550_t port)
-{
-	return UART_FCR_DEFVAL;
-}
-#endif
 
 int ns16550_calc_divisor(NS16550_t port, int clock, int baudrate)
 {
@@ -374,7 +350,6 @@ DEBUG_UART_FUNCS
 
 #endif
 
-#if CONFIG_IS_ENABLED(DM_SERIAL)
 static int ns16550_serial_putc(struct udevice *dev, const char ch)
 {
 	struct NS16550 *const com_port = dev_get_priv(dev);
@@ -622,5 +597,3 @@ U_BOOT_DRIVER(ns16550_serial) = {
 };
 #endif
 #endif /* SERIAL_PRESENT */
-
-#endif /* CONFIG_DM_SERIAL */
