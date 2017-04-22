@@ -101,6 +101,7 @@ config DM_SERIAL
 	bool "Enable Driver Model for serial drivers"
 	depends on DM
 	select SYS_MALLOC_F
+	default y if DM
 	help
 	  Enable driver model for serial. This replaces
 	  drivers/serial/serial.c with the serial uclass, which
