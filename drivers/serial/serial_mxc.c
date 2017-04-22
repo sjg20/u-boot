@@ -178,90 +178,6 @@ static void _mxc_serial_setbrg(struct mxc_uart *base, unsigned long clk,
 	writel(UCR1_UARTEN, &base->cr1);
 }
 
-#if !CONFIG_IS_ENABLED(DM_SERIAL)
-
-#ifndef CONFIG_MXC_UART_BASE
-#error "define CONFIG_MXC_UART_BASE to use the MXC UART driver"
-#endif
-
-#define mxc_base	((struct mxc_uart *)CONFIG_MXC_UART_BASE)
-
-static void mxc_serial_setbrg(void)
-{
-	u32 clk = imx_get_uartclk();
-
-	if (!gd->baudrate)
-		gd->baudrate = CONFIG_BAUDRATE;
-
-	_mxc_serial_setbrg(mxc_base, clk, gd->baudrate, false);
-}
-
-static int mxc_serial_getc(void)
-{
-	while (readl(&mxc_base->ts) & UTS_RXEMPTY)
-		WATCHDOG_RESET();
-	return (readl(&mxc_base->rxd) & URXD_RX_DATA); /* mask out status from upper word */
-}
-
-static void mxc_serial_putc(const char c)
-{
-	/* If \n, also do \r */
-	if (c == '\n')
-		serial_putc('\r');
-
-	writel(c, &mxc_base->txd);
-
-	/* wait for transmitter to be ready */
-	while (!(readl(&mxc_base->ts) & UTS_TXEMPTY))
-		WATCHDOG_RESET();
-}
-
-/* Test whether a character is in the RX buffer */
-static int mxc_serial_tstc(void)
-{
-	/* If receive fifo is empty, return false */
-	if (readl(&mxc_base->ts) & UTS_RXEMPTY)
-		return 0;
-	return 1;
-}
-
-/*
- * Initialise the serial port with the given baudrate. The settings
- * are always 8 data bits, no parity, 1 stop bit, no start bits.
- */
-static int mxc_serial_init(void)
-{
-	_mxc_serial_init(mxc_base, false);
-
-	serial_setbrg();
-
-	return 0;
-}
-
-static struct serial_device mxc_serial_drv = {
-	.name	= "mxc_serial",
-	.start	= mxc_serial_init,
-	.stop	= NULL,
-	.setbrg	= mxc_serial_setbrg,
-	.putc	= mxc_serial_putc,
-	.puts	= default_serial_puts,
-	.getc	= mxc_serial_getc,
-	.tstc	= mxc_serial_tstc,
-};
-
-void mxc_serial_initialize(void)
-{
-	serial_register(&mxc_serial_drv);
-}
-
-__weak struct serial_device *default_serial_console(void)
-{
-	return &mxc_serial_drv;
-}
-#endif
-
-#if CONFIG_IS_ENABLED(DM_SERIAL)
-
 int mxc_serial_setbrg(struct udevice *dev, int baudrate)
 {
 	struct mxc_serial_platdata *plat = dev->platdata;
@@ -364,7 +280,6 @@ U_BOOT_DRIVER(serial_mxc) = {
 	.ops	= &mxc_serial_ops,
 	.flags = DM_FLAG_PRE_RELOC,
 };
-#endif
 
 #ifdef CONFIG_DEBUG_UART_MXC
 #include <debug_uart.h>
