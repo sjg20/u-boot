@@ -96,8 +96,6 @@ DEBUG_UART_FUNCS
 
 #endif
 
-#if CONFIG_IS_ENABLED(DM_SERIAL)
-
 #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 static int omap_serial_ofdata_to_platdata(struct udevice *dev)
 {
@@ -168,4 +166,3 @@ U_BOOT_DRIVER(omap_serial) = {
 #endif
 };
 #endif
-#endif /* DM_SERIAL */
