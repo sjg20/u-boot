@@ -23,8 +23,6 @@ endif
 
 ifdef CONFIG_DM_SERIAL
 obj-$(CONFIG_PL01X_SERIAL) += serial_pl01x.o
-else
-obj-$(CONFIG_SYS_NS16550_SERIAL) += serial_ns16550.o
 endif
 
 obj-$(CONFIG_ALTERA_UART) += altera_uart.o
