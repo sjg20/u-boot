@@ -43,7 +43,7 @@
 /*-----------------------------------------------------------------------
  * Serial Configuration
  */
-#define CONFIG_SYS_NS16550_PORT_MAPPED
+#define CONFIG_SYS_NS16550_MEM32
 
 /*-----------------------------------------------------------------------
  * Command line configuration.

@@ -2,9 +2,9 @@
 	serial: serial {
 		u-boot,dm-pre-reloc;
 		compatible = "ns16550";
-		reg = <0x3f8 8>;
-		reg-shift = <0>;
-		clock-frequency = <1843200>;
+		reg = <0xfedc6000 8>;
+		reg-shift = <2>;
+		clock-frequency = <48000000>;
 		current-speed = <115200>;
 	};
 };
