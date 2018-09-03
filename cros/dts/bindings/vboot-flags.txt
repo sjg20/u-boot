@@ -1,0 +1,113 @@
+Chromium OS Verified Boot Flags
+===============================
+
+The device tree nodes which describes the Chromium OS vboot flags are as
+follows:
+
+
+The node name is the name of the flag. Each flag returns a value of 0 (off) or
+1 (on). Available flags are:
+
+- write-protect: hardware write-protect signal from Cr50
+- developer: developer mode signal, typically from TPM, but some other option
+     has been used historically, such as a physical button
+- lid-open: typically a GPIO
+- power-button: state of the power button (1=pressed), typically a GPIO or a
+     keyboard key
+- ec-in-rw: EC is in read-write code, typically a GPIO
+- oprom-loaded: Option ROM has been loaded, which indicates video is available
+- recovery: Recovery mode is selected, typically read from the EC or a button
+
+Multiple devices are supported for each flag, in which case they are considered
+in devicetree order.
+
+Common optional properties:
+
+- primary-only: Indicates that the device should only be active if U-Boot is
+  the primary bootloader. If U-Boot is booted from coreboot, this device is
+  ignored, since it is not possible for U-Boot to read the signal reliably
+  at the instant of boot and the signal may later change.
+
+
+Constant
+--------
+
+This uses a constant flag, set at build time.
+
+Required properties :
+- compatible = "google,const-flag"
+- value : Integer value of value (0 or 1)
+
+
+GPIO
+----
+
+This reads the flag from a GPIO.
+
+Required properties :
+- compatible = "google,gpio-flag"
+- gpio : phandle indicating the GPIO to use (including polarity)
+
+
+Optional properties :
+- sandbox-value : Value to set the GPIO to on initial startup (0 or 1). Only
+     sandbox allows setting these values, since it has a emulated GPIO system.
+
+
+Key
+---
+
+This reads the flag from the keyboard, useful for sandbox
+
+Required properties :
+- compatible = "google,key-flag"
+- key : Key code number to use (#include <linux/input.h> to get these)
+
+
+Sysinfo
+-------
+
+This reads the flag from coreboot tables.
+
+Required properties :
+- compatible = "google,sysinfo-flag"
+
+
+EC
+--
+
+This reads the flag from the Chromium OS EC
+
+Required properties :
+- compatible = "google,cros-ec-flag"
+
+
+Example
+=======
+
+	#include <linux/input.h>
+
+	write-protect {
+		compatible = "google,gpio-flag";
+		gpio = <&gpio_a 1>;
+	};
+	developer {
+		compatible = "google,const-flag";
+		value = <1>;
+	};
+	lid-open {
+		compatible = "google,sysinfo-flag";
+		google,name = "lid";
+	};
+	power-button {
+		compatible = "google,key-flag";
+		key = <KEY_PAUSE>;
+	};
+	oprom-loaded {
+		compatible = "google,const-flag";
+		value = <0>;
+	};
+	ec-in-rw {
+		compatible = "google,gpio-flag";
+		gpio = <&gpio_a 3>;
+	};
