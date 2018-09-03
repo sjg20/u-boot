@@ -12,3 +12,4 @@ This provides some information about Chromium OS and U-Boot.
    overview
    run_vboot
    chainload
+   cros/index
