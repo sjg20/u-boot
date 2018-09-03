@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Chromium OS-specific options for coreboot
+ *
+ * Copyright 2018 Google LLC
+ */
+
+#include "factory-friendly.dtsi"
+#include "chromeos-coreboot-flags.dtsi"
+#include "coreboot-coral.dtsi"
+
+/ {
+	chromeos-config {
+		kernel-addr = /bits/ 64 <0x00100000 0x2000000>;
+	};
+
+	chromeos {
+		compatible = "simple-bus";
+		fwstore-spi {
+			compatible = "cros,fwstore-spi";
+
+			/* Used when the PCH driver is not available */
+			rom-offset = <0xff081000>;
+			firmware-storage = <&fwstore_spi>;
+		};
+	};
+
+	config {
+		silent_console = <0>;
+	};
+
+	chosen {
+		bootargs = "";
+	};
+};
