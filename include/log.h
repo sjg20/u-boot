@@ -108,6 +108,8 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 #define log_io(_fmt...)
 #endif
 
+#if CONFIG_IS_ENABLED(LOG)
+
 /* Emit a log record if the level is less that the maximum */
 #define log(_cat, _level, _fmt, _args...) ({ \
 	int _l = _level; \
@@ -116,6 +118,9 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 		      __func__, \
 		      pr_fmt(_fmt), ##_args); \
 	})
+#else
+#define log(_cat, _level, _fmt, _args...)
+#endif
 
 #ifdef DEBUG
 #define _DEBUG	1
@@ -175,7 +180,7 @@ void __assert_fail(const char *assertion, const char *file, unsigned int line,
 	({ if (!(x) && _DEBUG) \
 		__assert_fail(#x, __FILE__, __LINE__, __func__); })
 
-#ifdef CONFIG_LOG_ERROR_RETURN
+#if CONFIG_IS_ENABLED(LOG) && defined(CONFIG_LOG_ERROR_RETURN)
 #define log_ret(_ret) ({ \
 	int __ret = (_ret); \
 	if (__ret < 0) \
