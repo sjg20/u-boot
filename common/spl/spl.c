@@ -482,6 +482,7 @@ static int boot_from_devices(struct spl_image_info *spl_image,
 			return 0;
 		}
 	}
+	puts(SPL_TPL_PROMPT "No more boot devices\n");
 
 	return -ENODEV;
 }
