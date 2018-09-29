@@ -119,8 +119,22 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 		      __func__, \
 		      pr_fmt(_fmt), ##_args); \
 	})
+#define log_err(_fmt...)	log(LOG_CATEGORY, LOGL_ERR, ##_fmt)
+#define log_warning(_fmt...)	log(LOG_CATEGORY, LOGL_WARNING, ##_fmt)
+#define log_notice(_fmt...)	log(LOG_CATEGORY, LOGL_NOTICE, ##_fmt)
+#define log_info(_fmt...)	log(LOG_CATEGORY, LOGL_INFO, ##_fmt)
+#define log_debug(_fmt...)	log(LOG_CATEGORY, LOGL_DEBUG, ##_fmt)
+#define log_content(_fmt...)	log(LOG_CATEGORY, LOGL_DEBUG_CONTENT, ##_fmt)
+#define log_io(_fmt...)		log(LOG_CATEGORY, LOGL_DEBUG_IO, ##_fmt)
 #else
 #define log(_cat, _level, _fmt, _args...)
+#define log_err(_fmt...)
+#define log_warning(_fmt...)
+#define log_notice(_fmt...)
+#define log_info(_fmt...)
+#define log_debug(_fmt...)
+#define log_content(_fmt...)
+#define log_io(_fmt...)
 #endif
 
 #ifdef DEBUG
