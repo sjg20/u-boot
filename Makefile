@@ -765,6 +765,7 @@ HAVE_VENDOR_COMMON_LIB = $(if $(wildcard $(srctree)/board/$(VENDOR)/common/Makef
 libs-y += lib/
 libs-$(HAVE_VENDOR_COMMON_LIB) += board/$(VENDOR)/common/
 libs-$(CONFIG_OF_EMBED) += dts/
+libs-$(CONFIG_CHROMEOS_VBOOT) += cros/
 libs-y += fs/
 libs-y += net/
 libs-y += disk/
@@ -854,6 +855,67 @@ LDPPFLAGS += \
 #########################################################################
 #########################################################################
 
+ifdef VBOOT_SOURCE
+# Go off and build vboot_reference directory with the same CFLAGS
+# This is a eng convenience, not used by ebuilds
+# set VBOOT_MAKEFLAGS to required make flags, e.g. MOCK_TPM=1 if no TPM
+CFLAGS_VBOOT = $(filter-out -Wstrict-prototypes, \
+		$(KBUILD_CPPFLAGS) $(KBUILD_CFLAGS) $(PLATFORM_CPPFLAGS) \
+		$(UBOOTINCLUDE) -I$(CURDIR)/include) -include common.h
+
+# Always call the vboot Makefile, since we don't have its dependencies
+#
+#  FIRMWARE_ARCH:
+#
+#    This can be either a real hardware architecture for which vboot
+#    can be built, or it can be unset.  When unset, vboot will be
+#    built for the host architecture.  When set, it has to be one of
+#    arm, i386, and x86_64.
+#
+#  ARCH:
+#
+#    ARCH must either be a real hardware architecture for which vboot
+#    can be built, or it must be 'amd64'.  'amd64' is used when
+#    building for the host architecture (which consequently must be
+#    'amd64').
+#
+#  ARCH is an exported variable, and since 'sandbox' is not an
+#  appropriate architecture for vboot, it must be changed on the
+#  command line.  However, since, without 'override', it is not
+#  possible to change the value of Make variables set on the command
+#  line, both FIRMWARE_ARCH and ARCH both must be set correctly before
+#  invoking the sub-make.
+#
+VBOOT_SUBMAKE_FIRMWARE_ARCH=$(filter-out sandbox,$(subst x86,i386,$(ARCH)))
+VBOOT_SUBMAKE_ARCH=$(subst sandbox,amd64,$(ARCH))
+
+# HACK: for sandbox, vboot 2014 seems to assume it is a host build
+ifdef CONFIG_SANDBOX
+VBOOT_SUBMAKE_FIRMWARE_ARCH=amd64
+endif
+
+.PHONY : vboot
+vboot:
+	$(Q)FIRMWARE_ARCH=$(VBOOT_SUBMAKE_FIRMWARE_ARCH) \
+		CC=$(CROSS_COMPILE)gcc \
+		CFLAGS="$(CFLAGS_VBOOT)" NO_STDINT=1 TPM2_MODE=1 \
+		$(MAKE) -C $(VBOOT_SOURCE) DEBUG=1 \
+		BUILD=$(CURDIR)/include/generated/vboot \
+		fwlib
+
+PLATFORM_LIBS += $(CURDIR)/include/generated/vboot/vboot_fw.a
+VBOOT_TARGET := vboot
+
+$(VBOOT_TARGET): $(u-boot-init)
+endif
+
+# Add vboot_reference lib
+ifdef CONFIG_CHROMEOS_VBOOT
+ifndef VBOOT_SOURCE
+PLATFORM_LIBS += $(VBOOT)/lib/vboot_fw.a
+endif
+endif
+
 ifneq ($(CONFIG_BOARD_SIZE_LIMIT),)
 BOARD_SIZE_CHECK= @ $(call size_check,$@,$(CONFIG_BOARD_SIZE_LIMIT))
 else
@@ -912,6 +974,7 @@ INPUTS-$(CONFIG_SPL_FRAMEWORK) += u-boot.img
 endif
 endif
 INPUTS-$(CONFIG_TPL) += tpl/u-boot-tpl.bin
+INPUTS-$(CONFIG_VPL) += vpl/u-boot-vpl.bin
 INPUTS-$(CONFIG_OF_SEPARATE) += u-boot.dtb
 ifeq ($(CONFIG_SPL_FRAMEWORK),y)
 INPUTS-$(CONFIG_OF_SEPARATE) += u-boot-dtb.img
@@ -1019,9 +1082,11 @@ cmd_cfgcheck = $(srctree)/scripts/check-config.sh $2 \
 PHONY += inputs
 inputs: $(INPUTS-y)
 
-all: .binman_stamp inputs
+all: .binman_stamp inputs $(if $(CONFIG_CHROMEOS_VBOOT),image.bin)
 ifeq ($(CONFIG_BINMAN),y)
+ifeq ($(CONFIG_CHROMEOS_VBOOT),)
 	$(call if_changed,binman)
+endif
 endif
 
 # Timestamp file to make sure that binman always runs
@@ -1207,7 +1272,7 @@ u-boot.bin: u-boot-fit-dtb.bin FORCE
 u-boot-dtb.bin: u-boot-nodtb.bin dts/dt.dtb FORCE
 	$(call if_changed,cat)
 
-else ifeq ($(CONFIG_OF_SEPARATE),y)
+else ifeq ($(CONFIG_OF_SEPARATE)$(CONFIG_OF_HOSTFILE),y)
 u-boot-dtb.bin: u-boot-nodtb.bin dts/dt.dtb FORCE
 	$(call if_changed,cat)
 
@@ -1638,6 +1703,19 @@ u-boot-x86-reset16.bin: u-boot FORCE
 
 endif # CONFIG_X86
 
+ifneq ($(CONFIG_CHROMEOS_VBOOT),)
+BINMAN_image.bin := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
+	-abmpblk=$(KBUILD_SRC)/cros/data/bmpblk.bin -I $(KBUILD_SRC)/cros/data \
+	"-ahardware-id=TEST 999" \
+	"-afrid=123412 123" -acros-ec-rw-path=$(KBUILD_SRC)/cros/data/ecrw.bin \
+	 -m -i image
+image.bin: $(INPUTS-y) \
+		$(if($(CONFIG_TPL),tpl/u-boot-tpl) \
+		$(if($(CONFIG_SPL),spl/u-boot-spl) \
+		u-boot.bin FORCE
+	$(call if_changed,binman)
+endif
+
 OBJCOPYFLAGS_u-boot-app.efi := $(OBJCOPYFLAGS_EFI)
 u-boot-app.efi: u-boot FORCE
 	$(call if_changed,zobjcopy)
@@ -1754,8 +1832,9 @@ cmd_smap = \
 	$(CC) $(c_flags) -DSYSTEM_MAP="\"$${smap}\"" \
 		-c $(srctree)/common/system_map.c -o common/system_map.o
 
-u-boot:	$(u-boot-init) $(u-boot-main) u-boot.lds FORCE
+u-boot:	$(u-boot-init) $(u-boot-main) $(VBOOT_TARGET) u-boot.lds FORCE
 	+$(call if_changed,u-boot__)
+
 ifeq ($(CONFIG_KALLSYMS),y)
 	$(call cmd,smap)
 	$(call cmd,u-boot__) common/system_map.o
@@ -1930,8 +2009,8 @@ spl/u-boot-spl.bin: spl/u-boot-spl
 	$(SPL_SIZE_CHECK)
 
 spl/u-boot-spl: tools prepare \
-		$(if $(CONFIG_OF_SEPARATE)$(CONFIG_OF_EMBED)$(CONFIG_SPL_OF_PLATDATA),dts/dt.dtb) \
-		$(if $(CONFIG_OF_SEPARATE)$(CONFIG_OF_EMBED)$(CONFIG_TPL_OF_PLATDATA),dts/dt.dtb)
+		$(if $(CONFIG_OF_SEPARATE)$(CONFIG_OF_EMBED)$(CONFIG_OF_HOSTFILE)$(CONFIG_SPL_OF_PLATDATA),dts/dt.dtb) \
+		$(if $(CONFIG_OF_SEPARATE)$(CONFIG_OF_EMBED)$(CONFIG_OF_HOSTFILE)$(CONFIG_TPL_OF_PLATDATA),dts/dt.dtb)
 	$(Q)$(MAKE) obj=spl -f $(srctree)/scripts/Makefile.spl all
 
 spl/sunxi-spl.bin: spl/u-boot-spl
@@ -1946,10 +2025,21 @@ spl/u-boot-spl.sfp: spl/u-boot-spl
 spl/boot.bin: spl/u-boot-spl
 	@:
 
-tpl/u-boot-tpl.bin: tools prepare \
-		$(if $(CONFIG_OF_SEPARATE)$(CONFIG_OF_EMBED)$(CONFIG_SPL_OF_PLATDATA),dts/dt.dtb)
-	$(Q)$(MAKE) obj=tpl -f $(srctree)/scripts/Makefile.spl all
+tpl/u-boot-tpl.bin: tpl/u-boot-tpl
+	@:
 	$(TPL_SIZE_CHECK)
+
+tpl/u-boot-tpl: tools prepare \
+		$(if $(CONFIG_OF_SEPARATE)$(CONFIG_OF_EMBED)$(CONFIG_OF_HOSTFILE)$(CONFIG_TPL_OF_PLATDATA),dts/dt.dtb)
+	$(Q)$(MAKE) obj=tpl -f $(srctree)/scripts/Makefile.spl all
+
+vpl/u-boot-vpl.bin: vpl/u-boot-vpl
+	@:
+	$(VPL_SIZE_CHECK)
+
+vpl/u-boot-vpl: tools prepare \
+		$(if $(CONFIG_OF_SEPARATE)$(CONFIG_OF_EMBED)$(CONFIG_OF_HOSTFILE)$(CONFIG_VPL_OF_PLATDATA),dts/dt.dtb)
+	$(Q)$(MAKE) obj=vpl -f $(srctree)/scripts/Makefile.spl all
 
 TAG_SUBDIRS := $(patsubst %,$(srctree)/%,$(u-boot-dirs) include)
 
