@@ -113,6 +113,8 @@ ifdef CONFIG_SPL_FRAMEWORK
 libs-$(CONFIG_PARTITIONS) += disk/
 endif
 
+libs-$(CONFIG_$(SPL_TPL_)CHROMEOS) += cros/
+
 libs-y += drivers/
 libs-$(CONFIG_SPL_USB_GADGET) += drivers/usb/dwc3/
 libs-$(CONFIG_SPL_USB_GADGET) += drivers/usb/cdns3/

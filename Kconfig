@@ -497,6 +497,8 @@ source "common/Kconfig"
 
 source "cmd/Kconfig"
 
+source "cros/Kconfig"
+
 source "disk/Kconfig"
 
 source "dts/Kconfig"
