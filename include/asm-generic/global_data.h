@@ -478,6 +478,10 @@ struct global_data {
 	 * @dmtag_list: List of DM tags
 	 */
 	struct list_head dmtag_list;
+#ifdef CONFIG_CHROMEOS
+	/** @vboot: Chrome OS verified boot context pointer */
+	struct vboot_info *vboot;
+#endif
 };
 #ifndef DO_DEPS_ONLY
 static_assert(sizeof(struct global_data) == GD_SIZE);

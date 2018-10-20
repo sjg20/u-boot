@@ -100,6 +100,9 @@ enum log_category_t {
 	LOGC_BOOT,
 	/** @LOGC_EVENT: Related to event and event handling */
 	LOGC_EVENT,
+	/** @LOGC_VBOOT: Chromium OS verified boot */
+	LOGC_VBOOT,
+
 	/** @LOGC_COUNT: Number of log categories */
 	LOGC_COUNT,
 	/** @LOGC_END: Sentinel value for lists of log categories */
