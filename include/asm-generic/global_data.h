@@ -467,6 +467,10 @@ struct global_data {
 	 */
 	char *smbios_version;
 #endif
+#ifdef CONFIG_CHROMEOS
+	/** @vboot: Chrome OS verified boot context pointer */
+	struct vboot_info *vboot;
+#endif
 };
 #ifndef DO_DEPS_ONLY
 static_assert(sizeof(struct global_data) == GD_SIZE);
