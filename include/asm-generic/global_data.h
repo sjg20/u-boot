@@ -129,6 +129,9 @@ typedef struct global_data {
 	struct spl_handoff *spl_handoff;
 # endif
 #endif
+#ifdef CONFIG_CHROMEOS
+	struct vboot_info *vboot;
+#endif
 } gd_t;
 #endif
 

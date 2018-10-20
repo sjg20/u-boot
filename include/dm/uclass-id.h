@@ -33,7 +33,12 @@ enum uclass_id {
 	UCLASS_BOARD,		/* Device information from hardware */
 	UCLASS_CLK,		/* Clock source, e.g. used by peripherals */
 	UCLASS_CPU,		/* CPU, typically part of an SoC */
+	UCLASS_CROS_AUX_FW,	/* Chrome OS auxiliary firmware */
 	UCLASS_CROS_EC,		/* Chrome OS EC */
+	UCLASS_CROS_FWSTORE,	/* Chrome OS firmware storage */
+	UCLASS_CROS_NVDATA,	/* Chrome OS non-volatile data device */
+	UCLASS_CROS_VBOOT_EC,	/* Chrome OS vboot EC operations */
+	UCLASS_CROS_VBOOT_FLAG,	/* Chrome OS verified boot flag */
 	UCLASS_DISPLAY,		/* Display (e.g. DisplayPort, HDMI) */
 	UCLASS_DMA,		/* Direct Memory Access */
 	UCLASS_EFI,		/* EFI managed devices */

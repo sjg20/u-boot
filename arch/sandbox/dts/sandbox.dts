@@ -1,5 +1,11 @@
 /dts-v1/;
 
+#ifdef CONFIG_CHROMEOS
+#include "chromeos-sandbox.dtsi"
+#include "flashmap-sandbox-ro.dtsi"
+#include "flashmap-16mb-rw.dtsi"
+#endif
+
 #define USB_CLASS_HUB			9
 
 / {
@@ -12,6 +18,12 @@
 		pci0 = &pci;
 		rtc0 = &rtc_0;
 		axi0 = &axi;
+		spi0 = "/spi@0";
+		vboot-ec0 = &cros_ec_vboot;
+	};
+
+	memory {
+		reg = <0 0x08000000>;
 	};
 
 	chosen {
@@ -46,6 +58,15 @@
 				image-pos = <0x10000>;
 				size = <0x10000>;
 			};
+		};
+
+		nvdata {
+			u-boot,dm-pre-reloc;
+			compatible = "google,cros-ec-nvdata";
+		};
+
+		cros_ec_vboot: vboot {
+			compatible = "google,cros-ec-vboot";
 		};
 	};
 
@@ -187,6 +208,7 @@
 	};
 
 	reset@1 {
+		u-boot,dm-pre-reloc;
 		compatible = "sandbox,reset";
 	};
 
@@ -197,12 +219,15 @@
 		reg = <0 0>;
 		compatible = "sandbox,spi";
 		cs-gpios = <0>, <&gpio_a 0>;
-		firmware_storage_spi: flash@0 {
+		fwstore_spi: flash@0 {
 			u-boot,dm-pre-reloc;
 			reg = <0>;
-			compatible = "spansion,m25p16", "sandbox,spi-flash";
+			compatible = "spansion,m25p128", "spi-flash";
 			spi-max-frequency = <40000000>;
 			sandbox,filename = "spi.bin";
+			emul {
+				compatible = "sandbox,spi-flash-emul";
+			};
 		};
 	};
 
@@ -256,6 +281,10 @@
 	tpm {
 		u-boot,dm-pre-reloc;
 		compatible = "google,sandbox-tpm";
+		secdata {
+			u-boot,dm-pre-reloc;
+			compatible = "google,tpm-secdata";
+		};
 	};
 
 	tpm2 {
