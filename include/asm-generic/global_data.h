@@ -436,6 +436,10 @@ struct global_data {
 #if CONFIG_IS_ENABLED(GENERATE_SMBIOS_TABLE)
 	char *smbios_version;		/* Points to SMBIOS type 0 version */
 #endif
+#ifdef CONFIG_CHROMEOS
+	/** vboot: Chrome OS verified boot context pointer */
+	struct vboot_info *vboot;
+#endif
 };
 
 /**
