@@ -146,6 +146,9 @@ typedef struct global_data {
 #ifdef CONFIG_GENERATE_ACPI_TABLE
 	struct acpi_ctx *acpi_ctx;
 #endif
+#ifdef CONFIG_CHROMEOS
+	struct vboot_info *vboot;
+#endif
 } gd_t;
 #endif
 

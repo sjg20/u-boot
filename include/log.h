@@ -63,6 +63,7 @@ enum log_category_t {
 	/* Advanced Configuration and Power Interface (ACPI) */
 	LOGC_ACPI,
 	LOGC_BOOT,	/* Related to boot process / boot image processing */
+	LOGC_VBOOT,	/* Chromium verified boot */
 
 	LOGC_COUNT,	/* Number of log categories */
 	LOGC_END,	/* Sentinel value for a list of log categories */
