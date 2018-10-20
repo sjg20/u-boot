@@ -463,6 +463,10 @@ struct global_data {
 	 */
 	char *smbios_version;
 #endif
+#ifdef CONFIG_CHROMEOS
+	/** @vboot: Chrome OS verified boot context pointer */
+	struct vboot_info *vboot;
+#endif
 };
 
 /**
