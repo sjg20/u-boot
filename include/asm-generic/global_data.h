@@ -427,6 +427,10 @@ struct global_data {
 	 */
 	struct acpi_ctx *acpi_ctx;
 #endif
+#ifdef CONFIG_CHROMEOS
+	/** vboot: Chrome OS verified boot context pointer */
+	struct vboot_info *vboot;
+#endif
 };
 
 /**
