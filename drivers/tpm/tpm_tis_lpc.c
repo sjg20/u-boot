@@ -388,12 +388,39 @@ static int tis_readresponse(struct udevice *dev, u8 *buffer, size_t len)
 	return offset;
 }
 
+static int tpm_tis_lpc_close(struct udevice *dev)
+{
+	struct tpm_tis_lpc_priv *priv = dev_get_priv(dev);
+	struct tpm_locality *regs = priv->regs;
+	u8 locality = 0;
+
+	if (tpm_read_word(priv, &regs[locality].access) &
+	    TIS_ACCESS_ACTIVE_LOCALITY) {
+		tpm_write_word(priv, TIS_ACCESS_ACTIVE_LOCALITY,
+			       &regs[locality].access);
+
+		if (tis_wait_reg(priv, &regs[locality].access,
+				 TIS_ACCESS_ACTIVE_LOCALITY, 0) == -ETIMEDOUT) {
+			printf("%s:%d - failed to release locality %d\n",
+			       __FILE__, __LINE__, locality);
+			return -ETIMEDOUT;
+		}
+	}
+	return 0;
+}
+
 static int tpm_tis_lpc_open(struct udevice *dev)
 {
 	struct tpm_tis_lpc_priv *priv = dev_get_priv(dev);
 	struct tpm_locality *regs = priv->regs;
 	u8 locality = 0; /* we use locality zero for everything. */
 	int ret;
+
+	ret = tpm_tis_lpc_close(dev);
+	if (ret) {
+		printf("%s: Failed to close TPM\n", __func__);
+		return ret;
+	}
 
 	/* now request access to locality. */
 	tpm_write_word(priv, TIS_ACCESS_REQUEST_USE, &regs[locality].access);
@@ -413,27 +440,7 @@ static int tpm_tis_lpc_open(struct udevice *dev)
 
 	tpm_write_word(priv, TIS_STS_COMMAND_READY,
 		       &regs[locality].tpm_status);
-	return 0;
-}
 
-static int tpm_tis_lpc_close(struct udevice *dev)
-{
-	struct tpm_tis_lpc_priv *priv = dev_get_priv(dev);
-	struct tpm_locality *regs = priv->regs;
-	u8 locality = 0;
-
-	if (tpm_read_word(priv, &regs[locality].access) &
-	    TIS_ACCESS_ACTIVE_LOCALITY) {
-		tpm_write_word(priv, TIS_ACCESS_ACTIVE_LOCALITY,
-			       &regs[locality].access);
-
-		if (tis_wait_reg(priv, &regs[locality].access,
-				 TIS_ACCESS_ACTIVE_LOCALITY, 0) == -ETIMEDOUT) {
-			printf("%s:%d - failed to release locality %d\n",
-			       __FILE__, __LINE__, locality);
-			return -ETIMEDOUT;
-		}
-	}
 	return 0;
 }
 
