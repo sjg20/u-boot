@@ -296,6 +296,15 @@ static inline bool mmc_is_tuning_cmd(uint cmdidx)
 #define EXT_CSD_EXTRACT_BOOT_PART(x)		(((x) >> 3) & 0x7)
 #define EXT_CSD_EXTRACT_PARTITION_ACCESS(x)	((x) & 0x7)
 
+/* Enable boot power-on write protect */
+#define EXT_CSD_BOOT_WP_PWR_WP_EN	BIT(0)
+/* Enable boot permanent write protect */
+#define EXT_CSD_BOOT_WP_PERM_WP_EN	BIT(2)
+/* Disable use of boot power-on write protect */
+#define EXT_CSD_BOOT_WP_PWR_WP_DIS	BIT(6)
+/* Bit 1 (Power-on) or Bit 3 (Permanent) selects the partition to protect */
+#define EXT_CSD_BOOT_WP_PART_SELECT	BIT(7)
+
 #define EXT_CSD_BOOT_BUS_WIDTH_MODE(x)	(x << 3)
 #define EXT_CSD_BOOT_BUS_WIDTH_RESET(x)	(x << 2)
 #define EXT_CSD_BOOT_BUS_WIDTH_WIDTH(x)	(x)
@@ -836,6 +845,27 @@ int get_mmc_num(void);
 int mmc_switch_part(struct mmc *mmc, unsigned int part_num);
 int mmc_hwpart_config(struct mmc *mmc, const struct mmc_hwpart_conf *conf,
 		      enum mmc_hwpart_conf_mode mode);
+
+/**
+ * Get boot partition write protect status
+ *
+ * @param mmc	MMC to get status of
+ * @return	0 if WP is not asserted, non-zero if WP is asserted
+ */
+int mmc_get_boot_wp(struct mmc *mmc);
+
+/**
+ * Change MMC Partition
+ *
+ * Switch access to partition specified in part.  Unlike mmc_boot_part_access,
+ * this function will not affect the configured boot partition or boot ack
+ * settings.
+ *
+ * @param mmc	MMC to configure
+ * @param part	Partition to access (one of PARTITION_ACCESS from spec)
+ * #return 0 on success, -ve on error
+ */
+int mmc_hwpart_access(struct mmc *mmc, int part);
 
 #if !CONFIG_IS_ENABLED(DM_MMC)
 int mmc_getcd(struct mmc *mmc);
