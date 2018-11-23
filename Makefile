@@ -1487,7 +1487,14 @@ cmd_smap = \
 	$(CC) $(c_flags) -DSYSTEM_MAP="\"$${smap}\"" \
 		-c $(srctree)/common/system_map.c -o common/system_map.o
 
-u-boot:	$(u-boot-init) $(u-boot-main) u-boot.lds FORCE
+quiet_cmd_u-boot-lib ?= LIB     $@
+      cmd_u-boot-lib ?= $(LD) $(PLATFORM_LDFLAGS) -r --exclude-libs ALL \
+		--start-group $(u-boot-main) --end-group -o $@
+
+u-boot.o: $(u-boot-init) $(u-boot-main) u-boot.lds FORCE
+	+$(call if_changed,u-boot-lib)
+
+u-boot: u-boot.o FORCE
 	+$(call if_changed,u-boot__)
 ifeq ($(CONFIG_KALLSYMS),y)
 	$(call cmd,smap)
