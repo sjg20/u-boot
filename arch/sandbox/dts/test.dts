@@ -282,8 +282,6 @@
 		};
 
 		i2c_emul: emul {
-			#address-cells = <1>;
-			#size-cells = <0>;
 			reg = <0xff>;
 			compatible = "sandbox,i2c-emul-parent";
 			emul_eeprom: emul-eeprom {
