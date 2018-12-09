@@ -527,6 +527,15 @@ config TPL_LOG_MAX_LEVEL
 	    6 - detail
 	    7 - debug
 
+config LOG_DEFAULT_LEVEL
+	int "Default logging level to display"
+	default 5
+	help
+	  This is the default logging level set when U-Boot starts. It can
+	  be adjusted later using the 'log level' command. Note that setting
+	  this to a value abnove LOG_MAX_LEVEL will be ineffective, since the
+	  higher levels are not compiled in to U-Boot.
+
 config LOG_CONSOLE
 	bool "Allow log output to the console"
 	depends on LOG
