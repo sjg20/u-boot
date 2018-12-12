@@ -12,10 +12,8 @@ SDL_CONFIG ?= sdl-config
 ifneq ($(NO_SDL),)
 PLATFORM_CPPFLAGS += -DSANDBOX_NO_SDL
 else
-ifdef CONFIG_SANDBOX_SDL
 PLATFORM_LIBS += $(shell $(SDL_CONFIG) --libs)
 PLATFORM_CPPFLAGS += $(shell $(SDL_CONFIG) --cflags)
-endif
 endif
 
 cmd_u-boot__ = $(CC) -o $@ -Wl,-T u-boot.lds $(u-boot-init) \
