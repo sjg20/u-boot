@@ -377,12 +377,8 @@ static int sandbox_cmdline_cb_unittests(struct sandbox_state *state,
 }
 SANDBOX_CMDLINE_OPT_SHORT(unittests, 'u', 0, "Run unit tests");
 
-<<<<<<< HEAD
 static int sandbox_cmdline_cb_select_unittests(struct sandbox_state *state,
 					       const char *arg)
-=======
-__weak int board_run_command(const char *cmdline)
->>>>>>> c26decb9c50... sandbox: Add support for Chromium OS verified boot
 {
 	state->select_unittests = arg;
 
