@@ -212,10 +212,29 @@ static int bd82x6x_get_gpio_base(struct udevice *dev, u32 *gbasep)
 	return 0;
 }
 
+static int bd82x6x_ioctl(struct udevice *dev, enum pch_req_t req, void *data,
+			 int size)
+{
+	u32 rcba, val;
+
+	switch (req) {
+	case PCH_REQ_HDA_CONFIG:
+		dm_pci_read_config32(dev, PCH_RCBA, &rcba);
+		val = readl(rcba + 0x2030);
+		if (!(val & (1U << 31)))
+			return -ENOENT;
+
+		return val & 0xfe;
+	default:
+		return -ENOSYS;
+	}
+}
+
 static const struct pch_ops bd82x6x_pch_ops = {
 	.get_spi_base	= bd82x6x_pch_get_spi_base,
 	.set_spi_protect = bd82x6x_set_spi_protect,
 	.get_gpio_base	= bd82x6x_get_gpio_base,
+	.ioctl		= bd82x6x_ioctl,
 };
 
 static const struct udevice_id bd82x6x_ids[] = {
