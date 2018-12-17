@@ -20,6 +20,10 @@
 
 	aliases {
 		serial0 = &serial;
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		i2c2 = &i2c2;
+		i2c3 = &i2c3;
 	};
 
 	config {
@@ -41,5 +45,29 @@
 
 	coreboot-fb {
 		compatible = "coreboot-fb";
+	};
+
+	i2c0: i2c0 {
+		compatible = "snps,designware-i2c";
+		reg = <0xfedc2000 1000>;
+		clock-frequency = <400000>;
+	};
+
+	i2c1: i2c1 {
+		compatible = "snps,designware-i2c";
+		reg = <0xfedc3000 1000>;
+		clock-frequency = <400000>;
+	};
+
+	i2c2: i2c2 {
+		compatible = "snps,designware-i2c";
+		reg = <0xfedc4000 1000>;
+		clock-frequency = <400000>;
+	};
+
+	i2c3: i2c3 {
+		compatible = "snps,designware-i2c";
+		reg = <0xfedc5000 1000>;
+		clock-frequency = <400000>;
 	};
 };
