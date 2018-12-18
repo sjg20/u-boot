@@ -21,6 +21,9 @@
 
 #include <gbb_header.h>
 #include <vboot_struct.h>
+#ifdef CONFIG_SYS_COREBOOT
+#include <asm/arch/sysinfo.h>
+#endif
 
 /**
  * gbb_copy_in() - Copy a portion of the GBB into vboot->cparams

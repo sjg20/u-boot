@@ -874,6 +874,9 @@ ifneq ($(CONFIG_SECURE_BOOT), y)
 ALL-$(CONFIG_RAMBOOT_PBL) += u-boot.pbl
 endif
 endif
+
+$(warning CONFIG_SPL $(CONFIG_SPL))
+
 ALL-$(CONFIG_SPL) += spl/u-boot-spl.bin
 ifeq ($(CONFIG_MX6)$(CONFIG_SECURE_BOOT), yy)
 ALL-$(CONFIG_SPL_FRAMEWORK) += u-boot-ivt.img
@@ -1355,7 +1358,9 @@ BINMAN_image.bin := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
 	"-ahardware-id=TEST 999" \
 	"-afrid=123412 123" -acros-ec-rw-path=$(KBUILD_SRC)/cros/data/ecrw.bin \
 	 -m -i image
-image.bin: $(filter-out image.bin,$(ALL-y)) tpl/u-boot-tpl spl/u-boot-spl \
+image.bin: $(filter-out image.bin,$(ALL-y)) \
+		$(if($(CONFIG_TPL),tpl/u-boot-tpl) \
+		$(if($(CONFIG_SPL),spl/u-boot-spl) \
 		u-boot.bin FORCE
 	$(call if_changed,binman)
 endif

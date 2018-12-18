@@ -164,11 +164,11 @@ static int boot_kernel(struct vboot_info *vboot,
 		EXTRA_BUFFER];
 	char *cmdline;
 	struct udevice *dev;
-#ifdef CONFIG_X86
+#ifdef CONFIG_X86x
 	struct boot_params *params;
 #endif
 
-#ifndef CONFIG_X86
+#ifndef CONFIG_X86x
 	/* Chromium OS kernel has to be loaded at fixed location */
 	cmd_tbl_t cmdtp;
 	ulong addr = map_to_sysmem(kparams->kernel_buffer);
@@ -231,7 +231,7 @@ static int boot_kernel(struct vboot_info *vboot,
 	if (dev)
 		device_remove(dev, DM_REMOVE_NORMAL);
 
-#ifdef CONFIG_X86
+#ifdef CONFIG_X86x
 	vboot_update_acpi(vboot);
 
 	params = (struct boot_params *)(uintptr_t)
