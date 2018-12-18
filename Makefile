@@ -875,8 +875,6 @@ ALL-$(CONFIG_RAMBOOT_PBL) += u-boot.pbl
 endif
 endif
 
-$(warning CONFIG_SPL $(CONFIG_SPL))
-
 ALL-$(CONFIG_SPL) += spl/u-boot-spl.bin
 ifeq ($(CONFIG_MX6)$(CONFIG_SECURE_BOOT), yy)
 ALL-$(CONFIG_SPL_FRAMEWORK) += u-boot-ivt.img
