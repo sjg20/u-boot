@@ -60,6 +60,15 @@
 		compatible = "snps,designware-i2c";
 		reg = <0xfedc3000 1000>;
 		clock-frequency = <400000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		tpm {
+			reg = <0x50>;
+			compatible = "google,cr50";
+			u-boot,i2c-offset-len = <0>;
+			busy-gpio = <>;
+		};
 	};
 
 	i2c2: i2c2 {
