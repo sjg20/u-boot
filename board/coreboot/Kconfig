@@ -18,6 +18,9 @@ config TARGET_COREBOOT
 	  coreboot terminology. This method was used for the Chromebook
 	  Pixel when launched.
 
+config TARGET_CHROMEOS_COREBOOT
+	bool "chromeos_coreboot"
+
 endchoice
 
 source "board/coreboot/coreboot/Kconfig"

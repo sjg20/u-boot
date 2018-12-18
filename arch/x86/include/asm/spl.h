@@ -2,6 +2,9 @@
 /*
  * Copyright (C) 2017 Google, Inc
  * Written by Simon Glass <sjg@chromium.org>
- *
- * This file is required for SPL to build, but is empty.
  */
+
+enum {
+	BOOT_DEVICE_BOARD,
+	BOOT_DEVICE_CROS_VBOOT,
+};

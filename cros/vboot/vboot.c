@@ -93,7 +93,7 @@ int vboot_load_config(struct vboot_info *vboot)
 
 void vboot_init_cparams(struct vboot_info *vboot, VbCommonParams *cparams)
 {
-#ifdef CONFIG_SYS_COREBOOT
+#ifdef CONFIG_SYS_COREBOOTx
 	cparams->shared_data_blob =
 		&((chromeos_acpi_t *)lib_sysinfo.vdat_addr)->vdat;
 	cparams->shared_data_size =

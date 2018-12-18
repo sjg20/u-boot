@@ -26,6 +26,9 @@
 		i2c3 = &i2c3;
 	};
 
+	binman {
+	};
+
 	config {
 		silent_console = <0>;
 	};
