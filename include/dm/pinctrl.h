@@ -407,4 +407,8 @@ int pinctrl_get_pins_count(struct udevice *dev);
  */
 int pinctrl_get_pin_name(struct udevice *dev, int selector, char *buf,
 			 int size);
+
+int pinctrl_pinmux_set(struct udevice *dev, uint pin_selector,
+		       uint func_selector);
+
 #endif /* __PINCTRL_H */

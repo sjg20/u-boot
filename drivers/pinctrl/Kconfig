@@ -106,6 +106,15 @@ config SPL_PINCONF
 
 if PINCTRL || SPL_PINCTRL
 
+config PINCTRL_AMD_FCP
+	bool "AMD FCP pinctrl driver"
+	depends on DM
+	help
+	  Select this to enable the pinctrl driver for the AMD Stoney Ridge
+	  Fusion Controller Hub (FCH). This supports 149 GPIOs which can be set
+	  as GPIOs as needed. This driver is required to support the GPIO
+	  driver.
+
 config PINCTRL_AR933X
 	bool "QCA/Athores ar933x pin control driver"
 	depends on DM && SOC_AR933X

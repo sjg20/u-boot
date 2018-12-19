@@ -82,4 +82,14 @@
 		reg = <0xfedc5000 1000>;
 		clock-frequency = <400000>;
 	};
+
+	gpio0: gpio {
+		compatible = "amd,fch-gpio";
+		reg = <0xfed81500 400>;
+	};
+
+	pinctrl {
+		compatible = "amd,fch-pinctrl";
+		reg = <0xfed80d00 200>;
+	};
 };
