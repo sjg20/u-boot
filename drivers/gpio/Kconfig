@@ -34,6 +34,16 @@ config DWAPB_GPIO
 	help
 	  Support for the Designware APB GPIO driver.
 
+config AMD_FCH_GPIO
+	bool "AMD FCH GPIO driver"
+	depends on DM_GPIO
+	select PINCTRL_AMD_FCH
+	help
+	  Select this to enable the GPIO driver for the AMD Stoney Ridge Fusion
+	  Controller Hub (FCH). This supports 149 GPIOs which can be set as
+	  inputs or outputs. This driver relies on the associated pinctrl
+	  driver to select GPIO mode for pins.
+
 config AT91_GPIO
 	bool "AT91 PIO GPIO driver"
 	depends on DM_GPIO
