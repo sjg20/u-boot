@@ -507,10 +507,12 @@ static int cr50_i2c_cleanup(struct udevice *dev)
 static int cr50_i2c_probe(struct udevice *dev)
 {
 	struct cr50_priv *priv = dev_get_priv(dev);
+	int ret;
 
-	/* Optional GPIO to track when cr40 is ready */
-	gpio_request_by_name(dev, "ready-gpio", 0, &priv->ready_gpio,
-			     GPIOD_IS_IN);
+	/* Optional GPIO to track when cr50 is ready */
+	ret = gpio_request_by_name(dev, "ready-gpio", 0, &priv->ready_gpio,
+				   GPIOD_IS_IN);
+	printf("GPIO error %d\n", ret);
 
 	return 0;
 }

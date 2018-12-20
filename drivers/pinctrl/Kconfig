@@ -106,8 +106,8 @@ config SPL_PINCONF
 
 if PINCTRL || SPL_PINCTRL
 
-config PINCTRL_AMD_FCP
-	bool "AMD FCP pinctrl driver"
+config PINCTRL_AMD_FCH
+	bool "AMD FCH pinctrl driver"
 	depends on DM
 	help
 	  Select this to enable the pinctrl driver for the AMD Stoney Ridge
