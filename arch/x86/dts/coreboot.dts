@@ -14,6 +14,7 @@
 /include/ "rtc.dtsi"
 /include/ "tsc_timer.dtsi"
 #include "dt-bindings/gpio/gpio.h"
+#include "dt-bindings/gpio/amd-fch-gpio.h"
 
 / {
 	model = "coreboot x86 payload";
@@ -68,7 +69,7 @@
 			reg = <0x50>;
 			compatible = "google,cr50";
 			u-boot,i2c-offset-len = <0>;
-			ready-gpio = <&gpio0 9 GPIO_ACTIVE_HIGH>;
+			ready-gpio = <&gpio0 9 (GPIO_ACTIVE_HIGH | TRIGGER_EDGE)>;
 		};
 	};
 

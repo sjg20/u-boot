@@ -339,6 +339,7 @@ int gpio_direction_output(unsigned gpio, int value)
 
 int dm_gpio_get_value(const struct gpio_desc *desc)
 {
+	struct dm_gpio_ops *ops = gpio_get_ops(desc->dev);
 	int value;
 	int ret;
 
@@ -346,7 +347,11 @@ int dm_gpio_get_value(const struct gpio_desc *desc)
 	if (ret)
 		return ret;
 
-	value = gpio_get_ops(desc->dev)->get_value(desc->dev, desc->offset);
+	if (ops->get_value_flags)
+		value = ops->get_value_flags(desc->dev, desc->offset,
+					     desc->flags);
+	else
+		value = ops->get_value(desc->dev, desc->offset);
 
 	return desc->flags & GPIOD_ACTIVE_LOW ? !value : value;
 }
@@ -557,7 +562,9 @@ int gpio_get_status(struct udevice *dev, int offset, char *buf, int buffsize)
 		const char *label;
 		bool used;
 
-		ret = ops->get_value(dev, offset);
+		ret = ops->get_value_flags ?
+			ops->get_value_flags(dev, offset, 0) :
+			ops->get_value(dev, offset);
 		if (ret < 0)
 			return ret;
 		used = gpio_get_function(dev, offset, &label) != GPIOF_UNUSED;
