@@ -79,6 +79,7 @@ static int amd_fch_pinctrl_probe(struct udevice *dev)
 }
 
 const struct pinctrl_ops amd_fch_pinctrl_ops = {
+	.get_gpio_mux = amd_fch_get_gpio_mux,
 	.pinmux_set = amd_fch_pinmux_set,
 };
 
