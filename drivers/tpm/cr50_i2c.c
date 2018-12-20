@@ -51,7 +51,7 @@ static int cr50_i2c_wait_tpm_ready(struct udevice *dev)
 
 	while (!dm_gpio_get_value(&priv->ready_gpio))
 		if (timer_get_us() > timeout) {
-			log_err("Timeout\n");
+			printf("Timeout\n");
 			return -ETIMEDOUT;
 		}
 
