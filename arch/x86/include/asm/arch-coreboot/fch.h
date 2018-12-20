@@ -13,4 +13,8 @@ enum {
 	PINCTRL_FCP_GPIO,
 };
 
+enum {
+	FCH_NUM_GPIOS		= 149,
+};
+
 #endif /* __ASM_ARCH_FCP_H */

@@ -40,9 +40,11 @@ static void run_preboot_environment_command(void)
 /* We come here after U-Boot is initialised and ready to process commands */
 void main_loop(void)
 {
+	const char *msg = "this is a test";
 	const char *s;
 
 	bootstage_mark_name(BOOTSTAGE_ID_MAIN_LOOP, "main_loop");
+	printf("%s", msg);
 
 #ifdef CONFIG_VERSION_VARIABLE
 	env_set("ver", version_string);  /* set version variable */

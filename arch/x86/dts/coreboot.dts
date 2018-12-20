@@ -13,6 +13,7 @@
 /include/ "reset.dtsi"
 /include/ "rtc.dtsi"
 /include/ "tsc_timer.dtsi"
+#include "dt-bindings/gpio/gpio.h"
 
 / {
 	model = "coreboot x86 payload";
@@ -67,7 +68,7 @@
 			reg = <0x50>;
 			compatible = "google,cr50";
 			u-boot,i2c-offset-len = <0>;
-			busy-gpio = <>;
+			ready-gpio = <&gpio0 9 GPIO_ACTIVE_HIGH>;
 		};
 	};
 
@@ -86,6 +87,8 @@
 	gpio0: gpio {
 		compatible = "amd,fch-gpio";
 		reg = <0xfed81500 400>;
+		bank-name = "A";
+		#gpio-cells = <2>;
 	};
 
 	pinctrl {

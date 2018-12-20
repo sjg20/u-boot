@@ -7,14 +7,11 @@
 
 #include <common.h>
 #include <dm.h>
-#include <asm/gpio.h>
+#include <asm-generic/gpio.h>
 #include <asm/io.h>
-#include <asm/arch/fcp.h>
+#include <asm/arch/fch.h>
+#include <dt-bindings/gpio/gpio.h>
 #include <dm/pinctrl.h>
-
-enum {
-	FCH_NUM_GPIOS		= 149,
-};
 
 enum {
 	FCH_GPIO_WAKE_STS	= 1 << 29,
@@ -81,7 +78,29 @@ static int fch_gpio_set_value(struct udevice *dev, unsigned offset,
 
 static int fch_gpio_get_function(struct udevice *dev, unsigned offset)
 {
-	return -ENODATA;
+	struct fch_gpio_priv *priv = dev_get_priv(dev);
+	int mux;
+	u32 val;
+
+	mux = pinctrl_get_gpio_mux(priv->pinctrl, 0, offset);
+	if (mux == GPIOF_INPUT) {
+		val = readl(&priv->regs[offset]);
+		if (val & FCH_GPIO_OUTPUT_EN)
+			return GPIOF_OUTPUT;
+		else
+			return GPIOF_INPUT;
+	}
+
+	return GPIOF_UNKNOWN;
+}
+
+static int fch_gpio_xlate(struct udevice *dev, struct gpio_desc *desc,
+			  struct ofnode_phandle_args *args)
+{
+	desc->offset = args->args[0];
+	desc->flags = args->args[1] & GPIO_ACTIVE_LOW ? GPIOD_ACTIVE_LOW : 0;
+
+	return 0;
 }
 
 static int fch_gpio_probe(struct udevice *dev)
@@ -107,6 +126,7 @@ static const struct dm_gpio_ops gpio_fch_ops = {
 	.get_value		= fch_gpio_get_value,
 	.set_value		= fch_gpio_set_value,
 	.get_function		= fch_gpio_get_function,
+	.xlate			= fch_gpio_xlate,
 };
 
 static const struct udevice_id fch_gpio_ids[] = {
