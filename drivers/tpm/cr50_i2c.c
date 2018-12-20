@@ -52,7 +52,10 @@ static int cr50_i2c_wait_tpm_ready(struct udevice *dev)
 	while (!dm_gpio_get_value(&priv->ready_gpio))
 		if (timer_get_us() > timeout) {
 			printf("Timeout\n");
-			return -ETIMEDOUT;
+			/*
+			 * Use this instead of -ETIMEDOUT which is used by i2c
+			 */
+			return -ETIME;
 		}
 
 	return 0;
@@ -239,6 +242,7 @@ static int request_locality(struct udevice *dev, int loc)
 		}
 		udelay(Cr50TimeoutShort);
 	}
+	printf("Request locality failed\n");
 
 	return -ETIMEDOUT;
 }

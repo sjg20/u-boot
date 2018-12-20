@@ -122,6 +122,7 @@ struct gpio_desc {
 #define GPIOD_IS_IN		(1 << 2)	/* GPIO is an input */
 #define GPIOD_ACTIVE_LOW	(1 << 3)	/* value has active low */
 #define GPIOD_IS_OUT_ACTIVE	(1 << 4)	/* set output active */
+#define GPIOD_EDGE		(1 << 5)	/* edge value (auto-clear) */
 
 	uint offset;		/* GPIO offset within the device */
 	/*
@@ -253,6 +254,8 @@ struct dm_gpio_ops {
 	int (*direction_output)(struct udevice *dev, unsigned offset,
 				int value);
 	int (*get_value)(struct udevice *dev, unsigned offset);
+	int (*get_value_flags)(struct udevice *dev, unsigned offset,
+			       ulong flags);
 	int (*set_value)(struct udevice *dev, unsigned offset, int value);
 	int (*get_open_drain)(struct udevice *dev, unsigned offset);
 	int (*set_open_drain)(struct udevice *dev, unsigned offset, int value);

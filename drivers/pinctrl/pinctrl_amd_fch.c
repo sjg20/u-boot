@@ -43,10 +43,12 @@ static int amd_fch_pinmux_set(struct udevice *dev, uint pin_selector,
 {
 	struct fch_pinctrl_priv *priv = dev_get_priv(dev);
 
+// 	printf("%s: old %x, \n", __func__, readb(&priv->regs[pin_selector]));
 	switch (func_selector) {
 	case PINCTRL_FCP_GPIO:
 		writeb(fch_gpio_use_table[pin_selector],
 		       &priv->regs[pin_selector]);
+// 		printf("new %x\n", readb(&priv->regs[pin_selector]));
 		break;
 	default:
 		return -ENOSYS;

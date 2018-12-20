@@ -10,6 +10,7 @@
 #include <asm-generic/gpio.h>
 #include <asm/io.h>
 #include <asm/arch/fch.h>
+#include <dt-bindings/gpio/amd-fch-gpio.h>
 #include <dt-bindings/gpio/gpio.h>
 #include <dm/pinctrl.h>
 
@@ -24,6 +25,7 @@ enum {
 struct fch_gpio_priv {
 	u32 *regs;
 	struct udevice *pinctrl;
+	bool use_edge[FCH_NUM_GPIOS];
 };
 
 static int fch_gpio_direction_input(struct udevice *dev, unsigned offset)
@@ -35,7 +37,9 @@ static int fch_gpio_direction_input(struct udevice *dev, unsigned offset)
 	ret = pinctrl_pinmux_set(priv->pinctrl, offset, PINCTRL_FCP_GPIO);
 	if (ret)
 		return ret;
+// 	printf("%s: old %x, \n", __func__, readl(&regs[offset]));
 	clrbits_le32(&regs[offset], FCH_GPIO_OUTPUT_EN);
+// 	printf("new %x\n", readl(&regs[offset]));
 
 	return 0;
 }
@@ -55,12 +59,24 @@ static int fch_gpio_direction_output(struct udevice *dev, unsigned offset,
 	return 0;
 }
 
-static int fch_gpio_get_value(struct udevice *dev, unsigned offset)
+int fch_gpio_get_value_flags(struct udevice *dev, ulong offset, ulong flags)
 {
 	struct fch_gpio_priv *priv = dev_get_priv(dev);
 	u32 *regs = priv->regs;
+	u32 val;
 
-	return readl(&regs[offset]) & FCH_GPIO_INPUT_VAL ? 1 : 0;
+	val = readl(&regs[offset]);
+	if (priv->use_edge[offset]) {
+		if (val & FCH_GPIO_INTERRUPT_STS) {
+			/* Clear interrupt status, preserve wake status */
+			val &= ~FCH_GPIO_WAKE_STS;
+			writel(val, &regs[offset]);
+			return 1;
+		}
+		return 0;
+	}
+
+	return val & FCH_GPIO_INPUT_VAL ? 1 : 0;
 }
 
 static int fch_gpio_set_value(struct udevice *dev, unsigned offset,
@@ -97,8 +113,17 @@ static int fch_gpio_get_function(struct udevice *dev, unsigned offset)
 static int fch_gpio_xlate(struct udevice *dev, struct gpio_desc *desc,
 			  struct ofnode_phandle_args *args)
 {
+	struct fch_gpio_priv *priv = dev_get_priv(dev);
+
 	desc->offset = args->args[0];
-	desc->flags = args->args[1] & GPIO_ACTIVE_LOW ? GPIOD_ACTIVE_LOW : 0;
+	priv->use_edge[desc->offset] = false;
+	desc->flags = 0;
+	if (args->args[1] & GPIO_ACTIVE_LOW)
+		desc->flags |= GPIOD_ACTIVE_LOW;
+	if (args->args[1] & TRIGGER_EDGE) {
+		desc->flags |= GPIOD_EDGE;
+		priv->use_edge[desc->offset] = true;
+	}
 
 	return 0;
 }
@@ -123,7 +148,7 @@ static int fch_gpio_probe(struct udevice *dev)
 static const struct dm_gpio_ops gpio_fch_ops = {
 	.direction_input	= fch_gpio_direction_input,
 	.direction_output	= fch_gpio_direction_output,
-	.get_value		= fch_gpio_get_value,
+	.get_value_flags	= fch_gpio_get_value_flags,
 	.set_value		= fch_gpio_set_value,
 	.get_function		= fch_gpio_get_function,
 	.xlate			= fch_gpio_xlate,
