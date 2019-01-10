@@ -51,7 +51,7 @@ static int cr50_i2c_wait_tpm_ready(struct udevice *dev)
 	timeout = timer_get_us() + Cr50TimeoutIrq;
 
 	i = 0;
-	while (!dm_gpio_get_value(&priv->ready_gpio))
+	while (!dm_gpio_get_value(&priv->ready_gpio)) {
 		i++;
 		if (timer_get_us() > timeout) {
 			printf("Timeout\n");
@@ -60,7 +60,7 @@ static int cr50_i2c_wait_tpm_ready(struct udevice *dev)
 			 */
 			return -ETIME;
 		}
-	printf("%d\n", i);
+        }
 
 	return 0;
 }
@@ -226,9 +226,9 @@ static int request_locality(struct udevice *dev, int loc)
 	int ret;
 
 	ret = check_locality(dev, loc);
-	if (ret < 0)
+	if (ret < 0) {
 		return ret;
-	else if (ret == loc)
+	} else if (ret == loc)
 		return loc;
 
 	ret = cr50_i2c_write(dev, tpm_access(loc), &buf, 1);
@@ -242,6 +242,7 @@ static int request_locality(struct udevice *dev, int loc)
 			return ret;
 		if (ret == loc) {
 			priv->locality = loc;
+			log_debug("Set locality to %x\n", loc);
 			return loc;
 		}
 		udelay(Cr50TimeoutShort);
@@ -500,7 +501,7 @@ static int cr50_i2c_open(struct udevice *dev)
 
 	priv->vendor = vendor;
 	cr50_i2c_get_desc(dev, buf, sizeof(buf));
-	log_debug(buf);
+	log_debug("%s\n", buf);
 
 	return 0;
 }
@@ -520,6 +521,8 @@ static int cr50_i2c_probe(struct udevice *dev)
 	/* Optional GPIO to track when cr50 is ready */
 	ret = gpio_request_by_name(dev, "ready-gpio", 0, &priv->ready_gpio,
 				   GPIOD_IS_IN);
+        if (ret)
+            printf("Warning: Cr50 does not have a ready-gpio (err=%d)\n", ret);
 
 	return 0;
 }

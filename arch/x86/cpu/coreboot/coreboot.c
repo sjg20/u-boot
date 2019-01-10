@@ -77,7 +77,7 @@ int last_stage_init(void)
 		timestamp_add_to_bootstage();
 
 	/* start usb so that usb keyboard can be used as input device */
-	usb_init();
+// 	usb_init();
 
 	board_final_cleanup();
 

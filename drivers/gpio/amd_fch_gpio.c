@@ -59,7 +59,7 @@ static int fch_gpio_direction_output(struct udevice *dev, unsigned offset,
 	return 0;
 }
 
-int fch_gpio_get_value_flags(struct udevice *dev, ulong offset, ulong flags)
+int fch_gpio_get_value_flags(struct udevice *dev, uint offset, ulong flags)
 {
 	struct fch_gpio_priv *priv = dev_get_priv(dev);
 	u32 *regs = priv->regs;
