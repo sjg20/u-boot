@@ -534,7 +534,7 @@ include/config/%.conf: $(KCONFIG_CONFIG) include/config/auto.conf.cmd
 	@# Otherwise, 'make silentoldconfig' would be invoked twice.
 	$(Q)touch include/config/auto.conf
 
-u-boot.cfg spl/u-boot.cfg tpl/u-boot.cfg:
+u-boot.cfg spl/u-boot.cfg tpl/u-boot.cfg: include/config.h FORCE
 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.autoconf $(@)
 
 -include include/autoconf.mk
@@ -974,7 +974,7 @@ quiet_cmd_cfgcheck = CFGCHK  $2
 cmd_cfgcheck = $(srctree)/scripts/check-config.sh $2 \
 		$(srctree)/scripts/config_whitelist.txt $(srctree)
 
-all:		$(ALL-y)
+all:		$(ALL-y) cfg
 ifeq ($(CONFIG_DM_I2C_COMPAT)$(CONFIG_SANDBOX),y)
 	@echo >&2 "===================== WARNING ======================"
 	@echo >&2 "This board uses CONFIG_DM_I2C_COMPAT. Please remove"
@@ -1641,7 +1641,7 @@ ifneq ($(KBUILD_SRC),)
 endif
 
 # prepare2 creates a makefile if using a separate output directory
-prepare2: prepare3 outputmakefile cfg
+prepare2: prepare3 outputmakefile
 
 prepare1: prepare2 $(version_h) $(timestamp_h) \
                    include/config/auto.conf
