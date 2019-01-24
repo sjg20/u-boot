@@ -18,7 +18,7 @@ int vboot_ver3_try_fw(struct vboot_info *vboot)
 	ret = vb2api_fw_phase3(vboot_get_ctx(vboot));
 	bootstage_mark(BOOTSTAGE_VBOOT_END_VERIFY_SLOT);
 	if (ret) {
-		log_info("Reboot reqested (%x)\n", ret);
+		log_info("Reboot requested (%x)\n", ret);
 		return VBERROR_REBOOT_REQUIRED;
 	}
 
