@@ -285,20 +285,20 @@ int cros_ofnode_memory(const char *name, struct fdt_memory *config)
 
 static void dump_fmap_entry(const char *path, struct fmap_entry *entry)
 {
-	log_debug("%-20s %08x:%08x\n", path, entry->offset, entry->length);
+	printf("%-20s %08x:%08x\n", path, entry->offset, entry->length);
 }
 
 static void dump_fmap_firmware_entry(const char *name,
 				     struct fmap_firmware_entry *entry)
 {
-	log_debug("%s\n", name);
+	printf("%s\n", name);
 	dump_fmap_entry("all", &entry->all);
 	dump_fmap_entry("spl", &entry->spl);
 	dump_fmap_entry("boot", &entry->boot);
 	dump_fmap_entry("vblock", &entry->vblock);
 	dump_fmap_entry("firmware_id", &entry->firmware_id);
-	log_debug("%-20s %08llx\n", "block_offset",
-		  (long long)entry->block_offset);
+	printf("%-20s %08llx\n", "block_offset",
+	       (long long)entry->block_offset);
 }
 
 void cros_ofnode_dump_fmap(struct cros_fmap *config)

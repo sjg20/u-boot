@@ -11,5 +11,6 @@ obj-$(CONFIG_CHROMEOS) += jump.o
 endif
 obj-$(CONFIG_CHROMEOS) += memwipe.o
 obj-$(CONFIG_CHROMEOS) += resource.o
+obj-$(CONFIG_CHROMEOS) += vboot_acpi.o
 obj-$(CONFIG_CHROMEOS) += vboot_internal.o
 obj-$(CONFIG_CHROMEOS) += vboot-ec-uclass.o
