@@ -8,8 +8,6 @@
 #ifndef _COREBOOT_SYSINFO_H
 #define _COREBOOT_SYSINFO_H
 
-#include <asm/coreboot_tables.h>
-
 /* Maximum number of memory range definitions */
 #define SYSINFO_MAX_MEM_RANGES	32
 /* Allow a maximum of 8 GPIOs */
@@ -56,5 +54,7 @@ struct sysinfo_t {
 extern struct sysinfo_t lib_sysinfo;
 
 int get_coreboot_info(struct sysinfo_t *info);
+
+struct sysinfo_t *lib_sysinfo_get(void);
 
 #endif

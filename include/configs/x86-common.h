@@ -36,7 +36,6 @@
 /*-----------------------------------------------------------------------
  * Real Time Clock Configuration
  */
-#define CONFIG_RTC_MC146818
 #define CONFIG_SYS_ISA_IO_BASE_ADDRESS	0
 #define CONFIG_SYS_ISA_IO      CONFIG_SYS_ISA_IO_BASE_ADDRESS
 
@@ -50,8 +49,7 @@
  */
 
 #ifndef CONFIG_BOOTCOMMAND
-#define CONFIG_BOOTCOMMAND	\
-	"ext2load scsi 0:3 01000000 /boot/vmlinuz; zboot 01000000"
+#define CONFIG_BOOTCOMMAND	"vboot go auto"
 #endif
 
 #if defined(CONFIG_CMD_KGDB)

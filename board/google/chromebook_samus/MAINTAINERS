@@ -11,3 +11,10 @@ S:	Maintained
 F:	board/google/chromebook_samus/
 F:	include/configs/chromebook_samus.h
 F:	configs/chromebook_samus_tpl_defconfig
+
+CHROMEOS SAMUS BOARD
+M:	Simon Glass <sjg@chromium.org>
+S:	Maintained
+F:	board/google/chromebook_samus/
+F:	include/configs/chromeos_samus.h
+F:	configs/chromeos_samus_defconfig
