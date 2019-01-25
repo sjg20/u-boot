@@ -60,6 +60,14 @@ config TARGET_CHROMEBOOK_SAMUS_TPL
 	  between different A/B versions of SPL/U-Boot, to allow upgrading of
 	  almost all U-Boot code in the field.
 
+config TARGET_CHROMEOS_SAMUS
+	bool "Chromium OS samus"
+	help
+	  This is a version of Samus which boots Chromium OS verified boot.
+	  See the instructions in doc/README.chromium for more information on
+	  how to build and run this. The Chromium OS interface code is located
+	  in the cros/ subdirectory.
+
 endchoice
 
 source "board/google/chromebook_link/Kconfig"

@@ -11,6 +11,13 @@
 #include <asm/arch/pch.h>
 #include <asm/arch/pei_data.h>
 
+__weak asmlinkage void sdram_console_tx_byte(unsigned char byte)
+{
+#ifdef DEBUG
+	putc(byte);
+#endif
+}
+
 void broadwell_fill_pei_data(struct pei_data *pei_data)
 {
 	pei_data->pei_version = PEI_VERSION;
