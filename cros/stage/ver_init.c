@@ -142,7 +142,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 
 	if (vboot_flag_read_walk(VBOOT_FLAG_RECOVERY) == 1) {
 		if (vboot->disable_dev_on_rec)
-			ctx->flags |= VB2_DISABLE_DEVELOPER_MODE;
+			ctx->flags |= VB2_CONTEXT_DISABLE_DEVELOPER_MODE;
 	}
 
 	if (vboot_flag_read_walk(VBOOT_FLAG_WIPEOUT) == 1)

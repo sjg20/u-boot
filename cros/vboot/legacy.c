@@ -9,7 +9,7 @@
 #include <os.h>
 #include <cros/vboot.h>
 
-int VbExLegacy(int altfw_num)
+int VbExLegacy(enum VbAltFwIndex_t altfw_num)
 {
 	/* TODO(sjg@chromium.org): Implement this */
 	printf("Legacy boot %d\n", altfw_num);

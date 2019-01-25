@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <gpt.h>
+#include <vboot_api.h>
 #include <vb2_api.h>
 #include <cros/cros_common.h>
 #include <cros/vboot_flag.h>
@@ -44,6 +45,11 @@ u8 VbExOverrideGptEntryPriority(const GptEntry *e)
 
 /* This should never get called */
 u32 VbExGetSwitches(u32 request_mask)
+{
+	return 0;
+}
+
+VbError_t VbExSetVendorData(const char *vendor_data_value)
 {
 	return 0;
 }

@@ -66,7 +66,8 @@ static void print_on_center(struct udevice *console, const char *message)
 		out_line(console, '.', cols);
 }
 
-VbError_t VbExDisplayScreen(u32 screen_type, u32 locale)
+VbError_t VbExDisplayScreen(u32 screen_type, u32 locale,
+                            const VbScreenData *data)
 {
 	struct vboot_info *vboot = vboot_get();
 	const char *msg = NULL;
@@ -164,7 +165,7 @@ static void show_cdata_string(struct udevice *console, const char *prompt,
 	out_str(console, "\n");
 }
 
-VbError_t VbExDisplayDebugInfo(const char *info_str)
+VbError_t VbExDisplayDebugInfo(const char *info_str, int full_info)
 {
 	struct vboot_info *vboot = vboot_get();
 	struct udevice *console = vboot->console;
@@ -179,7 +180,7 @@ VbError_t VbExDisplayDebugInfo(const char *info_str)
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExGetlocalisationCount(u32 *count)
+VbError_t VbExGetLocalizationCount(u32 *count)
 {
 	*count = vboot_get_locale_count();
 

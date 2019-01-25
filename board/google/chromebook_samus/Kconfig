@@ -1,4 +1,4 @@
-if TARGET_CHROMEBOOK_SAMUS || TARGET_CHROMEBOOK_SAMUS_TPL
+if TARGET_CHROMEBOOK_SAMUS || TARGET_CHROMEBOOK_SAMUS_TPL || TARGET_CHROMEOS_SAMUS
 
 config SYS_BOARD
 	default "chromebook_samus"
@@ -12,6 +12,7 @@ config SYS_SOC
 config SYS_CONFIG_NAME
 	default "chromebook_samus" if TARGET_CHROMEBOOK_SAMUS
 	default "chromebook_samus" if TARGET_CHROMEBOOK_SAMUS_TPL
+	default "chromeos_samus" if TARGET_CHROMEOS_SAMUS
 
 config SYS_TEXT_BASE
 	default 0xffe00000

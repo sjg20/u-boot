@@ -48,9 +48,10 @@ flash image.
 
 To run on sandbox:
 
+   BOARD=grunt            # Set to any board for which you have built an image
    $UB/tpl/u-boot-tpl -d $UB/u-boot.dtb.out \
-	-L6 -c "host bind 0 $CROS/src/build/images/cheza/latest/chromiumos_image.bin; vboot go auto" \
-	-l -w -s state.dtb -r
+	-L6 -c "host bind 0 $CROS/src/build/images/$BOARD/latest/chromiumos_image.bin; vboot go auto" \
+	-s state.dtb -lrwn
 
 To run on other boards:
    Install image.bin in the SPI flash of your device
