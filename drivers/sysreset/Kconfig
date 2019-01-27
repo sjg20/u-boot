@@ -23,6 +23,15 @@ config SYSRESET_GPIO
 	  example on Microblaze where reset logic can be controlled via GPIO
 	  pin which triggers cpu reset.
 
+config SYSRESET_INTEL_PCH
+	bool "Enable support for Intel PCH reset driver"
+	depends on X86
+	help
+	  Enable this option to get reset support on Intel SoCs which have
+	  a common Platform-Controller Hub (PCH). This driver supports powering
+	  off the device. It augments the standard x86 sysreset driver which
+	  provides normal reset options.
+
 config SYSRESET_MICROBLAZE
 	bool "Enable support for Microblaze soft reset"
 	depends on MICROBLAZE
