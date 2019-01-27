@@ -31,6 +31,11 @@ static int x86_sysreset_request(struct udevice *dev, enum sysreset_t type)
 	return -EINPROGRESS;
 }
 
+static int x86_sysreset_get_last(struct udevice *dev)
+{
+	return SYSRESET_POWER;
+}
+
 static const struct udevice_id x86_sysreset_ids[] = {
 	{ .compatible = "x86,reset" },
 	{ }
@@ -38,6 +43,7 @@ static const struct udevice_id x86_sysreset_ids[] = {
 
 static struct sysreset_ops x86_sysreset_ops = {
 	.request = x86_sysreset_request,
+	.get_last = x86_sysreset_get_last,
 };
 
 U_BOOT_DRIVER(x86_sysreset) = {
