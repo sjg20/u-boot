@@ -102,6 +102,9 @@ static int dm_test_spi_flash_direct(struct unit_test_state *uts)
 {
 	struct udevice *dev;
 	char buf[BUF_SIZE];
+	size_t map_size;
+	ulong map_base;
+	u32 offset;
 	int i;
 
 	ut_assertok(uclass_get_device(UCLASS_SPI_FLASH, 1, &dev));
@@ -129,6 +132,12 @@ static int dm_test_spi_flash_direct(struct unit_test_state *uts)
 	/* Check write protection */
 	ut_asserteq(0, spl_flash_get_sw_write_prot(dev));
 	ut_asserteq(1, spl_flash_get_sw_write_prot(dev));
+
+	/* Check mapping */
+	ut_assertok(spi_flash_get_mmap(dev, &map_base, &map_size, &offset));
+	ut_asserteq(0x1000, map_base);
+	ut_asserteq(0x2000, map_size);
+	ut_asserteq(0x100, offset);
 
 	return 0;
 }

@@ -68,6 +68,16 @@ static int sandbox_direct_get_sw_write_prot(struct udevice *dev)
 	return priv->write_prot++ ? 1 : 0;
 }
 
+static int sandbox_direct_get_mmap(struct udevice *dev, ulong *map_basep,
+				   size_t *map_sizep, u32 *offsetp)
+{
+	*map_basep = 0x1000;
+	*map_sizep = 0x2000;
+	*offsetp = 0x100;
+
+	return 0;
+}
+
 static int sandbox_direct_probe(struct udevice *dev)
 {
 	struct sandbox_direct_priv *priv = dev_get_priv(dev);
@@ -82,6 +92,7 @@ static struct dm_spi_flash_ops sandbox_direct_ops = {
 	.write = sandbox_direct_write,
 	.erase = sandbox_direct_erase,
 	.get_sw_write_prot = sandbox_direct_get_sw_write_prot,
+	.get_mmap = sandbox_direct_get_mmap,
 };
 
 static const struct udevice_id sandbox_direct_ids[] = {

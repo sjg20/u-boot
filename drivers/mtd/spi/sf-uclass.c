@@ -28,6 +28,17 @@ int spi_flash_erase_dm(struct udevice *dev, u32 offset, size_t len)
 	return log_ret(sf_get_ops(dev)->erase(dev, offset, len));
 }
 
+int spi_flash_get_mmap(struct udevice *dev, ulong *map_basep, size_t *map_sizep,
+		       u32 *offsetp)
+{
+	struct dm_spi_flash_ops *ops = sf_get_ops(dev);
+
+	if (!ops->get_mmap)
+		return -ENOSYS;
+
+	return ops->get_mmap(dev, map_basep, map_sizep, offsetp);
+}
+
 int spl_flash_get_sw_write_prot(struct udevice *dev)
 {
 	struct dm_spi_flash_ops *ops = sf_get_ops(dev);

@@ -47,6 +47,19 @@ struct dm_spi_flash_ops {
 	 *	other -ve value on error
 	 */
 	int (*get_sw_write_prot)(struct udevice *dev);
+
+	/**
+	 * get_mmap() - Get memory-mapped SPI
+	 *
+	 * @dev:	SPI flash device
+	 * @map_basep:	Returns base memory address for mapped SPI
+	 * @map_sizep:	Returns size of mapped SPI
+	 * @offsetp:	Returns start offset of SPI flash where the map works
+	 *	correctly (offsets before this are not visible)
+	 * @return 0 if OK, -EFAULT if memory mapping is not available
+	 */
+	int (*get_mmap)(struct udevice *dev, ulong *map_basep,
+			size_t *map_sizep, u32 *offsetp);
 };
 
 /* Access the serial operations for a device */
@@ -87,6 +100,20 @@ int spi_flash_write_dm(struct udevice *dev, u32 offset, size_t len,
  * @return 0 if OK, -ve on error
  */
 int spi_flash_erase_dm(struct udevice *dev, u32 offset, size_t len);
+
+/**
+ * spi_flash_get_mmap() - Get memory-mapped SPI
+ *
+ * @dev:	SPI flash device
+ * @map_basep:	Returns base memory address for mapped SPI
+ * @map_sizep:	Returns size of mapped SPI
+ * @offsetp:	Returns start offset of SPI flash where the map works
+ *	correctly (offsets before this are not visible)
+ * @return 0 if OK, -ENOSYS if no operation, -EFAULT if memory mapping is not
+ *	available
+ */
+int spi_flash_get_mmap(struct udevice *dev, ulong *map_basep, size_t *map_sizep,
+		       u32 *offsetp);
 
 /**
  * spl_flash_get_sw_write_prot() - Check state of software write-protect feature
