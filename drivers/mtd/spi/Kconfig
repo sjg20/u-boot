@@ -78,6 +78,15 @@ config SF_DEFAULT_SPEED
 	  speed and mode from platdata values computed from
 	  available node.
 
+config SPI_FLASH_INTEL_FAST
+	bool "Intel Fast SPI interface"
+	depends on DM_SPI_FLASH
+	help
+	  Add support for Intel Fast SPI interface, as used on Apollolake.
+	  This current only supports reading from SPI, enough to load SPL or
+	  U-Boot proper from SPI flash. Future work may enable write and erase
+	  operations.
+
 if SPI_FLASH
 
 config SPI_FLASH_SFDP_SUPPORT

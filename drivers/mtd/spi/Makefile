@@ -19,5 +19,6 @@ endif
 
 obj-$(CONFIG_SPI_FLASH) += spi-nor.o
 obj-$(CONFIG_SPI_FLASH_DATAFLASH) += sf_dataflash.o
+obj-$(CONFIG_SPI_FLASH_INTEL_FAST) += intel_fast_spi.o
 obj-$(CONFIG_SPI_FLASH_MTD) += sf_mtd.o
 obj-$(CONFIG_SPI_FLASH_SANDBOX) += sandbox.o
