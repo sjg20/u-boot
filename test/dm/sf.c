@@ -14,7 +14,12 @@
 #include <asm/test.h>
 #include <dm/test.h>
 #include <dm/util.h>
+#include <dm/uclass.h>
 #include <test/ut.h>
+
+enum {
+	BUF_SIZE	= 4,
+};
 
 /* Simple test of sandbox SPI flash */
 static int dm_test_spi_flash(struct unit_test_state *uts)
@@ -91,3 +96,40 @@ static int dm_test_spi_flash_func(struct unit_test_state *uts)
 	return 0;
 }
 DM_TEST(dm_test_spi_flash_func, DM_TESTF_SCAN_PDATA | DM_TESTF_SCAN_FDT);
+
+/* Test of the direct SPI flash interface (no SPI layer) */
+static int dm_test_spi_flash_direct(struct unit_test_state *uts)
+{
+	struct udevice *dev;
+	char buf[BUF_SIZE];
+	int i;
+
+	ut_assertok(uclass_get_device(UCLASS_SPI_FLASH, 1, &dev));
+
+	/* Check the read call */
+	ut_asserteq(-EIO, spi_flash_read_dm(dev, 1, BUF_SIZE, buf));
+	ut_assertok(spi_flash_read_dm(dev, 0, BUF_SIZE, buf));
+	for (i = 0; i < BUF_SIZE; i++)
+		ut_asserteq('a', buf[i]);
+
+	/* Check the write call */
+	ut_asserteq(-EIO, spi_flash_write_dm(dev, 1, BUF_SIZE, buf));
+	ut_assertok(spi_flash_write_dm(dev, 0, 1, "b"));
+	ut_assertok(spi_flash_read_dm(dev, 0, BUF_SIZE, buf));
+	for (i = 0; i < BUF_SIZE; i++)
+		ut_asserteq('b', buf[i]);
+
+	/* Check erase */
+	ut_asserteq(-EIO, spi_flash_erase_dm(dev, 1, BUF_SIZE));
+	ut_assertok(spi_flash_erase_dm(dev, 0, 1));
+	ut_assertok(spi_flash_read_dm(dev, 0, BUF_SIZE, buf));
+	for (i = 0; i < BUF_SIZE; i++)
+		ut_asserteq('c', buf[i]);
+
+	/* Check write protection */
+	ut_asserteq(0, spl_flash_get_sw_write_prot(dev));
+	ut_asserteq(1, spl_flash_get_sw_write_prot(dev));
+
+	return 0;
+}
+DM_TEST(dm_test_spi_flash_direct, DM_TESTF_SCAN_PDATA | DM_TESTF_SCAN_FDT);

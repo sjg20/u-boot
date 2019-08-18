@@ -636,6 +636,10 @@
 		};
 	};
 
+	spi-flash@0 {
+		compatible = "sandbox,spi-flash-direct";
+	};
+
 	syscon0: syscon@0 {
 		compatible = "sandbox,syscon0";
 		reg = <0x10 16>;
