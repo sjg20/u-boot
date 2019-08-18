@@ -7,7 +7,7 @@ ifndef CONFIG_SPL_BUILD
 obj-$(CONFIG_DWAPB_GPIO)	+= dwapb_gpio.o
 obj-$(CONFIG_AXP_GPIO)		+= axp_gpio.o
 endif
-obj-$(CONFIG_DM_GPIO)		+= gpio-uclass.o
+obj-$(CONFIG_$(SPL_TPL_)DM_GPIO) += gpio-uclass.o
 
 obj-$(CONFIG_$(SPL_)DM_PCA953X)	+= pca953x_gpio.o
 obj-$(CONFIG_DM_74X164)		+= 74x164_gpio.o
