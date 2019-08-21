@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/io.h>
 #include <linux/errno.h>
 #include <asm/arch/sys_proto.h>

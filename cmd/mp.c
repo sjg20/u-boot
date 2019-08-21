@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 
 static int cpu_status_all(void)
 {

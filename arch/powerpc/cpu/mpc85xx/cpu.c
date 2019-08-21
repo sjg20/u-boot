@@ -10,6 +10,7 @@
 
 #include <config.h>
 #include <common.h>
+#include <cpu_legacy.h>
 #include <watchdog.h>
 #include <command.h>
 #include <fsl_esdhc.h>
