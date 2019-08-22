@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <time.h>
 #include <asm/arch/pxa-regs.h>
 #include <asm/io.h>
 #include <asm/system.h>

@@ -71,5 +71,6 @@ uint64_t usec_to_tick(unsigned long usec);
 
 ulong usec2ticks(unsigned long usec);
 ulong ticks2usec(unsigned long ticks);
+void wait_ticks(unsigned long ticks);
 
 #endif /* _TIME_H */
