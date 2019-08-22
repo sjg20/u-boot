@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <dwmmc.h>
 #include <malloc.h>
 #include <asm/arcregs.h>

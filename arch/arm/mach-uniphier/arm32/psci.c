@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/io.h>

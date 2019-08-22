@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <vsprintf.h>
 #include <asm/arch/clock.h>
 #include <asm/io.h>

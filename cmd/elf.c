@@ -15,6 +15,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <elf.h>
 #include <env.h>
 #include <net.h>

@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <usb.h>
 #include <asm/gpio.h>
 #include <asm/arch/pinmux.h>
