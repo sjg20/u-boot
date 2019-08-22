@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <irq_legacy.h>
 #include <mpc83xx.h>
 #include <command.h>
 

@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <irq_legacy.h>
 #include <dm/lists.h>
 #include <efi_loader.h>
 #include <linux/libfdt.h>

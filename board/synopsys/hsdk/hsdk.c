@@ -8,6 +8,7 @@
 #include <config.h>
 #include <cpu_legacy.h>
 #include <env.h>
+#include <irq_legacy.h>
 #include <linux/printk.h>
 #include <linux/kernel.h>
 #include <linux/io.h>

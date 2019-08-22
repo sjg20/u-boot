@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <cpu_legacy.h>
+#include <irq_legacy.h>
 #include <asm/io.h>
 #include <asm/armv7m.h>
 

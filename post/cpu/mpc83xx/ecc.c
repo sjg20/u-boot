@@ -11,6 +11,7 @@
 #include <common.h>
 #include <cpu_legacy.h>
 #include <irq_legacy.h>
+#include <irq_legacy.h>
 #include <mpc83xx.h>
 #include <watchdog.h>
 #include <asm/io.h>

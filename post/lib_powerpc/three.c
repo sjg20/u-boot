@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <irq_legacy.h>
 
 /*
  * CPU test

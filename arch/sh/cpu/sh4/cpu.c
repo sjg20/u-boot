@@ -7,6 +7,7 @@
 #include <common.h>
 #include <command.h>
 #include <cpu.h>
+#include <irq_legacy.h>
 #include <netdev.h>
 #include <asm/processor.h>
 

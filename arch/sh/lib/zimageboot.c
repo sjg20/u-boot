@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <irq_legacy.h>
 #include <asm/io.h>
 #include <asm/zimage.h>
 

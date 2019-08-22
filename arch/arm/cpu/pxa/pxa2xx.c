@@ -11,6 +11,7 @@
 
 #include <common.h>
 #include <cpu_legacy.h>
+#include <irq_legacy.h>
 #include <time.h>
 #include <asm/arch/pxa-regs.h>
 #include <asm/io.h>

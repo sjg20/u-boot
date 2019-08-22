@@ -9,6 +9,7 @@
 #include <cpu_legacy.h>
 #include <dm.h>
 #include <errno.h>
+#include <irq_legacy.h>
 #include <asm/cache.h>
 
 DECLARE_GLOBAL_DATA_PTR;

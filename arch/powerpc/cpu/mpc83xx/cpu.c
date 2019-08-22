@@ -11,6 +11,7 @@
 
 #include <common.h>
 #include <cpu.h>
+#include <irq_legacy.h>
 #include <vsprintf.h>
 #include <watchdog.h>
 #include <command.h>

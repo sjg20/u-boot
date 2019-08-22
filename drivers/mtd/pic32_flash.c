@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <fdt_support.h>
 #include <flash.h>
+#include <irq_legacy.h>
 #include <mach/pic32.h>
 #include <wait_bit.h>
 
