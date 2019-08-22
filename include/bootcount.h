@@ -59,6 +59,9 @@ int dm_bootcount_set(struct udevice *dev, u32 bootcount);
 
 #endif
 
+void bootcount_store(ulong);
+ulong bootcount_load(void);
+
 #if defined(CONFIG_SPL_BOOTCOUNT_LIMIT) || defined(CONFIG_BOOTCOUNT_LIMIT)
 
 #if !defined(CONFIG_SYS_BOOTCOUNT_LE) && !defined(CONFIG_SYS_BOOTCOUNT_BE)
