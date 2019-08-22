@@ -73,4 +73,7 @@ ulong usec2ticks(unsigned long usec);
 ulong ticks2usec(unsigned long ticks);
 void wait_ticks(unsigned long ticks);
 
+/* Return value of monotonic microsecond timer */
+unsigned long timer_get_us(void);
+
 #endif /* _TIME_H */
