@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <eeprom_legacy.h>
 #include <env.h>
 #include <i2c_eeprom.h>
 #include <netdev.h>

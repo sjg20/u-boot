@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <eeprom_legacy.h>
 #include <env.h>
 #include <init.h>
 #include <ioports.h>

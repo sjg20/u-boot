@@ -22,6 +22,7 @@
 #include <common.h>
 #include <config.h>
 #include <command.h>
+#include <eeprom_legacy.h>
 #include <i2c.h>
 #include <eeprom_layout.h>
 

@@ -6,6 +6,7 @@
  *     Texas Instruments Incorporated, <www.ti.com>
  */
 #include <common.h>
+#include <eeprom_legacy.h>
 #include <env.h>
 #include <init.h>
 #include <asm/arch/clock.h>

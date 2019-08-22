@@ -8,6 +8,7 @@
  */
 
 #include <common.h>
+#include <eeprom_legacy.h>
 #include <asm/arch/hardware.h>
 #include <asm/omap_common.h>
 #include <dm/uclass.h>
