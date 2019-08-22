@@ -69,4 +69,7 @@ uint64_t usec_to_tick(unsigned long usec);
 	(time_after_eq(a,b) && \
 	 time_before(a,c))
 
+ulong usec2ticks(unsigned long usec);
+ulong ticks2usec(unsigned long ticks);
+
 #endif /* _TIME_H */
