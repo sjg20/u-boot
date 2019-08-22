@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <sort.h>
 #include <linux/libfdt.h>
 #include <malloc.h>
 #include <linux/compiler.h>
