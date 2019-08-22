@@ -9,6 +9,7 @@
  */
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <linux/compiler.h>
 
 static int parse_argv(const char *);

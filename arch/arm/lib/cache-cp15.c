@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/system.h>
 #include <asm/cache.h>
 #include <linux/compiler.h>

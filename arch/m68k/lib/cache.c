@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/immap.h>
 #include <asm/cache.h>
 

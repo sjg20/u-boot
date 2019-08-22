@@ -17,6 +17,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <dm.h>
 #include <env.h>
 #include <netdev.h>

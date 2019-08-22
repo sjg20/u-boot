@@ -8,6 +8,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/system.h>
 #include <asm/armv8/mmu.h>
 

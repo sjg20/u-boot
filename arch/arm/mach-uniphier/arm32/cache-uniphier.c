@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <linux/io.h>
 #include <linux/kernel.h>
 #include <asm/armv7.h>

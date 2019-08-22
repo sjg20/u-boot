@@ -6,6 +6,7 @@
 
 /* CPU specific code */
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/cache.h>
 
 /*

@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <ns16550.h>
 #include <asm/io.h>
 #include <asm/arch/msmc.h>

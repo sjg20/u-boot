@@ -9,6 +9,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <watchdog.h>
 
 #include <asm/immap.h>

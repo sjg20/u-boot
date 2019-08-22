@@ -14,6 +14,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <asm/system.h>
 
 static void cache_flush(void);

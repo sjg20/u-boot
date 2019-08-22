@@ -17,6 +17,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/io.h>
 #include <asm/msr.h>
 #include <asm/mtrr.h>

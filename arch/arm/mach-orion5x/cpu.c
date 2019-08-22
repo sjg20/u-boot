@@ -9,6 +9,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <netdev.h>
 #include <asm/cache.h>
 #include <asm/io.h>

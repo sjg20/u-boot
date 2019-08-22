@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 
 void invalidate_icache_all(void)
 {

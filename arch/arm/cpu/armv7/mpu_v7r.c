@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <asm/armv7.h>
 #include <asm/system.h>
 #include <asm/barriers.h>

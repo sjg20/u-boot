@@ -10,6 +10,7 @@
 
 #include <common.h>
 #include <bootm.h>
+#include <cpu_legacy.h>
 #include <asm/setjmp.h>
 
 /**

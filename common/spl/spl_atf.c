@@ -11,6 +11,7 @@
 
 #include <common.h>
 #include <atf_common.h>
+#include <cpu_legacy.h>
 #include <errno.h>
 #include <spl.h>
 

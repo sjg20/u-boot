@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <mmc.h>
 #include <i2c.h>
 #include <serial.h>

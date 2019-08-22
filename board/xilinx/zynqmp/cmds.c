@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <malloc.h>
 #include <asm/arch/hardware.h>

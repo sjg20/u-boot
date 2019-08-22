@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <bootm.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <fdt_support.h>
 #include <linux/libfdt.h>

@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/armada100.h>
 

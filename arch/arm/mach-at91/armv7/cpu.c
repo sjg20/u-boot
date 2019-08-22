@@ -9,6 +9,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <vsprintf.h>
 #include <asm/io.h>
 #include <asm/arch/hardware.h>

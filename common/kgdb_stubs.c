@@ -8,6 +8,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <kgdb.h>
 #include <serial.h>
 

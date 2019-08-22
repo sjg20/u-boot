@@ -3,6 +3,7 @@
  * (C) Copyright 2011
  * Ilya Yanok, EmCraft Systems
  */
+#include <cpu_legacy.h>
 #include <linux/types.h>
 #include <common.h>
 

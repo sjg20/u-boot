@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/processor.h>
 #include <asm/ppc.h>
 #include <asm/io.h>

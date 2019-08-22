@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <linux/usb/otg.h>
 #include <dwc3-sti-glue.h>
 #include <dwc3-uboot.h>

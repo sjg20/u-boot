@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/asm.h>
 
 int dcache_status(void)

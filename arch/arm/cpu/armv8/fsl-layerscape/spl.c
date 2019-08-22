@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <spl.h>
 #include <asm/io.h>

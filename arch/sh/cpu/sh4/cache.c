@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <asm/io.h>
 #include <asm/processor.h>
 #include <asm/system.h>

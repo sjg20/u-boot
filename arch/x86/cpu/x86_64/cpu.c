@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <cpu.h>
+#include <cpu_legacy.h>
 #include <debug_uart.h>
 
 /*

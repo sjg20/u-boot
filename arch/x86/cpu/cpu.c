@@ -20,6 +20,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <dm.h>
 #include <errno.h>
 #include <malloc.h>

@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 
 int arch_cpu_init(void)
 {
