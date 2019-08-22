@@ -20,4 +20,6 @@ void reset_timer(void);
 void enable_interrupts(void);
 int disable_interrupts(void);
 
+void trap_init(unsigned long reloc_addr);
+
 #endif
