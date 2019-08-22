@@ -324,4 +324,7 @@ void pl01x_serial_initialize(void);
 void pxa_serial_initialize(void);
 void sh_serial_initialize(void);
 
+int serial_printf(const char *fmt, ...)
+		__attribute__ ((format (__printf__, 1, 2)));
+
 #endif
