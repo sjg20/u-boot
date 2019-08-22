@@ -5,6 +5,7 @@
  * Copyright 2017-2018 NXP
  */
 #include <common.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <errno.h>
 #include <linux/bug.h>

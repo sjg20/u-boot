@@ -8,6 +8,7 @@
 
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <watchdog.h>
 #include <command.h>

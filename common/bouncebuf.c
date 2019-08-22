@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <malloc.h>
 #include <errno.h>
 #include <bouncebuf.h>

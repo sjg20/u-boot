@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/io.h>
 #include <asm/arch/gpio.h>
 #include <asm/arch/clk.h>

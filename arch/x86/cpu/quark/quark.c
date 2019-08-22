@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include <cpu.h>
+#include <cpu_legacy.h>
 #include <mmc.h>
 #include <asm/io.h>
 #include <asm/ioapic.h>

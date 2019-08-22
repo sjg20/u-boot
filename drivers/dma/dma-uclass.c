@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <dm.h>
 #include <dm/read.h>
 #include <dma-uclass.h>

@@ -10,6 +10,7 @@
 
 #include <config.h>
 #include <common.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <malloc.h>
 #include <net.h>

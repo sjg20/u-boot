@@ -6,6 +6,7 @@
 
 #include <avb_verify.h>
 #include <blk.h>
+#include <cpu_legacy.h>
 #include <fastboot.h>
 #include <image.h>
 #include <malloc.h>

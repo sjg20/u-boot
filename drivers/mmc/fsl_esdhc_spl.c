@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <mmc.h>
 #include <malloc.h>
 

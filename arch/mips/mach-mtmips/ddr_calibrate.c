@@ -17,6 +17,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <linux/io.h>
 #include <asm/cacheops.h>
 #include <asm/io.h>

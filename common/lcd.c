@@ -10,6 +10,7 @@
 #include <config.h>
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <env_callback.h>
 #include <linux/types.h>
 #include <stdio_dev.h>

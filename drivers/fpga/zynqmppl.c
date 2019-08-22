@@ -7,6 +7,7 @@
 
 #include <console.h>
 #include <common.h>
+#include <cpu_legacy.h>
 #include <zynqmppl.h>
 #include <linux/sizes.h>
 #include <asm/arch/sys_proto.h>

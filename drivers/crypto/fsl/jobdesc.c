@@ -8,6 +8,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <fsl_sec.h>
 #include "desc_constr.h"
 #include "jobdesc.h"

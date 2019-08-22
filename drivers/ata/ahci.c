@@ -9,6 +9,7 @@
  * This driver provides a SCSI interface to SATA.
  */
 #include <common.h>
+#include <cpu_legacy.h>
 
 #include <command.h>
 #include <dm.h>

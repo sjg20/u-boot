@@ -10,6 +10,7 @@
 #include <common.h>
 #include <command.h>
 #include <console.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <s_record.h>
 #include <net.h>

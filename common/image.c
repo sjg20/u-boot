@@ -8,6 +8,7 @@
 
 #ifndef USE_HOSTCC
 #include <common.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <u-boot/crc.h>
 #include <watchdog.h>

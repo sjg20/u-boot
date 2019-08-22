@@ -5,6 +5,7 @@
  */
 
 #include <bootcount.h>
+#include <cpu_legacy.h>
 #include <linux/compiler.h>
 
 /* Now implement the generic default functions */

@@ -13,6 +13,7 @@
  */
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <gzip.h>
 #include <image.h>

@@ -3,6 +3,7 @@
  * Copyright (c) 2019, Linaro Limited
  */
 
+#include <cpu_legacy.h>
 #include <asm/io.h>
 #include <common.h>
 #include <console.h>

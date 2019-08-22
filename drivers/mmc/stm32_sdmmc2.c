@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <clk.h>
+#include <cpu_legacy.h>
 #include <dm.h>
 #include <fdtdec.h>
 #include <linux/libfdt.h>

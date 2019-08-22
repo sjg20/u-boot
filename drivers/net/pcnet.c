@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <malloc.h>
 #include <net.h>
 #include <netdev.h>

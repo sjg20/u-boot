@@ -8,6 +8,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm-generic/io.h>
 #include <dm.h>
 #include <dm/device-internal.h>

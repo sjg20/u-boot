@@ -10,6 +10,7 @@
  *
 */
 
+#include <cpu_legacy.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/gpio.h>

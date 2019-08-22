@@ -13,6 +13,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <malloc.h>
 #include <memalign.h>
 #include <spi.h>

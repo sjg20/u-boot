@@ -23,6 +23,7 @@
  */
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <net.h>
 #include <miiphy.h>
 #include <malloc.h>

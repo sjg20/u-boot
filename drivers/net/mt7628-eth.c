@@ -14,6 +14,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <dm.h>
 #include <malloc.h>
 #include <miiphy.h>

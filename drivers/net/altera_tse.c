@@ -9,6 +9,7 @@
  * published by the Free Software Foundation.
  */
 #include <common.h>
+#include <cpu_legacy.h>
 #include <dm.h>
 #include <errno.h>
 #include <fdt_support.h>

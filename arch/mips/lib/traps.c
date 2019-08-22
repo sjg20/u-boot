@@ -11,6 +11,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/mipsregs.h>
 #include <asm/addrspace.h>
 #include <asm/system.h>

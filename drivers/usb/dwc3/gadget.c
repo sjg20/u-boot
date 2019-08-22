@@ -14,6 +14,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <malloc.h>
 #include <asm/dma-mapping.h>
 #include <linux/bug.h>

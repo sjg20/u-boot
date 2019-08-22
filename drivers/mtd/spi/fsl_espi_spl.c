@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <spi_flash.h>
 #include <malloc.h>
 

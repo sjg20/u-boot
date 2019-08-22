@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <dm.h>
 #include <dm/platform_data/net_ethoc.h>
 #include <linux/io.h>

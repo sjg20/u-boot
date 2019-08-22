@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/io.h>
 #include <asm/fsl_lbc.h>
 #include <nand.h>

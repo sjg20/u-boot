@@ -27,6 +27,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/relocs.h>
 #include <asm/sections.h>
 

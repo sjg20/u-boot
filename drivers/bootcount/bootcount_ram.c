@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/io.h>
 
 DECLARE_GLOBAL_DATA_PTR;

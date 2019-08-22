@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <pci.h>
 #include <command.h>
 #include <asm/byteorder.h>

@@ -16,6 +16,7 @@
 #include <config.h>
 #include <common.h>
 #include <cpu_legacy.h>
+#include <irq_legacy.h>
 #include <netdev.h>
 #include <asm/io.h>
 #include <asm/mach-types.h>

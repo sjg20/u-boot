@@ -14,6 +14,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <asm/byteorder.h>
 #include <usb.h>
 #include <asm/unaligned.h>

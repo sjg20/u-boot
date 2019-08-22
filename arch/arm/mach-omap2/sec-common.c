@@ -13,6 +13,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <stdarg.h>
 
 #include <asm/arch/sys_proto.h>

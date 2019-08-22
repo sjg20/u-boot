@@ -5,6 +5,7 @@
  */
 
 #include <clk.h>
+#include <cpu_legacy.h>
 #include <dm.h>
 #include <fdt_support.h>
 #include <linux/io.h>

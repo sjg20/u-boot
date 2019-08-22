@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <cros_ec.h>
 #include <dm.h>
 #include <led.h>

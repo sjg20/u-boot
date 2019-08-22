@@ -13,6 +13,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <dm.h>
 #include <linux/mtd/rawnand.h>
 #include <linux/sizes.h>

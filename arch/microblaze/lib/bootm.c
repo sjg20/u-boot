@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <fdt_support.h>
 #include <image.h>

@@ -33,6 +33,7 @@
 
 #include <common.h>
 #include <ahci.h>
+#include <cpu_legacy.h>
 #include <dm.h>
 #include <dm/device-internal.h>
 #include <dm/lists.h>

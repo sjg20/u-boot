@@ -3,6 +3,7 @@
  * (C) Copyright 2016 Vasily Khoruzhick <anarsoul@gmail.com>
  */
 
+#include <cpu_legacy.h>
 #include <linux/types.h>
 #include <common.h>
 
