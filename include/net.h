@@ -887,4 +887,9 @@ int update_tftp(ulong addr, char *interface, char *devstring);
  */
 void eth_parse_enetaddr(const char *addr, uint8_t *enetaddr);
 
+static inline struct in_addr env_get_ip(char *var)
+{
+	return string_to_ip(env_get(var));
+}
+
 #endif /* __NET_H__ */
