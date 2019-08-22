@@ -12,6 +12,7 @@
 #include <hexdump.h>
 #include <env_internal.h>
 #include <search.h>
+#include <u-boot/crc.h>
 #include <uuid.h>
 
 #define READ_ONLY BIT(31)
