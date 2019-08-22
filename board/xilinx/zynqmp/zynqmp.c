@@ -7,6 +7,7 @@
 #include <common.h>
 #include <cpu_legacy.h>
 #include <env.h>
+#include <init.h>
 #include <sata.h>
 #include <ahci.h>
 #include <scsi.h>

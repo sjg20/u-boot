@@ -7,6 +7,7 @@
 #include <dm.h>
 #include <env.h>
 #include <i2c_eeprom.h>
+#include <init.h>
 #include <netdev.h>
 
 static int get_ethaddr_from_eeprom(u8 *addr)

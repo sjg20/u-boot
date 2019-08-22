@@ -13,6 +13,7 @@
 #include <common.h>
 #include <config.h>
 #include <dm.h>
+#include <init.h>
 #include <dm/lists.h>
 #include <fdtdec.h>
 #include <asm/processor.h>

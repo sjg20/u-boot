@@ -3,6 +3,7 @@
  * Copyright (C) 2018 Armadeus Systems
  */
 
+#include <init.h>
 #include <asm/arch/mx6-pins.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/gpio.h>
