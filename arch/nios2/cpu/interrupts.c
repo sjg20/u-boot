@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <irq_legacy.h>
 #include <asm/nios2.h>
 #include <asm/types.h>
 #include <asm/io.h>

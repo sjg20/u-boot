@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <irq_legacy.h>
 #include <linux/compiler.h>
 #include <efi_loader.h>
 

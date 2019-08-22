@@ -8,6 +8,7 @@
 #include <board.h>
 #include <clk.h>
 #include <dm.h>
+#include <irq_legacy.h>
 #include <status_led.h>
 #include <time.h>
 #include <timer.h>

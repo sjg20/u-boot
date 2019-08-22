@@ -6,6 +6,7 @@
 #include <common.h>
 #include <cpu_legacy.h>
 #include <debug_uart.h>
+#include <irq_legacy.h>
 #include <malloc.h>
 #include <spl.h>
 #include <asm/cpu.h>

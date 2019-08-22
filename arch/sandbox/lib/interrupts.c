@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <irq_legacy.h>
 
 int interrupt_init(void)
 {

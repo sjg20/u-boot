@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <irq_legacy.h>
 #include <time.h>
 
 #include <asm/timer.h>
