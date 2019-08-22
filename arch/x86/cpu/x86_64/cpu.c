@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu.h>
 #include <debug_uart.h>
 
 /*

@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <cpu.h>
 #include <fdtdec.h>
 #include <usb.h>
 #include <asm/io.h>

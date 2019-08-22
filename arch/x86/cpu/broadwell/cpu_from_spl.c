@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <bloblist.h>
+#include <cpu.h>
 #include <debug_uart.h>
 #include <handoff.h>
 #include <asm/mtrr.h>

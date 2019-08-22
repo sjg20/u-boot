@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu.h>
 #include <efi.h>
 #include <errno.h>
 #include <usb.h>

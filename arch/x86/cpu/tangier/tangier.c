@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <cpu.h>
 #include <asm/u-boot-x86.h>
 
 /*

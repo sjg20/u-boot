@@ -37,4 +37,6 @@ u32 cpu_mask(void);
 u32 cpu_dsp_mask(void);
 int is_core_valid(unsigned int core);
 
+int checkcpu(void);
+
 #endif

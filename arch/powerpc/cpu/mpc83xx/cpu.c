@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <cpu.h>
 #include <vsprintf.h>
 #include <watchdog.h>
 #include <command.h>

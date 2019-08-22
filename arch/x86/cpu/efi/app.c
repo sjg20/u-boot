@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <cpu.h>
 #include <fdtdec.h>
 #include <netdev.h>
 
