@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <vsprintf.h>
 #include <watchdog.h>
 #include <command.h>

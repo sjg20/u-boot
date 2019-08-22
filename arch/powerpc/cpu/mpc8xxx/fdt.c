@@ -8,6 +8,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <asm/mp.h>

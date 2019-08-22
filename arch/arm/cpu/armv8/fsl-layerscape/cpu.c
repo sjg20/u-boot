@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <env.h>
 #include <fsl_ddr_sdram.h>
 #include <vsprintf.h>

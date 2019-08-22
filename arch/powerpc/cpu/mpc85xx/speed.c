@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <cpu_legacy.h>
 #include <ppc_asm.tmpl>
 #include <linux/compiler.h>
 #include <asm/processor.h>

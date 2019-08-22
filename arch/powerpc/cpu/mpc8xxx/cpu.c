@@ -10,6 +10,7 @@
 #include <config.h>
 #include <common.h>
 #include <command.h>
+#include <cpu_legacy.h>
 #include <tsec.h>
 #include <fm_eth.h>
 #include <netdev.h>
