@@ -8,7 +8,7 @@
 #include <common.h>
 #include <asm/asm.h>
 
-int dcache_status (void)
+int dcache_status(void)
 {
 	int i = 0;
 	int mask = 0x80;
@@ -18,7 +18,7 @@ int dcache_status (void)
 	return i;
 }
 
-int icache_status (void)
+int icache_status(void)
 {
 	int i = 0;
 	int mask = 0x20;
@@ -28,7 +28,7 @@ int icache_status (void)
 	return i;
 }
 
-void	icache_enable (void) {
+void	icache_enable(void) {
 	MSRSET(0x20);
 }
 
@@ -38,7 +38,7 @@ void	icache_disable(void) {
 	MSRCLR(0x20);
 }
 
-void	dcache_enable (void) {
+void	dcache_enable(void) {
 	MSRSET(0x80);
 }
 
