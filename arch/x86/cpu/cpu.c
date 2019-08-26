@@ -42,6 +42,9 @@
 #include <asm/interrupt.h>
 #include <asm/tables.h>
 #include <linux/compiler.h>
+#ifdef CONFIG_HAVE_FSP
+#include <asm/fsp/fsp_support.h>
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -261,6 +264,9 @@ int reserve_arch(void)
 {
 #ifdef CONFIG_ENABLE_MRC_CACHE
 	mrccache_reserve();
+#endif
+#ifdef CONFIG_HAVE_FSP
+	fsp_reserve();
 #endif
 
 #ifdef CONFIG_SEABIOS

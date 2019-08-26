@@ -82,3 +82,14 @@ void *hob_get_guid_hob_data(const void *hob_list, u32 *len,
 
 	return get_guid_hob_data(guid_hob);
 }
+
+uint hob_get_size(const void *hob_list)
+{
+	const struct hob_header *hdr;
+
+	for (hdr = hob_list; !end_of_hob(hdr); hdr = get_next_hob(hdr))
+		;
+	hdr++;
+
+	return (void *)hdr - hob_list;
+}

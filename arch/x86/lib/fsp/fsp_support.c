@@ -181,3 +181,19 @@ void *fsp_get_graphics_info(const void *hob_list, u32 *len)
 
 	return hob_get_guid_hob_data(hob_list, len, &guid);
 }
+
+void fsp_reserve(void)
+{
+	void *new_hobs;
+	uint hob_size;
+
+	hob_size = hob_get_size(gd->arch.hob_list);
+	gd->start_addr_sp -= hob_size;
+	new_hobs = (void *)gd->start_addr_sp;
+	memcpy(new_hobs, gd->arch.hob_list, hob_size);
+
+	gd->start_addr_sp &= ~0xf;
+	debug("Copying FSP HOBs from %p to %p, size %x\n", gd->arch.hob_list,
+	      new_hobs, hob_size);
+	gd->arch.hob_list = new_hobs;
+}

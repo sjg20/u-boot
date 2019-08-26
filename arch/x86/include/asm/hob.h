@@ -227,4 +227,12 @@ const struct hob_header *hob_get_next_guid_hob(const efi_guid_t *guid,
 void *hob_get_guid_hob_data(const void *hob_list, u32 *len,
 			    const efi_guid_t *guid);
 
+/**
+ * hob_get_size() - Get the total size of the HOB data
+ *
+ * This scans the list and returns the number of bytes oocupied by the HOB list.
+ * This can be used to copy the list to somewhere else in memory.
+ */
+uint hob_get_size(const void *hob_list);
+
 #endif /* __HOB_H__ */

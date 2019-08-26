@@ -160,4 +160,12 @@ void *fsp_prepare_mrc_cache(void);
  */
 u32 fsp_notify(struct fsp_header *fsp_hdr, u32 phase);
 
+/**
+ * fsp_reserve() - Relocation the HOBs
+ *
+ * Make space for the HOBs in the new memory and copy them there. This must be
+ * called from board_init_f() along with the 'reserve' functions.
+ */
+void fsp_reserve(void);
+
 #endif
