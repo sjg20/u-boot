@@ -36,8 +36,7 @@ int fast_spi_get_bios_mmap(ulong *map_basep, size_t *map_sizep, uint *offsetp)
 	ulong bar, base, mmio_base;
 
 	/* Special case to find mapping without probing the device */
-	pci_x86_read_config(NULL, PCH_DEV_SPI, PCI_BASE_ADDRESS_0, &bar,
-			    PCI_SIZE_32);
+	pci_x86_read_config(PCH_DEV_SPI, PCI_BASE_ADDRESS_0, &bar, PCI_SIZE_32);
 	mmio_base = bar & PCI_BASE_ADDRESS_MEM_MASK;
 	regs = (struct fast_spi_regs *)mmio_base;
 	base = fast_spi_get_bios_region(regs, map_sizep);
