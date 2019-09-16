@@ -14,6 +14,8 @@
 #include <spi.h>
 #include <spi_flash.h>
 #include <asm/mrccache.h>
+#include <dm/device-internal.h>
+#include <dm/uclass-internal.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -197,45 +199,43 @@ int mrccache_reserve(void)
 
 int mrccache_get_region(struct udevice **devp, struct mrc_region *entry)
 {
-	const void *blob = gd->fdt_blob;
-	int node, mrc_node;
+	struct udevice *dev;
+	ofnode mrc_node;
+	ulong map_base;
+	size_t map_size;
+	u32 offset;
 	u32 reg[2];
 	int ret;
 
 	/* Find the flash chip within the SPI controller node */
-	node = fdtdec_next_compatible(blob, 0, COMPAT_GENERIC_SPI_FLASH);
-	if (node < 0) {
-		debug("%s: Cannot find SPI flash\n", __func__);
-		return -ENOENT;
+	ret = uclass_find_first_device(UCLASS_SPI_FLASH, &dev);
+	if (ret)
+		return log_msg_ret("Cannot find SPI flash\n", ret);
+	ret = spi_flash_get_mmap(dev, &map_base, &map_size, &offset);
+	if (!ret) {
+		entry->base = map_base;
+	} else {
+		ret = dev_read_u32_array(dev, "memory-map", reg, 2);
+		if (ret)
+			return log_msg_ret("Cannot find memory map\n", ret);
+		entry->base = reg[0];
 	}
-
-	if (fdtdec_get_int_array(blob, node, "memory-map", reg, 2)) {
-		debug("%s: Cannot find memory map\n", __func__);
-		return -EINVAL;
-	}
-	entry->base = reg[0];
 
 	/* Find the place where we put the MRC cache */
-	mrc_node = fdt_subnode_offset(blob, node, "rw-mrc-cache");
-	if (mrc_node < 0) {
-		debug("%s: Cannot find node\n", __func__);
-		return -EPERM;
-	}
+	mrc_node = dev_read_subnode(dev, "rw-mrc-cache");
+	if (!ofnode_valid(mrc_node))
+		return log_msg_ret("Cannot find node", -EPERM);
 
-	if (fdtdec_get_int_array(blob, mrc_node, "reg", reg, 2)) {
-		debug("%s: Cannot find address\n", __func__);
-		return -EINVAL;
-	}
+	ret = ofnode_read_u32_array(mrc_node, "reg", reg, 2);
+	if (ret)
+		return log_msg_ret("Cannot find address", ret);
 	entry->offset = reg[0];
 	entry->length = reg[1];
 
-	if (devp) {
-		ret = uclass_get_device_by_of_offset(UCLASS_SPI_FLASH, node,
-						     devp);
-		debug("ret = %d\n", ret);
-		if (ret)
-			return ret;
-	}
+	if (devp)
+		*devp = dev;
+	debug("MRC cache in '%s', offset %x, len %x, base %x\n",
+	      dev->name, entry->offset, entry->length, entry->base);
 
 	return 0;
 }
@@ -253,6 +253,9 @@ int mrccache_save(void)
 	      gd->arch.mrc_output_len);
 
 	ret = mrccache_get_region(&sf, &entry);
+	if (ret)
+		goto err_entry;
+	ret = device_probe(sf);
 	if (ret)
 		goto err_entry;
 	data  = (struct mrc_data_container *)gd->arch.mrc_output;
