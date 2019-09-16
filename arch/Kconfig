@@ -133,6 +133,8 @@ config SANDBOX
 	imply PHYLIB
 	imply DM_MDIO
 	imply DM_MDIO_MUX
+	imply POWER_MGR
+	imply POWER_MGR_SANDBOX
 
 config SH
 	bool "SuperH architecture"
