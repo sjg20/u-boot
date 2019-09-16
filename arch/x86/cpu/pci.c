@@ -69,6 +69,24 @@ int pci_x86_clrset_config(pci_dev_t bdf, uint offset, ulong clr, ulong set,
 	return pci_x86_write_config(bdf, offset, value, size);
 }
 
+#if !CONFIG_IS_ENABLED(OF_PLATDATA)
+int pci_x86_get_devfn(struct udevice *dev)
+{
+	struct fdt_pci_addr addr;
+	int ret;
+
+	/* Extract the devfn from fdt_pci_addr */
+	ret = ofnode_read_pci_addr(dev_ofnode(dev), FDT_PCI_SPACE_CONFIG,
+				   "reg", &addr);
+	if (ret) {
+		if (ret != -ENOENT)
+			return -EINVAL;
+	}
+
+	return addr.phys_hi & 0xff00;
+}
+#endif
+
 void pci_assign_irqs(int bus, int device, u8 irq[4])
 {
 	pci_dev_t bdf;
