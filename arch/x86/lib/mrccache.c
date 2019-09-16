@@ -86,15 +86,16 @@ struct mrc_data_container *mrccache_find_current(struct mrc_region *entry)
  * @return next cache entry if found, NULL if we got to the end
  */
 static struct mrc_data_container *find_next_mrc_cache(struct mrc_region *entry,
-		struct mrc_data_container *cache)
+		struct mrc_data_container *prev)
 {
+	struct mrc_data_container *cache;
 	ulong base_addr, end_addr;
 
 	base_addr = entry->base + entry->offset;
 	end_addr = base_addr + entry->length;
 
-	cache = next_mrc_block(cache);
-	if ((ulong)cache >= end_addr) {
+	cache = next_mrc_block(prev);
+	if ((ulong)cache + mrc_block_size(prev->data_size) > end_addr) {
 		/* Crossed the boundary */
 		cache = NULL;
 		debug("%s: no available entries found\n", __func__);
