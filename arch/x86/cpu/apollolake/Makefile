@@ -15,6 +15,7 @@ obj-y += gpio.o
 obj-y += hostbridge.o
 obj-y += itss.o
 obj-y += lpc.o
+obj-y += p2sb.o
 obj-y += pch.o
 obj-y += pmc.o
 obj-y += uart.o
