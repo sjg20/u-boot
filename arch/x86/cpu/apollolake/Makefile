@@ -2,6 +2,7 @@
 #
 # Copyright (c) 2016 Google, Inc
 
+obj-$(CONFIG_SPL_BUILD) += cpu_spl.o
 obj-$(CONFIG_SPL_BUILD) += spl.o
 obj-$(CONFIG_SPL_BUILD) += systemagent.o
 
