@@ -37,6 +37,57 @@ enum {
 	TCO1_CNT_HLT			= 1 << 11,
 };
 
+#ifdef CONFIG_X86
+static int gpe0_shift(struct power_mgr_upriv *upriv, int regnum)
+{
+	return upriv->gpe0_dwx_shift_base + regnum * 4;
+}
+
+int pmc_gpe_init(struct udevice *dev)
+{
+	struct power_mgr_upriv *upriv = dev_get_uclass_priv(dev);
+	struct udevice *itss;
+	u32 *dw;
+	u32 gpio_cfg_mask;
+	u32 gpio_cfg;
+	int ret, i;
+	u32 mask;
+
+	dw = upriv->gpe0_dw;
+	mask = upriv->gpe0_dwx_mask;
+	gpio_cfg_mask = 0;
+	for (i = 0; i < upriv->gpe0_count; i++) {
+		gpio_cfg_mask |= mask << gpe0_shift(upriv, i);
+		if (dw[i] & mask)
+			return log_msg_ret("Base GPE0 value", -EINVAL);
+	}
+
+	/*
+	 * Route the GPIOs to the GPE0 block. Determine that all values
+	 * are different and if they aren't, use the reset values.
+	 */
+	if (dw[0] == dw[1] || dw[1] == dw[2]) {
+		log_info("PMC: Using default GPE route");
+		gpio_cfg = readl(upriv->gpe_cfg);
+		for (i = 0; i < upriv->gpe0_count; i++)
+			dw[i] = gpio_cfg >> gpe0_shift(upriv, i);
+	} else {
+		gpio_cfg = 0;
+		for (i = 0; i < upriv->gpe0_count; i++)
+			gpio_cfg |= dw[i] << gpe0_shift(upriv, i);
+		clrsetbits_le32(upriv->gpe_cfg, gpio_cfg_mask, gpio_cfg);
+	}
+
+	/* Set the routes in the GPIO communities as well */
+	ret = uclass_first_device_err(UCLASS_ITSS, &itss);
+	if (ret)
+		return log_msg_ret("Cannot find itss", ret);
+	gpio_route_gpe(itss, dw[0], dw[1], dw[2]);
+
+	return 0;
+}
+#endif /* CONFIG_X86 */
+
 static void pmc_fill_pm_reg_info(struct udevice *dev)
 {
 	struct power_mgr_upriv *upriv = dev_get_uclass_priv(dev);
