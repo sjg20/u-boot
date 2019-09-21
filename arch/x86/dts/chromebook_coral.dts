@@ -1,0 +1,298 @@
+/dts-v1/;
+
+#include <dt-bindings/gpio/x86-gpio.h>
+
+/include/ "skeleton.dtsi"
+/include/ "keyboard.dtsi"
+/include/ "reset.dtsi"
+/include/ "rtc.dtsi"
+/include/ "tsc_timer.dtsi"
+
+#ifdef CONFIG_CHROMEOS
+#include "chromeos-x86.dtsi"
+#include "flashmap-x86-ro.dtsi"
+#include "flashmap-16mb-rw.dtsi"
+#endif
+
+#include <asm/arch-apollolake/gpio_apl.h>
+#include <asm/arch-apollolake/gpio_defs.h>
+#include <asm/arch-apollolake/iomap.h>
+#include <asm/arch-apollolake/pm.h>
+
+/ {
+	model = "Google Coral";
+	compatible = "google,coral", "intel,apollolake";
+
+	aliases {
+	};
+
+	config {
+	       silent_console = <0>;
+	};
+
+	chosen {
+		stdout-path = &serial;
+	};
+
+	cpus {
+		u-boot,dm-pre-reloc;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu@0 {
+			u-boot,dm-pre-reloc;
+			device_type = "cpu";
+			compatible = "intel,apl-cpu";
+			reg = <0>;
+			intel,apic-id = <0>;
+		};
+
+		cpu@1 {
+			device_type = "cpu";
+			compatible = "intel,apl-cpu";
+			reg = <1>;
+			intel,apic-id = <1>;
+		};
+
+		cpu@2 {
+			device_type = "cpu";
+			compatible = "intel,apl-cpu";
+			reg = <2>;
+			intel,apic-id = <2>;
+		};
+
+		cpu@3 {
+			device_type = "cpu";
+			compatible = "intel,apl-cpu";
+			reg = <3>;
+			intel,apic-id = <3>;
+		};
+
+	};
+
+	keyboard {
+		intel,duplicate-por;
+	};
+
+	pci {
+		compatible = "pci-x86";
+		#address-cells = <3>;
+		#size-cells = <2>;
+		u-boot,dm-pre-reloc;
+		ranges = <0x02000000 0x0 0xc0000000 0xe0000000 0 0x10000000
+			0x42000000 0x0 0xb0000000 0xd0000000 0 0x10000000
+			0x01000000 0x0 0x1000 0x1000 0 0xefff>;
+
+		host_bridge: host-bridge@0,0 {
+			u-boot,dm-pre-reloc;
+			reg = <0x00000000 0 0 0 0>;
+			compatible = "intel,apl-hostbridge";
+			pciex-region-size = <0x10000000>;
+		};
+
+		punit@0,1 {
+			u-boot,dm-pre-reloc;
+			reg = <0x00000800 0 0 0 0>;
+			compatible = "intel,apl-punit";
+		};
+
+		p2sb: p2sb@d,0 {
+			u-boot,dm-pre-reloc;
+			reg = <0x02006810 0 0 0 0>;
+			compatible = "intel,apl-p2sb";
+			early-regs = <IOMAP_P2SB_BAR 0x100000>;
+
+			gpio_n: n {
+				compatible = "intel,apl-gpio";
+				intel,p2sb-port-id = <PID_GPIO_N>;
+			};
+
+			nw {
+				u-boot,dm-pre-reloc;
+				compatible = "intel,apl-gpio";
+				intel,p2sb-port-id = <PID_GPIO_NW>;
+			};
+
+			w {
+				u-boot,dm-pre-reloc;
+				compatible = "intel,apl-gpio";
+				intel,p2sb-port-id = <PID_GPIO_W>;
+			};
+
+			sw {
+				compatible = "intel,apl-gpio";
+				intel,p2sb-port-id = <PID_GPIO_SW>;
+			};
+
+			itss {
+				u-boot,dm-pre-reloc;
+				compatible = "intel,apl-itss";
+				intel,p2sb-port-id = <PID_ITSS>;
+				intel,pmc-routes = <
+					PMC_GPE_SW_31_0 GPIO_GPE_SW_31_0
+					PMC_GPE_SW_63_32 GPIO_GPE_SW_63_32
+					PMC_GPE_NW_31_0 GPIO_GPE_NW_31_0
+					PMC_GPE_NW_63_32 GPIO_GPE_NW_63_32
+					PMC_GPE_NW_95_64 GPIO_GPE_NW_95_64
+					PMC_GPE_N_31_0 GPIO_GPE_N_31_0
+					PMC_GPE_N_63_32 GPIO_GPE_N_63_32
+					PMC_GPE_W_31_0 GPIO_GPE_W_31_0>;
+			};
+		};
+
+		pmc@d,1 {
+			u-boot,dm-pre-reloc;
+			reg = <0x6900 0 0 0 0>;
+
+			/*
+			 * Values for BAR0, BAR2 and ACPI_BASE for when PCI
+			 * auto-configure is not available
+			 */
+			early-regs = <0xfe042000 0x2000
+				0xfe044000 0x2000
+				0x400 0x100>;
+			compatible = "intel,apl-pmc";
+			gpe0-dwx-mask = <0xf>;
+			gpe0-dwx-shift-base = <4>;
+			gpe0-dw = <PMC_GPE_N_31_0
+				PMC_GPE_N_63_32
+				PMC_GPE_SW_31_0>;
+			gpe0-sts = <0x20>;
+			gpe0-en = <0x30>;
+		};
+
+		fast-spi@d,2 {
+			u-boot,dm-pre-reloc;
+			reg = <0x02006a10 0 0 0 0>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			compatible = "intel,fast-spi";
+			early-regs = <IOMAP_SPI_BASE 0x1000>;
+			memory-map = <0xff800000 0x00800000>;
+
+			rw-mrc-cache {
+				label = "rw-mrc-cache";
+				reg = <0x003e0000 0x00010000>;
+				u-boot,dm-pre-reloc;
+			};
+			rw-var-mrc-cache {
+				label = "rw-mrc-cache";
+				reg = <0x003f0000 0x0001000>;
+				u-boot,dm-pre-reloc;
+			};
+
+		};
+
+		serial: serial@18,2 {
+			reg = <0x0200c210 0 0 0 0>;
+			u-boot,dm-pre-reloc;
+			compatible = "intel,apl-ns16550";
+			early-regs = <0xde000000 0x20>;
+			reg-shift = <2>;
+			clock-frequency = <1843200>;
+			current-speed = <115200>;
+		};
+
+		pch: pch@1f,0 {
+			reg = <0x0000f800 0 0 0 0>;
+			compatible = "intel,apl-pch";
+			u-boot,dm-pre-reloc;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			lpc {
+				compatible = "intel,apl-lpc";
+				#address-cells = <1>;
+				#size-cells = <0>;
+				u-boot,dm-pre-reloc;
+			};
+		};
+	};
+
+};
+
+&gpio_n {
+	u-boot,dm-pre-reloc;
+	early-pads = <
+		/* These two are for the debug UART */
+		GPIO_46 /* UART2 RX */
+			(PAD_CFG0_MODE_NF1 | PAD_CFG0_LOGICAL_RESET_DEEP)
+			(PAD_CFG1_PULL_NATIVE | PAD_CFG1_IOSSTATE_TxLASTRxE)
+
+		GPIO_47 /* UART2 TX */
+			(PAD_CFG0_MODE_NF1 | PAD_CFG0_LOGICAL_RESET_DEEP)
+			(PAD_CFG1_PULL_NATIVE | PAD_CFG1_IOSSTATE_TxLASTRxE)
+
+		GPIO_75 /* I2S1_BCLK -- PCH_WP */
+			(PAD_CFG0_MODE_GPIO | PAD_CFG0_LOGICAL_RESET_DEEP)
+			(PAD_CFG1_PULL_UP_20K | PAD_CFG1_IOSSTATE_TxDRxE)
+
+		/* I2C2 - TPM  */
+		GPIO_128 /* LPSS_I2C2_SDA */
+			(PAD_CFG0_MODE_NF1 | PAD_CFG0_LOGICAL_RESET_DEEP)
+			(PAD_CFG1_PULL_UP_2K | PAD_CFG1_IOSSTATE_TxLASTRxE)
+		GPIO_129 /* LPSS_I2C2_SCL */
+			(PAD_CFG0_MODE_NF1 | PAD_CFG0_LOGICAL_RESET_DEEP)
+			(PAD_CFG1_PULL_UP_2K | PAD_CFG1_IOSSTATE_TxLASTRxE)
+		GPIO_28 /* TPM IRQ */
+			(PAD_CFG0_MODE_GPIO | PAD_CFG0_LOGICAL_RESET_DEEP |
+				PAD_CFG0_TX_DISABLE | PAD_CFG0_ROUTE_IOAPIC |
+				PAD_CFG0_TRIG_LEVEL | PAD_CFG0_RX_POL_INVERT)
+			(PAD_CFG1_PULL_NONE | PAD_CFG1_IOSSTATE_TxDRxE)
+
+		/*
+		 * WLAN_PE_RST - default to deasserted just in case FSP
+		 * misbehaves
+		 */
+		GPIO_122  /* SIO_SPI_2_RXD */
+			(PAD_CFG0_MODE_GPIO | PAD_CFG0_LOGICAL_RESET_DEEP |
+				PAD_CFG0_RX_DISABLE | 0)
+			(PAD_CFG1_PULL_NONE | PAD_CFG1_IOSSTATE_TxLASTRxE)
+		>;
+};
+
+&host_bridge {
+	lpddr4-swizzle = /bits/ 8 <
+		/* LP4_PHYS_CH0A */
+
+		/* DQA[0:7] pins of LPDDR4 module */
+		6 7 5 4 3 1 0 2
+		/* DQA[8:15] pins of LPDDR4 module */
+		12 10 11 13 14 8 9 15
+		/* DQB[0:7] pins of LPDDR4 module with offset of 16 */
+		16 22 23 20 18 17 19 21
+		/* DQB[7:15] pins of LPDDR4 module with offset of 16 */
+		30 28 29 25 24 26 27 31
+
+		/* LP4_PHYS_CH0B */
+		/* DQA[0:7] pins of LPDDR4 module */
+		7 3 5 2 6 0 1 4
+		/* DQA[8:15] pins of LPDDR4 module */
+		 9 14 12 13 10 11 8 15
+		/* DQB[0:7] pins of LPDDR4 module with offset of 16 */
+		20 22 23 16 19 17 18 21
+		/* DQB[7:15] pins of LPDDR4 module with offset of 16 */
+		28 24 26 27 29 30 31 25
+
+		/* LP4_PHYS_CH1A */
+
+		/* DQA[0:7] pins of LPDDR4 module */
+		2 1 6 7 5 4 3 0
+		/* DQA[8:15] pins of LPDDR4 module */
+		11 10 8 9 12 15 13 14
+		/* DQB[0:7] pins of LPDDR4 module with offset of 16 */
+		17 23 19 16 21 22 20 18
+		/* DQB[7:15] pins of LPDDR4 module with offset of 16 */
+		31 29 26 25 28 27 24 30
+
+		/* LP4_PHYS_CH1B */
+
+		/* DQA[0:7] pins of LPDDR4 module */
+		4 3 7 5 6 1 0 2
+		/* DQA[8:15] pins of LPDDR4 module */
+		15 9 8 11 14 13 12 10
+		/* DQB[0:7] pins of LPDDR4 module with offset of 16 */
+		20 23 22 21 18 19 16 17
+		/* DQB[7:15] pins of LPDDR4 module with offset of 16 */
+		25 28 30 31 26 27 24 29>;
+};
