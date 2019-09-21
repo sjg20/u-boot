@@ -8,6 +8,7 @@
 #include <asm/fsp/fsp_support.h>
 #include <asm/e820.h>
 #include <asm/mrccache.h>
+#include <asm/mtrr.h>
 #include <asm/post.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -69,6 +70,8 @@ int dram_init_banksize(void)
 	/* Add the memory below 4GB */
 	gd->bd->bi_dram[0].start = 0;
 	gd->bd->bi_dram[0].size = low_end;
+
+	mtrr_add_request(MTRR_TYPE_WRBACK, 0, low_end);
 
 	return 0;
 }
