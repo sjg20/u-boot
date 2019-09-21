@@ -6,5 +6,6 @@ obj-$(CONFIG_SPL_BUILD) += systemagent.o
 
 obj-y += gpio.o
 obj-y += hostbridge.o
+obj-y += itss.o
 obj-y += pmc.o
 obj-y += uart.o
