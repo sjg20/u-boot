@@ -2,6 +2,8 @@
 #
 # Copyright (c) 2016 Google, Inc
 
+obj-$(CONFIG_SPL_BUILD) += systemagent.o
+
 obj-y += gpio.o
 obj-y += pmc.o
 obj-y += uart.o
