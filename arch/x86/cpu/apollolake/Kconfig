@@ -1,0 +1,68 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Copyright 2019 Google LLC
+#
+
+config INTEL_APOLLOLAKE
+	bool
+	select FSP_VERSION2
+	select HAVE_FSP
+	select ARCH_MISC_INIT
+	select USE_CAR
+	select INTEL_PMC
+	select TPL_X86_TSC_TIMER_NATIVE
+	select SPL_PCH_SUPPORT
+	select TPL_PCH_SUPPORT
+	select PCH_SUPPORT
+	select P2SB
+	imply ENABLE_MRC_CACHE
+	imply AHCI_PCI
+	imply SCSI
+	imply SCSI_AHCI
+	imply SPI_FLASH
+	imply USB
+	imply USB_EHCI_HCD
+	imply TPL
+	imply SPL
+	imply TPL_X86_16BIT_INIT
+	imply TPL_OF_PLATDATA
+	imply ITSS
+	imply POWER_MGR
+
+if INTEL_APOLLOLAKE
+
+config DCACHE_RAM_BASE
+	default 0xfef00000
+
+config DCACHE_RAM_SIZE
+	default 0xc0000
+
+config DCACHE_RAM_MRC_VAR_SIZE
+	default 0xb0000
+
+config CPU_SPECIFIC_OPTIONS
+	def_bool y
+	select SMM_TSEG
+	select X86_RAMTEST
+
+config SMM_TSEG_SIZE
+	hex
+	default 0x800000
+
+config MMCONF_BASE_ADDRESS
+	hex
+	default 0xe0000000
+
+config INTEL_GPIO_DUAL_ROUTE_SUPPORT
+	def_bool y
+
+config INTEL_GPIO_PADCFG_PADTOL
+	def_bool n
+
+config INTEL_GPIO_IOSTANDBY
+	def_bool y
+
+config TPL_SIZE_LIMIT
+	default 0x7800
+
+endif
