@@ -14,6 +14,7 @@
 #define SANDBOX_PCI_VENDOR_ID		0x1234
 #define SANDBOX_PCI_SWAP_CASE_EMUL_ID	0x5678
 #define SANDBOX_PCI_PMC_EMUL_ID		0x5677
+#define SANDBOX_PCI_P2SB_EMUL_ID	0x5676
 #define SANDBOX_PCI_CLASS_CODE		PCI_CLASS_CODE_COMM
 #define SANDBOX_PCI_CLASS_SUB_CODE	PCI_CLASS_SUB_CODE_COMM_SERIAL
 
@@ -213,5 +214,14 @@ int sandbox_get_pci_ep_irq_count(struct udevice *dev);
  * @return BAR value to return from emulator
  */
 uint sandbox_pci_read_bar(u32 barval, int type, uint size);
+
+/**
+ * sandbox_set_enable_memio() - Enable memory-mapped I/O read/write
+ *
+ * Normally readl(), writel() and the like are nops on sandbox. If this function
+ * is called with true, those function do real memory accesses. This is useful
+ * for certain tests.
+ */
+void sandbox_set_enable_memio(bool enable);
 
 #endif

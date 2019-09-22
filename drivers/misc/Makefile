@@ -10,6 +10,7 @@ obj-$(CONFIG_$(SPL_TPL_)CROS_EC_SANDBOX) += cros_ec_sandbox.o
 obj-$(CONFIG_$(SPL_TPL_)CROS_EC_LPC) += cros_ec_lpc.o
 
 ifndef CONFIG_SPL_BUILD
+obj-$(CONFIG_SANDBOX) += sandbox_adder.o
 obj-$(CONFIG_CROS_EC_I2C) += cros_ec_i2c.o
 obj-$(CONFIG_CROS_EC_SPI) += cros_ec_spi.o
 obj-$(CONFIG_SANDBOX) += swap_case.o
@@ -50,6 +51,7 @@ obj-$(CONFIG_MXS_OCOTP) += mxs_ocotp.o
 obj-$(CONFIG_NS87308) += ns87308.o
 obj-$(CONFIG_NUVOTON_NCT6102D) += nuvoton_nct6102d.o
 obj-$(CONFIG_P2SB) += p2sb-uclass.o
+obj-$(CONFIG_SANDBOX) += p2sb_sandbox.o p2sb_emul.o
 obj-$(CONFIG_PCA9551_LED) += pca9551_led.o
 obj-$(CONFIG_$(SPL_)PWRSEQ) += pwrseq-uclass.o
 obj-$(CONFIG_QFW) += qfw.o
