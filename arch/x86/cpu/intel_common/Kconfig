@@ -1,0 +1,18 @@
+config INTEL_PMC
+	bool "Intel Power-management Controller"
+	select POWER_MGR
+	help
+	  Enable support for the common Intel power-management controller which
+	  provides features including checking whether the system started from
+	  resume, powering off the system and enabling/disabling the reset
+	  mechanism.
+
+config SPL_INTEL_PMC
+	bool "Intel Power-management Controller in SPL"
+	default y if SPL && INTEL_PMC
+	select SPL_POWER_MGR
+	help
+	  Enable support for the common Intel power-management controller which
+	  provides features including checking whether the system started from
+	  resume, powering off the system and enabling/disabling the reset
+	  mechanism.
