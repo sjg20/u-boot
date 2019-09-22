@@ -345,6 +345,10 @@
 		vss-microvolts = <0>;
 	};
 
+	itss {
+		compatible = "sandbox,itss";
+	};
+
 	lcd {
 		u-boot,dm-pre-reloc;
 		compatible = "sandbox,lcd-sdl";
