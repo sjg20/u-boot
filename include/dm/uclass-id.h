@@ -54,6 +54,7 @@ enum uclass_id {
 	UCLASS_I2S,		/* I2S bus */
 	UCLASS_IDE,		/* IDE device */
 	UCLASS_IRQ,		/* Interrupt controller */
+	UCLASS_ITSS,		/* Intel interrupt thingy */
 	UCLASS_KEYBOARD,	/* Keyboard input device */
 	UCLASS_LED,		/* Light-emitting diode (LED) */
 	UCLASS_LPC,		/* x86 'low pin count' interface */
