@@ -138,6 +138,19 @@
 		filename = CONFIG_FSP_FILE_S;
 	};
 #endif
+#if IS_ENABLED(CONFIG_HAVE_MRC) || IS_ENABLED(CONFIG_FSP_VERSION2)
+	rw-mrc-cache {
+		type = "blob";
+		offset = <0xff8e0000>;
+		size = <0x10000>;
+		filename = "board/google/chromebook_coral/rw-mrc-cache";
+	};
+	rw-var-mrc-cache {
+		type = "blob";
+		size = <0x1000>;
+		filename = "board/google/chromebook_coral/rw-var-mrc-cache";
+	};
+#endif
 #ifdef CONFIG_HAVE_CMC
 	intel-cmc {
 		filename = CONFIG_CMC_FILE;
