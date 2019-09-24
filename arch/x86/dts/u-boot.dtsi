@@ -49,7 +49,7 @@
 	u-boot-tpl-dtb {
 	};
 	u-boot-spl {
-		offset = <CONFIG_SPL_TEXT_BASE>;
+		offset = <CONFIG_X86_OFFSET_SPL>;
 	};
 	u-boot-spl-dtb {
 	};
@@ -58,7 +58,7 @@
 	};
 #elif defined(CONFIG_SPL)
 	u-boot-spl-with-ucode-ptr {
-		offset = <CONFIG_SPL_TEXT_BASE>;
+		offset = <CONFIG_X86_OFFSET_SPL>;
 	};
 	u-boot-dtb-with-ucode2 {
 		type = "u-boot-dtb-with-ucode";
