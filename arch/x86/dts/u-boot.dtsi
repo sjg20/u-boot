@@ -125,6 +125,8 @@
 		filename = CONFIG_FSP_FILE_M;
 	};
 #endif
+	fdtmap {
+	};
 #ifdef CONFIG_HAVE_CMC
 	intel-cmc {
 		filename = CONFIG_CMC_FILE;
@@ -170,5 +172,8 @@
 		offset = <CONFIG_RESET_VEC_LOC>;
 	};
 #endif
+	image-header {
+		location = "end";
+	};
 };
 #endif
