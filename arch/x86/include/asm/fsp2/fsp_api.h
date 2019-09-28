@@ -12,6 +12,7 @@
 #include <asm/fsp/fsp_api.h>
 
 struct fspm_upd;
+struct fsps_upd;
 struct hob_header;
 
 enum fsp_boot_mode {
@@ -43,5 +44,17 @@ int fsp_memory_init(bool s3wake, bool use_spi_flash);
 
 typedef asmlinkage int (*fsp_memory_init_func)(struct fspm_upd *params,
 					       struct hob_header **hobp);
+
+/**
+ * fsp_silicon_init() - Init the silicon
+ *
+ * This calls the FSP's 'silicon init' entry point
+ *
+ * @s3wake: true if we are booting from resume
+ * @return 0 if OK, -ve on error
+ */
+int fsp_silicon_init(bool s3wake, bool use_spi_flash);
+
+typedef asmlinkage int (*fsp_silicon_init_func)(struct fsps_upd *params);
 
 #endif

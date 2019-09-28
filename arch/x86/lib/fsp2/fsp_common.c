@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <init.h>
 
 int arch_fsp_init(void)
 {

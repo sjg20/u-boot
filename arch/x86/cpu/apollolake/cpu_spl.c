@@ -179,12 +179,12 @@ static int arch_cpu_init_tpl(void)
 
 	enable_pm_timer_emulation(pmc);
 
-	ret = uclass_first_device_err(UCLASS_NORTHBRIDGE, &sa);
-	if (ret)
-		return log_msg_ret("Cannot set up northbridge", ret);
 	ret = uclass_first_device_err(UCLASS_P2SB, &p2sb);
 	if (ret)
 		return log_msg_ret("Cannot set up p2sb", ret);
+	ret = uclass_first_device_err(UCLASS_NORTHBRIDGE, &sa);
+	if (ret)
+		return log_msg_ret("Cannot set up northbridge", ret);
 	ret = uclass_first_device_err(UCLASS_GPIO, &gpio);
 	if (ret)
 		return log_msg_ret("Cannot set up gpio", ret);

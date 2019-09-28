@@ -7,6 +7,8 @@
 #ifndef _ASM_MRCCACHE_H
 #define _ASM_MRCCACHE_H
 
+struct fspm_upd;
+
 #define MRC_DATA_ALIGN		0x100
 #define MRC_DATA_SIGNATURE	(('M' << 0) | ('R' << 8) | \
 				 ('C' << 16) | ('D'<<24))
@@ -123,5 +125,7 @@ int mrccache_save(void);
  * @return 0 if saved to SPI flash successfully, other error if failed
  */
 int mrccache_spl_save(void);
+
+int prepare_mrc_cache(struct fspm_upd *upd);
 
 #endif /* _ASM_MRCCACHE_H */

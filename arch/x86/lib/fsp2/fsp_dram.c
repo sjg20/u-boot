@@ -11,6 +11,7 @@
 #include <asm/arch/cpu.h>
 #include <asm/fsp/fsp_support.h>
 #include <asm/fsp2/fsp_api.h>
+#include <asm/fsp2/fsp_internal.h>
 
 int dram_init(void)
 {
@@ -56,6 +57,9 @@ int dram_init(void)
 		gd->ram_size = ho->ram_size;
 		handoff_load_dram_banks(ho);
 #endif
+		ret = arch_fsp_s_preinit();
+		if (ret)
+			return log_msg_ret("fsp_s_preinit", ret);
 	}
 
 	return 0;

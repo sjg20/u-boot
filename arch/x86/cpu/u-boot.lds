@@ -34,7 +34,10 @@ SECTIONS
 		*(.__efi_runtime_stop)
 	}
 
-	.text  : { *(.text*); }
+	.text  : {
+		__image_copy_start = .;
+		*(.text*);
+	}
 
 	. = ALIGN(4);
 

@@ -33,6 +33,7 @@ struct pmc_route {
 struct apl_itss_priv {
 	struct pmc_route *route;
 	uint route_count;
+	u32 irq_snapshot[NUM_IPC_REGS];
 };
 
 static int apl_set_irq_polarity(struct udevice *dev, uint irq, bool active_low)
@@ -50,6 +51,86 @@ static int apl_set_irq_polarity(struct udevice *dev, uint irq, bool active_low)
 
 	return 0;
 }
+
+#ifndef CONFIG_TPL_BUILD
+static int apl_snapshot_irq_polarities(struct udevice *dev)
+{
+	struct apl_itss_priv *priv = dev_get_priv(dev);
+	const int start = GPIO_IRQ_START;
+	const int end = GPIO_IRQ_END;
+	int reg_start;
+	int reg_end;
+	int i;
+
+	reg_start = start / IRQS_PER_IPC;
+	reg_end = (end + IRQS_PER_IPC - 1) / IRQS_PER_IPC;
+
+	for (i = reg_start; i < reg_end; i++) {
+		uint reg = PCR_ITSS_IPC0_CONF + sizeof(uint32_t) * i;
+
+		priv->irq_snapshot[i] = pcr_read32(dev, reg);
+	}
+
+	return 0;
+}
+
+static void show_irq_polarities(struct udevice *dev, const char *msg)
+{
+	int i;
+
+	log_info("ITSS IRQ Polarities %s:\n", msg);
+	for (i = 0; i < NUM_IPC_REGS; i++) {
+		uint reg = PCR_ITSS_IPC0_CONF + sizeof(uint32_t) * i;
+
+		log_info("IPC%d: 0x%08x\n", i, pcr_read32(dev, reg));
+	}
+}
+
+static int apl_restore_irq_polarities(struct udevice *dev)
+{
+	struct apl_itss_priv *priv = dev_get_priv(dev);
+	const int start = GPIO_IRQ_START;
+	const int end = GPIO_IRQ_END;
+	int reg_start;
+	int reg_end;
+	int i;
+
+	show_irq_polarities(dev, "Before");
+
+	reg_start = start / IRQS_PER_IPC;
+	reg_end = (end + IRQS_PER_IPC - 1) / IRQS_PER_IPC;
+
+	for (i = reg_start; i < reg_end; i++) {
+		uint32_t mask;
+		uint16_t reg;
+		int irq_start;
+		int irq_end;
+
+		irq_start = i * IRQS_PER_IPC;
+		irq_end = min(irq_start + IRQS_PER_IPC - 1, ITSS_MAX_IRQ);
+
+		if (start > irq_end)
+			continue;
+		if (end < irq_start)
+			break;
+
+		/* Track bits within the bounds of of the register. */
+		irq_start = max(start, irq_start) % IRQS_PER_IPC;
+		irq_end = min(end, irq_end) % IRQS_PER_IPC;
+
+		/* Create bitmask of the inclusive range of start and end. */
+		mask = (((1U << irq_end) - 1) | (1U << irq_end));
+		mask &= ~((1U << irq_start) - 1);
+
+		reg = PCR_ITSS_IPC0_CONF + sizeof(uint32_t) * i;
+		pcr_clrsetbits32(dev, reg, mask, mask & priv->irq_snapshot[i]);
+	}
+
+	show_irq_polarities(dev, "After");
+
+	return 0;
+}
+#endif
 
 static int apl_route_pmc_gpio_gpe(struct udevice *dev, uint pmc_gpe_num)
 {
@@ -111,6 +192,10 @@ static int apl_itss_ofdata_to_platdata(struct udevice *dev)
 static const struct itss_ops apl_itss_ops = {
 	.route_pmc_gpio_gpe	= apl_route_pmc_gpio_gpe,
 	.set_irq_polarity	= apl_set_irq_polarity,
+#ifndef CONFIG_TPL_BUILD
+	.snapshot_irq_polarities = apl_snapshot_irq_polarities,
+	.restore_irq_polarities = apl_restore_irq_polarities,
+#endif
 };
 
 static const struct udevice_id apl_itss_ids[] = {

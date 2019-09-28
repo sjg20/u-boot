@@ -5,6 +5,8 @@
 # Entry-type module for U-Boot binary
 #
 
+import elf
+
 from entry import Entry
 from blob import Entry_blob
 
@@ -27,6 +29,10 @@ class Entry_u_boot(Entry_blob):
     """
     def __init__(self, section, etype, node):
         Entry_blob.__init__(self, section, etype, node)
+        self.elf_fname = 'u-boot'
 
     def GetDefaultFilename(self):
         return 'u-boot.bin'
+
+    def WriteSymbols(self, section):
+        elf.LookupAndWriteSymbols(self.elf_fname, self, section.GetImage())

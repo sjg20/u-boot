@@ -17,7 +17,7 @@
 #define SAFETY_MARGIN	0
 
 int fsp_get_header(ulong offset, ulong size, bool use_spi_flash,
-		   struct fsp_header **fspp, ulong *basep)
+		   struct fsp_header **fspp)
 {
 	static efi_guid_t guid = FSP_HEADER_GUID;
 	struct fv_ext_header *exhdr;
@@ -93,12 +93,37 @@ int fsp_get_header(ulong offset, ulong size, bool use_spi_flash,
 	}
 	ptr = base + (ptr - (void *)buf);
 	*fspp = ptr;
-	*basep = fsp->img_base;
 
 	return 0;
 }
 
 u32 fsp_notify(struct fsp_header *fsp_hdr, u32 phase)
 {
-	return 0;
+	fsp_notify_f notify;
+	struct fsp_notify_params params;
+	struct fsp_notify_params *params_ptr;
+	u32 status;
+
+	if (!fsp_hdr)
+		fsp_hdr = gd->arch.fsp_s_hdr;
+
+	if (!fsp_hdr)
+		return log_msg_ret("no FSP", -ENOENT);
+
+	notify = (fsp_notify_f)(fsp_hdr->img_base + fsp_hdr->fsp_notify);
+	params.phase = phase;
+	params_ptr = &params;
+
+	/*
+	 * Use ASM code to ensure correct parameter is on the stack for
+	 * FspNotify as U-Boot is using different ABI from FSP
+	 */
+	asm volatile (
+		"pushl	%1;"		/* push notify phase */
+		"call	*%%eax;"	/* call FspNotify */
+		"addl	$4, %%esp;"	/* clean up the stack */
+		: "=a"(status) : "m"(params_ptr), "a"(notify), "m"(*params_ptr)
+	);
+
+	return status;
 }

@@ -24,8 +24,6 @@
  *
  * @dtplat: of-platdata data from C struct
  * @num_cfgs: Number of configuration words for each pad
- * @early_pads: Early pad data to set up, each (pad, cfg0, cfg1)
- * @early_pads_count: Number of pads to process
  * @comm: Pad community for this device
  */
 struct apl_gpio_platdata {
@@ -34,8 +32,6 @@ struct apl_gpio_platdata {
 	struct dtd_intel_apl_gpio dtplat;
 #endif
 	int num_cfgs;
-	u32 *early_pads;
-	int early_pads_count;
 	const struct pad_community *comm;
 };
 
@@ -68,6 +64,10 @@ struct apl_gpio_priv {
 				((group) * sizeof(u32)))
 #define GPI_SMI_EN_OFFSET(comm, group) ((comm)->gpi_smi_en_reg_0 +	\
 				((group) * sizeof(u32)))
+#define GPI_IS_OFFSET(comm, group) ((comm)->gpi_int_sts_reg_0 +	\
+				((group) * sizeof(uint32_t)))
+#define GPI_IE_OFFSET(comm, group) ((comm)->gpi_int_en_reg_0 +	\
+				((group) * sizeof(uint32_t)))
 
 static const struct reset_mapping rst_map[] = {
 	{ .logical = PAD_CFG0_LOGICAL_RESET_PWROK, .chipset = 0U << 30 },
@@ -604,14 +604,43 @@ int gpio_route_gpe(struct udevice *itss, uint gpe0b, uint gpe0c, uint gpe0d)
 	return 0;
 }
 
-static int apl_gpio_early_init(struct udevice *dev)
+int gpio_gpi_clear_int_cfg(void)
 {
-	struct apl_gpio_platdata *plat = dev_get_platdata(dev);
+	struct udevice *dev;
+	struct uclass *uc;
+	int ret;
+
+	ret = uclass_get(UCLASS_GPIO, &uc);
+	if (ret)
+		return log_msg_ret("gpio uc", ret);
+	uclass_foreach_dev(dev, uc) {
+		struct apl_gpio_platdata *plat = dev_get_platdata(dev);
+		const struct pad_community *comm = plat->comm;
+		uint sts_value;
+		int group;
+
+		for (group = 0; group < comm->num_gpi_regs; group++) {
+			/* Clear the enable register */
+			pcr_write32(dev, GPI_IE_OFFSET(comm, group), 0);
+
+			/* Read and clear the set status register bits*/
+			sts_value = pcr_read32(dev,
+					       GPI_IS_OFFSET(comm, group));
+			pcr_write32(dev, GPI_IS_OFFSET(comm, group), sts_value);
+		}
+	}
+
+	return 0;
+}
+
+int gpio_config_pads(struct udevice *dev, int num_cfgs, u32 *pads,
+		     int pads_count)
+{
 	const u32 *ptr;
 	int i;
 
-	ptr = plat->early_pads;
-	for (i = 0; i < plat->early_pads_count; i++) {
+	log_debug("%s: pads_count=%d\n", __func__, pads_count);
+	for (ptr = pads, i = 0; i < pads_count; ptr += 1 + num_cfgs, i++) {
 		struct udevice *pad_dev = NULL;
 		struct pad_config *cfg;
 		int ret;
@@ -623,7 +652,6 @@ static int apl_gpio_early_init(struct udevice *dev)
 		ret = gpio_configure_pad(pad_dev, cfg);
 		if (ret)
 			return ret;
-		ptr += 1 + plat->num_cfgs;
 	}
 
 	return 0;
@@ -634,29 +662,11 @@ static int apl_gpio_ofdata_to_platdata(struct udevice *dev)
 	struct apl_gpio_platdata *plat = dev_get_platdata(dev);
 	struct apl_gpio_priv *priv = dev_get_priv(dev);
 	struct p2sb_child_platdata *pplat;
-	int size;
+	int ret;
 	int i;
 
 	plat->num_cfgs = 2;
-#if !CONFIG_IS_ENABLED(OF_PLATDATA)
-	int ret;
-
-	size = dev_read_size(dev, "early-pads");
-	if (size > 0) {
-		plat->early_pads = malloc(size);
-		if (!plat->early_pads)
-			return -ENOMEM;
-		size /= sizeof(fdt32_t);
-		ret = dev_read_u32_array(dev, "early-pads", plat->early_pads,
-					 size);
-		if (ret)
-			return ret;
-		plat->early_pads_count = size / (1 + plat->num_cfgs);
-	}
-#else
-	struct dtd_intel_apl_gpio *dtplat = &plat->dtplat;
-	int ret;
-
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
 	/*
 	 * It would be nice to do this in the bind() method, but with
 	 * of-platdata binding happens in the order that DM finds things in the
@@ -669,21 +679,6 @@ static int apl_gpio_ofdata_to_platdata(struct udevice *dev)
 	ret = p2sb_set_port_id(dev, plat->dtplat.intel_p2sb_port_id);
 	if (ret)
 		return log_msg_ret("Could not set port id", ret);
-
-	/* Assume that if everything is 0, it is empty */
-	plat->early_pads = dtplat->early_pads;
-	size = ARRAY_SIZE(dtplat->early_pads);
-	for (i = 0; i < size;) {
-		u32 val;
-		int j;
-
-		for (val = j = 0; j < plat->num_cfgs + 1; j++)
-			val |= dtplat->early_pads[i + j];
-		if (!val)
-			break;
-		plat->early_pads_count++;
-		i += plat->num_cfgs + 1;
-	}
 #endif
 	/* Attach this device to its community structure */
 	pplat = dev_get_parent_platdata(dev);
@@ -711,8 +706,6 @@ static int apl_gpio_probe(struct udevice *dev)
 
 	upriv->gpio_count = comm->last_pad - comm->first_pad + 1;
 	upriv->bank_name = dev->name;
-	if (spl_phase() == PHASE_TPL)
-		return apl_gpio_early_init(dev);
 	priv->itss_pol_cfg = true;
 
 	return 0;

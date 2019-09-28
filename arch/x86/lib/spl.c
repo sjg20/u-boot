@@ -141,6 +141,10 @@ static int x86_spl_init(void)
 	ret = set_max_freq();
 	if (ret)
 		debug("Failed to set CPU frequency (err=%d)\n", ret);
+	if (ret) {
+		debug("Cannot set up silicon (err=%d)\n", ret);
+		return ret;
+	}
 #endif
 
 	return 0;

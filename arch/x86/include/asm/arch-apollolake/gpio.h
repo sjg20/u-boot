@@ -153,4 +153,11 @@ struct pad_community {
  */
 int gpio_route_gpe(struct udevice *dev, uint gpe0b, uint gpe0c, uint gpe0d);
 
+int gpio_config_pads(struct udevice *dev, int num_cfgs, u32 *pads,
+		     int pads_count);
+
+int hostbridge_config_pads_for_node(struct udevice *dev, ofnode node);
+
+int gpio_gpi_clear_int_cfg(void);
+
 #endif

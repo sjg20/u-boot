@@ -14,6 +14,7 @@
 #include <spl.h>
 #include <asm/io.h>
 #include <asm/pci.h>
+#include <asm/lpss.h>
 
 /* Low-power Subsystem (LPSS) clock register */
 enum {
@@ -25,27 +26,10 @@ enum {
 	LPSS_CLOCK_DIV_M_SHIFT	= 1,
 	LPSS_CLOCK_DIV_M_MASK	= 0x7fff << LPSS_CLOCK_DIV_M_SHIFT,
 
-	LPSS_RESET_CTL_REG	= 0x204,
-
 	/* These set the UART input clock speed */
 	LPSS_UART_CLK_M_VAL	= 0x25a,
 	LPSS_UART_CLK_N_VAL	= 0x7fff,
 };
-
-/*
- * Bit 1:0 controls LPSS controller reset.
- *
- * 00 ->LPSS Host Controller is in reset (Reset Asserted)
- * 01/10 ->Reserved
- * 11 ->LPSS Host Controller is NOT at reset (Reset Released)
- */
-#define LPSS_CNT_RST_RELEASE	3
-
-/* Take controller out of reset */
-static void lpss_reset_release(void *regs)
-{
-	writel(LPSS_CNT_RST_RELEASE, regs + LPSS_RESET_CTL_REG);
-}
 
 static void lpss_clk_update(void *regs, u32 clk_m_val, u32 clk_n_val)
 {

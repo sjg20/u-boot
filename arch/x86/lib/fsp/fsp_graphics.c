@@ -7,6 +7,7 @@
 #include <dm.h>
 #include <vbe.h>
 #include <video.h>
+#include <asm/mtrr.h>
 #include <asm/fsp1/fsp_support.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -96,6 +97,9 @@ static int fsp_video_probe(struct udevice *dev)
 	ret = vbe_setup_video_priv(vesa, uc_priv, plat);
 	if (ret)
 		goto err;
+
+	mtrr_add_request(MTRR_TYPE_WRCOMB, vesa->phys_base_ptr, 256 << 20);
+	mtrr_commit(true);
 
 	printf("%dx%dx%d\n", uc_priv->xsize, uc_priv->ysize,
 	       vesa->bits_per_pixel);

@@ -18,4 +18,7 @@
  */
 #define SAFETY_MARGIN	0x4000
 
+#define MAX_PCIE_PORTS		6
+#define CLKREQ_DISABLED		0xf
+
 #endif /* __ASM_ARCH_CPU_H */

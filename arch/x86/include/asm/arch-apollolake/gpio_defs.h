@@ -143,13 +143,8 @@
 #define PAD_RESET(value)	PAD_CFG0_LOGICAL_RESET_##value
 #define PAD_PULL(value)		PAD_CFG1_PULL_##value
 
-#if IS_ENABLED(CONFIG_INTEL_GPIO_IOSTANDBY)
 #define PAD_IOSSTATE(value)	PAD_CFG1_IOSSTATE_##value
 #define PAD_IOSTERM(value)	PAD_CFG1_IOSTERM_##value
-#else
-#define PAD_IOSSTATE(value)	0
-#define PAD_IOSTERM(value)	0
-#endif
 
 #define PAD_IRQ_CFG(route, trig, inv) \
 				(PAD_CFG0_ROUTE_##route | \
@@ -165,11 +160,7 @@
 #endif /* CONFIG_INTEL_GPIO_DUAL_ROUTE_SUPPORT */
 
 #define _PAD_CFG_STRUCT(__pad, __config0, __config1)	\
-	{					\
-		.pad = __pad,			\
-		.pad_config[0] = __config0,	\
-		.pad_config[1] = __config1,	\
-	}
+		__pad (__config0) (__config1)
 
 #if GPIO_NUM_PAD_CFG_REGS > 2
 #define _PAD_CFG_STRUCT_3(__pad, __config0, __config1, __config2)	\

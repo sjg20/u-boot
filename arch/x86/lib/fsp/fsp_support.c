@@ -3,7 +3,8 @@
  * Copyright (C) 2013, Intel Corporation
  * Copyright (C) 2014, Bin Meng <bmeng.cn@gmail.com>
  */
-
+#define DEBUG
+#
 #include <common.h>
 #include <asm/fsp1/fsp_support.h>
 #include <asm/post.h>
@@ -184,6 +185,7 @@ void *fsp_get_graphics_info(const void *hob_list, u32 *len)
 
 void fsp_reserve(void)
 {
+	return;
 	void *new_hobs;
 	uint hob_size;
 
