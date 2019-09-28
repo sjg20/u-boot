@@ -98,11 +98,6 @@ int fsp_get_header(ulong offset, ulong size, bool use_spi_flash,
 	return 0;
 }
 
-int arch_fsp_init(void)
-{
-	return 0;
-}
-
 u32 fsp_notify(struct fsp_header *fsp_hdr, u32 phase)
 {
 	return 0;
