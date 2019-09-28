@@ -7,13 +7,9 @@
 #ifndef	__ASM_ARCH_FSP_M_UDP_H
 #define	__ASM_ARCH_FSP_M_UDP_H
 
-#define FSP_DRAM_CHANNELS	4
+#include <asm/fsp2/fsp_api.h>
 
-struct __packed fsp_upd_header {
-	u64	signature;
-	u8	revision;
-	u8	reserved[23];
-};
+#define FSP_DRAM_CHANNELS	4
 
 struct __packed fspm_arch_upd {
 	u8	revision;

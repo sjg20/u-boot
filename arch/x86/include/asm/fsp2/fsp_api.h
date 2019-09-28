@@ -24,6 +24,12 @@ enum fsp_boot_mode {
 	FSP_BOOT_IN_RECOVERY_MODE = 0x20
 };
 
+struct __packed fsp_upd_header {
+	u64	signature;
+	u8	revision;
+	u8	reserved[23];
+};
+
 /**
  * fsp_memory_init() - Init the SDRAM
  *
@@ -31,6 +37,7 @@ enum fsp_boot_mode {
  *	from scatch since we will lose its contents
  * @use_spi_flash: true to use the fast SPI driver to read FSP, otherwise use
  *	mapped SPI
+ * @return 0 if OK, -ve on error
  */
 int fsp_memory_init(bool s3wake, bool use_spi_flash);
 
