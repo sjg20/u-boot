@@ -6,8 +6,10 @@
  * Mostly taken from coreboot fsp2_0/memory_init.c
  */
 
-#ifndef __ASM_FSP_API_H
-#define __ASM_FSP_API_H
+#ifndef __ASM_FSP2_API_H
+#define __ASM_FSP2_API_H
+
+#include <asm/fsp/fsp_api.h>
 
 struct fspm_upd;
 struct hob_header;
