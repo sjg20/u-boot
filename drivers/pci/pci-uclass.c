@@ -983,11 +983,11 @@ static int pci_uclass_post_probe(struct udevice *bus)
 	if (ret)
 		return ret;
 
-#if CONFIG_IS_ENABLED(PCI_PNP)
-	ret = pci_auto_config_devices(bus);
-	if (ret < 0)
-		return ret;
-#endif
+	if (CONFIG_IS_ENABLED(PCI_PNP) && (gd->flags & GD_FLG_RELOC)) {
+		ret = pci_auto_config_devices(bus);
+		if (ret < 0)
+			return log_msg_ret("pci auto-config", ret);
+	}
 
 #if defined(CONFIG_X86) && defined(CONFIG_HAVE_FSP)
 	/*
