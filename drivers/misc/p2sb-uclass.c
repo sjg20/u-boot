@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <mapmem.h>
 #include <p2sb.h>
+#include <spl.h>
 #include <asm/io.h>
 #include <dm/uclass-internal.h>
 
@@ -189,10 +190,19 @@ static int p2sb_child_post_bind(struct udevice *dev)
 	return 0;
 }
 
+static int p2sb_post_bind(struct udevice *dev)
+{
+	if (spl_phase() >= PHASE_SPL)
+		return dm_scan_fdt_dev(dev);
+
+	return 0;
+}
+
 UCLASS_DRIVER(p2sb) = {
 	.id		= UCLASS_P2SB,
 	.name		= "p2sb",
 	.per_device_auto_alloc_size = sizeof(struct p2sb_uc_priv),
+	.post_bind	= p2sb_post_bind,
 	.child_post_bind = p2sb_child_post_bind,
 	.per_child_platdata_auto_alloc_size =
 		sizeof(struct p2sb_child_platdata),
