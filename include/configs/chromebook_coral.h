@@ -10,6 +10,8 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+#define CONFIG_BOOTCOMMAND
+
 #include <configs/x86-common.h>
 #include <configs/x86-chromebook.h>
 
