@@ -24,6 +24,9 @@ static int dm_test_itss_base(struct unit_test_state *uts)
 	ut_assertok(itss_set_irq_polarity(dev, 4, true));
 	ut_asserteq(-EINVAL, itss_set_irq_polarity(dev, 14, true));
 
+	ut_assertok(itss_snapshot_irq_polarities(dev));
+	ut_assertok(itss_restore_irq_polarities(dev));
+
 	return 0;
 }
 DM_TEST(dm_test_itss_base, DM_TESTF_SCAN_PDATA | DM_TESTF_SCAN_FDT);

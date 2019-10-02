@@ -28,6 +28,26 @@ int itss_set_irq_polarity(struct udevice *dev, uint irq, bool active_low)
 	return ops->set_irq_polarity(dev, irq, active_low);
 }
 
+int itss_snapshot_irq_polarities(struct udevice *dev)
+{
+	const struct itss_ops *ops = itss_get_ops(dev);
+
+	if (!ops->snapshot_irq_polarities)
+		return -ENOSYS;
+
+	return ops->snapshot_irq_polarities(dev);
+}
+
+int itss_restore_irq_polarities(struct udevice *dev)
+{
+	const struct itss_ops *ops = itss_get_ops(dev);
+
+	if (!ops->restore_irq_polarities)
+		return -ENOSYS;
+
+	return ops->restore_irq_polarities(dev);
+}
+
 UCLASS_DRIVER(itss) = {
 	.id		= UCLASS_ITSS,
 	.name		= "itss",
