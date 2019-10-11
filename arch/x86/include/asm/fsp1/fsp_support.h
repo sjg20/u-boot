@@ -10,6 +10,9 @@
 #include <asm/fsp/fsp_support.h>
 #include "fsp_ffs.h"
 
+struct fsp_config_data;
+struct fspinit_rtbuf;
+
 /**
  * fsp_asm_continuation() - FSP Continuation assembly helper routine
  *
