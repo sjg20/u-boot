@@ -72,4 +72,15 @@ int fspm_update_config(struct udevice *dev, struct fspm_upd *upd);
 int fsps_update_config(struct udevice *dev, ulong rom_offset,
 		       struct fsps_upd *upd);
 
+/**
+ * prepare_mrc_cache() - Read the MRC cache into the product-data struct
+ *
+ * This looks for cached Memory-reference code (MRC) data and stores it into
+ * @upd for use by the FSP-M binary.
+ *
+ * @return 0 if OK, -ENOENT if no data (whereupon the caller can continue and
+ *	expect a slower boot), other -ve value on other error
+ */
+int prepare_mrc_cache(struct fspm_upd *upd);
+
 #endif

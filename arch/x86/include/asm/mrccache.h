@@ -126,6 +126,4 @@ int mrccache_save(void);
  */
 int mrccache_spl_save(void);
 
-int prepare_mrc_cache(struct fspm_upd *upd);
-
 #endif /* _ASM_MRCCACHE_H */

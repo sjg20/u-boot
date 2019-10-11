@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <asm/fsp2/fsp_internal.h>
 #include <asm/arch/fsp/fsp_configs.h>
 #include <asm/arch/fsp/fsp_m_upd.h>
 
