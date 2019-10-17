@@ -353,6 +353,35 @@ config SHA_PROG_HW_ACCEL
 config MD5
 	bool
 
+config CRC32
+	bool "Enable crc32 routine"
+	default y
+	help
+	  This enables a 32-bit CRC (cyclic-redundancy check) routine. It is
+	  typically used to check for changes in a group of bytes. Even a
+	  small change typically produces a very different CRC value. This
+	  algorithm is simple and quite fast.
+
+config SPL_CRC32
+	bool "Enable crc32 routine in SPL"
+	depends on SPL
+	default y
+	help
+	  This enables a 32-bit CRC (cyclic-redundancy check) routine in SPL. It
+	  is typically used to check for changes in a group of bytes. Even a
+	  small change typically produces a very different CRC value. This
+	  algorithm is simple and quite fast.
+
+config TPL_CRC32
+	bool "Enable crc32 routine in SPL"
+	depends on TPL
+	default y
+	help
+	  This enables a 32-bit CRC (cyclic-redundancy check) routine in SPL. It
+	  is typically used to check for changes in a group of bytes. Even a
+	  small change typically produces a very different CRC value. This
+	  algorithm is simple and quite fast.
+
 config CRC32C
 	bool
 
