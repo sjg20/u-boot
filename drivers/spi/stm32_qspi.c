@@ -9,7 +9,9 @@
 
 #include <common.h>
 #include <clk.h>
+#include <dm.h>
 #include <reset.h>
+#include <spi.h>
 #include <spi-mem.h>
 #include <linux/iopoll.h>
 #include <linux/ioport.h>
