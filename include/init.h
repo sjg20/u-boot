@@ -221,6 +221,13 @@ void pci_init_board(void);
 
 void trap_init(unsigned long reloc_addr);
 
+/*
+ * initr_watchdog() - Init the watchdog
+ *
+ * @return 0 if OK, -ve on error
+ */
+int initr_watchdog(void);
+
 #endif	/* __ASSEMBLY__ */
 /* Put only stuff here that the assembler can digest */
 
