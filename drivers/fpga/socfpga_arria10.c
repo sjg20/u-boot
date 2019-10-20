@@ -11,6 +11,7 @@
 #include <altera.h>
 #include <asm/arch/pinmux.h>
 #include <common.h>
+#include <dm.h>
 #include <dm/ofnode.h>
 #include <errno.h>
 #include <fs_loader.h>
