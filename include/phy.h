@@ -9,12 +9,15 @@
 #ifndef _PHY_H
 #define _PHY_H
 
-#include <dm.h>
+#include <dm/ofnode.h>
+#include <dm/read.h>
 #include <linux/list.h>
 #include <linux/mii.h>
 #include <linux/ethtool.h>
 #include <linux/mdio.h>
 #include <phy_interface.h>
+
+struct udevice;
 
 #define PHY_FIXED_ID		0xa5a55a5a
 /*
