@@ -6,10 +6,11 @@
 #include <common.h>
 #include <fdtdec.h>
 #include <dm.h>
+#include <asm/gpio.h>
 #include <dm/root.h>
 #include <dm/test.h>
 #include <dm/util.h>
-#include <asm/gpio.h>
+#include <test/test.h>
 #include <test/ut.h>
 
 /* Test that sandbox GPIOs work correctly */

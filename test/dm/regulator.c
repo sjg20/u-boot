@@ -19,6 +19,7 @@
 #include <power/pmic.h>
 #include <power/regulator.h>
 #include <power/sandbox_pmic.h>
+#include <test/test.h>
 #include <test/ut.h>
 
 enum {

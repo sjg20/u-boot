@@ -9,6 +9,7 @@
 #include <regmap.h>
 #include <asm/test.h>
 #include <dm/test.h>
+#include <test/test.h>
 #include <test/ut.h>
 
 /* Base test of system controllers */

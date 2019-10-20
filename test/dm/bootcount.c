@@ -8,6 +8,7 @@
 #include <bootcount.h>
 #include <asm/test.h>
 #include <dm/test.h>
+#include <test/test.h>
 #include <test/ut.h>
 
 static int dm_test_bootcount(struct unit_test_state *uts)

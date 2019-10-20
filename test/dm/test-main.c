@@ -13,6 +13,8 @@
 #include <dm/test.h>
 #include <dm/root.h>
 #include <dm/uclass-internal.h>
+#include <test/test.h>
+#include <test/test.h>
 #include <test/ut.h>
 
 DECLARE_GLOBAL_DATA_PTR;

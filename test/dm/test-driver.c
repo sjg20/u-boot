@@ -10,9 +10,10 @@
 #include <dm.h>
 #include <errno.h>
 #include <malloc.h>
-#include <dm/test.h>
-#include <test/ut.h>
 #include <asm/io.h>
+#include <dm/test.h>
+#include <test/test.h>
+#include <test/ut.h>
 
 int dm_testdrv_op_count[DM_TEST_OP_COUNT];
 static struct unit_test_state *uts = &global_dm_test_state;
