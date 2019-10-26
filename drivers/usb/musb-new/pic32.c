@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <dm.h>
 #include <linux/usb/musb.h>
 #include "linux-compat.h"
 #include "musb_core.h"
