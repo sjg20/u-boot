@@ -13,7 +13,6 @@
 #include <malloc.h>
 #include <mmc.h>
 #include <sdhci.h>
-#include <dm.h>
 
 #if defined(CONFIG_FIXED_SDHCI_ALIGNED_BUFFER)
 void *aligned_buffer = (void *)CONFIG_FIXED_SDHCI_ALIGNED_BUFFER;
