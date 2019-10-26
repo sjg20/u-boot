@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0+
 
 #include <common.h>
+#include <clk.h>
+#include <dm.h>
+#include <linux/err.h>
+
 #include "brcmnand_compat.h"
 
 struct clk *devm_clk_get(struct udevice *dev, const char *id)

@@ -3,8 +3,8 @@
 #ifndef __BRCMNAND_COMPAT_H
 #define __BRCMNAND_COMPAT_H
 
-#include <clk.h>
-#include <dm.h>
+struct clk;
+struct udevice;
 
 struct clk *devm_clk_get(struct udevice *dev, const char *id);
 int clk_prepare_enable(struct clk *clk);
