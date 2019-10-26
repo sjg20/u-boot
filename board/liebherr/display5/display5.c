@@ -23,7 +23,6 @@
 #include <netdev.h>
 #include <i2c.h>
 
-#include <dm.h>
 #include <dm/platform_data/serial_mxc.h>
 #include <dm/platdata.h>
 
