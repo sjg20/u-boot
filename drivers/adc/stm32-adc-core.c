@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <dm.h>
 #include <asm/io.h>
 #include <power/regulator.h>
 #include "stm32-adc-core.h"
