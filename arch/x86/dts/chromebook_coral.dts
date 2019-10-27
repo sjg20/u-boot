@@ -133,6 +133,11 @@
 			compatible = "intel,apl-punit";
 		};
 
+		gma@2,0 {
+			reg = <0x00001000 0 0 0 0>;
+			compatible = "intel,gma";
+		};
+
 		p2sb: p2sb@d,0 {
 			u-boot,dm-pre-reloc;
 			reg = <0x02006810 0 0 0 0>;
@@ -233,6 +238,17 @@
 				PMC_GPE_SW_31_0>;
 			gpe0-sts = <0x20>;
 			gpe0-en = <0x30>;
+		};
+
+		/* WiFi */
+		pcie-b0@14,0 {
+			reg = <0x0000a000 0 0 0 0>;
+			acpi-name = "RP03";
+		};
+
+		/* WiFi */
+		pcie-a0@13,0 {
+			reg = <0x00009800 0 0 0 0>;
 		};
 
 		spi: fast-spi@d,2 {
@@ -504,6 +520,9 @@
 	 * GPIO for SD card detect
 	 * sdcard-cd-gpio = <GPIO_177>;
 	 */
+
+	 prt0-gpio = <GPIO_122>;
+	 sdcard-cd-gpio = <GPIO_177>;
 
 	/*
 	 * Order is emmc-tx-data-cntl1, emmc-tx-data-cntl2,

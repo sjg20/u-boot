@@ -531,7 +531,7 @@ typedef int pci_dev_t;
  * This is relevant for the following macros:
  * PCI_DEV, PCI_FUNC, PCI_DEVFN
  * The U-Boot macro PCI_DEV is equivalent to the Linux PCI_SLOT version with
- * the remark from above (input d in bits 15-8 instead of 7-0.
+ * the remark from above (input is in bits 15-8 instead of 7-0.
  */
 #define PCI_DEV(d)		(((d) >> 11) & 0x1f)
 #define PCI_FUNC(d)		(((d) >> 8) & 0x7)
@@ -542,6 +542,9 @@ typedef int pci_dev_t;
 #define PCI_BDF(b, d, f)	((b) << 16 | PCI_DEVFN(d, f))
 #define PCI_VENDEV(v, d)	(((v) << 16) | (d))
 #define PCI_ANY_ID		(~0)
+
+/* Convert from Linux format to U-Boot format */
+#define PCI_TO_BDF(val)		((val) << 8)
 
 struct pci_device_id {
 	unsigned int vendor, device;	/* Vendor and device ID or PCI_ANY_ID */
@@ -583,12 +586,14 @@ extern void pci_cfgfunc_config_device(struct pci_controller* hose, pci_dev_t dev
  *	before relocation also. Some platforms set up static configuration in
  *	TPL/SPL to reduce code size and boot time, since these phases only know
  *	about a small subset of PCI devices. This is normally false.
+ * @acpi_name: ACPI name for this bus (4-character string), or NULL if none
  */
 struct pci_controller {
 #ifdef CONFIG_DM_PCI
 	struct udevice *bus;
 	struct udevice *ctlr;
 	bool skip_auto_config_until_reloc;
+	const char *acpi_name;
 #else
 	struct pci_controller *next;
 #endif

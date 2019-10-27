@@ -9,6 +9,9 @@
 #include <binman.h>
 #include <dm.h>
 #include <irq.h>
+#include <mmc.h>
+#include <usb.h>
+#include <asm/acpi_table.h>
 #include <asm/intel_pinctrl.h>
 #include <asm/io.h>
 #include <asm/intel_regs.h>
@@ -16,6 +19,7 @@
 #include <asm/msr-index.h>
 #include <asm/pci.h>
 #include <asm/arch/cpu.h>
+#include <asm/arch/soc_config.h>
 #include <asm/arch/systemagent.h>
 #include <asm/arch/fsp/fsp_configs.h>
 #include <asm/arch/fsp/fsp_s_upd.h>
@@ -23,216 +27,117 @@
 #define PCH_P2SB_E0		0xe0
 #define HIDE_BIT		BIT(0)
 
-#define INTEL_GSPI_MAX		3
-#define MAX_USB2_PORTS		8
+static const char *name_from_id(enum uclass_id id)
+{
+	switch (id) {
+	case UCLASS_USB_HUB:
+		/* Root Hub */
+		return "RHUB";
+	/* DSDT: acpi/northbridge.asl */
+	case UCLASS_NORTHBRIDGE:
+		return "MCHC";
+	/* DSDT: acpi/lpc.asl */
+	case UCLASS_LPC:
+		return "LPCB";
+	/* DSDT: acpi/xhci.asl */
+	case UCLASS_USB:
+		return "XHCI";
+	/* DSDT: acpi/pch_hda.asl */
+	case UCLASS_SOUND:	/* Assume HDA for now */
+		return "HDAS";
+	case UCLASS_PWM:
+		return "PWM";
+	/* SDIO is not supported */
+	/* PCIe */
+	/* TODO(sjg@chromium.org): Get from device tree?
+	case PCH_DEVFN_PCIE1:
+		return "RP03";
+	case PCH_DEVFN_PCIE5:
+		return "RP01";
+	*/
+	default:
+		return NULL;
+	}
+}
 
-enum {
-	CHIPSET_LOCKDOWN_FSP = 0, /* FSP handles locking per UPDs */
-	CHIPSET_LOCKDOWN_COREBOOT, /* coreboot handles locking */
-};
+int soc_acpi_name(const struct udevice *dev, char *out_name)
+{
+	enum uclass_id parent_id = UCLASS_INVALID;
+	enum uclass_id id;
+	const char *name = out_name;
 
-/* Serial IRQ control. SERIRQ_QUIET is the default (0) */
-enum serirq_mode {
-	SERIRQ_QUIET,
-	SERIRQ_CONTINUOUS,
-	SERIRQ_OFF,
-};
+	id = device_get_uclass_id(dev);
+	if (dev_get_parent(dev))
+		parent_id = device_get_uclass_id(dev_get_parent(dev));
 
-struct gspi_cfg {
-	/* Bus speed in MHz */
-	u32 speed_mhz;
-	/* Bus should be enabled prior to ramstage with temporary base */
-	u8 early_init;
-};
+	if (device_is_on_pci_bus(dev))
+		name = name_from_id(id);
+	/* Storage */
+	else if (id == UCLASS_MMC)
+		name = mmc_is_sd(dev) ? "SDCD" : "EMMC";
+	if (!name) {
+		switch (parent_id) {
+		case UCLASS_USB: {
+			struct usb_device *udev = dev_get_parent_priv(dev);
 
-/*
- * This structure will hold data required by common blocks.
- * These are soc specific configurations which will be filled by soc.
- * We'll fill this structure once during init and use the data in common block.
- */
-struct soc_intel_common_config {
-	int chipset_lockdown;
-	struct gspi_cfg gspi[INTEL_GSPI_MAX];
-};
+			sprintf(out_name, udev->speed >= USB_SPEED_SUPER ?
+				"HS%02d" : "FS%02d",
+				udev->portnr);
+			name = out_name;
+			break;
+		}
+		case UCLASS_PCI: {
+			struct pci_controller *hose = dev_get_uclass_priv(dev);
 
-enum pnp_settings {
-	PNP_PERF,
-	PNP_POWER,
-	PNP_PERF_POWER,
-};
+			printf("hose->acpi_name = %s\n", hose->acpi_name);
+			if (hose->acpi_name)
+				name = hose->acpi_name;
+			else
+				name = "PCI0";
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	if (!name) {
+		int num;
 
-struct usb2_eye_per_port {
-	u8 per_port_tx_pe_half;
-	u8 per_port_pe_txi_set;
-	u8 per_port_txi_set;
-	u8 hs_skew_sel;
-	u8 usb_tx_emphasis_en;
-	u8 per_port_rxi_set;
-	u8 hs_npre_drv_sel;
-	u8 override_en;
-};
+		if (dev->seq == -1) {
+			log_warning("Device '%s' has no seq\n", dev->name);
+			return log_msg_ret("no seq", -ENXIO);
+		}
+		num = dev->seq + 1;
+		switch (id) {
+		/* DSDT: acpi/lpss.asl */
+		case UCLASS_SERIAL:
+			sprintf(out_name, "URT%d", num);
+			name = out_name;
+			break;
+		case UCLASS_I2C:
+			sprintf(out_name, "I2C%d", num);
+			name = out_name;
+			break;
+		case UCLASS_SPI:
+			sprintf(out_name, "SPI%d", num);
+			name = out_name;
+			break;
+		default:
+			break;
+		}
+	}
+	if (!name) {
+		log_warning("No name for device '%s'\n", dev->name);
+		return -ENOENT;
+	}
+	if (name != out_name) {
+		memcpy(out_name, name, ACPI_SIG_LEN);
+		out_name[ACPI_SIG_LEN] = '\0';
+	}
+	printf("acpi_name = %s\n", name);
 
-struct apl_config {
-	/* Common structure containing soc config data required by common code*/
-	struct soc_intel_common_config common_soc_config;
-
-	/*
-	 * Mapping from PCIe root port to CLKREQ input on the SOC. The SOC has
-	 * four CLKREQ inputs, but six root ports. Root ports without an
-	 * associated CLKREQ signal must be marked with "CLKREQ_DISABLED"
-	 */
-	u8 pcie_rp_clkreq_pin[MAX_PCIE_PORTS];
-
-	/* Enable/disable hot-plug for root ports (0 = disable, 1 = enable) */
-	u8 pcie_rp_hotplug_enable[MAX_PCIE_PORTS];
-
-	/* De-emphasis enable configuration for each PCIe root port */
-	u8 pcie_rp_deemphasis_enable[MAX_PCIE_PORTS];
-
-	/*
-	 * [14:8] DDR mode Number of dealy elements.Each = 125pSec.
-	 * [6:0] SDR mode Number of dealy elements.Each = 125pSec.
-	 */
-	u32 emmc_tx_cmd_cntl;
-
-	/*
-	 * [14:8] HS400 mode Number of dealy elements.Each = 125pSec.
-	 * [6:0] SDR104/HS200 mode Number of dealy elements.Each = 125pSec.
-	 */
-	u32 emmc_tx_data_cntl1;
-
-	/*
-	 * [30:24] SDR50 mode Number of dealy elements.Each = 125pSec.
-	 * [22:16] DDR50 mode Number of dealy elements.Each = 125pSec.
-	 * [14:8] SDR25/HS50 mode Number of dealy elements.Each = 125pSec.
-	 * [6:0] SDR12/Compatibility mode Number of dealy elements.
-	 *       Each = 125pSec.
-	 */
-	u32 emmc_tx_data_cntl2;
-
-	/*
-	 * [30:24] SDR50 mode Number of dealy elements.Each = 125pSec.
-	 * [22:16] DDR50 mode Number of dealy elements.Each = 125pSec.
-	 * [14:8] SDR25/HS50 mode Number of dealy elements.Each = 125pSec.
-	 * [6:0] SDR12/Compatibility mode Number of dealy elements.
-	 *       Each = 125pSec.
-	 */
-	u32 emmc_rx_cmd_data_cntl1;
-
-	/*
-	 * [14:8] HS400 mode 1 Number of dealy elements.Each = 125pSec.
-	 * [6:0] HS400 mode 2 Number of dealy elements.Each = 125pSec.
-	 */
-	u32 emmc_rx_strobe_cntl;
-
-	/*
-	 * [13:8] Auto Tuning mode Number of dealy elements.Each = 125pSec.
-	 * [6:0] SDR104/HS200 Number of dealy elements.Each = 125pSec.
-	 */
-	u32 emmc_rx_cmd_data_cntl2;
-
-	/* Select the eMMC max speed allowed */
-	u32 emmc_host_max_speed;
-
-	/* Specifies on which IRQ the SCI will internally appear */
-	u32 sci_irq;
-
-	/* Configure serial IRQ (SERIRQ) line */
-	enum serirq_mode serirq_mode;
-
-	/* Configure LPSS S0ix Enable */
-	bool lpss_s0ix_enable;
-
-	/* Enable DPTF support */
-	bool dptf_enable;
-
-	/* TCC activation offset value in degrees Celsius */
-	int tcc_offset;
-
-	/*
-	 * Configure Audio clk gate and power gate
-	 * IOSF-SB port ID 92 offset 0x530 [5] and [3]
-	 */
-	bool hdaudio_clk_gate_enable;
-	bool hdaudio_pwr_gate_enable;
-	bool hdaudio_bios_config_lockdown;
-
-	/* SLP S3 minimum assertion width */
-	int slp_s3_assertion_width_usecs;
-
-	/* GPIO pin for PERST_0 */
-	u32 prt0_gpio;
-
-	/* USB2 eye diagram settings per port */
-	struct usb2_eye_per_port usb2eye[MAX_USB2_PORTS];
-
-	/* GPIO SD card detect pin */
-	unsigned int sdcard_cd_gpio;
-
-	/*
-	 * PRMRR size setting with three options
-	 *  0x02000000 - 32MiB
-	 *  0x04000000 - 64MiB
-	 *  0x08000000 - 128MiB
-	 */
-	u32 PrmrrSize;
-
-	/*
-	 * Enable SGX feature.
-	 * Enabling SGX feature is 2 step process,
-	 * (1) set sgx_enable = 1
-	 * (2) set PrmrrSize to supported size
-	 */
-	bool sgx_enable;
-
-	/*
-	 * Select PNP Settings.
-	 * (0) Performance,
-	 * (1) Power
-	 * (2) Power & Performance
-	 */
-	enum pnp_settings pnp_settings;
-
-	/*
-	 * PMIC PCH_PWROK delay configuration - IPC Configuration
-	 * Upd for changing PCH_PWROK delay configuration : I2C_Slave_Address
-	 * (31:24) + Register_Offset (23:16) + OR Value (15:8) + AND Value (7:0)
-	 */
-	u32 pmic_pmc_ipc_ctrl;
-
-	/*
-	 * Options to disable XHCI Link Compliance Mode. Default is FALSE to not
-	 * disable Compliance Mode. Set TRUE to disable Compliance Mode.
-	 * 0:FALSE(Default), 1:True.
-	 */
-	bool disable_compliance_mode;
-
-	/*
-	 * Options to change USB3 ModPhy setting for the Integrated Filter (IF)
-	 * value. Default is 0 to not changing default IF value (0x12). Set
-	 * value with the range from 0x01 to 0xff to change IF value.
-	 */
-	u32 mod_phy_if_value;
-
-	/*
-	 * Options to bump USB3 LDO voltage. Default is FALSE to not increasing
-	 * LDO voltage. Set TRUE to increase LDO voltage with 40mV.
-	 * 0:FALSE (default), 1:True.
-	 */
-	bool mod_phy_voltage_bump;
-
-	/*
-	 * Options to adjust PMIC Vdd2 voltage. Default is 0 to not adjusting
-	 * the PMIC Vdd2 default voltage 1.20v. Upd for changing Vdd2 Voltage
-	 * configuration: I2C_Slave_Address (31:23) + Register_Offset (23:16)
-	 * + OR Value (15:8) + AND Value (7:0) through BUCK5_VID[3:2]:
-	 * 00=1.10v, 01=1.15v, 10=1.24v, 11=1.20v (default).
-	 */
-	u32 pmic_vdd2_voltage;
-
-	/* Option to enable VTD feature */
-	bool enable_vtd;
-};
+	return 0;
+}
 
 static int get_config(struct udevice *dev, struct apl_config *apl)
 {
@@ -284,6 +189,135 @@ static int get_config(struct udevice *dev, struct apl_config *apl)
 
 	return 0;
 }
+
+#if 0
+static void disable_dev(struct device *dev, FSP_S_CONFIG *silconfig)
+{
+	switch (dev->path.pci.devfn) {
+	case PCH_DEVFN_ISH:
+		silconfig->IshEnable = 0;
+		break;
+	case PCH_DEVFN_SATA:
+		silconfig->EnableSata = 0;
+		break;
+	case PCH_DEVFN_PCIE5:
+		silconfig->PcieRootPortEn[0] = 0;
+		silconfig->PcieRpHotPlug[0] = 0;
+		break;
+	case PCH_DEVFN_PCIE6:
+		silconfig->PcieRootPortEn[1] = 0;
+		silconfig->PcieRpHotPlug[1] = 0;
+		break;
+	case PCH_DEVFN_PCIE1:
+		silconfig->PcieRootPortEn[2] = 0;
+		silconfig->PcieRpHotPlug[2] = 0;
+		break;
+	case PCH_DEVFN_PCIE2:
+		silconfig->PcieRootPortEn[3] = 0;
+		silconfig->PcieRpHotPlug[3] = 0;
+		break;
+	case PCH_DEVFN_PCIE3:
+		silconfig->PcieRootPortEn[4] = 0;
+		silconfig->PcieRpHotPlug[4] = 0;
+		break;
+	case PCH_DEVFN_PCIE4:
+		silconfig->PcieRootPortEn[5] = 0;
+		silconfig->PcieRpHotPlug[5] = 0;
+		break;
+	case PCH_DEVFN_XHCI:
+		silconfig->Usb30Mode = 0;
+		break;
+	case PCH_DEVFN_XDCI:
+		silconfig->UsbOtg = 0;
+		break;
+	case PCH_DEVFN_I2C0:
+		silconfig->I2c0Enable = 0;
+		break;
+	case PCH_DEVFN_I2C1:
+		silconfig->I2c1Enable = 0;
+		break;
+	case PCH_DEVFN_I2C2:
+		silconfig->I2c2Enable = 0;
+		break;
+	case PCH_DEVFN_I2C3:
+		silconfig->I2c3Enable = 0;
+		break;
+	case PCH_DEVFN_I2C4:
+		silconfig->I2c4Enable = 0;
+		break;
+	case PCH_DEVFN_I2C5:
+		silconfig->I2c5Enable = 0;
+		break;
+	case PCH_DEVFN_I2C6:
+		silconfig->I2c6Enable = 0;
+		break;
+	case PCH_DEVFN_I2C7:
+		silconfig->I2c7Enable = 0;
+		break;
+	case PCH_DEVFN_UART0:
+		silconfig->Hsuart0Enable = 0;
+		break;
+	case PCH_DEVFN_UART1:
+		silconfig->Hsuart1Enable = 0;
+		break;
+	case PCH_DEVFN_UART2:
+		silconfig->Hsuart2Enable = 0;
+		break;
+	case PCH_DEVFN_UART3:
+		silconfig->Hsuart3Enable = 0;
+		break;
+	case PCH_DEVFN_SPI0:
+		silconfig->Spi0Enable = 0;
+		break;
+	case PCH_DEVFN_SPI1:
+		silconfig->Spi1Enable = 0;
+		break;
+	case PCH_DEVFN_SPI2:
+		silconfig->Spi2Enable = 0;
+		break;
+	case PCH_DEVFN_SDCARD:
+		silconfig->SdcardEnabled = 0;
+		break;
+	case PCH_DEVFN_EMMC:
+		silconfig->eMMCEnabled = 0;
+		break;
+	case PCH_DEVFN_SDIO:
+		silconfig->SdioEnabled = 0;
+		break;
+	case PCH_DEVFN_SMBUS:
+		silconfig->SmbusEnable = 0;
+		break;
+#if !CONFIG(SOC_INTEL_GLK)
+	case SA_DEVFN_IPU:
+		silconfig->IpuEn = 0;
+		break;
+#endif
+	case PCH_DEVFN_HDA:
+		silconfig->HdaEnable = 0;
+		break;
+	default:
+		printk(BIOS_WARNING, "PCI:%02x.%01x: Could not disable the device\n",
+			PCI_SLOT(dev->path.pci.devfn),
+			PCI_FUNC(dev->path.pci.devfn));
+		break;
+	}
+}
+
+static void parse_devicetree(FSP_S_CONFIG *silconfig)
+{
+	struct device *dev = pcidev_path_on_root(SA_DEVFN_ROOT);
+
+	if (!dev) {
+		printk(BIOS_ERR, "Could not find root device\n");
+		return;
+	}
+	/* Only disable bus 0 devices. */
+	for (dev = dev->bus->children; dev; dev = dev->sibling) {
+		if (!dev->enabled)
+			disable_dev(dev, silconfig);
+	}
+}
+#endif
 
 static void apl_fsp_silicon_init_params_cb(struct apl_config *apl,
 					   struct fsp_s_config *cfg)
@@ -351,8 +385,11 @@ int fsps_update_config(struct udevice *dev, ulong rom_offset,
 
 	apl = malloc(sizeof(*apl));
 	if (!apl)
-		return log_msg_ret("config", -ENOMEM);
-	get_config(dev, apl);
+		return log_msg_ret("alloc", -ENOMEM);
+	ret = get_config(dev, apl);
+	if (ret)
+		return log_msg_ret("config", ret);
+	gd->arch.soc_config = apl;
 
 	cfg->ish_enable = 0;
 	cfg->enable_sata = 0;
@@ -373,6 +410,7 @@ int fsps_update_config(struct udevice *dev, ulong rom_offset,
 	cfg->spi1_enable = 0;
 	cfg->spi2_enable = 0;
 	cfg->sdio_enabled = 0;
+	printf("pei_graphics_peim_init=%d\n", cfg->pei_graphics_peim_init);
 
 	memcpy(cfg->pcie_rp_clk_req_number, apl->pcie_rp_clkreq_pin,
 	       sizeof(cfg->pcie_rp_clk_req_number));
@@ -438,6 +476,57 @@ static void p2sb_set_hide_bit(pci_dev_t dev, int hide)
 	pci_x86_clrset_config(dev, PCH_P2SB_E0 + 1, HIDE_BIT,
 			      hide ? HIDE_BIT : 0, PCI_SIZE_8);
 }
+
+#if 0
+/*
+ * If the PCIe root port at function 0 is disabled,
+ * the PCIe root ports might be coalesced after FSP silicon init.
+ * The below function will swap the devfn of the first enabled device
+ * in devicetree and function 0 resides a pci device
+ * so that it won't confuse coreboot.
+ */
+static void pcie_update_device_tree(unsigned int devfn0, int num_funcs)
+{
+	struct device *func0;
+	unsigned int devfn;
+	int i;
+	unsigned int inc = PCI_DEVFN(0, 1);
+
+	func0 = pcidev_path_on_root(devfn0);
+	if (func0 == NULL)
+		return;
+
+	/* No more functions if function 0 is disabled. */
+	if (pci_read_config32(func0, PCI_VENDOR_ID) == 0xffffffff)
+		return;
+
+	devfn = devfn0 + inc;
+
+	/*
+	 * Increase funtion by 1.
+	 * Then find first enabled device to replace func0
+	 * as that port was move to func0.
+	 */
+	for (i = 1; i < num_funcs; i++, devfn += inc) {
+		struct device *dev = pcidev_path_on_root(devfn);
+		if (dev == NULL)
+			continue;
+
+		if (!dev->enabled)
+			continue;
+		/* Found the first enabled device in given dev number */
+		func0->path.pci.devfn = dev->path.pci.devfn;
+		dev->path.pci.devfn = devfn0;
+		break;
+	}
+}
+
+static void pcie_override_devicetree_after_silicon_init(void)
+{
+	pcie_update_device_tree(PCH_DEVFN_PCIE1, 4);
+	pcie_update_device_tree(PCH_DEVFN_PCIE5, 2);
+}
+#endif
 
 /* Configure package power limits */
 static int set_power_limits(struct udevice *dev)
@@ -603,3 +692,121 @@ int arch_fsp_init_r(void)
 
 	return 0;
 }
+
+#if 0
+static void soc_final(void *data)
+{
+	/* Disable global reset, just in case */
+	pmc_global_reset_enable(0);
+	/* Make sure payload/OS can't trigger global reset */
+	pmc_global_reset_lock();
+}
+
+static void drop_privilege_all(void)
+{
+	/* Drop privilege level on all the CPUs */
+	if (mp_run_on_all_cpus(&cpu_enable_untrusted_mode, NULL) < 0)
+		printk(BIOS_ERR, "failed to enable untrusted mode\n");
+}
+
+static void configure_xhci_host_mode_port0(void)
+{
+	uint32_t *cfg0;
+	uint32_t *cfg1;
+	const struct resource *res;
+	uint32_t reg;
+	struct stopwatch sw;
+	struct device *xhci_dev = PCH_DEV_XHCI;
+
+	printk(BIOS_INFO, "Putting xHCI port 0 into host mode.\n");
+	res = find_resource(xhci_dev, PCI_BASE_ADDRESS_0);
+	cfg0 = (void *)(uintptr_t)(res->base + DUAL_ROLE_CFG0);
+	cfg1 = (void *)(uintptr_t)(res->base + DUAL_ROLE_CFG1);
+	reg = read32(cfg0);
+	if (!(reg & SW_IDPIN_EN_MASK))
+		return;
+
+	reg &= ~(SW_IDPIN_MASK | SW_VBUS_VALID_MASK);
+	write32(cfg0, reg);
+
+	stopwatch_init_msecs_expire(&sw, 10);
+	/* Wait for the host mode status bit. */
+	while ((read32(cfg1) & DRD_MODE_MASK) != DRD_MODE_HOST) {
+		if (stopwatch_expired(&sw)) {
+			printk(BIOS_ERR, "Timed out waiting for host mode.\n");
+			return;
+		}
+	}
+
+	printk(BIOS_INFO, "xHCI port 0 host switch over took %lu ms\n",
+		stopwatch_duration_msecs(&sw));
+}
+
+static int check_xdci_enable(void)
+{
+	struct device *dev = PCH_DEV_XDCI;
+
+	return !!dev->enabled;
+}
+
+void platform_fsp_notify_status(enum fsp_notify_phase phase)
+{
+	if (phase == END_OF_FIRMWARE) {
+
+		/*
+		 * Before hiding P2SB device and dropping privilege level,
+		 * dump CSE status and disable HECI1 interface.
+		 */
+		heci_cse_lockdown();
+
+		/* Hide the P2SB device to align with previous behavior. */
+		p2sb_hide();
+
+		/*
+		 * As per guidelines BIOS is recommended to drop CPU privilege
+		 * level to IA_UNTRUSTED. After that certain device registers
+		 * and MSRs become inaccessible supposedly increasing system
+		 * security.
+		 */
+		drop_privilege_all();
+
+		/*
+		 * When USB OTG is set, GLK FSP enables xHCI SW ID pin and
+		 * configures USB-C as device mode. Force USB-C into host mode.
+		 */
+		if (check_xdci_enable())
+			configure_xhci_host_mode_port0();
+
+		/*
+		 * Override GLK xhci clock gating register(XHCLKGTEN) to
+		 * mitigate usb device suspend and resume failure.
+		 */
+		if (CONFIG(SOC_INTEL_GLK)) {
+			uint32_t *cfg;
+			const struct resource *res;
+			uint32_t reg;
+			struct device *xhci_dev = PCH_DEV_XHCI;
+
+			res = find_resource(xhci_dev, PCI_BASE_ADDRESS_0);
+			cfg = (void *)(uintptr_t)(res->base + CFG_XHCLKGTEN);
+			reg = SRAMPGTEN | SSLSE | USB2PLLSE | IOSFSTCGE |
+				HSTCGE | HSUXDMIPLLSE | SSTCGE | XHCFTCLKSE |
+				XHCBBTCGIPISO | XHCUSB2PLLSDLE | SSPLLSUE |
+				XHCBLCGE | HSLTCGE | SSLTCGE | IOSFBTCGE |
+				IOSFGBLCGE;
+			write32(cfg, reg);
+		}
+	}
+}
+
+/*
+ * spi_flash init() needs to run unconditionally on every boot (including
+ * resume) to allow write protect to be disabled for eventlog and nvram
+ * updates. This needs to be done as early as possible in ramstage. Thus, add a
+ * callback for entry into BS_PRE_DEVICE.
+ */
+static void spi_flash_init_cb(void *unused)
+{
+	fast_spi_init();
+}
+#endif

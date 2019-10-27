@@ -62,6 +62,21 @@ struct dm_spi_slave_platdata {
 	uint mode;
 };
 
+enum spi_clock_phase {
+	SPI_CLOCK_PHASE_FIRST,
+	SPI_CLOCK_PHASE_SECOND
+};
+
+enum spi_wire_mode {
+	SPI_4_WIRE_MODE,
+	SPI_3_WIRE_MODE
+};
+
+enum spi_polarity {
+	SPI_POLARITY_LOW,
+	SPI_POLARITY_HIGH
+};
+
 #endif /* CONFIG_DM_SPI */
 
 /**

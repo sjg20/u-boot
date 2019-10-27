@@ -132,6 +132,19 @@ struct i2c_msg_list {
 	uint nmsgs;
 };
 
+enum i2c_speed {
+	I2C_SPEED_STANDARD	= 100000,
+	I2C_SPEED_FAST		= 400000,
+	I2C_SPEED_FAST_PLUS	= 1000000,
+	I2C_SPEED_HIGH		= 3400000,
+	I2C_SPEED_FAST_ULTRA	= 5000000,
+};
+
+enum i2c_address_mode {
+	I2C_MODE_7_BIT,
+	I2C_MODE_10_BIT
+};
+
 /**
  * dm_i2c_read() - read bytes from an I2C chip
  *

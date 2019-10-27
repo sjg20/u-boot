@@ -370,7 +370,7 @@ struct mmc_uclass_priv {
  * @dev:	Device
  * @return associated mmc struct pointer if available, else NULL
  */
-struct mmc *mmc_get_mmc_dev(struct udevice *dev);
+struct mmc *mmc_get_mmc_dev(const struct udevice *dev);
 
 /* End of driver model support */
 
@@ -878,5 +878,7 @@ int mmc_get_env_dev(void);
  * @return block device if found, else NULL
  */
 struct blk_desc *mmc_get_blk_desc(struct mmc *mmc);
+
+bool mmc_is_sd(const struct udevice *dev);
 
 #endif /* _MMC_H_ */
