@@ -977,6 +977,7 @@ static int pci_uclass_pre_probe(struct udevice *bus)
 	hose->last_busno = bus->seq;
 	hose->skip_auto_config_until_reloc =
 		dev_read_bool(bus, "u-boot,skip-auto-config-until-reloc");
+	hose->acpi_name = dev_read_string(bus, "acpi-name");
 
 	return 0;
 }

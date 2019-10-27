@@ -49,6 +49,8 @@ enum log_category_t {
 	LOGC_ALLOC,	/* Memory allocation */
 	LOGC_SANDBOX,	/* Related to the sandbox board */
 	LOGC_BLOBLIST,	/* Bloblist */
+	/* Intel Advanced Configuration and Power Interface (ACPI) */
+	LOGC_ACPI,
 
 	LOGC_COUNT,	/* Number of log categories */
 	LOGC_END,	/* Sentinel value for a list of log categories */

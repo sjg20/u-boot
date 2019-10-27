@@ -206,7 +206,7 @@ int mmc_of_parse(struct udevice *dev, struct mmc_config *cfg)
 	return 0;
 }
 
-struct mmc *mmc_get_mmc_dev(struct udevice *dev)
+struct mmc *mmc_get_mmc_dev(const struct udevice *dev)
 {
 	struct mmc_uclass_priv *upriv;
 
@@ -316,6 +316,16 @@ void print_mmc_devices(char separator)
 #else
 void print_mmc_devices(char separator) { }
 #endif
+
+bool mmc_is_sd(const struct udevice *dev)
+{
+	const struct mmc *mmc = mmc_get_mmc_dev(dev);
+
+	if (!mmc)
+		return false;
+
+	return IS_SD(mmc);
+}
 
 int mmc_bind(struct udevice *dev, struct mmc *mmc, const struct mmc_config *cfg)
 {

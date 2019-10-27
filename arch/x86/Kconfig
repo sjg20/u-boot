@@ -755,6 +755,15 @@ config GENERATE_ACPI_TABLE
 	  by the operating system. It defines platform-independent interfaces
 	  for configuration and power management monitoring.
 
+config ACPI_CPU_STRING
+	string
+	default "\\_PR.CP%02d"
+	depends on GENERATE_ACPI_TABLE
+	help
+	  Sets the ACPI name string in the processor scope as written by
+	  the acpigen function. Default is \_PR.CPxx. Note that you need
+	  the \ escape character in the string.
+
 endmenu
 
 config HAVE_ACPI_RESUME
@@ -942,5 +951,32 @@ config TPL_ACPI_GPE
 	  GPIO mechanism for polling an input.
 
 	  See https://queue.acm.org/blogposting.cfm?id=18977 for more info
+
+config SA_PCIEX_LENGTH
+	hex
+	default 0x10000000 if (PCIEX_LENGTH_256MB)
+	default 0x8000000 if (PCIEX_LENGTH_128MB)
+	default 0x4000000 if (PCIEX_LENGTH_64MB)
+	default 0x10000000
+	help
+	  This option allows you to select length of PCIEX region.
+
+config PCIEX_LENGTH_256MB
+	bool
+
+config PCIEX_LENGTH_128MB
+	bool
+
+config PCIEX_LENGTH_64MB
+	bool
+
+config INTEL_GMA_ACPI
+	bool "Generate ACPI table for Intel GMA graphics"
+
+config INTEL_GMA_SWSMISCI
+	bool
+	help
+	  Select this option for Atom-based platforms which use the SWSMISCI
+	  register (0xe0) rather than the SWSCI register (0xe8).
 
 endmenu
