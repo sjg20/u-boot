@@ -2,12 +2,6 @@
 
 #include <config.h>
 
-#ifdef CONFIG_CHROMEOS
-#include "chromeos-sandbox.dtsi"
-#include "flashmap-sandbox-ro.dtsi"
-#include "flashmap-16mb-rw.dtsi"
-#endif
-
 #define USB_CLASS_HUB			9
 
 / {
@@ -114,3 +108,9 @@
 #include "sandbox.dtsi"
 #include "cros-ec-keyboard.dtsi"
 #include "sandbox_pmic.dtsi"
+
+#ifdef CONFIG_CHROMEOS
+#include "chromeos-sandbox.dtsi"
+#include "flashmap-sandbox-ro.dtsi"
+#include "flashmap-16mb-sandbox-rw.dtsi"
+#endif
