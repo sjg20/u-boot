@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <binman.h>
 #include <cpu_func.h>
 #include <cros_ec.h>
 #include <dm.h>
@@ -93,6 +94,14 @@ int board_late_init(void)
 		panic("Cannot init cros-ec device");
 		return -1;
 	}
+
+	/* TODO(sjg@chromium.org): This should select read-write A/B */
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
+		ret = binman_select_subnode("read-only");
+		if (ret)
+			return log_msg_ret("binman", ret);
+	}
+
 	return 0;
 }
 #endif
