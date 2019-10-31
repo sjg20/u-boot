@@ -63,7 +63,10 @@ To run on sandbox:
 
    $UB/tpl/u-boot-tpl -d $UB/u-boot.dtb.out \
 	-L6 -c "host bind 0 $CROS/src/build/images/cheza/latest/chromiumos_image.bin; vboot go auto" \
-	-l -w -s state.dtb -r
+	-l -w -s state.dtb -r -n
+
+   $UB/tpl/u-boot-tpl  -d $UB/u-boot.dtb.out -L6 -c "host bind 0 $CROS/src/build/images/cheza/latest/chromiumos_image.bin; vboot go auto" -l -w -s state.dtb -r -n -m mem
+
 
 To run on other boards:
    Install image.bin in the SPI flash of your device

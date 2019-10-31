@@ -27,7 +27,8 @@ void board_init_f(ulong flag)
 
 u32 spl_boot_device(void)
 {
-	return BOOT_DEVICE_BOARD;
+	return IS_ENABLED(CONFIG_CHROMEOS) ? BOOT_DEVICE_CROS_VBOOT :
+		BOOT_DEVICE_BOARD;
 }
 
 static int spl_board_load_image(struct spl_image_info *spl_image,
@@ -57,12 +58,19 @@ void spl_board_init(void)
 
 	preloader_console_init();
 
-	if (state->run_unittests) {
+	if (CONFIG_IS_ENABLED(UNIT_TEST) && state->run_unittests) {
 		int ret;
 
 		ret = dm_test_main(state->select_unittests);
 		/* continue execution into U-Boot */
 	}
+/*
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
+		void cros_do_stage(void);
+
+		cros_do_stage();
+	}
+*/
 }
 
 void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
