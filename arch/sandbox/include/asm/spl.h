@@ -8,6 +8,7 @@
 
 enum {
 	BOOT_DEVICE_BOARD,
+	BOOT_DEVICE_CROS_VBOOT,
 };
 
 /**
