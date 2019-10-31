@@ -6,6 +6,8 @@
 
 #define USB_CLASS_HUB			9
 
+#include <dt-bindings/cros/nvdata.h>
+
 / {
 	chosen {
 		stdout-path = "/serial";
@@ -239,9 +241,9 @@
 		firmware_storage_spi: flash@0 {
 			u-boot,dm-pre-proper;
 			reg = <0>;
-			compatible = "spansion,m25p16", "jedec,spi-nor";
+			compatible = "spansion,w25q128", "jedec,spi-nor";
 			spi-max-frequency = <40000000>;
-			sandbox,filename = "spi.bin";
+			sandbox,filename = "spi-cros.bin";
 		};
 	};
 
@@ -307,12 +309,23 @@
 		clock-frequency = <1000000>;
 	};
 
-	tpm {
+	tpm_v1: tpm {
 		compatible = "google,sandbox-tpm";
 	};
 
-	tpm2 {
+	tpm_v2: tpm2 {
 		compatible = "sandbox,tpm2";
+		u-boot,dm-vpl;
+
+		nvdata {
+			u-boot,dm-vpl;
+			compatible = "google,tpm-secdata";
+			nvdata,types = <CROS_NV_SECDATAF
+				CROS_NV_SECDATAK
+				CROS_NV_MRC_REC_HASH
+				CROS_NV_FWMP>;
+		};
+
 	};
 
 	triangle {
@@ -447,11 +460,12 @@
 	};
 
 	nvdata {
-		u-boot,dm-pre-reloc;
+		u-boot,dm-vpl;
 		compatible = "google,cros-ec-nvdata";
+		nvdata,types = <CROS_NV_DATA CROS_NV_VSTORE>;
 	};
 
-	cros_ec_vboot: vboot {
+	cros_vboot_ec: vboot {
 		compatible = "google,cros-ec-vboot";
 	};
 
