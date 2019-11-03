@@ -16,23 +16,23 @@
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
 
-binman_sym_declare(ulong, u_boot_spl, image_pos);
-binman_sym_declare(ulong, u_boot_spl, size);
+binman_sym_declare(ulong, spl, image_pos);
+binman_sym_declare(ulong, spl, size);
 /* U-Boot image_pos is declared by common/spl/spl.c */
-binman_sym_declare(ulong, u_boot_any, size);
+binman_sym_declare(ulong, u_boot, size);
 
 static ulong get_image_pos(void)
 {
 	return spl_phase() == PHASE_TPL ?
-		binman_sym(ulong, u_boot_spl, image_pos) :
-		binman_sym(ulong, u_boot_any, image_pos);
+		binman_sym(ulong, spl, image_pos) :
+		binman_sym(ulong, u_boot, image_pos);
 }
 
 static ulong get_image_size(void)
 {
 	return spl_phase() == PHASE_TPL ?
-		binman_sym(ulong, u_boot_spl, size) :
-		binman_sym(ulong, u_boot_any, size);
+		binman_sym(ulong, spl, size) :
+		binman_sym(ulong, u_boot, size);
 }
 
 /* This reads the next phase from mapped SPI flash */
@@ -73,7 +73,8 @@ static int rom_load_image(struct spl_image_info *spl_image,
 	spl_pos += map_base & ~0xff000000;
 	debug(", base %lx, pos %lx\n", map_base, spl_pos);
 	bootstage_start(BOOTSTAGE_ID_ACCUM_MMAP_SPI, "mmap_spi");
-	memcpy((void *)spl_image->load_addr, (void *)spl_pos, spl_size);
+	memcpy((void *)spl_image->load_addr, (void *)spl_pos,
+	       spl_size + SAFETY_MARGIN);
 	cpu_flush_l1d_to_l2();
 	bootstage_accum(BOOTSTAGE_ID_ACCUM_MMAP_SPI);
 

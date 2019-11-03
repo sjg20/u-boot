@@ -44,7 +44,7 @@
 	u-boot-tpl-dtb {
 	};
 #endif
-	u-boot-spl {
+	spl {
 		type = "section";
 		offset = <CONFIG_X86_OFFSET_SPL>;
 		u-boot-spl {

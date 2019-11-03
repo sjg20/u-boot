@@ -173,6 +173,7 @@ struct spl_load_info {
  * spl_parse_image_header() can parse a valid header.
  */
 binman_sym_extern(ulong, u_boot_any, image_pos);
+binman_sym_extern(ulong, u_boot, image_pos);
 
 /**
  * spl_load_simple_fit_skip_processing() - Hook to allow skipping the FIT

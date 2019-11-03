@@ -23,8 +23,6 @@
 #include <asm/sipi.h>
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
-#include <dm/lists.h>
-#include <dm/root.h>
 #include <linux/linkage.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -39,19 +37,22 @@ struct saved_msr {
 	uint32_t hi;
 } __packed;
 
-
+/**
+ * struct mp_flight_plan - Information about what each AP should do
+ *
+ * @num_records: Number of records in the plan
+ * @records: Records in the plan
+ * @bad_apid_ids: List of bad APIC IDs encountered
+ * @bad_apic_count: Number of bad APIC IDs encountered
+ */
 struct mp_flight_plan {
 	int num_records;
 	struct mp_flight_record *records;
+	int bad_apic_ids[4];
+	atomic_t bad_apic_count;
 };
 
 static struct mp_flight_plan mp_info;
-
-struct cpu_map {
-	struct udevice *dev;
-	int apic_id;
-	int err_code;
-};
 
 static inline void barrier_wait(atomic_t *b)
 {
@@ -126,6 +127,21 @@ static int find_cpu_by_apic_id(int apic_id, struct udevice **devp)
 	return -ENOENT;
 }
 
+static void list_cpu_apic_ids(void)
+{
+	struct udevice *dev;
+
+	debug("CPU APIC IDs:");
+	for (uclass_find_first_device(UCLASS_CPU, &dev);
+	     dev;
+	     uclass_find_next_device(&dev)) {
+		struct cpu_platdata *plat = dev_get_parent_platdata(dev);
+
+		debug(" %d", plat->cpu_id);
+	}
+	debug("\n");
+}
+
 /*
  * By the time APs call ap_init() caching has been setup, and microcode has
  * been loaded
@@ -142,7 +158,12 @@ static void ap_init(unsigned int cpu_index)
 	apic_id = lapicid();
 	ret = find_cpu_by_apic_id(apic_id, &dev);
 	if (ret) {
+		int count;
+
 		debug("Unknown CPU apic_id %x\n", apic_id);
+		count = atomic_inc_return(&mp_info.bad_apic_count) - 1;
+		if (count < ARRAY_SIZE(mp_info.bad_apic_ids))
+			mp_info.bad_apic_ids[count] = apic_id;
 		goto done;
 	}
 
@@ -460,10 +481,12 @@ int mp_init(struct mp_params *p)
 	ret = check_cpu_devices(num_cpus);
 	if (ret)
 		debug("Warning: Device tree does not describe all CPUs. Extra ones will not be started correctly\n");
+	list_cpu_apic_ids();
 
 	/* Copy needed parameters so that APs have a reference to the plan */
 	mp_info.num_records = p->num_records;
 	mp_info.records = p->flight_plan;
+	atomic_set(&mp_info.bad_apic_count, 0);
 
 	/* Load the SIPI vector */
 	ret = load_sipi_vector(&ap_count, num_cpus);
@@ -489,7 +512,17 @@ int mp_init(struct mp_params *p)
 	/* Walk the flight plan for the BSP */
 	ret = bsp_do_flight_plan(cpu, p);
 	if (ret) {
-		debug("CPU init failed: err=%d\n", ret);
+		int count = atomic_read(&mp_info.bad_apic_count);
+
+		debug("CPU init failed: err=%d, bad IDs: ", ret);
+		if (count) {
+			int i;
+
+			for (i = 0; i < count; i++)
+				debug(" %d", mp_info.bad_apic_ids[i]);
+		}
+		debug("\n");
+
 		return ret;
 	}
 
