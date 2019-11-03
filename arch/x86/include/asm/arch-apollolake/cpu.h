@@ -10,6 +10,13 @@
 #define CTC_FREQ		19200000
 
 #define MAX_PCIE_PORTS		6
+
+/*
+ * We need to read well past the end of the region in order for execution from
+ * the loaded data to work. It is not clear why.
+ */
+#define SAFETY_MARGIN	0
+
 #define CLKREQ_DISABLED		0xf
 
 #ifndef __ASSEMBLY__
