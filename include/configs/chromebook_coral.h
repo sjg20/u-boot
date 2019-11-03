@@ -11,7 +11,7 @@
 #define __CONFIG_H
 
 #define CONFIG_BOOTCOMMAND	\
-	"fatload mmc 1:c 1000000 syslinux/vmlinuz.A; zboot 1000000"
+	"usb start; ext2load usb 0:1 111000 vmlinuz; zboot 111000"
 
 #include <configs/x86-common.h>
 #include <configs/x86-chromebook.h>

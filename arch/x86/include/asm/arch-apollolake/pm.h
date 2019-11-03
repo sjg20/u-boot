@@ -16,4 +16,15 @@
 #define  PMC_GPE_N_63_32	7
 #define  PMC_GPE_W_31_0		9
 
+#define IRQ_REG			0x106C
+#define SCI_IRQ_ADJUST		24
+#define SCI_IRQ_SEL		(255 << SCI_IRQ_ADJUST)
+#define SCIS_IRQ9		9
+#define SCIS_IRQ10		10
+#define SCIS_IRQ11		11
+#define SCIS_IRQ20		20
+#define SCIS_IRQ21		21
+#define SCIS_IRQ22		22
+#define SCIS_IRQ23		23
+
 #endif

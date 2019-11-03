@@ -8,6 +8,7 @@
 #include <dm.h>
 #include <asm/cpu_common.h>
 #include <asm/cpu_x86.h>
+#include <asm/msr.h>
 
 struct cpu_apl_priv {
 };

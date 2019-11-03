@@ -10,6 +10,8 @@
 /* Port Id lives in bits 23:16 and register offset lives in 15:0 of address */
 #define PCR_PORTID_SHIFT	16
 
+#if !defined(__ACPI__)
+
 /**
  * struct p2sb_child_platdata - Information about each child of a p2sb device
  *
@@ -131,5 +133,7 @@ int p2sb_set_port_id(struct udevice *dev, int portid);
  * @return Port ID of that child
  */
 int p2sb_get_port_id(struct udevice *dev);
+
+#endif /* !__ACPI__ */
 
 #endif
