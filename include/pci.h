@@ -586,12 +586,14 @@ extern void pci_cfgfunc_config_device(struct pci_controller* hose, pci_dev_t dev
  *	before relocation also. Some platforms set up static configuration in
  *	TPL/SPL to reduce code size and boot time, since these phases only know
  *	about a small subset of PCI devices. This is normally false.
+ * @acpi_name: ACPI name for this bus (4-character string), or NULL if none
  */
 struct pci_controller {
 #ifdef CONFIG_DM_PCI
 	struct udevice *bus;
 	struct udevice *ctlr;
 	bool skip_auto_config_until_reloc;
+	const char *acpi_name;
 #else
 	struct pci_controller *next;
 #endif

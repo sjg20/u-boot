@@ -14,6 +14,9 @@
 #include <spl.h>
 #include <asm/pci.h>
 
+#define PCH_P2SB_E0		0xe0
+#define HIDE_BIT		BIT(0)
+
 struct p2sb_platdata {
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
 	struct dtd_intel_apl_p2sb dtplat;
@@ -93,7 +96,7 @@ int apl_p2sb_ofdata_to_platdata(struct udevice *dev)
 #if !CONFIG_IS_ENABLED(OF_PLATDATA)
 	int ret;
 
-	if (spl_phase() == PHASE_TPL) {
+// 	if (spl_phase() == PHASE_TPL) {
 		u32 base[2];
 
 		/* TPL sets up the initial BAR */
@@ -102,17 +105,22 @@ int apl_p2sb_ofdata_to_platdata(struct udevice *dev)
 		if (ret)
 			return log_msg_ret("Missing/short early-regs", ret);
 		plat->mmio_base = base[0];
-		plat->bdf = pci_get_devfn(dev);
-		if (plat->bdf < 0)
-			return log_msg_ret("Cannot get p2sb PCI address",
-					   plat->bdf);
-	}
+		if (spl_phase() == PHASE_TPL) {
+			plat->bdf = pci_get_devfn(dev);
+			if (plat->bdf < 0)
+				return log_msg_ret("Cannot get p2sb PCI address",
+						   plat->bdf);
+		}
+		upriv->mmio_base = plat->mmio_base;
+		debug("ofdata 1: mmio_base=%x\n", (uint)plat->mmio_base);
+// 	}
+// 	printf("%s: skip ofdata\n", __func__);
 #else
 	plat->mmio_base = plat->dtplat.early_regs[0];
 	plat->bdf = pci_ofplat_get_devfn(plat->dtplat.reg[0]);
-#endif
 	upriv->mmio_base = plat->mmio_base;
-	debug("p2sb: mmio_base=%x\n", (uint)plat->mmio_base);
+	debug("ofdata 2: mmio_base=%x\n", (uint)plat->mmio_base);
+#endif
 
 	return 0;
 }
@@ -122,16 +130,56 @@ static int apl_p2sb_probe(struct udevice *dev)
 	if (spl_phase() == PHASE_TPL)
 		return apl_p2sb_early_init(dev);
 	else {
+#if 0
 		struct p2sb_platdata *plat = dev_get_platdata(dev);
+		struct p2sb_uc_priv *upriv = dev_get_uclass_priv(dev);
 
+// 		printf("probe before: plat->mmio_base=%lx, upriv->mmio_base=%x\n",
+// 		       plat->mmio_base, upriv->mmio_base);
 		plat->mmio_base = dev_read_addr_pci(dev);
 		/* Don't set BDF since it should not be used */
+		printf("probe: plat->mmio_base=%lx\n", plat->mmio_base);
 		if (!plat->mmio_base || plat->mmio_base == FDT_ADDR_T_NONE)
 			return -EINVAL;
-
+		upriv->mmio_base = plat->mmio_base;
+#endif
 		if (spl_phase() == PHASE_SPL)
 			return apl_p2sb_spl_init(dev);
 	}
+
+	return 0;
+}
+
+static void p2sb_set_hide_bit(struct udevice *dev, bool hide)
+{
+	dm_pci_clrset_config8(dev, PCH_P2SB_E0 + 1, HIDE_BIT,
+			      hide ? HIDE_BIT : 0);
+}
+
+static int apl_p2sb_set_hide(struct udevice *dev, bool hide)
+{
+	u16 vendor;
+
+	if (!CONFIG_IS_ENABLED(PCI))
+		return -EPERM;
+	p2sb_set_hide_bit(dev, hide);
+
+	dm_pci_read_config16(dev, PCI_VENDOR_ID, &vendor);
+	if (hide && vendor != 0xffff)
+		return log_msg_ret("hide", -EEXIST);
+	else if (!hide && vendor != PCI_VENDOR_ID_INTEL)
+		return log_msg_ret("unhide", -ENOMEDIUM);
+
+	return 0;
+}
+
+static int apl_p2sb_remove(struct udevice *dev)
+{
+	int ret;
+
+	ret = apl_p2sb_set_hide(dev, true);
+	if (ret)
+		return log_msg_ret("hide", ret);
 
 	return 0;
 }
@@ -152,6 +200,10 @@ static int p2sb_child_post_bind(struct udevice *dev)
 	return 0;
 }
 
+struct p2sb_ops apl_p2sb_ops = {
+	.set_hide	= apl_p2sb_set_hide,
+};
+
 static const struct udevice_id apl_p2sb_ids[] = {
 	{ .compatible = "intel,apl-p2sb" },
 	{ }
@@ -162,9 +214,12 @@ U_BOOT_DRIVER(apl_p2sb_drv) = {
 	.id		= UCLASS_P2SB,
 	.of_match	= apl_p2sb_ids,
 	.probe		= apl_p2sb_probe,
+	.remove		= apl_p2sb_remove,
+	.ops		= &apl_p2sb_ops,
 	.ofdata_to_platdata = apl_p2sb_ofdata_to_platdata,
 	.platdata_auto_alloc_size = sizeof(struct p2sb_platdata),
 	.per_child_platdata_auto_alloc_size =
 		sizeof(struct p2sb_child_platdata),
 	.child_post_bind = p2sb_child_post_bind,
+	.flags		= DM_FLAG_OS_PREPARE,
 };

@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <acpi.h>
 #include <errno.h>
 #include <fdtdec.h>
 #include <malloc.h>
@@ -390,10 +391,20 @@ int dm_init_and_scan(bool pre_reloc_only)
 	return 0;
 }
 
+static int root_acpi_get_name(const struct udevice *dev, char *out_name)
+{
+	return acpi_return_name(out_name, "\\_SB");
+}
+
+struct acpi_ops root_acpi_ops = {
+	.get_name	= root_acpi_get_name,
+};
+
 /* This is the root driver - all drivers are children of this */
 U_BOOT_DRIVER(root_driver) = {
 	.name	= "root_driver",
 	.id	= UCLASS_ROOT,
+	acpi_ops_ptr(&root_acpi_ops)
 };
 
 /* This is the root uclass */

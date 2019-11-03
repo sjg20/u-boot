@@ -127,6 +127,14 @@ unsigned int install_e820_map(unsigned int max_entries,
 	entries[num_entries].type = E820_RESERVED;
 	num_entries++;
 #endif
+	entries[num_entries].addr = 0xd0000000; //IOMAP_P2SB_BAR;
+	entries[num_entries].size = 0x10000000;
+	entries[num_entries].type = E820_RESERVED;
+	num_entries++;
+	entries[num_entries].addr = 0xfed10000; //MCH_BASE_ADDRESS;
+	entries[num_entries].size = 0x8000;
+	entries[num_entries].type = E820_RESERVED;
+	num_entries++;
 
 	return num_entries;
 }

@@ -54,7 +54,7 @@ u64 dev_read_u64_default(struct udevice *dev, const char *propname, u64 def)
 	return ofnode_read_u64_default(dev_ofnode(dev), propname, def);
 }
 
-const char *dev_read_string(struct udevice *dev, const char *propname)
+const char *dev_read_string(const struct udevice *dev, const char *propname)
 {
 	return ofnode_read_string(dev_ofnode(dev), propname);
 }

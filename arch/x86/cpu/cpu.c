@@ -175,6 +175,14 @@ void show_boot_progress(int val)
 
 #if !defined(CONFIG_SYS_COREBOOT) && !defined(CONFIG_EFI_STUB)
 /*
+ * Implement a weak default function for boards that need to do some final init
+ * before the system is ready.
+ */
+__weak void board_final_init(void)
+{
+}
+
+/*
  * Implement a weak default function for boards that optionally
  * need to clean up the system before jumping to the kernel.
  */
@@ -186,7 +194,7 @@ int last_stage_init(void)
 {
 	struct acpi_fadt __maybe_unused *fadt;
 
-	board_final_cleanup();
+	board_final_init();
 
 #ifdef CONFIG_HAVE_ACPI_RESUME
 	fadt = acpi_find_fadt();
@@ -209,6 +217,12 @@ int last_stage_init(void)
 		enter_acpi_mode(fadt->pm1a_cnt_blk);
 	}
 #endif
+
+	/*
+	 * TODO(sjg@chromium.org): Move this to  bootm_announce_and_cleanup()
+	 * once FSP-S at 0x200000 does not overlap with the bzimage at 0x100000.
+	*/
+	board_final_cleanup();
 
 	return 0;
 }

@@ -174,6 +174,22 @@ int intel_pinctrl_get_pad(uint pad, struct udevice **devp, uint *offsetp)
 	return 0;
 }
 
+int pinctrl_get_pad_from_gpio(const struct gpio_desc *desc)
+{
+	struct udevice *pinctrl;
+	struct intel_pinctrl_priv *priv;
+	const struct pad_community *comm;
+
+	if (!desc->dev)
+		return -1;
+
+	pinctrl = dev_get_parent(desc->dev);
+	priv = dev_get_priv(pinctrl);
+	comm = priv->comm;;
+
+	return comm->first_pad + desc->offset;
+}
+
 static int pinctrl_configure_owner(struct udevice *dev,
 				   const struct pad_config *cfg,
 				   const struct pad_community *comm)
@@ -391,7 +407,7 @@ static int pinctrl_configure_pad(struct udevice *dev,
 	return 0;
 }
 
-u32 intel_pinctrl_get_config_reg_addr(struct udevice *dev, uint offset)
+u32 intel_pinctrl_get_config_reg_offset(struct udevice *dev, uint offset)
 {
 	struct intel_pinctrl_priv *priv = dev_get_priv(dev);
 	const struct pad_community *comm = priv->comm;
@@ -404,9 +420,16 @@ u32 intel_pinctrl_get_config_reg_addr(struct udevice *dev, uint offset)
 	return config_offset;
 }
 
+u32 intel_pinctrl_get_config_reg_addr(struct udevice *dev, uint offset)
+{
+	uint config_offset = intel_pinctrl_get_config_reg_offset(dev, offset);
+
+	return (u32)(ulong)pcr_reg_address(dev, config_offset);
+}
+
 u32 intel_pinctrl_get_config_reg(struct udevice *dev, uint offset)
 {
-	uint config_offset = intel_pinctrl_get_config_reg_addr(dev, offset);
+	uint config_offset = intel_pinctrl_get_config_reg_offset(dev, offset);
 
 	return pcr_read32(dev, config_offset);
 }
@@ -417,6 +440,8 @@ int intel_pinctrl_get_acpi_pin(struct udevice *dev, uint offset)
 	const struct pad_community *comm = priv->comm;
 	int group;
 
+	if (IS_ENABLED(CONFIG_INTEL_PINCTRL_MULTI_ACPI_DEVICES))
+		return offset;
 	group = pinctrl_group_index(comm, offset);
 
 	/* If pad base is not set then use GPIO number as ACPI pin number */
@@ -601,21 +626,25 @@ int pinctrl_config_pads_for_node(struct udevice *dev, ofnode node)
 	return 0;
 }
 
+const char *intel_pinctrl_acpi_path(const struct udevice *dev)
+{
+	struct intel_pinctrl_priv *priv = dev_get_priv(dev);
+	const struct pad_community *comm = priv->comm;
+
+	return comm->acpi_path;
+}
+
 int intel_pinctrl_ofdata_to_platdata(struct udevice *dev,
 				     const struct pad_community *comm,
 				     int num_cfgs)
 {
 	struct p2sb_child_platdata *pplat = dev_get_parent_platdata(dev);
 	struct intel_pinctrl_priv *priv = dev_get_priv(dev);
-	int ret;
 
 	if (!comm) {
 		log_err("Cannot find community for pid %d\n", pplat->pid);
 		return -EDOM;
 	}
-	ret = irq_first_device_type(X86_IRQT_ITSS, &priv->itss);
-	if (ret)
-		return log_msg_ret("Cannot find ITSS", ret);
 	priv->comm = comm;
 	priv->num_cfgs = num_cfgs;
 
@@ -625,8 +654,12 @@ int intel_pinctrl_ofdata_to_platdata(struct udevice *dev,
 int intel_pinctrl_probe(struct udevice *dev)
 {
 	struct intel_pinctrl_priv *priv = dev_get_priv(dev);
+	int ret;
 
 	priv->itss_pol_cfg = true;
+	ret = irq_first_device_type(X86_IRQT_ITSS, &priv->itss);
+	if (ret)
+		return log_msg_ret("Cannot find ITSS", ret);
 
 	return 0;
 }

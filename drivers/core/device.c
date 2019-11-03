@@ -793,6 +793,64 @@ int device_find_child_by_name(struct udevice *parent, const char *name,
 	return -ENODEV;
 }
 
+int device_first_child_err(struct udevice *parent, struct udevice **devp)
+{
+	struct udevice *dev;
+
+	device_find_first_child(parent, &dev);
+	if (!dev)
+		return -ENODEV;
+
+	return device_get_device_tail(dev, 0, devp);
+}
+
+int device_next_child_err(struct udevice **devp)
+{
+	struct udevice *dev = *devp;
+
+	device_find_next_child(&dev);
+	if (!dev)
+		return -ENODEV;
+
+	return device_get_device_tail(dev, 0, devp);
+}
+
+int device_first_child_ofdata_err(struct udevice *parent, struct udevice **devp)
+{
+	struct udevice *dev;
+	int ret;
+
+	device_find_first_child(parent, &dev);
+	if (!dev)
+		return -ENODEV;
+
+	ret = device_ofdata_to_platdata(dev);
+	if (ret)
+		return ret;
+
+	*devp = dev;
+
+	return 0;
+}
+
+int device_next_child_ofdata_err(struct udevice **devp)
+{
+	struct udevice *dev = *devp;
+	int ret;
+
+	device_find_next_child(&dev);
+	if (!dev)
+		return -ENODEV;
+
+	ret = device_ofdata_to_platdata(dev);
+	if (ret)
+		return ret;
+
+	*devp = dev;
+
+	return 0;
+}
+
 struct udevice *dev_get_parent(const struct udevice *child)
 {
 	return child->parent;
@@ -837,6 +895,18 @@ bool device_has_active_children(struct udevice *dev)
 	     child;
 	     device_find_next_child(&child)) {
 		if (device_active(child))
+			return true;
+	}
+
+	return false;
+}
+
+bool device_is_ancestor(struct udevice *child, struct udevice *ancestor)
+{
+	struct udevice *dev;
+
+	for (dev = child; dev; dev = dev_get_parent(dev)) {
+		if (dev == ancestor)
 			return true;
 	}
 

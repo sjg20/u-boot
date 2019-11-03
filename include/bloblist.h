@@ -27,6 +27,14 @@ enum bloblist_tag_t {
 	BLOBLISTT_SPL_HANDOFF,		/* Hand-off info from SPL */
 	BLOBLISTT_VBOOT_CTX,		/* Chromium OS verified boot context */
 	BLOBLISTT_VBOOT_HANDOFF,	/* Chromium OS internal handoff info */
+	BLOBLISTT_TCPA_LOG,		/* TPM log space */
+	/*
+	 * Advanced Configuration and Power Interface Global Non-Volatile
+	 * Sleeping table. This forms part of the ACPI tables passed to Linux.
+	 */
+	BLOBLISTT_ACPI_GNVS,
+	BLOBLISTT_TPM2_TCG_LOG,		/* TPM v2 log space */
+	BLOBLISTT_INTEL_VBT,		/* Intel Video-BIOS table */
 };
 
 /**
@@ -150,6 +158,19 @@ int bloblist_ensure_size(uint tag, int size, void **blobp);
  *	to lack of space, or it exists but has the wrong size
  */
 void *bloblist_ensure(uint tag, int size);
+
+/**
+ * bloblist_ensure_size_ret() - Find or add a blob
+ *
+ * Find an existing blob, or add a new one if not found
+ *
+ * @tag:	Tag to add (enum bloblist_tag_t)
+ * @sizep:	Size of the blob to create; returns size of actual blob
+ * @blobp:	Returns a pointer to blob on success
+ * @return 0 if OK, -ENOSPC if it is missing and could not be added due to lack
+ *	of space
+ */
+int bloblist_ensure_size_ret(uint tag, int *sizep, void **blobp);
 
 /**
  * bloblist_new() - Create a new, empty bloblist of a given size

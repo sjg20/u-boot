@@ -259,6 +259,9 @@ struct driver {
 	int per_child_platdata_auto_alloc_size;
 	const void *ops;	/* driver-specific operations */
 	uint32_t flags;
+#if CONFIG_IS_ENABLED(ACPI)
+	struct acpi_ops *acpi_ops;
+#endif
 };
 
 /* Declare a new U-Boot driver */
@@ -575,6 +578,32 @@ int device_find_first_child_by_uclass(struct udevice *parent,
 int device_find_child_by_name(struct udevice *parent, const char *name,
 			      struct udevice **devp);
 
+
+/**
+ * device_first_child_err() - Get the first child of a device
+ *
+ * The device returned is probed if necessary, and ready for use
+ *
+ * @parent:	Parent device to search
+ * @devp:	Returns device found, if any
+ * @return 0 if found, -ENODEV if not, -ve error if device failed to probe
+ */
+int device_first_child_err(struct udevice *parent, struct udevice **devp);
+
+/**
+ * device_next_child_err() - Get the next child of a parent device
+ *
+ * The device returned is probed if necessary, and ready for use
+ *
+ * @devp: On entry, pointer to device to lookup. On exit, returns pointer
+ * to the next sibling if no error occurred
+ * @return 0 if found, -ENODEV if not, -ve error if device failed to probe
+ */
+int device_next_child_err(struct udevice **devp);
+
+int device_first_child_ofdata_err(struct udevice *parent, struct udevice **devp);
+int device_next_child_ofdata_err(struct udevice **devp);
+
 /**
  * device_has_children() - check if a device has any children
  *
@@ -591,6 +620,8 @@ bool device_has_children(const struct udevice *dev);
  * them is active (probed).
  */
 bool device_has_active_children(struct udevice *dev);
+
+bool device_is_ancestor(struct udevice *child, struct udevice *ancestor);
 
 /**
  * device_is_last_sibling() - check if a device is the last sibling
@@ -678,7 +709,7 @@ int dev_enable_by_path(const char *path);
  * @dev:	device to test
  * @return:	true if it is on a PCI bus, false otherwise
  */
-static inline bool device_is_on_pci_bus(struct udevice *dev)
+static inline bool device_is_on_pci_bus(const struct udevice *dev)
 {
 	return device_get_uclass_id(dev->parent) == UCLASS_PCI;
 }
@@ -703,6 +734,34 @@ static inline bool device_is_on_pci_bus(struct udevice *dev)
  */
 #define device_foreach_child(pos, parent)	\
 	list_for_each_entry(pos, &parent->child_head, sibling_node)
+
+/**
+ * device_foreach_child_probe() - iterate through children, probing them
+ *
+ * This creates a for() loop which works through the available children of
+ * a device in order from start to end. Devices are probed if necessary,
+ * and ready for use.
+ *
+ * @pos: struct udevice * for the current device
+ * @parent: parent device to scan
+ */
+#define device_foreach_child_probe(pos, parent)	\
+	for (int _ret = device_first_child_err(parent, &dev); !_ret; \
+	     _ret = device_next_child_err(&dev))
+
+/**
+ * device_foreach_child_ofdata_to_platdata() - iterate through children
+ *
+ * This creates a for() loop which works through the available children of
+ * a device in order from start to end. Device ofdata is read by calling
+ * device_ofdata_to_platdata() on each one. The devices are not probed.
+ *
+ * @pos: struct udevice * for the current device
+ * @parent: parent device to scan
+ */
+#define device_foreach_child_ofdata_to_platdata(pos, parent)	\
+	for (int _ret = device_first_child_ofdata_err(parent, &dev); !_ret; \
+	     _ret = device_next_child_ofdata_err(&dev))
 
 /**
  * dm_scan_fdt_dev() - Bind child device in a the device tree

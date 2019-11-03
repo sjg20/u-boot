@@ -8,11 +8,13 @@
 #define LOG_CATEGORY UCLASS_TPM
 
 #include <common.h>
+#include <acpi.h>
 #include <dm.h>
 #include <i2c.h>
 #include <irq.h>
 #include <spl.h>
 #include <tpm-v2.h>
+#include <asm/acpigen.h>
 #include <asm/gpio.h>
 #include <asm/io.h>
 #include <asm/arch/iomap.h>
@@ -34,6 +36,15 @@ enum {
 	CR50_MAX_BUF_SIZE = 63,
 };
 
+/**
+ * struct cr50_priv - Private driver data
+ *
+ * @ready_gpio: GPIO to use to check if the TPM is ready
+ * @irq: IRQ to use check if the TPM is ready (has priority over @ready_gpio)
+ * @locality: Currenttly claimed locality (-1 if none)
+ * @vendor: vendor: Vendor ID for TPM
+ * @use_irq: true to use @irq, false to use @ready if available
+ */
 struct cr50_priv {
 	struct gpio_desc ready_gpio;
 	struct irq irq;
@@ -208,7 +219,7 @@ static int release_locality(struct udevice *dev, int force)
 		cr50_i2c_write(dev, addr, &buf, 1);
 	}
 
-	priv->locality = 0;
+	priv->locality = -1;
 
 	return 0;
 }
@@ -493,13 +504,14 @@ static int process_reset(struct udevice *dev)
 }
 
 /*
- * Locality could be already claimed (if this is a later coreboot stage and
- * the RO did not release it), or not yet claimed, if this is verstage or the
+ * Locality could be already claimed (if this is a later U-Boot phase and
+ * RO did not release it), or not yet claimed, if this is TPL or the
  * older RO did release it.
  */
 static int claim_locality(struct udevice *dev, int loc)
 {
 	const u8 mask = TPM_ACCESS_VALID | TPM_ACCESS_ACTIVE_LOCALITY;
+	struct cr50_priv *priv = dev_get_priv(dev);
 	u8 access;
 	int ret;
 
@@ -525,7 +537,8 @@ static int claim_locality(struct udevice *dev, int loc)
 		log_err("Failed to claim locality\n");
 		return -EPERM;
 	}
-	log_info("Claimed locality %d\n", loc);
+	printf("Claimed locality %d\n", loc);
+	priv->locality = loc;
 
 	return 0;
 }
@@ -560,7 +573,56 @@ static int cr50_i2c_open(struct udevice *dev)
 
 static int cr50_i2c_cleanup(struct udevice *dev)
 {
-	release_locality(dev, 1);
+	struct cr50_priv *priv = dev_get_priv(dev);
+
+	printf("%s: cleanup %d\n", __func__, priv->locality);
+	if (priv->locality != -1)
+		release_locality(dev, 1);
+
+	return 0;
+}
+
+static int cr50_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
+{
+	char scope[ACPI_DEVICE_PATH_MAX];
+	char name[ACPI_DEVICE_NAME_MAX];
+	const char *hid;
+	int ret;
+
+	ret = acpi_device_scope(dev, scope, sizeof(scope));
+	if (ret)
+		return log_msg_ret("scope", ret);
+	ret = acpi_device_name(dev, name);
+	if (ret)
+		return log_msg_ret("name", ret);
+
+	hid = dev_read_string(dev, "acpi-hid");
+	if (!hid)
+		return log_msg_ret("hid", ret);
+
+	/* Device */
+	acpigen_write_scope(scope);
+	acpigen_write_device(name);
+	acpigen_write_name_string("_HID", hid);
+	acpigen_write_name_integer("_UID",
+				   dev_read_u32_default(dev, "acpi-uid", 0));
+	acpigen_write_name_string("_DDN", dev_read_string(dev, "acpi-ddn"));
+	acpigen_write_sta(acpi_device_status(dev));
+
+	/* Resources */
+	acpigen_write_name("_CRS");
+	acpigen_write_resourcetemplate_header();
+	ret = acpi_device_write_i2c_dev(dev);
+	if (ret)
+		return log_msg_ret("i2c", ret);
+	ret = acpi_device_write_interrupt_or_gpio(dev, "ready-gpios");
+	if (ret)
+		return log_msg_ret("irq_gpio", ret);
+
+	acpigen_write_resourcetemplate_footer();
+
+	acpigen_pop_len(); /* Device */
+	acpigen_pop_len(); /* Scope */
 
 	return 0;
 }
@@ -593,7 +655,7 @@ static int cr50_i2c_ofdata_to_platdata(struct udevice *dev)
 		priv->irq = irq;
 		priv->use_irq = true;
 	} else {
-		ret = gpio_request_by_name(dev, "ready-gpio", 0,
+		ret = gpio_request_by_name(dev, "ready-gpios", 0,
 					   &priv->ready_gpio, GPIOD_IS_IN);
 		if (ret) {
 			log_warning("Cr50 does not have an ready GPIO/interrupt (err=%d)\n",
@@ -632,9 +694,14 @@ static int cr50_i2c_probe(struct udevice *dev)
 		return log_msg_ret("vendor-id", -EXDEV);
 	}
 	priv->vendor = vendor;
+	priv->locality = -1;
 
 	return 0;
 }
+
+struct acpi_ops cr50_acpi_ops = {
+	.fill_ssdt_generator	= cr50_acpi_fill_ssdt,
+};
 
 static const struct tpm_ops cr50_i2c_ops = {
 	.open		= cr50_i2c_open,
@@ -656,5 +723,8 @@ U_BOOT_DRIVER(cr50_i2c) = {
 	.ops    = &cr50_i2c_ops,
 	.ofdata_to_platdata	= cr50_i2c_ofdata_to_platdata,
 	.probe	= cr50_i2c_probe,
+	.remove	= cr50_i2c_cleanup,
 	.priv_auto_alloc_size = sizeof(struct cr50_priv),
+	acpi_ops_ptr(&cr50_acpi_ops)
+	.flags		= DM_FLAG_OS_PREPARE,
 };

@@ -11,6 +11,8 @@
 
 #include <dm/pinctrl.h>
 
+struct gpio_desc;
+
 /**
  * struct pad_config - config for a pad
  * @pad: offset of pad within community
@@ -262,12 +264,14 @@ int pinctrl_read_pads(struct udevice *dev, ofnode node, const char *prop,
 int pinctrl_count_pads(struct udevice *dev, u32 *pads, int size);
 
 /**
- * intel_pinctrl_get_config_reg_addr() - Get address of the pin config registers
+ * intel_pinctrl_get_config_reg_offset() - Get address of the pin config registers
  *
  * @dev: Pinctrl device
  * @offset: GPIO offset within this device
  * @return register offset within the GPIO p2sb region
  */
+u32 intel_pinctrl_get_config_reg_offset(struct udevice *dev, uint offset);
+
 u32 intel_pinctrl_get_config_reg_addr(struct udevice *dev, uint offset);
 
 /**
@@ -287,8 +291,11 @@ u32 intel_pinctrl_get_config_reg(struct udevice *dev, uint offset);
  * @pad: Pad to check
  * @devp: Returns pinctrl device containing that pad
  * @offsetp: Returns offset of pad within that pinctrl device
+ * @return 0 if OK, -ENOTBLK if pad number is invalid
  */
 int intel_pinctrl_get_pad(uint pad, struct udevice **devp, uint *offsetp);
+
+int pinctrl_get_pad_from_gpio(const struct gpio_desc *desc);
 
 /**
  * intel_pinctrl_get_acpi_pin() - Get the ACPI pin for a pinctrl pin
@@ -302,5 +309,7 @@ int intel_pinctrl_get_pad(uint pad, struct udevice **devp, uint *offsetp);
  *	ACPI pad base is not set
  */
 int intel_pinctrl_get_acpi_pin(struct udevice *dev, uint offset);
+
+const char *intel_pinctrl_acpi_path(const struct udevice *dev);
 
 #endif
