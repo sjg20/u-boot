@@ -54,7 +54,8 @@ static int rom_load_image(struct spl_image_info *spl_image,
 	spl_pos += map_base & ~0xff000000;
 	debug(", base %lx, pos %lx\n", map_base, spl_pos);
 	bootstage_start(BOOTSTAGE_ID_ACCUM_MMAP_SPI, "mmap_spi");
-	memcpy((void *)spl_image->load_addr, (void *)spl_pos, spl_size);
+	memcpy((void *)spl_image->load_addr, (void *)spl_pos,
+	       spl_size + SAFETY_MARGIN);
 	cpu_flush_l1d_to_l2();
 	bootstage_accum(BOOTSTAGE_ID_ACCUM_MMAP_SPI);
 
