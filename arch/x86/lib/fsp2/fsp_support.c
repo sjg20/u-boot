@@ -7,6 +7,7 @@
 #include <common.h>
 #include <dm.h>
 #include <spi_flash.h>
+#include <asm/arch/cpu.h>
 #include <asm/fsp/fsp_support.h>
 #include <asm/fsp2/fsp_internal.h>
 
@@ -93,6 +94,8 @@ int fsp_get_header(ulong offset, ulong size, bool use_spi_flash,
 	} else {
 		memcpy(base, (void *)offset, size);
 	}
+	cpu_flush_l1d_to_l2();
+
 	ptr = base + (ptr - (void *)buf);
 	*fspp = ptr;
 
