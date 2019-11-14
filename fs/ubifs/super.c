@@ -25,6 +25,7 @@
 #include <linux/seq_file.h>
 #include <linux/mount.h>
 #include <linux/math64.h>
+#include <linux/stringify.h>
 #include <linux/writeback.h>
 #else
 

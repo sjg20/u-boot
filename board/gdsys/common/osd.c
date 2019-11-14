@@ -9,6 +9,7 @@
 #include <common.h>
 #include <i2c.h>
 #include <malloc.h>
+#include <linux/stringify.h>
 
 #include "ch7301.h"
 #include "dp501.h"
