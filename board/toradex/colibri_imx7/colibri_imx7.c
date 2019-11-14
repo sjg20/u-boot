@@ -3,6 +3,7 @@
  * Copyright (C) 2016-2018 Toradex AG
  */
 
+#include <init.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/crm_regs.h>
 #include <asm/arch/imx-regs.h>

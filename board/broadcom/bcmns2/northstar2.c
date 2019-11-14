@@ -3,6 +3,7 @@
  * (C) Copyright 2016 Broadcom Ltd.
  */
 #include <common.h>
+#include <init.h>
 #include <asm/system.h>
 #include <asm/armv8/mmu.h>
 
