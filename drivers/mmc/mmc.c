@@ -6,6 +6,7 @@
  * Based vaguely on the Linux code
  */
 
+#include <blk.h>
 #include <config.h>
 #include <common.h>
 #include <command.h>

@@ -4,6 +4,7 @@
  *	Dave Liu <daveliu@freescale.com>
  */
 #include <common.h>
+#include <part.h>
 #include <asm/io.h>
 #include <malloc.h>
 #include <net.h>

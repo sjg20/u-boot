@@ -4,6 +4,7 @@
  * Author: Eric Nelson<eric@nelint.com>
  *
  */
+#include <blk.h>
 #include <config.h>
 #include <common.h>
 #include <malloc.h>

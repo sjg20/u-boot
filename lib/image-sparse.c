@@ -34,6 +34,7 @@
  *   to the "BSD-3-Clause", therefore, DO NOT MODIFY THIS LICENSE TEXT!
  */
 
+#include <blk.h>
 #include <config.h>
 #include <common.h>
 #include <image-sparse.h>

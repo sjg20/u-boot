@@ -4,6 +4,7 @@
  * Copyright 2015 Free Electrons.
  */
 
+#include <blk.h>
 #include <config.h>
 #include <common.h>
 #include <flash.h>

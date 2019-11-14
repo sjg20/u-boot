@@ -5,6 +5,7 @@
 
 #include <android_ab.h>
 #include <command.h>
+#include <part.h>
 
 static int do_ab_select(cmd_tbl_t *cmdtp, int flag, int argc,
 			char * const argv[])

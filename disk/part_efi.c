@@ -9,6 +9,8 @@
  *   when CONFIG_SYS_64BIT_LBA is not defined, lbaint_t is 32 bits; this
  *   limits the maximum size of addressable storage to < 2 Terra Bytes
  */
+#include <blk.h>
+#include <part.h>
 #include <uuid.h>
 #include <asm/cache.h>
 #include <asm/unaligned.h>
