@@ -7,6 +7,7 @@
 #include <common.h>
 #include <acpi_s3.h>
 #include <handoff.h>
+#include <init.h>
 #include <spl.h>
 #include <asm/arch/cpu.h>
 #include <asm/fsp/fsp_support.h>

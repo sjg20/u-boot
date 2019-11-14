@@ -12,7 +12,11 @@
 #include <command.h>
 #include <cpu_func.h>
 #include <env_callback.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <init.h>
+>>>>>>> 3541e855f17... common: Drop init.h from common header
 #include <linux/types.h>
 #include <stdio_dev.h>
 #include <lcd.h>

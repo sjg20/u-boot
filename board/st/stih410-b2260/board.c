@@ -6,7 +6,11 @@
 
 #include <common.h>
 #include <cpu_func.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <init.h>
+>>>>>>> 3541e855f17... common: Drop init.h from common header
 #include <linux/usb/otg.h>
 #include <dwc3-sti-glue.h>
 #include <dwc3-uboot.h>

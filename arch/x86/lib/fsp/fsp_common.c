@@ -8,6 +8,7 @@
 #include <cpu_func.h>
 #include <dm.h>
 #include <errno.h>
+#include <init.h>
 #include <rtc.h>
 #include <asm/cmos_layout.h>
 #include <asm/early_cmos.h>

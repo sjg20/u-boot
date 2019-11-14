@@ -26,7 +26,11 @@
 #include <common.h>
 #include <config.h>
 #include <debug_uart.h>
+<<<<<<< HEAD
 #include <asm/system.h>
+=======
+#include <init.h>
+>>>>>>> 0aaab499308... common: Drop init.h from common header
 #include <asm/arch/cpu.h>
 #include <asm/arch/dmc.h>
 #include <asm/arch/power.h>

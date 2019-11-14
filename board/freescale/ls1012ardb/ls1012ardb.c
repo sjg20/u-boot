@@ -7,7 +7,11 @@
 #include <fdt_support.h>
 #include <hang.h>
 #include <i2c.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <init.h>
+>>>>>>> 3541e855f17... common: Drop init.h from common header
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/fsl_serdes.h>

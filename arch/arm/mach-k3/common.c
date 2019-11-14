@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <cpu_func.h>
+#include <init.h>
 #include <spl.h>
 #include "common.h"
 #include <dm.h>

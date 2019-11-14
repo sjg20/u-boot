@@ -14,6 +14,7 @@
 #include <env_internal.h>
 #include <errno.h>
 #include <i2c.h>
+#include <init.h>
 #include <miiphy.h>
 #include <panel.h>
 #include <power/tps65217.h>

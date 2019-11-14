@@ -15,7 +15,11 @@
 #include <i2c.h>
 #include <i2c_eeprom.h>
 #include <env.h>
+<<<<<<< HEAD
 #include <net.h>
+=======
+#include <init.h>
+>>>>>>> 3541e855f17... common: Drop init.h from common header
 #include <linux/ctype.h>
 #include <u-boot/crc.h>
 
