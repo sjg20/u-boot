@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <asm/arch/clock.h>
 #include "qbman_portal.h"
+#include <linux/bug.h>
 
 /* QBMan portal management command codes */
 #define QBMAN_MC_ACQUIRE       0x30

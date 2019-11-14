@@ -12,6 +12,7 @@
 #include <net.h>
 #include <hwconfig.h>
 #include <phy.h>
+#include <linux/bug.h>
 #include <linux/compat.h>
 #include <fsl-mc/fsl_dpmac.h>
 

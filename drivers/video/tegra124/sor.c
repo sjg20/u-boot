@@ -15,7 +15,11 @@
 #include <asm/arch-tegra/dc.h>
 #include "displayport.h"
 #include "sor.h"
+<<<<<<< HEAD
 #include <linux/err.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 
 #define DEBUG_SOR 0
 

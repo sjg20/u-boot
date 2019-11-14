@@ -22,7 +22,11 @@
 #include <asm/system.h>
 #include <asm/mach-types.h>
 #include <asm/unaligned.h>
+<<<<<<< HEAD
 #include <dm/devres.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/compat.h>
 #include <malloc.h>
 #include <asm/io.h>

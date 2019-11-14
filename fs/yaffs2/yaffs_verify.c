@@ -16,6 +16,7 @@
 #include "yaffs_bitmap.h"
 #include "yaffs_getblockinfo.h"
 #include "yaffs_nand.h"
+#include <linux/bug.h>
 
 int yaffs_skip_verification(struct yaffs_dev *dev)
 {

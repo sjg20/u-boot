@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <getopt.h>
 #include "os_support.h"
+#include <linux/bug.h>
 
 #ifndef __packed
 #define __packed		__attribute__((packed))

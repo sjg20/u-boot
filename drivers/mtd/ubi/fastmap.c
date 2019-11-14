@@ -7,7 +7,11 @@
  */
 
 #ifndef __UBOOT__
+<<<<<<< HEAD
 #include <dm/devres.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/crc32.h>
 #include <linux/err.h>
 #include <u-boot/crc.h>

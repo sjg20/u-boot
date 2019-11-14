@@ -12,7 +12,11 @@
 #include <common.h>
 #include <malloc.h>
 #include <nand.h>
+<<<<<<< HEAD
 #include <dm/devres.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 
 #include <asm/io.h>
 #include <jffs2/jffs2.h>

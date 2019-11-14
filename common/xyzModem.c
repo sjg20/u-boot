@@ -24,6 +24,7 @@
 #include <common.h>
 #include <xyzModem.h>
 #include <stdarg.h>
+#include <linux/bug.h>
 #include <u-boot/crc.h>
 #include <watchdog.h>
 

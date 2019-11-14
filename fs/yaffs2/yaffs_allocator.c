@@ -15,7 +15,11 @@
 #include "yaffs_guts.h"
 #include "yaffs_trace.h"
 #include "yportenv.h"
+<<<<<<< HEAD
 #include <dm/devres.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 
 /*
  * Each entry in yaffs_tnode_list and yaffs_obj_list hold blocks

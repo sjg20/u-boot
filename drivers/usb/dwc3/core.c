@@ -18,9 +18,13 @@
 #include <malloc.h>
 #include <dwc3-uboot.h>
 #include <asm/dma-mapping.h>
+<<<<<<< HEAD
 #include <dm/device_compat.h>
 #include <dm/devres.h>
 #include <linux/err.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/ioport.h>
 #include <dm.h>
 #include <generic-phy.h>

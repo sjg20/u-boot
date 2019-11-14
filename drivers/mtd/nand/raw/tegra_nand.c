@@ -13,7 +13,11 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/funcmux.h>
 #include <asm/arch-tegra/clk_rst.h>
+<<<<<<< HEAD
 #include <dm/device_compat.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/errno.h>
 #include <asm/gpio.h>
 #include <fdtdec.h>

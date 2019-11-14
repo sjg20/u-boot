@@ -34,7 +34,11 @@
 #endif
 #include <malloc.h>
 #include <watchdog.h>
+<<<<<<< HEAD
 #include <dm/devres.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/err.h>
 #include <linux/compat.h>
 #include <linux/mtd/mtd.h>

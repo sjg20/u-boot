@@ -8,7 +8,11 @@
  */
 
 #include <common.h>
+<<<<<<< HEAD
 #include <malloc.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/errno.h>
 #include <asm/gpio.h>
 

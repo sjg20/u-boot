@@ -2,6 +2,7 @@
 
 #include <common.h>
 #include <exports.h>
+#include <linux/bug.h>
 
 /*
  * Author: Arun Dharankar <ADharankar@ATTBI.Com>

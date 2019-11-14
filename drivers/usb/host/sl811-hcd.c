@@ -22,6 +22,7 @@
 #include <mpc8xx.h>
 #include <usb.h>
 #include "sl811.h"
+#include <linux/bug.h>
 
 #include "../../../board/kup/common/kup.h"
 

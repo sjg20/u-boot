@@ -59,7 +59,11 @@
 
 #include <common.h>
 #include <malloc.h>
+<<<<<<< HEAD
 #include <dm/devres.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/compat.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/bbm.h>

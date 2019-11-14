@@ -36,7 +36,11 @@
 #include <asm/arch/msg.h>
 #include <asm/arch/mbox.h>
 #include <asm/unaligned.h>
+<<<<<<< HEAD
 #include <dm/device_compat.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/compat.h>
 #include <linux/io.h>
 #include <linux/iopoll.h>

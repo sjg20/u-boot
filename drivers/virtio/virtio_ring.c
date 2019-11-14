@@ -12,7 +12,11 @@
 #include <virtio_types.h>
 #include <virtio.h>
 #include <virtio_ring.h>
+<<<<<<< HEAD
 #include <linux/compat.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 
 int virtqueue_add(struct virtqueue *vq, struct virtio_sg *sgs[],
 		  unsigned int out_sgs, unsigned int in_sgs)

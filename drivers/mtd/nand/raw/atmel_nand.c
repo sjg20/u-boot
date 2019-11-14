@@ -11,14 +11,14 @@
  */
 
 #include <common.h>
+#include <malloc.h>
+#include <nand.h>
+#include <watchdog.h>
 #include <asm/gpio.h>
 #include <asm/arch/gpio.h>
 #include <dm/device_compat.h>
 #include <dm/devres.h>
-
-#include <malloc.h>
-#include <nand.h>
-#include <watchdog.h>
+#include <linux/bug.h>
 #include <linux/mtd/nand_ecc.h>
 
 #ifdef CONFIG_ATMEL_NAND_HWECC

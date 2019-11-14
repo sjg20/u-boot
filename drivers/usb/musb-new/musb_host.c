@@ -9,8 +9,12 @@
  */
 
 #ifndef __UBOOT__
+<<<<<<< HEAD
 #include <dm/device_compat.h>
 #include <dm/devres.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/delay.h>

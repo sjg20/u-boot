@@ -12,6 +12,7 @@
 
 #include <common.h>
 #include <nand.h>
+#include <linux/bug.h>
 #include <linux/mtd/nand_ecc.h>
 #include <linux/errno.h>
 #include <asm/io.h>

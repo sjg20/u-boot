@@ -17,9 +17,13 @@
 #include <memalign.h>
 #include <nand.h>
 #include <clk.h>
+<<<<<<< HEAD
 #include <dm/device_compat.h>
 #include <dm/devres.h>
 #include <linux/err.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/ioport.h>
 #include <linux/completion.h>
 #include <linux/errno.h>

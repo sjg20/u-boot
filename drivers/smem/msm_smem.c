@@ -13,7 +13,11 @@
 #include <dm/of_access.h>
 #include <dm/of_addr.h>
 #include <asm/io.h>
+<<<<<<< HEAD
 #include <linux/err.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 #include <linux/ioport.h>
 #include <linux/io.h>
 #include <smem.h>

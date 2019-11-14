@@ -25,6 +25,7 @@
 #include <asm/io.h>
 #include "integrator-sc.h"
 #include "pci_v3.h"
+#include <linux/bug.h>
 
 #define INTEGRATOR_BOOT_ROM_BASE	0x20000000
 #define INTEGRATOR_HDR0_SDRAM_BASE	0x80000000

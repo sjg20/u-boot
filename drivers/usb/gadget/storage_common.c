@@ -269,7 +269,11 @@ struct device_attribute { int i; };
 #define ETOOSMALL	525
 
 #include <usb_mass_storage.h>
+<<<<<<< HEAD
 #include <dm/device_compat.h>
+=======
+#include <linux/bug.h>
+>>>>>>> 1ce8706054d... common: Drop linux/bug.h from common header
 
 /*-------------------------------------------------------------------------*/
 

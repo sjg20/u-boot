@@ -9,7 +9,7 @@
  */
 
 #ifndef __UBOOT__
-#include <dm/devres.h>
+#include <linux/bug.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/ptrace.h>
@@ -27,6 +27,7 @@
 #include <linux/gfp.h>
 #include <linux/slab.h>
 #else
+#include <dm/devres.h>
 #include <linux/err.h>
 #include <ubi_uboot.h>
 #endif
