@@ -10,6 +10,7 @@
  */
 
 #include <common.h>
+#include <hang.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>

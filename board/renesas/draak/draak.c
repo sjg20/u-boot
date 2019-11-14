@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <hang.h>
 #include <malloc.h>
 #include <netdev.h>
 #include <dm.h>

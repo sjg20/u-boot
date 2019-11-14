@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 
+#include <hang.h>
 #include <init.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/iomux.h>

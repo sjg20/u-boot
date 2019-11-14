@@ -7,6 +7,7 @@
  *
  */
 #include <common.h>
+#include <hang.h>
 #include <spl.h>
 #include <dm.h>
 #include <miiphy.h>
