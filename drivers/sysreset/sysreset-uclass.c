@@ -9,6 +9,7 @@
 #include <common.h>
 #include <cpu_func.h>
 #include <hang.h>
+#include <log.h>
 #include <sysreset.h>
 #include <dm.h>
 #include <errno.h>
