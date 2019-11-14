@@ -7,15 +7,11 @@
  */
 
 #include <common.h>
-<<<<<<< HEAD
-#include <asm/cache.h>
-=======
-#include <part.h>
->>>>>>> 411a58868a4... common: Drop part.h from common header
-
 #include <command.h>
 #include <env.h>
 #include <env_internal.h>
+#include <part.h>
+#include <asm/cache.h>
 #include <linux/stddef.h>
 #include <malloc.h>
 #include <memalign.h>

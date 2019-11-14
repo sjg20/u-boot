@@ -11,6 +11,7 @@
 #include <efi_loader.h>
 #include <env.h>
 #include <fdt_support.h>
+#include <image.h>
 #include <linux/libfdt.h>
 #include <malloc.h>
 #include <mapmem.h>

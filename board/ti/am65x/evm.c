@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <image.h>
 #include <init.h>
 #include <net.h>
 #include <asm/arch/sys_proto.h>

@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include <bootstage.h>
+#include <image.h>
 #include <irq_func.h>
 #include <asm/cache.h>
 

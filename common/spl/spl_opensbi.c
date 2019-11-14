@@ -9,6 +9,7 @@
 #include <cpu_func.h>
 #include <errno.h>
 #include <hang.h>
+#include <image.h>
 #include <spl.h>
 #include <asm/smp.h>
 #include <opensbi.h>
