@@ -15,11 +15,13 @@
 #include <part.h>
 #include <malloc.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/byteorder.h>
 #include <asm/arch/clk.h>
 #include <asm/arch/hardware.h>
 #include "atmel_mci.h"
+#include <linux/printk.h>
 
 #ifndef CONFIG_SYS_MMC_CLK_OD
 # define CONFIG_SYS_MMC_CLK_OD	150000

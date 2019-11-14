@@ -5,6 +5,8 @@
  */
 #include <asm/io.h>
 #include <common.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/pmic.h>
 #include <power/max8997_muic.h>
 #include <power/hi6553_pmic.h>

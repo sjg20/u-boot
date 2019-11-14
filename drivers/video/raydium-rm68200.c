@@ -14,6 +14,8 @@
 #include <panel.h>
 #include <asm/gpio.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/regulator.h>
 
 /*** Manufacturer Command Set ***/

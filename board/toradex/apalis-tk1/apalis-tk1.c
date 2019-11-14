@@ -13,6 +13,8 @@
 #include <asm/arch/pinmux.h>
 #include <env_internal.h>
 #include <pci_tegra.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/as3722.h>
 #include <power/pmic.h>
 

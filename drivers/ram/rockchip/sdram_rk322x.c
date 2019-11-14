@@ -20,7 +20,9 @@
 #include <asm/arch-rockchip/uart.h>
 #include <asm/arch-rockchip/sdram.h>
 #include <asm/types.h>
+#include <linux/delay.h>
 #include <linux/err.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 struct chan_info {

@@ -9,6 +9,8 @@
 #include <rand.h>
 #include <reset.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "stm32mp1_ddr_regs.h"
 #include "stm32mp1_ddr.h"

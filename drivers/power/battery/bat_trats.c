@@ -6,6 +6,8 @@
 
 #include <common.h>
 #include <console.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/pmic.h>
 #include <power/battery.h>
 #include <power/max8997_pmic.h>

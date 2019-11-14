@@ -6,7 +6,9 @@
 #include <common.h>
 #include <spl.h>
 #include <linux/bitops.h>
+#include <linux/delay.h>
 #include <linux/io.h>
+#include <linux/printk.h>
 
 #include "../init.h"
 #include "../sc64-regs.h"

@@ -8,9 +8,11 @@
 
 #include <common.h>
 #include <lcd.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <asm/arch/dsim.h>
 #include <asm/arch/mipi_dsim.h>
+#include <linux/printk.h>
 
 #include "exynos_mipi_dsi_lowlevel.h"
 

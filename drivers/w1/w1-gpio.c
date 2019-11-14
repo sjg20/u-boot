@@ -10,6 +10,8 @@
 #include <common.h>
 #include <dm.h>
 #include <w1.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/gpio.h>
 

@@ -13,6 +13,8 @@
 #include <asm/io.h>
 #include <fs.h>
 #include <zynqpl.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/sizes.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/sys_proto.h>

@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <i2c.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <linux/bitops.h>
@@ -16,6 +17,7 @@
 #ifdef CONFIG_DM_I2C
 #include <dm.h>
 #endif
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

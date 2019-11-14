@@ -14,6 +14,8 @@
 #include <rtc.h>
 #include <asm/io.h>
 #include "mvrtc.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* This RTC does not support century, so we assume 20 */
 #define CENTURY 20

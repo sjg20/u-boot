@@ -10,6 +10,7 @@
 #include <init.h>
 #include <net.h>
 #include <spi.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <pci.h>
@@ -20,6 +21,7 @@
 #include <asm/io.h>
 #include <asm/fsl_serdes.h>
 #include <asm/fsl_mpc83xx_serdes.h>
+#include <linux/printk.h>
 
 /*
  * The following are used to control the SPI chip selects for the SPI command.

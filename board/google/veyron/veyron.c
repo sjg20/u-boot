@@ -9,7 +9,9 @@
 #include <init.h>
 #include <asm/arch-rockchip/clock.h>
 #include <dt-bindings/clock/rk3288-cru.h>
+#include <linux/delay.h>
 #include <linux/err.h>
+#include <linux/printk.h>
 #include <power/regulator.h>
 
 /*

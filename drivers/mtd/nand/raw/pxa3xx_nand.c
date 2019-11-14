@@ -14,11 +14,13 @@
 #include <asm/arch/cpu.h>
 #include <dm/device_compat.h>
 #include <dm/devres.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/bug.h>
 #include <linux/errno.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/rawnand.h>
+#include <linux/printk.h>
 #include <linux/types.h>
 
 #include "pxa3xx_nand.h"

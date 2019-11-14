@@ -19,7 +19,12 @@
 #include <image.h>
 #include <irq_func.h>
 #include <net.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <linux/delay.h>
+#include <linux/printk.h>
+>>>>>>> bec5f99924e... common: Drop linux/delay.h from common header
 #include <u-boot/crc.h>
 /* TODO: can we just include all these headers whether needed or not? */
 #if defined(CONFIG_CMD_BEDBUG)

@@ -29,7 +29,9 @@
 #include <asm/cache.h>
 #include <asm/unaligned.h>
 #include <linux/bug.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
+#include <linux/printk.h>
 #include <usb/xhci.h>
 
 #ifndef CONFIG_USB_MAX_CONTROLLER_COUNT

@@ -10,6 +10,7 @@
 #include <common.h>
 #include <display.h>
 #include <fdtdec.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <malloc.h>
 #include <video_bridge.h>
@@ -21,6 +22,7 @@
 #include <asm/arch/dp.h>
 #include <asm/arch/pinmux.h>
 #include <asm/arch/power.h>
+#include <linux/printk.h>
 
 #include "exynos_dp_lowlevel.h"
 

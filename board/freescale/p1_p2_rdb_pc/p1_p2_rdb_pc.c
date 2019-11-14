@@ -24,6 +24,7 @@
 #include <asm/fsl_lbc.h>
 #include <asm/mp.h>
 #include <miiphy.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <fsl_mdio.h>
@@ -32,6 +33,7 @@
 #include <ioports.h>
 #include <asm/fsl_serdes.h>
 #include <netdev.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_QE
 

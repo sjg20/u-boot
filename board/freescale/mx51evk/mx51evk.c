@@ -9,6 +9,7 @@
 #include <asm/gpio.h>
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/iomux-mx51.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/arch/crm_regs.h>
@@ -18,6 +19,7 @@
 #include <input.h>
 #include <mmc.h>
 #include <fsl_esdhc_imx.h>
+#include <linux/printk.h>
 #include <power/pmic.h>
 #include <fsl_pmic.h>
 #include <mc13892.h>

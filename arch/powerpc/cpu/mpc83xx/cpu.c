@@ -19,6 +19,7 @@
 #include <command.h>
 #include <mpc83xx.h>
 #include <asm/processor.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <tsec.h>
 #include <netdev.h>
@@ -27,6 +28,7 @@
 #include <linux/immap_qe.h>
 #include <asm/io.h>
 #endif
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

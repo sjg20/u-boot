@@ -16,6 +16,8 @@
 #include <asm/io.h>
 #include <asm/arch/sdmmc_defs.h>
 #include <asm-generic/gpio.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define DAVINCI_MAX_BLOCKS	(32)
 #define WATCHDOG_COUNT		(100000)

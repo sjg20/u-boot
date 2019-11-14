@@ -16,7 +16,9 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/funcmux.h>
 #include <asm/arch-tegra/timer.h>
+#include <linux/delay.h>
 #include <linux/input.h>
+#include <linux/printk.h>
 
 enum {
 	KBC_MAX_GPIO		= 24,

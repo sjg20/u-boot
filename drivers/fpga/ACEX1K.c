@@ -10,6 +10,8 @@
 #include <common.h>		/* core U-Boot definitions */
 #include <console.h>
 #include <ACEX1K.h>		/* ACEX device family */
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* Define FPGA_DEBUG to get debug printf's */
 #ifdef	FPGA_DEBUG

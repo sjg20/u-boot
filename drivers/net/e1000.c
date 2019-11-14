@@ -38,7 +38,12 @@ tested on both gig copper and gig fiber boards
 #include <net.h>
 #include <pci.h>
 #include "e1000.h"
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <linux/delay.h>
+#include <linux/printk.h>
+>>>>>>> ad95c7069dd... common: Drop linux/delay.h from common header
 
 #define TOUT_LOOP   100000
 

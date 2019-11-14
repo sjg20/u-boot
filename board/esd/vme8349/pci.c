@@ -19,6 +19,8 @@
 #include <i2c.h>
 #include <asm/fsl_i2c.h>
 #include "vme8349pin.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static struct pci_region pci1_regions[] = {
 	{

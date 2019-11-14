@@ -9,6 +9,8 @@
  * Keith Outwater, keith_outwater@mvis.com
  */
 #include <common.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/arch/imx-regs.h>
 #include <asm/gpio.h>

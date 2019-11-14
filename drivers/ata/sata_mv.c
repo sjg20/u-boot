@@ -43,9 +43,11 @@
 #include <libata.h>
 #include <malloc.h>
 #include <sata.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <linux/mbus.h>
+#include <linux/printk.h>
 
 #include <asm/arch/soc.h>
 #if defined(CONFIG_KIRKWOOD)

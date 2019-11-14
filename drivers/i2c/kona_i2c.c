@@ -8,10 +8,12 @@
 
 #include <common.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/arch/sysmap.h>
 #include <asm/kona-common/clk.h>
 #include <i2c.h>
+#include <linux/printk.h>
 
 /* Hardware register offsets and field defintions */
 #define CS_OFFSET				0x00000020

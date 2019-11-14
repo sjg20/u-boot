@@ -8,6 +8,8 @@
 #include <common.h>
 #include <command.h>
 #include <rtc.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* GPP Pins */
 #define DATA		0x200

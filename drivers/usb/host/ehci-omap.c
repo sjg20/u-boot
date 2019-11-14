@@ -12,6 +12,8 @@
 
 #include <common.h>
 #include <usb.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <usb/ulpi.h>
 #include <errno.h>
 #include <asm/io.h>

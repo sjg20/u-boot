@@ -18,6 +18,8 @@
 #include <malloc.h>
 #include <dwc3-uboot.h>
 #include <asm/dma-mapping.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 <<<<<<< HEAD
 #include <dm/device_compat.h>
 #include <dm/devres.h>

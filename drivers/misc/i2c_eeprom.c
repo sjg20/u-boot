@@ -5,12 +5,14 @@
 
 #include <common.h>
 #include <eeprom.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/kernel.h>
 #include <dm.h>
 #include <dm/device-internal.h>
 #include <i2c.h>
 #include <i2c_eeprom.h>
+#include <linux/printk.h>
 
 struct i2c_eeprom_drv_data {
 	u32 size; /* size in bytes */

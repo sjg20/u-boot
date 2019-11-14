@@ -12,6 +12,7 @@
 #include <common.h>
 #include <net.h>
 #include <malloc.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/immap_qe.h>
 #include <asm/io.h>
@@ -21,6 +22,7 @@
 #include "miiphy.h"
 #include <fsl_qe.h>
 #include <phy.h>
+#include <linux/printk.h>
 
 #define ugphy_printk(format, arg...)  \
 	printf(format "\n", ## arg)

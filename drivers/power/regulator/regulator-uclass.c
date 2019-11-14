@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <dm.h>
 #include <dm/uclass-internal.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/pmic.h>
 #include <power/regulator.h>
 

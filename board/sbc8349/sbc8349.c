@@ -17,8 +17,10 @@
 #include <spd_sdram.h>
 #include <miiphy.h>
 #if defined(CONFIG_OF_LIBFDT)
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #endif
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

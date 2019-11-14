@@ -17,12 +17,14 @@
 #include <errno.h>
 #include <spi.h>
 #include <time.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/arch-rockchip/clock.h>
 #include <asm/arch-rockchip/periph.h>
 #include <dm/pinctrl.h>
 #include "rk_spi.h"
+#include <linux/printk.h>
 
 /* Change to 1 to output registers at the start of each transaction */
 #define DEBUG_RK_SPI	0

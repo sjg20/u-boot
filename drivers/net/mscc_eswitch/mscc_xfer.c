@@ -3,8 +3,10 @@
  * Copyright (c) 2018 Microsemi Corporation
  */
 
+#include <linux/delay.h>
 #include <linux/io.h>
 #include "mscc_xfer.h"
+#include <linux/printk.h>
 
 #define QS_XTR_FLUSH_FLUSH		GENMASK(1, 0)
 #define QS_INJ_CTRL_GAP_SIZE(x)		((x) << 21)

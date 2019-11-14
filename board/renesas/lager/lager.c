@@ -20,6 +20,7 @@
 #include <asm/processor.h>
 #include <asm/mach-types.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/gpio.h>
@@ -31,6 +32,7 @@
 #include <i2c.h>
 #include <mmc.h>
 #include "qos.h"
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

@@ -8,6 +8,8 @@
 #include <config.h>
 #include <net.h>
 #include <netdev.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_MCF547x_8x
 #include <asm/fsl_mcdmafec.h>

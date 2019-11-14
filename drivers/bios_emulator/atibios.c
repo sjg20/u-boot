@@ -51,6 +51,8 @@
 #include <malloc.h>
 #include <vbe.h>
 #include "biosemui.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* Length of the BIOS image */
 #define MAX_BIOSLEN	    (128 * 1024L)

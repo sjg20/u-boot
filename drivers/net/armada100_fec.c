@@ -16,11 +16,13 @@
 #include <netdev.h>
 #include <asm/types.h>
 #include <asm/byteorder.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/mii.h>
 #include <asm/io.h>
 #include <asm/arch/armada100.h>
 #include "armada100_fec.h"
+#include <linux/printk.h>
 
 #define  PHY_ADR_REQ     0xFF	/* Magic number to read/write PHY address */
 

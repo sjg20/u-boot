@@ -29,6 +29,8 @@
 #include <net.h>
 #include <malloc.h>
 #include "cs8900.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #undef DEBUG
 

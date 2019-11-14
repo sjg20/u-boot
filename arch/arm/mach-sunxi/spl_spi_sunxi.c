@@ -7,7 +7,9 @@
 #include <spl.h>
 #include <asm/gpio.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_SPL_OS_BOOT
 #error CONFIG_SPL_OS_BOOT is not supported yet

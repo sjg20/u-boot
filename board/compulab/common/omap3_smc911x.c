@@ -7,6 +7,8 @@
 
 #include <common.h>
 #include <netdev.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/io.h>
 #include <linux/errno.h>

@@ -10,6 +10,8 @@
 #include <asm/processor.h>
 #include <asm/io.h>
 #include <asm/global_data.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "mpc8308.h"
 #include <gdsys_fpga.h>

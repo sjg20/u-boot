@@ -10,6 +10,8 @@
 #include <div64.h>
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/clock.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static struct pit_reg *cur_pit = (struct pit_reg *)PIT_BASE_ADDR;
 

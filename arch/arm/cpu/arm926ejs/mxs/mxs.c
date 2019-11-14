@@ -14,6 +14,7 @@
 #include <hang.h>
 #include <init.h>
 #include <net.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
@@ -23,6 +24,7 @@
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/sys_proto.h>
 #include <linux/compiler.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

@@ -23,6 +23,7 @@
 #include <watchdog.h>
 #include <asm/io.h>
 #include <linux/compiler.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

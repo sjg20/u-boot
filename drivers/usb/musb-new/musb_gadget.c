@@ -11,6 +11,7 @@
 #ifndef __UBOOT__
 #include <linux/kernel.h>
 #include <linux/list.h>
+#include <linux/printk.h>
 #include <linux/timer.h>
 #include <linux/module.h>
 #include <linux/smp.h>

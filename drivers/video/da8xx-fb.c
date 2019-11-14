@@ -16,8 +16,10 @@
 #include <malloc.h>
 #include <memalign.h>
 #include <video_fb.h>
+#include <linux/delay.h>
 #include <linux/list.h>
 #include <linux/fb.h>
+#include <linux/printk.h>
 
 #include <linux/errno.h>
 #include <asm/io.h>

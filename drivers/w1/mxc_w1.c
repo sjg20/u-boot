@@ -21,8 +21,10 @@
 #include <common.h>
 #include <dm.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/io.h>
 #include <w1.h>
+#include <linux/printk.h>
 
 struct mxc_w1_regs {
 	u16 control;

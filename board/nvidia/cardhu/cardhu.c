@@ -12,6 +12,8 @@
 #include <asm/gpio.h>
 #include "pinmux-config-cardhu.h"
 #include <i2c.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define PMU_I2C_ADDRESS		0x2D
 #define MAX_I2C_RETRY		3

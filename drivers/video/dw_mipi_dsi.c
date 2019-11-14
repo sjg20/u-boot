@@ -20,8 +20,10 @@
 #include <asm/arch/gpio.h>
 #include <dm/device-internal.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/iopoll.h>
 #include <video_bridge.h>
+#include <linux/printk.h>
 
 #define HWVER_131			0x31333100	/* IP version 1.31 */
 

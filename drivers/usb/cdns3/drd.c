@@ -15,6 +15,7 @@
 #include <linux/delay.h>
 #include <linux/iopoll.h>
 #include <linux/kernel.h>
+#include <linux/printk.h>
 #include <linux/usb/otg.h>
 
 #include "gadget.h"

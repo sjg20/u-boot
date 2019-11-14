@@ -16,6 +16,8 @@
 #include <asm/io.h>
 #include <pci.h>
 #include <miiphy.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* some kernel function compatible define */
 

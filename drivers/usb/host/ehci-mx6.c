@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <wait_bit.h>
 #include <linux/compiler.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <usb/ehci-ci.h>
 #include <asm/io.h>
 #include <asm/arch/imx-regs.h>

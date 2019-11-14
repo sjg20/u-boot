@@ -14,6 +14,8 @@
 #include <pci.h>
 #include <miiphy.h>
 #include "pch_gbe.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #if !defined(CONFIG_PHYLIB)
 # error "PCH Gigabit Ethernet driver requires PHYLIB - missing CONFIG_PHYLIB"

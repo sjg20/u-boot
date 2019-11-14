@@ -19,8 +19,10 @@
 #include <log.h>
 #include <spi.h>
 #include <tpm-v2.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/compiler.h>
+#include <linux/printk.h>
 #include <linux/types.h>
 #include <linux/unaligned/be_byteshift.h>
 #include <asm-generic/gpio.h>

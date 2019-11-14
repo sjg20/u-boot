@@ -15,6 +15,8 @@
 #include <asm/gpio.h>
 #include "maxim_codec.h"
 #include "max98090.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /*
  * Sets hw params for max98090

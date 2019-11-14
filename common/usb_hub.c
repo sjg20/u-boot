@@ -31,12 +31,14 @@
 #include <asm/processor.h>
 #include <asm/unaligned.h>
 #include <linux/ctype.h>
+#include <linux/delay.h>
 #include <linux/list.h>
 #include <asm/byteorder.h>
 #ifdef CONFIG_SANDBOX
 #include <asm/state.h>
 #endif
 #include <asm/unaligned.h>
+#include <linux/printk.h>
 
 #include <usb.h>
 

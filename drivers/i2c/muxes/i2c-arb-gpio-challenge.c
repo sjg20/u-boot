@@ -10,6 +10,8 @@
 #include <i2c.h>
 #include <malloc.h>
 #include <asm/gpio.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

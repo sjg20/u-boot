@@ -12,6 +12,8 @@
 #include <malloc.h>
 #include <reset-uclass.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define MAX_RESETS	32
 

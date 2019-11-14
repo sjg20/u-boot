@@ -6,6 +6,8 @@
 
 #include "regulator_common.h"
 #include <common.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/regulator.h>
 
 int regulator_common_ofdata_to_platdata(struct udevice *dev,

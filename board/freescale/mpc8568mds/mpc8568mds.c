@@ -18,8 +18,10 @@
 #include <spd_sdram.h>
 #include <i2c.h>
 #include <ioports.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
+#include <linux/printk.h>
 
 #include "bcsr.h"
 

@@ -14,7 +14,9 @@
 #include <asm/gpio.h>
 #include <asm/io.h>
 #include <asm/arch-tegra/tegra_mmc.h>
+#include <linux/delay.h>
 #include <linux/err.h>
+#include <linux/printk.h>
 
 struct tegra_mmc_plat {
 	struct mmc_config cfg;

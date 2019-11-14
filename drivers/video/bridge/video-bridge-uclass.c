@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <edid.h>
 #include <video_bridge.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 int video_bridge_set_backlight(struct udevice *dev, int percent)
 {

@@ -18,6 +18,8 @@
 #include <asm/arch/i2c_defs.h>
 #include <asm/io.h>
 #include "davinci_i2c.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_DM_I2C
 /* Information about i2c controller */

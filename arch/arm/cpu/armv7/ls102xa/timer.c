@@ -10,6 +10,8 @@
 #include <div64.h>
 #include <asm/arch/immap_ls102xa.h>
 #include <asm/arch/clock.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

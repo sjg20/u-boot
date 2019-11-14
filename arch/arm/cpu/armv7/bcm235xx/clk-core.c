@@ -11,11 +11,13 @@
 
 #include <common.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <bitfield.h>
 #include <asm/arch/sysmap.h>
 #include <asm/kona-common/clk.h>
 #include "clk-core.h"
+#include <linux/printk.h>
 
 #define CLK_WR_ACCESS_PASSWORD	0x00a5a501
 #define WR_ACCESS_OFFSET	0	/* common to all clock blocks */

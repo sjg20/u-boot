@@ -17,6 +17,8 @@
 #include <asm/arch/mipi_dsim.h>
 #include <asm/arch/watchdog.h>
 #include <asm/arch/power.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/pmic.h>
 #include <usb/dwc2_udc.h>
 #include <power/max8997_pmic.h>

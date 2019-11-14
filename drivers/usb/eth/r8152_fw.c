@@ -8,6 +8,8 @@
 #include <errno.h>
 #include "usb_ether.h"
 #include "r8152.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static u8 r8152b_pla_patch_a[] = {
 	0x08, 0xe0, 0x40, 0xe0, 0x78, 0xe0, 0x85, 0xe0,

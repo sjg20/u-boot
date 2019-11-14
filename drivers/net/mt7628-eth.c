@@ -24,7 +24,9 @@
 #include <asm/cache.h>
 #include <asm/io.h>
 #include <linux/bitfield.h>
+#include <linux/delay.h>
 #include <linux/err.h>
+#include <linux/printk.h>
 
 /* Ethernet frame engine register */
 #define PDMA_RELATED		0x0800

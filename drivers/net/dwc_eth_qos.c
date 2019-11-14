@@ -42,6 +42,8 @@
 #include <asm/cache.h>
 #include <asm/gpio.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* Core registers */
 

@@ -10,6 +10,7 @@
 #include <linux/bitops.h>
 #include <linux/delay.h>
 #include <misc.h>
+#include <linux/printk.h>
 
 /* OTP Register Offsets */
 #define OTPC_SBPI_CTRL			0x0020

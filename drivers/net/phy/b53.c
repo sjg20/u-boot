@@ -23,6 +23,8 @@
  */
 
 #include <common.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <errno.h>
 #include <malloc.h>

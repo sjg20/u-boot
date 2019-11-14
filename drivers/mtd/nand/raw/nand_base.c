@@ -34,6 +34,8 @@
 #endif
 #include <malloc.h>
 #include <watchdog.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 <<<<<<< HEAD
 #include <dm/devres.h>
 =======

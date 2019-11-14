@@ -10,11 +10,13 @@
 #include <dm/of_access.h>
 #include <dm/of_addr.h>
 #include <fdt_support.h>
+#include <linux/delay.h>
 #include <linux/io.h>
 #include <linux/ioport.h>
 #include <miiphy.h>
 #include <net.h>
 #include <wait_bit.h>
+#include <linux/printk.h>
 
 #include <dt-bindings/mscc/jr2_data.h>
 #include "mscc_xfer.h"

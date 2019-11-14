@@ -18,6 +18,8 @@
 #include <asm/armv8/mmu.h>
 #include <asm/psci.h>
 #include <linux/arm-smccc.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/psci.h>
 
 #define PMIC_REG_TO_BUS_ADDR(x) (x << 2)

@@ -10,6 +10,8 @@
  */
 
 #include <common.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "am35x.h"
 

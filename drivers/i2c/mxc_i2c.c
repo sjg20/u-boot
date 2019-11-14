@@ -17,6 +17,7 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/imx-regs.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/mach-imx/mxc_i2c.h>
 #include <asm/io.h>
@@ -25,6 +26,7 @@
 #include <dm.h>
 #include <dm/pinctrl.h>
 #include <fdtdec.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

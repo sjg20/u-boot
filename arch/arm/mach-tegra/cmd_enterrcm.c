@@ -29,6 +29,8 @@
 #include <irq_func.h>
 #include <asm/arch/tegra.h>
 #include <asm/arch-tegra/pmc.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static int do_enterrcm(cmd_tbl_t *cmdtp, int flag, int argc,
 		       char * const argv[])

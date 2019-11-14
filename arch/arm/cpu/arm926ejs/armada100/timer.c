@@ -12,6 +12,8 @@
 #include <time.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/armada100.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /*
  * Timer registers

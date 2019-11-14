@@ -11,6 +11,7 @@
 #include <init.h>
 #include <serial.h>
 #include <spl.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
@@ -27,6 +28,7 @@
 #include <bootcount.h>
 #include <watchdog.h>
 #include "common.h"
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

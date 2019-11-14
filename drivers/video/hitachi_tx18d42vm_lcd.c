@@ -7,6 +7,8 @@
 
 #include <common.h>
 #include <malloc.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/gpio.h>
 #include <errno.h>

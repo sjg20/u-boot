@@ -15,6 +15,8 @@
 #include <asm/arch-tegra/dc.h>
 #include "displayport.h"
 #include "sor.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 <<<<<<< HEAD
 #include <linux/err.h>
 =======

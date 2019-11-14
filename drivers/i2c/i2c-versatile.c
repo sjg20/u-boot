@@ -11,7 +11,9 @@
 #include <i2c.h>
 #include <asm/io.h>
 #include <clk.h>
+#include <linux/delay.h>
 #include <linux/io.h>
+#include <linux/printk.h>
 
 #define I2C_CONTROL_REG		0x00
 #define I2C_SET_REG		0x00

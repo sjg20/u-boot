@@ -8,7 +8,9 @@
 #include <asm/io.h>
 #include <asm/arch/clock_manager.h>
 #include <asm/arch/freeze_controller.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
+#include <linux/printk.h>
 
 static const struct socfpga_freeze_controller *freeze_controller_base =
 		(void *)(SOCFPGA_SYSMGR_ADDRESS + SYSMGR_FRZCTRL_ADDRESS);

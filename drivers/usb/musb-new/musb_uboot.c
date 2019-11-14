@@ -2,8 +2,10 @@
 #include <console.h>
 #include <malloc.h>
 #include <watchdog.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/errno.h>
+#include <linux/printk.h>
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 

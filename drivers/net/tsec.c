@@ -15,9 +15,11 @@
 #include <command.h>
 #include <tsec.h>
 #include <fsl_mdio.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/processor.h>
 #include <asm/io.h>
+#include <linux/printk.h>
 
 #ifndef CONFIG_DM_ETH
 /* Default initializations for TSEC controllers. */

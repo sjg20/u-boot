@@ -13,6 +13,8 @@
 #include <asm/arch-tegra/clk_rst.h>
 #include <asm/arch-tegra/pmc.h>
 #include "../cpu.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* Tegra114-specific CPU init code */
 static void enable_cpu_power_rail(void)

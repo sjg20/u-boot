@@ -8,6 +8,8 @@
 #include <usb.h>
 #include <asm/io.h>
 #include <asm/arch/imx-regs.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <usb/ehci-ci.h>
 #include <errno.h>
 

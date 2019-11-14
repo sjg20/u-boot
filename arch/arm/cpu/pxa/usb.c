@@ -5,6 +5,8 @@
  */
 
 #include <common.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #if defined(CONFIG_USB_OHCI_NEW) && defined(CONFIG_SYS_USB_OHCI_CPU_INIT)
 # if defined(CONFIG_CPU_MONAHANS) || defined(CONFIG_CPU_PXA27X)

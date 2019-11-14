@@ -10,6 +10,8 @@
 #include <asm/intel_regs.h>
 #include <asm/io.h>
 #include <asm/arch/pch.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define IOBP_RETRY 1000
 

@@ -12,8 +12,10 @@
 #include <reset.h>
 #include <spi-mem.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/iopoll.h>
 #include <linux/ioport.h>
+#include <linux/printk.h>
 #include <linux/sizes.h>
 
 struct stm32_qspi_regs {

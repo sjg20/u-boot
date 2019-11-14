@@ -18,9 +18,11 @@
 #include <config.h>
 #include <net.h>
 #include <miiphy.h>
+#include <linux/delay.h>
 #include <linux/mii.h>
 #include <asm/immap.h>
 #include <asm/fsl_mcdmafec.h>
+#include <linux/printk.h>
 
 #include "MCD_dma.h"
 

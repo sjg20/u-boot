@@ -14,6 +14,8 @@
 #include <asm/mmc.h>
 #include <spi.h>
 #include <spi_flash.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 int checkboard(void)
 {

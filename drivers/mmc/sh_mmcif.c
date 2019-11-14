@@ -14,9 +14,11 @@
 #include <dm.h>
 #include <malloc.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/compat.h>
 #include <linux/io.h>
+#include <linux/printk.h>
 #include <linux/sizes.h>
 #include "sh_mmcif.h"
 

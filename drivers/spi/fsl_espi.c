@@ -7,6 +7,8 @@
  */
 
 #include <common.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <malloc.h>
 #include <spi.h>

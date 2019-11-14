@@ -12,6 +12,8 @@
 #include <asm/fsl_law.h>
 #include <fsl_ddr_sdram.h>
 #include <asm/global_data.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

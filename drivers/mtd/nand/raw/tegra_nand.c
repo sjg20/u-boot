@@ -13,6 +13,8 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/funcmux.h>
 #include <asm/arch-tegra/clk_rst.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 <<<<<<< HEAD
 #include <dm/device_compat.h>
 =======

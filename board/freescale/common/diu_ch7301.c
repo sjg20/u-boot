@@ -12,6 +12,8 @@
 #include <common.h>
 #include <stdio_dev.h>
 #include <i2c.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define I2C_DVI_INPUT_DATA_FORMAT_REG		0x1F
 #define I2C_DVI_PLL_CHARGE_CNTL_REG		0x33

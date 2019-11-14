@@ -25,12 +25,14 @@
 #include <log.h>
 #include <malloc.h>
 #include <spi.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm-generic/gpio.h>
 #include <dm/device-internal.h>
 #include <dm/of_extra.h>
 #include <dm/uclass-internal.h>
+#include <linux/printk.h>
 
 #ifdef DEBUG_TRACE
 #define debug_trace(fmt, b...)	debug(fmt, #b)

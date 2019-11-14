@@ -18,10 +18,12 @@
 
 #include <common.h>
 #include <cpu_func.h>
+#include <linux/delay.h>
 #include <linux/io.h>
 #include <asm/cacheops.h>
 #include <asm/io.h>
 #include "mt76xx.h"
+#include <linux/printk.h>
 
 #define NUM_OF_CACHELINE	128
 #define MIN_START		6

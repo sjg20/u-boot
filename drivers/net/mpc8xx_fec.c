@@ -12,6 +12,8 @@
 #include <netdev.h>
 #include <asm/cpm_8xx.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <phy.h>
 #include <linux/mii.h>

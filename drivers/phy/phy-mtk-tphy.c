@@ -14,6 +14,8 @@
 #include <asm/io.h>
 #include <dm/device_compat.h>
 #include <dm/devres.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <dt-bindings/phy/phy.h>
 

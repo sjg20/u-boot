@@ -16,9 +16,14 @@
 #include <net.h>
 #include <netdev.h>
 #include <miiphy.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <linux/delay.h>
+>>>>>>> bec5f99924e... common: Drop linux/delay.h from common header
 #include <linux/errno.h>
 #include <asm/io.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_DM_ETH
 #include <clk.h>

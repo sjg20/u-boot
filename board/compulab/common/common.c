@@ -10,6 +10,8 @@
 #include <asm/bootm.h>
 #include <asm/gpio.h>
 #include <asm/setup.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "common.h"
 #include "eeprom.h"

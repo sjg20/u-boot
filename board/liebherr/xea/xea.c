@@ -25,12 +25,14 @@
 #include <asm/arch/iomux-mx28.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/delay.h>
 #include <linux/mii.h>
 #include <miiphy.h>
 #include <netdev.h>
 #include <errno.h>
 #include <usb.h>
 #include <serial.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_SPL_BUILD
 #include <spl.h>

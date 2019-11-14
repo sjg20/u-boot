@@ -10,9 +10,11 @@
 #include <timer.h>
 #include <asm/io.h>
 #include <asm/arch/ddr.h>
+#include <linux/delay.h>
 #include <linux/iopoll.h>
 #include "stm32mp1_ddr.h"
 #include "stm32mp1_ddr_regs.h"
+#include <linux/printk.h>
 
 #define RCC_DDRITFCR		0xD8
 

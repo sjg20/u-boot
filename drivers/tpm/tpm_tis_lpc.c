@@ -17,6 +17,8 @@
 #include <mapmem.h>
 #include <tpm-v1.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define PREFIX "lpc_tpm: "
 

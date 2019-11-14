@@ -6,6 +6,8 @@
 #include <net.h>
 #include <netdev.h>
 #include <pci.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #undef DEBUG_SROM
 #undef DEBUG_SROM2

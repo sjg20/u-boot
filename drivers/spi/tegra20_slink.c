@@ -14,6 +14,8 @@
 #include <spi.h>
 #include <fdtdec.h>
 #include "tegra_spi.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

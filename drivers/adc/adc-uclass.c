@@ -12,6 +12,8 @@
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
 #include <adc.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/regulator.h>
 
 #define ADC_UCLASS_PLATDATA_SIZE	sizeof(struct adc_uclass_platdata)

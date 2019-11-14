@@ -8,12 +8,14 @@
 #include <common.h>
 #include <init.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/crm_regs.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/iomux-mx35.h>
 #include <i2c.h>
+#include <linux/printk.h>
 #include <power/pmic.h>
 #include <fsl_pmic.h>
 #include <mc13892.h>

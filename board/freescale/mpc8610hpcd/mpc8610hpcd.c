@@ -15,10 +15,12 @@
 #include <asm/fsl_serdes.h>
 #include <i2c.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <spd_sdram.h>
 #include <netdev.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

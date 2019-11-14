@@ -8,6 +8,7 @@
 #include <common.h>
 #include <net.h>
 #include <malloc.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <linux/immap_qe.h>
@@ -17,6 +18,7 @@
 #include "miiphy.h"
 #include <fsl_qe.h>
 #include <phy.h>
+#include <linux/printk.h>
 
 /* Default UTBIPAR SMI address */
 #ifndef CONFIG_UTBIPAR_INIT_TBIPA

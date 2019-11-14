@@ -16,6 +16,8 @@
 #include <fsl_dtsec.h>
 #include <fsl_tgec.h>
 #include <fsl_memac.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "fm.h"
 

@@ -11,7 +11,9 @@
 #include <asm/io.h>
 #include <asm/arch/sys_proto.h>
 #include <errno.h>
+#include <linux/delay.h>
 #include <linux/iopoll.h>
+#include <linux/printk.h>
 
 static struct anamix_pll *ana_pll = (struct anamix_pll *)ANATOP_BASE_ADDR;
 

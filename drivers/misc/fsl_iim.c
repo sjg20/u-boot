@@ -10,12 +10,14 @@
 
 #include <common.h>
 #include <fuse.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/arch/imx-regs.h>
 #if defined(CONFIG_MX51) || defined(CONFIG_MX53)
 #include <asm/arch/clock.h>
 #endif
+#include <linux/printk.h>
 
 /* FSL IIM-specific constants */
 #define STAT_BUSY		0x80

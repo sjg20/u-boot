@@ -4,6 +4,8 @@
  */
 #include <common.h>
 #include <init.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/arch/clock.h>
 #include <asm/arch/crm_regs.h>

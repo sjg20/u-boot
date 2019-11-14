@@ -10,8 +10,10 @@
 #include <adc.h>
 #include <asm/io.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/iopoll.h>
 #include "stm32-adc-core.h"
+#include <linux/printk.h>
 
 /* STM32H7 - Registers for each ADC instance */
 #define STM32H7_ADC_ISR			0x00

@@ -23,6 +23,8 @@
 #include <usb.h>
 #include "sl811.h"
 #include <linux/bug.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "../../../board/kup/common/kup.h"
 

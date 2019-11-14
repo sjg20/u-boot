@@ -13,6 +13,8 @@
 #include <reset.h>
 #include <asm/io.h>
 #include <linux/bitops.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define OFS_U2_PHY_AC0			0x800
 #define USBPLL_FBDIV_S			16

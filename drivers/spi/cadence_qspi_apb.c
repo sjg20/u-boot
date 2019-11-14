@@ -28,12 +28,14 @@
 #include <common.h>
 #include <asm/io.h>
 #include <dma.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <wait_bit.h>
 #include <spi.h>
 #include <spi-mem.h>
 #include <malloc.h>
 #include "cadence_qspi.h"
+#include <linux/printk.h>
 
 #define CQSPI_REG_POLL_US			1 /* 1us */
 #define CQSPI_REG_RETRY				10000

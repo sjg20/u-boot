@@ -13,6 +13,7 @@
 
 #ifndef __UBOOT__
 #include <linux/bug.h>
+#include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/clk.h>
@@ -20,6 +21,7 @@
 #include <linux/io.h>
 #include <linux/platform_device.h>
 #include <linux/dma-mapping.h>
+#include <linux/printk.h>
 
 #include <plat/usb.h>
 #else

@@ -21,6 +21,8 @@
 #include <asm/mach-imx/iomux-v3.h>
 #include <fsl_esdhc_imx.h>
 #include "common.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 enum ddr_config {
 	DDR_16BIT_256MB,

@@ -8,6 +8,8 @@
 #include <asm/io.h>
 #include <asm/arch/sysmap.h>
 #include <asm/kona-common/clk.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "dwc2_udc_otg_priv.h"
 #include "bcm_udc_otg.h"

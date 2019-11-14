@@ -15,6 +15,8 @@
 #include <errno.h>
 #include <mmc.h>
 #include <part.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/regulator.h>
 #include <malloc.h>
 #include <memalign.h>

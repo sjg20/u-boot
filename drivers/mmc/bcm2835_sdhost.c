@@ -36,6 +36,8 @@
 #include <asm/arch/msg.h>
 #include <asm/arch/mbox.h>
 #include <asm/unaligned.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 <<<<<<< HEAD
 #include <dm/device_compat.h>
 =======

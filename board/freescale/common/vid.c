@@ -11,6 +11,8 @@
 #include <asm/io.h>
 #ifdef CONFIG_FSL_LSCH2
 #include <asm/arch/immap_lsch2.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #elif defined(CONFIG_FSL_LSCH3)
 #include <asm/arch/immap_lsch3.h>
 #else

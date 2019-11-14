@@ -43,6 +43,7 @@
 #include <malloc.h>
 #include <linux/mii.h>
 #include "ax88180.h"
+#include <linux/printk.h>
 
 /*
  * ===========================================================================

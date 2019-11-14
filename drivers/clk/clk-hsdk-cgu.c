@@ -14,7 +14,9 @@
 #include <div64.h>
 #include <dm.h>
 #include <linux/bug.h>
+#include <linux/delay.h>
 #include <linux/io.h>
+#include <linux/printk.h>
 
 /*
  * Synopsys ARC HSDK clock tree.

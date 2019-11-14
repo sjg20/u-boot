@@ -14,6 +14,7 @@
 #include <asm/gpio.h>
 #include <asm/io.h>
 #include <linux/delay.h>
+#include <linux/printk.h>
 
 struct mscc_bb_priv {
 	void __iomem *regs;

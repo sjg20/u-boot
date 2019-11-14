@@ -7,6 +7,8 @@
 #include <common.h>
 #include <init.h>
 #include <irq_func.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/timer.h>
 #include <asm/immap.h>

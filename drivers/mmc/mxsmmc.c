@@ -23,6 +23,7 @@
 #include <common.h>
 #include <malloc.h>
 #include <mmc.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
@@ -30,6 +31,7 @@
 #include <asm/arch/sys_proto.h>
 #include <asm/mach-imx/dma.h>
 #include <bouncebuf.h>
+#include <linux/printk.h>
 
 #define	MXSMMC_MAX_TIMEOUT	10000
 #define MXSMMC_SMALL_TRANSFER	512

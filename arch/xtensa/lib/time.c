@@ -6,6 +6,8 @@
 #include <common.h>
 #include <time.h>
 #include <asm/global_data.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/stringify.h>
 
 DECLARE_GLOBAL_DATA_PTR;

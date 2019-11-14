@@ -15,6 +15,8 @@
 #include <common.h>
 #include <console.h>
 #include <virtex2.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #if 0
 #define FPGA_DEBUG

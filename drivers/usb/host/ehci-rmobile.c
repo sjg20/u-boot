@@ -10,6 +10,8 @@
 #include <asm/io.h>
 #include <asm/arch/ehci-rmobile.h>
 #include "ehci.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #if defined(CONFIG_R8A7740)
 static u32 usb_base_address[] = {

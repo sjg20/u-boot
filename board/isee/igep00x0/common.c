@@ -7,8 +7,10 @@
 #include <asm/arch/mux.h>
 #include <asm/arch/sys_proto.h>
 #include <jffs2/load_kernel.h>
+#include <linux/delay.h>
 #include <linux/mtd/rawnand.h>
 #include "igep00x0.h"
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

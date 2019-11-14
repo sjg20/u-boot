@@ -11,6 +11,8 @@
 #include <asm/arch-rockchip/hardware.h>
 #include <asm/arch-rockchip/sdram_rk3036.h>
 #include <asm/arch-rockchip/uart.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /*
  * we can not fit the code to access the device tree in SPL

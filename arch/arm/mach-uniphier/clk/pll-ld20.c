@@ -5,6 +5,7 @@
  */
 
 #include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "../init.h"
 #include "../sc64-regs.h"

@@ -19,6 +19,8 @@
 #include <common.h>
 #include <miiphy.h>
 #include <netdev.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/sizes.h>
 #include <usb.h>
 #include <power/pmic.h>

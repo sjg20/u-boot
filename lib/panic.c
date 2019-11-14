@@ -14,6 +14,8 @@
 #if !defined(CONFIG_PANIC_HANG)
 #include <command.h>
 #endif
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static void panic_finish(void) __attribute__ ((noreturn));
 

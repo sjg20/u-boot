@@ -15,6 +15,8 @@
 #include <sound.h>
 #include <asm/io.h>
 #include <dt-bindings/sound/azalia.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /**
  * struct hda_regs - HDA registers

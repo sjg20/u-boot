@@ -13,6 +13,8 @@
 #include <netdev.h>
 #include <asm/io.h>
 #include <asm/gpio.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <mach/jz4780.h>
 #include <mach/jz4780_dram.h>
 #include <mach/jz4780_gpio.h>

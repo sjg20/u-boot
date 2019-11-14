@@ -19,7 +19,9 @@
 #include <i2c.h>
 #include <miiphy.h>
 #include <command.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
+#include <linux/printk.h>
 #include <u-boot/crc.h>
 #if defined(CONFIG_PCI)
 #include <pci.h>

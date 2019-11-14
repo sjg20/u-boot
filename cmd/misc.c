@@ -10,6 +10,8 @@
 #include <common.h>
 #include <command.h>
 #include <console.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static int do_sleep(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {

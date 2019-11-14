@@ -10,9 +10,11 @@
 #include <time.h>
 #include <dm/device_compat.h>
 #include <linux/bitfield.h>
+#include <linux/delay.h>
 #include <linux/io.h>
 #include <spi.h>
 #include <wait_bit.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

@@ -8,6 +8,8 @@
 #include <dm.h>
 #include <sysreset.h>
 #include <wait_bit.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "sysreset_mpc83xx.h"
 

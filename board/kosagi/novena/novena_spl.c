@@ -23,6 +23,8 @@
 #include <mmc.h>
 #include <fsl_esdhc_imx.h>
 #include <spl.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/arch/mx6-ddr.h>
 

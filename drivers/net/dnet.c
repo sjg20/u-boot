@@ -9,6 +9,8 @@
  */
 
 #include <common.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #ifndef CONFIG_DNET_AUTONEG_TIMEOUT
 #define CONFIG_DNET_AUTONEG_TIMEOUT	5000000	/* default value */

@@ -11,6 +11,8 @@
 #include <init.h>
 #include <mpc83xx.h>
 #include <spd_sdram.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/bitops.h>
 #include <asm/io.h>

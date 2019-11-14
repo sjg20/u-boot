@@ -23,6 +23,8 @@
 #include <netdev.h>
 #include <i2c.h>
 #include <pca953x.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

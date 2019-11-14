@@ -10,7 +10,9 @@
 #include <asm/arch/cpu.h>
 #include <asm/arch/efuse.h>
 #include <asm/arch/soc.h>
+#include <linux/delay.h>
 #include <linux/mbus.h>
+#include <linux/printk.h>
 
 #if defined(CONFIG_MVEBU_EFUSE_FAKE)
 #define DRY_RUN

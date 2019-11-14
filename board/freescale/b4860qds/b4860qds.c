@@ -15,6 +15,7 @@
 #include <linux/compiler.h>
 #include <asm/mmu.h>
 #include <asm/processor.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/cache.h>
 #include <asm/immap_85xx.h>
@@ -23,6 +24,7 @@
 #include <asm/fsl_liodn.h>
 #include <fm_eth.h>
 #include <hwconfig.h>
+#include <linux/printk.h>
 
 #include "../common/qixis.h"
 #include "../common/vsc3316_3308.h"

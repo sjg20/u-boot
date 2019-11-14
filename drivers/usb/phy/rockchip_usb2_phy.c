@@ -6,6 +6,8 @@
 #include <common.h>
 #include <hang.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "../gadget/dwc2_udc_otg_priv.h"
 

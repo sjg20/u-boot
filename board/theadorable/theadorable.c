@@ -16,10 +16,12 @@
 #include <asm/io.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/soc.h>
+#include <linux/delay.h>
 #include <linux/mbus.h>
 #ifdef CONFIG_NET
 #include <netdev.h>
 #endif
+#include <linux/printk.h>
 #include <u-boot/crc.h>
 #include "theadorable.h"
 

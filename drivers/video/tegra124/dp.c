@@ -16,6 +16,8 @@
 #include "edid.h"
 #include "sor.h"
 #include "displayport.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define DO_FAST_LINK_TRAINING		1
 

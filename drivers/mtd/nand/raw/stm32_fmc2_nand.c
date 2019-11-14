@@ -9,9 +9,11 @@
 #include <dm.h>
 #include <nand.h>
 #include <reset.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/iopoll.h>
 #include <linux/ioport.h>
+#include <linux/printk.h>
 
 /* Bad block marker length */
 #define FMC2_BBM_LEN			2

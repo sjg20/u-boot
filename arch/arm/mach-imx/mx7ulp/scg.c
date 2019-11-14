@@ -10,6 +10,8 @@
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/pcc.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 scg_p scg1_regs = (scg_p)SCG1_RBASE;
 

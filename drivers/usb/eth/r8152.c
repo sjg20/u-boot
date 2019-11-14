@@ -11,10 +11,12 @@
 #include <memalign.h>
 #include <net.h>
 #include <usb.h>
+#include <linux/delay.h>
 #include <linux/mii.h>
 #include <linux/bitops.h>
 #include "usb_ether.h"
 #include "r8152.h"
+#include <linux/printk.h>
 
 #ifndef CONFIG_DM_ETH
 /* local vars */

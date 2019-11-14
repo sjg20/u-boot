@@ -11,6 +11,8 @@
 #include <asm/arch/sys_proto.h>
 #include <asm/io.h>
 #include <asm/emif.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /**
  * Base address for EMIF instances

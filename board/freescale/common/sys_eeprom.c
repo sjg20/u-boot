@@ -12,6 +12,8 @@
 #include <i2c.h>
 #include <init.h>
 #include <linux/ctype.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <u-boot/crc.h>
 
 #ifdef CONFIG_SYS_I2C_EEPROM_CCID

@@ -16,7 +16,9 @@
 #include <bitfield.h>
 #include <dm/lists.h>
 #include <dt-bindings/clock/rk3128-cru.h>
+#include <linux/delay.h>
 #include <linux/log2.h>
+#include <linux/printk.h>
 
 enum {
 	VCO_MAX_HZ	= 2400U * 1000000,

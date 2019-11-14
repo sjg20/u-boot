@@ -21,6 +21,8 @@
 #include <i2c.h>
 #include <asm/io.h>
 #include "mv_i2c.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* All transfers are described by this data structure */
 struct mv_i2c_msg {

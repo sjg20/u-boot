@@ -19,6 +19,7 @@
 #include <asm/mach-types.h>
 #include <i2c.h>
 #include "am3517crane.h"
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

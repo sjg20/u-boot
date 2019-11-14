@@ -14,6 +14,8 @@
 #include <i2c.h>
 #include <rtc.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define RTC_RV3029_PAGE_LEN             7
 

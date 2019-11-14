@@ -7,6 +7,7 @@
 #include <common.h>
 #include <init.h>
 #include <net.h>
+#include <linux/delay.h>
 #include <linux/io.h>
 #include <miiphy.h>
 #include <netdev.h>
@@ -15,6 +16,7 @@
 #include <asm/arch/soc.h>
 #include <asm/arch/mpp.h>
 #include <asm/arch/gpio.h>
+#include <linux/printk.h>
 
 /* Note: GPIO differences between specific boards
  *

@@ -5,6 +5,8 @@
  */
 
 #include <common.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/pmic.h>
 #include <power/max17042_fg.h>
 #include <i2c.h>

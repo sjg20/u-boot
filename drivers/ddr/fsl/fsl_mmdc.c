@@ -10,6 +10,8 @@
 #include <common.h>
 #include <fsl_mmdc.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static void set_wait_for_bits_clear(void *ptr, u32 value, u32 bits)
 {

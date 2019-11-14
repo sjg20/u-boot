@@ -14,6 +14,8 @@
 #include <time.h>
 #include <asm/io.h>
 #include <faraday/fttmr010.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static ulong timestamp;
 static ulong lastdec;

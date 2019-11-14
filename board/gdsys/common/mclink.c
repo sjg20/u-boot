@@ -9,6 +9,8 @@
 #include <common.h>
 #include <asm/io.h>
 #include <errno.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <gdsys_fpga.h>
 

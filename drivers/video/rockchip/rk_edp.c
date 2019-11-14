@@ -19,6 +19,8 @@
 #include <asm/arch-rockchip/edp_rk3288.h>
 #include <asm/arch-rockchip/grf_rk3288.h>
 #include <dt-bindings/clock/rk3288-cru.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define MAX_CR_LOOP 5
 #define MAX_EQ_LOOP 5

@@ -13,6 +13,8 @@
 #include <i2c.h>
 #include "anx98xx-edp.h"
 #include "anx9804.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /**
  * anx9804_init() - Init anx9804 parallel lcd to edp bridge chip

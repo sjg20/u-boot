@@ -26,6 +26,8 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/dram.h>
 #include <asm/arch/prcm.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static const struct dram_para dram_para = {
 	.clock = CONFIG_DRAM_CLK,

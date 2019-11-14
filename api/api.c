@@ -11,6 +11,8 @@
 #include <env.h>
 #include <malloc.h>
 #include <env_internal.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/types.h>
 #include <api_public.h>
 #include <u-boot/crc.h>

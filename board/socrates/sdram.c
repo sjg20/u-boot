@@ -12,6 +12,8 @@
 #include <asm/processor.h>
 #include <asm/mmu.h>
 #include <spd_sdram.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 
 #if !defined(CONFIG_SPD_EEPROM)

@@ -34,6 +34,8 @@
 #include <net.h>
 #include <netdev.h>
 #include <usb.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <usb/ehci-ci.h>
 
 DECLARE_GLOBAL_DATA_PTR;

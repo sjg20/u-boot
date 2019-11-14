@@ -12,6 +12,8 @@
 #include <asm/arch-tegra/pmc.h>
 #include <asm/arch-tegra/tegra_i2c.h>
 #include "../cpu.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* Tegra30-specific CPU init code */
 void tegra_i2c_ll_write_addr(uint addr, uint config)

@@ -15,6 +15,7 @@
 #include <common.h>
 #include <dm.h>
 #include <fdtdec.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <malloc.h>
 #include <usb.h>
@@ -25,6 +26,7 @@
 #include <asm/gpio.h>
 #include <linux/errno.h>
 #include <linux/compat.h>
+#include <linux/printk.h>
 #include <linux/usb/dwc3.h>
 
 #include <usb/xhci.h>

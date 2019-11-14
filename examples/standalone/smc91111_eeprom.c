@@ -13,6 +13,7 @@
 #include <common.h>
 #include <exports.h>
 #include "../drivers/net/smc91111.h"
+#include <linux/printk.h>
 
 #ifndef SMC91111_EEPROM_INIT
 # define SMC91111_EEPROM_INIT()

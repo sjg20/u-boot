@@ -17,6 +17,8 @@
 #include <asm/arch-rockchip/hardware.h>
 #include <dm/lists.h>
 #include <dt-bindings/clock/rv1108-cru.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/stringify.h>
 
 DECLARE_GLOBAL_DATA_PTR;

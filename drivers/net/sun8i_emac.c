@@ -20,6 +20,7 @@
 #include <dm.h>
 #include <fdt_support.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <malloc.h>
 #include <miiphy.h>
@@ -29,6 +30,7 @@
 #if CONFIG_IS_ENABLED(DM_GPIO)
 #include <asm-generic/gpio.h>
 #endif
+#include <linux/printk.h>
 
 #define MDIO_CMD_MII_BUSY		BIT(0)
 #define MDIO_CMD_MII_WRITE		BIT(1)

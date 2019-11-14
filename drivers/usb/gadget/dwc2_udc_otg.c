@@ -23,6 +23,8 @@
 #include <generic-phy.h>
 #include <malloc.h>
 #include <reset.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 <<<<<<< HEAD
 #include <dm/device_compat.h>
 #include <dm/devres.h>

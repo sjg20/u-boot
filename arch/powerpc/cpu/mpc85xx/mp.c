@@ -15,6 +15,8 @@
 #include <asm/fsl_law.h>
 #include <fsl_ddr_sdram.h>
 #include "mp.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 u32 fsl_ddr_get_intl3r(void);

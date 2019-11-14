@@ -21,11 +21,13 @@
 
 #include <common.h>
 #include <nand.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <nand.h>
 #include <asm/arch/clk.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/printk.h>
 
 /*
  * MLC NAND controller registers.

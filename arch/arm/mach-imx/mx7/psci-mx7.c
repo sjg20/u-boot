@@ -15,6 +15,8 @@
 #include <linux/bitops.h>
 #include <common.h>
 #include <fsl_wdog.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define GPC_LPCR_A7_BSC	0x0
 #define GPC_LPCR_A7_AD		0x4

@@ -7,6 +7,8 @@
 
 #include <common.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #if defined(CONFIG_ORION5X)
 #include <asm/arch/orion5x.h>

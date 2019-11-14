@@ -8,6 +8,8 @@
 #include <asm/arch/tegra.h>
 #include <asm/arch-tegra/pmc.h>
 #include "../cpu.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static void enable_cpu_power_rail(void)
 {

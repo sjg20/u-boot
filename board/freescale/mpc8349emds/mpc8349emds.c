@@ -15,6 +15,8 @@
 #include <miiphy.h>
 #ifdef CONFIG_SYS_FSL_DDR2
 #include <fsl_ddr_sdram.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #else
 #include <spd_sdram.h>
 #endif

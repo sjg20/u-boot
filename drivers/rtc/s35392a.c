@@ -23,6 +23,8 @@
 #include <i2c.h>
 #include <linux/bitrev.h>
 #include <rtc.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define S35390A_CHIP_ADDR	0x30
 

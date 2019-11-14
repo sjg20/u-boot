@@ -15,11 +15,16 @@
 #include <errno.h>
 #include <miiphy.h>
 #include <malloc.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <linux/delay.h>
+>>>>>>> ad95c7069dd... common: Drop linux/delay.h from common header
 #include <linux/mii.h>
 #include <wait_bit.h>
 #include <asm/io.h>
 #include <asm/gpio.h>
+#include <linux/printk.h>
 
 /* Registers */
 #define RAVB_REG_CCC		0x000

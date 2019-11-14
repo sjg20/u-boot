@@ -11,6 +11,8 @@
 #include <clk.h>
 #include <dm/device-internal.h>
 #include <asm/arch/clock_manager.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_SPL_BUILD
 

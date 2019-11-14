@@ -78,6 +78,8 @@
 #include <netdev.h>
 #include <asm/io.h>
 #include <pci.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define RTL_TIMEOUT	100000
 

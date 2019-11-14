@@ -21,10 +21,12 @@
 #include <ti-usb-phy-uboot.h>
 #include <dm/device_compat.h>
 #include <dm/devres.h>
+#include <linux/delay.h>
 #include <linux/ioport.h>
 #include <asm/io.h>
 #include <asm/arch/sys_proto.h>
 #include <dm.h>
+#include <linux/printk.h>
 
 #include "linux-compat.h"
 

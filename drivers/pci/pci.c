@@ -16,6 +16,8 @@
 
 #include <common.h>
 #include <init.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <command.h>
 #include <env.h>

@@ -8,6 +8,8 @@
 #include <asm/io.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/soc.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "comphy_a3700.h"
 

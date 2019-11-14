@@ -16,6 +16,8 @@
 #include <reset.h>
 #include <asm/io.h>
 #include <dm/device.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* USBH PLL Control register */
 #define USBH_PLL_REG		0x18

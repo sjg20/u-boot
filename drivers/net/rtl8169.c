@@ -52,6 +52,8 @@
 #include <asm/cache.h>
 #include <asm/io.h>
 #include <pci.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #undef DEBUG_RTL8169
 #undef DEBUG_RTL8169_TX

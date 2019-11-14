@@ -51,6 +51,7 @@
 #include "lan91c96.h"
 #include <net.h>
 #include <linux/compiler.h>
+#include <linux/printk.h>
 
 /*------------------------------------------------------------------------
  *

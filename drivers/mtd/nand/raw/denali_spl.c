@@ -7,8 +7,10 @@
 #include <common.h>
 #include <asm/io.h>
 #include <asm/unaligned.h>
+#include <linux/delay.h>
 #include <linux/mtd/rawnand.h>
 #include "denali.h"
+#include <linux/printk.h>
 
 #define DENALI_MAP01		(1 << 26)	/* read/write pages in PIO */
 #define DENALI_MAP10		(2 << 26)	/* high-level control plane */

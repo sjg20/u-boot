@@ -9,10 +9,12 @@
 #include <config.h>
 #include <common.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/fsl_upm.h>
 #include <nand.h>
+#include <linux/printk.h>
 
 static void fsl_upm_start_pattern(struct fsl_upm *upm, u32 pat_offset)
 {

@@ -11,10 +11,12 @@
 #include <init.h>
 #include <pci.h>
 #include <asm/fsl_pci.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <asm/fsl_serdes.h>
 #include <linux/errno.h>
+#include <linux/printk.h>
 
 #include "../common/qrio.h"
 #include "kmp204x.h"

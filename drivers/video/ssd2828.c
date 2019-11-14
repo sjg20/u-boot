@@ -14,6 +14,8 @@
 #include <mipi_display.h>
 #include <asm/arch/gpio.h>
 #include <asm/gpio.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "videomodes.h"
 #include "ssd2828.h"

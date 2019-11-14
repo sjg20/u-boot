@@ -11,6 +11,7 @@
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/iomux.h>
 #include <asm/arch/mx6-pins.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/gpio.h>
 #include <asm/mach-imx/mxc_i2c.h>
@@ -28,6 +29,7 @@
 #include <i2c.h>
 #include <input.h>
 #include <pwm.h>
+#include <linux/printk.h>
 DECLARE_GLOBAL_DATA_PTR;
 
 #define NC_PAD_CTRL (PAD_CTL_PUS_100K_UP |	\

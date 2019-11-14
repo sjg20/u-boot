@@ -11,7 +11,9 @@
 #include <usb.h>
 #include <asm/io.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/iopoll.h>
+#include <linux/printk.h>
 #include <power/regulator.h>
 
 #include "r8a66597.h"

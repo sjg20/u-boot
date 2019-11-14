@@ -16,6 +16,8 @@
 #include <asm/arch/gpio.h>
 #include <asm/gpio.h>
 #include <asm/mach-types.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "duovero_mux_data.h"
 

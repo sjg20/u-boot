@@ -21,8 +21,10 @@
 #include <dm/device-internal.h>
 #include <dm/lists.h>
 #include <dm/uclass-internal.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/log2.h>
+#include <linux/printk.h>
 #include <linux/stringify.h>
 
 enum rk3188_clk_type {

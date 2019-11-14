@@ -22,10 +22,12 @@
 #include <spd_sdram.h>
 #include <i2c.h>
 #include <ioports.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <fsl_esdhc.h>
 #include <phy.h>
+#include <linux/printk.h>
 
 #include "bcsr.h"
 #if defined(CONFIG_PQ_MDS_PIB)

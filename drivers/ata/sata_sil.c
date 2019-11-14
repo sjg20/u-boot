@@ -16,6 +16,8 @@
 #include <sata.h>
 #include <libata.h>
 #include <sata.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #if CONFIG_IS_ENABLED(BLK)
 #include <dm.h>

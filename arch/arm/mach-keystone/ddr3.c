@@ -12,6 +12,8 @@
 #include <asm/arch/msmc.h>
 #include <asm/arch/ddr3.h>
 #include <asm/arch/psc_defs.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/ti-common/ti-edma3.h>
 

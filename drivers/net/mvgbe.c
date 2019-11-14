@@ -18,11 +18,13 @@
 #include <miiphy.h>
 #include <wait_bit.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/types.h>
 #include <asm/system.h>
 #include <asm/byteorder.h>
 #include <asm/arch/cpu.h>
+#include <linux/printk.h>
 
 #if defined(CONFIG_KIRKWOOD)
 #include <asm/arch/soc.h>

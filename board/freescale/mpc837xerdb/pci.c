@@ -8,6 +8,8 @@
 #include <mpc83xx.h>
 #include <pci.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static struct pci_region pci_regions[] = {
 	{

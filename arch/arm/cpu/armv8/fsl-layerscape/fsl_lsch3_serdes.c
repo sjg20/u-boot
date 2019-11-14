@@ -6,10 +6,12 @@
 
 #include <common.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/arch/fsl_serdes.h>
 #include <asm/arch/soc.h>
 #include <fsl-mc/ldpaa_wriop.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_SYS_FSL_SRDS_1
 static u8 serdes1_prtcl_map[SERDES_PRCTL_COUNT];

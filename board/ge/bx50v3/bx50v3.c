@@ -12,6 +12,7 @@
 #include <asm/arch/iomux.h>
 #include <asm/arch/mx6-pins.h>
 #include <env.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/libfdt.h>
 #include <asm/gpio.h>
@@ -27,6 +28,7 @@
 #include <asm/arch/crm_regs.h>
 #include <asm/io.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/printk.h>
 #include <power/regulator.h>
 #include <power/da9063_pmic.h>
 #include <input.h>

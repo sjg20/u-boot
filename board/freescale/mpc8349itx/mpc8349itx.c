@@ -18,8 +18,10 @@
 #include <spd_sdram.h>
 #include <asm/mmu.h>
 #if defined(CONFIG_OF_LIBFDT)
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #endif
+#include <linux/printk.h>
 
 #include "../../../arch/powerpc/cpu/mpc83xx/hrcw/hrcw.h"
 #include "../../../arch/powerpc/cpu/mpc83xx/elbc/elbc.h"

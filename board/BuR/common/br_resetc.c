@@ -11,6 +11,8 @@
 #include <i2c.h>
 #include <dm/uclass.h>
 #include "br_resetc.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* I2C Address of controller */
 #define	RSTCTRL_ADDR_PSOC	0x75

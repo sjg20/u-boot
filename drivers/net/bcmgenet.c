@@ -22,6 +22,7 @@
 #include <cpu_func.h>
 #include <dm.h>
 #include <fdt_support.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <malloc.h>
 #include <miiphy.h>
@@ -29,6 +30,7 @@
 #include <dm/of_access.h>
 #include <dm/ofnode.h>
 #include <linux/iopoll.h>
+#include <linux/printk.h>
 #include <linux/sizes.h>
 #include <asm/dma-mapping.h>
 #include <wait_bit.h>

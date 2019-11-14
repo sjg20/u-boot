@@ -14,6 +14,8 @@
 #include <asm/mach-imx/mxc_i2c.h>
 #include <i2c.h>
 #include <miiphy.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "platinum.h"
 

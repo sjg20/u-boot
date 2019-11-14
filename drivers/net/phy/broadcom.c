@@ -7,6 +7,8 @@
  */
 #include <common.h>
 #include <phy.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* Broadcom BCM54xx -- taken from linux sungem_phy */
 #define MIIM_BCM54xx_AUXCNTL			0x18

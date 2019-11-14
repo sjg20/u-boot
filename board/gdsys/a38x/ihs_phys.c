@@ -2,6 +2,8 @@
 #include <dm.h>
 #include <miiphy.h>
 #include <asm-generic/gpio.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "ihs_phys.h"
 #include "dt_helpers.h"

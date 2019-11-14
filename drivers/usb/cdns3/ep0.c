@@ -13,6 +13,8 @@
 #include <cpu_func.h>
 #include <asm/cache.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/usb/composite.h>
 #include <linux/iopoll.h>
 

@@ -11,10 +11,12 @@
 #include <video.h>
 #include <asm/cache.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/mbus.h>
 #include <asm/io.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/soc.h>
+#include <linux/printk.h>
 
 #define MVEBU_LCD_WIN_CONTROL(w)	(0xf000 + ((w) << 4))
 #define MVEBU_LCD_WIN_BASE(w)		(0xf004 + ((w) << 4))

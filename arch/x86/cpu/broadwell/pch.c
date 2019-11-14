@@ -23,6 +23,8 @@
 #include <asm/arch/serialio.h>
 #include <asm/arch/spi.h>
 #include <dm/uclass-internal.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define BIOS_CTRL	0xdc
 

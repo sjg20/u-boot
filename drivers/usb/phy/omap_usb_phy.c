@@ -11,10 +11,12 @@
 #include <common.h>
 #include <usb.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/omap_common.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/printk.h>
 
 #include <linux/compat.h>
 #include <linux/usb/dwc3.h>

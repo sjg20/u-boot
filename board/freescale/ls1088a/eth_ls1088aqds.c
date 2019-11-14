@@ -19,6 +19,8 @@
 #include <miiphy.h>
 #include <fsl-mc/fsl_mc.h>
 #include <fsl-mc/ldpaa_wriop.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "../common/qixis.h"
 

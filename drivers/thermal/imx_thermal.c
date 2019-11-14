@@ -15,9 +15,11 @@
 #include <dm.h>
 #include <errno.h>
 #include <malloc.h>
+#include <linux/delay.h>
 #include <linux/math64.h>
 #include <thermal.h>
 #include <imx_thermal.h>
+#include <linux/printk.h>
 
 /* board will busyloop until this many degrees C below CPU max temperature */
 #define TEMPERATURE_HOT_DELTA   5 /* CPU maxT - 5C */

@@ -13,6 +13,7 @@
 #include <asm/fsl_mpc83xx_serdes.h>
 #include <spd_sdram.h>
 #include <tsec.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <fsl_esdhc.h>
@@ -20,6 +21,7 @@
 #include <phy.h>
 #include "pci.h"
 #include "../common/pq-mds-pib.h"
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

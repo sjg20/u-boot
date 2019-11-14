@@ -13,7 +13,9 @@
 #include <asm/io.h>
 #include <asm/gpio.h>
 #include <asm/arch/sd_emmc.h>
+#include <linux/delay.h>
 #include <linux/log2.h>
+#include <linux/printk.h>
 
 static inline void *get_regbase(const struct mmc *mmc)
 {

@@ -37,6 +37,8 @@
 #include <asm/unaligned.h>
 #include <errno.h>
 #include <usb.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define USB_BUFSIZ	512
 

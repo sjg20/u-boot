@@ -26,6 +26,8 @@
 #include <asm/io.h>
 #include <asm/arch/timer_defs.h>
 #include <div64.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

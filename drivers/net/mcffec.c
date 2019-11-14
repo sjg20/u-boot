@@ -19,7 +19,9 @@
 #include <miiphy.h>
 #include <asm/fec.h>
 #include <asm/immap.h>
+#include <linux/delay.h>
 #include <linux/mii.h>
+#include <linux/printk.h>
 
 #undef	ET_DEBUG
 #undef	MII_DEBUG

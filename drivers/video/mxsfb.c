@@ -9,10 +9,12 @@
 #include <env.h>
 #include <asm/cache.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <malloc.h>
 #include <video.h>
 #include <video_fb.h>
+#include <linux/printk.h>
 
 #include <asm/arch/clock.h>
 #include <asm/arch/imx-regs.h>

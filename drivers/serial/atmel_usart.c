@@ -14,6 +14,8 @@
 #include <serial.h>
 #include <debug_uart.h>
 #include <linux/compiler.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/io.h>
 #ifdef CONFIG_DM_SERIAL

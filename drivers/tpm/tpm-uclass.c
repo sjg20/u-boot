@@ -6,6 +6,8 @@
 
 #include <common.h>
 #include <dm.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/unaligned/be_byteshift.h>
 #include <tpm-v1.h>
 #include <tpm-v2.h>

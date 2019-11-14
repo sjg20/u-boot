@@ -20,6 +20,7 @@
 #include <asm/immap_85xx.h>
 #include <ioports.h>
 #include <flash.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <asm/io.h>
@@ -27,6 +28,7 @@
 #include <mb862xx.h>
 #include <video_fb.h>
 #include "upm_table.h"
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

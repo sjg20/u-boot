@@ -15,9 +15,11 @@
 #include <dm.h>
 #include <part.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/compat.h>
 #include <linux/io.h>
+#include <linux/printk.h>
 #include <linux/sizes.h>
 #include <asm/arch/rmobile.h>
 #include <asm/arch/sh_sdhi.h>

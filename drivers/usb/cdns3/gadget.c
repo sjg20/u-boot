@@ -59,7 +59,9 @@
 #include <dm.h>
 #include <dm/device_compat.h>
 #include <dm/devres.h>
+#include <linux/delay.h>
 #include <linux/err.h>
+#include <linux/printk.h>
 #include <linux/usb/gadget.h>
 #include <linux/compat.h>
 #include <linux/iopoll.h>

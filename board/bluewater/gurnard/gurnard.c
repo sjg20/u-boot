@@ -33,6 +33,8 @@
 #include <asm/arch/clk.h>
 #include <asm/arch/gpio.h>
 #include <dm/uclass-internal.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_GURNARD_SPLASH
 #include "splash_logo.h"

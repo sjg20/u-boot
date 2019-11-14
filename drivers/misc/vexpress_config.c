@@ -11,6 +11,7 @@
 #include <asm/io.h>
 #include <linux/delay.h>
 #include <misc.h>
+#include <linux/printk.h>
 
 #define SYS_CFGDATA		0xa0
 

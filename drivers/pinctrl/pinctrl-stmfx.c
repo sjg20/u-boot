@@ -15,6 +15,8 @@
 #include <dm/lists.h>
 #include <dm/pinctrl.h>
 #include <linux/bitfield.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <power/regulator.h>
 
 /* STMFX pins = GPIO[15:0] + aGPIO[7:0] */

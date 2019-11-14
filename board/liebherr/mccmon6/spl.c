@@ -22,6 +22,8 @@
 #include <asm/arch/sys_proto.h>
 #include <serial.h>
 #include <spl.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/arch/mx6-ddr.h>
 /*

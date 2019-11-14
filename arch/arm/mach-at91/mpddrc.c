@@ -11,6 +11,8 @@
 #include <asm/io.h>
 #include <asm/arch/atmel_mpddrc.h>
 #include <asm/arch/at91_common.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define SAMA5D3_MPDDRC_VERSION		0x140
 

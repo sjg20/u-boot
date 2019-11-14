@@ -16,6 +16,8 @@
 #include <malloc.h>
 #include <spi.h>
 #include <asm/gpio.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

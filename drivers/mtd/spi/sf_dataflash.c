@@ -14,8 +14,10 @@
 #include <spi.h>
 #include <spi_flash.h>
 #include <div64.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/math64.h>
+#include <linux/printk.h>
 
 #include "sf_internal.h"
 

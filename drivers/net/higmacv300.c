@@ -10,11 +10,13 @@
 #include <common.h>
 #include <console.h>
 #include <linux/bug.h>
+#include <linux/delay.h>
 #include <linux/mii.h>
 #include <miiphy.h>
 #include <net.h>
 #include <reset.h>
 #include <wait_bit.h>
+#include <linux/printk.h>
 
 #define STATION_ADDR_LOW		0x0000
 #define STATION_ADDR_HIGH		0x0004

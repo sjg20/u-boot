@@ -9,6 +9,7 @@
 #include <common.h>
 #include <dm.h>
 #include <fdtdec.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <malloc.h>
 #include <usb.h>
@@ -20,6 +21,7 @@
 #include <linux/errno.h>
 #include <linux/compat.h>
 #include "ehci.h"
+#include <linux/printk.h>
 
 /* Declare global data pointer */
 DECLARE_GLOBAL_DATA_PTR;

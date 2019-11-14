@@ -8,6 +8,8 @@
 #include <init.h>
 #include <malloc.h>
 #include <asm/fsl_serdes.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

@@ -32,7 +32,12 @@
 #include <asm/byteorder.h>
 #include <dm.h>
 #include <errno.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <linux/delay.h>
+#include <linux/printk.h>
+>>>>>>> ad95c7069dd... common: Drop linux/delay.h from common header
 
 #if defined(CONFIG_PCI_OHCI)
 # include <pci.h>

@@ -11,6 +11,8 @@
 
 #include <common.h>
 #include <net.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "arp.h"
 

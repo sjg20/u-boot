@@ -9,6 +9,8 @@
 #include <i2c.h>
 #include <malloc.h>
 #include <reset.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <dm/device.h>
 #include <linux/io.h>

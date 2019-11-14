@@ -9,6 +9,8 @@
 #include <asm/io.h>
 #include <asm/processor.h>
 #ifdef CONFIG_USB_EHCI_FSL
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <usb/ehci-ci.h>
 #endif
 

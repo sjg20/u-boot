@@ -18,6 +18,7 @@
 #include <asm/arch/fsl_serdes.h>
 #include <fsl-mc/fsl_mc.h>
 #include <fsl-mc/ldpaa_wriop.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

@@ -11,6 +11,8 @@
 #include <common.h>
 #include <blk.h>
 #include <cpu_func.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <command.h>
 #include <dm.h>

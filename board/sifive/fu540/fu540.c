@@ -12,6 +12,7 @@
 #include <linux/bug.h>
 #include <linux/delay.h>
 #include <linux/io.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_MISC_INIT_R
 

@@ -21,6 +21,8 @@
 #include <i2c.h>
 #include <mmc.h>
 #include <tpm-v1.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <u-boot/crc.h>
 #include <u-boot/sha1.h>
 #include <asm/byteorder.h>

@@ -27,6 +27,7 @@
 #include <malloc.h>
 #include <asm/io.h>
 #include <linux/bug.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/errno.h>
 #include <phy.h>
@@ -39,6 +40,7 @@
 #include <asm-generic/gpio.h>
 #include <fdt_support.h>
 #include <linux/mdio.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

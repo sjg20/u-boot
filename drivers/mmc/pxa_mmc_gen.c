@@ -8,10 +8,12 @@
 #include <common.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/regs-mmc.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <malloc.h>
 #include <mmc.h>
+#include <linux/printk.h>
 
 /* PXAMMC Generic default config for various CPUs */
 #if defined(CONFIG_CPU_PXA25X)

@@ -14,9 +14,11 @@
 #include <dm/device.h>
 #include <linux/bug.h>
 #include <linux/compat.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/io.h>
 #include "virtio_pci.h"
+#include <linux/printk.h>
 
 #define VIRTIO_PCI_DRV_NAME	"virtio-pci.m"
 

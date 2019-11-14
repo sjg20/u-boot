@@ -5,10 +5,12 @@
 
 #include <common.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/arch/sysmap.h>
 #include <asm/kona-common/clk.h>
 #include "clk-core.h"
+#include <linux/printk.h>
 
 #define WR_ACCESS_ADDR			ESUB_CLK_BASE_ADDR
 #define WR_ACCESS_PASSWORD				0xA5A500

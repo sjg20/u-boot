@@ -12,7 +12,9 @@
 #include <env.h>
 #include <malloc.h>
 #include <net.h>
+#include <linux/delay.h>
 #include <linux/io.h>
+#include <linux/printk.h>
 
 #include "ftmac100.h"
 #ifdef CONFIG_DM_ETH

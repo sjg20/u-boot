@@ -14,6 +14,8 @@
 #include <common.h>
 #include <init.h>
 #include <time.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/types.h>
 #include <asm/arch/ep93xx.h>
 #include <asm/io.h>

@@ -15,6 +15,8 @@
 #include <i2c.h>
 #include "pinmux-config-colibri_t30.h"
 #include "../common/tdx-common.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 int arch_misc_init(void)
 {

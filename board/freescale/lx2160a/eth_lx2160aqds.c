@@ -20,6 +20,7 @@
 #include <asm/arch/fsl_serdes.h>
 #include <fsl-mc/fsl_mc.h>
 #include <fsl-mc/ldpaa_wriop.h>
+#include <linux/printk.h>
 
 #include "../common/qixis.h"
 

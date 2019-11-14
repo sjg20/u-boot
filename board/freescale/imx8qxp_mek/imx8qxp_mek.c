@@ -8,6 +8,7 @@
 #include <env.h>
 #include <errno.h>
 #include <init.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fsl_esdhc_imx.h>
 #include <fdt_support.h>
@@ -18,6 +19,7 @@
 #include <asm/arch/imx8-pins.h>
 #include <asm/arch/iomux.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

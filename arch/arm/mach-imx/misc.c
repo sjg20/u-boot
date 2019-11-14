@@ -5,9 +5,11 @@
 
 #include <common.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/mach-imx/regs-common.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

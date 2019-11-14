@@ -6,8 +6,10 @@
 
 #include <common.h>
 #include <miiphy.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <mv88e6352.h>
+#include <linux/printk.h>
 
 #define SMI_HDR		((0x8 | 0x1) << 12)
 #define SMI_BUSY_MASK	(0x8000)

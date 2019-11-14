@@ -20,6 +20,8 @@
 #include <asm/gpio.h>
 #include <miiphy.h>
 #include <asm/mach-types.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_ARMADA100_FEC
 #include <net.h>

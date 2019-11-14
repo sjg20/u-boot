@@ -24,6 +24,8 @@
 #include <asm/mach-imx/sata.h>
 #include <asm/io.h>
 #include <env.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/sizes.h>
 #include <common.h>
 #include <miiphy.h>

@@ -11,11 +11,13 @@
 #include <common.h>
 #include <fdt_support.h>
 #include <init.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <pci.h>
 #include <mpc83xx.h>
 #include <ns16550.h>
 #include <nand.h>
+#include <linux/printk.h>
 
 #include <asm/bitops.h>
 #include <asm/io.h>

@@ -13,6 +13,8 @@
 #include <asm/arch-tegra/clk_rst.h>
 #include <spi.h>
 #include "tegra_spi.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* COMMAND1 */
 #define SPI_CMD1_GO			BIT(31)

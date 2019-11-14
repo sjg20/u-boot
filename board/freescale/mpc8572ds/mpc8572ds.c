@@ -19,11 +19,13 @@
 #include <asm/io.h>
 #include <asm/fsl_serdes.h>
 #include <miiphy.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <tsec.h>
 #include <fsl_mdio.h>
 #include <netdev.h>
+#include <linux/printk.h>
 
 #include "../common/sgmii_riser.h"
 

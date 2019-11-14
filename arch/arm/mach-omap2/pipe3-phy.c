@@ -11,8 +11,10 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include "pipe3-phy.h"
+#include <linux/printk.h>
 
 /* PLLCTRL Registers */
 #define PLL_STATUS              0x00000004

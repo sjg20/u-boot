@@ -12,6 +12,8 @@
 #include <asm/io.h>
 #include <asm/pci.h>
 #include <asm/arch/systemagent.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /*
  * Punit Initialisation code. This all isn't documented, but

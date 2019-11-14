@@ -24,6 +24,8 @@
  */
 
 #include <twl4030.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /* Defines for bits in registers */
 #define OPMODE_MASK		(3 << 3)

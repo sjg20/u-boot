@@ -8,6 +8,8 @@
 #include <rtc.h>
 #include <asm/io.h>
 #include <asm/davinci_rtc.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 int rtc_get(struct rtc_time *tmp)
 {

@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <init.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/arch/imx-regs.h>
@@ -23,6 +24,7 @@
 #include <dm.h>
 #include <imx_thermal.h>
 #include <mmc.h>
+#include <linux/printk.h>
 
 struct scu_regs {
 	u32	ctrl;

@@ -20,6 +20,7 @@
 #include <asm/arch/mmc_host_def.h>
 #include <asm/arch/mux.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/delay.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/rawnand.h>
 #include <linux/mtd/onenand.h>
@@ -27,6 +28,7 @@
 #include <mtd_node.h>
 #include <fdt_support.h>
 #include "igep00x0.h"
+#include <linux/printk.h>
 
 static const struct ns16550_platdata igep_serial = {
 	.base = OMAP34XX_UART3,

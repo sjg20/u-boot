@@ -9,6 +9,8 @@
 
 #include <common.h>
 #include <dm.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/types.h>
 #include <linux/io.h>
 #include <linux/errno.h>

@@ -11,8 +11,10 @@
 #include <usb.h>
 #include <malloc.h>
 #include <memalign.h>
+#include <linux/delay.h>
 #include <linux/mii.h>
 #include "usb_ether.h"
+#include <linux/printk.h>
 
 /* ASIX AX8817X based USB 2.0 Ethernet Devices */
 

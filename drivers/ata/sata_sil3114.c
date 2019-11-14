@@ -19,6 +19,7 @@
 #include <sata.h>
 #include <libata.h>
 #include "sata_sil3114.h"
+#include <linux/printk.h>
 
 /* Convert sectorsize to wordsize */
 #define ATA_SECTOR_WORDS (ATA_SECT_SIZE/2)

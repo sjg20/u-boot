@@ -9,6 +9,8 @@
 #include <i2s.h>
 #include <malloc.h>
 #include <sound.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define SOUND_BITS_IN_BYTE 8
 

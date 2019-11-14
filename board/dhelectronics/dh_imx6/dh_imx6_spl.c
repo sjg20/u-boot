@@ -25,6 +25,8 @@
 #include <i2c.h>
 #include <mmc.h>
 #include <spl.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define ENET_PAD_CTRL							\
 	(PAD_CTL_PUS_100K_UP | PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm |	\

@@ -14,6 +14,8 @@
 #include <asm/arch/mmc_host_def.h>
 #include <tca642x.h>
 #include <usb.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <linux/usb/gadget.h>
 #include <dwc3-uboot.h>
 #include <dwc3-omap-uboot.h>

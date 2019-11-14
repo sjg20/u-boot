@@ -23,6 +23,8 @@
 #include <asm/arch/cpu.h>
 #include <asm/arch/mpp.h>
 #include <asm/arch/gpio.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "lsxl.h"
 

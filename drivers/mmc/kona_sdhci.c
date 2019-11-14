@@ -6,8 +6,10 @@
 #include <common.h>
 #include <malloc.h>
 #include <sdhci.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/kona-common/clk.h>
+#include <linux/printk.h>
 
 #define SDHCI_CORECTRL_OFFSET		0x00008000
 #define SDHCI_CORECTRL_EN		0x01

@@ -37,6 +37,8 @@
 #include "board.h"
 #include "../common/factoryset.h"
 #include <nand.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #ifdef CONFIG_SPL_BUILD
 static struct draco_baseboard_id __attribute__((section(".data"))) settings;

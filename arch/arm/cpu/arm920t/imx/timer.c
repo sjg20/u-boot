@@ -16,6 +16,7 @@
 #include <cpu_func.h>
 #include <time.h>
 #if defined (CONFIG_IMX)
+#include <linux/printk.h>
 
 #include <asm/arch/imx-regs.h>
 

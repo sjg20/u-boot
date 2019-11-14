@@ -8,6 +8,8 @@
 #include <dm.h>
 #include <reset.h>
 #include <rng.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/io.h>
 #include <linux/iopoll.h>

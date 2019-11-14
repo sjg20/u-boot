@@ -13,6 +13,8 @@
 #include <asm/fsl_law.h>
 #include <asm/mpc85xx_gpio.h>
 #include "ddr.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

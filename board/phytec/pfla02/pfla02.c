@@ -19,6 +19,7 @@
 #include <asm/mach-imx/mxc_i2c.h>
 #include <asm/mach-imx/spi.h>
 #include <env.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/gpio.h>
 #include <mmc.h>
@@ -29,6 +30,7 @@
 #include <netdev.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/sections.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

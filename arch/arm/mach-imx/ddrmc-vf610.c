@@ -12,6 +12,8 @@
 #include <asm/arch/iomux-vf610.h>
 #include <asm/arch/ddrmc-vf610.h>
 #include "ddrmc-vf610-calibration.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 void ddrmc_setup_iomux(const iomux_v3_cfg_t *pads, int pads_count)
 {

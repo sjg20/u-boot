@@ -15,6 +15,8 @@
 #include <linux/bug.h>
 #include <linux/compat.h>
 #include <fsl-mc/fsl_dpmac.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <fsl-mc/ldpaa_wriop.h>
 #include "ldpaa_eth.h"

@@ -11,11 +11,13 @@
 #include <fdtdec.h>
 #include "mmc_private.h"
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/libfdt.h>
 #include <malloc.h>
 #include <sdhci.h>
 #include <zynqmp_tap_delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

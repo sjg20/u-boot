@@ -11,6 +11,8 @@
 #include <spi.h>
 #include <asm/io.h>
 #include "sh_spi.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static void sh_spi_write(unsigned long data, unsigned long *reg)
 {

@@ -17,7 +17,9 @@
 #include <asm/arch/misc.h>
 #include <asm/arch/reset_manager.h>
 #include <asm/arch/sdram.h>
+#include <linux/delay.h>
 #include <linux/kernel.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

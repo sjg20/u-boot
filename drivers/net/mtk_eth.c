@@ -20,10 +20,12 @@
 #include <asm/gpio.h>
 #include <asm/io.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/ioport.h>
 #include <linux/mdio.h>
 #include <linux/mii.h>
+#include <linux/printk.h>
 
 #include "mtk_eth.h"
 

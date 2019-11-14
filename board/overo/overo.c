@@ -20,6 +20,7 @@
 #include <ns16550.h>
 #include <netdev.h>
 #include <twl4030.h>
+#include <linux/delay.h>
 #include <linux/mtd/rawnand.h>
 #include <asm/io.h>
 #include <asm/arch/mmc_host_def.h>
@@ -29,6 +30,7 @@
 #include <asm/gpio.h>
 #include <asm/mach-types.h>
 #include "overo.h"
+#include <linux/printk.h>
 
 #ifdef CONFIG_USB_EHCI_HCD
 #include <usb.h>

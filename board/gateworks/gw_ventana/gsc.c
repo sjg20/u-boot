@@ -5,10 +5,12 @@
  * Author: Tim Harvey <tharvey@gateworks.com>
  */
 
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <common.h>
 #include <i2c.h>
 #include <linux/ctype.h>
+#include <linux/printk.h>
 
 #include "ventana_eeprom.h"
 #include "gsc.h"

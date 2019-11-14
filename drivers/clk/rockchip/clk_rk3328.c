@@ -17,6 +17,8 @@
 #include <asm/io.h>
 #include <dm/lists.h>
 #include <dt-bindings/clock/rk3328-cru.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 struct pll_div {
 	u32 refdiv;

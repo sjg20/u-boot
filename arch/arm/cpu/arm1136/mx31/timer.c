@@ -8,6 +8,7 @@
 #include <init.h>
 #include <asm/arch/imx-regs.h>
 #include <asm/io.h>
+#include <linux/printk.h>
 
 #define TIMER_BASE 0x53f90000 /* General purpose timer 1 */
 

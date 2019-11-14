@@ -32,6 +32,8 @@
 #include <asm/arch/emac_defs.h>
 #include <asm/io.h>
 #include "davinci_emac.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 unsigned int	emac_dbg = 0;
 #define debug_emac(fmt,args...)	if (emac_dbg) printf(fmt,##args)

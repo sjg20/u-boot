@@ -20,6 +20,8 @@
 #include <asm/utils.h>
 #include <linux/compiler.h>
 #include <asm/ti-common/ti-edma3.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static int emif1_enabled = -1, emif2_enabled = -1;
 

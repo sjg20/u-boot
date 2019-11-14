@@ -6,10 +6,12 @@
 #include <malloc.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/imx-regs.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/gpio.h>
 #include <asm/mach-imx/mxc_i2c.h>
 #include <watchdog.h>
+#include <linux/printk.h>
 
 int force_idle_bus(void *priv)
 {

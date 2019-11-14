@@ -17,6 +17,8 @@
 #include <asm/io.h>
 #include <dm/uclass.h>
 #include <wdt.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

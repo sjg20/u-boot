@@ -8,6 +8,7 @@
 #include <cpu_func.h>
 #include <errno.h>
 #include <init.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <asm/io.h>
 #include <asm/gpio.h>
@@ -16,6 +17,7 @@
 #include <asm/arch/imx8-pins.h>
 #include <asm/arch/iomux.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

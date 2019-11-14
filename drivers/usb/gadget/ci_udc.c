@@ -14,10 +14,15 @@
 #include <net.h>
 #include <malloc.h>
 #include <asm/byteorder.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <linux/delay.h>
+>>>>>>> ad95c7069dd... common: Drop linux/delay.h from common header
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/unaligned.h>
+#include <linux/printk.h>
 #include <linux/types.h>
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>

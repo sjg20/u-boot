@@ -13,6 +13,8 @@
 #include <asm/io.h>
 #include <dm.h>
 #include <dm/platform_data/serial_coldfire.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

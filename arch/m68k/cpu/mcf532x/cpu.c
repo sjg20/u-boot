@@ -15,6 +15,8 @@
 #include <watchdog.h>
 #include <command.h>
 #include <netdev.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/immap.h>
 #include <asm/io.h>

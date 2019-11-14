@@ -10,6 +10,7 @@
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/iomux.h>
 #include <asm/arch/mx6-pins.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/gpio.h>
 #include <asm/mach-imx/iomux-v3.h>
@@ -23,6 +24,7 @@
 #include <netdev.h>
 #include <miiphy.h>
 #include <micrel.h>
+#include <linux/printk.h>
 
 #include <common.h>
 #include <malloc.h>

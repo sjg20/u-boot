@@ -13,6 +13,8 @@
 #include <asm/byteorder.h>
 #include <asm/io.h>
 #include <usbdevice.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <usb/pxa27x_udc.h>
 #include <usb/udc.h>
 

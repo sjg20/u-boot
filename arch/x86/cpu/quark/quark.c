@@ -17,6 +17,8 @@
 #include <asm/arch/device.h>
 #include <asm/arch/msg_port.h>
 #include <asm/arch/quark.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static void quark_setup_mtrr(void)
 {

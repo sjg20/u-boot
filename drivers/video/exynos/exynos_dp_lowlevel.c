@@ -7,6 +7,7 @@
 
 #include <config.h>
 #include <common.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/dp_info.h>
@@ -14,6 +15,7 @@
 #include <fdtdec.h>
 #include <linux/libfdt.h>
 #include "exynos_dp_lowlevel.h"
+#include <linux/printk.h>
 
 /* Declare global data pointer */
 static void exynos_dp_enable_video_input(struct exynos_dp *dp_regs,

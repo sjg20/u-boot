@@ -21,6 +21,8 @@
 #include <malloc.h>
 #include <asm/cache.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 <<<<<<< HEAD
 #include <dm/device_compat.h>
 #include <dm/devres.h>

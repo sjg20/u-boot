@@ -8,6 +8,7 @@
 #include <i2c.h>
 #include <init.h>
 #include <net.h>
+#include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <pci.h>
@@ -16,6 +17,7 @@
 #include <asm/io.h>
 #include <asm/fsl_serdes.h>
 #include <asm/fsl_mpc83xx_serdes.h>
+#include <linux/printk.h>
 
 int checkboard(void)
 {

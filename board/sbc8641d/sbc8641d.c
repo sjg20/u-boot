@@ -22,6 +22,7 @@
 #include <asm/fsl_serdes.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

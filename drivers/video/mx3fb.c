@@ -9,6 +9,8 @@
 #include <env.h>
 #include <malloc.h>
 #include <video_fb.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/clock.h>

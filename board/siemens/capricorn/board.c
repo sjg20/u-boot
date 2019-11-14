@@ -25,6 +25,8 @@
 #include <asm/arch-imx8/clock.h>
 #endif
 #include "../common/factoryset.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define GPIO_PAD_CTRL \
 		((SC_PAD_CONFIG_NORMAL << PADRING_CONFIG_SHIFT) | \

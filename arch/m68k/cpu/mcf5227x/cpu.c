@@ -13,6 +13,8 @@
 #include <vsprintf.h>
 #include <watchdog.h>
 #include <command.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include <asm/immap.h>
 #include <asm/io.h>

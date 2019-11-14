@@ -11,6 +11,8 @@
 #include <asm/arch-rockchip/clock.h>
 #include <asm/arch-rockchip/hardware.h>
 #include <div64.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static struct rockchip_pll_rate_table rockchip_auto_table;
 

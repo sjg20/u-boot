@@ -18,6 +18,8 @@
 #include <asm/arch/crm_regs.h>
 #include <asm/mach-imx/iomux-v3.h>
 #include <asm/mach-imx/regs-usbphy.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <usb/ehci-ci.h>
 #include <linux/libfdt.h>
 #include <fdtdec.h>

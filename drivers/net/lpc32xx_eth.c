@@ -11,12 +11,14 @@
 #include <malloc.h>
 #include <miiphy.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/types.h>
 #include <asm/system.h>
 #include <asm/byteorder.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/config.h>
+#include <linux/printk.h>
 
 /*
  * Notes:

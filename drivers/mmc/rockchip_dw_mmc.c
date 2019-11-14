@@ -15,7 +15,9 @@
 #include <asm/gpio.h>
 #include <asm/arch-rockchip/clock.h>
 #include <asm/arch-rockchip/periph.h>
+#include <linux/delay.h>
 #include <linux/err.h>
+#include <linux/printk.h>
 
 struct rockchip_mmc_plat {
 #if CONFIG_IS_ENABLED(OF_PLATDATA)

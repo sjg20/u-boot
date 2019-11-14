@@ -8,6 +8,8 @@
 #include <command.h>
 #include <errno.h>
 #include <time.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 static int test_get_timer(void)
 {

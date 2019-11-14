@@ -6,6 +6,8 @@
 #include <common.h>
 #include <command.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define PWRAP_BASE		0x1000d000
 #define PWRAP_WACS2_CMD		0x9c

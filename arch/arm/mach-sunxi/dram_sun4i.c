@@ -27,6 +27,8 @@
 #include <asm/arch/dram.h>
 #include <asm/arch/timer.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define CPU_CFG_CHIP_VER(n) ((n) << 6)
 #define CPU_CFG_CHIP_VER_MASK CPU_CFG_CHIP_VER(0x3)

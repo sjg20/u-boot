@@ -10,6 +10,8 @@
 #include <dm.h>
 #include <i2c.h>
 #include <asm/gpio.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #define DEFAULT_UDELAY	5
 #define RETRIES		0

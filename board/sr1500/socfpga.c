@@ -8,6 +8,8 @@
 #include <asm/arch/reset_manager.h>
 #include <asm/gpio.h>
 #include <asm/io.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 int board_early_init_f(void)
 {

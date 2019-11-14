@@ -6,7 +6,9 @@
 
 #include <common.h>
 #include <i2c.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
+#include <linux/printk.h>
 
 /* GPIO Pin from kirkwood connected to PROGRAM_B pin of the xilinx FPGA */
 #define KM_XLX_PROGRAM_B_PIN    39

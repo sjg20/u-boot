@@ -3,6 +3,8 @@
 #include "e1000.h"
 #include <malloc.h>
 #include <linux/compiler.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /*-----------------------------------------------------------------------
  * SPI transfer

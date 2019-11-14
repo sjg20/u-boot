@@ -14,6 +14,8 @@
 #include <display.h>
 #include <dm.h>
 #include <errno.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 #include "axi.h"
 #include "logicore_dp_dpcd.h"

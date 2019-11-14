@@ -15,6 +15,8 @@
 #include <i2c.h>
 #include <errno.h>
 #include <atsha204a-i2c.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 #include <u-boot/crc.h>
 
 #define ATSHA204A_TWLO			60

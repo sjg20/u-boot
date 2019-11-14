@@ -13,6 +13,8 @@
 #include <asm/arch-tegra/pmc.h>
 #include <asm/arch-tegra/scu.h>
 #include "cpu.h"
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 int get_num_cpus(void)
 {

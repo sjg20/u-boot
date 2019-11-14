@@ -10,11 +10,13 @@
  */
 
 #include <common.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/at91_pmc.h>
 #include <asm/arch/clk.h>
+#include <linux/printk.h>
 
 #if !defined(CONFIG_AT91FAMILY)
 # error You need to define CONFIG_AT91FAMILY in your board config!

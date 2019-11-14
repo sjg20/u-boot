@@ -21,6 +21,8 @@
 #include <asm/arch-tegra/timer.h>
 #include <div64.h>
 #include <fdtdec.h>
+#include <linux/delay.h>
+#include <linux/printk.h>
 
 /*
  * Clock types that we can use as a source. The Tegra210 has muxes for the
