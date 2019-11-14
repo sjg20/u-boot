@@ -11,7 +11,11 @@
  */
 
 #include <common.h>
+<<<<<<< HEAD
 #include <blk.h>
+=======
+#include <bootstage.h>
+>>>>>>> 8405d5c6cbc... common: Drop bootstage.h from common header
 #include <command.h>
 #include <console.h>
 #include <dm.h>
