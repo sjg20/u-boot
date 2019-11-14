@@ -9,6 +9,7 @@
 #include <fdtdec.h>
 #include <init.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <wait_bit.h>
 #include <watchdog.h>
 #include <asm/cache.h>

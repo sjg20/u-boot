@@ -12,6 +12,7 @@
  */
 
 #include <common.h>
+#include <stdio.h>
 #include <asm/hardware.h>
 #include <asm/io.h>
 #include <linux/delay.h>

@@ -21,6 +21,7 @@
 #include <init.h>
 #include <malloc.h>
 #include <memalign.h>
+#include <stdio.h>
 #include <version.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

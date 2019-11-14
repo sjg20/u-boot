@@ -37,6 +37,7 @@
 #include <spl.h>
 #endif
 #include <status_led.h>
+#include <stdio.h>
 #include <sysreset.h>
 #include <timer.h>
 #include <trace.h>

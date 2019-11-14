@@ -8,6 +8,7 @@
 #include <common.h>
 #include <init.h>
 #include <spi.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/immap.h>
 #include <mmc.h>

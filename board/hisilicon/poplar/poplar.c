@@ -8,7 +8,11 @@
 #include <cpu_func.h>
 #include <dm.h>
 #include <init.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <asm/io.h>
 #include <dm/platform_data/serial_pl01x.h>
 #include <asm/arch/hi3798cv200.h>

@@ -7,6 +7,7 @@
 #include <clk.h>
 #if defined(CONFIG_DM) && defined(CONFIG_CLK)
 #include <dm.h>
+#include <stdio.h>
 #include <dm/device.h>
 #include <dm/root.h>
 #include <dm/device-internal.h>

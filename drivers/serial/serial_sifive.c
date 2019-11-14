@@ -9,6 +9,7 @@
 #include <dm.h>
 #include <errno.h>
 #include <fdtdec.h>
+#include <stdio.h>
 #include <watchdog.h>
 #include <asm/io.h>
 #include <linux/compiler.h>

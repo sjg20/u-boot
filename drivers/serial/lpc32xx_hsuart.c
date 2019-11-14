@@ -7,6 +7,7 @@
 #include <clock_legacy.h>
 #include <dm.h>
 #include <serial.h>
+#include <stdio.h>
 #include <dm/platform_data/lpc32xx_hsuart.h>
 
 #include <asm/arch/uart.h>

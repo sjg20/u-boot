@@ -6,6 +6,7 @@
 #include <common.h>
 #include <mpc83xx.h>
 #include <ioports.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/processor.h>
 #ifdef CONFIG_USB_EHCI_FSL

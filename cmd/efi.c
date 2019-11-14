@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <malloc.h>
 #include <sort.h>
+#include <stdio.h>
 
 static const char *const type_name[] = {
 	"reserved",

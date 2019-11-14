@@ -88,6 +88,7 @@
  ****************************************************************************/
 
 #include <common.h>
+#include <stdio.h>
 
 #include <kgdb.h>
 #include <command.h>

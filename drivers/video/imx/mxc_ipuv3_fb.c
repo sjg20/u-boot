@@ -11,8 +11,15 @@
  */
 
 #include <common.h>
+<<<<<<< HEAD
 #include <part.h>
+=======
+<<<<<<< HEAD
+>>>>>>> 9d4e5e0f03a... common: Drop stdio.h from common header
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <linux/errno.h>
 #include <asm/global_data.h>
 #include <linux/string.h>

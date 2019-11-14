@@ -23,6 +23,7 @@
 #ifdef CONFIG_LED_STATUS
 #include <status_led.h>
 #endif
+#include <stdio.h>
 #include <twl4030.h>
 #include <linux/mtd/rawnand.h>
 #include <asm/io.h>

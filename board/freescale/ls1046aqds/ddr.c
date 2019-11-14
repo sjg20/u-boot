@@ -9,6 +9,7 @@
 #ifdef CONFIG_FSL_DEEP_SLEEP
 #include <fsl_sleep.h>
 #endif
+#include <stdio.h>
 #include <asm/arch/clock.h>
 #include "ddr.h"
 

@@ -96,6 +96,7 @@
 #include <errno.h>
 #include <image.h>
 #include <net.h>
+#include <stdio.h>
 #include <net/fastboot.h>
 #include <net/tftp.h>
 #if defined(CONFIG_CMD_PCAP)

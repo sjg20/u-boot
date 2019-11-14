@@ -10,7 +10,11 @@
 #include <cpu_func.h>
 #include <init.h>
 #include <ns16550.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <asm/io.h>
 #include <asm/arch/msmc.h>
 #include <asm/arch/clock.h>

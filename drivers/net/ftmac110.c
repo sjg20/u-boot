@@ -10,7 +10,11 @@
 #include <command.h>
 #include <malloc.h>
 #include <net.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/dma-mapping.h>

@@ -16,6 +16,7 @@
 #if defined(CONFIG_PCI)
 #include <pci.h>
 #endif
+#include <stdio.h>
 #include <asm/mmu.h>
 #if defined(CONFIG_OF_LIBFDT)
 #include <linux/delay.h>

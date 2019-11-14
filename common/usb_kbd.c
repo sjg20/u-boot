@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <malloc.h>
 #include <memalign.h>
+#include <stdio.h>
 #include <stdio_dev.h>
 #include <watchdog.h>
 #include <asm/byteorder.h>

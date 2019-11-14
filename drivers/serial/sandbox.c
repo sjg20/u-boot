@@ -16,6 +16,7 @@
 #include <lcd.h>
 #include <os.h>
 #include <serial.h>
+#include <stdio.h>
 #include <video.h>
 #include <linux/compiler.h>
 #include <asm/state.h>

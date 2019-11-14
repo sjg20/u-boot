@@ -6,6 +6,7 @@
 #include <common.h>
 #include <console.h>
 #ifndef CONFIG_SYS_COREBOOT
+#include <stdio.h>
 #error This driver requires coreboot
 #endif
 

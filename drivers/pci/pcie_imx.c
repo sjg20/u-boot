@@ -13,6 +13,7 @@
 #include <init.h>
 #include <malloc.h>
 #include <pci.h>
+#include <stdio.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/iomux.h>
 #include <asm/arch/crm_regs.h>

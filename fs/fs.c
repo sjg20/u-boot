@@ -14,6 +14,7 @@
 #include <fat.h>
 #include <fs.h>
 #include <sandboxfs.h>
+#include <stdio.h>
 #include <ubifs_uboot.h>
 #include <btrfs.h>
 #include <asm/io.h>

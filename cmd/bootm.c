@@ -15,6 +15,7 @@
 #include <image.h>
 #include <malloc.h>
 #include <nand.h>
+#include <stdio.h>
 #include <asm/byteorder.h>
 #include <linux/ctype.h>
 #include <linux/err.h>

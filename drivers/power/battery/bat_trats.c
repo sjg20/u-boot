@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <console.h>
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <power/pmic.h>

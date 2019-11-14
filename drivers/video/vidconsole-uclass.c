@@ -8,6 +8,7 @@
  */
 
 #include <common.h>
+#include <stdio.h>
 #include <linux/ctype.h>
 #include <dm.h>
 #include <video.h>

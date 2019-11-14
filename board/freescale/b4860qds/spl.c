@@ -8,6 +8,7 @@
 #include <env.h>
 #include <env_internal.h>
 #include <init.h>
+#include <stdio.h>
 #include <asm/spl.h>
 #include <malloc.h>
 #include <ns16550.h>

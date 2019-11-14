@@ -11,6 +11,7 @@
 #ifndef CONFIG_SPL_BUILD
 #include <console.h>
 #include <fuse.h>
+#include <stdio.h>
 
 static int mfgr_fuse(void)
 {

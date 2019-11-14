@@ -13,6 +13,7 @@
 #include <env.h>
 #include <env_internal.h>
 #include <sort.h>
+#include <stdio.h>
 #include <linux/stddef.h>
 #include <search.h>
 #include <errno.h>

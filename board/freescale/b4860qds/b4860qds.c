@@ -12,6 +12,7 @@
 #include <init.h>
 #include <irq_func.h>
 #include <netdev.h>
+#include <stdio.h>
 #include <linux/compiler.h>
 #include <asm/mmu.h>
 #include <asm/processor.h>

@@ -6,6 +6,7 @@
 #include <common.h>
 #include <dm.h>
 #include <fdtdec.h>
+#include <stdio.h>
 #include <video.h>
 #include <asm/sdl.h>
 #include <asm/state.h>

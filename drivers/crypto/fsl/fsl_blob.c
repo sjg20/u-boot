@@ -9,7 +9,11 @@
 #include <malloc.h>
 #include <memalign.h>
 #include <fsl_sec.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <linux/errno.h>
 #include "jobdesc.h"
 #include "desc.h"

@@ -7,6 +7,7 @@
 #include <dm.h>
 #include <malloc.h>
 #include <spi.h>
+#include <stdio.h>
 #include <dm/device_compat.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>

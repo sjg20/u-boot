@@ -7,6 +7,7 @@
 #include <common.h>
 #include <clock_legacy.h>
 #include <command.h>
+#include <stdio.h>
 #include <linux/ctype.h>
 #include <asm/io.h>
 #include <stdio_dev.h>

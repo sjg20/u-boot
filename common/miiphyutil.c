@@ -13,6 +13,7 @@
 #include <dm.h>
 #include <miiphy.h>
 #include <phy.h>
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

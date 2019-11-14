@@ -9,7 +9,11 @@
 #include <cpu_func.h>
 #include <dm.h>
 #include <init.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <dm/device-internal.h>
 #include <dm/lists.h>
 #include <dm/uclass.h>

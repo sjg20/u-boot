@@ -6,6 +6,7 @@
 #include <image.h>
 #include "pblimage.h"
 #include "pbl_crc32.h"
+#include <stdio.h>
 #include <u-boot/crc.h>
 
 #define roundup(x, y)		((((x) + ((y) - 1)) / (y)) * (y))

@@ -11,6 +11,7 @@
 #include <common.h>
 #include <gzip.h>
 #include <spl.h>
+#include <stdio.h>
 #include <xyzModem.h>
 #include <asm/u-boot.h>
 #include <linux/libfdt.h>

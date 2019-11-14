@@ -10,6 +10,7 @@
 #include <image.h>
 #include <init.h>
 #include <spl.h>
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

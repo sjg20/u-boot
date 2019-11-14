@@ -10,6 +10,7 @@
 #include <malloc.h>
 #include <errno.h>
 #include <net.h>
+#include <stdio.h>
 #include <linux/compiler.h>
 
 #include <cavium/atf.h>

@@ -8,6 +8,7 @@
 #include <dm.h>
 #include <errno.h>
 #include <serial.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <linux/bitops.h>
 

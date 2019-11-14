@@ -17,6 +17,7 @@
 #include "../common/qixis.h"
 #include "t102xqds_qixis.h"
 #include "../common/spl.h"
+#include <stdio.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

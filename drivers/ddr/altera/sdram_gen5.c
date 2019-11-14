@@ -9,6 +9,7 @@
 #include <init.h>
 #include <ram.h>
 #include <reset.h>
+#include <stdio.h>
 #include <watchdog.h>
 #include <asm/arch/fpga_manager.h>
 #include <asm/arch/reset_manager.h>

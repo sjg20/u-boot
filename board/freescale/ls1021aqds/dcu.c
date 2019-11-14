@@ -6,6 +6,7 @@
  * FSL DCU Framebuffer driver
  */
 
+#include <stdio.h>
 #include <asm/io.h>
 #include <common.h>
 #include <fsl_dcu_fb.h>

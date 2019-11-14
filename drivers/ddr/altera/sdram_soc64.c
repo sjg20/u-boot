@@ -15,6 +15,7 @@
 #include <ram.h>
 #include <reset.h>
 #include "sdram_soc64.h"
+#include <stdio.h>
 #include <wait_bit.h>
 #include <asm/arch/firewall.h>
 #include <asm/arch/system_manager.h>

@@ -10,6 +10,7 @@
 #include <config.h>
 #include <common.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <linux/ctype.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

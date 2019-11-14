@@ -1,4 +1,5 @@
 #include "compiler.h"
+#include <stdio.h>
 
 enum {
 	MODE_GEN_INFO,

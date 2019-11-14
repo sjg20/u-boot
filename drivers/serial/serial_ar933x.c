@@ -9,6 +9,7 @@
 #include <div64.h>
 #include <errno.h>
 #include <serial.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/addrspace.h>
 #include <asm/types.h>

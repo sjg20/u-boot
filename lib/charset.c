@@ -9,6 +9,7 @@
 #include <charset.h>
 #include <capitalization.h>
 #include <malloc.h>
+#include <stdio.h>
 
 static struct capitalization_table capitalization_table[] =
 #ifdef CONFIG_EFI_UNICODE_CAPITALIZATION

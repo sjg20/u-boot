@@ -8,6 +8,7 @@
 #include <common.h>		/* core U-Boot definitions */
 #include <altera.h>
 #include <ACEX1K.h>		/* ACEX device family */
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

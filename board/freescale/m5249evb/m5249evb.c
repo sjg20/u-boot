@@ -8,6 +8,7 @@
 #include <command.h>
 #include <init.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <asm/immap.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

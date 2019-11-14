@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <hash.h>
 #include <os.h>
+#include <stdio.h>
 #include <u-boot/sha256.h>
 #include <spi.h>
 #include <asm/malloc.h>

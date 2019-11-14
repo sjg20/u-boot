@@ -69,6 +69,7 @@
 #include <env.h>
 #include <fdtdec.h>
 #include <gzip.h>
+#include <stdio.h>
 #include <version.h>
 #include <malloc.h>
 #include <video.h>

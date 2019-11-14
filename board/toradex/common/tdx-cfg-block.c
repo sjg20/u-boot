@@ -5,7 +5,11 @@
 
 #include <common.h>
 #include "tdx-cfg-block.h"
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 
 #if defined(CONFIG_TARGET_APALIS_IMX6) || \
 	defined(CONFIG_TARGET_APALIS_IMX8) || \

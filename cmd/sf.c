@@ -14,7 +14,11 @@
 #include <mapmem.h>
 #include <spi.h>
 #include <spi_flash.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <jffs2/jffs2.h>
 #include <linux/mtd/mtd.h>
 

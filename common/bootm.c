@@ -16,7 +16,11 @@
 #include <malloc.h>
 #include <mapmem.h>
 #include <net.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <asm/io.h>
 #if defined(CONFIG_CMD_USB)
 #include <usb.h>

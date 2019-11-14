@@ -6,6 +6,7 @@
 #include <common.h>
 #include <errno.h>
 #include <dm.h>
+#include <stdio.h>
 #include <dm/uclass-internal.h>
 #include <power/pmic.h>
 

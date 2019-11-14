@@ -16,6 +16,7 @@
  */
 
 #include <common.h>
+#include <stdio.h>
 #include <asm/cpm_85xx.h>
 #include <serial.h>
 #include <linux/compiler.h>

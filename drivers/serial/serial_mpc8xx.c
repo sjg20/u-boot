@@ -8,6 +8,7 @@
 #include <command.h>
 #include <dm.h>
 #include <serial.h>
+#include <stdio.h>
 #include <watchdog.h>
 #include <asm/cpm_8xx.h>
 #include <linux/compiler.h>

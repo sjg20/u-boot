@@ -11,6 +11,7 @@
 #include <init.h>
 #include <net.h>
 #include <netdev.h>
+#include <stdio.h>
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/arch/imx-regs.h>

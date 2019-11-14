@@ -9,6 +9,7 @@
 #include <miiphy.h>
 #include <net.h>
 #include <netdev.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/soc.h>

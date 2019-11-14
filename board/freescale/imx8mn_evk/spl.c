@@ -10,6 +10,7 @@
 #include <image.h>
 #include <init.h>
 #include <spl.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/mach-imx/iomux-v3.h>
 #include <asm/arch/clock.h>

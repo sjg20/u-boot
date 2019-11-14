@@ -10,6 +10,7 @@
 #include <init.h>
 #include <net.h>
 #include <pci.h>
+#include <stdio.h>
 #include <time.h>
 #include <asm/processor.h>
 #include <asm/mmu.h>

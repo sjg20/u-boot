@@ -14,6 +14,7 @@
 #include <init.h>
 #include <miiphy.h>
 #include <misc.h>
+#include <stdio.h>
 #include <tpm-v1.h>
 #include <video_osd.h>
 

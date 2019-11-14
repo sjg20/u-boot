@@ -50,6 +50,7 @@
 /* @(#) $Id$ */
 
 #include "deflate.h"
+#include <stdio.h>
 #include <u-boot/crc.h>
 
 const char deflate_copyright[] =

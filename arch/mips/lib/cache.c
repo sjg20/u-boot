@@ -6,7 +6,11 @@
 
 #include <common.h>
 #include <cpu_func.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <asm/cacheops.h>
 #ifdef CONFIG_MIPS_L2_CACHE
 #include <asm/cm.h>

@@ -5,6 +5,7 @@
 
 #ifdef USE_HOSTCC
 #include "mkimage.h"
+#include <stdio.h>
 #include <time.h>
 #else
 #include <common.h>

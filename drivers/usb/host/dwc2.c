@@ -8,6 +8,7 @@
 #include <cpu_func.h>
 #include <dm.h>
 #include <errno.h>
+#include <stdio.h>
 #include <usb.h>
 #include <malloc.h>
 #include <memalign.h>

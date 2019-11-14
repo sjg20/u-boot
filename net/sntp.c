@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <net.h>
 #include <rtc.h>
+#include <stdio.h>
 
 #include "sntp.h"
 

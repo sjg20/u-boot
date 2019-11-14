@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <stdio.h>
 #include <asm/io.h>
 
 #define pixis_base (u8 *)PIXIS_BASE

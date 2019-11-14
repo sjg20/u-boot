@@ -11,6 +11,7 @@
 
 #include <common.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <linux/types.h>
 #include <linux/list.h>
 #include <power/pmic.h>

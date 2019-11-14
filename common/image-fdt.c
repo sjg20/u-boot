@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <image.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <linux/libfdt.h>
 #include <mapmem.h>
 #include <asm/io.h>

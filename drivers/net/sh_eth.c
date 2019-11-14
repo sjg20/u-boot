@@ -17,8 +17,12 @@
 #include <netdev.h>
 #include <miiphy.h>
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include <asm/cache.h>
 =======
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <linux/delay.h>
 >>>>>>> bec5f99924e... common: Drop linux/delay.h from common header
 #include <linux/errno.h>

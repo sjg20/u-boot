@@ -20,6 +20,7 @@
 
 #include "dtc.h"
 #include <stdarg.h>
+#include <stdio.h>
 
 #ifdef TRACE_CHECKS
 #define TRACE(c, ...) \

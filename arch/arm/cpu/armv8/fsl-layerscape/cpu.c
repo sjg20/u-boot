@@ -11,6 +11,7 @@
 #include <init.h>
 #include <hang.h>
 #include <net.h>
+#include <stdio.h>
 #include <vsprintf.h>
 #include <asm/cache.h>
 #include <asm/io.h>

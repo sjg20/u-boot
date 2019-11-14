@@ -12,7 +12,11 @@
 #include <image.h>
 #include <malloc.h>
 #include <spl.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <linux/libfdt.h>
 
 DECLARE_GLOBAL_DATA_PTR;

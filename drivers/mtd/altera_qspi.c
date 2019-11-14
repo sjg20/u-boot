@@ -10,6 +10,7 @@
 #include <fdt_support.h>
 #include <flash.h>
 #include <mtd.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <linux/bitops.h>
 

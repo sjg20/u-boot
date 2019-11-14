@@ -6,6 +6,7 @@
 #include <common.h>
 #include <dm.h>
 #include <init.h>
+#include <stdio.h>
 #include <asm/arch-tegra/ap.h>
 #include <asm/gpio.h>
 #include <asm/io.h>

@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <fdtdec.h>
 #include <os.h>
+#include <stdio.h>
 #include <asm/malloc.h>
 #include <asm/state.h>
 

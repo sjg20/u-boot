@@ -10,6 +10,7 @@
 
 #include <common.h>
 #include <init.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/sys_proto.h>

@@ -12,6 +12,7 @@
 #include <reset.h>
 #include "stm32mp1_ddr.h"
 #include "stm32mp1_tests.h"
+#include <stdio.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

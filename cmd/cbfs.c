@@ -10,6 +10,7 @@
 #include <command.h>
 #include <env.h>
 #include <cbfs.h>
+#include <stdio.h>
 
 static int do_cbfs_init(cmd_tbl_t *cmdtp, int flag, int argc,
 			char *const argv[])

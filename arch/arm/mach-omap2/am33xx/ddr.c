@@ -5,7 +5,11 @@
  * Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
  */
 
+<<<<<<< HEAD
 #include <common.h>
+=======
+#include <stdio.h>
+>>>>>>> a2663cf734f... common: Drop stdio.h from common header
 #include <asm/arch/cpu.h>
 #include <asm/arch/ddr_defs.h>
 #include <asm/arch/sys_proto.h>

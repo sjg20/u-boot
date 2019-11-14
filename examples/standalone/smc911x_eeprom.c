@@ -17,7 +17,11 @@
 #include <common.h>
 #include <console.h>
 #include <exports.h>
+<<<<<<< HEAD
 #include <net.h>
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <linux/ctype.h>
 #include "../drivers/net/smc911x.h"
 

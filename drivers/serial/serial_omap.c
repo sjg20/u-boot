@@ -12,6 +12,7 @@
 #include <ns16550.h>
 #include <serial.h>
 #include <clk.h>
+#include <stdio.h>
 #include <linux/err.h>
 
 #ifndef CONFIG_SYS_NS16550_CLK

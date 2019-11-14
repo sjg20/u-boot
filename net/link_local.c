@@ -17,6 +17,7 @@
 #include <rand.h>
 #include "arp.h"
 #include "net_rand.h"
+#include <stdio.h>
 
 /* We don't need more than 32 bits of the counter */
 #define MONOTONIC_MS() ((unsigned)get_timer(0) * (1000 / CONFIG_SYS_HZ))

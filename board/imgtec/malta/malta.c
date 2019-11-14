@@ -13,6 +13,7 @@
 #include <pci_gt64120.h>
 #include <pci_msc01.h>
 #include <rtc.h>
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

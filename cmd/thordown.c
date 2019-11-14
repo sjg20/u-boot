@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <stdio.h>
 #include <thor.h>
 #include <dfu.h>
 #include <g_dnl.h>

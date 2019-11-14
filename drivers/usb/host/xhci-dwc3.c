@@ -11,6 +11,7 @@
 #include <dm.h>
 #include <fdtdec.h>
 #include <generic-phy.h>
+#include <stdio.h>
 #include <usb.h>
 #include <dwc3-uboot.h>
 #include <linux/delay.h>

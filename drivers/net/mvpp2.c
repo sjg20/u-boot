@@ -16,7 +16,11 @@
 #include <common.h>
 #include <cpu_func.h>
 #include <dm.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <dm/device-internal.h>
 #include <dm/device_compat.h>
 #include <dm/devres.h>

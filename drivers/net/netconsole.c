@@ -7,6 +7,7 @@
 #include <common.h>
 #include <command.h>
 #include <env.h>
+#include <stdio.h>
 #include <stdio_dev.h>
 #include <net.h>
 

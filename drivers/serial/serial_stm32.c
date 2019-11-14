@@ -9,6 +9,7 @@
 #include <dm.h>
 #include <reset.h>
 #include <serial.h>
+#include <stdio.h>
 #include <watchdog.h>
 #include <asm/io.h>
 #include <asm/arch/stm32.h>

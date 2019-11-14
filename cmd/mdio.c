@@ -12,6 +12,7 @@
 #include <command.h>
 #include <miiphy.h>
 #include <phy.h>
+#include <stdio.h>
 
 static char last_op[2];
 static uint last_data;

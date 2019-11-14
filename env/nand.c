@@ -17,6 +17,7 @@
 #include <command.h>
 #include <env.h>
 #include <env_internal.h>
+#include <stdio.h>
 #include <linux/stddef.h>
 #include <malloc.h>
 #include <memalign.h>

@@ -11,6 +11,7 @@
 #include <common.h>
 #include <command.h>
 #include <dm.h>
+#include <stdio.h>
 #include <dm/device-internal.h>
 #include <errno.h>
 #include <mmc.h>

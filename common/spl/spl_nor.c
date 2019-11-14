@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include <spl.h>
+#include <stdio.h>
 
 static ulong spl_nor_load_read(struct spl_load_info *load, ulong sector,
 			       ulong count, void *buf)

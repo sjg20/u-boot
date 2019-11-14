@@ -12,6 +12,7 @@
 #include <ns16550.h>
 #include <reset.h>
 #include <serial.h>
+#include <stdio.h>
 #include <watchdog.h>
 #include <linux/err.h>
 #include <linux/types.h>

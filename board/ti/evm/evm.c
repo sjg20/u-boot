@@ -18,6 +18,7 @@
 #include <ns16550.h>
 #include <netdev.h>
 #include <serial.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/arch/mem.h>
 #include <asm/arch/mux.h>

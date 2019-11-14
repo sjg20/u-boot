@@ -9,7 +9,11 @@
 #include <common.h>
 #include <cpu_func.h>
 #include <malloc.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 
 /*
  * Flush range from all levels of d-cache/unified-cache.

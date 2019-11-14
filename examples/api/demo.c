@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <env.h>
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <linux/types.h>

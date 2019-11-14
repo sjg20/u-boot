@@ -9,6 +9,7 @@
 #include <common.h>
 #include <init.h>
 #include <net.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/gpio.h>
 #include <asm/arch/imx-regs.h>

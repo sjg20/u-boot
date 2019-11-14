@@ -14,6 +14,7 @@
 #include <malloc.h>
 #include <fpga.h>
 #include <lattice.h>
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

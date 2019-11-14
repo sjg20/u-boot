@@ -15,6 +15,7 @@
 #include <init.h>
 #include <status_led.h>
 #include <bus_vcxk.h>
+#include <stdio.h>
 
 /*---------------------------------------------------------------------------*/
 

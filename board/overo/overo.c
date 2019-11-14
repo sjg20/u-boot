@@ -19,6 +19,7 @@
 #include <net.h>
 #include <ns16550.h>
 #include <netdev.h>
+#include <stdio.h>
 #include <twl4030.h>
 #include <linux/delay.h>
 #include <linux/mtd/rawnand.h>

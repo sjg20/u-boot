@@ -42,7 +42,11 @@
 #include <malloc.h>
 #include <part.h>
 #include <sparse_format.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 
 #include <linux/math64.h>
 

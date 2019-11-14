@@ -13,6 +13,7 @@
 #include <hexdump.h>
 #include <malloc.h>
 #include <search.h>
+#include <stdio.h>
 #include <linux/ctype.h>
 
 #define BS systab.boottime

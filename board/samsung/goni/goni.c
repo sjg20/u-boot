@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <init.h>
+#include <stdio.h>
 #include <asm/gpio.h>
 #include <asm/arch/mmc.h>
 #include <dm.h>

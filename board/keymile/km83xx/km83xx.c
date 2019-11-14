@@ -21,6 +21,7 @@
 #include <mpc83xx.h>
 #include <i2c.h>
 #include <miiphy.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/mmu.h>
 #include <asm/processor.h>

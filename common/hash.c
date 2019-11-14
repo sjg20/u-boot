@@ -16,7 +16,11 @@
 #include <malloc.h>
 #include <mapmem.h>
 #include <hw_sha.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> e4cec538d7b... common: Drop stdio.h from common header
 #include <asm/io.h>
 #include <linux/errno.h>
 #include <u-boot/crc.h>

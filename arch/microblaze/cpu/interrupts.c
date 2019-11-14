@@ -12,6 +12,7 @@
 #include <fdtdec.h>
 #include <irq_func.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <asm/microblaze_intc.h>
 #include <asm/asm.h>
 

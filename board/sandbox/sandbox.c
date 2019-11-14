@@ -10,6 +10,7 @@
 #include <init.h>
 #include <led.h>
 #include <os.h>
+#include <stdio.h>
 #include <asm/test.h>
 #include <asm/u-boot-sandbox.h>
 

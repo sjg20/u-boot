@@ -18,6 +18,7 @@
 #include <net.h>
 #include <exports.h>
 #include <serial.h>
+#include <stdio.h>
 #include <xyzModem.h>
 <<<<<<< HEAD
 #include <asm/cache.h>

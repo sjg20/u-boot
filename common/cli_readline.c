@@ -11,6 +11,7 @@
 #include <common.h>
 #include <bootretry.h>
 #include <cli.h>
+#include <stdio.h>
 #include <time.h>
 #include <watchdog.h>
 

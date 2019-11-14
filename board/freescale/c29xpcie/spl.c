@@ -12,6 +12,7 @@
 #include <mmc.h>
 #include <nand.h>
 #include <i2c.h>
+#include <stdio.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

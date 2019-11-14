@@ -5,6 +5,7 @@
  * Author: Tim Harvey <tharvey@gateworks.com>
  */
 
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/errno.h>
 #include <common.h>

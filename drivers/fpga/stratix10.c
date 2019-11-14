@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include <altera.h>
+#include <stdio.h>
 #include <asm/arch/mailbox_s10.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

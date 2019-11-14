@@ -12,6 +12,7 @@
 #include <malloc.h>
 #include <memalign.h>
 #include <net.h>
+#include <stdio.h>
 #include <usb.h>
 #include <asm/unaligned.h>
 #include <linux/delay.h>

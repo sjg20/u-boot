@@ -10,7 +10,11 @@
 #include <common.h>
 #include <cpu_func.h>
 #include <hang.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <asm/system.h>
 #include <asm/armv8/mmu.h>
 

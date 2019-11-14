@@ -12,6 +12,7 @@
 #include <common.h>
 #include <dm.h>
 #include <regmap.h>
+#include <stdio.h>
 #include <asm/gpio.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>

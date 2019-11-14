@@ -11,6 +11,7 @@
 #include <common.h>
 #include <fdt_support.h>
 #include <init.h>
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <pci.h>

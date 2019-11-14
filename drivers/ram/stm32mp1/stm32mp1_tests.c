@@ -5,7 +5,11 @@
 #include <common.h>
 #include <console.h>
 #include <init.h>
+<<<<<<< HEAD
 #include <rand.h>
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <watchdog.h>
 #include <asm/io.h>
 #include <linux/log2.h>

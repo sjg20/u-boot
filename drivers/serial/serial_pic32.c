@@ -8,6 +8,7 @@
 #include <dm.h>
 #include <malloc.h>
 #include <serial.h>
+#include <stdio.h>
 #include <wait_bit.h>
 #include <linux/bitops.h>
 #include <mach/pic32.h>

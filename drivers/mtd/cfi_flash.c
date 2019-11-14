@@ -24,6 +24,7 @@
 #include <fdt_support.h>
 #include <flash.h>
 #include <irq_func.h>
+#include <stdio.h>
 #include <asm/processor.h>
 #include <asm/io.h>
 #include <asm/byteorder.h>

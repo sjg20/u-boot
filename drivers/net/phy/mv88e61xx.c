@@ -30,6 +30,7 @@
  */
 
 #include <common.h>
+#include <stdio.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

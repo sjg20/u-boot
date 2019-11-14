@@ -14,7 +14,11 @@
 #include <env.h>
 #include <efi_loader.h>
 #include <net.h>
+<<<<<<< HEAD
 #include <rand.h>
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <uuid.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

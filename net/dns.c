@@ -26,6 +26,7 @@
 #include <command.h>
 #include <env.h>
 #include <net.h>
+#include <stdio.h>
 #include <asm/unaligned.h>
 
 #include "dns.h"

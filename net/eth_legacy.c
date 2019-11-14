@@ -11,6 +11,7 @@
 #include <env.h>
 #include <net.h>
 #include <phy.h>
+#include <stdio.h>
 #include <linux/bug.h>
 #include <linux/errno.h>
 #include <net/pcap.h>

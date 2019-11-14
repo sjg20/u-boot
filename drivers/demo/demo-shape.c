@@ -9,6 +9,7 @@
 #include <fdtdec.h>
 #include <malloc.h>
 #include <dm-demo.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/gpio.h>
 

@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <stdio.h>
 #include <linux/bug.h>
 #include <linux/io.h>
 #include <linux/serial_reg.h>

@@ -12,6 +12,7 @@
 #include <cpu_func.h>
 #include <net.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <linux/delay.h>
 #include <linux/errno.h>

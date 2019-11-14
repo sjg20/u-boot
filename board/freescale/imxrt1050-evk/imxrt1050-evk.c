@@ -9,6 +9,7 @@
 #include <init.h>
 #include <ram.h>
 #include <spl.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/armv7m.h>
 

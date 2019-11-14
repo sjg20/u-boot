@@ -10,6 +10,7 @@
 #include <cpu_func.h>
 #include <dm.h>
 #include <errno.h>
+#include <stdio.h>
 #include <asm/byteorder.h>
 #include <asm/cache.h>
 #include <asm/unaligned.h>

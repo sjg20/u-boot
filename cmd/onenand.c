@@ -12,6 +12,7 @@
 #include <common.h>
 #include <command.h>
 #include <malloc.h>
+#include <stdio.h>
 
 #include <linux/compat.h>
 #include <linux/mtd/mtd.h>

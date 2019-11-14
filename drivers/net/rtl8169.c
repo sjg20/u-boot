@@ -49,7 +49,11 @@
 #ifndef CONFIG_DM_ETH
 #include <netdev.h>
 #endif
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <asm/io.h>
 #include <pci.h>
 #include <linux/delay.h>

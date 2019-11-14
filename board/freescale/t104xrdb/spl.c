@@ -16,6 +16,7 @@
 #include <spi_flash.h>
 #include "../common/sleep.h"
 #include "../common/spl.h"
+#include <stdio.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <malloc.h>
 #include <serial.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/types.h>
 

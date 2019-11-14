@@ -8,6 +8,7 @@
 #include <env.h>
 #include <hang.h>
 #include <init.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/arch/crm_regs.h>
 #include <asm/arch/mx6-ddr.h>

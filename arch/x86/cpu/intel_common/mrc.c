@@ -6,6 +6,7 @@
 #include <common.h>
 #include <dm.h>
 #include <init.h>
+#include <stdio.h>
 #include <syscon.h>
 #include <asm/cpu.h>
 #include <asm/gpio.h>

@@ -6,6 +6,7 @@
 #include <common.h>
 #include <config.h>
 #include <spl.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <nand.h>
 #include <linux/libfdt_env.h>

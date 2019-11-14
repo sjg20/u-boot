@@ -7,6 +7,7 @@
 #include <common.h>
 #include <command.h>
 #include <net.h>
+#include <stdio.h>
 #include <net/tftp.h>
 #include "nfs.h"
 #include "bootp.h"

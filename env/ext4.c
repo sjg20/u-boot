@@ -20,6 +20,7 @@
 
 #include <common.h>
 #include <part.h>
+#include <stdio.h>
 
 #include <command.h>
 #include <env.h>

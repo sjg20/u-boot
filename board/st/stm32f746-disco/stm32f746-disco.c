@@ -15,6 +15,7 @@
 #include <spl.h>
 #include <splash.h>
 #include <st_logo_data.h>
+#include <stdio.h>
 #include <video.h>
 #include <asm/io.h>
 #include <asm/armv7m.h>

@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <env.h>
 #include <net.h>
+#include <stdio.h>
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
 #include <net/pcap.h>

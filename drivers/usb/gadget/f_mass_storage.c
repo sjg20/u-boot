@@ -245,6 +245,7 @@
 #include <common.h>
 #include <console.h>
 #include <g_dnl.h>
+#include <stdio.h>
 <<<<<<< HEAD
 #include <dm/devres.h>
 =======

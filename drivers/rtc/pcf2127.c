@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <i2c.h>
 #include <rtc.h>
+#include <stdio.h>
 
 #define PCF2127_REG_CTRL1	0x00
 #define PCF2127_REG_CTRL2	0x01

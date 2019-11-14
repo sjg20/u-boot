@@ -5,6 +5,7 @@
 
 #include <common.h>
 #ifdef CONFIG_PPC
+#include <stdio.h>
 #include <asm/fsl_law.h>
 #endif
 #include <div64.h>

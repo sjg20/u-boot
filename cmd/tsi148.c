@@ -10,6 +10,7 @@
 #include <common.h>
 #include <command.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <pci.h>
 

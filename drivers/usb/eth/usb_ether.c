@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <malloc.h>
 #include <net.h>
+#include <stdio.h>
 #include <usb.h>
 #include <asm/cache.h>
 #include <dm/device-internal.h>

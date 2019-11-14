@@ -14,6 +14,7 @@
 
 #include <common.h>
 #include <console.h>
+#include <stdio.h>
 #include <virtex2.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

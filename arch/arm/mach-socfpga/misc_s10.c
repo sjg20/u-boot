@@ -12,6 +12,7 @@
 #include <init.h>
 #include <miiphy.h>
 #include <netdev.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <asm/arch/reset_manager.h>
 #include <asm/arch/system_manager.h>

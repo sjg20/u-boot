@@ -5,7 +5,11 @@
 
 #include <common.h>
 #include <adc.h>
+<<<<<<< HEAD
 #include <net.h>
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <asm/arch/stm32.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/gpio.h>

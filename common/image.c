@@ -13,7 +13,11 @@
 #include <display_options.h>
 #include <env.h>
 #include <malloc.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <u-boot/crc.h>
 #include <watchdog.h>
 

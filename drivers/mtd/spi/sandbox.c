@@ -16,6 +16,7 @@
 #include <malloc.h>
 #include <spi.h>
 #include <os.h>
+#include <stdio.h>
 
 #include <spi_flash.h>
 #include "sf_internal.h"

@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <stdio.h>
 
 static int do_echo(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {

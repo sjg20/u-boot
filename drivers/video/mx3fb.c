@@ -8,6 +8,7 @@
 #include <common.h>
 #include <env.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <video_fb.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

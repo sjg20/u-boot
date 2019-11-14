@@ -8,6 +8,7 @@
 #include <init.h>
 #include <spl.h>
 #include <fsl_esdhc.h>
+#include <stdio.h>
 
 #include <asm/io.h>
 #include <asm/gpio.h>

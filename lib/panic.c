@@ -15,6 +15,7 @@
 #include <command.h>
 #endif
 #include <stdarg.h>
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

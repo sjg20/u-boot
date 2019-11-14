@@ -9,6 +9,7 @@
  */
 
 #include <common.h>
+#include <stdio.h>
 #include <usb.h>
 #include <linux/errno.h>
 #include <asm/omap_common.h>

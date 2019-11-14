@@ -9,6 +9,7 @@
 #include <common.h>
 #include <dm.h>
 #include <serial.h>
+#include <stdio.h>
 #include <asm/io.h>
 #include <linux/bitops.h>
 

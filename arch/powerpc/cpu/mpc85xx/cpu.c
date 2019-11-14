@@ -14,6 +14,7 @@
 #include <display_options.h>
 #include <init.h>
 #include <irq_func.h>
+#include <stdio.h>
 #include <time.h>
 #include <vsprintf.h>
 #include <watchdog.h>

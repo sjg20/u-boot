@@ -8,6 +8,7 @@
 #include <malloc.h>
 #include <mmc.h>
 #include "mmc_private.h"
+#include <stdio.h>
 
 static struct list_head mmc_devices;
 static int cur_dev_num = -1;

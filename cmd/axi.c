@@ -15,6 +15,7 @@
 #include <console.h>
 #include <display_options.h>
 #include <dm.h>
+#include <stdio.h>
 
 /* Currently selected AXI bus device */
 static struct udevice *axi_cur_bus;

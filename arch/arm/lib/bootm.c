@@ -17,6 +17,7 @@
 #include <cpu_func.h>
 #include <dm.h>
 #include <hang.h>
+#include <stdio.h>
 #include <dm/root.h>
 #include <env.h>
 #include <image.h>

@@ -11,6 +11,7 @@
 #include <i2c.h>
 #include <init.h>
 #include <spi.h>
+#include <stdio.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/libfdt.h>

@@ -17,6 +17,7 @@
 #include <hang.h>
 #include <init.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #include <asm/arch/sys_proto.h>
 #include <asm/cache.h>

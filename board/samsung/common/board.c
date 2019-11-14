@@ -12,6 +12,7 @@
 #include <init.h>
 #include <net.h>
 #include <spi.h>
+#include <stdio.h>
 #include <tmu.h>
 #include <netdev.h>
 #include <asm/io.h>

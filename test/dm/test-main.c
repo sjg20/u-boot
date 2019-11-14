@@ -9,6 +9,7 @@
 #include <dm.h>
 #include <errno.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <asm/state.h>
 #include <dm/test.h>
 #include <dm/root.h>

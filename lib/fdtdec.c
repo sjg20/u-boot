@@ -12,6 +12,7 @@
 #include <init.h>
 #include <malloc.h>
 #include <net.h>
+#include <stdio.h>
 #include <dm/of_extra.h>
 #include <env.h>
 #include <errno.h>

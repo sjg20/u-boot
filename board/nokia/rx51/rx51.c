@@ -24,6 +24,7 @@
 #include <common.h>
 #include <env.h>
 #include <init.h>
+#include <stdio.h>
 #include <watchdog.h>
 #include <malloc.h>
 #include <twl4030.h>

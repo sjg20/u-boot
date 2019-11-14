@@ -20,6 +20,7 @@
 
 #include "dtc.h"
 #include "srcpos.h"
+#include <stdio.h>
 
 extern FILE *yyin;
 extern int yyparse(void);

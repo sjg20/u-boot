@@ -11,6 +11,7 @@
 #include <command.h>
 #include <env.h>
 #include <net.h>
+#include <stdio.h>
 #include <vsprintf.h>
 #include <asm/cache.h>
 #include <linux/compiler.h>

@@ -12,6 +12,7 @@
 #include <cpu_func.h>
 #include <env.h>
 #include <init.h>
+#include <stdio.h>
 #include <watchdog.h>
 #include <command.h>
 #include <image.h>

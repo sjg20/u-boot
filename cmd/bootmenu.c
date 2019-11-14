@@ -8,6 +8,7 @@
 #include <ansi.h>
 #include <env.h>
 #include <menu.h>
+#include <stdio.h>
 #include <watchdog.h>
 #include <malloc.h>
 #include <linux/delay.h>

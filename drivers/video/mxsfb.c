@@ -7,7 +7,11 @@
 #include <common.h>
 #include <dm.h>
 #include <env.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <dm/device_compat.h>
 #include <linux/delay.h>
 #include <linux/errno.h>

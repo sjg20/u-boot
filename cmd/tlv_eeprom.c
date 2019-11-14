@@ -19,7 +19,11 @@
 #include <net.h>
 =======
 #include <init.h>
+<<<<<<< HEAD
 >>>>>>> 3541e855f17... common: Drop init.h from common header
+=======
+#include <stdio.h>
+>>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <linux/ctype.h>
 #include <u-boot/crc.h>
 

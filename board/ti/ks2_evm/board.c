@@ -14,6 +14,7 @@
 #include <spl.h>
 #include <exports.h>
 #include <fdt_support.h>
+#include <stdio.h>
 #include <asm/arch/ddr3.h>
 #include <asm/arch/psc_defs.h>
 #include <asm/arch/clock.h>

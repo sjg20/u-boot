@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include <serial.h>
+#include <stdio.h>
 
 #ifndef CONFIG_TPL_BUILD
 

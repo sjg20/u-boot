@@ -18,7 +18,11 @@
 #include <net.h>
 #include <pci.h>
 #include <reset.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <dm/device_compat.h>
 #include <dm/devres.h>
 #include <linux/compiler.h>

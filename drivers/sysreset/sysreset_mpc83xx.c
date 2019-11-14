@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <stdio.h>
 #include <sysreset.h>
 #include <wait_bit.h>
 #include <linux/delay.h>

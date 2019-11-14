@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <malloc.h>
 #include <serial.h>
+#include <stdio.h>
 #include <watchdog.h>
 #include <asm/io.h>
 #include <linux/compiler.h>

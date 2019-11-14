@@ -21,6 +21,7 @@
 #include <fs.h>
 #include <i2c.h>
 #include <mmc.h>
+#include <stdio.h>
 #include <tpm-v1.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

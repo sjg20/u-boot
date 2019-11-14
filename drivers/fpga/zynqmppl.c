@@ -8,6 +8,7 @@
 #include <console.h>
 #include <common.h>
 #include <cpu_func.h>
+#include <stdio.h>
 #include <zynqmppl.h>
 #include <zynqmp_firmware.h>
 <<<<<<< HEAD

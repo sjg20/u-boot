@@ -5,7 +5,11 @@
  * Author: Tim Harvey <tharvey@gateworks.com>
  */
 
+<<<<<<< HEAD
 #include <common.h>
+=======
+#include <stdio.h>
+>>>>>>> a2663cf734f... common: Drop stdio.h from common header
 #include <asm/arch/clock.h>
 #include <asm/arch/mx6-pins.h>
 #include <asm/arch/sys_proto.h>

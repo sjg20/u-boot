@@ -22,7 +22,11 @@
 #include <common.h>
 #include <bootstage.h>
 #include <image.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <linux/mtd/mtd.h>
 #include <command.h>
 #include <console.h>

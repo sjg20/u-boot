@@ -13,7 +13,11 @@
 #include "jr.h"
 #include "fsl_hash.h"
 #include <hw_sha.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <linux/errno.h>
 
 #define CRYPTO_MAX_ALG_NAME	80

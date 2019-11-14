@@ -8,6 +8,7 @@
 #include <config.h>
 #include <nand.h>
 #include <onenand_uboot.h>
+#include <stdio.h>
 #include <ubispl.h>
 #include <spl.h>
 

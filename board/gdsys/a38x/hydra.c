@@ -1,5 +1,6 @@
 #include <common.h>
 #include <console.h> /* ctrlc */
+#include <stdio.h>
 #include <asm/io.h>
 
 #include "hydra.h"

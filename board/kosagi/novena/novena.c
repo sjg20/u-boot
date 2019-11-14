@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <eeprom.h>
 #include <init.h>
+#include <stdio.h>
 #include <dm/device-internal.h>
 #include <ahci.h>
 #include <env.h>

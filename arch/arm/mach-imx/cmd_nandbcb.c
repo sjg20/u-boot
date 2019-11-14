@@ -12,6 +12,7 @@
 #include <common.h>
 #include <malloc.h>
 #include <nand.h>
+#include <stdio.h>
 #include <linux/bitops.h>
 <<<<<<< HEAD
 #include <dm/devres.h>

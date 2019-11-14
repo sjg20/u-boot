@@ -9,7 +9,11 @@
 #include <common.h>
 #include <console.h>
 #include <cpu_func.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <stdio.h>
+>>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 #include <asm/io.h>
 #include <fs.h>
 #include <zynqpl.h>

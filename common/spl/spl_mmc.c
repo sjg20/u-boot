@@ -9,6 +9,7 @@
 #include <dm.h>
 #include <part.h>
 #include <spl.h>
+#include <stdio.h>
 #include <linux/compiler.h>
 #include <errno.h>
 #include <asm/u-boot.h>

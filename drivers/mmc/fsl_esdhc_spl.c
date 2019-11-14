@@ -8,6 +8,7 @@
 #include <hang.h>
 #include <mmc.h>
 #include <malloc.h>
+#include <stdio.h>
 
 /*
  * The environment variables are written to just after the u-boot image

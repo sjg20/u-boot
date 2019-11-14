@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include <debug_uart.h>
+#include <stdio.h>
 #include <linux/io.h>
 #include <linux/serial_reg.h>
 

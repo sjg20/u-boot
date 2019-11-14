@@ -19,6 +19,7 @@
 #include <i2c.h>
 #include <miiphy.h>
 #include <command.h>
+#include <stdio.h>
 #include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <linux/printk.h>
