@@ -13,7 +13,11 @@
 #include "common.h"
 #include <dm.h>
 #include <remoteproc.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <linux/soc/ti/ti_sci_protocol.h>
 #include <fdt_support.h>
 #include <asm/arch/sys_proto.h>

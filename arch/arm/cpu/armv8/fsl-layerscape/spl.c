@@ -10,7 +10,11 @@
 #include <image.h>
 #include <init.h>
 #include <spl.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
 #include <fsl_ifc.h>
 #include <i2c.h>

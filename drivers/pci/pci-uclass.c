@@ -11,6 +11,7 @@
 #include <malloc.h>
 #include <pci.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <dm/device-internal.h>
 #include <dm/lists.h>

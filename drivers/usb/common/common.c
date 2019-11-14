@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <asm/global_data.h>
 #include <linux/libfdt.h>
 #include <linux/usb/otg.h>
 #include <linux/usb/ch9.h>

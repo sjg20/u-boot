@@ -8,6 +8,7 @@
 #include <cpu_func.h>
 #include <dm.h>
 #include <errno.h>
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <os.h>

@@ -12,6 +12,7 @@
 
 #include <common.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <asm/ptrace.h>
 #include <cpu_func.h>
 #include <hang.h>

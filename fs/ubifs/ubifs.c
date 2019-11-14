@@ -18,6 +18,7 @@
 #include <memalign.h>
 #include "ubifs.h"
 #include <part.h>
+#include <asm/global_data.h>
 #include <dm/devres.h>
 #include <u-boot/zlib.h>
 

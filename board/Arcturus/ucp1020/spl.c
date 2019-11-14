@@ -21,6 +21,7 @@
 #include <fsl_esdhc.h>
 #include <spi_flash.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

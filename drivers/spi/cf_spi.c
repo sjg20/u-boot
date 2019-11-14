@@ -15,6 +15,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <asm/global_data.h>
 #include <dm/platform_data/spi_coldfire.h>
 #include <spi.h>
 #include <malloc.h>

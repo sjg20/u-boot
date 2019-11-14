@@ -7,6 +7,7 @@
 #include <dm.h>
 #include <mmc.h>
 #include <spl.h>
+#include <asm/global_data.h>
 
 #if CONFIG_IS_ENABLED(OF_LIBFDT)
 /**

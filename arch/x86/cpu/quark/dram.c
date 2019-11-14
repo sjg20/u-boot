@@ -9,7 +9,11 @@
 #include <fdtdec.h>
 #include <init.h>
 #include <malloc.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/mrccache.h>
 #include <asm/mtrr.h>
 #include <asm/post.h>

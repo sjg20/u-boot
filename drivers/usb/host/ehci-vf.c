@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <usb.h>
 #include <errno.h>
+#include <asm/global_data.h>
 #include <linux/compiler.h>
 #include <asm/io.h>
 #include <asm-generic/gpio.h>

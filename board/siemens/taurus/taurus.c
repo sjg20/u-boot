@@ -18,6 +18,7 @@
 #include <flash.h>
 #include <init.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch/at91sam9260_matrix.h>
 #include <asm/arch/at91sam9_smc.h>

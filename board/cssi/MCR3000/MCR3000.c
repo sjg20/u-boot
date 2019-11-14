@@ -15,6 +15,7 @@
 #include <fdt_support.h>
 #include <serial.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <dm/uclass.h>
 #include <wdt.h>

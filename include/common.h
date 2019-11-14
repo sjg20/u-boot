@@ -21,7 +21,6 @@
 #include <linux/string.h>
 #include <linux/kernel.h>
 #include <asm/u-boot.h> /* boot information for Linux kernel */
-#include <asm/global_data.h>	/* global data used for startup functions */
 #include <vsprintf.h>
 #endif	/* __ASSEMBLY__ */
 

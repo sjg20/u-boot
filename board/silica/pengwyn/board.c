@@ -20,6 +20,7 @@
 #include <phy.h>
 #include <cpsw.h>
 #include "board.h"
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

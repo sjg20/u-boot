@@ -11,7 +11,11 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <time.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/sys_proto.h>

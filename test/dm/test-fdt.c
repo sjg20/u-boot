@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <fdtdec.h>
 #include <malloc.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <dm/test.h>
 #include <dm/root.h>

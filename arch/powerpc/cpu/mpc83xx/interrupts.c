@@ -10,6 +10,7 @@
 #include <command.h>
 #include <irq_func.h>
 #include <mpc83xx.h>
+#include <asm/global_data.h>
 #include <asm/processor.h>
 
 DECLARE_GLOBAL_DATA_PTR;

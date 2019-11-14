@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <asm/arch/clock.h>
 #include "ddr.h"
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

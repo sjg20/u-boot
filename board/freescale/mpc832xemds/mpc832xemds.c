@@ -17,6 +17,7 @@
 #include <pci.h>
 #endif
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <asm/mmu.h>
 #if defined(CONFIG_OF_LIBFDT)
 #include <linux/delay.h>

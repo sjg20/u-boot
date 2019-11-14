@@ -10,6 +10,7 @@
 #include <netdev.h>
 #include <stdio.h>
 #include <twl4030.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch/mmc_host_def.h>
 #include <asm/arch/mem.h>

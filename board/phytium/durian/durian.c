@@ -9,7 +9,11 @@
 #include <cpu_func.h>
 #include <init.h>
 #include <asm/armv8/mmu.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/system.h>
 #include <asm/io.h>
 #include <linux/arm-smccc.h>

@@ -7,6 +7,7 @@
 #include <bootstage.h>
 #include <dm.h>
 #include <init.h>
+#include <asm/global_data.h>
 #include <dm/ofnode.h>
 #include <mapmem.h>
 #include <asm/arch-rockchip/timer.h>

@@ -17,7 +17,11 @@
 #include <asm/cache.h>
 =======
 #include <stdio.h>
+<<<<<<< HEAD
 >>>>>>> df98fd49b9f... common: Drop stdio.h from common header
+=======
+#include <asm/global_data.h>
+>>>>>>> cabef25fe6d... common: Drop asm/global_data.h from common header
 #include <u-boot/crc.h>
 #include <watchdog.h>
 

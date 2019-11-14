@@ -6,6 +6,7 @@
 #include <clk.h>
 #include <cpu_func.h>
 #include <dm.h>
+#include <asm/global_data.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

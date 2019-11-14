@@ -11,6 +11,7 @@
 #include <malloc.h>
 #include <spi.h>
 #include <time.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>

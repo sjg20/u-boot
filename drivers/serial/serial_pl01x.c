@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <watchdog.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <serial.h>
 #include <dm/platform_data/serial_pl01x.h>

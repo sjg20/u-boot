@@ -16,6 +16,7 @@
 #include <serial.h>
 #include <stdio.h>
 #include <watchdog.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <linux/compiler.h>
 #include <dm/pinctrl.h>

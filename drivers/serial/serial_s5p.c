@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <fdtdec.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/compiler.h>
 #include <asm/io.h>
 #include <asm/arch/clk.h>

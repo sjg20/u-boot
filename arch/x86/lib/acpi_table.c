@@ -9,6 +9,7 @@
 #include <common.h>
 #include <cpu.h>
 #include <dm.h>
+#include <asm/global_data.h>
 #include <dm/uclass-internal.h>
 #include <serial.h>
 #include <version.h>

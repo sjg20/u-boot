@@ -19,6 +19,7 @@
 #include <asm/arch/mpp.h>
 #include <asm/arch/gpio.h>
 #include "dns325.h"
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

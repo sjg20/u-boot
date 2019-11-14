@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <watchdog.h>
 #include <command.h>
+#include <asm/global_data.h>
 #include <asm/m5329.h>
 #include <asm/immap_5329.h>
 #include <asm/io.h>

@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <asm/cpm_85xx.h>
 #include <serial.h>
+#include <asm/global_data.h>
 #include <linux/compiler.h>
 
 DECLARE_GLOBAL_DATA_PTR;

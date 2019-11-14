@@ -8,6 +8,7 @@
 #include <dwmmc.h>
 #include <init.h>
 #include <malloc.h>
+#include <asm/global_data.h>
 #include <linux/bitops.h>
 
 #include <asm/arcregs.h>

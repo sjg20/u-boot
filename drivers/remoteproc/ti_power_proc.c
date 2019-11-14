@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <fdtdec.h>
 #include <remoteproc.h>
+#include <asm/global_data.h>
 #include <mach/psc_defs.h>
 
 DECLARE_GLOBAL_DATA_PTR;

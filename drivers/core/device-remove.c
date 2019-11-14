@@ -11,6 +11,7 @@
 #include <common.h>
 #include <errno.h>
 #include <malloc.h>
+#include <asm/global_data.h>
 #include <dm/device.h>
 #include <dm/device-internal.h>
 #include <dm/uclass.h>

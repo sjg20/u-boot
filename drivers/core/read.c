@@ -4,6 +4,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#include <asm/global_data.h>
 #include <asm/types.h>
 #include <asm/io.h>
 #include <common.h>

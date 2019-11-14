@@ -16,6 +16,7 @@
 #include <asm/arch/soc.h>
 #include <asm/arch/mpp.h>
 #include "dreamplug.h"
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <asm/global_data.h>
 #include <asm/msr.h>
 #include <asm/cpu.h>
 #include <asm/intel_regs.h>

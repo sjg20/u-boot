@@ -7,7 +7,11 @@
 
 #include <common.h>
 #include <cpu_func.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> cabef25fe6d... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
 #include <asm/arch/omap.h>
 #include <malloc.h>

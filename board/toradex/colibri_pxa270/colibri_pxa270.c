@@ -16,6 +16,7 @@
 #include <asm/arch/pxa.h>
 #include <asm/arch/regs-mmc.h>
 #include <asm/arch/regs-uart.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <dm/platdata.h>
 #include <dm/platform_data/serial_pxa.h>

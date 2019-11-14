@@ -8,7 +8,11 @@
 #include <common.h>
 #include <cpu_func.h>
 #include <malloc.h>
+<<<<<<< HEAD
 #include <part.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> 0e1dbd5f37c... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
 #include <asm/arch/gpio.h>
 #include <asm/arch/clk.h>

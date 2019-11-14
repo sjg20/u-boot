@@ -18,6 +18,7 @@
 #include <miiphy.h>
 #include <panel.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <power/tps65217.h>
 #include <power/tps65910.h>
 #include <spl.h>

@@ -7,7 +7,11 @@
 #include <cpu_func.h>
 #include <errno.h>
 #include <image.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <linux/kernel.h>
 #include <asm/io.h>
 #include <asm/system.h>

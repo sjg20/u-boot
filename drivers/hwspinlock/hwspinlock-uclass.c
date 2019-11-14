@@ -7,6 +7,7 @@
 #include <dm.h>
 #include <errno.h>
 #include <hwspinlock.h>
+#include <asm/global_data.h>
 #include <dm/device-internal.h>
 #include <dm/device_compat.h>
 #include <linux/compat.h>

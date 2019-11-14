@@ -7,6 +7,7 @@
 #include <common.h>
 #include <dm.h>
 #include <errno.h>
+#include <asm/global_data.h>
 #include <linux/libfdt.h>
 #include <malloc.h>
 #include <mapmem.h>

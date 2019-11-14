@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <i2c.h>
 #include <video_bridge.h>
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <power/regulator.h>

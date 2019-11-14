@@ -7,6 +7,7 @@
 #include <dm.h>
 #include <init.h>
 #include <ram.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch-rockchip/sdram.h>
 #include <dm/uclass-internal.h>

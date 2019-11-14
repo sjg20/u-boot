@@ -13,6 +13,7 @@
 #include "stm32mp1_ddr.h"
 #include "stm32mp1_tests.h"
 #include <stdio.h>
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

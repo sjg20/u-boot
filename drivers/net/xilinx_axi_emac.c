@@ -12,6 +12,7 @@
 #include <dm.h>
 #include <net.h>
 #include <malloc.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <phy.h>
 #include <miiphy.h>

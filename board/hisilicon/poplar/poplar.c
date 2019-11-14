@@ -12,7 +12,11 @@
 #include <asm/cache.h>
 =======
 #include <stdio.h>
+<<<<<<< HEAD
 >>>>>>> 1b996e58b42... common: Drop stdio.h from common header
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
 #include <dm/platform_data/serial_pl01x.h>
 #include <asm/arch/hi3798cv200.h>

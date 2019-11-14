@@ -13,6 +13,7 @@
 #include <fdt_support.h>
 #include <image.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/libfdt.h>
 #include <malloc.h>
 #include <mapmem.h>

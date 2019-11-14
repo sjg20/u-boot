@@ -15,6 +15,7 @@
 #ifdef CONFIG_MIPS_L2_CACHE
 #include <asm/cm.h>
 #endif
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/mipsregs.h>
 #include <asm/system.h>

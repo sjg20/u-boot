@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <display_options.h>
+#include <asm/global_data.h>
 #include <asm/processor.h>
 #include <asm/mmu.h>
 #ifdef CONFIG_ADDR_MAP

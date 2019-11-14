@@ -8,6 +8,7 @@
 #include <hang.h>
 #include <init.h>
 #include <spl.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch/sys_proto.h>
 #include <linux/libfdt.h>

@@ -9,6 +9,7 @@
 #include <ns16550.h>
 #include <serial.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/compiler.h>
 
 #ifndef CONFIG_NS16550_MIN_FUNCTIONS

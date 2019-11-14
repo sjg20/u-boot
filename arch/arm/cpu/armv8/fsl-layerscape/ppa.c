@@ -6,7 +6,11 @@
 #include <malloc.h>
 #include <config.h>
 #include <errno.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/system.h>
 #include <asm/types.h>
 #include <asm/arch/soc.h>

@@ -19,6 +19,7 @@
 #include <miiphy.h>
 #include <stdio.h>
 #include <asm/fec.h>
+#include <asm/global_data.h>
 #include <asm/immap.h>
 #include <linux/delay.h>
 #include <linux/mii.h>

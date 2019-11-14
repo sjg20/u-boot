@@ -26,7 +26,11 @@
 =======
 =======
 #include <stdio.h>
+<<<<<<< HEAD
 >>>>>>> 1b996e58b42... common: Drop stdio.h from common header
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <linux/delay.h>
 #include <linux/printk.h>
 >>>>>>> bec5f99924e... common: Drop linux/delay.h from common header

@@ -11,6 +11,7 @@
 #include <cpu_func.h>
 #include <asm-generic/io.h>
 #include <dm.h>
+#include <asm/global_data.h>
 #include <dm/device-internal.h>
 #include <dm/lists.h>
 #include <dwc3-uboot.h>

@@ -12,6 +12,7 @@
 #include <net.h>
 #include <phy.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/bug.h>
 #include <linux/errno.h>
 #include <net/pcap.h>

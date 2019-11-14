@@ -12,6 +12,7 @@
 #include <mpc83xx.h>
 #include <spd_sdram.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

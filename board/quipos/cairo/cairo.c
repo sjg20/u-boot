@@ -13,6 +13,7 @@
 #include <dm.h>
 #include <netdev.h>
 #include <ns16550.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch/mem.h>
 #include <asm/arch/mux.h>

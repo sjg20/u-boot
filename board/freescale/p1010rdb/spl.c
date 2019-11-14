@@ -17,6 +17,7 @@
 #include <spi_flash.h>
 #include "../common/spl.h"
 #include <stdio.h>
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

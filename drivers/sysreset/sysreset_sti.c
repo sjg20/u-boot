@@ -9,6 +9,7 @@
 #include <regmap.h>
 #include <syscon.h>
 #include <sysreset.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 
 DECLARE_GLOBAL_DATA_PTR;

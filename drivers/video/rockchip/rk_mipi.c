@@ -13,6 +13,7 @@
 #include <regmap.h>
 #include "rk_mipi.h"
 #include <syscon.h>
+#include <asm/global_data.h>
 #include <asm/gpio.h>
 #include <asm/io.h>
 #include <dm/uclass-internal.h>

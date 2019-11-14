@@ -20,7 +20,11 @@
 #include <errno.h>
 #include <stdio.h>
 #include <uuid.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> cabef25fe6d... common: Drop asm/global_data.h from common header
 #include <dm/device-internal.h>
 #include <u-boot/crc.h>
 

@@ -15,7 +15,11 @@
 #include <ram.h>
 #include <asm/arch/misc.h>
 #include <asm/armv8/mmu.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/sections.h>
 #include <dm/uclass.h>
 #include <dt-bindings/clock/mt8518-clk.h>

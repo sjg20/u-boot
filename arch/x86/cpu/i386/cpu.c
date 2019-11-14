@@ -25,6 +25,7 @@
 #include <spl.h>
 #include <asm/control_regs.h>
 #include <asm/cpu.h>
+#include <asm/global_data.h>
 #include <asm/mp.h>
 #include <asm/msr.h>
 #include <asm/mtrr.h>

@@ -39,7 +39,11 @@
 #include <phy.h>
 #include <reset.h>
 #include <wait_bit.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> cabef25fe6d... common: Drop asm/global_data.h from common header
 #include <asm/gpio.h>
 #include <asm/io.h>
 #include <linux/bitops.h>

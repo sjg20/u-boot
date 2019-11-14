@@ -11,7 +11,11 @@
 #include <dm.h>
 #include <efi_loader.h>
 #include <fdt_support.h>
+<<<<<<< HEAD
 #include <part.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> 0e1dbd5f37c... common: Drop asm/global_data.h from common header
 #include <linux/sizes.h>
 #include <asm/arch/mem.h>
 #include <dm/device-internal.h>

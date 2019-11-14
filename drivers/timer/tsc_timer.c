@@ -13,6 +13,7 @@
 #include <time.h>
 #include <timer.h>
 #include <asm/cpu.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/i8254.h>
 #include <asm/ibmpc.h>

@@ -8,6 +8,7 @@
 #include <dm.h>
 #include <init.h>
 #include <ram.h>
+#include <asm/global_data.h>
 #include <dt-bindings/memory/mpc83xx-sdram.h>
 
 DECLARE_GLOBAL_DATA_PTR;

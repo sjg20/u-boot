@@ -11,6 +11,7 @@
 #include <mapmem.h>
 #include <errno.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/sizes.h>
 #include <linux/stddef.h>
 

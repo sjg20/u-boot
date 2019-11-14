@@ -13,6 +13,7 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/fsl_serdes.h>
 #include <asm/arch/ls102xa_stream_id.h>
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

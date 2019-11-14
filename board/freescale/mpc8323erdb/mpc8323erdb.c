@@ -20,6 +20,7 @@
 #include <miiphy.h>
 #include <command.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/libfdt.h>
 #include <linux/printk.h>

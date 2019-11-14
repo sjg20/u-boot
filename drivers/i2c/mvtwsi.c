@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <i2c.h>
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/io.h>

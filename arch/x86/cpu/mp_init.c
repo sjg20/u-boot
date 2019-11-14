@@ -13,6 +13,7 @@
 #include <qfw.h>
 #include <asm/atomic.h>
 #include <asm/cpu.h>
+#include <asm/global_data.h>
 #include <asm/interrupt.h>
 #include <asm/lapic.h>
 #include <asm/microcode.h>

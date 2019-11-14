@@ -23,7 +23,11 @@
 >>>>>>> 3541e855f17... common: Drop init.h from common header
 =======
 #include <stdio.h>
+<<<<<<< HEAD
 >>>>>>> 1b996e58b42... common: Drop stdio.h from common header
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <linux/ctype.h>
 #include <u-boot/crc.h>
 

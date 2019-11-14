@@ -14,6 +14,7 @@
 #include <fsl_ddr.h>
 #include <fsl_sec.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <fdt_support.h>
 #include <linux/delay.h>

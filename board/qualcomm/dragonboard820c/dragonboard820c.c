@@ -9,7 +9,11 @@
 #include <init.h>
 #include <asm/arch/sysmap-apq8096.h>
 #include <env.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <linux/arm-smccc.h>
 #include <linux/psci.h>
 #include <common.h>

@@ -9,6 +9,7 @@
 #include <cmd_spl.h>
 #include <env.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/libfdt.h>
 
 DECLARE_GLOBAL_DATA_PTR;

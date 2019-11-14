@@ -35,6 +35,7 @@
 #include <vbe.h>
 #include <video.h>
 #include <video_fb.h>
+#include <asm/global_data.h>
 #include <linux/screen_info.h>
 
 #ifdef CONFIG_X86

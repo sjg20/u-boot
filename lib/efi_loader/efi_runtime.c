@@ -13,6 +13,7 @@
 #include <efi_loader.h>
 #include <malloc.h>
 #include <rtc.h>
+#include <asm/global_data.h>
 #include <u-boot/crc.h>
 
 /* For manual relocation support */

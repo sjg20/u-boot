@@ -17,6 +17,7 @@
 #include <phy.h>
 #include <errno.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/err.h>

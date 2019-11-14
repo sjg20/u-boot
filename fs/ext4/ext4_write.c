@@ -25,7 +25,11 @@
 #include <blk.h>
 #include <malloc.h>
 #include <memalign.h>
+<<<<<<< HEAD
 #include <part.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> 0e1dbd5f37c... common: Drop asm/global_data.h from common header
 #include <linux/stat.h>
 #include <div64.h>
 #include "ext4_common.h"

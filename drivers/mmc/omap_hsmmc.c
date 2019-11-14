@@ -33,7 +33,11 @@
 #if defined(CONFIG_OMAP54XX) || defined(CONFIG_OMAP44XX)
 #include <palmas.h>
 #endif
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> cabef25fe6d... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
 #include <asm/arch/mmc_host_def.h>
 #ifdef CONFIG_OMAP54XX

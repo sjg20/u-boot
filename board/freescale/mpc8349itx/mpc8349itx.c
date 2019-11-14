@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <vsc7385.h>
 #ifdef CONFIG_PCI
+#include <asm/global_data.h>
 #include <asm/mpc8349_pci.h>
 #include <pci.h>
 #endif

@@ -13,6 +13,7 @@
 #include <time.h>
 #include <timer.h>
 #include <watchdog.h>
+#include <asm/global_data.h>
 #include <linux/bitops.h>
 
 DECLARE_GLOBAL_DATA_PTR;

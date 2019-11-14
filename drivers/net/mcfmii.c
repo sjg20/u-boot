@@ -8,6 +8,7 @@
 #include <config.h>
 #include <net.h>
 #include <netdev.h>
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

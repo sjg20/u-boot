@@ -11,6 +11,7 @@
 #include <malloc.h>
 #include <sort.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 
 static const char *const type_name[] = {
 	"reserved",

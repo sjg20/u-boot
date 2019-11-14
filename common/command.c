@@ -13,6 +13,7 @@
 #include <console.h>
 #include <env.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/ctype.h>
 
 /*

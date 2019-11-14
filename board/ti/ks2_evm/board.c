@@ -18,6 +18,7 @@
 #include <asm/arch/ddr3.h>
 #include <asm/arch/psc_defs.h>
 #include <asm/arch/clock.h>
+#include <asm/global_data.h>
 #include <asm/ti-common/ti-aemif.h>
 #include <asm/ti-common/keystone_net.h>
 

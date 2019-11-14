@@ -15,6 +15,7 @@
 #include <i2c.h>
 #include <errno.h>
 #include <atsha204a-i2c.h>
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <u-boot/crc.h>

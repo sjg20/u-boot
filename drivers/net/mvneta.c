@@ -19,7 +19,11 @@
 #include <netdev.h>
 #include <config.h>
 #include <malloc.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> cabef25fe6d... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>

@@ -12,6 +12,7 @@
 #include <init.h>
 #include <netdev.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/compiler.h>
 #include <asm/mmu.h>
 #include <asm/processor.h>

@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <init.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <linux/delay.h>
 #include <linux/errno.h>

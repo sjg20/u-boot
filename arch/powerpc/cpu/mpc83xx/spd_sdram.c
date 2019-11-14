@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <vsprintf.h>
+#include <asm/global_data.h>
 #include <asm/processor.h>
 #include <asm/io.h>
 #include <i2c.h>

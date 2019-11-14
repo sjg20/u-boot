@@ -7,6 +7,7 @@
 #include <cpu.h>
 #include <dm.h>
 #include <errno.h>
+#include <asm/global_data.h>
 #include <dm/device-internal.h>
 #include <dm/lists.h>
 #include <linux/bitops.h>

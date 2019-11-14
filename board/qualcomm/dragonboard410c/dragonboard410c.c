@@ -12,7 +12,11 @@
 #include <init.h>
 #include <net.h>
 #include <usb.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/gpio.h>
 #include <fdt_support.h>
 #include <asm/arch/dram.h>

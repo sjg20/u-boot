@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <common.h>
 #include <fsl_dcu_fb.h>

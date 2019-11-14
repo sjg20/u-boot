@@ -8,6 +8,7 @@
 #include <dm.h>
 #include <init.h>
 #include <asm/arch-rockchip/clock.h>
+#include <asm/global_data.h>
 #include <dt-bindings/clock/rk3288-cru.h>
 #include <linux/delay.h>
 #include <linux/err.h>

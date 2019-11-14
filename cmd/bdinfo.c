@@ -13,7 +13,11 @@
 #include <net.h>
 #include <stdio.h>
 #include <vsprintf.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <linux/compiler.h>
 
 DECLARE_GLOBAL_DATA_PTR;

@@ -10,6 +10,7 @@
 #include <env.h>
 #include <image.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <u-boot/zlib.h>
 #include <bzlib.h>
 #include <watchdog.h>

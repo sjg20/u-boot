@@ -16,6 +16,7 @@
 #include <image.h>
 #include <malloc.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/libfdt.h>
 #include <mapmem.h>
 #include <asm/io.h>

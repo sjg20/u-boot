@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <clk-uclass.h>
+#include <asm/global_data.h>
 #include <dm/device.h>
 #include <linux/err.h>
 #include <linux/io.h>

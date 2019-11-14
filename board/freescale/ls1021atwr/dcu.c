@@ -9,6 +9,7 @@
 #include <fsl_dcu_fb.h>
 #include "div64.h"
 #include "../common/dcu_sii9022a.h"
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

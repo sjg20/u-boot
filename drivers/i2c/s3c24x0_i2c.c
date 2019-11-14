@@ -12,6 +12,7 @@
 #include <asm/arch/clk.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/pinmux.h>
+#include <asm/global_data.h>
 #else
 #include <asm/arch/s3c24x0_cpu.h>
 #endif

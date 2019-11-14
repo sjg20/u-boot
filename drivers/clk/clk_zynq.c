@@ -10,6 +10,7 @@
 #include <common.h>
 #include <clk-uclass.h>
 #include <dm.h>
+#include <asm/global_data.h>
 #include <dm/device_compat.h>
 #include <dm/lists.h>
 #include <errno.h>

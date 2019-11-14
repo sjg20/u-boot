@@ -20,7 +20,11 @@
 #include <asm/arch/firewall.h>
 #include <asm/arch/system_manager.h>
 #include <asm/arch/reset_manager.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
 #include <dm/device_compat.h>
 #include <linux/sizes.h>

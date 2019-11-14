@@ -26,6 +26,7 @@
 #include <memalign.h>
 #include <part.h>
 #include <stddef.h>
+#include <asm/global_data.h>
 #include <linux/stat.h>
 #include <linux/time.h>
 #include <asm/byteorder.h>

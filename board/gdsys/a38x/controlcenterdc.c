@@ -11,6 +11,7 @@
 #include <net.h>
 #include <stdio.h>
 #include <tpm-v1.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch/cpu.h>
 #include <asm-generic/gpio.h>

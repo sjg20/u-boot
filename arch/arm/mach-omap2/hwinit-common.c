@@ -17,6 +17,7 @@
 #include <spl.h>
 #include <stdio.h>
 #include <asm/arch/sys_proto.h>
+#include <asm/global_data.h>
 #include <linux/sizes.h>
 #include <asm/emif.h>
 #include <asm/omap_common.h>

@@ -10,7 +10,11 @@
 #include <malloc.h>
 #include <asm/arcregs.h>
 #include "axs10x.h"
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 
 DECLARE_GLOBAL_DATA_PTR;
 

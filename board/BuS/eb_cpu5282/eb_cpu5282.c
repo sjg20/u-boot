@@ -16,6 +16,7 @@
 #include <status_led.h>
 #include <bus_vcxk.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 
 /*---------------------------------------------------------------------------*/
 

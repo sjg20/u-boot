@@ -20,6 +20,7 @@
  */
 
 #include <common.h>
+#include <asm/global_data.h>
 <<<<<<< HEAD
 #include <malloc.h>
 =======

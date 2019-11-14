@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <irq.h>
 #include <malloc.h>
+#include <asm/global_data.h>
 #include <asm/intel_pinctrl.h>
 #include <asm/io.h>
 #include <asm/intel_regs.h>

@@ -26,6 +26,7 @@
 #include <stdio.h>
 >>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 #include <watchdog.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <linux/compiler.h>
 #include <linux/printk.h>

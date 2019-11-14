@@ -1,4 +1,5 @@
 #include <common.h>
+#include <asm/global_data.h>
 
 #if defined(CONFIG_UNIT_TEST)
 #define DEBUG

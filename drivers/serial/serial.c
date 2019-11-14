@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdio_dev.h>
 #include <post.h>
+#include <asm/global_data.h>
 #include <linux/compiler.h>
 #include <errno.h>
 #include <linux/delay.h>

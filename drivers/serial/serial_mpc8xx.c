@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <watchdog.h>
 #include <asm/cpm_8xx.h>
+#include <asm/global_data.h>
 #include <linux/compiler.h>
 
 DECLARE_GLOBAL_DATA_PTR;

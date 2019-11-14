@@ -11,7 +11,11 @@
 #include <stdio_dev.h>
 #include <video.h>
 #include <video_console.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <dm/lists.h>
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>

@@ -78,6 +78,7 @@
 #include <common.h>         /* readline */
 #include <env.h>
 #include <malloc.h>         /* malloc, free, realloc*/
+#include <asm/global_data.h>
 #include <linux/ctype.h>    /* isalpha, isdigit */
 #include <console.h>
 #include <bootretry.h>

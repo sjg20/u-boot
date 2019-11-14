@@ -17,6 +17,7 @@
 #include <init.h>
 #include <ns16550.h>
 #include <twl4030.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/gpio.h>
 #include <asm/arch/mmc_host_def.h>

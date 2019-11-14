@@ -9,6 +9,7 @@
 #include <phy.h>
 #include <config.h>
 #include <common.h>
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

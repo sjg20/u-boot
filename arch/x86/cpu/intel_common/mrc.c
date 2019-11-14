@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <syscon.h>
 #include <asm/cpu.h>
+#include <asm/global_data.h>
 #include <asm/gpio.h>
 #include <asm/intel_regs.h>
 #include <asm/mrc_common.h>

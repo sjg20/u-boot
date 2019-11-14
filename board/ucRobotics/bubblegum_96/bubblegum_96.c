@@ -10,7 +10,11 @@
 #include <asm/cache.h>
 =======
 #include <init.h>
+<<<<<<< HEAD
 >>>>>>> 3541e855f17... common: Drop init.h from common header
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <linux/arm-smccc.h>
 #include <linux/psci.h>
 #include <common.h>

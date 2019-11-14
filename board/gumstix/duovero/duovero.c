@@ -14,6 +14,7 @@
 #include <asm/emif.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/gpio.h>
+#include <asm/global_data.h>
 #include <asm/gpio.h>
 #include <asm/mach-types.h>
 #include <linux/delay.h>

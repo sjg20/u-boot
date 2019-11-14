@@ -15,8 +15,12 @@
 #include <malloc.h>
 #include <net.h>
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include <asm/cache.h>
 =======
+=======
+#include <asm/global_data.h>
+>>>>>>> cabef25fe6d... common: Drop asm/global_data.h from common header
 #include <linux/bitops.h>
 >>>>>>> 62914068d58... common: Drop linux/bitops.h from common header
 #include <linux/compiler.h>

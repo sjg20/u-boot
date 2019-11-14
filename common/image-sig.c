@@ -7,6 +7,7 @@
 #include "mkimage.h"
 #include <stdio.h>
 #include <time.h>
+#include <asm/global_data.h>
 #else
 #include <common.h>
 #include <malloc.h>

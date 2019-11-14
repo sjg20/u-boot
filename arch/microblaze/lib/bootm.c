@@ -15,7 +15,11 @@
 #include <fdt_support.h>
 #include <hang.h>
 #include <image.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <u-boot/zlib.h>
 #include <asm/byteorder.h>
 

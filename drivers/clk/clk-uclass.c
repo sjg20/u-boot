@@ -13,6 +13,7 @@
 #include <dt-structs.h>
 #include <errno.h>
 #include <malloc.h>
+#include <asm/global_data.h>
 #include <dm/devres.h>
 #include <dm/read.h>
 #include <linux/bug.h>

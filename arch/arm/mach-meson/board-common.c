@@ -9,7 +9,11 @@
 #include <net.h>
 #include <asm/arch/boot.h>
 #include <env.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <linux/libfdt.h>
 #include <linux/err.h>
 #include <asm/arch/mem.h>

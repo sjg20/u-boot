@@ -20,6 +20,7 @@
 #ifdef CONFIG_U_QE
 #include <fsl_qe.h>
 #endif
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

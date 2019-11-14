@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <asm/global_data.h>
 
 /* Memory test
  *

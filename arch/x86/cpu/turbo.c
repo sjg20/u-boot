@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <asm/cpu.h>
+#include <asm/global_data.h>
 #include <asm/msr.h>
 #include <asm/processor.h>
 #include <asm/turbo.h>

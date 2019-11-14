@@ -21,6 +21,7 @@
 #include <exports.h>
 #include <env_internal.h>
 #include <watchdog.h>
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

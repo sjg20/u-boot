@@ -11,6 +11,7 @@
 #include <dm.h>
 #include <serial.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

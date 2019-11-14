@@ -11,6 +11,7 @@
 #include <env.h>
 #include <pci.h>
 #include <usb.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

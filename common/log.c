@@ -10,6 +10,7 @@
 #include <log.h>
 #include <malloc.h>
 #include <stdarg.h>
+#include <asm/global_data.h>
 #include <dm/uclass.h>
 
 DECLARE_GLOBAL_DATA_PTR;

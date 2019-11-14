@@ -10,6 +10,7 @@
 #include <malloc.h>
 #include <fdtdec.h>
 #include <nand.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch/cpu.h>
 #include <dm/device_compat.h>

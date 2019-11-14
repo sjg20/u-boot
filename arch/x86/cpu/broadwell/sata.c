@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <asm/global_data.h>
 #include <asm/gpio.h>
 #include <asm/io.h>
 #include <asm/intel_regs.h>

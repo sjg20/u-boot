@@ -8,8 +8,12 @@
 #include <common.h>
 #include <asm/arch/sm.h>
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include <asm/cache.h>
 =======
+=======
+#include <asm/global_data.h>
+>>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <linux/bitops.h>
 >>>>>>> a9f77b195ef... common: Drop linux/bitops.h from common header
 #include <linux/err.h>

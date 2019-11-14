@@ -11,6 +11,7 @@
 #include <fdtdec.h>
 #include <malloc.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <dm/device-internal.h>
 #include <dm/root.h>
 #include <dm/util.h>

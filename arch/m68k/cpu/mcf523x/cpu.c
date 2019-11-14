@@ -16,6 +16,7 @@
 #include <watchdog.h>
 #include <command.h>
 #include <netdev.h>
+#include <asm/global_data.h>
 
 #include <asm/immap.h>
 #include <asm/io.h>

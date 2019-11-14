@@ -13,6 +13,7 @@
 #include <fsl_sleep.h>
 #endif
 #include <asm/arch/clock.h>
+#include <asm/global_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

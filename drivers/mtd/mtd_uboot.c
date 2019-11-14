@@ -6,6 +6,7 @@
 #include <common.h>
 #include <env.h>
 #include <malloc.h>
+#include <asm/global_data.h>
 #include <dm/device.h>
 #include <dm/uclass-internal.h>
 #include <linux/err.h>

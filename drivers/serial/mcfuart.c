@@ -18,6 +18,7 @@
 #include <common.h>
 #include <dm.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <dm/platform_data/serial_coldfire.h>
 #include <serial.h>
 #include <linux/compiler.h>

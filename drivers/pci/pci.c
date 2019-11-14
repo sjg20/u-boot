@@ -17,6 +17,7 @@
 #include <common.h>
 #include <init.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

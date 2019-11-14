@@ -11,6 +11,7 @@
 #include <irq_func.h>
 #include <log.h>
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <dm/lists.h>
 #include <efi_loader.h>
 #include <linux/delay.h>

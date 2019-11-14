@@ -11,6 +11,7 @@
 #include <init.h>
 #if defined(CONFIG_OF_LIBFDT)
 #include <stdio.h>
+#include <asm/global_data.h>
 #include <linux/libfdt.h>
 #endif
 #include <pci.h>
