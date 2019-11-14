@@ -10,6 +10,7 @@
 #include <efi_loader.h>
 #include <irq_func.h>
 #include <malloc.h>
+#include <stdarg.h>
 #include <time.h>
 #include <linux/libfdt_env.h>
 #include <u-boot/crc.h>

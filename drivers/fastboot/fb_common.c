@@ -14,6 +14,7 @@
 #include <command.h>
 #include <env.h>
 #include <fastboot.h>
+#include <stdarg.h>
 #include <net/fastboot.h>
 
 /**

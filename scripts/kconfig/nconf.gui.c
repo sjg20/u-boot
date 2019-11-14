@@ -7,6 +7,7 @@
  */
 #include "nconf.h"
 #include "lkc.h"
+#include <stdarg.h>
 
 /* a list of all the different widgets we use */
 attributes_t attributes[ATTR_MAX+1] = {0};

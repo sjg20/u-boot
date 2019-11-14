@@ -6,7 +6,11 @@
  */
 
 #include <efi_selftest.h>
+<<<<<<< HEAD
 #include <net.h>
+=======
+#include <stdarg.h>
+>>>>>>> 57bcba3b74c... common: Drop stdarg.h from common header
 #include <vsprintf.h>
 
 struct efi_simple_text_output_protocol *con_out;

@@ -11,6 +11,7 @@
 #include <env.h>
 #include <malloc.h>
 #include <env_internal.h>
+#include <stdarg.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <linux/types.h>

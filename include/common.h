@@ -19,7 +19,6 @@
 #include <linux/types.h>
 #include <linux/printk.h>
 #include <linux/string.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <linux/kernel.h>
 #include <asm/u-boot.h> /* boot information for Linux kernel */

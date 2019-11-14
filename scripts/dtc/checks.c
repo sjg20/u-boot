@@ -19,6 +19,7 @@
  */
 
 #include "dtc.h"
+#include <stdarg.h>
 
 #ifdef TRACE_CHECKS
 #define TRACE(c, ...) \
