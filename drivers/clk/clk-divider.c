@@ -26,6 +26,7 @@
 #include <div64.h>
 #include <clk.h>
 #include "clk.h"
+#include <linux/printk.h>
 
 #define UBOOT_DM_CLK_CCF_DIVIDER "ccf_clk_divider"
 

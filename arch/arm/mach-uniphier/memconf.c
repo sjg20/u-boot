@@ -9,6 +9,7 @@
 #include <asm/u-boot.h>
 #include <linux/errno.h>
 #include <linux/io.h>
+#include <linux/printk.h>
 #include <linux/sizes.h>
 
 #include "sg-regs.h"

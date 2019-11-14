@@ -60,6 +60,7 @@
 #include <common.h>
 #include <malloc.h>
 #include <asm/u-boot.h>
+#include <linux/printk.h>
 <<<<<<< HEAD
 #include <dm/devres.h>
 =======

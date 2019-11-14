@@ -44,6 +44,7 @@
 #include <common.h>
 #include <linux/compiler.h>
 #include "x86emu/x86emui.h"
+#include <linux/printk.h>
 
 /*----------------------------- Implementation ----------------------------*/
 

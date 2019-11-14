@@ -11,6 +11,7 @@
 #include <dm/pinctrl.h>
 #include <linux/bitops.h>
 #include <linux/err.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

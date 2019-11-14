@@ -19,6 +19,7 @@
 #include <linux/bitops.h>
 #include <linux/iopoll.h>
 #include <linux/list.h>
+#include <linux/printk.h>
 
 /* PCIe shared registers */
 #define PCIE_SYS_CFG		0x00

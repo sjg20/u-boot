@@ -18,6 +18,7 @@
 #include <linux/module.h>
 #include <linux/mtd/spinand.h>
 #include <linux/of.h>
+#include <linux/printk.h>
 #include <linux/slab.h>
 #include <linux/spi/spi.h>
 #include <linux/spi/spi-mem.h>

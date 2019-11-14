@@ -11,6 +11,7 @@
 #include <fdtdec.h>
 #include <i2c.h>
 #include <dm/lists.h>
+#include <linux/printk.h>
 #include <power/as3722.h>
 #include <power/pmic.h>
 

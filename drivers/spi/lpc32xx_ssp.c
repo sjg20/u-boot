@@ -12,6 +12,7 @@
 #include <malloc.h>
 #include <spi.h>
 #include <asm/arch/clk.h>
+#include <linux/printk.h>
 
 /* SSP chip registers */
 struct ssp_regs {

@@ -22,6 +22,7 @@
 #include <asm/global_data.h>
 >>>>>>> cabef25fe6d... common: Drop asm/global_data.h from common header
 #include <linux/libfdt.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

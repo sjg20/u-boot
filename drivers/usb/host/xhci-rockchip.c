@@ -10,6 +10,7 @@
 #include <watchdog.h>
 #include <linux/errno.h>
 #include <linux/compat.h>
+#include <linux/printk.h>
 #include <linux/usb/dwc3.h>
 #include <power/regulator.h>
 

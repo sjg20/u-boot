@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <remoteproc.h>
 #include <asm/io.h>
+#include <linux/printk.h>
 
 /**
  * enum sandbox_state - different device states

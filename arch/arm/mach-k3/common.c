@@ -17,7 +17,11 @@
 #include <asm/cache.h>
 =======
 #include <asm/global_data.h>
+<<<<<<< HEAD
 >>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
+=======
+#include <linux/printk.h>
+>>>>>>> 7247e0db453... common: Drop linux/printk.h from common header
 #include <linux/soc/ti/ti_sci_protocol.h>
 #include <fdt_support.h>
 #include <asm/arch/sys_proto.h>

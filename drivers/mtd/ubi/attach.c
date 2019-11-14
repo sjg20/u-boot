@@ -72,6 +72,7 @@
 #ifndef __UBOOT__
 #include <linux/bug.h>
 #include <linux/err.h>
+#include <linux/printk.h>
 #include <linux/slab.h>
 #include <linux/crc32.h>
 #include <linux/random.h>

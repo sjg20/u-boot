@@ -8,6 +8,7 @@
 #include <asm/arch/sys_proto.h>
 #include <dm/ofnode.h>
 #include <fdt_support.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

@@ -16,6 +16,7 @@
 #include <asm/io.h>
 #include <dm/pinctrl.h>
 #include <linux/bug.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

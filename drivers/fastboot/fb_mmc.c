@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <linux/compat.h>
 #include <android_image.h>
+#include <linux/printk.h>
 
 #define FASTBOOT_MAX_BLK_WRITE 16384
 

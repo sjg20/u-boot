@@ -24,6 +24,7 @@
 #include <malloc.h>
 #include <miiphy.h>
 #include <linux/bug.h>
+#include <linux/printk.h>
 #include <linux/types.h>
 #include "ep93xx_eth.h"
 

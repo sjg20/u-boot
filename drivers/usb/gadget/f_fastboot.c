@@ -16,6 +16,7 @@
 #include <fastboot.h>
 #include <malloc.h>
 #include <stdio.h>
+#include <linux/printk.h>
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 #include <linux/usb/composite.h>

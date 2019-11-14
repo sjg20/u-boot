@@ -13,6 +13,7 @@
 #include <linux/bug.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/printk.h>
 #include <linux/slab.h>
 #include <linux/sched.h>
 #include <linux/types.h>

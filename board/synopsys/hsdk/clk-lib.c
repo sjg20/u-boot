@@ -7,6 +7,7 @@
 #include <clk.h>
 #include <malloc.h>
 #include <dm/device.h>
+#include <linux/printk.h>
 
 #include "clk-lib.h"
 

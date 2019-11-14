@@ -22,6 +22,7 @@
 #include <spl.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/u-boot.h>
+#include <linux/printk.h>
 
 #include "../common/board_detect.h"
 

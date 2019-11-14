@@ -14,6 +14,7 @@
 #include <part.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <linux/printk.h>
 
 /**
  * image_size - final fastboot image size

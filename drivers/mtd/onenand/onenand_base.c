@@ -27,6 +27,7 @@
 #include <linux/mtd/mtd.h>
 #include "linux/mtd/flashchip.h"
 #include <linux/mtd/onenand.h>
+#include <linux/printk.h>
 
 #include <asm/io.h>
 #include <linux/errno.h>

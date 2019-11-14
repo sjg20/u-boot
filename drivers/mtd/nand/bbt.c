@@ -14,6 +14,7 @@
 #include <linux/bitops.h>
 #include <linux/mtd/nand.h>
 #ifndef __UBOOT__
+#include <linux/printk.h>
 #include <linux/slab.h>
 #endif
 

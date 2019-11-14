@@ -17,7 +17,6 @@
 #include <errno.h>
 #include <time.h>
 #include <linux/types.h>
-#include <linux/printk.h>
 #include <linux/string.h>
 #include <linux/kernel.h>
 #include <vsprintf.h>

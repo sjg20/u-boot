@@ -17,6 +17,7 @@
 #include <dm/devres.h>
 #include <linux/bitops.h>
 #include <linux/crc16.h>
+#include <linux/printk.h>
 #include <linux/slab.h>
 #include <linux/random.h>
 #else

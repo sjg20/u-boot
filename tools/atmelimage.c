@@ -6,6 +6,7 @@
 
 #include "imagetool.h"
 #include "mkimage.h"
+#include <linux/printk.h>
 
 #include <image.h>
 

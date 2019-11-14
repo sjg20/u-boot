@@ -117,6 +117,7 @@
 #include <malloc.h>
 #include <div64.h>
 #include <linux/compiler.h>
+#include <linux/printk.h>
 #include <linux/stat.h>
 #include <linux/time.h>
 #include <u-boot/crc.h>

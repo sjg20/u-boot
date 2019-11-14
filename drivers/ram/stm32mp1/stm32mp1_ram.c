@@ -12,6 +12,7 @@
 #include <syscon.h>
 #include <asm/io.h>
 #include "stm32mp1_ddr.h"
+#include <linux/printk.h>
 
 static const char *const clkname[] = {
 	"ddrc1",

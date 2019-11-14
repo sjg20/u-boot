@@ -13,6 +13,7 @@
 #include <linux/bitops.h>
 #include <linux/iopoll.h>
 #include <linux/math64.h>
+#include <linux/printk.h>
 
 #define writel_bits(mask, val, addr) \
 	writel((readl(addr) & ~(mask)) | (val), addr)

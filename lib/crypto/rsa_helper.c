@@ -19,6 +19,7 @@
 #ifndef __UBOOT__
 #include "rsaprivkey.asn1.h"
 #endif
+#include <linux/printk.h>
 
 int rsa_get_n(void *context, size_t hdrlen, unsigned char tag,
 	      const void *value, size_t vlen)

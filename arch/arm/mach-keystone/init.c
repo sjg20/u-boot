@@ -21,6 +21,7 @@
 #include <asm/arch/hardware.h>
 #include <asm/arch/psc_defs.h>
 #include <linux/bitops.h>
+#include <linux/printk.h>
 
 #define MAX_PCI_PORTS		2
 enum pci_mode	{

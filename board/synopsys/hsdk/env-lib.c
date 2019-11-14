@@ -6,6 +6,7 @@
 
 #include "env-lib.h"
 #include <env.h>
+#include <linux/printk.h>
 
 #define MAX_CMD_LEN	25
 

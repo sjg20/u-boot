@@ -16,6 +16,7 @@
 #include <generic-phy.h>
 #include <regmap.h>
 #include <clk.h>
+#include <linux/printk.h>
 
 #include <linux/bitops.h>
 #include <linux/compat.h>

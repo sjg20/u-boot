@@ -11,6 +11,7 @@
 #include <linux/bug.h>
 #include <linux/io.h>
 #include <linux/log2.h>
+#include <linux/printk.h>
 
 #include "../init.h"
 #include "../sbc/sbc-regs.h"

@@ -20,6 +20,7 @@
 #include <dm/devres.h>
 #include <linux/module.h>
 #include <linux/moduleparam.h>
+#include <linux/printk.h>
 #include <linux/stringify.h>
 #include <linux/namei.h>
 #include <linux/stat.h>

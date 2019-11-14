@@ -16,6 +16,7 @@
 #include <linux/module.h>
 #endif
 #include <linux/mtd/nand.h>
+#include <linux/printk.h>
 
 /**
  * nanddev_isbad() - Check if a block is bad

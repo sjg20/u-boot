@@ -41,6 +41,7 @@
 
 #include <common.h>
 #include "x86emu/x86emui.h"
+#include <linux/printk.h>
 
 /*------------------------- Global Variables ------------------------------*/
 

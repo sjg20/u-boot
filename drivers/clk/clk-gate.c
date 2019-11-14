@@ -18,6 +18,7 @@
 #include <clk.h>
 #include "clk.h"
 #include <linux/err.h>
+#include <linux/printk.h>
 
 #define UBOOT_DM_CLK_GATE "clk_gate"
 

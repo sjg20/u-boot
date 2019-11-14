@@ -24,6 +24,7 @@
 #include <fdt_support.h>
 #include <time.h>
 #include <linux/bitops.h>
+#include <linux/printk.h>
 #include <u-boot/crc.h>
 # include <atsha204a-i2c.h>
 

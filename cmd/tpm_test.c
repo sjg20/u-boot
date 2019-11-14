@@ -8,6 +8,7 @@
 #include <cpu_func.h>
 #include <tpm-v1.h>
 #include "tpm-user-utils.h"
+#include <linux/printk.h>
 
 /* Prints error and returns on failure */
 #define TPM_CHECK(tpm_command) do { \

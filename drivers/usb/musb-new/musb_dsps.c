@@ -25,6 +25,7 @@
 #include <linux/dma-mapping.h>
 #include <linux/pm_runtime.h>
 #include <linux/module.h>
+#include <linux/printk.h>
 
 #include <linux/of.h>
 #include <linux/of_device.h>

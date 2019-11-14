@@ -9,6 +9,7 @@
 #include <spi.h>
 #include <malloc.h>
 #include <wait_bit.h>
+#include <linux/printk.h>
 
 #include <asm/io.h>
 

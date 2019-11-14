@@ -7,6 +7,7 @@
 #include <adc.h>
 #include <asm/io.h>
 #include <asm/arch-rockchip/boot_mode.h>
+#include <linux/printk.h>
 
 #if (CONFIG_ROCKCHIP_BOOT_MODE_REG == 0)
 

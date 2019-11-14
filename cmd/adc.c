@@ -7,6 +7,7 @@
 #include <command.h>
 #include <dm.h>
 #include <adc.h>
+#include <linux/printk.h>
 
 static int do_adc_list(cmd_tbl_t *cmdtp, int flag, int argc,
 		       char *const argv[])

@@ -12,6 +12,7 @@
 #ifndef __UBOOT__
 #include <linux/debugfs.h>
 #include <linux/err.h>
+#include <linux/printk.h>
 #include <linux/uaccess.h>
 #include <linux/module.h>
 #endif

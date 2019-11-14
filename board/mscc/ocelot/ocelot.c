@@ -16,6 +16,7 @@
 #include <miiphy.h>
 #include <asm/u-boot.h>
 #include <linux/bitops.h>
+#include <linux/printk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

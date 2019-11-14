@@ -14,6 +14,7 @@
 #undef	PACKET_TRACE
 
 #include <common.h>
+#include <linux/printk.h>
 <<<<<<< HEAD
 #include <dm/devres.h>
 #include <linux/err.h>

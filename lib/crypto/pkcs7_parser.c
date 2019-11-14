@@ -15,6 +15,7 @@
 #ifndef __UBOOT__
 #include <linux/module.h>
 #include <linux/export.h>
+#include <linux/printk.h>
 #include <linux/slab.h>
 #endif
 #include <linux/err.h>

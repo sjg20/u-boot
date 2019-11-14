@@ -10,6 +10,7 @@
 #include <asm/arch/stm32mp1_smc.h>
 #include <linux/arm-smccc.h>
 #include <linux/iopoll.h>
+#include <linux/printk.h>
 
 #define BSEC_OTP_MAX_VALUE		95
 
