@@ -8,6 +8,7 @@
 #include <android_bootloader_message.h>
 #include <command.h>
 #include <common.h>
+#include <display_options.h>
 #include <part.h>
 
 enum bcb_cmd {

@@ -4,6 +4,7 @@
  */
 
 #include <config.h>
+#include <display_options.h>
 #include <errno.h>
 #include <common.h>
 #include <env.h>

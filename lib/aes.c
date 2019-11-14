@@ -23,6 +23,7 @@
 
 #ifndef USE_HOSTCC
 #include <common.h>
+#include <display_options.h>
 #else
 #include <string.h>
 #endif

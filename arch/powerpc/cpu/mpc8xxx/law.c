@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <display_options.h>
 #include <linux/compiler.h>
 #include <asm/fsl_law.h>
 #include <asm/io.h>

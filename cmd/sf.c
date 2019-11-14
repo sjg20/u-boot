@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <display_options.h>
 #include <div64.h>
 #include <dm.h>
 #include <flash.h>

@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <display_options.h>
 #include <efi_loader.h>
 #include <env.h>
 #include <image.h>

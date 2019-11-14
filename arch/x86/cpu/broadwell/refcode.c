@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <display_options.h>
 #include <errno.h>
 #include <init.h>
 #include <asm/arch/pei_data.h>

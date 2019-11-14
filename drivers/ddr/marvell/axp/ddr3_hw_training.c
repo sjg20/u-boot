@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <display_options.h>
 #include <i2c.h>
 #include <spl.h>
 #include <asm/io.h>

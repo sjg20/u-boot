@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <console.h>
+#include <display_options.h>
 #include <div64.h>
 #include <version.h>
 #include <linux/ctype.h>
