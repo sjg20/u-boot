@@ -5,6 +5,7 @@
  * Macpaul Lin, Andes Technology Corporation <macpaul@andestech.com>
  */
 
+#include <flash.h>
 #include <init.h>
 #include <asm/mach-types.h>
 #include <common.h>

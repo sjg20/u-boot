@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <env_flags.h>
 #include <fcntl.h>
+#include <flash.h>
 #include <libgen.h>
 #include <linux/fs.h>
 #include <linux/stringify.h>

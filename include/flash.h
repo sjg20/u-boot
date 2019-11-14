@@ -84,20 +84,20 @@ typedef unsigned long flash_sect_t;
 
 /* Prototypes */
 
-extern unsigned long flash_init (void);
-extern void flash_print_info (flash_info_t *);
-extern int flash_erase	(flash_info_t *, int, int);
-extern int flash_sect_erase (ulong addr_first, ulong addr_last);
-extern int flash_sect_protect (int flag, ulong addr_first, ulong addr_last);
-extern int flash_sect_roundb (ulong *addr);
+extern unsigned long flash_init(void);
+extern void flash_print_info(flash_info_t *);
+extern int flash_erase(flash_info_t *, int, int);
+extern int flash_sect_erase(ulong addr_first, ulong addr_last);
+extern int flash_sect_protect(int flag, ulong addr_first, ulong addr_last);
+extern int flash_sect_roundb(ulong *addr);
 extern unsigned long flash_sector_size(flash_info_t *info, flash_sect_t sect);
 extern void flash_set_verbose(uint);
 
 /* common/flash.c */
-extern void flash_protect (int flag, ulong from, ulong to, flash_info_t *info);
-extern int flash_write (char *, ulong, ulong);
-extern flash_info_t *addr2info (ulong);
-extern int write_buff (flash_info_t *info, uchar *src, ulong addr, ulong cnt);
+extern void flash_protect(int flag, ulong from, ulong to, flash_info_t *info);
+extern int flash_write(char *, ulong, ulong);
+extern flash_info_t *addr2info(ulong);
+extern int write_buff(flash_info_t *info, uchar *src, ulong addr, ulong cnt);
 
 /* drivers/mtd/cfi_mtd.c */
 #ifdef CONFIG_FLASH_CFI_MTD
