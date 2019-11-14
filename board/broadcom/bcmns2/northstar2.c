@@ -12,6 +12,7 @@
 >>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/system.h>
 #include <asm/armv8/mmu.h>
+#include <asm/u-boot.h>
 
 static struct mm_region ns2_mem_map[] = {
 	{

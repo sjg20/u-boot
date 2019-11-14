@@ -24,6 +24,7 @@
 #include <asm/arch/mem.h>
 #include "tricorder.h"
 #include "tricorder-eeprom.h"
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

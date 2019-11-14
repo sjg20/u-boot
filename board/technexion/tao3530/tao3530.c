@@ -19,6 +19,7 @@
 #include <asm/arch/gpio.h>
 #include <asm/gpio.h>
 #include <asm/mach-types.h>
+#include <asm/u-boot.h>
 
 #include <usb.h>
 #include <asm/ehci-omap.h>

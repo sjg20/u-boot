@@ -19,6 +19,7 @@
 #include <asm/global_data.h>
 >>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
+#include <asm/u-boot.h>
 #include <linux/errno.h>
 #include <asm/system.h>
 #include <fm_eth.h>

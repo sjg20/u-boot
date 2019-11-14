@@ -21,6 +21,7 @@
 #include <asm/global_data.h>
 >>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/sections.h>
+#include <asm/u-boot.h>
 #include <dm/uclass.h>
 #include <dt-bindings/clock/mt8512-clk.h>
 

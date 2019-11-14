@@ -18,6 +18,7 @@
 #include <asm/arch/regs-uart.h>
 #include <asm/global_data.h>
 #include <asm/io.h>
+#include <asm/u-boot.h>
 #include <dm/platdata.h>
 #include <dm/platform_data/serial_pxa.h>
 #include <netdev.h>

@@ -10,6 +10,7 @@
 #include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch-rockchip/sdram.h>
+#include <asm/u-boot.h>
 #include <dm/uclass-internal.h>
 
 DECLARE_GLOBAL_DATA_PTR;

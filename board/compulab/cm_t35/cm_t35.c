@@ -23,6 +23,7 @@
 #include <splash.h>
 #include <twl4030.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <linux/compiler.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

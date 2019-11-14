@@ -14,6 +14,7 @@
 #include <asm/arch/misc.h>
 #include <asm/global_data.h>
 #include <asm/io.h>
+#include <asm/u-boot.h>
 
 #include <usb.h>
 #include <usb/dwc2_udc.h>

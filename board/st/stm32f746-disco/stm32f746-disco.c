@@ -24,6 +24,7 @@
 #include <asm/arch/gpio.h>
 #include <asm/arch/syscfg.h>
 #include <asm/gpio.h>
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

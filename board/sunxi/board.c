@@ -28,6 +28,7 @@
 #include <asm/arch/mmc.h>
 #include <asm/arch/spl.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <u-boot/crc.h>

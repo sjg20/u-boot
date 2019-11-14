@@ -17,7 +17,11 @@
 >>>>>>> 1b996e58b42... common: Drop stdio.h from common header
 =======
 #include <asm/global_data.h>
+<<<<<<< HEAD
 >>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
+=======
+#include <asm/u-boot.h>
+>>>>>>> 7384894e6c7... common: Drop asm/u-boot.h from common header
 #include <dm/device-internal.h>
 #include <dm/lists.h>
 #include <dm/uclass.h>

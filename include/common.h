@@ -20,7 +20,6 @@
 #include <linux/printk.h>
 #include <linux/string.h>
 #include <linux/kernel.h>
-#include <asm/u-boot.h> /* boot information for Linux kernel */
 #include <vsprintf.h>
 #endif	/* __ASSEMBLY__ */
 

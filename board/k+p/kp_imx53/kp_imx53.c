@@ -16,6 +16,7 @@
 #include <asm/arch/clock.h>
 #include <asm/gpio.h>
 #include <env.h>
+#include <asm/u-boot.h>
 #include <power/pmic.h>
 #include <fsl_pmic.h>
 #include "kp_id_rev.h"

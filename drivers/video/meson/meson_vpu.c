@@ -15,7 +15,11 @@
 #include <part.h>
 =======
 #include <asm/global_data.h>
+<<<<<<< HEAD
 >>>>>>> 0e1dbd5f37c... common: Drop asm/global_data.h from common header
+=======
+#include <asm/u-boot.h>
+>>>>>>> a0c3f82a6f3... common: Drop asm/u-boot.h from common header
 #include <linux/sizes.h>
 #include <asm/arch/mem.h>
 #include <dm/device-internal.h>

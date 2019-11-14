@@ -12,6 +12,7 @@
 #include <image.h>
 #include <stdio.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <dm/uclass.h>
 #include <env.h>
 #include <fdt_support.h>

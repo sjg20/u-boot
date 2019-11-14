@@ -74,6 +74,7 @@
 #include <malloc.h>
 #include <video.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <linux/compiler.h>
 
 #if defined(CONFIG_VIDEO_MXS)

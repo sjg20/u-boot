@@ -21,6 +21,7 @@
 #include <asm/fec.h>
 #include <asm/global_data.h>
 #include <asm/immap.h>
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/mii.h>
 #include <linux/printk.h>

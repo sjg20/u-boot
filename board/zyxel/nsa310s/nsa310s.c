@@ -15,6 +15,7 @@
 #include <asm/global_data.h>
 #include <asm/io.h>
 #include "nsa310s.h"
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

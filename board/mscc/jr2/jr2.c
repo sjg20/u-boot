@@ -10,6 +10,7 @@
 #include <asm/io.h>
 #include <led.h>
 #include <miiphy.h>
+#include <asm/u-boot.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>

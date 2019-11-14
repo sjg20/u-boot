@@ -14,6 +14,7 @@
 #include <asm/processor.h>
 #include <asm/mach-types.h>
 #include <asm/io.h>
+#include <asm/u-boot.h>
 #include <linux/errno.h>
 #include <asm/arch/sys_proto.h>
 

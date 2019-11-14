@@ -15,6 +15,7 @@
 #include <serial.h>
 #include <stdio.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <linux/libfdt.h>
 #include <spl.h>
 #include <asm/arch/cpu.h>

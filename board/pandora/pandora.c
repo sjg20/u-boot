@@ -26,6 +26,7 @@
 #include <asm/arch/sys_proto.h>
 #include <asm/mach-types.h>
 #include "pandora.h"
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

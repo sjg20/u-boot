@@ -21,7 +21,11 @@
 >>>>>>> df98fd49b9f... common: Drop stdio.h from common header
 =======
 #include <asm/global_data.h>
+<<<<<<< HEAD
 >>>>>>> cabef25fe6d... common: Drop asm/global_data.h from common header
+=======
+#include <asm/u-boot.h>
+>>>>>>> 3758d75976a... common: Drop asm/u-boot.h from common header
 #include <u-boot/crc.h>
 #include <watchdog.h>
 

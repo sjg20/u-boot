@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <miiphy.h>
 #include <usb.h>
+#include <asm/u-boot.h>
 #include <usb/ehci-ci.h>
 #include <led.h>
 

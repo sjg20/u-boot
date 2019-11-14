@@ -18,6 +18,7 @@
 #include <asm/io.h>
 #include <spl.h>
 #include <asm/arch/sys_proto.h>
+#include <asm/u-boot.h>
 
 #include "../common/board_detect.h"
 

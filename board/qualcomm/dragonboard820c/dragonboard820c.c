@@ -13,7 +13,11 @@
 #include <asm/cache.h>
 =======
 #include <asm/global_data.h>
+<<<<<<< HEAD
 >>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
+=======
+#include <asm/u-boot.h>
+>>>>>>> 7384894e6c7... common: Drop asm/u-boot.h from common header
 #include <linux/arm-smccc.h>
 #include <linux/psci.h>
 #include <common.h>

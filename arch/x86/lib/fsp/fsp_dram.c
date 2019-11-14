@@ -12,6 +12,7 @@
 #include <asm/mrccache.h>
 #include <asm/mtrr.h>
 #include <asm/post.h>
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

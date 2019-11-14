@@ -18,6 +18,7 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/display2.h>
+#include <asm/u-boot.h>
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
 #include "simplefb_common.h"

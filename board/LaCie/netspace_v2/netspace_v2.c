@@ -19,6 +19,7 @@
 #include <asm/arch/soc.h>
 #include <asm/arch/mpp.h>
 #include <asm/arch/gpio.h>
+#include <asm/u-boot.h>
 
 #include "netspace_v2.h"
 #include "../common/common.h"

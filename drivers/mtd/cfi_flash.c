@@ -29,6 +29,7 @@
 #include <asm/processor.h>
 #include <asm/io.h>
 #include <asm/byteorder.h>
+#include <asm/u-boot.h>
 #include <asm/unaligned.h>
 #include <env_internal.h>
 #include <linux/delay.h>

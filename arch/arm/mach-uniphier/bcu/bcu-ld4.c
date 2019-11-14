@@ -5,6 +5,7 @@
  *   Author: Masahiro Yamada <yamada.masahiro@socionext.com>
  */
 
+#include <asm/u-boot.h>
 #include <linux/io.h>
 
 #include "../init.h"

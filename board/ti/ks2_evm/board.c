@@ -21,6 +21,7 @@
 #include <asm/global_data.h>
 #include <asm/ti-common/ti-aemif.h>
 #include <asm/ti-common/keystone_net.h>
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

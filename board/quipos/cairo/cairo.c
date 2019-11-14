@@ -22,6 +22,7 @@
 #include <asm/mach-types.h>
 #include <asm/omap_mmc.h>
 #include "cairo.h"
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

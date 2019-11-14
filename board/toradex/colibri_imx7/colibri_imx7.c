@@ -19,6 +19,7 @@
 #include <asm/io.h>
 #include <common.h>
 #include <dm.h>
+#include <asm/u-boot.h>
 #include <dm/platform_data/serial_mxc.h>
 #include <fdt_support.h>
 #include <fsl_esdhc_imx.h>

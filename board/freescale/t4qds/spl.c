@@ -18,6 +18,7 @@
 #include <i2c.h>
 #include "../common/qixis.h"
 #include "t4240qds_qixis.h"
+#include <asm/u-boot.h>
 
 #define FSL_CORENET_CCSR_PORSR1_RCW_MASK	0xFF800000
 

@@ -30,6 +30,7 @@
 #include <asm/arch/sysctrl.h>
 #include <asm/arch/wdt.h>
 #include "../drivers/mmc/arm_pl180_mmci.h"
+#include <asm/u-boot.h>
 
 static struct systimer *systimer_base = (struct systimer *)V2M_TIMER01;
 static struct sysctrl *sysctrl_base = (struct sysctrl *)SCTL_BASE;

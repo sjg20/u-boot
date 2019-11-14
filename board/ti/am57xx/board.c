@@ -34,6 +34,7 @@
 #include <asm/arch/gpio.h>
 #include <asm/arch/omap.h>
 #include <usb.h>
+#include <asm/u-boot.h>
 #include <linux/usb/gadget.h>
 #include <dwc3-uboot.h>
 #include <dwc3-omap-uboot.h>

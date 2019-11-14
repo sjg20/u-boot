@@ -13,6 +13,7 @@
 #include <init.h>
 #include <asm/arch/cpu.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

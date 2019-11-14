@@ -13,6 +13,7 @@
 #include <asm/arch/mpp.h>
 #include "iconnect.h"
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

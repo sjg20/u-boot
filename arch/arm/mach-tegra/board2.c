@@ -37,6 +37,7 @@
 #include <asm/arch/emc.h>
 #endif
 #include "emc.h"
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

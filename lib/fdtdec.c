@@ -14,6 +14,7 @@
 #include <net.h>
 #include <stdio.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <dm/of_extra.h>
 #include <env.h>
 #include <errno.h>

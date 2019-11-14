@@ -27,6 +27,7 @@
 #include <asm/emif.h>
 #include <asm/gpio.h>
 #include "evm.h"
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

@@ -16,6 +16,7 @@
 >>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/system.h>
 #include <asm/io.h>
+#include <asm/u-boot.h>
 #include <linux/arm-smccc.h>
 #include <linux/kernel.h>
 #include <scsi.h>

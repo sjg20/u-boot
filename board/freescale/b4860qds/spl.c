@@ -17,6 +17,7 @@
 #include <i2c.h>
 #include "../common/qixis.h"
 #include "b4860qds_qixis.h"
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

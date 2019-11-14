@@ -12,6 +12,7 @@
 #include <asm/global_data.h>
 >>>>>>> cabef25fe6d... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

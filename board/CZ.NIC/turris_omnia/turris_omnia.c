@@ -19,6 +19,7 @@
 #include <asm/io.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/soc.h>
+#include <asm/u-boot.h>
 #include <dm/uclass.h>
 #include <fdt_support.h>
 #include <time.h>

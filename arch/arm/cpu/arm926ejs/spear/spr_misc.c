@@ -13,6 +13,7 @@
 #include <net.h>
 #include <stdio.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <linux/mtd/st_smi.h>
 #include <asm/io.h>
 #include <asm/arch/hardware.h>

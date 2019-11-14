@@ -21,6 +21,7 @@
 #include <asm/arch/gpio.h>
 #include <asm/arch/sama5d2.h>
 #include <asm/arch/sama5d2_smc.h>
+#include <asm/u-boot.h>
 
 extern void at91_pda_detect(void);
 

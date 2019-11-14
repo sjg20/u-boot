@@ -9,6 +9,7 @@
 #include <common.h>
 #include <clock_legacy.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <asm/processor.h>

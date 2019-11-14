@@ -15,6 +15,7 @@
 #include <status_led.h>
 #include <cpsw.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

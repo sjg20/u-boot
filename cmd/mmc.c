@@ -14,6 +14,7 @@
 #include <sparse_format.h>
 #include <image-sparse.h>
 #include <stdio.h>
+#include <asm/u-boot.h>
 
 static int curr_device = -1;
 

@@ -27,6 +27,7 @@
 #include <fsl_qe.h>
 #endif
 #include <asm/arch/ppa.h>
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

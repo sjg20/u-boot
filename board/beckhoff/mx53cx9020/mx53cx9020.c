@@ -18,6 +18,7 @@
 #include <asm/mach-imx/mx5_video.h>
 #include <ACEX1K.h>
 #include <asm/gpio.h>
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

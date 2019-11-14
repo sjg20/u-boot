@@ -13,6 +13,7 @@
 #include <asm/io.h>
 #include <clk.h>
 #include <dm.h>
+#include <asm/u-boot.h>
 #include <dm/device_compat.h>
 #include <dm/of_access.h>
 #include <errno.h>

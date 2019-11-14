@@ -20,7 +20,11 @@
 #include <asm/mach-types.h>
 #include <i2c.h>
 #include "am3517crane.h"
+<<<<<<< HEAD
 #include <linux/printk.h>
+=======
+#include <asm/u-boot.h>
+>>>>>>> 3d0bc656183... common: Drop asm/u-boot.h from common header
 
 DECLARE_GLOBAL_DATA_PTR;
 

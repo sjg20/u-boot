@@ -19,6 +19,7 @@
 #include <mmc.h>
 #include <fsl_esdhc.h>
 #include <i2c.h>
+#include <asm/u-boot.h>
 
 #include "t4rdb.h"
 

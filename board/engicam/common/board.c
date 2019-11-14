@@ -16,6 +16,7 @@
 #include <asm/arch/sys_proto.h>
 #include <watchdog.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 
 #include "board.h"
 

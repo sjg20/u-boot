@@ -19,6 +19,7 @@
 #include <clk.h>
 #include <config.h>
 #include <dm.h>
+#include <asm/u-boot.h>
 #include <dm/device.h>
 #include <dm/uclass.h>
 #include <env.h>

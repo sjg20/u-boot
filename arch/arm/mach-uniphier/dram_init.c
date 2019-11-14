@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <init.h>
+#include <asm/u-boot.h>
 #include <linux/errno.h>
 #include <linux/io.h>
 #include <linux/kernel.h>

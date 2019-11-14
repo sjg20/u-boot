@@ -17,6 +17,7 @@
 #include <asm/arch/gpio.h>
 #include <debug_uart.h>
 #include <asm/mach-types.h>
+#include <asm/u-boot.h>
 
 extern void at91_pda_detect(void);
 

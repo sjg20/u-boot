@@ -32,6 +32,7 @@
 #include <stdio_dev.h>
 #include <usb.h>
 #include <dwc3-uboot.h>
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <samsung/misc.h>

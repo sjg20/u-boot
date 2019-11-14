@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <asm/global_data.h>
 #include <asm/gpio.h>
+#include <asm/u-boot.h>
 #include <linux/bitops.h>
 #include <linux/mbus.h>
 #include <linux/io.h>

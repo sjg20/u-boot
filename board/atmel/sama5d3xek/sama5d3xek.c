@@ -15,6 +15,7 @@
 #include <asm/arch/clk.h>
 #include <debug_uart.h>
 #include <env.h>
+#include <asm/u-boot.h>
 #include <linux/ctype.h>
 #include <spl.h>
 #include <asm/arch/atmel_mpddrc.h>

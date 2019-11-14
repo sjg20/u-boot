@@ -35,6 +35,7 @@
 #include <net.h>
 #include <netdev.h>
 #endif
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

@@ -18,6 +18,7 @@
 #include <asm/gpio.h>
 #include <spl.h>
 #include "work_92105_display.h"
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

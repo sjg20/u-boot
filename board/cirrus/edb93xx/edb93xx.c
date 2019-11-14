@@ -25,6 +25,7 @@
 #include <asm/io.h>
 #include <asm/mach-types.h>
 #include <asm/arch/ep93xx.h>
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

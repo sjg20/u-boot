@@ -18,6 +18,7 @@
 >>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
 #include <asm/io.h>
 #include <zynqmp_firmware.h>
+#include <asm/u-boot.h>
 
 #define ZYNQ_SILICON_VER_MASK	0xF000
 #define ZYNQ_SILICON_VER_SHIFT	12

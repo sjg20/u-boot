@@ -22,6 +22,7 @@
 #include <netdev.h>
 #include <twl4030.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <linux/mtd/omap_gpmc.h>
 #include <asm/io.h>
 #include <asm/arch/mem.h>

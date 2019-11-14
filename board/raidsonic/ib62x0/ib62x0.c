@@ -15,6 +15,7 @@
 #include <asm/arch/soc.h>
 #include <asm/arch/mpp.h>
 #include "ib62x0.h"
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

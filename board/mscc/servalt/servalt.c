@@ -9,6 +9,7 @@
 #include <asm/global_data.h>
 #include <asm/io.h>
 #include <led.h>
+#include <asm/u-boot.h>
 
 enum {
 	BOARD_TYPE_PCB116 = 0xAABBCE00,

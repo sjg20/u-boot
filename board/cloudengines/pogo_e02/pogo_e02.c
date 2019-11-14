@@ -18,6 +18,7 @@
 #include <asm/arch/mpp.h>
 #include "pogo_e02.h"
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

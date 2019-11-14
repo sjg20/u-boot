@@ -16,6 +16,7 @@
 #include <asm/arch/soc.h>
 #include <asm/arch/mpp.h>
 #include "ds109.h"
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

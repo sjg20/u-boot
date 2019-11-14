@@ -12,6 +12,7 @@
 #include <asm/io.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/soc.h>
+#include <asm/u-boot.h>
 
 #if defined(CONFIG_ARCH_MVEBU)
 /* Use common XOR definitions for A3x and AXP */

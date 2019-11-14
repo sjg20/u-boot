@@ -20,6 +20,7 @@
 #include <asm/arch/mx6-pins.h>
 #ifdef CONFIG_SPL_BUILD
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 # include <asm/arch/mx6-ddr.h>
 #endif
 #include <asm/arch/clock.h>

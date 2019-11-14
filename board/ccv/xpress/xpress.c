@@ -27,6 +27,7 @@
 #include <mmc.h>
 #include <netdev.h>
 #include <usb.h>
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <usb/ehci-ci.h>

@@ -17,6 +17,7 @@
 #ifdef CONFIG_LED_STATUS
 #include <status_led.h>
 #endif
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

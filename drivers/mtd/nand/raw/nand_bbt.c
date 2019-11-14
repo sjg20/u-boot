@@ -59,6 +59,7 @@
 
 #include <common.h>
 #include <malloc.h>
+#include <asm/u-boot.h>
 <<<<<<< HEAD
 #include <dm/devres.h>
 =======

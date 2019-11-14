@@ -31,6 +31,7 @@
 #include <asm/arch/sys_proto.h>
 #include <asm/gpio.h>
 #include <asm/arch/rmobile.h>
+#include <asm/u-boot.h>
 
 #define s_init_wait(cnt) \
 		({	\

@@ -7,6 +7,7 @@
 #include <command.h>
 #include <console.h>
 #include <asm/global_data.h>
+#include <asm/u-boot.h>
 #include <linux/ctype.h>
 #include <net.h>
 #include <bedbug/type.h>

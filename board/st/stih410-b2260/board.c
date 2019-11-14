@@ -14,7 +14,11 @@
 >>>>>>> 3541e855f17... common: Drop init.h from common header
 =======
 #include <asm/global_data.h>
+<<<<<<< HEAD
 >>>>>>> d595c5894cd... common: Drop asm/global_data.h from common header
+=======
+#include <asm/u-boot.h>
+>>>>>>> 7384894e6c7... common: Drop asm/u-boot.h from common header
 #include <linux/usb/otg.h>
 #include <dwc3-sti-glue.h>
 #include <dwc3-uboot.h>

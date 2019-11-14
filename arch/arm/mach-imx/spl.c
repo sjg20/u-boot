@@ -19,6 +19,7 @@
 #include <asm/mach-imx/hab.h>
 #include <asm/mach-imx/boot_mode.h>
 #include <g_dnl.h>
+#include <asm/u-boot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

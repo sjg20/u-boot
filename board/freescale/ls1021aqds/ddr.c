@@ -12,6 +12,7 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include "ddr.h"
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

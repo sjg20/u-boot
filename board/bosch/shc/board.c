@@ -37,6 +37,7 @@
 #include <i2c.h>
 #include <miiphy.h>
 #include <cpsw.h>
+#include <asm/u-boot.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <power/tps65217.h>
