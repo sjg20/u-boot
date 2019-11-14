@@ -14,6 +14,7 @@
 #include <syscon.h>
 #include <reset.h>
 #include <clk.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/printk.h>

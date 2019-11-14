@@ -17,6 +17,7 @@
 #include <fs_loader.h>
 #include <wait_bit.h>
 #include <watchdog.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

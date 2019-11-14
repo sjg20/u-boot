@@ -11,6 +11,7 @@
 #include <flash.h>
 #include <mtd.h>
 #include <asm/io.h>
+#include <linux/bitops.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

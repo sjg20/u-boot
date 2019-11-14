@@ -13,6 +13,7 @@
 #include <clk-uclass.h>
 #include <div64.h>
 #include <dm.h>
+#include <linux/bitops.h>
 #include <linux/bug.h>
 #include <linux/delay.h>
 #include <linux/io.h>

@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <linux/bitops.h>
 <<<<<<< HEAD
 #include <dm/device_compat.h>
 =======

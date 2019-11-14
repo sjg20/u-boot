@@ -14,7 +14,11 @@
 #include <miiphy.h>
 #include <malloc.h>
 #include <net.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <linux/bitops.h>
+>>>>>>> 62914068d58... common: Drop linux/bitops.h from common header
 #include <linux/compiler.h>
 #include <linux/delay.h>
 #include <linux/err.h>

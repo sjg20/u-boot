@@ -13,6 +13,7 @@
 #include <led.h>
 #include <wait_bit.h>
 #include <miiphy.h>
+#include <linux/bitops.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

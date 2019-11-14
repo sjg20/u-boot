@@ -7,7 +7,11 @@
 
 #include <common.h>
 #include <asm/arch/sm.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <linux/bitops.h>
+>>>>>>> a9f77b195ef... common: Drop linux/bitops.h from common header
 #include <linux/err.h>
 #include <linux/kernel.h>
 #include <dm.h>

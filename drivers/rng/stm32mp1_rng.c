@@ -8,6 +8,7 @@
 #include <dm.h>
 #include <reset.h>
 #include <rng.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

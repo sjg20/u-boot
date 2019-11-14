@@ -9,6 +9,7 @@
 #include <tpm-common.h>
 #include <tpm-v2.h>
 #include "tpm-utils.h"
+#include <linux/bitops.h>
 
 u32 tpm2_startup(struct udevice *dev, enum tpm2_startup_types mode)
 {

@@ -13,6 +13,7 @@
 #include <spl.h>
 #include <asm/arch-rockchip/bootrom.h>
 #include <asm/io.h>
+#include <linux/bitops.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

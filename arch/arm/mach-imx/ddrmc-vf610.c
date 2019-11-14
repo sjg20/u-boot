@@ -12,6 +12,7 @@
 #include <asm/arch/iomux-vf610.h>
 #include <asm/arch/ddrmc-vf610.h>
 #include "ddrmc-vf610-calibration.h"
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

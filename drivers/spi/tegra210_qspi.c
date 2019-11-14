@@ -14,6 +14,7 @@
 #include <spi.h>
 #include <fdtdec.h>
 #include "tegra_spi.h"
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

@@ -6,6 +6,7 @@
 #include <miiphy.h>
 #include <wait_bit.h>
 #include "mscc_miim.h"
+#include <linux/bitops.h>
 
 #define MIIM_STATUS			0x0
 #define		MIIM_STAT_BUSY			BIT(3)

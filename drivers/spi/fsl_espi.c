@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

@@ -12,6 +12,7 @@
 #include <asm/io.h>
 #include <dm/pinctrl.h>
 #include "pinctrl-snapdragon.h"
+#include <linux/bitops.h>
 
 struct msm_pinctrl_priv {
 	phys_addr_t base;

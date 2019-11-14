@@ -11,6 +11,7 @@
 #include <spi.h>
 #include <asm/mpc8xxx_spi.h>
 #include <asm-generic/gpio.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

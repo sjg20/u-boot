@@ -18,6 +18,7 @@
 
 #include <common.h>
 #include <cpu_func.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/io.h>
 #include <asm/cacheops.h>

@@ -9,6 +9,7 @@
 #include <i2c.h>
 #include <malloc.h>
 #include <reset.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

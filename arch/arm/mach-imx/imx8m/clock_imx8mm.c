@@ -12,6 +12,7 @@
 #include <asm/io.h>
 #include <div64.h>
 #include <errno.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

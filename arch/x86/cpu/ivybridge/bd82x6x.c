@@ -17,6 +17,7 @@
 #include <asm/arch/model_206ax.h>
 #include <asm/arch/pch.h>
 #include <asm/arch/sandybridge.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

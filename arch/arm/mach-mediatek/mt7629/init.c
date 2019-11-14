@@ -13,6 +13,7 @@
 #include <asm/arch/misc.h>
 #include <asm/sections.h>
 #include <dm/uclass.h>
+#include <linux/bitops.h>
 #include <linux/io.h>
 
 #include <dt-bindings/clock/mt7629-clk.h>

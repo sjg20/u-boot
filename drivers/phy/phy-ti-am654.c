@@ -19,6 +19,7 @@
 #include <power-domain.h>
 #include <regmap.h>
 #include <syscon.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/err.h>
 #include <linux/printk.h>

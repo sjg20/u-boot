@@ -8,6 +8,7 @@
 #include <dm/device_compat.h>
 #include <dm/lists.h>
 #include <dm/pinctrl.h>
+#include <linux/bitops.h>
 #include <linux/err.h>
 
 DECLARE_GLOBAL_DATA_PTR;

@@ -12,6 +12,7 @@
 #include <malloc.h>
 #include <search.h>
 #include <uuid.h>
+#include <linux/bitops.h>
 #include <u-boot/crc.h>
 
 #define READ_ONLY BIT(31)

@@ -10,6 +10,7 @@
 #define pr_fmt(fmt)	"spi-nand: " fmt
 
 #ifndef __UBOOT__
+#include <linux/bitops.h>
 #include <linux/bug.h>
 #include <linux/device.h>
 #include <linux/jiffies.h>

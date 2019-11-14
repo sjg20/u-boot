@@ -8,6 +8,7 @@
 #include <i2c.h>
 #include <misc.h>
 #include <asm/arch-tegra/bpmp_abi.h>
+#include <linux/bitops.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

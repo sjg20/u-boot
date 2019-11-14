@@ -9,6 +9,7 @@
 #ifdef CONFIG_DM_I2C
 #include <dm.h>
 #include <regmap.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #else

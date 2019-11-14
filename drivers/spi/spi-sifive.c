@@ -11,6 +11,7 @@
 #include <malloc.h>
 #include <spi.h>
 #include <asm/io.h>
+#include <linux/bitops.h>
 #include <linux/log2.h>
 #include <clk.h>
 

@@ -13,6 +13,7 @@
 #include <p2sb.h>
 #include <spl.h>
 #include <asm/pci.h>
+#include <linux/bitops.h>
 
 struct p2sb_platdata {
 #if CONFIG_IS_ENABLED(OF_PLATDATA)

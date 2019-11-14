@@ -8,6 +8,7 @@
 #include <common.h>
 #include <errno.h>
 #include <phy.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

@@ -10,7 +10,11 @@
 #include <cpu_func.h>
 #include <zynqmppl.h>
 #include <zynqmp_firmware.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <linux/bitops.h>
+>>>>>>> 62914068d58... common: Drop linux/bitops.h from common header
 #include <linux/sizes.h>
 #include <asm/arch/sys_proto.h>
 #include <memalign.h>

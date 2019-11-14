@@ -5,6 +5,7 @@
 #include <common.h>
 #include <watchdog.h>
 #include "LzmaDec.h"
+#include <linux/bitops.h>
 
 #include <linux/string.h>
 

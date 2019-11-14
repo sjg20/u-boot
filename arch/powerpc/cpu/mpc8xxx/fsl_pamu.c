@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <linux/bitops.h>
 #include <linux/log2.h>
 #include <malloc.h>
 #include <asm/fsl_pamu.h>

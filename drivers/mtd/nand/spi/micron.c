@@ -8,6 +8,7 @@
 
 #ifndef __UBOOT__
 #include <malloc.h>
+#include <linux/bitops.h>
 #include <linux/device.h>
 #include <linux/kernel.h>
 #endif

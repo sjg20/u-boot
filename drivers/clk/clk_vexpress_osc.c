@@ -12,6 +12,7 @@
 #include <dm/lists.h>
 #include <errno.h>
 #include <misc.h>
+#include <linux/bitops.h>
 
 #define CLK_FUNCTION		BIT(20)
 

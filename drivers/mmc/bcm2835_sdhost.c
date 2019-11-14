@@ -36,6 +36,7 @@
 #include <asm/arch/msg.h>
 #include <asm/arch/mbox.h>
 #include <asm/unaligned.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 <<<<<<< HEAD

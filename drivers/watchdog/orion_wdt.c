@@ -16,6 +16,7 @@
 #include <dm.h>
 #include <clk.h>
 #include <wdt.h>
+#include <linux/bitops.h>
 #include <linux/kernel.h>
 #include <asm/io.h>
 #include <asm/arch/cpu.h>

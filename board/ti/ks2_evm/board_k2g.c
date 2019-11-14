@@ -20,6 +20,7 @@
 #include <remoteproc.h>
 #include "mux-k2g.h"
 #include "../common/board_detect.h"
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

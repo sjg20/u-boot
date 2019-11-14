@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <net.h>
 #include <phy.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <u-boot/crc.h>

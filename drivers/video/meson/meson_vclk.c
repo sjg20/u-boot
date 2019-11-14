@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <edid.h>
 #include "meson_vpu.h"
+#include <linux/bitops.h>
 #include <linux/iopoll.h>
 #include <linux/math64.h>
 

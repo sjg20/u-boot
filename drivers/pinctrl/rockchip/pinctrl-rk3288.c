@@ -7,6 +7,7 @@
 #include <dm.h>
 #include <dm/pinctrl.h>
 #include <regmap.h>
+#include <linux/bitops.h>
 
 #include "pinctrl-rockchip.h"
 

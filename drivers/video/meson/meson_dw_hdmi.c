@@ -12,6 +12,7 @@
 #include <dw_hdmi.h>
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
+#include <linux/bitops.h>
 #include <linux/printk.h>
 #include <power/regulator.h>
 #include <clk.h>

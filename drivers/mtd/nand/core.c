@@ -11,6 +11,7 @@
 
 #include <common.h>
 #ifndef __UBOOT__
+#include <linux/bitops.h>
 #include <linux/compat.h>
 #include <linux/module.h>
 #endif

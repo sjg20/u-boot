@@ -13,6 +13,7 @@
 #include <asm/gpio.h>
 #include <asm/io.h>
 #include "../pinctrl/renesas/sh_pfc.h"
+#include <linux/bitops.h>
 
 #define GPIO_IOINTSEL	0x00	/* General IO/Interrupt Switching Register */
 #define GPIO_INOUTSEL	0x04	/* General Input/Output Switching Register */

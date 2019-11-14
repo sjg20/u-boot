@@ -7,6 +7,7 @@
 #include <common.h>
 #include <spl.h>
 #include <stdio.h>
+#include <linux/bitops.h>
 #include <linux/bug.h>
 #include <linux/io.h>
 #include <linux/log2.h>

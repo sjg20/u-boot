@@ -14,6 +14,7 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/lcdc.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

@@ -31,6 +31,7 @@
 #include <mtd_node.h>
 #include <netdev.h>
 #include <phy.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <power/regulator.h>

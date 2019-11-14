@@ -25,6 +25,7 @@
 #include <net.h>
 #include <reset.h>
 #include <asm/io.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

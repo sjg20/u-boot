@@ -15,6 +15,7 @@
 #include <asm/io.h>
 #include <asm/arch-armada8k/soc-info.h>
 #include "pinctrl-mvebu.h"
+#include <linux/bitops.h>
 
 #define AP_EMMC_PHY_CTRL_REG		0x100
 #define CP_EMMC_PHY_CTRL_REG		0x424

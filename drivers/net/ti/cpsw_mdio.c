@@ -10,6 +10,7 @@
 #include <asm/io.h>
 #include <miiphy.h>
 #include <wait_bit.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

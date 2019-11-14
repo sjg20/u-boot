@@ -9,6 +9,7 @@
 #include <common.h>
 #include <dm.h>
 #include <syscon.h>
+#include <linux/bitops.h>
 #include <linux/errno.h>
 #include <asm/gpio.h>
 #include <asm/io.h>

@@ -10,6 +10,7 @@
 #include <time.h>
 #include <dm/device_compat.h>
 #include <linux/bitfield.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/io.h>
 #include <spi.h>

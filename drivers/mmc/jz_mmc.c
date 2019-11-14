@@ -13,6 +13,7 @@
 #include <asm/unaligned.h>
 #include <errno.h>
 #include <dm/device_compat.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <mach/jz4780.h>

@@ -7,6 +7,7 @@
 #include <cpu_func.h>
 #include <dm.h>
 #include <fdtdec.h>
+#include <linux/bitops.h>
 #include <linux/libfdt.h>
 #include <asm/io.h>
 #include <asm/system.h>

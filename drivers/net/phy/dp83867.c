@@ -6,6 +6,7 @@
 #include <common.h>
 #include <phy.h>
 #include <dm/devres.h>
+#include <linux/bitops.h>
 #include <linux/compat.h>
 #include <malloc.h>
 

@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <malloc.h>
 #include <reset-uclass.h>
+#include <linux/bitops.h>
 #include <linux/io.h>
 
 struct mtmips_reset_priv {

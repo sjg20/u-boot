@@ -17,7 +17,11 @@
 #include <malloc.h>
 #include <memalign.h>
 #include <spi.h>
+<<<<<<< HEAD
 #include <asm/cache.h>
+=======
+#include <linux/bitops.h>
+>>>>>>> 62914068d58... common: Drop linux/bitops.h from common header
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>

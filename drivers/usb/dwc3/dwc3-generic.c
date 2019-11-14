@@ -14,6 +14,7 @@
 #include <dm/device-internal.h>
 #include <dm/lists.h>
 #include <dwc3-uboot.h>
+#include <linux/bitops.h>
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 #include <malloc.h>

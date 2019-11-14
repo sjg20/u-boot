@@ -21,6 +21,7 @@
 #include <malloc.h>
 #include <asm/cache.h>
 #include <asm/io.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 <<<<<<< HEAD

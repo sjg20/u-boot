@@ -1,6 +1,7 @@
 #include <config.h>
 #include <common.h>
 #include <watchdog.h>
+#include <linux/bitops.h>
 
 /*-------------------------------------------------------------*/
 /*--- Decompression machinery                               ---*/

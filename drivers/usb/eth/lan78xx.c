@@ -8,6 +8,7 @@
 #include <usb.h>
 #include "usb_ether.h"
 #include "lan7x.h"
+#include <linux/bitops.h>
 
 /* LAN78xx specific register/bit defines */
 #define LAN78XX_HW_CFG_LED1_EN		BIT(21) /* Muxed with EEDO */

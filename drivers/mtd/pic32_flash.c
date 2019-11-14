@@ -11,6 +11,7 @@
 #include <fdt_support.h>
 #include <flash.h>
 #include <irq_func.h>
+#include <linux/bitops.h>
 #include <mach/pic32.h>
 #include <wait_bit.h>
 

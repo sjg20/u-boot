@@ -14,6 +14,7 @@
 #include <asm/arch/stm32.h>
 #include "serial_stm32.h"
 #include <dm/device_compat.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

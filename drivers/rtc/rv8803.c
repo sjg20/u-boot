@@ -15,6 +15,7 @@
 #include <dm.h>
 #include <rtc.h>
 #include <i2c.h>
+#include <linux/bitops.h>
 
 /*
  * RTC register addresses

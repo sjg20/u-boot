@@ -21,6 +21,7 @@
 #include <asm/arch/clock.h>
 #endif
 #include <fsl_dspi.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

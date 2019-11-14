@@ -15,6 +15,7 @@
 #include <asm/arch/clk.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/io.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

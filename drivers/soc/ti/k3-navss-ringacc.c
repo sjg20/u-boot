@@ -17,6 +17,7 @@
 #include <dm/devres.h>
 #include <dm/read.h>
 #include <dm/uclass.h>
+#include <linux/bitops.h>
 #include <linux/compat.h>
 #include <linux/err.h>
 #include <linux/soc/ti/k3-navss-ringacc.h>

@@ -65,6 +65,7 @@
  */
 
 #ifndef __UBOOT__
+#include <linux/bitops.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/sched.h>

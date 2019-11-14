@@ -15,6 +15,7 @@
 #include <part.h>
 #include <malloc.h>
 #include <asm/io.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/errno.h>
 #include <asm/byteorder.h>

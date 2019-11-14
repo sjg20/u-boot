@@ -11,6 +11,7 @@
 #include <common.h>
 #include <malloc.h>
 #include <asm/io.h>
+#include <linux/bitops.h>
 #include <linux/errno.h>
 #include "mvgpio.h"
 #include <asm/gpio.h>

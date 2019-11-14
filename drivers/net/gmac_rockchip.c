@@ -26,6 +26,7 @@
 #include <dm/pinctrl.h>
 #include <dt-bindings/clock/rk3288-cru.h>
 #include "designware.h"
+#include <linux/bitops.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 #define DELAY_ENABLE(soc, tx, rx) \

@@ -11,8 +11,12 @@
 #include <fdtdec.h>
 #include <malloc.h>
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include <asm/cache.h>
 =======
+=======
+#include <linux/bitops.h>
+>>>>>>> 62914068d58... common: Drop linux/bitops.h from common header
 #include <linux/delay.h>
 >>>>>>> ad95c7069dd... common: Drop linux/delay.h from common header
 #include <linux/libfdt.h>

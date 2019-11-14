@@ -17,6 +17,7 @@
 #include <memalign.h>
 #include <nand.h>
 #include <clk.h>
+#include <linux/bitops.h>
 <<<<<<< HEAD
 #include <dm/device_compat.h>
 #include <dm/devres.h>

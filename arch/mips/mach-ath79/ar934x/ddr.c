@@ -9,6 +9,7 @@
 #include <asm/io.h>
 #include <asm/addrspace.h>
 #include <asm/types.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <mach/ar71xx_regs.h>

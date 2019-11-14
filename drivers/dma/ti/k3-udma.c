@@ -19,6 +19,7 @@
 #include <dm/of_access.h>
 #include <dma.h>
 #include <dma-uclass.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <dt-bindings/dma/k3-udma.h>
 #include <linux/bitmap.h>

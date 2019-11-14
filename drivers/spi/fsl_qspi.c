@@ -9,6 +9,7 @@
 #include <malloc.h>
 #include <spi.h>
 #include <asm/io.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 #include <linux/sizes.h>

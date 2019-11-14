@@ -21,6 +21,7 @@
 #include <asm/arch-tegra/timer.h>
 #include <div64.h>
 #include <fdtdec.h>
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

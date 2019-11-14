@@ -11,6 +11,7 @@
 #include <i2c.h>
 #include <media_bus_format.h>
 #include "dw_hdmi.h"
+#include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/printk.h>
 

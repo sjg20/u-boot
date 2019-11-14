@@ -10,6 +10,7 @@
 #include <ram.h>
 #include <wdt.h>
 #include <asm/io.h>
+#include <linux/bitops.h>
 #include <linux/io.h>
 #include <linux/sizes.h>
 #include "mt76xx.h"

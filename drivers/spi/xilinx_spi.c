@@ -20,6 +20,7 @@
 #include <spi.h>
 #include <asm/io.h>
 #include <wait_bit.h>
+#include <linux/bitops.h>
 
 /*
  * [0]: http://www.xilinx.com/support/documentation
