@@ -29,6 +29,16 @@
 		};
 	};
 
+	calculator {
+		compatible = "feature,calculator";
+		gui = <&nuklear>;
+	};
+
+	diagnostics {
+		compatible = "feature,diagnostics";
+		gui = <&nuklear>;
+	};
+
 	clk_fixed: clk-fixed {
 		u-boot,dm-pre-reloc;
 		compatible = "fixed-clock";
@@ -53,7 +63,6 @@
 			 <&clk_sandbox 3>,
 			 <&clk_sandbox 2>;
 		clock-names = "fixed", "i2c", "spi", "uart2", "uart1";
-	};
 
 	gpio_a: gpios@0 {
 		u-boot,dm-pre-reloc;
@@ -125,6 +134,11 @@
 		xres = <1366>;
 		yres = <768>;
 		log2-depth = <5>;
+
+		nuklear: nuklear {
+			compatible = "gui,nuklear";
+			theme = "red";
+		};
 	};
 
 	leds {
@@ -139,6 +153,10 @@
 			gpios = <&gpio_a 2 0>;
 			label = "sandbox:green";
 		};
+	};
+
+	mouse {
+		compatible = "sandbox,mouse";
 	};
 
 	pci@0 {
