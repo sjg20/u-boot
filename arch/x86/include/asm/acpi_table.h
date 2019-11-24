@@ -13,9 +13,12 @@
 #define OEM_ID			"U-BOOT"	/* U-Boot */
 #define OEM_TABLE_ID		"U-BOOTBL"	/* U-Boot Table */
 #define ASLC_ID			"INTL"		/* Intel ASL Compiler */
+#define ACPI_TABLE_CREATOR	OEM_TABLE_ID
 
 #define ACPI_RSDP_REV_ACPI_1_0	0
 #define ACPI_RSDP_REV_ACPI_2_0	2
+
+#if !defined(__ACPI__)
 
 /*
  * RSDP (Root System Description Pointer)
@@ -385,6 +388,13 @@ struct __packed acpi_spcr {
 	u32 reserved2;
 };
 
+struct __packed acpi_cstate {
+	u8  ctype;
+	u16 latency;
+	u32 power;
+	struct acpi_gen_regaddr resource;
+};
+
 /* These can be used by the target port */
 
 void acpi_fill_header(struct acpi_table_header *header, char *signature);
@@ -402,7 +412,7 @@ int acpi_create_mcfg_mmconfig(struct acpi_mcfg_mmconfig *mmconfig, u32 base,
 			      u16 seg_nr, u8 start, u8 end);
 u32 acpi_fill_mcfg(u32 current);
 u32 acpi_fill_csrt(u32 current);
-void acpi_create_gnvs(struct acpi_global_nvs *gnvs);
+int acpi_create_gnvs(struct acpi_global_nvs *gnvs);
 ulong write_acpi_tables(ulong start);
 
 /**
@@ -413,5 +423,10 @@ ulong write_acpi_tables(ulong start);
  * @return:	ACPI RSDP table address
  */
 ulong acpi_get_rsdp_addr(void);
+
+void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
+		      void *dsdt);
+
+#endif /* !__ACPI__*/
 
 #endif /* __ASM_ACPI_TABLE_H__ */

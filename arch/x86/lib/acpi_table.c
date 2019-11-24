@@ -17,8 +17,13 @@
 #include <asm/ioapic.h>
 #include <asm/lapic.h>
 #include <asm/mpspec.h>
+#include <asm/processor.h>
+#include <asm/smm.h>
 #include <asm/tables.h>
 #include <asm/arch/global_nvs.h>
+#include <asm/arch/iomap.h>
+#include <asm/arch/pm.h>
+#include <power/acpi_pmc.h>
 
 /*
  * IASL compiles the dsdt entries and writes the hex values
@@ -474,6 +479,133 @@ static void acpi_create_spcr(struct acpi_spcr *spcr)
 	header->checksum = table_compute_checksum((void *)spcr, header->length);
 }
 
+uint32_t soc_read_sci_irq_select(void)
+{
+	uintptr_t pmc_bar = PMC_BAR0;
+
+	return readl((void *)pmc_bar + IRQ_REG);
+}
+
+static int acpi_sci_irq(void)
+{
+	int sci_irq = 9;
+	uint32_t scis;
+
+	scis = soc_read_sci_irq_select();
+	scis &= SCI_IRQ_SEL;
+	scis >>= SCI_IRQ_ADJUST;
+
+	/* Determine how SCI is routed. */
+	switch (scis) {
+	case SCIS_IRQ9:
+	case SCIS_IRQ10:
+	case SCIS_IRQ11:
+		sci_irq = scis - SCIS_IRQ9 + 9;
+		break;
+	case SCIS_IRQ20:
+	case SCIS_IRQ21:
+	case SCIS_IRQ22:
+	case SCIS_IRQ23:
+		sci_irq = scis - SCIS_IRQ20 + 20;
+		break;
+	default:
+		debug("Invalid SCI route! Defaulting to IRQ9\n");
+		sci_irq = 9;
+		break;
+	}
+
+	printf("SCI is IRQ%d\n", sci_irq);
+	return sci_irq;
+}
+
+void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
+		      void *dsdt)
+{
+	struct acpi_table_header *header = &(fadt->header);
+	const uint pmbase = IOMAP_ACPI_BASE;
+
+	memset((void *)fadt, 0, sizeof(struct acpi_fadt));
+
+	acpi_fill_header(header, "FACP");
+	header->length = sizeof(struct acpi_fadt);
+	header->revision = 4;
+	memcpy(header->oem_id, OEM_ID, 6);
+	memcpy(header->oem_table_id, ACPI_TABLE_CREATOR, 8);
+	memcpy(header->aslc_id, ASLC_ID, 4);
+	header->aslc_revision = 1;
+
+	fadt->firmware_ctrl = (unsigned long) facs;
+	fadt->dsdt = (unsigned long) dsdt;
+
+	fadt->x_firmware_ctl_l = (unsigned long)facs;
+	fadt->x_firmware_ctl_h = 0;
+	fadt->x_dsdt_l = (unsigned long)dsdt;
+	fadt->x_dsdt_h = 0;
+
+// 	if (CONFIG(SYSTEM_TYPE_CONVERTIBLE) ||
+// 	    CONFIG(SYSTEM_TYPE_LAPTOP))
+		fadt->preferred_pm_profile = ACPI_PM_MOBILE;
+// 	else if (CONFIG(SYSTEM_TYPE_DETACHABLE) ||
+// 		 CONFIG(SYSTEM_TYPE_TABLET))
+// 		fadt->preferred_pm_profile = PM_TABLET;
+// 	else
+// 		fadt->preferred_pm_profile = PM_DESKTOP;
+
+	/* Use ACPI 3.0 revision */
+	fadt->header.revision = 4;
+
+	fadt->sci_int = acpi_sci_irq();
+	fadt->smi_cmd = APM_CNT;
+	fadt->acpi_enable = APM_CNT_ACPI_ENABLE;
+	fadt->acpi_disable = APM_CNT_ACPI_DISABLE;
+	fadt->s4bios_req = 0x0;
+	fadt->pstate_cnt = 0;
+
+	fadt->pm1a_evt_blk = pmbase + PM1_STS;
+	fadt->pm1b_evt_blk = 0x0;
+	fadt->pm1a_cnt_blk = pmbase + PM1_CNT;
+	fadt->pm1b_cnt_blk = 0x0;
+
+	fadt->gpe0_blk = pmbase + GPE0_STS;
+
+	fadt->pm1_evt_len = 4;
+	fadt->pm1_cnt_len = 2;
+
+	/* GPE0 STS/EN pairs each 32 bits wide. */
+	fadt->gpe0_blk_len = 2 * GPE0_REG_MAX * sizeof(uint32_t);
+
+	fadt->flush_size = 0x400;	/* twice of cache size */
+	fadt->flush_stride = 0x10;	/* Cache line width  */
+	fadt->duty_offset = 1;
+	fadt->day_alrm = 0xd;
+
+	fadt->flags = ACPI_FADT_WBINVD | ACPI_FADT_C1_SUPPORTED |
+	    ACPI_FADT_C2_MP_SUPPORTED | ACPI_FADT_SLEEP_BUTTON |
+	    ACPI_FADT_RESET_REGISTER | ACPI_FADT_SEALED_CASE |
+	    ACPI_FADT_S4_RTC_WAKE | ACPI_FADT_PLATFORM_CLOCK;
+
+	fadt->reset_reg.space_id = 1;
+	fadt->reset_reg.bit_width = 8;
+	fadt->reset_reg.addrl = IO_PORT_RESET;
+	fadt->reset_value = RST_CPU | SYS_RST;
+
+	fadt->x_pm1a_evt_blk.space_id = 1;
+	fadt->x_pm1a_evt_blk.bit_width = fadt->pm1_evt_len * 8;
+	fadt->x_pm1a_evt_blk.addrl = pmbase + PM1_STS;
+
+	fadt->x_pm1b_evt_blk.space_id = 1;
+
+	fadt->x_pm1a_cnt_blk.space_id = 1;
+	fadt->x_pm1a_cnt_blk.bit_width = fadt->pm1_cnt_len * 8;
+	fadt->x_pm1a_cnt_blk.addrl = pmbase + PM1_CNT;
+
+	fadt->x_pm1b_cnt_blk.space_id = 1;
+
+	fadt->x_gpe1_blk.space_id = 1;
+
+	header->checksum = table_compute_checksum(fadt, header->length);
+}
+
 /*
  * QEMU's version of write_acpi_tables is defined in drivers/misc/qfw.c
  */
@@ -592,7 +724,7 @@ ulong write_acpi_tables(ulong start)
 	acpi_add_table(rsdp, spcr);
 	current = ALIGN(current, 16);
 
-	debug("current = %x\n", current);
+	printf("current = %x\n", current);
 
 	acpi_rsdp_addr = (unsigned long)rsdp;
 	debug("ACPI: done\n");
