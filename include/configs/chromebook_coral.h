@@ -11,7 +11,7 @@
 #define __CONFIG_H
 
 #define CONFIG_BOOTCOMMAND	\
-	"usb start; ext2load usb 0:1 111000 vmlinuz; zboot 111000"
+	"usb start; ext2load usb 0:1 111000 vmlinuz; echo; echo; echo !!!!!!! warning hard-coded serial; echo; echo; zboot 111000"
 
 #include <configs/x86-common.h>
 #include <configs/x86-chromebook.h>
