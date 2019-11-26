@@ -879,4 +879,6 @@ int mmc_get_env_dev(void);
  */
 struct blk_desc *mmc_get_blk_desc(struct mmc *mmc);
 
+bool mmc_is_sd(const struct udevice *dev);
+
 #endif /* _MMC_H_ */

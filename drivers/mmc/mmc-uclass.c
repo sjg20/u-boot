@@ -317,6 +317,16 @@ void print_mmc_devices(char separator)
 void print_mmc_devices(char separator) { }
 #endif
 
+bool mmc_is_sd(const struct udevice *dev)
+{
+	struct mmc *mmc = mmc_get_mmc_dev(dev);
+
+	if (!mmc)
+		return false;
+
+	return IS_SD(mmc);
+}
+
 int mmc_bind(struct udevice *dev, struct mmc *mmc, const struct mmc_config *cfg)
 {
 	struct blk_desc *bdesc;

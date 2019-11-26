@@ -6,6 +6,7 @@
  * Copyright (C) 2016, Bin Meng <bmeng.cn@gmail.com>
  */
 
+#define DEBUG
 #define LOG_CATEGORY LOGC_ACPI
 
 #include <common.h>
@@ -372,10 +373,10 @@ __weak ulong acpi_fill_madt(ulong current)
 
 static void acpi_create_madt(struct acpi_madt *madt)
 {
-	struct acpi_table_header *header = &(madt->header);
+	struct acpi_table_header *header = &madt->header;
 	u32 current = (u32)madt + sizeof(struct acpi_madt);
 
-	memset((void *)madt, 0, sizeof(struct acpi_madt));
+	memset((void *)madt, '\0', sizeof(struct acpi_madt));
 
 	/* Fill out header fields */
 	acpi_fill_header(header, "APIC");
@@ -825,6 +826,61 @@ void acpi_create_dbg2(struct acpi_dbg2_header *dbg2,
 	header->checksum = acpi_checksum((uint8_t *)dbg2, header->length);
 }
 
+ulong acpi_get_rsdp_addr(void)
+{
+	return acpi_rsdp_addr;
+}
+
+int get_acpi_table_revision(enum acpi_tables table)
+{
+	switch (table) {
+	case FADT:
+		return ACPI_FADT_REV_ACPI_3_0;
+	case MADT: /* ACPI 3.0: 2, ACPI 4.0/5.0: 3, ACPI 6.2b/6.3: 5 */
+		return 2;
+	case MCFG:
+		return 1;
+	case TCPA:
+		return 2;
+	case TPM2:
+		return 4;
+	case SSDT: /* ACPI 3.0 upto 6.3: 2 */
+		return 2;
+	case SRAT: /* ACPI 2.0: 1, ACPI 3.0: 2, ACPI 4.0 upto 6.3: 3 */
+		return 1; /* TODO Should probably be upgraded to 2 */
+	case DMAR:
+		return 1;
+	case SLIT: /* ACPI 2.0 upto 6.3: 1 */
+		return 1;
+	case SPMI: /* IMPI 2.0 */
+		return 5;
+	case HPET: /* Currently 1. Table added in ACPI 2.0. */
+		return 1;
+	case VFCT: /* ACPI 2.0/3.0/4.0: 1 */
+		return 1;
+	case IVRS:
+		return IVRS_FORMAT_FIXED;
+	case DBG2:
+		return 0;
+	case FACS: /* ACPI 2.0/3.0: 1, ACPI 4.0 upto 6.3: 2 */
+		return 1;
+	case RSDT: /* ACPI 1.0 upto 6.3: 1 */
+		return 1;
+	case XSDT: /* ACPI 2.0 upto 6.3: 1 */
+		return 1;
+	case RSDP: /* ACPI 2.0 upto 6.3: 2 */
+		return 2;
+	case HEST:
+		return 1;
+	case NHLT:
+		return 5;
+	case BERT:
+		return 1;
+	default:
+		return -EINVAL;
+	}
+}
+
 /*
  * QEMU's version of write_acpi_tables is defined in drivers/misc/qfw.c
  */
@@ -949,59 +1005,4 @@ ulong write_acpi_tables(ulong start)
 	debug("ACPI: done\n");
 
 	return current;
-}
-
-ulong acpi_get_rsdp_addr(void)
-{
-	return acpi_rsdp_addr;
-}
-
-int get_acpi_table_revision(enum acpi_tables table)
-{
-	switch (table) {
-	case FADT:
-		return ACPI_FADT_REV_ACPI_3_0;
-	case MADT: /* ACPI 3.0: 2, ACPI 4.0/5.0: 3, ACPI 6.2b/6.3: 5 */
-		return 2;
-	case MCFG:
-		return 1;
-	case TCPA:
-		return 2;
-	case TPM2:
-		return 4;
-	case SSDT: /* ACPI 3.0 upto 6.3: 2 */
-		return 2;
-	case SRAT: /* ACPI 2.0: 1, ACPI 3.0: 2, ACPI 4.0 upto 6.3: 3 */
-		return 1; /* TODO Should probably be upgraded to 2 */
-	case DMAR:
-		return 1;
-	case SLIT: /* ACPI 2.0 upto 6.3: 1 */
-		return 1;
-	case SPMI: /* IMPI 2.0 */
-		return 5;
-	case HPET: /* Currently 1. Table added in ACPI 2.0. */
-		return 1;
-	case VFCT: /* ACPI 2.0/3.0/4.0: 1 */
-		return 1;
-	case IVRS:
-		return IVRS_FORMAT_FIXED;
-	case DBG2:
-		return 0;
-	case FACS: /* ACPI 2.0/3.0: 1, ACPI 4.0 upto 6.3: 2 */
-		return 1;
-	case RSDT: /* ACPI 1.0 upto 6.3: 1 */
-		return 1;
-	case XSDT: /* ACPI 2.0 upto 6.3: 1 */
-		return 1;
-	case RSDP: /* ACPI 2.0 upto 6.3: 2 */
-		return 2;
-	case HEST:
-		return 1;
-	case NHLT:
-		return 5;
-	case BERT:
-		return 1;
-	default:
-		return -EINVAL;
-	}
 }

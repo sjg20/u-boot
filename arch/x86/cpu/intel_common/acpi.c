@@ -63,9 +63,13 @@ __weak ulong acpi_fill_mcfg(ulong current)
 static int acpi_sci_irq(void)
 {
 	int sci_irq = 9;
-	int scis;
+	uint scis;
+	int ret;
 
-	scis = soc_read_sci_irq_select();
+	ret = soc_read_sci_irq_select();
+	if (IS_ERR_VALUE(ret))
+		return log_msg_ret("sci_irq", ret);
+	scis = ret;
 	scis &= SCI_IRQ_SEL;
 	scis >>= SCI_IRQ_ADJUST;
 
@@ -98,6 +102,9 @@ static unsigned long acpi_madt_irq_overrides(unsigned long current)
 	int sci = acpi_sci_irq();
 	uint16_t flags = MP_IRQ_TRIGGER_LEVEL;
 
+	if (sci < 0)
+		return log_msg_ret("sci irq", sci);
+
 	/* INT_SRC_OVR */
 	current += acpi_create_madt_irqoverride((void *)current, 0, 0, 2, 0);
 
@@ -113,7 +120,7 @@ static unsigned long acpi_madt_irq_overrides(unsigned long current)
 unsigned long acpi_fill_madt(unsigned long current)
 {
 	/* Local APICs */
-	current = acpi_create_madt_lapics(current);
+	current += acpi_create_madt_lapics(current);
 
 	/* IOAPIC */
 	current += acpi_create_madt_ioapic((void *)current, 2, IO_APIC_ADDR, 0);

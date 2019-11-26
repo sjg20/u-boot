@@ -674,7 +674,7 @@ int dev_enable_by_path(const char *path);
  * @dev:	device to test
  * @return:	true if it is on a PCI bus, false otherwise
  */
-static inline bool device_is_on_pci_bus(struct udevice *dev)
+static inline bool device_is_on_pci_bus(const struct udevice *dev)
 {
 	return device_get_uclass_id(dev->parent) == UCLASS_PCI;
 }

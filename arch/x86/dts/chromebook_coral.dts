@@ -222,6 +222,17 @@
 			gpe0-en = <0x30>;
 		};
 
+		/* WiFi */
+		pcie-b0@14,0 {
+			reg = <0x0000a000 0 0 0 0>;
+			acpi-name = "RP03";
+		};
+
+		/* WiFi */
+		pcie-a0@13,0 {
+			reg = <0x00009800 0 0 0 0>;
+		};
+
 		spi: fast-spi@d,2 {
 			u-boot,dm-pre-reloc;
 			reg = <0x02006a10 0 0 0 0>;
