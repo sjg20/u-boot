@@ -11,6 +11,7 @@
 #include <cpu.h>
 #include <dm.h>
 #include <errno.h>
+#include <asm/acpigen.h>
 #include <asm/cpu.h>
 #include <asm/cpu_common.h>
 #include <asm/intel_regs.h>
@@ -225,4 +226,9 @@ void cpu_set_eist(bool eist_status)
 	else
 		msr.lo &= ~MISC_ENABLE_ENHANCED_SPEEDSTEP;
 	msr_write(MSR_IA32_MISC_ENABLE, msr);
+}
+
+int cpu_get_coord_type(void)
+{
+	return HW_ALL;
 }

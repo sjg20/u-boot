@@ -16,6 +16,7 @@
  * GNU General Public License for more details.
  */
 
+#define LOG_CATEGORY LOGC_ACPI
 /*
 #include <arch/acpi.h>
 #include <arch/acpigen.h>
@@ -41,15 +42,21 @@
 #include "chip.h"
 */
 #include <common.h>
+#include <acpi_s3.h>
 #include <cpu.h>
 #include <dm.h>
 #include <p2sb.h>
+#include <pci.h>
 #include <asm/acpi_table.h>
 #include <asm/intel_pinctrl.h>
+#include <asm/intel_regs.h>
+#include <asm/io.h>
+#include <asm/mpspec.h>
 #include <asm/arch/iomap.h>
 #include <asm/arch/global_nvs.h>
 #include <asm/arch/gpio.h>
 #include <asm/arch/soc_config.h>
+#include <asm/arch/systemagent.h>
 #include <dm/uclass-internal.h>
 #include <power/acpi_pmc.h>
 
@@ -89,25 +96,42 @@ static struct acpi_cstate cstate_map[] = {
 	},
 };
 
-#if 0
-uint32_t soc_read_sci_irq_select(void)
+int soc_read_sci_irq_select(void)
 {
-	uintptr_t pmc_bar = soc_read_pmc_base();
-	return read32((void *)pmc_bar + IRQ_REG);
+	struct acpi_pmc_upriv *upriv;
+	struct udevice *dev;
+	int pmc_bar;
+	int ret;
+
+	ret = uclass_first_device_ret(UCLASS_ACPI_PMC, &dev);
+	if (ret)
+		return log_msg_ret("pmc");
+	upriv = device_get_uc_priv(dev);
+	pmc_bar = upriv->pmc_bar0;
+
+	return readl((void *)pmc_bar + IRQ_REG);
 }
 
-void soc_write_sci_irq_select(uint32_t scis)
+void soc_write_sci_irq_select(uint scis)
 {
-	uintptr_t pmc_bar = soc_read_pmc_base();
-	write32((void *)pmc_bar + IRQ_REG, scis);
+	struct acpi_pmc_upriv *upriv;
+	struct udevice *dev
+	int pmc_bar;
+	int ret;
+
+	ret = uclass_first_device_ret(UCLASS_ACPI_PMC, &dev);
+	if (ret)
+		return log_msg_ret("pmc");
+	upriv = device_get_uc_priv(dev);
+	pmc_bar = upriv->pmc_bar0;
+	writel((void *)pmc_bar + IRQ_REG, scis);
 }
 
-acpi_cstate_t *soc_get_cstate_map(size_t *entries)
+struct acpi_cstate *soc_get_cstate_map(size_t *entries)
 {
 	*entries = ARRAY_SIZE(cstate_map);
 	return cstate_map;
 }
-#endif
 
 int acpi_create_gnvs(struct acpi_global_nvs *gnvs)
 {
@@ -174,9 +198,7 @@ int acpi_create_gnvs(struct acpi_global_nvs *gnvs)
 	return 0;
 }
 
-#if 0
-uint32_t acpi_fill_soc_wake(uint32_t generic_pm1_en,
-			    const struct chipset_power_state *ps)
+uint32_t acpi_fill_soc_wake(uint32_t generic_pm1_en)
 {
 	/*
 	 * WAK_STS bit is set when the system is in one of the sleep states
@@ -185,8 +207,8 @@ uint32_t acpi_fill_soc_wake(uint32_t generic_pm1_en,
 	 * can only be set by hardware and can only be cleared by writing a one
 	 * to this bit position.
 	 */
-
 	generic_pm1_en |= WAK_STS | RTC_EN | PWRBTN_EN;
+
 	return generic_pm1_en;
 }
 
@@ -194,7 +216,6 @@ int soc_madt_sci_irq_polarity(int sci)
 {
 	return MP_IRQ_POLARITY_LOW;
 }
-#endif
 
 void acpi_create_fadt(struct acpi_fadt *fadt, struct acpi_facs *facs,
 		      void *dsdt)
@@ -226,18 +247,20 @@ void acpi_create_fadt(struct acpi_fadt *fadt, struct acpi_facs *facs,
 		fadt->flags |= ACPI_FADT_LOW_PWR_IDLE_S0;
 }
 
-#if 0
-static unsigned long soc_fill_dmar(unsigned long current)
+static int soc_fill_dmar(unsigned long *currentp)
 {
-	struct device *const igfx_dev = pcidev_path_on_root(SA_DEVFN_IGD);
-	uint64_t gfxvtbar = MCHBAR64(GFXVTBAR) & VTBAR_MASK;
-	uint64_t defvtbar = MCHBAR64(DEFVTBAR) & VTBAR_MASK;
-	bool gfxvten = MCHBAR32(GFXVTBAR) & VTBAR_ENABLED;
-	bool defvten = MCHBAR32(DEFVTBAR) & VTBAR_ENABLED;
+	struct udevice *dev;
+	uint64_t gfxvtbar = readq(MCHBAR_REG(GFXVTBAR)) & VTBAR_MASK;
+	uint64_t defvtbar = readq(MCHBAR_REG(DEFVTBAR)) & VTBAR_MASK;
+	bool gfxvten = readl(MCHBAR_REG(GFXVTBAR)) & VTBAR_ENABLED;
+	bool defvten = readl(MCHBAR_REG(DEFVTBAR)) & VTBAR_ENABLED;
 	unsigned long tmp;
+	ulong current = *currentp;
+
+	uclass_find_first_device(UCLASS_VIDEO, &dev);
 
 	/* IGD has to be enabled, GFXVTBAR set and enabled. */
-	if (igfx_dev && igfx_dev->enabled && gfxvtbar && gfxvten) {
+	if (dev && device_active(dev) && gfxvtbar && gfxvten) {
 		tmp = current;
 
 		current += acpi_create_dmar_drhd(current, 0, 0, gfxvtbar);
@@ -254,6 +277,11 @@ static unsigned long soc_fill_dmar(unsigned long current)
 
 	/* DEFVTBAR has to be set and enabled. */
 	if (defvtbar && defvten) {
+		struct udevice *p2sb_dev;
+		uint16_t ibdf, hbdf;
+		uint ioapic, hpet;
+		int ret;
+
 		tmp = current;
 		/*
 		 * P2SB may already be hidden. There's no clear rule, when.
@@ -261,29 +289,38 @@ static unsigned long soc_fill_dmar(unsigned long current)
 		 * HPET device which is stored in P2SB device. So unhide it to
 		 * get the info and hide it again when done.
 		 */
-		p2sb_unhide();
-		struct device *p2sb_dev = pcidev_path_on_root(PCH_DEVFN_P2SB);
-		uint16_t ibdf = pci_read_config16(p2sb_dev, PCH_P2SB_IBDF);
-		uint16_t hbdf = pci_read_config16(p2sb_dev, PCH_P2SB_HBDF);
-		p2sb_hide();
+// 		p2sb_unhide();
+		ret = uclass_first_device_err(UCLASS_P2SB, &p2sb_dev);
+		if (ret)
+			return log_msg_ret("p2sb", ret);
+
+		dm_pci_read_config16(p2sb_dev, PCH_P2SB_IBDF, &ibdf);
+		ioapic = PCI_TO_BDF(ibdf);
+		dm_pci_read_config16(p2sb_dev, PCH_P2SB_HBDF, &hbdf);
+		hpet = PCI_TO_BDF(hbdf);
+// 		p2sb_hide();
 
 		current += acpi_create_dmar_drhd(current,
 				DRHD_INCLUDE_PCI_ALL, 0, defvtbar);
 		current += acpi_create_dmar_ds_ioapic(current,
-				2, ibdf >> 8, PCI_SLOT(ibdf), PCI_FUNC(ibdf));
+				2, PCI_BUS(ioapic), PCI_DEV(ioapic),
+				PCI_FUNC(ioapic));
 		current += acpi_create_dmar_ds_msi_hpet(current,
-				0, hbdf >> 8, PCI_SLOT(hbdf), PCI_FUNC(hbdf));
+				0, PCI_BUS(hpet), PCI_DEV(hpet),
+				PCI_FUNC(hpet));
 		acpi_dmar_drhd_fixup(tmp, current);
 	}
+	*currentp = current;
 
-	return current;
+	return 0;
 }
 
-unsigned long sa_write_acpi_tables(struct device *const dev,
-				     unsigned long current,
-				     struct acpi_rsdp *const rsdp)
+int sa_write_acpi_tables(struct udevice *dev, unsigned long *currentp,
+			 struct acpi_rsdp *const rsdp)
 {
-	acpi_dmar_t *const dmar = (acpi_dmar_t *)current;
+	struct acpi_dmar *const dmar = (struct acpi_dmar *)current;
+	ulong current;
+	int ret;
 
 	/* Create DMAR table only if virtualization is enabled. Due to some
 	 * constraints on Apollo Lake SoC (some stepping affected), VTD could
@@ -294,19 +331,25 @@ unsigned long sa_write_acpi_tables(struct device *const dev,
 	 * is enabled. Otherwise the DMAR header will be generated while the
 	 * content of the table will be missing.
 	 */
+	u32 val;
 
-	if ((pci_read_config32(dev, CAPID0_A) & VTD_DISABLE) ||
-	    !(MCHBAR32(DEFVTBAR) & VTBAR_ENABLED))
-		return current;
+	dm_pci_read_config32(dev, CAPID0_A, &val);
+	if ((val & VTD_DISABLE) ||
+	    !(readl(MCHBAR_REG(DEFVTBAR)) & VTBAR_ENABLED))
+		return 0;
 
-	printk(BIOS_DEBUG, "ACPI:    * DMAR\n");
+	log_debug("ACPI:    * DMAR\n");
+	current = *currentp;
 	acpi_create_dmar(dmar, DMAR_INTR_REMAP, soc_fill_dmar);
 	current += dmar->header.length;
-	current = acpi_align_current(current);
-	acpi_add_table(rsdp, dmar);
-	current = acpi_align_current(current);
+	current = ALIGN(current, 16);
+	ret = acpi_add_table(rsdp, dmar);
+	if (ret)
+		return log_msg_ret("add_table", ret);
+	current = ALIGN(current, 16);
+	*currentp = current;
 
-	return current;
+	return 0;
 }
 
 void soc_power_states_generation(int core_id, int cores_per_package)
@@ -406,4 +449,3 @@ int acpigen_soc_clear_tx_gpio(unsigned int gpio_num)
 {
 	return acpigen_soc_set_gpio_val(gpio_num, 0);
 }
-#endif

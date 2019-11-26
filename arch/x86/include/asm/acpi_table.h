@@ -426,9 +426,91 @@ enum acpi_upc_type {
 	UPC_TYPE_HUB
 };
 
+enum dev_scope_type {
+	SCOPE_PCI_ENDPOINT = 1,
+	SCOPE_PCI_SUB = 2,
+	SCOPE_IOAPIC = 3,
+	SCOPE_MSI_HPET = 4,
+	SCOPE_ACPI_NAMESPACE_DEVICE = 5
+};
+
+struct __packed dev_scope {
+	u8 type;
+	u8 length;
+	u8 reserved[2];
+	u8 enumeration;
+	u8 start_bus;
+	struct {
+		u8 dev;
+		u8 fn;
+	} __packed path[0];
+};
+
+enum dmar_type {
+	DMAR_DRHD = 0,
+	DMAR_RMRR = 1,
+	DMAR_ATSR = 2,
+	DMAR_RHSA = 3,
+	DMAR_ANDD = 4
+};
+
+enum {
+	DRHD_INCLUDE_PCI_ALL = 1
+};
+
+enum dmar_flags {
+	DMAR_INTR_REMAP			= 1 << 0,
+	DMAR_X2APIC_OPT_OUT		= 1 << 1,
+	DMA_CTRL_PLATFORM_OPT_IN_FLAG	= 1 << 2,
+};
+
+struct __packed dmar_entry {
+	u16 type;
+	u16 length;
+	u8 flags;
+	u8 reserved;
+	u16 segment;
+	u64 bar;
+};
+
+struct __packed dmar_rmrr_entry {
+	u16 type;
+	u16 length;
+	u16 reserved;
+	u16 segment;
+	u64 bar;
+	u64 limit;
+};
+
+/* DMAR (DMA Remapping Reporting Structure) */
+struct acpi_dmar {
+	struct acpi_table_header header;
+	u8 host_address_width;
+	u8 flags;
+	u8 reserved[10];
+	struct dmar_entry structure[0];
+} __packed;
+
+enum acpi_tables {
+	/* Tables defined by ACPI and used by coreboot */
+	BERT, DBG2, DMAR, DSDT, FACS, FADT, HEST, HPET, IVRS, MADT, MCFG,
+	RSDP, RSDT, SLIT, SRAT, SSDT, TCPA, TPM2, XSDT, ECDT,
+	/* Additional proprietary tables used by coreboot */
+	VFCT, NHLT, SPMI
+};
+
 /* These can be used by the target port */
+/**
+ * Add an ACPI table to the RSDT (and XSDT) structure, recalculate length
+ * and checksum.
+ */
+int acpi_add_table(struct acpi_rsdp *rsdp, void *table);
 
 void acpi_fill_header(struct acpi_table_header *header, char *signature);
+unsigned long acpi_write_hpet(struct udevice *dev, unsigned long current,
+			      struct acpi_rsdp *rsdp);
+unsigned long acpi_write_dbg2_pci_uart(struct acpi_rsdp *rsdp, ulong current,
+				       struct udevice *dev, uint8_t access_size);
 void acpi_create_fadt(struct acpi_fadt *fadt, struct acpi_facs *facs,
 		      void *dsdt);
 int acpi_create_madt_lapics(u32 current);
@@ -438,12 +520,29 @@ int acpi_create_madt_irqoverride(struct acpi_madt_irqoverride *irqoverride,
 				 u8 bus, u8 source, u32 gsirq, u16 flags);
 int acpi_create_madt_lapic_nmi(struct acpi_madt_lapic_nmi *lapic_nmi,
 			       u8 cpu, u16 flags, u8 lint);
-u32 acpi_fill_madt(u32 current);
+ulong acpi_fill_madt(ulong current);
 int acpi_create_mcfg_mmconfig(struct acpi_mcfg_mmconfig *mmconfig, u32 base,
 			      u16 seg_nr, u8 start, u8 end);
-u32 acpi_fill_mcfg(u32 current);
+ulong acpi_fill_mcfg(ulong current);
 u32 acpi_fill_csrt(u32 current);
 int acpi_create_gnvs(struct acpi_global_nvs *gnvs);
+unsigned long acpi_create_dmar_drhd(unsigned long current, u8 flags,
+	u16 segment, u64 bar);
+unsigned long acpi_create_dmar_rmrr(unsigned long current, u16 segment,
+				    u64 bar, u64 limit);
+void acpi_dmar_rmrr_fixup(unsigned long base, unsigned long current);
+void acpi_dmar_drhd_fixup(unsigned long base, unsigned long current);
+void acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags,
+		      int (*acpi_fill_dmar)(unsigned long *currentp));
+unsigned long acpi_create_dmar_ds_pci_br(unsigned long current, u8 bus,
+	u8 dev, u8 fn);
+unsigned long acpi_create_dmar_ds_pci(unsigned long current, u8 bus,
+	u8 dev, u8 fn);
+unsigned long acpi_create_dmar_ds_ioapic(unsigned long current,
+	u8 enumeration_id, u8 bus, u8 dev, u8 fn);
+unsigned long acpi_create_dmar_ds_msi_hpet(unsigned long current,
+	u8 enumeration_id, u8 bus, u8 dev, u8 fn);
+
 ulong write_acpi_tables(ulong start);
 
 /**
@@ -457,6 +556,13 @@ ulong acpi_get_rsdp_addr(void);
 
 void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
 		      void *dsdt);
+int get_acpi_table_revision(enum acpi_tables table);
+
+/* to convert */
+int soc_read_sci_irq_select(void);
+void soc_write_sci_irq_select(uint scis);
+int soc_madt_sci_irq_polarity(int sci);
+struct acpi_cstate *soc_get_cstate_map(size_t *entries);
 
 #endif /* !__ACPI__*/
 

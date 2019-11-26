@@ -106,11 +106,7 @@ static void acpi_write_xsdt(struct acpi_xsdt *xsdt)
 			sizeof(struct acpi_xsdt));
 }
 
-/**
- * Add an ACPI table to the RSDT (and XSDT) structure, recalculate length
- * and checksum.
- */
-static void acpi_add_table(struct acpi_rsdp *rsdp, void *table)
+int acpi_add_table(struct acpi_rsdp *rsdp, void *table)
 {
 	int i, entries_num;
 	struct acpi_rsdt *rsdt;
@@ -132,7 +128,7 @@ static void acpi_add_table(struct acpi_rsdp *rsdp, void *table)
 
 	if (i >= entries_num) {
 		debug("ACPI: Error: too many tables\n");
-		return;
+		return -E2BIG;
 	}
 
 	/* Add table to the RSDT */
@@ -164,6 +160,91 @@ static void acpi_add_table(struct acpi_rsdp *rsdp, void *table)
 		xsdt->header.checksum = table_compute_checksum((u8 *)xsdt,
 				xsdt->header.length);
 	}
+
+	return 0;
+}
+
+int acpi_create_mcfg_mmconfig(acpi_mcfg_mmconfig_t *mmconfig, u32 base,
+				u16 seg_nr, u8 start, u8 end)
+{
+	memset(mmconfig, 0, sizeof(*mmconfig));
+	mmconfig->base_address = base;
+	mmconfig->base_reserved = 0;
+	mmconfig->pci_segment_group_number = seg_nr;
+	mmconfig->start_bus_number = start;
+	mmconfig->end_bus_number = end;
+
+	return sizeof(acpi_mcfg_mmconfig_t);
+}
+
+unsigned long acpi_write_hpet(struct udevice *dev, unsigned long current,
+			      struct acpi_rsdp *rsdp)
+{
+	acpi_hpet_t *hpet;
+
+	/*
+	 * We explicitly add these tables later on:
+	 */
+	printk(BIOS_DEBUG, "ACPI:    * HPET\n");
+
+	hpet = (acpi_hpet_t *) current;
+	current += sizeof(acpi_hpet_t);
+	current = ALIGN_UP(current, 16);
+	acpi_create_hpet(hpet);
+	acpi_add_table(rsdp, hpet);
+
+	return current;
+}
+
+unsigned long acpi_write_dbg2_pci_uart(acpi_rsdp_t *rsdp, unsigned long current,
+				       struct udevice *dev, uint8_t access_size)
+{
+	acpi_dbg2_header_t *dbg2 = (acpi_dbg2_header_t *)current;
+	struct resource *res;
+	acpi_addr_t address;
+
+	if (!dev) {
+		printk(BIOS_ERR, "%s: Device not found\n", __func__);
+		return current;
+	}
+	if (!dev->enabled) {
+		printk(BIOS_INFO, "%s: Device not enabled\n", __func__);
+		return current;
+	}
+	res = find_resource(dev, PCI_BASE_ADDRESS_0);
+	if (!res) {
+		printk(BIOS_ERR, "%s: Unable to find resource for %s\n",
+		       __func__, dev_path(dev));
+		return current;
+	}
+
+	memset(&address, 0, sizeof(address));
+	if (res->flags & IORESOURCE_IO)
+		address.space_id = ACPI_ADDRESS_SPACE_IO;
+	else if (res->flags & IORESOURCE_MEM)
+		address.space_id = ACPI_ADDRESS_SPACE_MEMORY;
+	else {
+		printk(BIOS_ERR, "%s: Unknown address space type\n", __func__);
+		return current;
+	}
+
+	address.addrl = (uint32_t)res->base;
+	address.addrh = (uint32_t)((res->base >> 32) & 0xffffffff);
+	address.access_size = access_size;
+
+	acpi_create_dbg2(dbg2,
+			 ACPI_DBG2_PORT_SERIAL,
+			 ACPI_DBG2_PORT_SERIAL_16550,
+			 &address, res->size,
+			 acpi_device_path(dev));
+
+	if (dbg2->header.length) {
+		current += dbg2->header.length;
+		current = acpi_align_current(current);
+		acpi_add_table(rsdp, dbg2);
+	}
+
+	return current;
 }
 
 static void acpi_create_facs(struct acpi_facs *facs)
@@ -479,45 +560,6 @@ static void acpi_create_spcr(struct acpi_spcr *spcr)
 	header->checksum = table_compute_checksum((void *)spcr, header->length);
 }
 
-uint32_t soc_read_sci_irq_select(void)
-{
-	uintptr_t pmc_bar = PMC_BAR0;
-
-	return readl((void *)pmc_bar + IRQ_REG);
-}
-
-static int acpi_sci_irq(void)
-{
-	int sci_irq = 9;
-	uint32_t scis;
-
-	scis = soc_read_sci_irq_select();
-	scis &= SCI_IRQ_SEL;
-	scis >>= SCI_IRQ_ADJUST;
-
-	/* Determine how SCI is routed. */
-	switch (scis) {
-	case SCIS_IRQ9:
-	case SCIS_IRQ10:
-	case SCIS_IRQ11:
-		sci_irq = scis - SCIS_IRQ9 + 9;
-		break;
-	case SCIS_IRQ20:
-	case SCIS_IRQ21:
-	case SCIS_IRQ22:
-	case SCIS_IRQ23:
-		sci_irq = scis - SCIS_IRQ20 + 20;
-		break;
-	default:
-		debug("Invalid SCI route! Defaulting to IRQ9\n");
-		sci_irq = 9;
-		break;
-	}
-
-	printf("SCI is IRQ%d\n", sci_irq);
-	return sci_irq;
-}
-
 void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
 		      void *dsdt)
 {
@@ -604,6 +646,127 @@ void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
 	fadt->x_gpe1_blk.space_id = 1;
 
 	header->checksum = table_compute_checksum(fadt, header->length);
+}
+
+unsigned long acpi_create_dmar_drhd(unsigned long current, u8 flags,
+	u16 segment, u64 bar)
+{
+	struct dmar_entry *drhd = (struct dmar_entry *)current;
+
+	memset(drhd, 0, sizeof(*drhd));
+	drhd->type = DMAR_DRHD;
+	drhd->length = sizeof(*drhd); /* will be fixed up later */
+	drhd->flags = flags;
+	drhd->segment = segment;
+	drhd->bar = bar;
+
+	return drhd->length;
+}
+
+unsigned long acpi_create_dmar_rmrr(unsigned long current, u16 segment,
+				    u64 bar, u64 limit)
+{
+	struct dmar_rmrr_entry *rmrr = (struct dmar_rmrr_entry *)current;
+
+	memset(rmrr, 0, sizeof(*rmrr));
+	rmrr->type = DMAR_RMRR;
+	rmrr->length = sizeof(*rmrr); /* will be fixed up later */
+	rmrr->segment = segment;
+	rmrr->bar = bar;
+	rmrr->limit = limit;
+
+	return rmrr->length;
+}
+
+void acpi_dmar_drhd_fixup(unsigned long base, unsigned long current)
+{
+	struct dmar_entry *drhd = (struct dmar_entry *)base;
+
+	drhd->length = current - base;
+}
+
+void acpi_dmar_rmrr_fixup(unsigned long base, unsigned long current)
+{
+	struct dmar_rmrr_entry *rmrr = (struct dmar_rmrr_entry *)base;
+
+	rmrr->length = current - base;
+}
+
+void acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags,
+		      int (*acpi_fill_dmar)(unsigned long *currentp))
+{
+	struct acpi_table_header *header = &dmar->header;
+	unsigned long current = (unsigned long)dmar + sizeof(struct acpi_dmar);
+
+	memset((void *)dmar, 0, sizeof(struct acpi_dmar));
+
+	if (!header)
+		return;
+
+	/* Fill out header fields. */
+	memcpy(header->signature, "DMAR", 4);
+	memcpy(header->oem_id, OEM_ID, 6);
+	memcpy(header->oem_table_id, ACPI_TABLE_CREATOR, 8);
+	memcpy(header->asl_compiler_id, ASLC, 4);
+
+	header->asl_compiler_revision = asl_revision;
+	header->length = sizeof(acpi_dmar_t);
+	header->revision = get_acpi_table_revision(DMAR);
+
+	dmar->host_address_width = cpu_phys_address_size() - 1;
+	dmar->flags = flags;
+
+	current = acpi_fill_dmar(current);
+
+	/* (Re)calculate length and checksum. */
+	header->length = current - (unsigned long)dmar;
+	header->checksum = acpi_checksum((void *)dmar, header->length);
+}
+
+static unsigned long acpi_create_dmar_ds(unsigned long current,
+	enum dev_scope_type type, u8 enumeration_id, u8 bus, u8 dev, u8 fn)
+{
+	/* we don't support longer paths yet */
+	const size_t dev_scope_length = sizeof(struct dev_scope) + 2;
+
+	struct dev_scope *ds = (struct dev_scope *)current;
+	memset(ds, 0, dev_scope_length);
+	ds->type	= type;
+	ds->length	= dev_scope_length;
+	ds->enumeration	= enumeration_id;
+	ds->start_bus	= bus;
+	ds->path[0].dev	= dev;
+	ds->path[0].fn	= fn;
+
+	return ds->length;
+}
+
+unsigned long acpi_create_dmar_ds_pci_br(unsigned long current, u8 bus,
+	u8 dev, u8 fn)
+{
+	return acpi_create_dmar_ds(current,
+			SCOPE_PCI_SUB, 0, bus, dev, fn);
+}
+
+unsigned long acpi_create_dmar_ds_pci(unsigned long current, u8 bus,
+	u8 dev, u8 fn)
+{
+	return acpi_create_dmar_ds(current,
+			SCOPE_PCI_ENDPOINT, 0, bus, dev, fn);
+}
+
+unsigned long acpi_create_dmar_ds_ioapic(unsigned long current,
+	u8 enumeration_id, u8 bus, u8 dev, u8 fn)
+{
+	return acpi_create_dmar_ds(current,
+			SCOPE_IOAPIC, enumeration_id, bus, dev, fn);
+}
+
+unsigned long acpi_create_dmar_ds_msi_hpet(unsigned long current,
+	u8 enumeration_id, u8 bus, u8 dev, u8 fn)
+{
+	return acpi_create_dmar_ds(current,
+			SCOPE_MSI_HPET, enumeration_id, bus, dev, fn);
 }
 
 /*
@@ -735,4 +898,55 @@ ulong write_acpi_tables(ulong start)
 ulong acpi_get_rsdp_addr(void)
 {
 	return acpi_rsdp_addr;
+}
+
+int get_acpi_table_revision(enum acpi_tables table)
+{
+	switch (table) {
+	case FADT:
+		return ACPI_FADT_REV_ACPI_3_0;
+	case MADT: /* ACPI 3.0: 2, ACPI 4.0/5.0: 3, ACPI 6.2b/6.3: 5 */
+		return 2;
+	case MCFG:
+		return 1;
+	case TCPA:
+		return 2;
+	case TPM2:
+		return 4;
+	case SSDT: /* ACPI 3.0 upto 6.3: 2 */
+		return 2;
+	case SRAT: /* ACPI 2.0: 1, ACPI 3.0: 2, ACPI 4.0 upto 6.3: 3 */
+		return 1; /* TODO Should probably be upgraded to 2 */
+	case DMAR:
+		return 1;
+	case SLIT: /* ACPI 2.0 upto 6.3: 1 */
+		return 1;
+	case SPMI: /* IMPI 2.0 */
+		return 5;
+	case HPET: /* Currently 1. Table added in ACPI 2.0. */
+		return 1;
+	case VFCT: /* ACPI 2.0/3.0/4.0: 1 */
+		return 1;
+	case IVRS:
+		return IVRS_FORMAT_FIXED;
+	case DBG2:
+		return 0;
+	case FACS: /* ACPI 2.0/3.0: 1, ACPI 4.0 upto 6.3: 2 */
+		return 1;
+	case RSDT: /* ACPI 1.0 upto 6.3: 1 */
+		return 1;
+	case XSDT: /* ACPI 2.0 upto 6.3: 1 */
+		return 1;
+	case RSDP: /* ACPI 2.0 upto 6.3: 2 */
+		return 2;
+	case HEST:
+		return 1;
+	case NHLT:
+		return 5;
+	case BERT:
+		return 1;
+	default:
+		return -1;
+	}
+	return -1;
 }

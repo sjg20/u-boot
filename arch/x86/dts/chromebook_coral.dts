@@ -115,6 +115,11 @@
 			compatible = "intel,apl-punit";
 		};
 
+		gma@2,0 {
+			reg = <0x00001000 0 0 0 0>;
+			compatible = "intel,gma";
+		};
+
 		p2sb: p2sb@d,0 {
 			u-boot,dm-pre-reloc;
 			reg = <0x02006810 0 0 0 0>;

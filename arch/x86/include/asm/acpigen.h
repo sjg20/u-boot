@@ -337,10 +337,15 @@ void acpigen_write_STA(uint8_t status);
 void acpigen_write_TPC(const char *gnvs_tpc_limit);
 void acpigen_write_PSS_package(u32 coreFreq, u32 power, u32 transLat,
 			u32 busmLat, u32 control, u32 status);
-typedef enum { SW_ALL = 0xfc, SW_ANY = 0xfd, HW_ALL = 0xfe } PSD_coord;
-void acpigen_write_PSD_package(u32 domain, u32 numprocs, PSD_coord coordtype);
-void acpigen_write_CST_package_entry(struct acpi_cstate *cstate);
-void acpigen_write_CST_package(struct acpi_cstate *entry, int nentries);
+enum psd_coord {
+	SW_ALL = 0xfc,
+	SW_ANY = 0xfd,
+	HW_ALL = 0xfe
+};
+
+void acpigen_write_psd_package(u32 domain, u32 numprocs, enum psd_coord coordtype);
+void acpigen_write_cst_package_entry(struct acpi_cstate *cstate);
+void acpigen_write_cst_package(struct acpi_cstate *entry, int nentries);
 typedef enum { CSD_HW_ALL = 0xfe } CSD_coord;
 void acpigen_write_CSD_package(u32 domain, u32 numprocs, CSD_coord coordtype,
 				u32 index);
@@ -350,7 +355,7 @@ void acpigen_write_processor_package(const char *name,
 				     unsigned int core_count);
 void acpigen_write_processor_cnot(const unsigned int number_of_cores);
 void acpigen_write_TSS_package(int entries, struct acpi_tstate *tstate_list);
-void acpigen_write_TSD_package(u32 domain, u32 numprocs, PSD_coord coordtype);
+void acpigen_write_TSD_package(u32 domain, u32 numprocs, enum psd_coord coordtype);
 void acpigen_write_mem32fixed(int readwrite, u32 base, u32 size);
 void acpigen_write_io16(u16 min, u16 max, u8 align, u8 len, u8 decode16);
 void acpigen_write_register_resource(const struct acpi_gen_regaddr *addr);

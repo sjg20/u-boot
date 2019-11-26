@@ -1008,6 +1008,7 @@ void acpigen_write_resourcetemplate_footer(void)
 	acpigen_pop_len();
 }
 
+/*
 static void acpigen_add_mainboard_rsvd_mem32(void *gp, struct device *dev,
 						struct resource *res)
 {
@@ -1028,6 +1029,7 @@ static void acpigen_add_mainboard_rsvd_io(void *gp, struct device *dev,
 		base += sz;
 	}
 }
+*/
 
 void acpigen_write_mainboard_resource_template(void)
 {
