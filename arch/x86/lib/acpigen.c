@@ -791,7 +791,8 @@ void acpigen_write_PSS_package(u32 coreFreq, u32 power, u32 transLat,
 		  coreFreq, power, control, status);
 }
 
-void acpigen_write_PSD_package(u32 domain, u32 numprocs, PSD_coord coordtype)
+void acpigen_write_psd_package(u32 domain, u32 numprocs,
+			       enum psd_coord coordtype)
 {
 	acpigen_write_name("_PSD");
 	acpigen_write_package(1);
@@ -874,7 +875,8 @@ void acpigen_write_TSS_package(int entries, struct acpi_tstate *tstate_list)
 	acpigen_pop_len();
 }
 
-void acpigen_write_TSD_package(u32 domain, u32 numprocs, PSD_coord coordtype)
+void acpigen_write_tsd_package(u32 domain, u32 numprocs,
+			       enum psd_coord coordtype)
 {
 	acpigen_write_name("_TSD");
 	acpigen_write_package(1);

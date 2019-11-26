@@ -47,14 +47,18 @@
 #include <dm.h>
 #include <p2sb.h>
 #include <pci.h>
+#include <asm/acpigen.h>
 #include <asm/acpi_table.h>
+#include <asm/cpu_common.h>
 #include <asm/intel_pinctrl.h>
 #include <asm/intel_regs.h>
 #include <asm/io.h>
 #include <asm/mpspec.h>
+#include <asm/intel_pinctrl_defs.h>
 #include <asm/arch/iomap.h>
 #include <asm/arch/global_nvs.h>
 #include <asm/arch/gpio.h>
+#include <asm/arch/pm.h>
 #include <asm/arch/soc_config.h>
 #include <asm/arch/systemagent.h>
 #include <dm/uclass-internal.h>
@@ -100,31 +104,29 @@ int soc_read_sci_irq_select(void)
 {
 	struct acpi_pmc_upriv *upriv;
 	struct udevice *dev;
-	int pmc_bar;
 	int ret;
 
-	ret = uclass_first_device_ret(UCLASS_ACPI_PMC, &dev);
+	ret = uclass_first_device_err(UCLASS_ACPI_PMC, &dev);
 	if (ret)
-		return log_msg_ret("pmc");
-	upriv = device_get_uc_priv(dev);
-	pmc_bar = upriv->pmc_bar0;
+		return log_msg_ret("pmc", ret);
+	upriv = dev_get_uclass_priv(dev);
 
-	return readl((void *)pmc_bar + IRQ_REG);
+	return readl(upriv->pmc_bar0 + IRQ_REG);
 }
 
-void soc_write_sci_irq_select(uint scis)
+int soc_write_sci_irq_select(uint scis)
 {
 	struct acpi_pmc_upriv *upriv;
-	struct udevice *dev
-	int pmc_bar;
+	struct udevice *dev;
 	int ret;
 
-	ret = uclass_first_device_ret(UCLASS_ACPI_PMC, &dev);
+	ret = uclass_first_device_err(UCLASS_ACPI_PMC, &dev);
 	if (ret)
-		return log_msg_ret("pmc");
-	upriv = device_get_uc_priv(dev);
-	pmc_bar = upriv->pmc_bar0;
-	writel((void *)pmc_bar + IRQ_REG, scis);
+		return log_msg_ret("pmc", ret);
+	upriv = dev_get_uclass_priv(dev);
+	writel(scis, upriv->pmc_bar0 + IRQ_REG);
+
+	return 0;
 }
 
 struct acpi_cstate *soc_get_cstate_map(size_t *entries)
@@ -377,7 +379,15 @@ static void acpigen_soc_get_dw0_in_local5(uintptr_t addr)
 static int acpigen_soc_get_gpio_val(unsigned int gpio_num, uint32_t mask)
 {
 	assert(gpio_num < TOTAL_PADS);
-	uintptr_t addr = (uintptr_t) gpio_dwx_address(gpio_num);
+	struct udevice *dev;
+	uintptr_t addr;
+	uint offset;
+	int ret;
+
+	ret = intel_pinctrl_get_pad(gpio_num, &dev, &offset);
+	if (ret)
+		return ret;
+	addr = intel_pinctrl_get_config_reg_addr(dev, offset);
 
 	acpigen_soc_get_dw0_in_local5(addr);
 
@@ -403,7 +413,15 @@ static int acpigen_soc_get_gpio_val(unsigned int gpio_num, uint32_t mask)
 static int acpigen_soc_set_gpio_val(unsigned int gpio_num, uint32_t val)
 {
 	assert(gpio_num < TOTAL_PADS);
-	uintptr_t addr = (uintptr_t) gpio_dwx_address(gpio_num);
+	struct udevice *dev;
+	uintptr_t addr;
+	uint offset;
+	int ret;
+
+	ret = intel_pinctrl_get_pad(gpio_num, &dev, &offset);
+	if (ret)
+		return ret;
+	addr = intel_pinctrl_get_config_reg_addr(dev, offset);
 
 	acpigen_soc_get_dw0_in_local5(addr);
 

@@ -49,6 +49,15 @@ struct __packed acpi_table_header {
 	u32 aslc_revision;	/* ASL compiler revision number */
 };
 
+struct acpi_gen_regaddr {
+	u8 space_id;	/* Address space ID */
+	u8 bit_width;	/* Register size in bits */
+	u8 bit_offset;	/* Register bit offset */
+	u8 access_size;	/* Access size */
+	u32 addrl;	/* Register address, low 32 bits */
+	u32 addrh;	/* Register address, high 32 bits */
+};
+
 /* A maximum number of 32 ACPI tables ought to be enough for now */
 #define MAX_ACPI_TABLES		32
 
@@ -62,6 +71,16 @@ struct acpi_rsdt {
 struct acpi_xsdt {
 	struct acpi_table_header header;
 	u64 entry[MAX_ACPI_TABLES];
+};
+
+/* HPET timers */
+struct __packed acpi_hpet {
+	struct acpi_table_header header;
+	u32 id;
+	struct acpi_gen_regaddr addr;
+	u8 number;
+	u16 min_tick;
+	u8 attributes;
 };
 
 /* FADT Preferred Power Management Profile */
@@ -131,15 +150,6 @@ enum acpi_address_space_size {
 	ACPI_ACCESS_SIZE_QWORD_ACCESS
 };
 
-struct acpi_gen_regaddr {
-	u8 space_id;	/* Address space ID */
-	u8 bit_width;	/* Register size in bits */
-	u8 bit_offset;	/* Register bit offset */
-	u8 access_size;	/* Access size */
-	u32 addrl;	/* Register address, low 32 bits */
-	u32 addrh;	/* Register address, high 32 bits */
-};
-
 /* FADT (Fixed ACPI Description Table) */
 struct __packed acpi_fadt {
 	struct acpi_table_header header;
@@ -198,6 +208,18 @@ struct __packed acpi_fadt {
 	struct acpi_gen_regaddr x_gpe0_blk;
 	struct acpi_gen_regaddr x_gpe1_blk;
 };
+
+/* FADT TABLE Revision values */
+#define ACPI_FADT_REV_ACPI_1_0		1
+#define ACPI_FADT_REV_ACPI_2_0		3
+#define ACPI_FADT_REV_ACPI_3_0		4
+#define ACPI_FADT_REV_ACPI_4_0		4
+#define ACPI_FADT_REV_ACPI_5_0		5
+#define ACPI_FADT_REV_ACPI_6_0		6
+
+/* IVRS Revision Field */
+#define IVRS_FORMAT_FIXED	0x01	/* Type 10h & 11h only */
+#define IVRS_FORMAT_MIXED	0x02	/* Type 10h, 11h, & 40h */
 
 /* FACS flags */
 #define ACPI_FACS_S4BIOS_F	(1 << 0)
@@ -337,32 +359,6 @@ struct acpi_csrt_shared_info {
 	u32 max_block_size;
 };
 
-/* DBG2 definitions are partially used for SPCR interface_type */
-
-/* Types for port_type field */
-
-#define ACPI_DBG2_SERIAL_PORT		0x8000
-#define ACPI_DBG2_1394_PORT		0x8001
-#define ACPI_DBG2_USB_PORT		0x8002
-#define ACPI_DBG2_NET_PORT		0x8003
-
-/* Subtypes for port_subtype field */
-
-#define ACPI_DBG2_16550_COMPATIBLE	0x0000
-#define ACPI_DBG2_16550_SUBSET		0x0001
-#define ACPI_DBG2_ARM_PL011		0x0003
-#define ACPI_DBG2_ARM_SBSA_32BIT	0x000D
-#define ACPI_DBG2_ARM_SBSA_GENERIC	0x000E
-#define ACPI_DBG2_ARM_DCC		0x000F
-#define ACPI_DBG2_BCM2835		0x0010
-
-#define ACPI_DBG2_1394_STANDARD		0x0000
-
-#define ACPI_DBG2_USB_XHCI		0x0000
-#define ACPI_DBG2_USB_EHCI		0x0001
-
-#define ACPI_DBG2_UNKNOWN		0x00FF
-
 /* SPCR (Serial Port Console Redirection table) */
 struct __packed acpi_spcr {
 	struct acpi_table_header header;
@@ -491,6 +487,57 @@ struct acpi_dmar {
 	struct dmar_entry structure[0];
 } __packed;
 
+
+/* DBG2 definitions are partially used for SPCR interface_type */
+
+/* Types for port_type field */
+
+#define ACPI_DBG2_SERIAL_PORT		0x8000
+#define ACPI_DBG2_1394_PORT		0x8001
+#define ACPI_DBG2_USB_PORT		0x8002
+#define ACPI_DBG2_NET_PORT		0x8003
+
+/* Subtypes for port_subtype field */
+
+#define ACPI_DBG2_16550_COMPATIBLE	0x0000
+#define ACPI_DBG2_16550_SUBSET		0x0001
+#define ACPI_DBG2_ARM_PL011		0x0003
+#define ACPI_DBG2_ARM_SBSA_32BIT	0x000D
+#define ACPI_DBG2_ARM_SBSA_GENERIC	0x000E
+#define ACPI_DBG2_ARM_DCC		0x000F
+#define ACPI_DBG2_BCM2835		0x0010
+
+#define ACPI_DBG2_1394_STANDARD		0x0000
+
+#define ACPI_DBG2_USB_XHCI		0x0000
+#define ACPI_DBG2_USB_EHCI		0x0001
+
+#define ACPI_DBG2_UNKNOWN		0x00FF
+
+
+/* DBG2: Microsoft Debug Port Table 2 header */
+struct __packed acpi_dbg2_header {
+	struct acpi_table_header header;
+	uint32_t devices_offset;
+	uint32_t devices_count;
+};
+
+/* DBG2: Microsoft Debug Port Table 2 device entry */
+struct __packed acpi_dbg2_device {
+	uint8_t  revision;
+	uint16_t length;
+	uint8_t  address_count;
+	uint16_t namespace_string_length;
+	uint16_t namespace_string_offset;
+	uint16_t oem_data_length;
+	uint16_t oem_data_offset;
+	uint16_t port_type;
+	uint16_t port_subtype;
+	uint8_t  reserved[2];
+	uint16_t base_address_offset;
+	uint16_t address_size_offset;
+};
+
 enum acpi_tables {
 	/* Tables defined by ACPI and used by coreboot */
 	BERT, DBG2, DMAR, DSDT, FACS, FADT, HEST, HPET, IVRS, MADT, MCFG,
@@ -532,8 +579,8 @@ unsigned long acpi_create_dmar_rmrr(unsigned long current, u16 segment,
 				    u64 bar, u64 limit);
 void acpi_dmar_rmrr_fixup(unsigned long base, unsigned long current);
 void acpi_dmar_drhd_fixup(unsigned long base, unsigned long current);
-void acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags,
-		      int (*acpi_fill_dmar)(unsigned long *currentp));
+int acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags,
+		     int (*acpi_fill_dmar)(unsigned long *currentp));
 unsigned long acpi_create_dmar_ds_pci_br(unsigned long current, u8 bus,
 	u8 dev, u8 fn);
 unsigned long acpi_create_dmar_ds_pci(unsigned long current, u8 bus,
@@ -542,6 +589,11 @@ unsigned long acpi_create_dmar_ds_ioapic(unsigned long current,
 	u8 enumeration_id, u8 bus, u8 dev, u8 fn);
 unsigned long acpi_create_dmar_ds_msi_hpet(unsigned long current,
 	u8 enumeration_id, u8 bus, u8 dev, u8 fn);
+int acpi_create_hpet(struct acpi_hpet *hpet);
+void acpi_create_dbg2(struct acpi_dbg2_header *dbg2,
+		      int port_type, int port_subtype,
+		      struct acpi_gen_regaddr *address, uint32_t address_size,
+		      const char *device_path);
 
 ulong write_acpi_tables(ulong start);
 
@@ -560,9 +612,11 @@ int get_acpi_table_revision(enum acpi_tables table);
 
 /* to convert */
 int soc_read_sci_irq_select(void);
-void soc_write_sci_irq_select(uint scis);
+int soc_write_sci_irq_select(uint scis);
 int soc_madt_sci_irq_polarity(int sci);
 struct acpi_cstate *soc_get_cstate_map(size_t *entries);
+
+void acpi_fill_fadt(struct acpi_fadt *fadt);
 
 #endif /* !__ACPI__*/
 

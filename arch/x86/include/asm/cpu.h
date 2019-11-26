@@ -288,4 +288,6 @@ u32 cpu_get_family_model(void);
  */
 u32 cpu_get_stepping(void);
 
+int cpu_phys_address_size(void);
+
 #endif

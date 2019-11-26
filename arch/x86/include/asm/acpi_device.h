@@ -61,13 +61,13 @@ struct acpi_dp {
  */
 #define ACPI_DT_NAMESPACE_HID		"PRP0001"
 
-struct device;
-const char *acpi_device_name(const struct device *dev);
-const char *acpi_device_hid(const struct device *dev);
-const char *acpi_device_path(const struct device *dev);
-const char *acpi_device_scope(const struct device *dev);
-const char *acpi_device_path_join(const struct device *dev, const char *name);
-int acpi_device_status(const struct device *dev);
+struct udevice;
+const char *acpi_device_name(const struct udevice *dev);
+const char *acpi_device_hid(const struct udevice *dev);
+const char *acpi_device_path(const struct udevice *dev);
+const char *acpi_device_scope(const struct udevice *dev);
+const char *acpi_device_path_join(const struct udevice *dev, const char *name);
+int acpi_device_status(const struct udevice *dev);
 
 /*
  * ACPI Descriptor for extended Interrupt()

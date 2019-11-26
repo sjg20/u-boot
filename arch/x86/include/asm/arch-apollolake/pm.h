@@ -35,6 +35,7 @@
 #define PSS_LATENCY_TRANSITION	10
 #define PSS_LATENCY_BUSMASTER	10
 
+#ifndef __ASSEMBLY__
 /* Track power state from reset to log events. */
 struct __packed chipset_power_state {
 	uint16_t pm1_sts;
@@ -50,5 +51,6 @@ struct __packed chipset_power_state {
 	uint32_t gen_pmcon3;
 	uint32_t prev_sleep_state;
 };
+#endif
 
 #endif

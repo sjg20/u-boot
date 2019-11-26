@@ -6,6 +6,8 @@
  * Copyright (C) 2016, Bin Meng <bmeng.cn@gmail.com>
  */
 
+#define LOG_CATEGORY LOGC_ACPI
+
 #include <common.h>
 #include <cpu.h>
 #include <dm.h>
@@ -13,7 +15,9 @@
 #include <serial.h>
 #include <version.h>
 #include <asm/acpi/global_nvs.h>
+#include <asm/acpi_device.h>
 #include <asm/acpi_table.h>
+#include <asm/cpu.h>
 #include <asm/ioapic.h>
 #include <asm/lapic.h>
 #include <asm/mpspec.h>
@@ -25,6 +29,9 @@
 #include <asm/arch/pm.h>
 #include <power/acpi_pmc.h>
 
+/* TODO(sjg@chromium.org): Figure out how to get compiler revision */
+#define ASL_REVISION	0
+
 /*
  * IASL compiles the dsdt entries and writes the hex values
  * to a C array AmlCode[] (see dsdt.c).
@@ -33,6 +40,16 @@ extern const unsigned char AmlCode[];
 
 /* ACPI RSDP address to be used in boot parameters */
 static ulong acpi_rsdp_addr;
+
+u8 acpi_checksum(u8 *table, u32 length)
+{
+	u8 ret = 0;
+	while (length--) {
+		ret += *table;
+		table++;
+	}
+	return -ret;
+}
 
 static void acpi_write_rsdp(struct acpi_rsdp *rsdp, struct acpi_rsdt *rsdt,
 			    struct acpi_xsdt *xsdt)
@@ -164,83 +181,78 @@ int acpi_add_table(struct acpi_rsdp *rsdp, void *table)
 	return 0;
 }
 
-int acpi_create_mcfg_mmconfig(acpi_mcfg_mmconfig_t *mmconfig, u32 base,
-				u16 seg_nr, u8 start, u8 end)
+int acpi_create_mcfg_mmconfig(struct acpi_mcfg_mmconfig *mmconfig, u32 base,
+			      u16 seg_nr, u8 start, u8 end)
 {
-	memset(mmconfig, 0, sizeof(*mmconfig));
-	mmconfig->base_address = base;
-	mmconfig->base_reserved = 0;
+	const int size = sizeof(*mmconfig);
+
+	memset(mmconfig, '\0', size);
+	mmconfig->base_address_l = base;
+	mmconfig->base_address_h = 0;
 	mmconfig->pci_segment_group_number = seg_nr;
 	mmconfig->start_bus_number = start;
 	mmconfig->end_bus_number = end;
 
-	return sizeof(acpi_mcfg_mmconfig_t);
+	return size;
 }
 
 unsigned long acpi_write_hpet(struct udevice *dev, unsigned long current,
 			      struct acpi_rsdp *rsdp)
 {
-	acpi_hpet_t *hpet;
+	struct acpi_hpet *hpet;
 
 	/*
 	 * We explicitly add these tables later on:
 	 */
-	printk(BIOS_DEBUG, "ACPI:    * HPET\n");
+	log_debug("ACPI:    * HPET\n");
 
-	hpet = (acpi_hpet_t *) current;
-	current += sizeof(acpi_hpet_t);
-	current = ALIGN_UP(current, 16);
+	hpet = (struct acpi_hpet *) current;
+	current += sizeof(struct acpi_hpet);
+	current = ALIGN(current, 16);
 	acpi_create_hpet(hpet);
 	acpi_add_table(rsdp, hpet);
 
 	return current;
 }
 
-unsigned long acpi_write_dbg2_pci_uart(acpi_rsdp_t *rsdp, unsigned long current,
+unsigned long acpi_write_dbg2_pci_uart(struct acpi_rsdp *rsdp, ulong current,
 				       struct udevice *dev, uint8_t access_size)
 {
-	acpi_dbg2_header_t *dbg2 = (acpi_dbg2_header_t *)current;
-	struct resource *res;
-	acpi_addr_t address;
+	struct acpi_dbg2_header *dbg2 = (struct acpi_dbg2_header *)current;
+	phys_addr_t addr;
+	struct acpi_gen_regaddr address;
 
 	if (!dev) {
-		printk(BIOS_ERR, "%s: Device not found\n", __func__);
+		log_err("Device not found\n");
 		return current;
 	}
-	if (!dev->enabled) {
-		printk(BIOS_INFO, "%s: Device not enabled\n", __func__);
+	if (device_active(dev)) {
+		log_info("Device not enabled\n");
 		return current;
 	}
-	res = find_resource(dev, PCI_BASE_ADDRESS_0);
-	if (!res) {
-		printk(BIOS_ERR, "%s: Unable to find resource for %s\n",
-		       __func__, dev_path(dev));
-		return current;
-	}
+	/*
+	 * PCI devices don't remember their resource allocation information in
+	 * U-Boot at present. We assume that MMIO is used for the UART and that
+	 * the address space is 32 bytes: ns16550 uses 8 registers of up to
+	 * 32-bits each. This is only for debugging so it is not a big deal.
+	 */
+	addr = dm_pci_read_bar32(dev, 0);
 
-	memset(&address, 0, sizeof(address));
-	if (res->flags & IORESOURCE_IO)
-		address.space_id = ACPI_ADDRESS_SPACE_IO;
-	else if (res->flags & IORESOURCE_MEM)
-		address.space_id = ACPI_ADDRESS_SPACE_MEMORY;
-	else {
-		printk(BIOS_ERR, "%s: Unknown address space type\n", __func__);
-		return current;
-	}
-
-	address.addrl = (uint32_t)res->base;
-	address.addrh = (uint32_t)((res->base >> 32) & 0xffffffff);
+	memset(&address, '\0', sizeof(address));
+	address.space_id = ACPI_ADDRESS_SPACE_MEMORY;
+	address.addrl = (uint32_t)addr;
+	address.addrh = (uint32_t)((addr >> 32) & 0xffffffff);
 	address.access_size = access_size;
 
 	acpi_create_dbg2(dbg2,
-			 ACPI_DBG2_PORT_SERIAL,
-			 ACPI_DBG2_PORT_SERIAL_16550,
-			 &address, res->size,
+			 ACPI_DBG2_SERIAL_PORT,
+			 ACPI_DBG2_16550_COMPATIBLE,
+			 &address, 32,
 			 acpi_device_path(dev));
 
 	if (dbg2->header.length) {
 		current += dbg2->header.length;
-		current = acpi_align_current(current);
+		current = ALIGN(current, 16);
 		acpi_add_table(rsdp, dbg2);
 	}
 
@@ -346,7 +358,7 @@ static int acpi_create_madt_irq_overrides(u32 current)
 	return length;
 }
 
-__weak u32 acpi_fill_madt(u32 current)
+__weak ulong acpi_fill_madt(ulong current)
 {
 	current += acpi_create_madt_lapics(current);
 
@@ -381,20 +393,7 @@ static void acpi_create_madt(struct acpi_madt *madt)
 	header->checksum = table_compute_checksum((void *)madt, header->length);
 }
 
-int acpi_create_mcfg_mmconfig(struct acpi_mcfg_mmconfig *mmconfig, u32 base,
-			      u16 seg_nr, u8 start, u8 end)
-{
-	memset(mmconfig, 0, sizeof(*mmconfig));
-	mmconfig->base_address_l = base;
-	mmconfig->base_address_h = 0;
-	mmconfig->pci_segment_group_number = seg_nr;
-	mmconfig->start_bus_number = start;
-	mmconfig->end_bus_number = end;
-
-	return sizeof(struct acpi_mcfg_mmconfig);
-}
-
-__weak u32 acpi_fill_mcfg(u32 current)
+__weak ulong acpi_fill_mcfg(ulong current)
 {
 	current += acpi_create_mcfg_mmconfig
 		((struct acpi_mcfg_mmconfig *)current,
@@ -564,7 +563,6 @@ void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
 		      void *dsdt)
 {
 	struct acpi_table_header *header = &(fadt->header);
-	const uint pmbase = IOMAP_ACPI_BASE;
 
 	memset((void *)fadt, 0, sizeof(struct acpi_fadt));
 
@@ -596,54 +594,7 @@ void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
 	/* Use ACPI 3.0 revision */
 	fadt->header.revision = 4;
 
-	fadt->sci_int = acpi_sci_irq();
-	fadt->smi_cmd = APM_CNT;
-	fadt->acpi_enable = APM_CNT_ACPI_ENABLE;
-	fadt->acpi_disable = APM_CNT_ACPI_DISABLE;
-	fadt->s4bios_req = 0x0;
-	fadt->pstate_cnt = 0;
-
-	fadt->pm1a_evt_blk = pmbase + PM1_STS;
-	fadt->pm1b_evt_blk = 0x0;
-	fadt->pm1a_cnt_blk = pmbase + PM1_CNT;
-	fadt->pm1b_cnt_blk = 0x0;
-
-	fadt->gpe0_blk = pmbase + GPE0_STS;
-
-	fadt->pm1_evt_len = 4;
-	fadt->pm1_cnt_len = 2;
-
-	/* GPE0 STS/EN pairs each 32 bits wide. */
-	fadt->gpe0_blk_len = 2 * GPE0_REG_MAX * sizeof(uint32_t);
-
-	fadt->flush_size = 0x400;	/* twice of cache size */
-	fadt->flush_stride = 0x10;	/* Cache line width  */
-	fadt->duty_offset = 1;
-	fadt->day_alrm = 0xd;
-
-	fadt->flags = ACPI_FADT_WBINVD | ACPI_FADT_C1_SUPPORTED |
-	    ACPI_FADT_C2_MP_SUPPORTED | ACPI_FADT_SLEEP_BUTTON |
-	    ACPI_FADT_RESET_REGISTER | ACPI_FADT_SEALED_CASE |
-	    ACPI_FADT_S4_RTC_WAKE | ACPI_FADT_PLATFORM_CLOCK;
-
-	fadt->reset_reg.space_id = 1;
-	fadt->reset_reg.bit_width = 8;
-	fadt->reset_reg.addrl = IO_PORT_RESET;
-	fadt->reset_value = RST_CPU | SYS_RST;
-
-	fadt->x_pm1a_evt_blk.space_id = 1;
-	fadt->x_pm1a_evt_blk.bit_width = fadt->pm1_evt_len * 8;
-	fadt->x_pm1a_evt_blk.addrl = pmbase + PM1_STS;
-
-	fadt->x_pm1b_evt_blk.space_id = 1;
-
-	fadt->x_pm1a_cnt_blk.space_id = 1;
-	fadt->x_pm1a_cnt_blk.bit_width = fadt->pm1_cnt_len * 8;
-	fadt->x_pm1a_cnt_blk.addrl = pmbase + PM1_CNT;
-
-	fadt->x_pm1b_cnt_blk.space_id = 1;
-
-	fadt->x_gpe1_blk.space_id = 1;
+	acpi_fill_fadt(fadt);
 
 	header->checksum = table_compute_checksum(fadt, header->length);
 }
@@ -692,35 +643,39 @@ void acpi_dmar_rmrr_fixup(unsigned long base, unsigned long current)
 	rmrr->length = current - base;
 }
 
-void acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags,
+int acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags,
 		      int (*acpi_fill_dmar)(unsigned long *currentp))
 {
 	struct acpi_table_header *header = &dmar->header;
 	unsigned long current = (unsigned long)dmar + sizeof(struct acpi_dmar);
+	int ret;
 
 	memset((void *)dmar, 0, sizeof(struct acpi_dmar));
-
 	if (!header)
-		return;
+		return -EFAULT;
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "DMAR", 4);
 	memcpy(header->oem_id, OEM_ID, 6);
 	memcpy(header->oem_table_id, ACPI_TABLE_CREATOR, 8);
-	memcpy(header->asl_compiler_id, ASLC, 4);
+	memcpy(header->aslc_id, ASLC_ID, 4);
 
-	header->asl_compiler_revision = asl_revision;
-	header->length = sizeof(acpi_dmar_t);
+	header->aslc_revision = ASL_REVISION;
+	header->length = sizeof(struct acpi_dmar);
 	header->revision = get_acpi_table_revision(DMAR);
 
 	dmar->host_address_width = cpu_phys_address_size() - 1;
 	dmar->flags = flags;
 
-	current = acpi_fill_dmar(current);
+	ret = acpi_fill_dmar(&current);
+	if (ret)
+		return log_msg_ret("fill", ret);
 
 	/* (Re)calculate length and checksum. */
 	header->length = current - (unsigned long)dmar;
 	header->checksum = acpi_checksum((void *)dmar, header->length);
+
+	return 0;
 }
 
 static unsigned long acpi_create_dmar_ds(unsigned long current,
@@ -767,6 +722,107 @@ unsigned long acpi_create_dmar_ds_msi_hpet(unsigned long current,
 {
 	return acpi_create_dmar_ds(current,
 			SCOPE_MSI_HPET, enumeration_id, bus, dev, fn);
+}
+
+/* http://www.intel.com/hardwaredesign/hpetspec_1.pdf */
+int acpi_create_hpet(struct acpi_hpet *hpet)
+{
+	struct acpi_table_header *header = &hpet->header;
+	struct acpi_gen_regaddr *addr = &hpet->addr;
+
+	memset((void *)hpet, 0, sizeof(struct acpi_hpet));
+	if (!header)
+		return -EFAULT;
+
+	/* Fill out header fields. */
+	acpi_fill_header(header, "HPET");
+
+	header->aslc_revision = ASL_REVISION;
+	header->length = sizeof(struct acpi_hpet);
+	header->revision = get_acpi_table_revision(HPET);
+
+	/* Fill out HPET address. */
+	addr->space_id = 0; /* Memory */
+	addr->bit_width = 64;
+	addr->bit_offset = 0;
+	addr->addrl = CONFIG_HPET_ADDRESS & 0xffffffff;
+	addr->addrh = ((unsigned long long)CONFIG_HPET_ADDRESS) >> 32;
+
+	hpet->id = *(unsigned int *)CONFIG_HPET_ADDRESS;
+	hpet->number = 0;
+	hpet->min_tick = 0x80; /* HPET_MIN_TICKS */
+
+	header->checksum = acpi_checksum((void *)hpet,
+					 sizeof(struct acpi_hpet));
+
+	return 0;
+}
+
+void acpi_create_dbg2(struct acpi_dbg2_header *dbg2,
+		      int port_type, int port_subtype,
+		      struct acpi_gen_regaddr *address, uint32_t address_size,
+		      const char *device_path)
+{
+	uintptr_t current;
+	struct acpi_dbg2_device *device;
+	uint32_t *dbg2_addr_size;
+	struct acpi_table_header *header;
+	size_t path_len;
+	const char *path;
+	char *namespace;
+
+	/* Fill out header fields. */
+	current = (uintptr_t)dbg2;
+	memset(dbg2, 0, sizeof(struct acpi_dbg2_header));
+	header = &dbg2->header;
+
+	if (!header)
+		return;
+
+	header->revision = get_acpi_table_revision(DBG2);
+	acpi_fill_header(header, "DBG2");
+	header->aslc_revision = ASL_REVISION;
+
+	/* One debug device defined */
+	dbg2->devices_offset = sizeof(struct acpi_dbg2_header);
+	dbg2->devices_count = 1;
+	current += sizeof(struct acpi_dbg2_header);
+
+	/* Device comes after the header */
+	device = (struct acpi_dbg2_device *)current;
+	memset(device, 0, sizeof(struct acpi_dbg2_device));
+	current += sizeof(struct acpi_dbg2_device);
+
+	device->revision = 0;
+	device->address_count = 1;
+	device->port_type = port_type;
+	device->port_subtype = port_subtype;
+
+	/* Base Address comes after device structure */
+	memcpy((void *)current, address, sizeof(struct acpi_gen_regaddr));
+	device->base_address_offset = current - (uintptr_t)device;
+	current += sizeof(struct acpi_gen_regaddr);
+
+	/* Address Size comes after address structure */
+	dbg2_addr_size = (uint32_t *)current;
+	device->address_size_offset = current - (uintptr_t)device;
+	*dbg2_addr_size = address_size;
+	current += sizeof(uint32_t);
+
+	/* Namespace string comes last, use '.' if not provided */
+	path = device_path ? : ".";
+	/* Namespace string length includes NULL terminator */
+	path_len = strlen(path) + 1;
+	namespace = (char *)current;
+	device->namespace_string_length = path_len;
+	device->namespace_string_offset = current - (uintptr_t)device;
+	strncpy(namespace, path, path_len);
+	current += path_len;
+
+	/* Update structure lengths and checksum */
+	device->length = current - (uintptr_t)device;
+	header->length = current - (uintptr_t)dbg2;
+	header->checksum = acpi_checksum((uint8_t *)dbg2, header->length);
 }
 
 /*
@@ -946,7 +1002,6 @@ int get_acpi_table_revision(enum acpi_tables table)
 	case BERT:
 		return 1;
 	default:
-		return -1;
+		return -EINVAL;
 	}
-	return -1;
 }

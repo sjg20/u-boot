@@ -7,6 +7,8 @@
 #ifndef _ASM_ARCH_SOC_CONFIG_H
 #define _ASM_ARCH_SOC_CONFIG_H
 
+#include <i2c.h>
+
 #define INTEL_GSPI_MAX		3
 #define INTEL_I2C_DEV_MAX	8
 #define MAX_USB2_PORTS		8
@@ -15,14 +17,6 @@
 enum {
 	CHIPSET_LOCKDOWN_FSP = 0, /* FSP handles locking per UPDs */
 	CHIPSET_LOCKDOWN_COREBOOT, /* coreboot handles locking */
-};
-
-enum i2c_speed {
-	I2C_SPEED_STANDARD	= 100000,
-	I2C_SPEED_FAST		= 400000,
-	I2C_SPEED_FAST_PLUS	= 1000000,
-	I2C_SPEED_HIGH		= 3400000,
-	I2C_SPEED_FAST_ULTRA	= 5000000,
 };
 
 /*

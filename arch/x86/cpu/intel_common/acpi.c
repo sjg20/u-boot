@@ -15,6 +15,8 @@
  */
 
 #include <common.h>
+#include <cpu.h>
+#include <dm.h>
 #include <asm/acpi_table.h>
 #include <asm/acpigen.h>
 #include <asm/cpu.h>
@@ -433,16 +435,27 @@ __weak void soc_power_states_generation(int core_id,
 {
 }
 
-void generate_cpu_entries(struct device *device)
+int generate_cpu_entries(struct device *device)
 {
 	int core_id, cpu_id, pcontrol_blk = ACPI_BASE_ADDRESS;
+	struct udevice *dev;
 	int plen = 6;
-	int totalcores = dev_count_cpu();
-	int cores_per_package = get_cores_per_package();
-	int numcpus = totalcores / cores_per_package;
+	int totalcores;
+	int cores_per_package;
+	int numcpus;
+	int ret;
 
-	printk(BIOS_DEBUG, "Found %d CPU(s) with %d core(s) each.\n",
-	       numcpus, cores_per_package);
+	ret = uclass_first_device_err(UCLASS_CPU, &dev);
+	if (ret)
+		return log_msg_ret("cpu", ret);
+	ret = cpu_get_count(dev);
+	if (ret < 0)
+		return log_msg_ret("count", ret);
+	totalcores = ret;
+	cores_per_package = get_cores_per_package();
+	numcpus = totalcores / cores_per_package;
+	log_debug("Found %d CPU(s) with %d core(s) each.\n", numcpus,
+		  cores_per_package);
 
 	for (cpu_id = 0; cpu_id < numcpus; cpu_id++) {
 		for (core_id = 0; core_id < cores_per_package; core_id++) {
@@ -470,9 +483,11 @@ void generate_cpu_entries(struct device *device)
 
 	/* Add a method to notify processor nodes */
 	acpigen_write_processor_cnot(cores_per_package);
+
+	return 0;
 }
 
-#if CONFIG(SOC_INTEL_COMMON_ACPI_WAKE_SOURCE)
+#if IS_ENABLED(CONFIG_SOC_INTEL_COMMON_ACPI_WAKE_SOURCE)
 /* Save wake source data for ACPI _SWS methods in NVS */
 static void acpi_save_wake_source(void *unused)
 {

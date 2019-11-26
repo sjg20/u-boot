@@ -159,4 +159,7 @@ uint32_t cpu_get_power_max(void);
  */
 uint32_t cpu_get_max_turbo_ratio(void);
 
+void generate_p_state_entries(int core, int cores_per_package);
+void generate_t_state_entries(int core, int cores_per_package);
+
 #endif
