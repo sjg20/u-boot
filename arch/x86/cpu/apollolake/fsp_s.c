@@ -93,7 +93,8 @@ int soc_acpi_name(const struct udevice *dev, char *out_name)
 			if (hose->acpi_name)
 				name = hose->acpi_name;
 			else
-				return "PCI0";
+				name = "PCI0";
+			break;
 		}
 		default:
 			break;
