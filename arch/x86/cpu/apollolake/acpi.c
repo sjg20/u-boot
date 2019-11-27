@@ -42,6 +42,7 @@
 #include "chip.h"
 */
 #include <common.h>
+#include <acpi.h>
 #include <acpi_s3.h>
 #include <cpu.h>
 #include <dm.h>
@@ -219,8 +220,7 @@ int soc_madt_sci_irq_polarity(int sci)
 	return MP_IRQ_POLARITY_LOW;
 }
 
-void acpi_create_fadt(struct acpi_fadt *fadt, struct acpi_facs *facs,
-		      void *dsdt)
+void soc_fill_fadt(struct acpi_fadt *fadt)
 {
 	const struct apl_config *cfg = gd->arch.soc_config;
 
@@ -229,7 +229,6 @@ void acpi_create_fadt(struct acpi_fadt *fadt, struct acpi_facs *facs,
 		panic("no cfg");
 // 		return log_msg_ret("cfg", -EINVAL);
 	}
-	acpi_fadt_common(fadt, facs, dsdt);
 
 	fadt->pm_tmr_blk = IOMAP_ACPI_BASE + PM1_TMR;
 
@@ -249,7 +248,24 @@ void acpi_create_fadt(struct acpi_fadt *fadt, struct acpi_facs *facs,
 		fadt->flags |= ACPI_FADT_LOW_PWR_IDLE_S0;
 }
 
-static int soc_fill_dmar(unsigned long *currentp)
+void acpi_create_fadt(struct acpi_fadt *fadt, struct acpi_facs *facs,
+		      void *dsdt)
+{
+	const struct apl_config *cfg = gd->arch.soc_config;
+	struct acpi_table_header *header = &fadt->header;
+
+	if (!cfg) {
+		printf("%s: bad\n", __func__);
+		panic("no cfg");
+// 		return log_msg_ret("cfg", -EINVAL);
+	}
+	acpi_fadt_common(fadt, facs, dsdt);
+	intel_acpi_fill_fadt(fadt);
+	soc_fill_fadt(fadt);
+	header->checksum = table_compute_checksum(fadt, header->length);
+}
+
+int apl_acpi_fill_dmar(struct acpi_ctx *ctx)
 {
 	struct udevice *dev;
 	uint64_t gfxvtbar = readq(MCHBAR_REG(GFXVTBAR)) & VTBAR_MASK;
@@ -257,24 +273,24 @@ static int soc_fill_dmar(unsigned long *currentp)
 	bool gfxvten = readl(MCHBAR_REG(GFXVTBAR)) & VTBAR_ENABLED;
 	bool defvten = readl(MCHBAR_REG(DEFVTBAR)) & VTBAR_ENABLED;
 	unsigned long tmp;
-	ulong current = *currentp;
 
 	uclass_find_first_device(UCLASS_VIDEO, &dev);
 
 	/* IGD has to be enabled, GFXVTBAR set and enabled. */
 	if (dev && device_active(dev) && gfxvtbar && gfxvten) {
-		tmp = current;
+		tmp = ctx->current;
 
-		current += acpi_create_dmar_drhd(current, 0, 0, gfxvtbar);
-		current += acpi_create_dmar_ds_pci(current, 0, 2, 0);
-		acpi_dmar_drhd_fixup(tmp, current);
+		ctx->current += acpi_create_dmar_drhd(ctx->current, 0, 0,
+						      gfxvtbar);
+		ctx->current += acpi_create_dmar_ds_pci(ctx->current, 0, 2, 0);
+		acpi_dmar_drhd_fixup(tmp, ctx->current);
 
 		/* Add RMRR entry */
-		tmp = current;
-		current += acpi_create_dmar_rmrr(current, 0,
+		tmp = ctx->current;
+		ctx->current += acpi_create_dmar_rmrr(ctx->current, 0,
 				sa_get_gsm_base(), sa_get_tolud_base() - 1);
-		current += acpi_create_dmar_ds_pci(current, 0, 2, 0);
-		acpi_dmar_rmrr_fixup(tmp, current);
+		ctx->current += acpi_create_dmar_ds_pci(ctx->current, 0, 2, 0);
+		acpi_dmar_rmrr_fixup(tmp, ctx->current);
 	}
 
 	/* DEFVTBAR has to be set and enabled. */
@@ -284,7 +300,7 @@ static int soc_fill_dmar(unsigned long *currentp)
 		uint ioapic, hpet;
 		int ret;
 
-		tmp = current;
+		tmp = ctx->current;
 		/*
 		 * P2SB may already be hidden. There's no clear rule, when.
 		 * It is needed to get bus, device and function for IOAPIC and
@@ -302,54 +318,16 @@ static int soc_fill_dmar(unsigned long *currentp)
 		hpet = PCI_TO_BDF(hbdf);
 // 		p2sb_hide();
 
-		current += acpi_create_dmar_drhd(current,
+		ctx->current += acpi_create_dmar_drhd(ctx->current,
 				DRHD_INCLUDE_PCI_ALL, 0, defvtbar);
-		current += acpi_create_dmar_ds_ioapic(current,
+		ctx->current += acpi_create_dmar_ds_ioapic(ctx->current,
 				2, PCI_BUS(ioapic), PCI_DEV(ioapic),
 				PCI_FUNC(ioapic));
-		current += acpi_create_dmar_ds_msi_hpet(current,
+		ctx->current += acpi_create_dmar_ds_msi_hpet(ctx->current,
 				0, PCI_BUS(hpet), PCI_DEV(hpet),
 				PCI_FUNC(hpet));
-		acpi_dmar_drhd_fixup(tmp, current);
+		acpi_dmar_drhd_fixup(tmp, ctx->current);
 	}
-	*currentp = current;
-
-	return 0;
-}
-
-int sa_write_acpi_tables(struct udevice *dev, unsigned long *currentp,
-			 struct acpi_rsdp *const rsdp)
-{
-	struct acpi_dmar *const dmar = (struct acpi_dmar *)current;
-	ulong current;
-	int ret;
-
-	/* Create DMAR table only if virtualization is enabled. Due to some
-	 * constraints on Apollo Lake SoC (some stepping affected), VTD could
-	 * not be enabled together with IPU. Doing so will override and disable
-	 * VTD while leaving CAPID0_A still reporting that VTD is available.
-	 * As in this case FSP will lock VTD to disabled state, we need to make
-	 * sure that DMAR table generation only happens when at least DEFVTBAR
-	 * is enabled. Otherwise the DMAR header will be generated while the
-	 * content of the table will be missing.
-	 */
-	u32 val;
-
-	dm_pci_read_config32(dev, CAPID0_A, &val);
-	if ((val & VTD_DISABLE) ||
-	    !(readl(MCHBAR_REG(DEFVTBAR)) & VTBAR_ENABLED))
-		return 0;
-
-	log_debug("ACPI:    * DMAR\n");
-	current = *currentp;
-	acpi_create_dmar(dmar, DMAR_INTR_REMAP, soc_fill_dmar);
-	current += dmar->header.length;
-	current = ALIGN(current, 16);
-	ret = acpi_add_table(rsdp, dmar);
-	if (ret)
-		return log_msg_ret("add_table", ret);
-	current = ALIGN(current, 16);
-	*currentp = current;
 
 	return 0;
 }

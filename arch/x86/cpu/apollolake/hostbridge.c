@@ -3,13 +3,19 @@
  * Copyright 2019 Google LLC
  */
 
+#define LOG_CATEGORY UCLASS_NORTHBRIDGE
+
 #include <common.h>
+#include <acpi.h>
 #include <dm.h>
 #include <dt-structs.h>
 #include <spl.h>
 #include <asm/intel_pinctrl.h>
 #include <asm/intel_regs.h>
+#include <asm/io.h>
+#include <asm/acpi_table.h>
 #include <asm/pci.h>
+#include <asm/arch/acpi.h>
 #include <asm/arch/systemagent.h>
 
 /**
@@ -164,6 +170,56 @@ static int apl_hostbridge_probe(struct udevice *dev)
 	return 0;
 }
 
+static int apl_acpi_get_name(const struct udevice *dev, char *out_name)
+{
+	return acpi_return_name(out_name, "RHUB");
+}
+
+static int apl_acpi_write_tables(struct udevice *dev, struct acpi_ctx *ctx)
+{
+	struct acpi_table_header *header;
+	struct acpi_dmar *dmar;
+	u32 val;
+
+	/*
+	 * Create DMAR table only if virtualization is enabled. Due to some
+	 * constraints on Apollo Lake SoC (some stepping affected), VTD could
+	 * not be enabled together with IPU. Doing so will override and disable
+	 * VTD while leaving CAPID0_A still reporting that VTD is available.
+	 * As in this case FSP will lock VTD to disabled state, we need to make
+	 * sure that DMAR table generation only happens when at least DEFVTBAR
+	 * is enabled. Otherwise the DMAR header will be generated while the
+	 * content of the table will be missing.
+	 */
+
+	dm_pci_read_config32(dev, CAPID0_A, &val);
+	if ((val & VTD_DISABLE) ||
+	    !(readl(MCHBAR_REG(DEFVTBAR)) & VTBAR_ENABLED))
+		return 0;
+
+	log_debug("ACPI:    * DMAR\n");
+	dmar = (struct acpi_dmar *)ctx->current;
+	header = &dmar->header;
+	acpi_create_dmar(dmar, DMAR_INTR_REMAP);
+	ctx->current += sizeof(struct acpi_dmar);
+	apl_acpi_fill_dmar(ctx);
+
+	/* (Re)calculate length and checksum. */
+	header->length = ctx->current - (unsigned long)dmar;
+	header->checksum = acpi_checksum((void *)dmar, header->length);
+
+	ctx_align(ctx);
+	acpi_add_table(ctx->rsdp, dmar);
+	ctx_align(ctx);
+
+	return 0;
+}
+
+struct acpi_ops apl_hostbridge_acpi_ops = {
+	.get_name	= apl_acpi_get_name,
+	.write_tables	= apl_acpi_write_tables,
+};
+
 static const struct udevice_id apl_hostbridge_ids[] = {
 	{ .compatible = "intel,apl-hostbridge" },
 	{ }
@@ -176,4 +232,5 @@ U_BOOT_DRIVER(apl_hostbridge_drv) = {
 	.ofdata_to_platdata = apl_hostbridge_ofdata_to_platdata,
 	.probe		= apl_hostbridge_probe,
 	.platdata_auto_alloc_size = sizeof(struct apl_hostbridge_platdata),
+	acpi_ops_ptr(&apl_hostbridge_acpi_ops)
 };

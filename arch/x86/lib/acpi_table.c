@@ -563,9 +563,9 @@ static void acpi_create_spcr(struct acpi_spcr *spcr)
 void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
 		      void *dsdt)
 {
-	struct acpi_table_header *header = &(fadt->header);
+	struct acpi_table_header *header = &fadt->header;
 
-	memset((void *)fadt, 0, sizeof(struct acpi_fadt));
+	memset((void *)fadt, '\0', sizeof(struct acpi_fadt));
 
 	acpi_fill_header(header, "FACP");
 	header->length = sizeof(struct acpi_fadt);
@@ -594,10 +594,6 @@ void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
 
 	/* Use ACPI 3.0 revision */
 	fadt->header.revision = 4;
-
-	acpi_fill_fadt(fadt);
-
-	header->checksum = table_compute_checksum(fadt, header->length);
 }
 
 unsigned long acpi_create_dmar_drhd(unsigned long current, u8 flags,
@@ -644,12 +640,9 @@ void acpi_dmar_rmrr_fixup(unsigned long base, unsigned long current)
 	rmrr->length = current - base;
 }
 
-int acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags,
-		      int (*acpi_fill_dmar)(unsigned long *currentp))
+int acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags)
 {
 	struct acpi_table_header *header = &dmar->header;
-	unsigned long current = (unsigned long)dmar + sizeof(struct acpi_dmar);
-	int ret;
 
 	memset((void *)dmar, 0, sizeof(struct acpi_dmar));
 	if (!header)
@@ -667,14 +660,6 @@ int acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags,
 
 	dmar->host_address_width = cpu_phys_address_size() - 1;
 	dmar->flags = flags;
-
-	ret = acpi_fill_dmar(&current);
-	if (ret)
-		return log_msg_ret("fill", ret);
-
-	/* (Re)calculate length and checksum. */
-	header->length = current - (unsigned long)dmar;
-	header->checksum = acpi_checksum((void *)dmar, header->length);
 
 	return 0;
 }

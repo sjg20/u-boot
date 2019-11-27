@@ -581,8 +581,7 @@ unsigned long acpi_create_dmar_rmrr(unsigned long current, u16 segment,
 				    u64 bar, u64 limit);
 void acpi_dmar_rmrr_fixup(unsigned long base, unsigned long current);
 void acpi_dmar_drhd_fixup(unsigned long base, unsigned long current);
-int acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags,
-		     int (*acpi_fill_dmar)(unsigned long *currentp));
+int acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags);
 unsigned long acpi_create_dmar_ds_pci_br(unsigned long current, u8 bus,
 	u8 dev, u8 fn);
 unsigned long acpi_create_dmar_ds_pci(unsigned long current, u8 bus,
@@ -618,8 +617,10 @@ int soc_write_sci_irq_select(uint scis);
 int soc_madt_sci_irq_polarity(int sci);
 struct acpi_cstate *soc_get_cstate_map(size_t *entries);
 
-void acpi_fill_fadt(struct acpi_fadt *fadt);
+void intel_acpi_fill_fadt(struct acpi_fadt *fadt);
 int soc_acpi_name(const struct udevice *dev, char *out_name);
+
+u8 acpi_checksum(u8 *table, u32 length);
 
 #endif /* !__ACPI__*/
 

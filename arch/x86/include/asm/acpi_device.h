@@ -306,7 +306,7 @@ struct acpi_gpio {
 	.pins = { (gpio) } }
 
 /* Write GpioIo() or GpioInt() descriptor to SSDT AML output */
-void acpi_device_write_gpio(const struct acpi_gpio *gpio);
+int acpi_device_write_gpio(const struct acpi_gpio *gpio);
 
 /*
  * ACPI Descriptors for Serial Bus interfaces

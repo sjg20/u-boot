@@ -132,7 +132,7 @@ __weak void soc_fill_fadt(struct acpi_fadt *fadt)
 {
 }
 
-void acpi_fill_fadt(struct acpi_fadt *fadt)
+void intel_acpi_fill_fadt(struct acpi_fadt *fadt)
 {
 	const uint16_t pmbase = IOMAP_ACPI_BASE;
 
@@ -188,7 +188,6 @@ void acpi_fill_fadt(struct acpi_fadt *fadt)
 
 	fadt->x_gpe1_blk.space_id = 1;
 
-	soc_fill_fadt(fadt);
 }
 
 unsigned long southbridge_write_acpi_tables(struct udevice *dev,

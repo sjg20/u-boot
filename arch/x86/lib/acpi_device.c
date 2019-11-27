@@ -14,6 +14,7 @@
 #include <common.h>
 #include <dm.h>
 #include <asm/acpigen.h>
+#include <asm/intel_pinctrl.h>
 
 /*
 #include <string.h>
@@ -245,7 +246,7 @@ void acpi_device_write_interrupt(const struct acpi_irq *irq)
 }
 
 /* ACPI 6.1 section 6.4.3.8.1 - GPIO Interrupt or I/O */
-void acpi_device_write_gpio(const struct acpi_gpio *gpio)
+int acpi_device_write_gpio(const struct acpi_gpio *gpio)
 {
 	void *start, *desc_length;
 	void *pin_table_offset, *vendor_data_offset, *resource_offset;
@@ -253,7 +254,7 @@ void acpi_device_write_gpio(const struct acpi_gpio *gpio)
 	int pin;
 
 	if (!gpio || gpio->type > ACPI_GPIO_TYPE_IO)
-		return;
+		return -EINVAL;
 
 	start = acpigen_get_current();
 
@@ -361,9 +362,17 @@ void acpi_device_write_gpio(const struct acpi_gpio *gpio)
 
 	/* Pin Table, one word for each pin */
 	for (pin = 0; pin < gpio->pin_count; pin++) {
-		uint16_t acpi_pin = gpio->pins[pin];
+		struct udevice *pinctrl;
+		uint offset;
+		int acpi_pin;
+		int ret;
 
-		acpi_pin = gpio_acpi_pin(acpi_pin);
+		ret = intel_pinctrl_get_pad(gpio->pins[pin], &pinctrl,
+					    &offset);
+		if (ret)
+			return log_msg_ret("pin", ret);
+		acpi_pin = intel_pinctrl_get_acpi_pin(pinctrl, offset);
+
 		acpigen_emit_word(acpi_pin);
 	}
 
@@ -378,6 +387,8 @@ void acpi_device_write_gpio(const struct acpi_gpio *gpio)
 
 	/* Fill in GPIO Descriptor Length (account for len word) */
 	acpi_device_fill_len(desc_length);
+
+	return 0;
 }
 
 /* ACPI 6.1 section 6.4.3.8.2.1 - I2cSerialBus() */
