@@ -25,8 +25,12 @@ struct acpi_ops {
 	int (*write_tables)(struct udevice *dev, struct acpi_ctx *ctx);
 };
 
+#define device_get_acpi_ops(dev)	(dev->driver->acpi_ops)
+
 int acpi_return_name(char *out_name, const char *name);
 
 int ctx_align(struct acpi_ctx *ctx);
+
+int acpi_dev_write_tables(struct acpi_ctx *ctx);
 
 #endif

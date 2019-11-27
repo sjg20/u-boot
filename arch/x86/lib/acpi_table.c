@@ -10,6 +10,7 @@
 #define LOG_CATEGORY LOGC_ACPI
 
 #include <common.h>
+#include <acpi.h>
 #include <cpu.h>
 #include <dm.h>
 #include <dm/uclass-internal.h>
@@ -882,6 +883,7 @@ ulong write_acpi_tables(ulong start)
 	struct acpi_madt *madt;
 	struct acpi_csrt *csrt;
 	struct acpi_spcr *spcr;
+	struct acpi_ctx ctx;
 	int i;
 
 	current = start;
@@ -983,6 +985,10 @@ ulong write_acpi_tables(ulong start)
 	current += spcr->header.length;
 	acpi_add_table(rsdp, spcr);
 	current = ALIGN(current, 16);
+
+	ctx.current = current;
+	ctx.rsdp = rsdp;
+	acpi_dev_write_tables(&ctx);
 
 	printf("current = %x\n", current);
 
