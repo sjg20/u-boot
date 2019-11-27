@@ -14,6 +14,7 @@
 #include <asm/intel_regs.h>
 #include <asm/io.h>
 #include <asm/acpi_table.h>
+#include <asm/intel_sa.h>
 #include <asm/pci.h>
 #include <asm/arch/acpi.h>
 #include <asm/arch/systemagent.h>
@@ -45,7 +46,9 @@ enum {
 
 	PCIEXBAR_PCIEXBAREN	= 1 << 0,
 
+	BGSM			= 0xb4,  /* Base GTT Stolen Memory */
 	TSEG			= 0xb8,  /* TSEG base */
+	TOLUD			= 0xbc,
 };
 
 static int apl_hostbridge_early_init_pinctrl(struct udevice *dev)
@@ -213,6 +216,31 @@ static int apl_acpi_write_tables(struct udevice *dev, struct acpi_ctx *ctx)
 	ctx_align(ctx);
 
 	return 0;
+}
+
+static ulong sa_read_reg(struct udevice *dev, int reg)
+{
+	u32 val;
+
+	/* All regions concerned for have 1 MiB alignment. */
+	dm_pci_read_config32(dev, BGSM, &val);
+
+	return ALIGN_DOWN(val, 1 << 20);
+}
+
+ulong sa_get_tolud_base(struct udevice *dev)
+{
+	return sa_read_reg(dev, TOLUD);
+}
+
+ulong sa_get_gsm_base(struct udevice *dev)
+{
+	return sa_read_reg(dev, BGSM);
+}
+
+ulong sa_get_tseg_base(struct udevice *dev)
+{
+	return sa_read_reg(dev, TSEG);
 }
 
 struct acpi_ops apl_hostbridge_acpi_ops = {

@@ -52,10 +52,11 @@
 #include <asm/acpi_table.h>
 #include <asm/cpu_common.h>
 #include <asm/intel_pinctrl.h>
+#include <asm/intel_pinctrl_defs.h>
 #include <asm/intel_regs.h>
 #include <asm/io.h>
 #include <asm/mpspec.h>
-#include <asm/intel_pinctrl_defs.h>
+#include <asm/tables.h>
 #include <asm/arch/iomap.h>
 #include <asm/arch/global_nvs.h>
 #include <asm/arch/gpio.h>
@@ -267,14 +268,18 @@ void acpi_create_fadt(struct acpi_fadt *fadt, struct acpi_facs *facs,
 
 int apl_acpi_fill_dmar(struct acpi_ctx *ctx)
 {
-	struct udevice *dev;
+	struct udevice *dev, *sa_dev;
 	uint64_t gfxvtbar = readq(MCHBAR_REG(GFXVTBAR)) & VTBAR_MASK;
 	uint64_t defvtbar = readq(MCHBAR_REG(DEFVTBAR)) & VTBAR_MASK;
 	bool gfxvten = readl(MCHBAR_REG(GFXVTBAR)) & VTBAR_ENABLED;
 	bool defvten = readl(MCHBAR_REG(DEFVTBAR)) & VTBAR_ENABLED;
 	unsigned long tmp;
+	int ret;
 
 	uclass_find_first_device(UCLASS_VIDEO, &dev);
+	ret = uclass_first_device_err(UCLASS_NORTHBRIDGE, &sa_dev);
+	if (ret)
+		return log_msg_ret("no sa", ret);
 
 	/* IGD has to be enabled, GFXVTBAR set and enabled. */
 	if (dev && device_active(dev) && gfxvtbar && gfxvten) {
@@ -288,7 +293,8 @@ int apl_acpi_fill_dmar(struct acpi_ctx *ctx)
 		/* Add RMRR entry */
 		tmp = ctx->current;
 		ctx->current += acpi_create_dmar_rmrr(ctx->current, 0,
-				sa_get_gsm_base(), sa_get_tolud_base() - 1);
+				sa_get_gsm_base(sa_dev),
+				sa_get_tolud_base(sa_dev) - 1);
 		ctx->current += acpi_create_dmar_ds_pci(ctx->current, 0, 2, 0);
 		acpi_dmar_rmrr_fixup(tmp, ctx->current);
 	}

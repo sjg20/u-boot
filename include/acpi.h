@@ -8,7 +8,7 @@
 #define __ACPI_H__
 
 #if CONFIG_IS_ENABLED(ACPI)
-#define acpi_ops_ptr(_ptr)	_ptr,
+#define acpi_ops_ptr(_ptr)	.acpi_ops	= _ptr,
 #else
 #define acpi_ops_ptr(_ptr)
 #endif
