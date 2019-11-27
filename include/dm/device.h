@@ -255,6 +255,9 @@ struct driver {
 	int per_child_platdata_auto_alloc_size;
 	const void *ops;	/* driver-specific operations */
 	uint32_t flags;
+#if CONFIG_IS_ENABLED(ACPI)
+	struct acpi_ops *acpi_ops;
+#endif
 };
 
 /* Declare a new U-Boot driver */
