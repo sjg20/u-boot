@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <acpi.h>
 #include <dm.h>
 #include <vbe.h>
 #include <video.h>
@@ -111,6 +112,30 @@ err:
 	return ret;
 }
 
+static int fsp_video_acpi_write_tables(struct udevice *dev, struct acpi_ctx *ctx)
+{
+#if 0
+	igd_opregion_t *opregion;
+
+	printk(BIOS_DEBUG, "ACPI:    * IGD OpRegion\n");
+	opregion = (igd_opregion_t *)current;
+
+	if (intel_gma_init_igd_opregion(opregion) != CB_SUCCESS)
+		return current;
+
+	/* FIXME: Add platform specific mailbox initialization */
+
+	current += sizeof(igd_opregion_t);
+
+	return acpi_align_current(current);
+#endif
+	return 0;
+}
+
+struct acpi_ops fsp_video_acpi_ops = {
+	.write_tables	= fsp_video_acpi_write_tables,
+};
+
 static const struct udevice_id fsp_video_ids[] = {
 	{ .compatible = "fsp-fb" },
 	{ }
@@ -121,6 +146,7 @@ U_BOOT_DRIVER(fsp_video) = {
 	.id	= UCLASS_VIDEO,
 	.of_match = fsp_video_ids,
 	.probe	= fsp_video_probe,
+	acpi_ops_ptr(&fsp_video_acpi_ops)
 };
 
 static struct pci_device_id fsp_video_supported[] = {

@@ -15,6 +15,7 @@
  */
 
 #include <common.h>
+#include <acpi.h>
 #include <cpu.h>
 #include <dm.h>
 #include <asm/acpi_table.h>
@@ -190,14 +191,16 @@ void intel_acpi_fill_fadt(struct acpi_fadt *fadt)
 
 }
 
-unsigned long southbridge_write_acpi_tables(struct udevice *dev,
-					    unsigned long current,
-					    struct acpi_rsdp *rsdp)
+int intel_southbridge_write_acpi_tables(struct udevice *dev,
+					struct acpi_ctx *ctx)
 {
-	current = acpi_write_dbg2_pci_uart(rsdp, current, gd->cur_serial_dev,
-					   ACPI_ACCESS_SIZE_DWORD_ACCESS);
+	ctx->current = acpi_write_dbg2_pci_uart(ctx->rsdp, ctx->current,
+						gd->cur_serial_dev,
+						ACPI_ACCESS_SIZE_DWORD_ACCESS);
 
-	return acpi_write_hpet(dev, current, rsdp);
+	ctx->current = acpi_write_hpet(dev, ctx->current, ctx->rsdp);
+
+	return 0;
 }
 
 __weak uint32_t acpi_fill_soc_wake(uint32_t generic_pm1_en,

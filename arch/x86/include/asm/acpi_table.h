@@ -20,6 +20,9 @@
 
 #if !defined(__ACPI__)
 
+struct udevice;
+struct acpi_ctx;
+
 #define ACPI_SIG_LEN		4
 
 /*
@@ -621,6 +624,8 @@ void intel_acpi_fill_fadt(struct acpi_fadt *fadt);
 int soc_acpi_name(const struct udevice *dev, char *out_name);
 
 u8 acpi_checksum(u8 *table, u32 length);
+int intel_southbridge_write_acpi_tables(struct udevice *dev,
+					struct acpi_ctx *ctx);
 
 #endif /* !__ACPI__*/
 

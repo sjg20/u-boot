@@ -173,12 +173,12 @@ static int apl_hostbridge_probe(struct udevice *dev)
 	return 0;
 }
 
-static int apl_acpi_get_name(const struct udevice *dev, char *out_name)
+static int apl_acpi_hb_get_name(const struct udevice *dev, char *out_name)
 {
 	return acpi_return_name(out_name, "RHUB");
 }
 
-static int apl_acpi_write_tables(struct udevice *dev, struct acpi_ctx *ctx)
+static int apl_acpi_hb_write_tables(struct udevice *dev, struct acpi_ctx *ctx)
 {
 	struct acpi_table_header *header;
 	struct acpi_dmar *dmar;
@@ -244,8 +244,8 @@ ulong sa_get_tseg_base(struct udevice *dev)
 }
 
 struct acpi_ops apl_hostbridge_acpi_ops = {
-	.get_name	= apl_acpi_get_name,
-	.write_tables	= apl_acpi_write_tables,
+	.get_name	= apl_acpi_hb_get_name,
+	.write_tables	= apl_acpi_hb_write_tables,
 };
 
 static const struct udevice_id apl_hostbridge_ids[] = {

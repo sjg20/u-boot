@@ -6,8 +6,10 @@
  */
 
 #include <common.h>
+#include <acpi.h>
 #include <dm.h>
 #include <spl.h>
+#include <asm/acpi_table.h>
 #include <asm/lpc_common.h>
 #include <asm/pci.h>
 #include <asm/arch/iomap.h>
@@ -120,6 +122,16 @@ void lpc_io_setup_comm_a_b(void)
 	lpc_enable_fixed_io_ranges(com_enable);
 }
 
+static int apl_acpi_lpc_get_name(const struct udevice *dev, char *out_name)
+{
+	return acpi_return_name(out_name, "LPCB");
+}
+
+struct acpi_ops apl_lpc_acpi_ops = {
+	.get_name	= apl_acpi_lpc_get_name,
+	.write_tables	= intel_southbridge_write_acpi_tables,
+};
+
 static int apl_lpc_probe(struct udevice *dev)
 {
 	if (spl_phase() == PHASE_TPL)
@@ -138,4 +150,5 @@ U_BOOT_DRIVER(apl_lpc_drv) = {
 	.id		= UCLASS_LPC,
 	.of_match	= apl_lpc_ids,
 	.probe		= apl_lpc_probe,
+	acpi_ops_ptr(&apl_lpc_acpi_ops)
 };

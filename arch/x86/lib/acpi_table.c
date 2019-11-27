@@ -986,9 +986,11 @@ ulong write_acpi_tables(ulong start)
 	acpi_add_table(rsdp, spcr);
 	current = ALIGN(current, 16);
 
+	printf("before current = %x\n", current);
 	ctx.current = current;
 	ctx.rsdp = rsdp;
 	acpi_dev_write_tables(&ctx);
+	current = ctx.current;
 
 	printf("current = %x\n", current);
 
