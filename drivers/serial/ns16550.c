@@ -92,19 +92,59 @@ static inline int serial_in_shift(void *addr, int shift)
 #define CONFIG_SYS_NS16550_CLK  0
 #endif
 
+static void serial_out_dynamic(struct ns16550_platdata *plat, u8 *addr,
+			       int value)
+{
+	if (plat->flags & NS16550_FLAG_IO) {
+		outb(value, addr);
+	} else if (plat->reg_width == 4) {
+		if (plat->flags & NS16550_FLAG_ENDIAN) {
+			if (plat->flags & NS16550_FLAG_BE)
+				out_be32(addr, value);
+			else
+				out_le32(addr, value);
+		} else {
+			writel(value, addr);
+		}
+	} else if (plat->flags & NS16550_FLAG_BE) {
+		writeb(value, addr + (1 << plat->reg_shift) - 1);
+	} else {
+		writeb(value, addr);
+	}
+}
+
+static int serial_in_dynamic(struct ns16550_platdata *plat, u8 *addr)
+{
+	if (plat->flags & NS16550_FLAG_IO) {
+		return inb(addr);
+	} else if (plat->reg_width == 4) {
+		if (plat->flags & NS16550_FLAG_ENDIAN) {
+			if (plat->flags & NS16550_FLAG_BE)
+				return in_be32(addr);
+			else
+				return in_le32(addr);
+		} else {
+			return readl(addr);
+		}
+	} else if (plat->flags & NS16550_FLAG_BE) {
+		return readb(addr + (1 << plat->reg_shift) - 1);
+	} else {
+		return readb(addr);
+	}
+}
+
 static void ns16550_writeb(NS16550_t port, int offset, int value)
 {
 	struct ns16550_platdata *plat = port->plat;
 	unsigned char *addr;
 
 	offset *= 1 << plat->reg_shift;
-	addr = (unsigned char *)plat->base + offset;
+	addr = (unsigned char *)plat->base + offset + plat->reg_offset;
 
-	/*
-	 * As far as we know it doesn't make sense to support selection of
-	 * these options at run-time, so use the existing CONFIG options.
-	 */
-	serial_out_shift(addr + plat->reg_offset, plat->reg_shift, value);
+	if (IS_ENABLED(CONFIG_NS16550_DYNAMIC))
+		serial_out_dynamic(plat, addr, value);
+	else
+		serial_out_shift(addr, plat->reg_shift, value);
 }
 
 static int ns16550_readb(NS16550_t port, int offset)
@@ -113,9 +153,12 @@ static int ns16550_readb(NS16550_t port, int offset)
 	unsigned char *addr;
 
 	offset *= 1 << plat->reg_shift;
-	addr = (unsigned char *)plat->base + offset;
+	addr = (unsigned char *)plat->base + offset + plat->reg_offset;
 
-	return serial_in_shift(addr + plat->reg_offset, plat->reg_shift);
+	if (IS_ENABLED(CONFIG_NS16550_DYNAMIC))
+		return serial_in_dynamic(plat, addr);
+	else
+		return serial_in_shift(addr, plat->reg_shift);
 }
 
 static u32 ns16550_getfcr(NS16550_t port)
