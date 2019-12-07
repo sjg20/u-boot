@@ -57,3 +57,22 @@ int ip_checksum_ok(const void *addr, unsigned nbytes)
 {
 	return !(compute_ip_checksum(addr, nbytes) & 0xfffe);
 }
+
+/**
+ * net_random_ethaddr - Generate software assigned random Ethernet address
+ * @addr: Pointer to a six-byte array containing the Ethernet address
+ *
+ * Generate a random Ethernet address (MAC) that is not multicast
+ * and has the local assigned bit set.
+ */
+void net_random_ethaddr(uchar *addr)
+{
+	int i;
+	unsigned int seed = get_ticks();
+
+	for (i = 0; i < 6; i++)
+		addr[i] = rand_r(&seed);
+
+	addr[0] &= 0xfe;	/* clear multicast bit */
+	addr[0] |= 0x02;	/* set local assignment bit (IEEE802) */
+}

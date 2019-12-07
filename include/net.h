@@ -825,17 +825,7 @@ static inline int is_valid_ethaddr(const u8 *addr)
  * Generate a random Ethernet address (MAC) that is not multicast
  * and has the local assigned bit set.
  */
-static inline void net_random_ethaddr(uchar *addr)
-{
-	int i;
-	unsigned int seed = get_ticks();
-
-	for (i = 0; i < 6; i++)
-		addr[i] = rand_r(&seed);
-
-	addr[0] &= 0xfe;	/* clear multicast bit */
-	addr[0] |= 0x02;	/* set local assignment bit (IEEE802) */
-}
+void net_random_ethaddr(uchar *addr);
 
 /* Convert an IP address to a string */
 void ip_to_string(struct in_addr x, char *s);
