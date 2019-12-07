@@ -129,7 +129,7 @@ static inline void arch_reset_for_test(void)
 #ifdef CONFIG_SANDBOX
 #include <asm/state.h>
 
-	state_reset_for_test(state_get_current());
+	state_reset_for_test(state_get_current(), false);
 #endif
 }
 
