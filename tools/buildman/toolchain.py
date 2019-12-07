@@ -368,7 +368,7 @@ class Toolchains:
             if verbose: print("   - scanning path '%s'" % path)
             fnames = self.ScanPath(path, verbose)
             for fname in fnames:
-                self.Add(fname, True, verbose)
+                self.Add(fname, False, verbose)
 
     def List(self):
         """List out the selected toolchains for each architecture"""
