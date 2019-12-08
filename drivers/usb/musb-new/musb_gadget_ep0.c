@@ -882,7 +882,9 @@ finish:
 
 	default:
 		/* "can't happen" */
-		WARN_ON(1);
+		/* WARN_ON(1); (disable since __FILE__ can be large) */
+		dev_dbg(musb->controller, "odd; unknown state %d\n",
+			musb->ep0_state);
 		musb_writew(regs, MUSB_CSR0, MUSB_CSR0_P_SENDSTALL);
 		musb->ep0_state = MUSB_EP0_STAGE_IDLE;
 		break;
