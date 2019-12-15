@@ -15,6 +15,7 @@
 #include "flashmap-16mb-rw.dtsi"
 #endif
 
+#include <dt-bindings/clock/intel-clock.h>
 #include <asm/intel_pinctrl_defs.h>
 #include <asm/arch-apollolake/cpu.h>
 #include <asm/arch-apollolake/gpio.h>
@@ -37,6 +38,11 @@
 
 	chosen {
 		stdout-path = &serial;
+	};
+
+	clk: clock {
+		compatible = "intel,apl-clk";
+		#clock-cells = <1>;
 	};
 
 	cpus {
