@@ -39,6 +39,9 @@ config INTEL_APOLLOLAKE
 	imply HAVE_X86_FIT
 	imply INTEL_GPIO
 	imply SMP
+	imply CLK
+	imply CMD_CLK
+	imply CLK_INTEL
 
 if INTEL_APOLLOLAKE
 
