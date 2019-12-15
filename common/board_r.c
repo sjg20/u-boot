@@ -320,6 +320,9 @@ static int initr_dm_devices(void)
 {
 	int ret;
 
+	if (!ll_boot_init())
+		return 0;
+
 	if (IS_ENABLED(CONFIG_TIMER_EARLY)) {
 		ret = dm_timer_init();
 		if (ret)
