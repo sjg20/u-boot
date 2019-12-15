@@ -261,6 +261,9 @@ int interrupt_init(void)
 	struct udevice *dev;
 	int ret;
 
+	if (!ll_boot_init())
+		return 0;
+
 	/* Try to set up the interrupt router, but don't require one */
 	ret = uclass_first_device_err(UCLASS_IRQ, &dev);
 	if (ret && ret != -ENODEV)
