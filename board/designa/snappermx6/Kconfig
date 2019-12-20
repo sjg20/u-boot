@@ -1,0 +1,12 @@
+if TARGET_SNAPPERMX6
+
+config SYS_BOARD
+	default "snappermx6"
+
+config SYS_VENDOR
+	default "designa"
+
+config SYS_CONFIG_NAME
+	default "snappermx6"
+
+endif

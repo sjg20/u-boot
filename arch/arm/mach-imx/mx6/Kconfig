@@ -561,6 +561,10 @@ config TARGET_SOMLABS_VISIONSOM_6ULL
 	select DM_THERMAL
 	imply CMD_DM
 
+config TARGET_SNAPPERMX6
+	bool "snappermx6"
+	select SUPPORT_SPL
+
 config TARGET_TBS2910
 	bool "TBS2910 Matrix ARM mini PC"
 
@@ -698,6 +702,7 @@ source "board/bticino/mamoj/Kconfig"
 source "board/ccv/xpress/Kconfig"
 source "board/compulab/cm_fx6/Kconfig"
 source "board/congatec/cgtqmx6eval/Kconfig"
+source "board/designa/snappermx6/Kconfig"
 source "board/dhelectronics/dh_imx6/Kconfig"
 source "board/el/el6x/Kconfig"
 source "board/embest/mx6boards/Kconfig"

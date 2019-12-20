@@ -1,0 +1,6 @@
+SNAPPERMX6 BOARD
+M:	Andre Renaud <arenaud@designa-electronics.com>
+S:	Maintained
+F:	board/designa/snappermx6
+F:	include/configs/snappermx6.h
+F:	configs/snappermx6_defconfig
