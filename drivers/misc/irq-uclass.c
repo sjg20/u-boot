@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright (C) 2015, Bin Meng <bmeng.cn@gmail.com>
+ * Copyright 2019 Google, LLC
+ * Written by Simon Glass <sjg@chromium.org>
  */
 
 #include <common.h>
 #include <dm.h>
 #include <irq.h>
+#include <dm/device-internal.h>
 
 int irq_route_pmc_gpio_gpe(struct udevice *dev, uint pmc_gpe_num)
 {
@@ -45,6 +47,26 @@ int irq_restore_polarities(struct udevice *dev)
 		return -ENOSYS;
 
 	return ops->restore_polarities(dev);
+}
+
+int irq_first_device_type(enum irq_dev_t type, struct udevice **devp)
+{
+	struct udevice *dev;
+	struct uclass *uc;
+	int ret;
+
+	ret = uclass_get(UCLASS_IRQ, &uc);
+	if (ret)
+		return ret;
+	uclass_foreach_dev(dev, uc) {
+		if (dev_get_driver_data(dev) == type) {
+			*devp = dev;
+
+			return device_probe(dev);
+		}
+	}
+
+	return -ENODEV;
 }
 
 UCLASS_DRIVER(irq) = {
