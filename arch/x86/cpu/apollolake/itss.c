@@ -146,6 +146,15 @@ static int apl_route_pmc_gpio_gpe(struct udevice *dev, uint pmc_gpe_num)
 	return -ENOENT;
 }
 
+static int apl_itss_bind(struct udevice *dev)
+{
+	/* This is not set with of-platdata, so set it manually */
+	if (CONFIG_IS_ENABLED(OF_PLATDATA))
+		dev->driver_data = X86_IRQT_ITSS;
+
+	return 0;
+}
+
 static int apl_itss_ofdata_to_platdata(struct udevice *dev)
 {
 	struct apl_itss_priv *priv = dev_get_priv(dev);
@@ -208,6 +217,7 @@ U_BOOT_DRIVER(apl_itss_drv) = {
 	.id		= UCLASS_IRQ,
 	.of_match	= apl_itss_ids,
 	.ops		= &apl_itss_ops,
+	.bind		= apl_itss_bind,
 	.ofdata_to_platdata = apl_itss_ofdata_to_platdata,
 	.platdata_auto_alloc_size = sizeof(struct apl_itss_platdata),
 	.priv_auto_alloc_size = sizeof(struct apl_itss_priv),
