@@ -199,7 +199,7 @@ static const struct irq_ops apl_itss_ops = {
 };
 
 static const struct udevice_id apl_itss_ids[] = {
-	{ .compatible = "intel,apl-itss"},
+	{ .compatible = "intel,apl-itss", .data = X86_IRQT_ITSS },
 	{ }
 };
 
