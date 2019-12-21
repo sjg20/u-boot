@@ -99,6 +99,8 @@ int irq_restore_polarities(struct udevice *dev);
 /**
  * irq_first_device_type() - Get a particular interrupt controller
  *
+ * On success this returns an activated interrupt device.
+ *
  * @type: Type to find
  * @devp: Returns the device, if found
  * @return 0 if OK, -ENODEV if not found, other -ve error if uclass failed to
