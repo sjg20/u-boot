@@ -64,7 +64,7 @@ int soc_acpi_name(const struct udevice *dev, char *out_name)
 {
 	enum uclass_id parent_id = UCLASS_INVALID;
 	enum uclass_id id;
-	const char *name = out_name;
+	const char *name = NULL;
 
 	id = device_get_uclass_id(dev);
 	if (dev_get_parent(dev))
@@ -75,6 +75,15 @@ int soc_acpi_name(const struct udevice *dev, char *out_name)
 	/* Storage */
 	else if (id == UCLASS_MMC)
 		name = mmc_is_sd(dev) ? "SDCD" : "EMMC";
+	else if (id == UCLASS_PCI) {
+		struct pci_controller *hose = dev_get_uclass_priv(dev);
+
+		printf("hose->acpi_name = %s\n", hose->acpi_name);
+		if (hose->acpi_name)
+			name = hose->acpi_name;
+		else
+			name = "PCI0";
+	}
 	if (!name) {
 		switch (parent_id) {
 		case UCLASS_USB: {
@@ -84,16 +93,6 @@ int soc_acpi_name(const struct udevice *dev, char *out_name)
 				"HS%02d" : "FS%02d",
 				udev->portnr);
 			name = out_name;
-			break;
-		}
-		case UCLASS_PCI: {
-			struct pci_controller *hose = dev_get_uclass_priv(dev);
-
-			printf("hose->acpi_name = %s\n", hose->acpi_name);
-			if (hose->acpi_name)
-				name = hose->acpi_name;
-			else
-				name = "PCI0";
 			break;
 		}
 		default:

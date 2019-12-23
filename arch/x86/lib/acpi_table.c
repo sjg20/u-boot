@@ -466,13 +466,14 @@ static int acpi_create_tcpa(struct acpi_tcpa *tcpa)
 
 __weak u32 acpi_fill_csrt(u32 current)
 {
-	return current;
+	return 0;
 }
 
-static void acpi_create_csrt(struct acpi_csrt *csrt)
+static int acpi_create_csrt(struct acpi_csrt *csrt)
 {
 	struct acpi_table_header *header = &(csrt->header);
 	u32 current = (u32)csrt + sizeof(struct acpi_csrt);
+	uint ptr;
 
 	memset((void *)csrt, 0, sizeof(struct acpi_csrt));
 
@@ -481,11 +482,16 @@ static void acpi_create_csrt(struct acpi_csrt *csrt)
 	header->length = sizeof(struct acpi_csrt);
 	header->revision = 0;
 
-	current = acpi_fill_csrt(current);
+	ptr = acpi_fill_csrt(current);
+	if (!ptr)
+		return -ENOENT;
+	current = ptr;
 
 	/* (Re)calculate length and checksum */
 	header->length = current - (u32)csrt;
 	header->checksum = table_compute_checksum((void *)csrt, header->length);
+
+	return 0;
 }
 
 static void acpi_create_spcr(struct acpi_spcr *spcr)
@@ -1059,10 +1065,11 @@ ulong write_acpi_tables(ulong start)
 
 	debug("ACPI:    * CSRT\n");
 	csrt = (struct acpi_csrt *)current;
-	acpi_create_csrt(csrt);
-	current += csrt->header.length;
-	acpi_add_table(rsdp, csrt);
-	current = ALIGN(current, 16);
+	if (!acpi_create_csrt(csrt)) {
+		current += csrt->header.length;
+		acpi_add_table(rsdp, csrt);
+		current = ALIGN(current, 16);
+	}
 
 	debug("ACPI:    * SPCR\n");
 	spcr = (struct acpi_spcr *)current;
