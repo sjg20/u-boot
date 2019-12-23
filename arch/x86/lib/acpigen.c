@@ -29,6 +29,8 @@
 
 #define ACPIGEN_MAXLEN 0xfffff
 
+#define ACPI_CPU_STRING "\\_PR.CP%02d"
+
 /*
 #include <lib.h>
 #include <string.h>
@@ -354,8 +356,7 @@ void acpigen_write_processor(u8 cpuindex, u32 pblock_addr, u8 pblock_len)
 	acpigen_emit_ext_op(PROCESSOR_OP);
 	acpigen_write_len_f();
 
-	snprintf(pscope, sizeof(pscope),
-		 CONFIG_ACPI_CPU_STRING, (unsigned int) cpuindex);
+	snprintf(pscope, sizeof(pscope), ACPI_CPU_STRING, (uint)cpuindex);
 	acpigen_emit_namestring(pscope);
 	acpigen_emit_byte(cpuindex);
 	acpigen_emit_dword(pblock_addr);
@@ -372,7 +373,7 @@ void acpigen_write_processor_package(const char *const name,
 	acpigen_write_name(name);
 	acpigen_write_package(core_count);
 	for (i = first_core; i < first_core + core_count; ++i) {
-		snprintf(pscope, sizeof(pscope), CONFIG_ACPI_CPU_STRING, i);
+		snprintf(pscope, sizeof(pscope), ACPI_CPU_STRING, i);
 		acpigen_emit_namestring(pscope);
 	}
 	acpigen_pop_len();
@@ -386,7 +387,7 @@ void acpigen_write_processor_cnot(const unsigned int number_of_cores)
 	acpigen_write_method("\\_PR.CNOT", 1);
 	for (core_id = 0; core_id < number_of_cores; core_id++) {
 		char buffer[30];
-		snprintf(buffer, sizeof(buffer), CONFIG_ACPI_CPU_STRING,
+		snprintf(buffer, sizeof(buffer), ACPI_CPU_STRING,
 			 core_id);
 		acpigen_emit_byte(NOTIFY_OP);
 		acpigen_emit_namestring(buffer);
