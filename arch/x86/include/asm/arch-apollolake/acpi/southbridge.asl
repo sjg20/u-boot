@@ -43,8 +43,3 @@
 
 /* PCI _OSC */
 #include <asm/acpi/pci_osc.asl>
-
-/* SGX */
-#if IS_ENABLED(CONFIG_SOC_INTEL_COMMON_BLOCK_SGX)
-#include <asm/acpi/sgx.asl>
-#endif
