@@ -7,20 +7,53 @@
 #include <command.h>
 #include <asm/acpi_table.h>
 
-static int dump_rsdp(struct acpi_rsdp *rsdp)
-{
-	printf("RSDP:\n");
-	printf("%-20s%.8s\n", "Signature:", rsdp->signature);
-
-	return 0;
-}
-
 static void dump_hdr(struct acpi_table_header *hdr)
 {
 	printf("%.4s %08lx %06x (v%02d %.6s %.8s %u %.4s %d)\n", hdr->signature,
 	       (ulong)hdr, hdr->length, hdr->revision, hdr->oem_id,
 	       hdr->oem_table_id, hdr->oem_revision, hdr->aslc_id,
 	       hdr->aslc_revision);
+}
+
+/**
+ * find_table() - Look up an ACPI table
+ *
+ * @sig: Signature of table (4 characters, upper case)
+ * @return pointer to table header, or NULL if not found
+ */
+struct acpi_table_header *find_table(const char *sig)
+{
+	struct acpi_rsdp *rsdp;
+	struct acpi_rsdt *rsdt;
+	int len, i, count;
+
+	rsdp = (struct acpi_rsdp *)gd->arch.acpi_start;
+	if (!rsdp)
+		return NULL;
+	rsdt = (struct acpi_rsdt *)rsdp->rsdt_address;
+	len = rsdt->header.length - sizeof(rsdt->header);
+	count = len / sizeof(u32);
+	for (i = 0; i < count; i++) {
+		struct acpi_table_header *hdr;
+
+		hdr = (struct acpi_table_header *)rsdt->entry[i];
+		if (!memcmp(hdr->signature, sig, ACPI_SIG_LEN))
+			return hdr;
+	}
+
+	return NULL;
+}
+
+static int dump_table_name(const char *sig)
+{
+	struct acpi_table_header *hdr;
+
+	hdr = find_table(sig);
+	if (!hdr)
+		return -ENOENT;
+	printf("%.*s\n", ACPI_SIG_LEN, hdr->signature);
+
+	return 0;
 }
 
 static int list_rsdt(struct acpi_rsdt *rsdt, struct acpi_xsdt *xsdt)
@@ -68,6 +101,10 @@ static int do_acpi_list(cmd_tbl_t *cmdtp, int flag, int argc,
 	struct acpi_rsdp *rsdp;
 
 	rsdp = (struct acpi_rsdp *)gd->arch.acpi_start;
+	if (!rsdp) {
+		printf("No ACPI tables present\n");
+		return 0;
+	}
 	printf("ACPI tables start at %p\n", rsdp);
 	list_rsdp(rsdp);
 
@@ -77,6 +114,24 @@ static int do_acpi_list(cmd_tbl_t *cmdtp, int flag, int argc,
 static int do_acpi_dump(cmd_tbl_t *cmdtp, int flag, int argc,
 			char *const argv[])
 {
+	const char *name;
+	char sig[ACPI_SIG_LEN];
+	int ret;
+
+	if (argc < 2)
+		return CMD_RET_USAGE;
+	name = argv[1];
+	if (strlen(name) != ACPI_SIG_LEN) {
+		printf("Table name '%s' must be four characters\n", name);
+		return CMD_RET_FAILURE;
+	}
+	str_to_upper(name, sig);
+	ret = dump_table_name(sig);
+	if (ret) {
+		printf("Table '%s' not found\n", name);
+		return CMD_RET_FAILURE;
+	}
+
 	return 0;
 }
 
