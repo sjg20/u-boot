@@ -25,10 +25,10 @@ static int apl_get_count(struct udevice *dev)
 static int acpi_cpu_fill_ssdt_generator(struct udevice *dev,
 					struct acpi_ctx *ctx)
 {
-	struct cpu_platdata *plat = dev_get_platdata(dev);
+	struct cpu_platdata *plat = dev_get_parent_platdata(dev);
 	int ret;
 
-	/* Trigger of the first CPU */
+	/* Trigger off the first CPU */
 	if (!plat->cpu_id) {
 		ret = generate_cpu_entries(dev, ctx);
 		if (ret)
