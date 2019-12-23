@@ -195,10 +195,7 @@ int acpi_create_gnvs(struct acpi_global_nvs *gnvs)
 		gnvs->scdp = p2sb_get_port_id(pinctrl);
 		gnvs->scdo = intel_pinctrl_get_acpi_pin(pinctrl, offset);
 	}
-/*
-	if (IS_ENABLED(CONFIG_SOC_INTEL_COMMON_BLOCK_SGX))
-		sgx_fill_gnvs(gnvs);
-*/
+
 	return 0;
 }
 
