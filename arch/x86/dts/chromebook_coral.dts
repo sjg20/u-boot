@@ -40,6 +40,10 @@
 		i2c7 = &i2c_7;
 	};
 
+	board {
+		compatible = "google,coral";
+	};
+
 	config {
 	       silent_console = <0>;
 	};

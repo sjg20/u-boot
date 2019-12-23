@@ -145,6 +145,21 @@ void *bloblist_ensure(uint tag, int size)
 	return (void *)rec + rec->hdr_size;
 }
 
+int bloblist_ensure_size_ret(uint tag, int *sizep, void **blobp)
+{
+	struct bloblist_rec *rec;
+	int ret;
+
+	ret = bloblist_ensurerec(tag, &rec, *sizep);
+	if (ret == -ESPIPE)
+		*sizep = rec->size;
+	else if (ret)
+		return ret;
+	*blobp = (void *)rec + rec->hdr_size;
+
+	return 0;
+}
+
 static u32 bloblist_calc_chksum(struct bloblist_hdr *hdr)
 {
 	struct bloblist_rec *rec;

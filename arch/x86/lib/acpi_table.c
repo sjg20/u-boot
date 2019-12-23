@@ -11,6 +11,7 @@
 
 #include <common.h>
 #include <acpi.h>
+#include <bloblist.h>
 #include <cpu.h>
 #include <dm.h>
 #include <dm/uclass-internal.h>
@@ -92,6 +93,7 @@ void acpi_fill_header(struct acpi_table_header *header, char *signature)
 	memcpy(header->oem_table_id, OEM_TABLE_ID, 8);
 	header->oem_revision = U_BOOT_BUILD_DATE;
 	memcpy(header->aslc_id, ASLC_ID, 4);
+	header->aslc_revision = 0;
 }
 
 static void acpi_write_rsdt(struct acpi_rsdt *rsdt)
@@ -229,7 +231,7 @@ unsigned long acpi_write_dbg2_pci_uart(struct acpi_rsdp *rsdp, ulong current,
 		log_err("Device not found\n");
 		return current;
 	}
-	if (device_active(dev)) {
+	if (!device_active(dev)) {
 		log_info("Device not enabled\n");
 		return current;
 	}
@@ -253,11 +255,9 @@ unsigned long acpi_write_dbg2_pci_uart(struct acpi_rsdp *rsdp, ulong current,
 			 &address, 32,
 			 acpi_device_path(dev));
 
-	if (dbg2->header.length) {
-		current += dbg2->header.length;
-		current = ALIGN(current, 16);
-		acpi_add_table(rsdp, dbg2);
-	}
+	current += dbg2->header.length;
+	current = ALIGN(current, 16);
+	acpi_add_table(rsdp, dbg2);
 
 	return current;
 }
@@ -423,6 +423,45 @@ static void acpi_create_mcfg(struct acpi_mcfg *mcfg)
 	/* (Re)calculate length and checksum */
 	header->length = current - (u32)mcfg;
 	header->checksum = table_compute_checksum((void *)mcfg, header->length);
+}
+
+/**
+ * acpi_create_tcpa() - Create a TCPA table
+ *
+ * @tcpa: Pointer to place to put table
+ *
+ * Trusted Computing Platform Alliance Capabilities Table
+ * TCPA PC Specific Implementation SpecificationTCPA is defined in the PCI
+ * Firmware Specification 3.0
+ */
+static int acpi_create_tcpa(struct acpi_tcpa *tcpa)
+{
+	struct acpi_table_header *header = &tcpa->header;
+	u32 current = (u32)tcpa + sizeof(struct acpi_tcpa);
+	int size = 0x10000;	/* Use this as the default size */
+	void *log;
+	int ret;
+
+	memset(tcpa, '\0', sizeof(struct acpi_tcpa));
+
+	/* Fill out header fields */
+	acpi_fill_header(header, "TCPA");
+	header->length = sizeof(struct acpi_tcpa);
+	header->revision = 1;
+
+	ret = bloblist_ensure_size_ret(BLOBLISTT_TCPA_LOG, &size, &log);
+	if (ret)
+		return log_msg_ret("blob", ret);
+
+	tcpa->platform_class = 0;
+	tcpa->laml = size;
+	tcpa->lasa = (ulong)log;
+
+	/* (Re)calculate length and checksum */
+	header->length = current - (u32)tcpa;
+	header->checksum = table_compute_checksum((void *)tcpa, header->length);
+
+	return 0;
 }
 
 __weak u32 acpi_fill_csrt(u32 current)
@@ -761,11 +800,8 @@ void acpi_create_dbg2(struct acpi_dbg2_header *dbg2,
 
 	/* Fill out header fields. */
 	current = (uintptr_t)dbg2;
-	memset(dbg2, 0, sizeof(struct acpi_dbg2_header));
+	memset(dbg2, '\0', sizeof(struct acpi_dbg2_header));
 	header = &dbg2->header;
-
-	if (!header)
-		return;
 
 	header->revision = get_acpi_table_revision(DBG2);
 	acpi_fill_header(header, "DBG2");
@@ -906,11 +942,12 @@ ulong write_acpi_tables(ulong start)
 	struct acpi_fadt *fadt;
 	struct acpi_table_header *ssdt;
 	struct acpi_mcfg *mcfg;
+	struct acpi_tcpa *tcpa;
 	struct acpi_madt *madt;
 	struct acpi_csrt *csrt;
 	struct acpi_spcr *spcr;
 	struct acpi_ctx ctx;
-	int i;
+	int ret, i;
 
 	current = start;
 	gd->arch.acpi_start = start;
@@ -1007,6 +1044,18 @@ ulong write_acpi_tables(ulong start)
 	current += mcfg->header.length;
 	acpi_add_table(rsdp, mcfg);
 	current = ALIGN(current, 16);
+
+	debug("ACPI:    * TCPA\n");
+	tcpa = (struct acpi_tcpa *)current;
+	ret = acpi_create_tcpa(tcpa);
+	printf("ret=%d\n", ret);
+	if (ret) {
+		log_warning("Failed to create TCPA table (err=%d)\n", ret);
+	} else {
+		current += tcpa->header.length;
+		acpi_add_table(rsdp, tcpa);
+		current = ALIGN(current, 16);
+	}
 
 	debug("ACPI:    * CSRT\n");
 	csrt = (struct acpi_csrt *)current;
