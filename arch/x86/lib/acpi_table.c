@@ -249,10 +249,11 @@ unsigned long acpi_write_dbg2_pci_uart(struct acpi_rsdp *rsdp, ulong current,
 	address.addrh = (uint32_t)((addr >> 32) & 0xffffffff);
 	address.access_size = access_size;
 
+	printf("\n\nDBG2\n");
 	acpi_create_dbg2(dbg2,
 			 ACPI_DBG2_SERIAL_PORT,
 			 ACPI_DBG2_16550_COMPATIBLE,
-			 &address, 32,
+			 &address, 0x1000,
 			 acpi_device_path(dev));
 
 	current += dbg2->header.length;
@@ -293,14 +294,17 @@ int acpi_create_madt_lapics(u32 current)
 {
 	struct udevice *dev;
 	int total_length = 0;
+	int cpu_num = 0;
 
 	for (uclass_find_first_device(UCLASS_CPU, &dev);
 	     dev;
 	     uclass_find_next_device(&dev)) {
 		struct cpu_platdata *plat = dev_get_parent_platdata(dev);
-		int length = acpi_create_madt_lapic(
-				(struct acpi_madt_lapic *)current,
-				plat->cpu_id, plat->cpu_id);
+		int length;
+
+		length = acpi_create_madt_lapic(
+			(struct acpi_madt_lapic *)current, cpu_num++,
+			plat->cpu_id);
 		current += length;
 		total_length += length;
 	}

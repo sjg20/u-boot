@@ -33,12 +33,12 @@ static inline const struct device_node *dev_np(struct udevice *dev)
  * @dev:	device to check
  * @return reference of the the device's DT node
  */
-static inline ofnode dev_ofnode(struct udevice *dev)
+static inline ofnode dev_ofnode(const struct udevice *dev)
 {
 	return dev->node;
 }
 
-static inline bool dev_of_valid(struct udevice *dev)
+static inline bool dev_of_valid(const struct udevice *dev)
 {
 	return ofnode_valid(dev_ofnode(dev));
 }
@@ -124,7 +124,7 @@ u64 dev_read_u64_default(struct udevice *dev, const char *propname, u64 def);
  * @propname:	name of the property to read
  * @return string from property value, or NULL if there is no such property
  */
-const char *dev_read_string(struct udevice *dev, const char *propname);
+const char *dev_read_string(const struct udevice *dev, const char *propname);
 
 /**
  * dev_read_bool() - read a boolean value from a device's DT property
@@ -654,7 +654,7 @@ static inline u64 dev_read_u64_default(struct udevice *dev,
 	return ofnode_read_u64_default(dev_ofnode(dev), propname, def);
 }
 
-static inline const char *dev_read_string(struct udevice *dev,
+static inline const char *dev_read_string(const struct udevice *dev,
 					  const char *propname)
 {
 	return ofnode_read_string(dev_ofnode(dev), propname);
