@@ -46,6 +46,16 @@ struct acpi_table_header *find_table(const char *sig)
 		hdr = (struct acpi_table_header *)rsdt->entry[i];
 		if (!memcmp(hdr->signature, sig, ACPI_SIG_LEN))
 			return hdr;
+		if (!memcmp(hdr->signature, "FACP", ACPI_SIG_LEN)) {
+			struct acpi_fadt *fadt = (struct acpi_fadt *)hdr;
+
+			if (!memcmp(sig, "DSDT", ACPI_SIG_LEN) && fadt->dsdt)
+				return (struct acpi_table_header *)fadt->dsdt;
+			if (!memcmp(sig, "FACS", ACPI_SIG_LEN) &&
+			    fadt->firmware_ctrl)
+				return (struct acpi_table_header *)fadt->
+					firmware_ctrl;
+		}
 	}
 
 	return NULL;
@@ -58,7 +68,8 @@ static int dump_table_name(const char *sig)
 	hdr = find_table(sig);
 	if (!hdr)
 		return -ENOENT;
-	printf("%.*s\n", ACPI_SIG_LEN, hdr->signature);
+	printf("%.*s @ %p\n", ACPI_SIG_LEN, hdr->signature, hdr);
+	print_buffer(0, hdr, 1, hdr->length, 0);
 
 	return 0;
 }
@@ -145,7 +156,7 @@ static int do_acpi_dump(cmd_tbl_t *cmdtp, int flag, int argc,
 	str_to_upper(name, sig);
 	ret = dump_table_name(sig);
 	if (ret) {
-		printf("Table '%s' not found\n", name);
+		printf("Table '%.*s' not found\n", ACPI_SIG_LEN, sig);
 		return CMD_RET_FAILURE;
 	}
 

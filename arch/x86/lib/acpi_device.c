@@ -136,11 +136,14 @@ static int acpi_device_path_fill(const struct udevice *dev, char *buf,
 const char *acpi_device_path(const struct udevice *dev)
 {
 	static char buf[DEVICE_PATH_MAX] = {};
+	int ret;
 
 	if (!dev)
 		return NULL;
 
-	if (acpi_device_path_fill(dev, buf, sizeof(buf), 0) <= 0)
+	ret = acpi_device_path_fill(dev, buf, sizeof(buf), 0);
+	printf("%s: dev='%s': ret=%d, %s\n", __func__, dev->name, ret, buf);
+	if (ret <= 0)
 		return NULL;
 
 	return buf;
@@ -243,6 +246,13 @@ void acpi_device_write_interrupt(const struct acpi_irq *irq)
 
 	/* Fill in Descriptor Length (account for len word) */
 	acpi_device_fill_len(desc_length);
+}
+
+const char *gpio_acpi_path(int gpio_num)
+{
+// 	const struct pad_community *comm = gpio_get_community(gpio_num);
+// 	return comm->acpi_path;
+	return NULL;
 }
 
 /* ACPI 6.1 section 6.4.3.8.1 - GPIO Interrupt or I/O */
@@ -536,7 +546,7 @@ void acpi_device_add_power_res(const struct acpi_power_res_params *params)
 				ARRAY_SIZE(power_res_dev_states));
 
 	/* Method (_STA, 0, NotSerialized) { Return (0x1) } */
-	acpigen_write_STA(0x1);
+	acpigen_write_sta(0x1);
 
 	/* Method (_ON, 0, Serialized) */
 	acpigen_write_method_serialized("_ON", 0);

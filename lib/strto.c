@@ -167,5 +167,5 @@ long trailing_strtol(const char *str)
 void str_to_upper(const char *in, char *out)
 {
 	while (*in)
-		*out++ = *in++;
+		*out++ = toupper(*in++);
 }

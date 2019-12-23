@@ -364,6 +364,7 @@
 			reg-shift = <2>;
 			clock-frequency = <1843200>;
 			current-speed = <115200>;
+			acpi-name = "URT3";
 		};
 
 		pch: pch@1f,0 {
