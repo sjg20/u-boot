@@ -9,10 +9,17 @@
 
 static void dump_hdr(struct acpi_table_header *hdr)
 {
-	printf("%.4s %08lx %06x (v%02d %.6s %.8s %u %.4s %d)\n", hdr->signature,
-	       (ulong)hdr, hdr->length, hdr->revision, hdr->oem_id,
-	       hdr->oem_table_id, hdr->oem_revision, hdr->aslc_id,
-	       hdr->aslc_revision);
+	bool has_hdr = memcmp(hdr->signature, "FACS", ACPI_SIG_LEN);
+
+	printf("%.*s %08lx %06x", ACPI_SIG_LEN, hdr->signature, (ulong)hdr,
+	       hdr->length);
+	if (has_hdr) {
+		printf(" (v%02d %.6s %.8s %u %.4s %d)\n", hdr->revision,
+		       hdr->oem_id, hdr->oem_table_id, hdr->oem_revision,
+		       hdr->aslc_id, hdr->aslc_revision);
+	} else {
+		printf("\n");
+	}
 }
 
 /**
@@ -56,6 +63,14 @@ static int dump_table_name(const char *sig)
 	return 0;
 }
 
+static void list_fact(struct acpi_fadt *fadt)
+{
+	if (fadt->dsdt)
+		dump_hdr((struct acpi_table_header *)fadt->dsdt);
+	if (fadt->firmware_ctrl)
+		dump_hdr((struct acpi_table_header *)fadt->firmware_ctrl);
+}
+
 static int list_rsdt(struct acpi_rsdt *rsdt, struct acpi_xsdt *xsdt)
 {
 	int len, i, count;
@@ -70,6 +85,8 @@ static int list_rsdt(struct acpi_rsdt *rsdt, struct acpi_xsdt *xsdt)
 
 		hdr = (struct acpi_table_header *)rsdt->entry[i];
 		dump_hdr(hdr);
+		if (!memcmp(hdr->signature, "FACP", ACPI_SIG_LEN))
+			list_fact((struct acpi_fadt *)hdr);
 		if (xsdt) {
 			if (xsdt->entry[i] != rsdt->entry[i]) {
 				printf("   (xsdt mismatch %llx)\n",
