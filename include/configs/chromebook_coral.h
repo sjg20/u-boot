@@ -25,7 +25,7 @@
 
 #undef CONFIG_STD_DEVICES_SETTINGS
 #define CONFIG_STD_DEVICES_SETTINGS     "stdin=usbkbd,i8042-kbd,serial\0" \
-					"stdout=vidconsole,serial\0" \
+					"stdout=serial\0" \
 					"stderr=vidconsole,serial\0"
 
 #define CONFIG_ENV_SECT_SIZE		0x1000

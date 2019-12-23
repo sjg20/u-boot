@@ -39,13 +39,16 @@ int chromeos_get_gpio(struct udevice *dev, const char *prop,
 	int ret;
 
 	ret = gpio_request_by_name(dev, prop, 0, &desc, 0);
-	if (ret)
+	if (ret == -ENOTBLK)
+		info->gpio_num = CROS_GPIO_VIRTUAL;
+	else if (ret)
 		return log_msg_ret("gpio", ret);
+	else
+		info->gpio_num = desc.offset;
 	info->linux_name = dev_read_string(desc.dev, "linux-name");
 	if (!info->linux_name)
 		return log_msg_ret("linux-name", -ENOENT);
 	info->type = type;
-	info->gpio_num = desc.offset;
 	/* Get ACPI pin from GPIO library if available */
 	if (info->gpio_num != CROS_GPIO_VIRTUAL) {
 		pinctrl = dev_get_parent(dev);
@@ -58,7 +61,8 @@ int chromeos_get_gpio(struct udevice *dev, const char *prop,
 	return 0;
 }
 
-int chromeos_acpi_gpio_generate(struct udevice *dev, struct acpi_ctx *ctx)
+static int chromeos_acpi_gpio_generate(struct udevice *dev,
+				       struct acpi_ctx *ctx)
 {
 	struct cros_gpio_info info[4];
 	int count, i;
@@ -81,17 +85,18 @@ int chromeos_acpi_gpio_generate(struct udevice *dev, struct acpi_ctx *ctx)
 	}
 
 	acpigen_pop_len();
-
 	acpigen_pop_len();
 
 	return 0;
 }
 
+#if 0
 static int coral_write_acpi_tables(struct udevice *dev, struct acpi_ctx *ctx)
 {
 	/* Add NHLT here */
 	return 0;
 }
+#endif
 
 struct acpi_ops coral_acpi_ops = {
 // 	.write_tables	= coral_write_acpi_tables,

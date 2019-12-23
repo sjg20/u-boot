@@ -1003,7 +1003,25 @@ ulong write_acpi_tables(ulong start)
 	memcpy((char *)current,
 	       (char *)&AmlCode + sizeof(struct acpi_table_header),
 	       dsdt->length - sizeof(struct acpi_table_header));
-	current += dsdt->length - sizeof(struct acpi_table_header);
+
+	if (dsdt->length >= sizeof(struct acpi_table_header)) {
+		current += sizeof(struct acpi_table_header);
+
+		acpigen_set_current((char *)current);
+		printf("Injecting DSDT, current=%x\n", current);
+		acpi_inject_dsdt_generator(NULL);
+		current = (ulong)acpigen_get_current();
+		printf("   - after=%x\n", current);
+		memcpy((char *)current,
+		       (char *)AmlCode + sizeof(struct acpi_table_header),
+		       dsdt->length - sizeof(struct acpi_table_header));
+		current += dsdt->length - sizeof(struct acpi_table_header);
+
+		/* (Re)calculate length and checksum. */
+		dsdt->length = current - (ulong)dsdt;
+		dsdt->checksum = 0;
+		dsdt->checksum = acpi_checksum((void *)dsdt, dsdt->length);
+	}
 	current = ALIGN(current, 16);
 
 	/* Pack GNVS into the ACPI table area */
