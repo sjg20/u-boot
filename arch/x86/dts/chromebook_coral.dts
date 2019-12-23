@@ -42,6 +42,9 @@
 
 	board {
 		compatible = "google,coral";
+		recovery-gpio = <&gpio_nw (-1) GPIO_ACTIVE_LOW>;
+		write-protect-gpio = <&gpio_nw GPIO_75 GPIO_ACTIVE_HIGH>;
+		power-off-gpio = <&gpio_n GPIO_10 GPIO_ACTIVE_HIGH>;
 	};
 
 	config {
@@ -157,6 +160,7 @@
 					u-boot,dm-pre-reloc;
 					gpio-controller;
 					#gpio-cells = <2>;
+					linux-name = "INT3452:00";
 				};
 			};
 
@@ -170,6 +174,7 @@
 					u-boot,dm-pre-reloc;
 					gpio-controller;
 					#gpio-cells = <2>;
+					linux-name = "INT3452:01";
 				};
 			};
 
@@ -183,6 +188,7 @@
 					u-boot,dm-pre-reloc;
 					gpio-controller;
 					#gpio-cells = <2>;
+					linux-name = "INT3452:02";
 				};
 			};
 
@@ -196,6 +202,7 @@
 					u-boot,dm-pre-reloc;
 					gpio-controller;
 					#gpio-cells = <2>;
+					linux-name = "INT3452:03";
 				};
 			};
 
