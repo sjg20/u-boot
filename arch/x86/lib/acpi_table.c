@@ -623,7 +623,7 @@ void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
 	header->aslc_revision = 1;
 
 	fadt->firmware_ctrl = (unsigned long) facs;
-	fadt->dsdt = (unsigned long) dsdt;
+	fadt->dsdt = (unsigned long)dsdt;
 
 	fadt->x_firmware_ctl_l = (unsigned long)facs;
 	fadt->x_firmware_ctl_h = 0;

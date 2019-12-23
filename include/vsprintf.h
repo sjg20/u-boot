@@ -222,4 +222,7 @@ bool str2long(const char *p, ulong *num);
  * @hz: Value to convert
  */
 char *strmhz(char *buf, unsigned long hz);
+
+void str_to_upper(const char *in, char *out);
+
 #endif
