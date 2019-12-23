@@ -787,7 +787,7 @@ int acpi_create_hpet(struct acpi_hpet *hpet)
 
 	hpet->id = *(unsigned int *)CONFIG_HPET_ADDRESS;
 	hpet->number = 0;
-	hpet->min_tick = 0x80; /* HPET_MIN_TICKS */
+	hpet->min_tick = 0; /* HPET_MIN_TICKS */
 
 	header->checksum = acpi_checksum((void *)hpet,
 					 sizeof(struct acpi_hpet));
