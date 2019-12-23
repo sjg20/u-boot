@@ -99,7 +99,7 @@ const char *acpi_device_hid(const struct device *dev)
 static int acpi_device_path_fill(const struct udevice *dev, char *buf,
 				 size_t buf_len, int cur)
 {
-	char name[ACPI_SIG_LEN];
+	char name[ACPI_SIG_LEN + 1];
 	int next = 0;
 	int ret;
 
