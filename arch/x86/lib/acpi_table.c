@@ -913,6 +913,7 @@ ulong write_acpi_tables(ulong start)
 	int i;
 
 	current = start;
+	gd->arch.acpi_start = start;
 
 	/* Align ACPI tables to 16 byte */
 	current = ALIGN(current, 16);
