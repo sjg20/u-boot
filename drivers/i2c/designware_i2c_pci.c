@@ -5,6 +5,8 @@
  * Copyright 2019 Google Inc
  */
 
+#define DEBUG
+
 #include <common.h>
 #include <acpi.h>
 #include <dm.h>
@@ -124,14 +126,20 @@ static int designware_i2c_pci_bind(struct udevice *dev)
  */
 static void dw_i2c_acpi_write_speed_config(struct dw_i2c_speed_config *config)
 {
-	if (config->speed_mode >= IC_SPEED_MODE_HIGH)
+	switch (config->speed_mode) {
+	case IC_SPEED_MODE_HIGH:
 		acpigen_write_name("HSCN");
-	else if (config->speed_mode >= IC_SPEED_FAST_PLUS)
+		break;
+	case IC_SPEED_MODE_FAST_PLUS:
 		acpigen_write_name("FPCN");
-	else if (config->speed_mode >= IC_SPEED_MODE_FAST)
+		break;
+	case IC_SPEED_MODE_FAST:
 		acpigen_write_name("FMCN");
-	else
+		break;
+	case IC_SPEED_MODE_STANDARD:
+	default:
 		acpigen_write_name("SSCN");
+	}
 
 	/* Package () { scl_lcnt, scl_hcnt, sda_hold } */
 	acpigen_write_package(3);
@@ -149,6 +157,8 @@ static int dw_i2c_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 {
 	struct dw_i2c_speed_config config;
 	const char *path;
+	u32 speeds[4];
+	int size, i;
 	int ret;
 
 	path = acpi_device_path(dev);
@@ -162,13 +172,25 @@ static int dw_i2c_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	if (ret)
 		return log_msg_ret("probe", ret);
 
-	/* Report timing values for the OS driver */
-	ret = dw_i2c_gen_speed_config(dev, &config);
-	if (ret)
-		return log_msg_ret("config", ret);
+	size = dev_read_size(dev, "i2c,speeds");
+	if (size < 0)
+		return log_msg_ret("i2c,speeds", -EINVAL);
+	size /= sizeof(u32);
+	if (size > ARRAY_SIZE(speeds))
+		return log_msg_ret("array", -E2BIG);
 
+	ret = dev_read_u32_array(dev, "i2c,speeds", speeds, size);
+	if (ret)
+		return log_msg_ret("read", -E2BIG);
+
+	debug("Doing %d speeds\n", size);
 	acpigen_write_scope(path);
-	dw_i2c_acpi_write_speed_config(&config);
+	for (i = 0; i < size; i++) {
+		ret = dw_i2c_gen_speed_config(dev, speeds[i], &config);
+		if (ret)
+			return log_msg_ret("config", ret);
+		dw_i2c_acpi_write_speed_config(&config);
+	}
 	acpigen_pop_len();
 
 	return 0;
