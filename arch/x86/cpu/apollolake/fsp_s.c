@@ -106,11 +106,11 @@ int soc_acpi_name(const struct udevice *dev, char *out_name)
 	if (!name) {
 		int num;
 
-		if (dev->seq == -1) {
+		if (dev->req_seq == -1) {
 			log_warning("Device '%s' has no seq\n", dev->name);
 			return log_msg_ret("no seq", -ENXIO);
 		}
-		num = dev->seq + 1;
+		num = dev->req_seq;
 		switch (id) {
 		/* DSDT: acpi/lpss.asl */
 		case UCLASS_SERIAL:
