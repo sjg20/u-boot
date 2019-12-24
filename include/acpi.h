@@ -39,4 +39,6 @@ int acpi_fill_ssdt_generator(struct acpi_ctx *ctx);
 
 int acpi_inject_dsdt_generator(struct acpi_ctx *ctx);
 
+void acpi_dump_items(void);
+
 #endif

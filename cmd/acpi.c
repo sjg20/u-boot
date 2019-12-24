@@ -4,6 +4,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 #include <common.h>
+#include <acpi.h>
 #include <command.h>
 #include <asm/acpi_table.h>
 
@@ -139,6 +140,14 @@ static int do_acpi_list(cmd_tbl_t *cmdtp, int flag, int argc,
 	return 0;
 }
 
+static int do_acpi_split(cmd_tbl_t *cmdtp, int flag, int argc,
+			char *const argv[])
+{
+	acpi_dump_items();
+
+	return 0;
+}
+
 static int do_acpi_dump(cmd_tbl_t *cmdtp, int flag, int argc,
 			char *const argv[])
 {
@@ -169,4 +178,5 @@ static char acpi_help_text[] =
 
 U_BOOT_CMD_WITH_SUBCMDS(acpi, "ACPI tables", acpi_help_text,
 	U_BOOT_SUBCMD_MKENT(list, 1, 1, do_acpi_list),
+	U_BOOT_SUBCMD_MKENT(split, 1, 1, do_acpi_split),
 	U_BOOT_SUBCMD_MKENT(dump, 2, 1, do_acpi_dump));
