@@ -20,6 +20,7 @@ enum gen_type_t {
 };
 
 struct acpi_item {
+	struct udevice *dev;
 	enum gen_type_t type;
 	char *buf;
 	int size;
@@ -28,7 +29,18 @@ struct acpi_item {
 static struct acpi_item acpi_item[MAX_ITEMS];
 static int item_count;
 
-static int acpi_add_item(enum gen_type_t type, void *start)
+static char *ordering[] = {
+	"board",
+	"cpu@0",
+	"i2c2@16,0",
+// 	"i2c2@16,2",
+// 	"i2c2@16,3",
+// 	"i2c2@17,0",
+// 	"i2c2@17,1",
+	NULL,
+};
+
+static int acpi_add_item(struct udevice *dev, enum gen_type_t type, void *start)
 {
 	struct acpi_item *item;
 	void *end = acpigen_get_current();
@@ -39,6 +51,7 @@ static int acpi_add_item(enum gen_type_t type, void *start)
 	}
 
 	item = &acpi_item[item_count];
+	item->dev = dev;
 	item->type = type;
 	item->size = end - start;
 	if (!item->size)
@@ -48,7 +61,8 @@ static int acpi_add_item(enum gen_type_t type, void *start)
 		return log_msg_ret("mem", -ENOMEM);
 	memcpy(item->buf, start, item->size);
 	item_count++;
-	printf("* Added type %d, %p, size %x\n", type, start, item->size);
+	printf("* %s: Added type %d, %p, size %x\n", dev->name, type, start,
+	       item->size);
 
 	return 0;
 }
@@ -60,10 +74,53 @@ void acpi_dump_items(void)
 	for (i = 0; i < item_count; i++) {
 		struct acpi_item *item = &acpi_item[i];
 
-		printf("type %d, size %x\n", item->type, item->size);
-		print_buffer(0, item->buf, 1, item->size, 0);
-		printf("\n");
+		printf("dev '%s', type %d, size %x\n", item->dev->name,
+		       item->type, item->size);
+// 		print_buffer(0, item->buf, 1, item->size, 0);
+// 		printf("\n");
 	}
+}
+
+struct acpi_item *find_item(const char *devname)
+{
+	int i;
+
+	for (i = 0; i < item_count; i++) {
+		struct acpi_item *item = &acpi_item[i];
+
+		if (!strcmp(devname, item->dev->name))
+			return item;
+	}
+
+	return NULL;
+}
+
+static int build_type(void *start, enum gen_type_t type)
+{
+	void *ptr;
+	void *end = acpigen_get_current();
+	char **strp;
+
+	ptr = start;
+	for (strp = ordering; *strp; strp++) {
+		struct acpi_item *item;
+
+		item = find_item(*strp);
+		if (!item) {
+			printf("Failed to file item '%s'\n", *strp);
+		} else if (item->type == type) {
+			printf("   - add %s\n", item->dev->name);
+			memcpy(ptr, item->buf, item->size);
+			ptr += item->size;
+		}
+	}
+
+	if (ptr != end) {
+		printf("*** Missing bytes: ptr=%p, end=%p\n", ptr, end);
+		return -ENXIO;
+	}
+
+	return 0;
 }
 
 int acpi_return_name(char *out_name, const char *name)
@@ -127,7 +184,7 @@ int _acpi_fill_ssdt_generator(struct udevice *parent, struct acpi_ctx *ctx)
 		ret = aops->fill_ssdt_generator(parent, ctx);
 		if (ret)
 			return ret;
-		ret = acpi_add_item(TYPE_SSDT, start);
+		ret = acpi_add_item(parent, TYPE_SSDT, start);
 		if (ret)
 			return ret;
 	}
@@ -142,11 +199,13 @@ int _acpi_fill_ssdt_generator(struct udevice *parent, struct acpi_ctx *ctx)
 
 int acpi_fill_ssdt_generator(struct acpi_ctx *ctx)
 {
+	void *start = acpigen_get_current();
 	int ret;
 
 	debug("Writing SSDT tables\n");
 	ret = _acpi_fill_ssdt_generator(dm_root(), ctx);
-	debug("Writing finished, err=%d\n", ret);
+	debug("Writing SSDT finished, err=%d\n", ret);
+	build_type(start, TYPE_SSDT);
 
 	return ret;
 }
@@ -165,7 +224,7 @@ int _acpi_inject_dsdt_generator(struct udevice *parent, struct acpi_ctx *ctx)
 		ret = aops->inject_dsdt_generator(parent, ctx);
 		if (ret)
 			return ret;
-		ret = acpi_add_item(TYPE_DSDT, start);
+		ret = acpi_add_item(parent, TYPE_DSDT, start);
 		if (ret)
 			return ret;
 	}
@@ -180,11 +239,13 @@ int _acpi_inject_dsdt_generator(struct udevice *parent, struct acpi_ctx *ctx)
 
 int acpi_inject_dsdt_generator(struct acpi_ctx *ctx)
 {
+	void *start = acpigen_get_current();
 	int ret;
 
 	debug("Writing DSDT tables\n");
 	ret = _acpi_inject_dsdt_generator(dm_root(), ctx);
-	debug("Writing finished, err=%d\n", ret);
+	debug("Writing DSDT finished, err=%d\n", ret);
+	build_type(start, TYPE_DSDT);
 
 	return ret;
 }

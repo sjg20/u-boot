@@ -11,6 +11,8 @@
 #include <spl.h>
 #include <asm/acpigen.h>
 #include <asm/lpss.h>
+#include <dm/device-internal.h>
+#include <dm/uclass-internal.h>
 #include "designware_i2c.h"
 
 enum {
@@ -88,6 +90,8 @@ static int designware_i2c_pci_bind(struct udevice *dev)
 {
 	char name[20];
 
+	if (dev_of_valid(dev))
+		return 0;
 	/*
 	 * Create a unique device name for PCI type devices
 	 * ToDo:
@@ -101,7 +105,7 @@ static int designware_i2c_pci_bind(struct udevice *dev)
 	 * be possible. We cannot use static data in drivers since they may be
 	 * used in SPL or before relocation.
 	 */
-	dev->req_seq = gd->arch.dw_i2c_num_cards++;
+	dev->req_seq = uclass_find_next_free_req_seq(UCLASS_I2C);
 	sprintf(name, "i2c_designware#%u", dev->req_seq);
 	device_set_name(dev, name);
 
@@ -118,18 +122,13 @@ static int designware_i2c_pci_bind(struct udevice *dev)
  * FPCN: I2C_SPEED_FAST_PLUS
  * HSCN: I2C_SPEED_HIGH
  */
-static void dw_i2c_acpi_write_speed_config(struct dw_i2c *priv)
+static void dw_i2c_acpi_write_speed_config(struct dw_i2c_speed_config *config)
 {
-	struct dw_i2c_speed_config *config = &priv->config;
-
-	if (!config->scl_lcnt && !config->scl_hcnt && !config->sda_hold)
-		return;
-
-	if (priv->speed_mode >= IC_SPEED_MODE_HIGH)
+	if (config->speed_mode >= IC_SPEED_MODE_HIGH)
 		acpigen_write_name("HSCN");
-	else if (priv->speed_mode >= IC_SPEED_FAST_PLUS)
+	else if (config->speed_mode >= IC_SPEED_FAST_PLUS)
 		acpigen_write_name("FPCN");
-	else if (priv->speed_mode >= IC_SPEED_MODE_FAST)
+	else if (config->speed_mode >= IC_SPEED_MODE_FAST)
 		acpigen_write_name("FMCN");
 	else
 		acpigen_write_name("SSCN");
@@ -146,34 +145,33 @@ static void dw_i2c_acpi_write_speed_config(struct dw_i2c *priv)
  * Generate I2C timing information into the SSDT for the OS driver to consume,
  * optionally applying override values provided by the caller.
  */
-static void dw_i2c_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
+static int dw_i2c_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 {
-	const struct dw_i2c_bus_config *bcfg;
-	uintptr_t dw_i2c_addr;
-	struct dw_i2c_speed_config sgen;
-	int bus;
+	struct dw_i2c_speed_config config;
 	const char *path;
-	unsigned int speed;
+	int ret;
 
 	path = acpi_device_path(dev);
 	if (!path)
-		return;
+		return log_msg_ret("path", -ENOENT);
 
-	if (!device_active(dev))
-		return;
-
-	/* Ensure a default speed is available */
-	speed = (bcfg->speed == 0) ? I2C_SPEED_FAST : bcfg->speed;
-
-			ret = dw_i2c_calc_timing(priv, i2c_spd, bus_clk, spk_cnt,
-					 &config);
+	/* If no device-tree node, ignore this since we assume it isn't used */
+	if (!dev_of_valid(dev))
+		return 0;
+	ret = device_probe(dev);
+	if (ret)
+		return log_msg_ret("probe", ret);
 
 	/* Report timing values for the OS driver */
-	if (dw_i2c_gen_speed_config(dw_i2c_addr, speed, bcfg, &sgen) >= 0) {
-		acpigen_write_scope(path);
-		dw_i2c_acpi_write_speed_config(&sgen);
-		acpigen_pop_len();
-	}
+	ret = dw_i2c_gen_speed_config(dev, &config);
+	if (ret)
+		return log_msg_ret("config", ret);
+
+	acpigen_write_scope(path);
+	dw_i2c_acpi_write_speed_config(&config);
+	acpigen_pop_len();
+
+	return 0;
 }
 
 struct acpi_ops dw_i2c_acpi_ops = {

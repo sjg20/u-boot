@@ -182,6 +182,7 @@ struct dw_i2c_speed_config {
 	uint16_t scl_lcnt;
 	uint16_t scl_hcnt;
 	uint32_t sda_hold;
+	enum i2c_speed_mode speed_mode;
 };
 
 /**
@@ -216,5 +217,7 @@ extern const struct dm_i2c_ops designware_i2c_ops;
 int designware_i2c_probe(struct udevice *bus);
 int designware_i2c_remove(struct udevice *dev);
 int designware_i2c_ofdata_to_platdata(struct udevice *bus);
+int dw_i2c_gen_speed_config(struct udevice *dev,
+			    struct dw_i2c_speed_config *config);
 
 #endif /* __DW_I2C_H_ */

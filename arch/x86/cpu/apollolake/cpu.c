@@ -29,6 +29,7 @@ static int acpi_cpu_fill_ssdt_generator(struct udevice *dev,
 	int ret;
 
 	/* Trigger off the first CPU */
+	printf("\n\ncpu %s\n", dev->name);
 	if (!plat->cpu_id) {
 		ret = generate_cpu_entries(dev, ctx);
 		if (ret)

@@ -485,10 +485,10 @@ int generate_cpu_entries(struct udevice *dev, struct acpi_ctx *ctx)
 	}
 	/* PPKG is usually used for thermal management
 	   of the first and only package. */
-	acpigen_write_processor_package("PPKG", 0, cores_per_package);
+// 	acpigen_write_processor_package("PPKG", 0, cores_per_package);
 
 	/* Add a method to notify processor nodes */
-	acpigen_write_processor_cnot(cores_per_package);
+// 	acpigen_write_processor_cnot(cores_per_package);
 
 	return 0;
 }
