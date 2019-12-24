@@ -44,7 +44,7 @@
 		compatible = "google,coral";
 		recovery-gpio = <&gpio_nw (-1) GPIO_ACTIVE_LOW>;
 		write-protect-gpio = <&gpio_nw GPIO_75 GPIO_ACTIVE_HIGH>;
-		power-off-gpio = <&gpio_n GPIO_10 GPIO_ACTIVE_HIGH>;
+		phase-enforce-gpio = <&gpio_n GPIO_10 GPIO_ACTIVE_HIGH>;
 	};
 
 	config {

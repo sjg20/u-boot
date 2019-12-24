@@ -51,7 +51,8 @@ int chromeos_get_gpio(struct udevice *dev, const char *prop,
 	info->type = type;
 	/* Get ACPI pin from GPIO library if available */
 	if (info->gpio_num != CROS_GPIO_VIRTUAL) {
-		pinctrl = dev_get_parent(dev);
+		printf("dev=%s\n", desc.dev->name);
+		pinctrl = dev_get_parent(desc.dev);
 		info->gpio_num = intel_pinctrl_get_acpi_pin(pinctrl,
 							    info->gpio_num);
 	}
@@ -64,12 +65,20 @@ int chromeos_get_gpio(struct udevice *dev, const char *prop,
 static int chromeos_acpi_gpio_generate(struct udevice *dev,
 				       struct acpi_ctx *ctx)
 {
-	struct cros_gpio_info info[4];
+	struct cros_gpio_info info[3];
 	int count, i;
 	int ret;
 
 	count = 3;
 	ret = chromeos_get_gpio(dev, "recovery-gpio", CROS_GPIO_REC, &info[0]);
+	if (ret)
+		return log_msg_ret("rec", ret);
+	ret = chromeos_get_gpio(dev, "write-protect-gpio", CROS_GPIO_WP,
+				&info[1]);
+	if (ret)
+		return log_msg_ret("rec", ret);
+	ret = chromeos_get_gpio(dev, "phase-enforce-gpio", CROS_GPIO_PE,
+				&info[2]);
 	if (ret)
 		return log_msg_ret("rec", ret);
 	acpigen_write_scope("\\");
