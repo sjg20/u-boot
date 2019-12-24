@@ -13,23 +13,6 @@
 #include <asm/io.h>
 #include "designware_i2c.h"
 
-/**
- * struct dw_i2c_speed_config - timings to use for a particular speed
- *
- * This holds calculated values to be written to the I2C controller. Each value
- * is represented as a number of IC clock cycles.
- *
- * @scl_lcnt: Low count value for SCL
- * @scl_hcnt: High count value for SCL
- * @sda_hold: Data hold count
- */
-struct dw_i2c_speed_config {
-	/* SCL high and low period count */
-	uint16_t scl_lcnt;
-	uint16_t scl_hcnt;
-	uint32_t sda_hold;
-};
-
 #ifdef CONFIG_SYS_I2C_DW_ENABLE_STATUS_UNSUPPORTED
 static int  dw_i2c_enable(struct i2c_regs *i2c_base, bool enable)
 {
@@ -295,6 +278,10 @@ static unsigned int __dw_i2c_set_bus_speed(struct dw_i2c *priv,
 	/* Restore back i2c now speed set */
 	if (ena == IC_ENABLE_0B)
 		dw_i2c_enable(i2c_base, true);
+	if (priv) {
+		priv->config = config;
+		priv->speed_mode = i2c_spd;
+	}
 
 	return 0;
 }
