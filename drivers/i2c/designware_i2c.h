@@ -67,6 +67,8 @@ struct i2c_regs {
 #define MIN_SS_SCL_LOWTIME	4700
 #define MIN_FS_SCL_HIGHTIME	600
 #define MIN_FS_SCL_LOWTIME	1300
+#define MIN_FP_SCL_HIGHTIME	260
+#define MIN_FP_SCL_LOWTIME	500
 #define MIN_HS_SCL_HIGHTIME	60
 #define MIN_HS_SCL_LOWTIME	160
 
@@ -138,13 +140,14 @@ struct i2c_regs {
 enum i2c_speed_mode {
 	IC_SPEED_MODE_STANDARD,
 	IC_SPEED_MODE_FAST,
-	IC_SPEED_FAST_PLUS,
+	IC_SPEED_MODE_FAST_PLUS,
 	IC_SPEED_MODE_HIGH,
 
 	IC_SPEED_MODE_COUNT,
 };
 
 #define I2C_HIGH_SPEED		3400000
+#define I2C_FAST_PLUS_SPEED	1000000
 #define I2C_FAST_SPEED		400000
 #define I2C_STANDARD_SPEED	100000
 
@@ -217,7 +220,7 @@ extern const struct dm_i2c_ops designware_i2c_ops;
 int designware_i2c_probe(struct udevice *bus);
 int designware_i2c_remove(struct udevice *dev);
 int designware_i2c_ofdata_to_platdata(struct udevice *bus);
-int dw_i2c_gen_speed_config(struct udevice *dev,
+int dw_i2c_gen_speed_config(struct udevice *dev, int speed_hz,
 			    struct dw_i2c_speed_config *config);
 
 #endif /* __DW_I2C_H_ */

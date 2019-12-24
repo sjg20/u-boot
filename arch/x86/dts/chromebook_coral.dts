@@ -297,13 +297,17 @@
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <104>;
 			i2c-scl-falling-time-ns = <52>;
+			clock-frequency = <100000>;
+			i2c,speeds = <100000 400000 1000000>;
 		};
 
 		i2c_1: i2c2@16,1 {
 			compatible = "intel,apl-i2c";
 			reg = <0x0200b110 0 0 0 0>;
 			clocks = <&clk CLK_I2C>;
-			status = "disabled";
+			i2c,speeds = <100000 400000 1000000 3400000>;
+			i2c-scl-rising-time-ns = <52>;
+			i2c-scl-falling-time-ns = <52>;
 		};
 
 		i2c_2: i2c2@16,2 {
@@ -312,6 +316,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000 1000000>;
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <57>;
 			i2c-scl-falling-time-ns = <28>;
@@ -330,6 +335,8 @@
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <76>;
 			i2c-scl-falling-time-ns = <164>;
+			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000>;
 		};
 
 		i2c_4: i2c2@17,0 {
@@ -339,6 +346,8 @@
 			i2c-sda-hold-time-ns = <350>;
 			i2c-scl-rising-time-ns = <114>;
 			i2c-scl-falling-time-ns = <164>;
+			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000>;
 		};
 
 		i2c_5: i2c2@17,1 {
@@ -347,6 +356,8 @@
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <76>;
 			i2c-scl-falling-time-ns = <164>;
+			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000 1000000>;
 		};
 
 		i2c_6: i2c2@17,2 {

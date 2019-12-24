@@ -4,6 +4,8 @@
  * Vipin Kumar, ST Micoelectronics, vipin.kumar@st.com.
  */
 
+#define DEBUG
+
 #include <common.h>
 #include <clk.h>
 #include <dm.h>
@@ -99,12 +101,19 @@ static const struct i2c_mode_info info_for_mode[] = {
 		300,
 		300,
 	},
+	[IC_SPEED_MODE_FAST_PLUS] = {
+		I2C_FAST_PLUS_SPEED,
+		MIN_FP_SCL_HIGHTIME,
+		MIN_FP_SCL_LOWTIME,
+		260,
+		500,
+	},
 	[IC_SPEED_MODE_HIGH] = {
 		I2C_HIGH_SPEED,
 		MIN_HS_SCL_HIGHTIME,
 		MIN_HS_SCL_LOWTIME,
-		120,
-		120,
+		60,
+		160,
 	},
 };
 
@@ -142,9 +151,9 @@ static int dw_i2c_calc_timing(struct dw_i2c *priv, enum i2c_speed_mode mode,
 	min_tlow_cnt = calc_counts(ic_clk, info->min_scl_lowtime_ns);
 	min_thigh_cnt = calc_counts(ic_clk, info->min_scl_hightime_ns);
 
-	debug("dw_i2c: period %d rise %d fall %d tlow %d thigh %d spk %d\n",
-	      period_cnt, rise_cnt, fall_cnt, min_tlow_cnt, min_thigh_cnt,
-	      spk_cnt);
+	debug("dw_i2c: speed mode %d, speed %d, hdrperiod %d rise %d fall %d tlow %d thigh %d spk %d\n",
+	      mode, info->speed, period_cnt, rise_cnt, fall_cnt, min_tlow_cnt,
+	      min_thigh_cnt, spk_cnt);
 
 	/*
 	 * Back-solve for hcnt and lcnt according to the following equations:
@@ -156,7 +165,8 @@ static int dw_i2c_calc_timing(struct dw_i2c *priv, enum i2c_speed_mode mode,
 
 	if (hcnt < 0 || lcnt < 0) {
 		debug("dw_i2c: bad counts. hcnt = %d lcnt = %d\n", hcnt, lcnt);
-		return -EINVAL;
+		printf("mode=%d, hcnt=%d, lcnt=%d\n", mode, hcnt, lcnt);
+// 		return log_msg_ret("counts", -EINVAL);
 	}
 
 	/*
@@ -202,6 +212,8 @@ static int calc_bus_speed(struct dw_i2c *priv, int speed, ulong bus_clk,
 	if (speed >= I2C_HIGH_SPEED &&
 	    (!scl_sda_cfg || scl_sda_cfg->has_high_speed))
 		i2c_spd = IC_SPEED_MODE_HIGH;
+	else if (speed >= I2C_FAST_PLUS_SPEED)
+		i2c_spd = IC_SPEED_MODE_FAST_PLUS;
 	else if (speed >= I2C_FAST_SPEED)
 		i2c_spd = IC_SPEED_MODE_FAST;
 	else
@@ -266,13 +278,12 @@ static int dw_i2c_set_bus_speed(struct dw_i2c *priv, struct i2c_regs *i2c_base,
 		writel(config.scl_hcnt, &i2c_base->ic_hs_scl_hcnt);
 		writel(config.scl_lcnt, &i2c_base->ic_hs_scl_lcnt);
 		break;
-
 	case IC_SPEED_MODE_STANDARD:
 		cntl |= IC_CON_SPD_SS;
 		writel(config.scl_hcnt, &i2c_base->ic_ss_scl_hcnt);
 		writel(config.scl_lcnt, &i2c_base->ic_ss_scl_lcnt);
 		break;
-
+	case IC_SPEED_MODE_FAST_PLUS:
 	case IC_SPEED_MODE_FAST:
 	default:
 		cntl |= IC_CON_SPD_FS;
@@ -295,15 +306,13 @@ static int dw_i2c_set_bus_speed(struct dw_i2c *priv, struct i2c_regs *i2c_base,
 	return 0;
 }
 
-int dw_i2c_gen_speed_config(struct udevice *dev,
+int dw_i2c_gen_speed_config(struct udevice *dev, int speed_hz,
 			    struct dw_i2c_speed_config *config)
 {
 	struct dw_i2c *priv = dev_get_priv(dev);
 	ulong rate;
-	int speed_hz;
 	int ret;
 
-	speed_hz = dev_read_u32_default(dev, "clock-frequency", 100000);
 	if (CONFIG_IS_ENABLED(CLK)) {
 		rate = clk_get_rate(&priv->clk);
 		if (IS_ERR_VALUE(rate))
