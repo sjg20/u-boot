@@ -6,8 +6,10 @@
  */
 
 #include <common.h>
+#include <acpi.h>
 #include <dm.h>
 #include <spl.h>
+#include <asm/acpigen.h>
 #include <asm/lpss.h>
 #include "designware_i2c.h"
 
@@ -106,6 +108,78 @@ static int designware_i2c_pci_bind(struct udevice *dev)
 	return 0;
 }
 
+/*
+ * Write ACPI object to describe speed configuration.
+ *
+ * ACPI Object: Name ("xxxx", Package () { scl_lcnt, scl_hcnt, sda_hold }
+ *
+ * SSCN: I2C_SPEED_STANDARD
+ * FMCN: I2C_SPEED_FAST
+ * FPCN: I2C_SPEED_FAST_PLUS
+ * HSCN: I2C_SPEED_HIGH
+ */
+static void dw_i2c_acpi_write_speed_config(struct dw_i2c *priv)
+{
+	struct dw_i2c_speed_config *config = &priv->config;
+
+	if (!config->scl_lcnt && !config->scl_hcnt && !config->sda_hold)
+		return;
+
+	if (priv->speed_mode >= IC_SPEED_MODE_HIGH)
+		acpigen_write_name("HSCN");
+	else if (priv->speed_mode >= IC_SPEED_FAST_PLUS)
+		acpigen_write_name("FPCN");
+	else if (priv->speed_mode >= IC_SPEED_MODE_FAST)
+		acpigen_write_name("FMCN");
+	else
+		acpigen_write_name("SSCN");
+
+	/* Package () { scl_lcnt, scl_hcnt, sda_hold } */
+	acpigen_write_package(3);
+	acpigen_write_word(config->scl_hcnt);
+	acpigen_write_word(config->scl_lcnt);
+	acpigen_write_dword(config->sda_hold);
+	acpigen_pop_len();
+}
+
+/*
+ * Generate I2C timing information into the SSDT for the OS driver to consume,
+ * optionally applying override values provided by the caller.
+ */
+static void dw_i2c_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
+{
+	const struct dw_i2c_bus_config *bcfg;
+	uintptr_t dw_i2c_addr;
+	struct dw_i2c_speed_config sgen;
+	int bus;
+	const char *path;
+	unsigned int speed;
+
+	path = acpi_device_path(dev);
+	if (!path)
+		return;
+
+	if (!device_active(dev))
+		return;
+
+	/* Ensure a default speed is available */
+	speed = (bcfg->speed == 0) ? I2C_SPEED_FAST : bcfg->speed;
+
+			ret = dw_i2c_calc_timing(priv, i2c_spd, bus_clk, spk_cnt,
+					 &config);
+
+	/* Report timing values for the OS driver */
+	if (dw_i2c_gen_speed_config(dw_i2c_addr, speed, bcfg, &sgen) >= 0) {
+		acpigen_write_scope(path);
+		dw_i2c_acpi_write_speed_config(&sgen);
+		acpigen_pop_len();
+	}
+}
+
+struct acpi_ops dw_i2c_acpi_ops = {
+	.fill_ssdt_generator	= dw_i2c_acpi_fill_ssdt,
+};
+
 static const struct udevice_id designware_i2c_pci_ids[] = {
 	{ .compatible = "snps,designware-i2c-pci" },
 	{ .compatible = "intel,apl-i2c", .data = INTEL_APL },
@@ -123,6 +197,7 @@ U_BOOT_DRIVER(i2c_designware_pci) = {
 	.remove = designware_i2c_remove,
 	.flags = DM_FLAG_OS_PREPARE,
 	.ops	= &designware_i2c_ops,
+	acpi_ops_ptr(&dw_i2c_acpi_ops)
 };
 
 static struct pci_device_id designware_pci_supported[] = {

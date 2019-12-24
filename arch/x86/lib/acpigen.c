@@ -230,7 +230,6 @@ void acpigen_write_string(const char *string)
 	acpigen_emit_string(string);
 }
 
-#if 0
 void acpigen_write_coreboot_hid(enum coreboot_acpi_ids id)
 {
 	char hid[9]; /* BOOTxxxx */
@@ -238,7 +237,6 @@ void acpigen_write_coreboot_hid(enum coreboot_acpi_ids id)
 	snprintf(hid, sizeof(hid), "%.4s%04X", COREBOOT_ACPI_ID, id);
 	acpigen_write_name_string("_HID", hid);
 }
-#endif
 
 /*
  * The naming conventions for ACPI namespace names are a bit tricky as
