@@ -248,18 +248,12 @@ void acpi_device_write_interrupt(const struct acpi_irq *irq)
 	acpi_device_fill_len(desc_length);
 }
 
-const char *gpio_acpi_path(int gpio_num)
-{
-// 	const struct pad_community *comm = gpio_get_community(gpio_num);
-// 	return comm->acpi_path;
-	return NULL;
-}
-
 /* ACPI 6.1 section 6.4.3.8.1 - GPIO Interrupt or I/O */
 int acpi_device_write_gpio(const struct acpi_gpio *gpio)
 {
 	void *start, *desc_length;
 	void *pin_table_offset, *vendor_data_offset, *resource_offset;
+	struct udevice *pinctrl = NULL;
 	uint16_t flags = 0;
 	int pin;
 
@@ -372,7 +366,6 @@ int acpi_device_write_gpio(const struct acpi_gpio *gpio)
 
 	/* Pin Table, one word for each pin */
 	for (pin = 0; pin < gpio->pin_count; pin++) {
-		struct udevice *pinctrl;
 		uint offset;
 		int acpi_pin;
 		int ret;
@@ -381,7 +374,9 @@ int acpi_device_write_gpio(const struct acpi_gpio *gpio)
 					    &offset);
 		if (ret)
 			return log_msg_ret("pin", ret);
+		printf("GPIO %s %x\n", pinctrl->name, offset);
 		acpi_pin = intel_pinctrl_get_acpi_pin(pinctrl, offset);
+		printf("ACPI pin %x\n", acpi_pin);
 
 		acpigen_emit_word(acpi_pin);
 	}
@@ -390,7 +385,8 @@ int acpi_device_write_gpio(const struct acpi_gpio *gpio)
 	acpi_device_fill_from_len(resource_offset, start);
 
 	/* Resource Source Name String */
-	acpigen_emit_string(gpio->resource ? : gpio_acpi_path(gpio->pins[0]));
+	acpigen_emit_string(gpio->resource ? :
+			    pinctrl ? intel_pinctrl_acpi_path(pinctrl) : NULL);
 
 	/* Fill in Vendor Data Offset */
 	acpi_device_fill_from_len(vendor_data_offset, start);
