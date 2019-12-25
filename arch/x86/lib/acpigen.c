@@ -15,6 +15,7 @@
 
 #include <common.h>
 #include <hexdump.h>
+#include <uuid.h>
 #include <asm/acpigen.h>
 #include <asm/acpi_table.h>
 #include <linux/ioport.h>
@@ -1101,9 +1102,12 @@ int acpigen_write_uuid(const char *uuid)
 	uint8_t buf[UUID_LEN];
 	size_t i, order[UUID_LEN] = { 3, 2, 1, 0, 5, 4, 7, 6,
 				      8, 9, 10, 11, 12, 13, 14, 15 };
+	int ret;
 
 	/* Parse UUID string into bytes */
-	if (hex2bin(buf, uuid, UUID_LEN))
+	printf("hex %s\n", uuid);
+	ret = uuid_str_to_bin(uuid, buf, UUID_STR_FORMAT_STD);
+	if (ret)
 		return log_msg_ret("bad hex", -EINVAL);
 
 	/* BufferOp */
