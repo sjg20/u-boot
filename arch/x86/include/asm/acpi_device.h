@@ -491,6 +491,6 @@ size_t acpi_dp_add_property_list(struct acpi_dp *dp,
 				 size_t property_count);
 
 /* Write Device Property hierarchy and clean up resources */
-void acpi_dp_write(struct acpi_dp *table);
+int acpi_dp_write(struct acpi_dp *table);
 
 #endif

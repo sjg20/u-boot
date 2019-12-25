@@ -11,6 +11,8 @@
 
 #include <dm/pinctrl.h>
 
+struct gpio_desc;
+
 /**
  * struct pad_config - config for a pad
  * @pad: offset of pad within community
@@ -290,6 +292,8 @@ u32 intel_pinctrl_get_config_reg(struct udevice *dev, uint offset);
  * @return 0 if OK, -ENOTBLK if pad number is invalid
  */
 int intel_pinctrl_get_pad(uint pad, struct udevice **devp, uint *offsetp);
+
+int pinctrl_get_pad_from_gpio(struct gpio_desc *desc);
 
 /**
  * intel_pinctrl_get_acpi_pin() - Get the ACPI pin for a pinctrl pin

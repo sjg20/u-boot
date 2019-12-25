@@ -69,17 +69,18 @@ int soc_acpi_name(const struct udevice *dev, char *out_name)
 	id = device_get_uclass_id(dev);
 	if (dev_get_parent(dev))
 		parent_id = device_get_uclass_id(dev_get_parent(dev));
+// 	printf("dev '%s', id=%d, parent_id=%d\n", dev->name, id, parent_id);
 
 	name = dev_read_string(dev, "acpi-name");
 	if (name)
 		;
-	else if (device_is_on_pci_bus(dev))
-		name = name_from_id(id);
 	else if (id == UCLASS_MMC)
 		name = mmc_is_sd(dev) ? "SDCD" : "EMMC";
 	else if (id == UCLASS_ROOT)
 		name = "\\_SB";
-	else if (id == UCLASS_PCI) {
+	else if (device_is_on_pci_bus(dev))
+		name = name_from_id(id);
+	if (!name && id == UCLASS_PCI) {
 		struct pci_controller *hose = dev_get_uclass_priv(dev);
 
 		printf("hose->acpi_name = %s\n", hose->acpi_name);

@@ -174,6 +174,22 @@ int intel_pinctrl_get_pad(uint pad, struct udevice **devp, uint *offsetp)
 	return 0;
 }
 
+int pinctrl_get_pad_from_gpio(struct gpio_desc *desc)
+{
+	struct udevice *pinctrl;
+	struct intel_pinctrl_priv *priv;
+	const struct pad_community *comm;
+
+	if (!desc->dev)
+		return -1;
+
+	pinctrl = dev_get_parent(desc->dev);
+	priv = dev_get_priv(pinctrl);
+	comm = priv->comm;;
+
+	return comm->first_pad + desc->offset;
+}
+
 static int pinctrl_configure_owner(struct udevice *dev,
 				   const struct pad_config *cfg,
 				   const struct pad_community *comm)
