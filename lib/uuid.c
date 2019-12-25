@@ -143,7 +143,8 @@ int uuid_guid_get_str(unsigned char *guid_bin, char *guid_str)
  * @param uuid_bin - pointer to allocated array for big endian output [16B]
  * @str_format     - UUID string format: 0 - UUID; 1 - GUID
  */
-int uuid_str_to_bin(char *uuid_str, unsigned char *uuid_bin, int str_format)
+int uuid_str_to_bin(const char *uuid_str, unsigned char *uuid_bin,
+		    int str_format)
 {
 	uint16_t tmp16;
 	uint32_t tmp32;
