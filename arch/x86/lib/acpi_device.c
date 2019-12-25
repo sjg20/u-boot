@@ -135,7 +135,7 @@ static int acpi_device_path_fill(const struct udevice *dev, char *buf,
  */
 const char *acpi_device_path(const struct udevice *dev)
 {
-	static char buf[DEVICE_PATH_MAX] = {};
+	static char buf[ACPI_DEVICE_PATH_MAX] = {};
 	int ret;
 
 	if (!dev)
@@ -150,24 +150,24 @@ const char *acpi_device_path(const struct udevice *dev)
 }
 
 /* Return the path of the parent device as the ACPI Scope for this device */
-const char *acpi_device_scope(const struct udevice *dev)
+int acpi_device_scope(const struct udevice *dev, char *scope, int maxlen)
 {
-	static char buf[DEVICE_PATH_MAX] = {};
+	int ret;
 
 	if (!dev || !dev_get_parent(dev))
-		return NULL;
+		return -ENODEV;
 
-	if (acpi_device_path_fill(dev_get_parent(dev), buf, sizeof(buf), 0)
-			<= 0)
-		return NULL;
+	ret = acpi_device_path_fill(dev_get_parent(dev), scope, maxlen), 0);
+	if (ret < 0)
+		return ret;
 
-	return buf;
+	return 0;
 }
 
 /* Concatentate the device path and provided name suffix */
 const char *acpi_device_path_join(const struct udevice *dev, const char *name)
 {
-	static char buf[DEVICE_PATH_MAX] = {};
+	static char buf[ACPI_DEVICE_PATH_MAX] = {};
 	ssize_t len;
 
 	if (!dev)

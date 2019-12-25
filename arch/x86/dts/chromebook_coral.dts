@@ -252,6 +252,11 @@
 			gpe0-en = <0x30>;
 		};
 
+		sound@e,0 {
+			reg = <0x7000>;
+			compatible = "maxim,max98357a";
+		};
+
 		/* WiFi */
 		pcie-b0@14,0 {
 			reg = <0x0000a000 0 0 0 0>;

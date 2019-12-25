@@ -61,13 +61,14 @@ struct acpi_dp {
  */
 #define ACPI_DT_NAMESPACE_HID		"PRP0001"
 
-#define DEVICE_PATH_MAX 30
+#define ACPI_DEVICE_NAME_MAX		5	/* includes nul terminator */
+#define ACPI_DEVICE_PATH_MAX		30
 
 struct udevice;
 int acpi_device_name(const struct udevice *dev, char *name);
 // const char *acpi_device_hid(const struct udevice *dev);
 const char *acpi_device_path(const struct udevice *dev);
-const char *acpi_device_scope(const struct udevice *dev);
+int acpi_device_scope(const struct udevice *dev, char *scope, int maxlen);
 const char *acpi_device_path_join(const struct udevice *dev, const char *name);
 int acpi_device_status(const struct udevice *dev);
 
