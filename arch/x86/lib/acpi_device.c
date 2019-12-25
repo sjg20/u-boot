@@ -66,8 +66,8 @@ int acpi_device_name(const struct udevice *dev, char *name)
 		return -ENOENT;
 
 	/* Walk up the tree to find if any parent can identify this device */
-	for (pdev = dev; pdev; pdev = dev_get_parent(dev)) {
-		ret = soc_acpi_name(dev, name);
+	for (pdev = dev; pdev; pdev = dev_get_parent(pdev)) {
+		ret = soc_acpi_name(pdev, name);
 		if (!ret)
 			return 0;
 	}
@@ -665,14 +665,15 @@ static void acpi_dp_free(struct acpi_dp *dp)
 	}
 }
 
-void acpi_dp_write(struct acpi_dp *table)
+int acpi_dp_write(struct acpi_dp *table)
 {
 	struct acpi_dp *dp, *prop;
 	char *dp_count, *prop_count = NULL;
 	int child_count = 0;
+	int ret;
 
 	if (!table || table->type != ACPI_DP_TYPE_TABLE)
-		return;
+		return 0;
 
 	/* Name (name) */
 	acpigen_write_name(table->name);
@@ -697,7 +698,9 @@ void acpi_dp_write(struct acpi_dp *table)
 			if (!prop_count) {
 				*dp_count += 2;
 				/* ToUUID (ACPI_DP_UUID) */
-				acpigen_write_uuid(ACPI_DP_UUID);
+				ret = acpigen_write_uuid(ACPI_DP_UUID);
+				if (ret)
+					return log_msg_ret("touuid", ret);
 				/*
 				 * Package (PROP), element count determined as
 				 * it is populated
@@ -717,7 +720,9 @@ void acpi_dp_write(struct acpi_dp *table)
 		/* Update DP package count to 2 or 4 */
 		*dp_count += 2;
 		/* ToUUID (ACPI_DP_CHILD_UUID) */
-		acpigen_write_uuid(ACPI_DP_CHILD_UUID);
+		ret = acpigen_write_uuid(ACPI_DP_CHILD_UUID);
+		if (ret)
+			return log_msg_ret("child uuid", ret);
 
 		/* Print child pointer properties */
 		acpigen_write_package(child_count);
@@ -733,12 +738,18 @@ void acpi_dp_write(struct acpi_dp *table)
 	acpigen_pop_len();
 
 	/* Recursively parse children into separate tables */
-	for (dp = prop; dp; dp = dp->next)
-		if (dp->type == ACPI_DP_TYPE_CHILD)
-			acpi_dp_write(dp->child);
+	for (dp = prop; dp; dp = dp->next) {
+		if (dp->type == ACPI_DP_TYPE_CHILD) {
+			ret = acpi_dp_write(dp->child);
+			if (ret)
+				return log_msg_ret("dp child", ret);
+		}
+	}
 
 	/* Clean up */
 	acpi_dp_free(table);
+
+	return 0;
 }
 
 static struct acpi_dp *acpi_dp_new(struct acpi_dp *dp, enum acpi_dp_type type,

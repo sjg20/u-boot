@@ -38,6 +38,8 @@ static char *ordering[] = {
 	"i2c2@16,3",
 	"i2c2@17,0",
 	"i2c2@17,1",
+	"sdmmc@1b,0",
+	"pci_mmc",
 	NULL,
 };
 
