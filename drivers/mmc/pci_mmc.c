@@ -88,6 +88,7 @@ static int pci_mmc_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	gpio.interrupt_debounce_timeout = 10000; /* 100ms */
 	gpio.pin_count = 1;
 	gpio.pins[0] = pinctrl_get_pad_from_gpio(&priv->cd_gpio);
+	printf("GPIO pin %d\n", gpio.pins[0]);
 
 	/* Use device path as the Scope for the SSDT */
 	path = acpi_device_path(dev);

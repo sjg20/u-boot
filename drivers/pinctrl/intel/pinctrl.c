@@ -433,6 +433,8 @@ int intel_pinctrl_get_acpi_pin(struct udevice *dev, uint offset)
 	const struct pad_community *comm = priv->comm;
 	int group;
 
+	if (IS_ENABLED(CONFIG_INTEL_PINCTRL_MULTI_ACPI_DEVICES))
+		return offset;
 	group = pinctrl_group_index(comm, offset);
 
 	/* If pad base is not set then use GPIO number as ACPI pin number */
@@ -615,6 +617,14 @@ int pinctrl_config_pads_for_node(struct udevice *dev, ofnode node)
 		return log_msg_ret("pad config", ret);
 
 	return 0;
+}
+
+const char *intel_pinctrl_acpi_path(struct udevice *dev)
+{
+	struct intel_pinctrl_priv *priv = dev_get_priv(dev);
+	const struct pad_community *comm = priv->comm;
+
+	return comm->acpi_path;
 }
 
 int intel_pinctrl_ofdata_to_platdata(struct udevice *dev,

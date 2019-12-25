@@ -308,4 +308,6 @@ int pinctrl_get_pad_from_gpio(struct gpio_desc *desc);
  */
 int intel_pinctrl_get_acpi_pin(struct udevice *dev, uint offset);
 
+const char *intel_pinctrl_acpi_path(struct udevice *dev);
+
 #endif
