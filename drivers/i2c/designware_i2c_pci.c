@@ -5,8 +5,6 @@
  * Copyright 2019 Google Inc
  */
 
-#define DEBUG
-
 #include <common.h>
 #include <acpi.h>
 #include <dm.h>

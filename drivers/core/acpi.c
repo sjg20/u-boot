@@ -39,6 +39,8 @@ static char *ordering[] = {
 	"i2c2@17,0",
 	"i2c2@17,1",
 	"sdmmc@1b,0",
+	"codec",
+	"wifi",
 	"pci_mmc",
 	NULL,
 };

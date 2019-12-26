@@ -68,7 +68,6 @@ static int pci_mmc_bind(struct udevice *dev)
 
 static int pci_mmc_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 {
-	struct pci_mmc_priv *priv;
 	struct gpio_desc cd_gpio;
 	const char *path;
 	struct acpi_gpio gpio;
@@ -76,7 +75,6 @@ static int pci_mmc_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	int ret;
 
 	gpio_request_by_name(dev, "cd-gpios", 0, &cd_gpio, GPIOD_IS_IN);
-	priv = dev_get_priv(dev);
 
 	memset(&gpio, '\0', sizeof(gpio));
 	gpio.type = ACPI_GPIO_TYPE_INTERRUPT;
@@ -87,7 +85,7 @@ static int pci_mmc_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	gpio.irq.wake = ACPI_IRQ_WAKE;
 	gpio.interrupt_debounce_timeout = 10000; /* 100ms */
 	gpio.pin_count = 1;
-	gpio.pins[0] = pinctrl_get_pad_from_gpio(&priv->cd_gpio);
+	gpio.pins[0] = pinctrl_get_pad_from_gpio(&cd_gpio);
 	printf("GPIO pin %d\n", gpio.pins[0]);
 
 	/* Use device path as the Scope for the SSDT */

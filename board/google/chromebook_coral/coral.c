@@ -70,14 +70,14 @@ static int chromeos_acpi_gpio_generate(struct udevice *dev,
 	int ret;
 
 	count = 3;
-	ret = chromeos_get_gpio(dev, "recovery-gpio", CROS_GPIO_REC, &info[0]);
+	ret = chromeos_get_gpio(dev, "recovery-gpios", CROS_GPIO_REC, &info[0]);
 	if (ret)
 		return log_msg_ret("rec", ret);
-	ret = chromeos_get_gpio(dev, "write-protect-gpio", CROS_GPIO_WP,
+	ret = chromeos_get_gpio(dev, "write-protect-gpios", CROS_GPIO_WP,
 				&info[1]);
 	if (ret)
 		return log_msg_ret("rec", ret);
-	ret = chromeos_get_gpio(dev, "phase-enforce-gpio", CROS_GPIO_PE,
+	ret = chromeos_get_gpio(dev, "phase-enforce-gpios", CROS_GPIO_PE,
 				&info[2]);
 	if (ret)
 		return log_msg_ret("rec", ret);

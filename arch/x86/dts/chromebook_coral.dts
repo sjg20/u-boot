@@ -18,6 +18,7 @@
 #include <dt-bindings/clock/intel-clock.h>
 #include <asm/intel_pinctrl_defs.h>
 #include <asm/arch-apollolake/cpu.h>
+#include <asm/arch-apollolake/gpe.h>
 #include <asm/arch-apollolake/gpio.h>
 #include <asm/arch-apollolake/iomap.h>
 #include <asm/arch-apollolake/pm.h>
@@ -43,9 +44,9 @@
 
 	board {
 		compatible = "google,coral";
-		recovery-gpio = <&gpio_nw (-1) GPIO_ACTIVE_LOW>;
-		write-protect-gpio = <&gpio_nw GPIO_75 GPIO_ACTIVE_HIGH>;
-		phase-enforce-gpio = <&gpio_n GPIO_10 GPIO_ACTIVE_HIGH>;
+		recovery-gpios = <&gpio_nw (-1) GPIO_ACTIVE_LOW>;
+		write-protect-gpios = <&gpio_nw GPIO_75 GPIO_ACTIVE_HIGH>;
+		phase-enforce-gpios = <&gpio_n GPIO_10 GPIO_ACTIVE_HIGH>;
 	};
 
 	config {
@@ -252,20 +253,20 @@
 			gpe0-en = <0x30>;
 		};
 
-		sound@e,0 {
-			reg = <0x7000>;
-			compatible = "maxim,max98357a";
-		};
-
-		/* WiFi */
-		pcie-b0@14,0 {
-			reg = <0x0000a000 0 0 0 0>;
-			acpi-name = "RP03";
-		};
-
-		/* WiFi */
-		pcie-a0@13,0 {
-			reg = <0x00009800 0 0 0 0>;
+		audio@e,0 {
+			reg = <0x7000 0 0 0 0>;
+			compatible = "simple-bus";
+			acpi-name = "HDAS";
+			i2s {
+				compatible = "fred";
+			};
+			codec {
+				compatible = "maxim,max98357a";
+				acpi-ddn = "Maxim Integrated 98357A Amplifier";
+				sdmode-gpios = <&gpio_n GPIO_76 GPIO_ACTIVE_HIGH>;
+				sdmode-delay = <5>;
+				acpi-name = "MAXM";
+			};
 		};
 
 		spi: fast-spi@d,2 {
@@ -294,6 +295,18 @@
 					reg = <0x008f0000 0x0001000>;
 					u-boot,dm-pre-reloc;
 				};
+			};
+		};
+
+		/* WiFi */
+		pcie-a0@14,0 {
+			reg = <0x0000a000 0 0 0 0>;
+			acpi-name = "RP01";
+			wifi {
+				compatible = "intel,generic-wifi";
+				acpi-ddn = "Intel WiFi";
+				acpi-name = "WIFI";
+				gpe-wake = <GPE0_DW3_00>;
 			};
 		};
 
@@ -330,7 +343,7 @@
 				reg = <0x50>;
 				compatible = "google,cr50";
 				u-boot,i2c-offset-len = <0>;
-				ready-gpio = <&gpio_n 28 GPIO_ACTIVE_LOW>;
+				ready-gpios = <&gpio_n 28 GPIO_ACTIVE_LOW>;
 				interrupts-extended = <&acpi_gpe 0x3c 0>;
 			};
 		};
