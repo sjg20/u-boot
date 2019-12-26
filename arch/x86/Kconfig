@@ -970,4 +970,12 @@ config INTEL_GMA_SWSMISCI
 	  Select this option for Atom-based platforms which use the SWSMISCI
 	  register (0xe0) rather than the SWSCI register (0xe8).
 
+config INTEL_GENERIC_WIFI
+	bool "Enable generation of ACPI tables for Intel WiFi "
+	help
+	  Select this option to provide code to a build generic WiFi ACPI table
+	  for Intel WiFi devices. This is not a WiFi driver and offers no
+	  network functionality. It is only here to generate the ACPI tables
+	  required by Linux.
+
 endmenu

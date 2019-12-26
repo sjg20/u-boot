@@ -22,6 +22,7 @@
 #include <asm/acpigen.h>
 #include <asm/cpu.h>
 #include <asm/cpu_common.h>
+#include <asm/generic_wifi.h>
 #include <asm/intel_acpi.h>
 #include <asm/ioapic.h>
 #include <asm/mpspec.h>
@@ -553,3 +554,38 @@ static void acpi_save_wake_source(void *unused)
 BOOT_STATE_INIT_ENTRY(BS_OS_RESUME, BS_ON_ENTRY, acpi_save_wake_source, NULL);
 
 #endif
+
+#ifdef CONFIG_INTEL_GENERIC_WIFI
+static int intel_wifi_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
+{
+	struct generic_wifi_config config;
+	bool have_config;
+	int ret;
+
+	ret = dev_read_u32(dev, "gpe-wake", &config.wake);
+	have_config = !ret;
+	/* By default, all intel wifi chips wake from S3 */
+	config.maxsleep = 3;
+	ret = generic_wifi_fill_ssdt(dev, have_config ? &config : NULL);
+	if (ret)
+		return log_msg_ret("wifi", ret);
+
+	return 0;
+}
+
+struct acpi_ops wifi_acpi_ops = {
+	.fill_ssdt_generator	= intel_wifi_acpi_fill_ssdt,
+};
+
+static const struct udevice_id intel_wifi_ids[] = {
+	{ .compatible = "intel,generic-wifi" },
+	{ }
+};
+
+U_BOOT_DRIVER(intel_wifi) = {
+	.name		= "intel_wifi",
+	.id		= UCLASS_MISC,
+	.of_match	= intel_wifi_ids,
+	acpi_ops_ptr(&wifi_acpi_ops)
+};
+#endif /* CONFIG_INTEL_GENERIC_WIFI */

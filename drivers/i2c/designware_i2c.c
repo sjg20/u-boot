@@ -4,8 +4,6 @@
  * Vipin Kumar, ST Micoelectronics, vipin.kumar@st.com.
  */
 
-#define DEBUG
-
 #include <common.h>
 #include <clk.h>
 #include <dm.h>

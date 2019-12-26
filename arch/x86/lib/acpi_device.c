@@ -157,7 +157,7 @@ int acpi_device_scope(const struct udevice *dev, char *scope, int maxlen)
 	if (!dev || !dev_get_parent(dev))
 		return -ENODEV;
 
-	ret = acpi_device_path_fill(dev_get_parent(dev), scope, maxlen), 0);
+	ret = acpi_device_path_fill(dev_get_parent(dev), scope, maxlen, 0);
 	if (ret < 0)
 		return ret;
 
