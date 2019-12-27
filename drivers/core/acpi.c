@@ -55,6 +55,7 @@ static int acpi_add_item(struct udevice *dev, enum gen_type_t type, void *start)
 		printf("Too many items\n");
 		return log_msg_ret("mem", -ENOSPC);
 	}
+	printf("%s: line=%d, item_count=%d\n", __func__, __LINE__, item_count);
 
 	item = &acpi_item[item_count];
 	item->dev = dev;
@@ -62,10 +63,14 @@ static int acpi_add_item(struct udevice *dev, enum gen_type_t type, void *start)
 	item->size = end - start;
 	if (!item->size)
 		return 0;
+	printf("%s: line=%d, size=%x\n", __func__, __LINE__, item->size);
 	item->buf = malloc(item->size);
+	printf("%s: line=%d\n", __func__, __LINE__);
 	if (!item->buf)
 		return log_msg_ret("mem", -ENOMEM);
+	printf("%s: line=%d\n", __func__, __LINE__);
 	memcpy(item->buf, start, item->size);
+	printf("%s: line=%d\n", __func__, __LINE__);
 	item_count++;
 	printf("* %s: Added type %d, %p, size %x\n", dev->name, type, start,
 	       item->size);
@@ -188,6 +193,7 @@ int _acpi_fill_ssdt_generator(struct udevice *parent, struct acpi_ctx *ctx)
 
 		debug("- %s %p\n", parent->name, aops->fill_ssdt_generator);
 		ret = aops->fill_ssdt_generator(parent, ctx);
+		printf("%s: ret=%d\n", __func__, ret);
 		if (ret)
 			return ret;
 		ret = acpi_add_item(parent, TYPE_SSDT, start);

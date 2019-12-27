@@ -325,6 +325,7 @@
 				reg = <0x1a>;
 				compatible = "dlg,da7219";
 				interrupts-extended = <&acpi_gpe (0x20 + 116) 0>;
+				acpi-name = "DLG7";
 				acpi-ddn = "Dialog Semiconductor DA7219 Audio Codec";
 				dlg,btn-cfg = <50>;
 				dlg,mic-det-thr = <500>;
@@ -337,8 +338,7 @@
 				dlg,c-mic-btn-thr = <0x3e>;
 				dlg,btn-avg = <4>;
 				dlg,adc-1bit-rpt = <1>;
-				dlg,micbias-pulse-lvl = <2600>;
-				dlg,micbias-pulse-time = <0>;
+				dlg,micbias-lvl = <2600>;
 				dlg,mic-amp-in-sel = "diff";
 			};
 		};

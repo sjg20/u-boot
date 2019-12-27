@@ -107,10 +107,12 @@ void acpigen_emit_dword(unsigned int data)
 char *acpigen_write_package(int nr_el)
 {
 	char *p;
+
 	acpigen_emit_byte(PACKAGE_OP);
 	acpigen_write_len_f();
 	p = acpigen_get_current();
 	acpigen_emit_byte(nr_el);
+
 	return p;
 }
 

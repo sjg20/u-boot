@@ -188,6 +188,7 @@ static int dw_i2c_calc_timing(struct dw_i2c *priv, enum i2c_speed_mode mode,
 	sda_hold_time_ns = priv && priv->sda_hold_time_ns ?
 		 priv->sda_hold_time_ns : DEFAULT_SDA_HOLD_TIME;
 	config->sda_hold = calc_counts(ic_clk, sda_hold_time_ns);
+	printf("here\n");
 
 	debug("dw_i2c: hcnt = %d lcnt = %d sda hold = %d\n", hcnt, lcnt,
 	      config->sda_hold);
@@ -320,6 +321,7 @@ int dw_i2c_gen_speed_config(struct udevice *dev, int speed_hz,
 	}
 
 	ret = calc_bus_speed(priv, speed_hz, rate, config);
+	printf("%s: ret=%d\n", __func__, ret);
 	if (ret)
 		return log_msg_ret("calc_bus_speed", ret);
 

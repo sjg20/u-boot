@@ -153,8 +153,6 @@ int irq_request(struct udevice *dev, struct irq *irq)
 	const struct irq_ops *ops;
 
 	log_debug("(dev=%p, irq=%p)\n", dev, irq);
-	if (!irq)
-		return 0;
 	ops = irq_get_ops(dev);
 
 	irq->dev = dev;

@@ -99,7 +99,7 @@ const char *acpi_device_hid(const struct device *dev)
 static int acpi_device_path_fill(const struct udevice *dev, char *buf,
 				 size_t buf_len, int cur)
 {
-	char name[ACPI_SIG_LEN + 1];
+	char name[ACPI_DEVICE_NAME_MAX];
 	int next = 0;
 	int ret;
 
@@ -380,19 +380,24 @@ int acpi_device_write_gpio(const struct acpi_gpio *gpio)
 
 		acpigen_emit_word(acpi_pin);
 	}
+	printf("%s: %d\n", __func__, __LINE__);
 
 	/* Fill in Resource Source Name Offset */
 	acpi_device_fill_from_len(resource_offset, start);
+	printf("%s: %d\n", __func__, __LINE__);
 
 	/* Resource Source Name String */
 	acpigen_emit_string(gpio->resource ? :
 			    pinctrl ? intel_pinctrl_acpi_path(pinctrl) : NULL);
+	printf("%s: %d\n", __func__, __LINE__);
 
 	/* Fill in Vendor Data Offset */
 	acpi_device_fill_from_len(vendor_data_offset, start);
+	printf("%s: %d\n", __func__, __LINE__);
 
 	/* Fill in GPIO Descriptor Length (account for len word) */
 	acpi_device_fill_len(desc_length);
+	printf("%s: %d\n", __func__, __LINE__);
 
 	return 0;
 }
@@ -707,6 +712,7 @@ int acpi_dp_write(struct acpi_dp *table)
 			acpi_dp_write_property(dp);
 		}
 	}
+
 	if (prop_count) {
 		/* Package (PROP) length, if a package was written */
 		acpigen_pop_len();
@@ -743,7 +749,7 @@ int acpi_dp_write(struct acpi_dp *table)
 	}
 
 	/* Clean up */
-	acpi_dp_free(table);
+// 	acpi_dp_free(table);
 
 	return 0;
 }
@@ -757,7 +763,7 @@ static struct acpi_dp *acpi_dp_new(struct acpi_dp *dp, enum acpi_dp_type type,
 	if (!new)
 		return NULL;
 
-	memset(new, 0, sizeof(*new));
+	memset(new, '\0', sizeof(*new));
 	new->type = type;
 	new->name = name;
 
@@ -821,9 +827,6 @@ size_t acpi_dp_add_property_list(struct acpi_dp *dp,
 struct acpi_dp *acpi_dp_add_integer(struct acpi_dp *dp, const char *name,
 				    uint64_t value)
 {
-	if (!dp)
-		return NULL;
-
 	struct acpi_dp *new = acpi_dp_new(dp, ACPI_DP_TYPE_INTEGER, name);
 
 	if (new)
@@ -835,9 +838,6 @@ struct acpi_dp *acpi_dp_add_integer(struct acpi_dp *dp, const char *name,
 struct acpi_dp *acpi_dp_add_string(struct acpi_dp *dp, const char *name,
 				   const char *string)
 {
-	if (!dp)
-		return NULL;
-
 	struct acpi_dp *new = acpi_dp_new(dp, ACPI_DP_TYPE_STRING, name);
 
 	if (new)

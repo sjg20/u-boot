@@ -11,6 +11,7 @@
 #include <irq.h>
 #include <mmc.h>
 #include <usb.h>
+#include <asm/acpi_device.h>
 #include <asm/acpi_table.h>
 #include <asm/intel_pinctrl.h>
 #include <asm/io.h>
@@ -136,10 +137,8 @@ int soc_acpi_name(const struct udevice *dev, char *out_name)
 		log_warning("No name for device '%s'\n", dev->name);
 		return -ENOENT;
 	}
-	if (name != out_name) {
-		memcpy(out_name, name, ACPI_SIG_LEN);
-		out_name[ACPI_SIG_LEN] = '\0';
-	}
+	if (name != out_name)
+		memcpy(out_name, name, ACPI_DEVICE_NAME_MAX);
 	printf("acpi_name for '%s': %s\n", dev->name, name);
 
 	return 0;
