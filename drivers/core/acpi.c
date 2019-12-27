@@ -39,7 +39,7 @@ static char *ordering[] = {
 	"i2c2@17,0",
 	"i2c2@17,1",
 	"sdmmc@1b,0",
-	"codec",
+	"maxim-codec",
 	"wifi",
 	"pci_mmc",
 	NULL,
@@ -253,4 +253,29 @@ int acpi_inject_dsdt_generator(struct acpi_ctx *ctx)
 	build_type(start, TYPE_DSDT);
 
 	return ret;
+}
+
+int acpi_dp_add_integer_from_dt(struct udevice *dev, struct acpi_dp *dp,
+				const char *prop)
+{
+	int ret;
+	u32 val = 0;
+
+	ret = dev_read_u32(dev, prop, &val);
+	acpi_dp_add_integer(dp, prop, val);
+
+	return ret;
+}
+
+int acpi_dp_add_string_from_dt(struct udevice *dev, struct acpi_dp *dp,
+			       const char *prop)
+{
+	const char *val;
+
+	val = dev_read_string(dev, prop);
+	if (!val)
+		return -ENOENT;
+	acpi_dp_add_string(dp, prop, val);
+
+	return 0;
 }

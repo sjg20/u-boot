@@ -13,6 +13,7 @@
 #define acpi_ops_ptr(_ptr)
 #endif
 
+struct acpi_dp;
 struct udevice;
 
 struct acpi_ctx {
@@ -40,5 +41,10 @@ int acpi_fill_ssdt_generator(struct acpi_ctx *ctx);
 int acpi_inject_dsdt_generator(struct acpi_ctx *ctx);
 
 void acpi_dump_items(void);
+
+int acpi_dp_add_integer_from_dt(struct udevice *dev, struct acpi_dp *dp,
+				const char *prop);
+int acpi_dp_add_string_from_dt(struct udevice *dev, struct acpi_dp *dp,
+			       const char *prop);
 
 #endif

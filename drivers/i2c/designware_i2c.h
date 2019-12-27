@@ -136,16 +136,6 @@ struct i2c_regs {
 #define IC_STATUS_TFNF		0x0002
 #define IC_STATUS_ACT		0x0001
 
-/* Speed Selection */
-enum i2c_speed_mode {
-	IC_SPEED_MODE_STANDARD,
-	IC_SPEED_MODE_FAST,
-	IC_SPEED_MODE_FAST_PLUS,
-	IC_SPEED_MODE_HIGH,
-
-	IC_SPEED_MODE_COUNT,
-};
-
 #define I2C_HIGH_SPEED		3400000
 #define I2C_FAST_PLUS_SPEED	1000000
 #define I2C_FAST_SPEED		400000

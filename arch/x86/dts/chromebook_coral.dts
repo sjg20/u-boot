@@ -260,7 +260,7 @@
 			i2s {
 				compatible = "fred";
 			};
-			codec {
+			maxim-codec {
 				compatible = "maxim,max98357a";
 				acpi-ddn = "Maxim Integrated 98357A Amplifier";
 				sdmode-gpios = <&gpio_n GPIO_76 GPIO_ACTIVE_HIGH>;
@@ -307,6 +307,7 @@
 				acpi-ddn = "Intel WiFi";
 				acpi-name = "WIFI";
 				gpe-wake = <GPE0_DW3_00>;
+				interrupts-extended = <&acpi_gpe 0x3c 0>;
 			};
 		};
 
@@ -318,6 +319,28 @@
 			i2c-scl-falling-time-ns = <52>;
 			clock-frequency = <100000>;
 			i2c,speeds = <100000 400000 1000000>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			da-codec {
+				reg = <0x1a>;
+				compatible = "dlg,da7219";
+				interrupts-extended = <&acpi_gpe (0x20 + 116) 0>;
+				acpi-ddn = "Dialog Semiconductor DA7219 Audio Codec";
+				dlg,btn-cfg = <50>;
+				dlg,mic-det-thr = <500>;
+				dlg,jack-ins-deb = <20>;
+				dlg,jack-det-rate = "32ms_64ms";
+				dlg,jack-rem-deb = <1>;
+				dlg,a-d-btn-thr = <0xa>;
+				dlg,d-b-btn-thr = <0x16>;
+				dlg,b-c-btn-thr = <0x21>;
+				dlg,c-mic-btn-thr = <0x3e>;
+				dlg,btn-avg = <4>;
+				dlg,adc-1bit-rpt = <1>;
+				dlg,micbias-pulse-lvl = <2600>;
+				dlg,micbias-pulse-time = <0>;
+				dlg,mic-amp-in-sel = "diff";
+			};
 		};
 
 		i2c_1: i2c2@16,1 {
@@ -344,7 +367,7 @@
 				compatible = "google,cr50";
 				u-boot,i2c-offset-len = <0>;
 				ready-gpios = <&gpio_n 28 GPIO_ACTIVE_LOW>;
-				interrupts-extended = <&acpi_gpe 0x3c 0>;
+				interrupts-extended = <&acpi_gpe (0x20 + 0x1c) 0>;
 			};
 		};
 

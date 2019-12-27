@@ -30,6 +30,16 @@ enum dm_i2c_chip_flags {
 	DM_I2C_CHIP_WR_ADDRESS	= 1 << 2, /* Send address for each write byte */
 };
 
+/* Speed Selection */
+enum i2c_speed_mode {
+	IC_SPEED_MODE_STANDARD,
+	IC_SPEED_MODE_FAST,
+	IC_SPEED_MODE_FAST_PLUS,
+	IC_SPEED_MODE_HIGH,
+
+	IC_SPEED_MODE_COUNT,
+};
+
 struct udevice;
 /**
  * struct dm_i2c_chip - information about an i2c chip
