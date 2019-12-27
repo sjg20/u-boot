@@ -1,5 +1,7 @@
 #include <common.h>
 
+#define DEBUG
+
 #if defined(CONFIG_UNIT_TEST)
 #define DEBUG
 #endif

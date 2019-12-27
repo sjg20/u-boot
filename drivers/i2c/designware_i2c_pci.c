@@ -185,11 +185,13 @@ static int dw_i2c_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	acpigen_write_scope(path);
 	for (i = 0; i < size; i++) {
 		ret = dw_i2c_gen_speed_config(dev, speeds[i], &config);
+		printf("%s: ret=%d\n", __func__, ret);
 		if (ret)
 			return log_msg_ret("config", ret);
 		dw_i2c_acpi_write_speed_config(&config);
 	}
 	acpigen_pop_len();
+	printf("%s: done\n", __func__);
 
 	return 0;
 }

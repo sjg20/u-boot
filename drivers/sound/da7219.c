@@ -33,7 +33,6 @@
 #include "chip.h"
 #endif
 
-#define DA7219_ACPI_NAME	"DLG7"
 #define DA7219_ACPI_HID		"DLGS7219"
 
 static int da7219_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
@@ -47,6 +46,8 @@ static int da7219_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	struct irq req_irq;
 	u32 val;
 	int ret;
+
+	printf("\n\nda7219: before %p\n", acpigen_get_current());
 
 	ret = acpi_device_scope(dev, scope, sizeof(scope));
 	if (ret)
@@ -129,7 +130,7 @@ static int da7219_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	acpi_dp_add_integer_from_dt(dev, aad, "dlg,c-mic-btn-thr");
 	acpi_dp_add_integer_from_dt(dev, aad, "dlg,btn-avg");
 	acpi_dp_add_integer_from_dt(dev, aad, "dlg,adc-1bit-rpt");
-	if (dev_read_u32(dev, "dlg,micbias-pulse-lvl", &val)) {
+	if (!dev_read_u32(dev, "dlg,micbias-pulse-lvl", &val)) {
 		acpi_dp_add_integer_from_dt(dev, aad, "dlg,micbias-pulse-lvl");
 		acpi_dp_add_integer_from_dt(dev, aad, "dlg,micbias-pulse-time");
 	}
@@ -148,6 +149,7 @@ static int da7219_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 
 	acpigen_pop_len(); /* Device */
 	acpigen_pop_len(); /* Scope */
+	printf("\n\nda7219: %p\n", acpigen_get_current());
 
 	return 0;
 }
