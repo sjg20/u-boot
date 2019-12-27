@@ -174,7 +174,7 @@ int intel_pinctrl_get_pad(uint pad, struct udevice **devp, uint *offsetp)
 	return 0;
 }
 
-int pinctrl_get_pad_from_gpio(struct gpio_desc *desc)
+int pinctrl_get_pad_from_gpio(const struct gpio_desc *desc)
 {
 	struct udevice *pinctrl;
 	struct intel_pinctrl_priv *priv;
@@ -619,7 +619,7 @@ int pinctrl_config_pads_for_node(struct udevice *dev, ofnode node)
 	return 0;
 }
 
-const char *intel_pinctrl_acpi_path(struct udevice *dev)
+const char *intel_pinctrl_acpi_path(const struct udevice *dev)
 {
 	struct intel_pinctrl_priv *priv = dev_get_priv(dev);
 	const struct pad_community *comm = priv->comm;

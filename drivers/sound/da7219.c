@@ -37,8 +37,6 @@
 
 static int da7219_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 {
-	struct dm_i2c_chip *chip = dev_get_parent_platdata(dev);
-	struct dm_i2c_bus *i2c_bus = dev_get_uclass_priv(dev_get_parent(dev));
 	char scope[ACPI_DEVICE_PATH_MAX];
 	char name[ACPI_DEVICE_NAME_MAX];
 	struct acpi_dp *dsd, *aad;
@@ -81,34 +79,9 @@ static int da7219_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	ret = irq_get_by_index(dev, 0, &req_irq);
 
 	/* Use either Interrupt() or GpioInt() */
-	if (!ret) {
-		struct acpi_irq irq;
-
-		memset(&irq, '\0', sizeof(irq));
-		irq.pin = req_irq.id;
-		irq.mode = ACPI_IRQ_EDGE_TRIGGERED;
-		irq.polarity = ACPI_IRQ_ACTIVE_LOW;
-		irq.shared = ACPI_IRQ_EXCLUSIVE;
-		irq.wake = ACPI_IRQ_NO_WAKE;
-		acpi_device_write_interrupt(&irq);
-	} else {
-		struct acpi_gpio gpio;
-		struct gpio_desc req_gpio;
-
-		ret = gpio_request_by_name(dev, "req-gpios", 0,
-					   &req_gpio, GPIOD_IS_IN);
-		if (ret)
-			return log_msg_ret("irq", ret);
-
-		memset(&gpio, '\0', sizeof(gpio));
-		gpio.type = ACPI_GPIO_TYPE_IO;
-		gpio.pull = ACPI_GPIO_PULL_DEFAULT;
-		gpio.io_restrict = ACPI_GPIO_IO_RESTRICT_OUTPUT;
-		gpio.polarity = ACPI_GPIO_ACTIVE_HIGH;
-		gpio.pin_count = 1;
-		gpio.pins[0] = pinctrl_get_pad_from_gpio(&req_gpio);
-		acpi_device_write_gpio(&gpio);
-	}
+	ret = acpi_device_write_interrupt_or_gpio(dev, "req-gpios");
+	if (ret)
+		return log_msg_ret("irq_gpio", ret);
 	acpigen_write_resourcetemplate_footer();
 
 	/* AAD Child Device Properties */

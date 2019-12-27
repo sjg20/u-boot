@@ -603,18 +603,16 @@ static int cr50_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	acpigen_write_name("_CRS");
 	acpigen_write_resourcetemplate_header();
 	acpi_device_write_i2c(&i2c);
-	if (config->irq_gpio.pin_count)
-		acpi_device_write_gpio(&config->irq_gpio);
-	else
-		acpi_device_write_interrupt(&config->irq);
+	ret = acpi_device_write_interrupt_or_gpio(dev, "ready-gpios");
+	if (ret)
+		return log_msg_ret("irq_gpio", ret);
 
 	acpigen_write_resourcetemplate_footer();
 
 	acpigen_pop_len(); /* Device */
 	acpigen_pop_len(); /* Scope */
 
-	printk(BIOS_INFO, "%s: %s at %s\n", acpi_device_path(dev),
-	       dev->chip_ops->name, dev_path(dev));
+	return 0;
 }
 
 enum {

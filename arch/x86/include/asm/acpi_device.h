@@ -20,6 +20,10 @@
 #include <i2c.h>
 #include <spi.h>
 
+struct irq;
+struct gpio_desc;
+struct udevice;
+
 enum acpi_dp_type {
 	ACPI_DP_TYPE_UNKNOWN,
 	ACPI_DP_TYPE_INTEGER,
@@ -64,7 +68,6 @@ struct acpi_dp {
 #define ACPI_DEVICE_NAME_MAX		5	/* includes nul terminator */
 #define ACPI_DEVICE_PATH_MAX		30
 
-struct udevice;
 int acpi_device_name(const struct udevice *dev, char *name);
 // const char *acpi_device_hid(const struct udevice *dev);
 const char *acpi_device_path(const struct udevice *dev);
@@ -145,7 +148,7 @@ struct acpi_irq {
 		     ACPI_IRQ_SHARED, ACPI_IRQ_WAKE)
 
 /* Write extended Interrupt() descriptor to SSDT AML output */
-void acpi_device_write_interrupt(const struct acpi_irq *irq);
+int acpi_device_write_interrupt(const struct acpi_irq *irq);
 
 /*
  * ACPI Descriptors for GpioIo() and GpioInterrupt()
@@ -496,5 +499,9 @@ int acpi_dp_write(struct acpi_dp *table);
 
 int acpi_device_set_i2c(struct udevice *dev, struct acpi_i2c *i2c,
 			const char *scope);
+
+int acpi_device_write_gpio_desc(const struct gpio_desc *desc);
+int acpi_device_write_interrupt_irq(const struct irq *req_irq);
+int acpi_device_write_interrupt_or_gpio(struct udevice *dev, const char *prop);
 
 #endif

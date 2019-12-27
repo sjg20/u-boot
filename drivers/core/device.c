@@ -796,10 +796,9 @@ int device_find_child_by_name(struct udevice *parent, const char *name,
 int device_first_child_err(struct udevice *parent, struct udevice **devp)
 {
 	struct udevice *dev;
-	int ret;
 
-	device_find_first_child(&dev);
-	if (!*dev)
+	device_find_first_child(parent, &dev);
+	if (!dev)
 		return -ENODEV;
 
 	return device_get_device_tail(dev, 0, devp);
@@ -808,10 +807,9 @@ int device_first_child_err(struct udevice *parent, struct udevice **devp)
 int device_next_child_err(struct udevice **devp)
 {
 	struct udevice *dev = *devp;
-	int ret;
 
 	device_find_next_child(&dev);
-	if (!*dev)
+	if (!dev)
 		return -ENODEV;
 
 	return device_get_device_tail(dev, 0, devp);

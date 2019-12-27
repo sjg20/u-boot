@@ -13,7 +13,9 @@
 
 #include <common.h>
 #include <dm.h>
+#include <irq.h>
 #include <asm/acpigen.h>
+#include <asm-generic/gpio.h>
 #include <asm/intel_pinctrl.h>
 
 /*
@@ -200,17 +202,17 @@ int acpi_device_status(const struct udevice *dev)
 }
 
 /* ACPI 6.1 section 6.4.3.6: Extended Interrupt Descriptor */
-void acpi_device_write_interrupt(const struct acpi_irq *irq)
+int acpi_device_write_interrupt(const struct acpi_irq *irq)
 {
 	void *desc_length;
 	uint8_t flags;
 
 	if (!irq || !irq->pin)
-		return;
+		return -ENOENT;
 
 	/* This is supported by GpioInt() but not Interrupt() */
 	if (irq->polarity == ACPI_IRQ_ACTIVE_BOTH)
-		return;
+		return -EINVAL;
 
 	/* Byte 0: Descriptor Type */
 	acpigen_emit_byte(ACPI_DESCRIPTOR_INTERRUPT);
@@ -246,6 +248,8 @@ void acpi_device_write_interrupt(const struct acpi_irq *irq)
 
 	/* Fill in Descriptor Length (account for len word) */
 	acpi_device_fill_len(desc_length);
+
+	return 0;
 }
 
 /* ACPI 6.1 section 6.4.3.8.1 - GPIO Interrupt or I/O */
@@ -398,6 +402,65 @@ int acpi_device_write_gpio(const struct acpi_gpio *gpio)
 	/* Fill in GPIO Descriptor Length (account for len word) */
 	acpi_device_fill_len(desc_length);
 	printf("%s: %d\n", __func__, __LINE__);
+
+	return 0;
+}
+
+int acpi_device_write_gpio_desc(const struct gpio_desc *desc)
+{
+	struct acpi_gpio gpio;
+	int ret;
+
+	memset(&gpio, '\0', sizeof(gpio));
+	gpio.type = ACPI_GPIO_TYPE_IO;
+	gpio.pull = ACPI_GPIO_PULL_DEFAULT;
+	gpio.io_restrict = ACPI_GPIO_IO_RESTRICT_OUTPUT;
+	gpio.polarity = ACPI_GPIO_ACTIVE_HIGH;
+	gpio.pin_count = 1;
+	gpio.pins[0] = pinctrl_get_pad_from_gpio(desc);
+	ret = acpi_device_write_gpio(&gpio);
+	if (ret)
+		return log_msg_ret("gpio", ret);
+
+	return 0;
+}
+
+int acpi_device_write_interrupt_irq(const struct irq *req_irq)
+{
+	struct acpi_irq irq;
+	int ret;
+
+	memset(&irq, '\0', sizeof(irq));
+	irq.pin = req_irq->id;
+	irq.mode = ACPI_IRQ_EDGE_TRIGGERED;
+	irq.polarity = ACPI_IRQ_ACTIVE_LOW;
+	irq.shared = ACPI_IRQ_EXCLUSIVE;
+	irq.wake = ACPI_IRQ_NO_WAKE;
+	ret = acpi_device_write_interrupt(&irq);
+	if (ret)
+		return log_msg_ret("irq", ret);
+
+	return 0;
+}
+
+int acpi_device_write_interrupt_or_gpio(struct udevice *dev, const char *prop)
+{
+	struct irq req_irq;
+	int ret;
+
+	ret = irq_get_by_index(dev, 0, &req_irq);
+	if (!ret) {
+		ret = acpi_device_write_interrupt_irq(&req_irq);
+		if (ret)
+			return log_msg_ret("irq", ret);
+	} else {
+		struct gpio_desc req_gpio;
+
+		ret = gpio_request_by_name(dev, prop, 0, &req_gpio,
+					   GPIOD_IS_IN);
+		if (ret)
+			return log_msg_ret("gpio", ret);
+	}
 
 	return 0;
 }
@@ -644,7 +707,7 @@ static void acpi_dp_write_array(const struct acpi_dp *array)
 
 	acpigen_pop_len();
 }
-
+/*
 static void acpi_dp_free(struct acpi_dp *dp)
 {
 	while (dp) {
@@ -665,7 +728,7 @@ static void acpi_dp_free(struct acpi_dp *dp)
 		dp = p;
 	}
 }
-
+*/
 int acpi_dp_write(struct acpi_dp *table)
 {
 	struct acpi_dp *dp, *prop;
