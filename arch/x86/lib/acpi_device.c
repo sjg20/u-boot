@@ -498,6 +498,7 @@ void acpi_device_write_i2c(const struct acpi_i2c *i2c)
 	 *   [15:1]: 0 => Reserved
 	 *      [0]: 0 => 7bit, 1 => 10bit
 	 */
+	printf("i2c->mode_10bit %d\n", i2c->mode_10bit);
 	acpigen_emit_word(i2c->mode_10bit);
 
 	/* Byte 9: Type Specific Revision ID */
@@ -1005,19 +1006,36 @@ struct acpi_dp *acpi_dp_add_gpio(struct acpi_dp *dp, const char *name,
 	return gpio;
 }
 
-int acpi_device_set_i2c(struct udevice *dev, struct acpi_i2c *i2c,
+int acpi_device_set_i2c(const struct udevice *dev, struct acpi_i2c *i2c,
 			const char *scope)
 {
 	struct udevice *bus = dev_get_parent(dev);
 	struct dm_i2c_bus *i2c_bus = dev_get_uclass_priv(bus);
 	struct dm_i2c_chip *chip = dev_get_parent_platdata(dev);
 
-	memset(&i2c, '\0', sizeof(i2c));
+	memset(i2c, '\0', sizeof(i2c));
 	i2c->address = chip->chip_addr;
 	i2c->mode_10bit = 0;
 	i2c->speed = i2c_bus->speed_hz > 100000 ? I2C_SPEED_FAST :
 		IC_SPEED_MODE_STANDARD;
 	i2c->resource = scope;
+
+	return 0;
+}
+
+int acpi_device_write_i2c_dev(const struct udevice *dev)
+{
+	char scope[ACPI_DEVICE_PATH_MAX];
+	struct acpi_i2c i2c;
+	int ret;
+
+	ret = acpi_device_scope(dev, scope, sizeof(scope));
+	if (ret)
+		return log_msg_ret("scope", ret);
+	ret = acpi_device_set_i2c(dev, &i2c, scope);
+	if (ret)
+		return log_msg_ret("set", ret);
+	acpi_device_write_i2c(&i2c);
 
 	return 0;
 }

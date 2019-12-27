@@ -571,7 +571,6 @@ static int cr50_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 {
 	char scope[ACPI_DEVICE_PATH_MAX];
 	char name[ACPI_DEVICE_NAME_MAX];
-	struct acpi_i2c i2c;
 	const char *hid;
 	int ret;
 
@@ -581,10 +580,6 @@ static int cr50_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	ret = acpi_device_name(dev, name);
 	if (ret)
 		return log_msg_ret("name", ret);
-
-	ret = acpi_device_set_i2c(dev, &i2c, scope);
-	if (ret)
-		return log_msg_ret("i2c", ret);
 
 	hid = dev_read_string(dev, "acpi-hid");
 	if (!hid)
@@ -602,7 +597,9 @@ static int cr50_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	/* Resources */
 	acpigen_write_name("_CRS");
 	acpigen_write_resourcetemplate_header();
-	acpi_device_write_i2c(&i2c);
+	ret = acpi_device_write_i2c_dev(dev);
+	if (ret)
+		return log_msg_ret("i2c", ret);
 	ret = acpi_device_write_interrupt_or_gpio(dev, "ready-gpios");
 	if (ret)
 		return log_msg_ret("irq_gpio", ret);

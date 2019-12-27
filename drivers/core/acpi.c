@@ -42,7 +42,8 @@ static char *ordering[] = {
 	"maxim-codec",
 	"wifi",
 	"da-codec",
-	"pci_mmc",
+	"tpm@50",
+// 	"pci_mmc",
 	NULL,
 };
 
@@ -200,7 +201,7 @@ int _acpi_fill_ssdt_generator(struct udevice *parent, struct acpi_ctx *ctx)
 		if (ret)
 			return ret;
 	}
-	device_foreach_child_probe(dev, parent) {
+	device_foreach_child_ofdata_to_platdata(dev, parent) {
 		ret = _acpi_fill_ssdt_generator(dev, ctx);
 		if (ret)
 			return ret;
@@ -240,7 +241,7 @@ int _acpi_inject_dsdt_generator(struct udevice *parent, struct acpi_ctx *ctx)
 		if (ret)
 			return ret;
 	}
-	device_foreach_child_probe(dev, parent) {
+	device_foreach_child_ofdata_to_platdata(dev, parent) {
 		ret = _acpi_inject_dsdt_generator(dev, ctx);
 		if (ret)
 			return ret;

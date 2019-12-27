@@ -601,6 +601,9 @@ int device_first_child_err(struct udevice *parent, struct udevice **devp);
  */
 int device_next_child_err(struct udevice **devp);
 
+int device_first_child_ofdata_err(struct udevice *parent, struct udevice **devp);
+int device_next_child_ofdata_err(struct udevice **devp);
+
 /**
  * device_has_children() - check if a device has any children
  *
@@ -743,6 +746,20 @@ static inline bool device_is_on_pci_bus(const struct udevice *dev)
 #define device_foreach_child_probe(pos, parent)	\
 	for (int _ret = device_first_child_err(parent, &dev); !_ret; \
 	     _ret = device_next_child_err(&dev))
+
+/**
+ * device_foreach_child_ofdata_to_platdata() - iterate through children
+ *
+ * This creates a for() loop which works through the available children of
+ * a device in order from start to end. Device ofdata is read by calling
+ * device_ofdata_to_platdata() on each one. The devices are not probed.
+ *
+ * @pos: struct udevice * for the current device
+ * @parent: parent device to scan
+ */
+#define device_foreach_child_ofdata_to_platdata(pos, parent)	\
+	for (int _ret = device_first_child_ofdata_err(parent, &dev); !_ret; \
+	     _ret = device_next_child_ofdata_err(&dev))
 
 /**
  * dm_scan_fdt_dev() - Bind child device in a the device tree
