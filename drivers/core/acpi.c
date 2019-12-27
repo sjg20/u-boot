@@ -41,6 +41,7 @@ static char *ordering[] = {
 	"sdmmc@1b,0",
 	"maxim-codec",
 	"wifi",
+	"da-codec",
 	"pci_mmc",
 	NULL,
 };
