@@ -494,4 +494,7 @@ size_t acpi_dp_add_property_list(struct acpi_dp *dp,
 /* Write Device Property hierarchy and clean up resources */
 int acpi_dp_write(struct acpi_dp *table);
 
+int acpi_device_set_i2c(struct udevice *dev, struct acpi_i2c *i2c,
+			const char *scope);
+
 #endif

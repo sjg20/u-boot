@@ -368,6 +368,8 @@
 				u-boot,i2c-offset-len = <0>;
 				ready-gpios = <&gpio_n 28 GPIO_ACTIVE_LOW>;
 				interrupts-extended = <&acpi_gpe (0x20 + 0x1c) 0>;
+				acpi-hid = "GOOG0005";
+				acpi-ddn = "I2C TPM";
 			};
 		};
 

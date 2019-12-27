@@ -69,12 +69,9 @@ static int da7219_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	acpigen_write_name_integer("_S0W", 4);
 	acpigen_write_sta(acpi_device_status(dev));
 
-	memset(&i2c, '\0', sizeof(i2c));
-	i2c.address = chip->chip_addr,
-	i2c.mode_10bit = 0;
-	i2c.speed = i2c_bus->speed_hz > 100000 ? I2C_SPEED_FAST :
-		IC_SPEED_MODE_STANDARD;
-	i2c.resource = scope;
+	ret = acpi_device_set_i2c(dev, &i2c, scope);
+	if (ret)
+		return log_msg_ret("i2c", ret);
 
 	/* Resources */
 	acpigen_write_name("_CRS");

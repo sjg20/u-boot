@@ -941,3 +941,20 @@ struct acpi_dp *acpi_dp_add_gpio(struct acpi_dp *dp, const char *name,
 
 	return gpio;
 }
+
+int acpi_device_set_i2c(struct udevice *dev, struct acpi_i2c *i2c,
+			const char *scope)
+{
+	struct udevice *bus = dev_get_parent(dev);
+	struct dm_i2c_bus *i2c_bus = dev_get_uclass_priv(bus);
+	struct dm_i2c_chip *chip = dev_get_parent_platdata(dev);
+
+	memset(&i2c, '\0', sizeof(i2c));
+	i2c->address = chip->chip_addr;
+	i2c->mode_10bit = 0;
+	i2c->speed = i2c_bus->speed_hz > 100000 ? I2C_SPEED_FAST :
+		IC_SPEED_MODE_STANDARD;
+	i2c->resource = scope;
+
+	return 0;
+}
