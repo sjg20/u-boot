@@ -391,9 +391,9 @@
 				acpi,desc = "ELAN Touchscreen";
 				interrupts-extended = <&acpi_gpe GPIO_21_IRQ 0>;
 				acpi,probed;
-				reset-gpio = <&gpio_n GPIO_36 GPIO_ACTIVE_HIGH>;
+				reset-gpios = <&gpio_n GPIO_36 GPIO_ACTIVE_HIGH>;
 				reset-delay-ms = <20>;
-				enable-gpio = <&gpio_n GPIO_152 GPIO_ACTIVE_HIGH>;
+				enable-gpios = <&gpio_n GPIO_152 GPIO_ACTIVE_HIGH>;
 				enable-delay-ms = <1>;
 				has-power-resource;
 			};
@@ -405,9 +405,9 @@
 				acpi,desc = "Raydium Touchscreen";
 				interrupts-extended = <&acpi_gpe GPIO_21_IRQ 0>;
 				acpi,probed;
-				reset-gpio = <&gpio_n GPIO_36 GPIO_ACTIVE_HIGH>;
+				reset-gpios = <&gpio_n GPIO_36 GPIO_ACTIVE_HIGH>;
 				reset-delay-ms = <1>;
-				enable-gpio = <&gpio_n GPIO_152 GPIO_ACTIVE_HIGH>;
+				enable-gpios = <&gpio_n GPIO_152 GPIO_ACTIVE_HIGH>;
 				enable-delay-ms = <50>;
 				has-power-resource;
 			};

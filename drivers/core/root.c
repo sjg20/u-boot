@@ -393,7 +393,7 @@ int dm_init_and_scan(bool pre_reloc_only)
 
 static int root_acpi_get_name(const struct udevice *dev, char *out_name)
 {
-	return acpi_return_name(out_name, "\\.SB");
+	return acpi_return_name(out_name, "\\_SB");
 }
 
 struct acpi_ops root_acpi_ops = {

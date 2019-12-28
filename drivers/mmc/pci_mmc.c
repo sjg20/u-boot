@@ -97,21 +97,15 @@ static int pci_mmc_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 
 	/* Write GpioInt() as default (if set) or custom from devicetree */
 	acpigen_write_resourcetemplate_header();
-	printf("%s: %d\n", __func__, __LINE__);
 	acpi_device_write_gpio(&gpio);
-	printf("%s: %d\n", __func__, __LINE__);
 	acpigen_write_resourcetemplate_footer();
-	printf("%s: %d\n", __func__, __LINE__);
 
 	/* Bind the cd-gpio name to the GpioInt() resource */
 	dp = acpi_dp_new_table("_DSD");
-	printf("%s: %d\n", __func__, __LINE__);
 	if (!dp)
 		return -ENOMEM;
 	acpi_dp_add_gpio(dp, "cd-gpio", path, 0, 0, 1);
-	printf("%s: %d\n", __func__, __LINE__);
 	ret = acpi_dp_write(dp);
-	printf("%s: %d\n", __func__, __LINE__);
 	if (ret)
 		return log_msg_ret("cd", ret);
 

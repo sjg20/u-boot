@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <acpi.h>
 #include <dm.h>
 #include <errno.h>
 #include <i2c.h>
@@ -14,6 +15,8 @@
 #if CONFIG_IS_ENABLED(DM_GPIO)
 #include <asm/gpio.h>
 #endif
+#include <asm/acpi_device.h>
+#include "acpi_i2c.h"
 
 #define I2C_MAX_OFFSET_LEN	4
 
@@ -728,7 +731,18 @@ UCLASS_DRIVER(i2c_generic) = {
 	.name		= "i2c_generic",
 };
 
+static const struct udevice_id generic_chip_i2c_ids[] = {
+	{ .compatible = "i2c-chip" },
+	{ }
+};
+
 U_BOOT_DRIVER(i2c_generic_chip_drv) = {
 	.name		= "i2c_generic_chip_drv",
 	.id		= UCLASS_I2C_GENERIC,
+	.of_match 	= generic_chip_i2c_ids,
+#if CONFIG_IS_ENABLED(ACPI)
+	.ofdata_to_platdata	= acpi_i2c_ofdata_to_platdata,
+	.priv_auto_alloc_size	= sizeof(struct acpi_i2c_priv),
+#endif
+	acpi_ops_ptr(&acpi_i2c_ops)
 };

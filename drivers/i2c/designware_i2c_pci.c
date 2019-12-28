@@ -159,16 +159,16 @@ static int dw_i2c_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	int size, i;
 	int ret;
 
+	/* If no device-tree node, ignore this since we assume it isn't used */
+	if (!dev_of_valid(dev))
+		return 0;
 	path = acpi_device_path(dev);
 	if (!path)
 		return log_msg_ret("path", -ENOENT);
 
-	/* If no device-tree node, ignore this since we assume it isn't used */
-	if (!dev_of_valid(dev))
-		return 0;
-	ret = device_probe(dev);
-	if (ret)
-		return log_msg_ret("probe", ret);
+// 	ret = device_probe(dev);
+// 	if (ret)
+// 		return log_msg_ret("probe", ret);
 
 	size = dev_read_size(dev, "i2c,speeds");
 	if (size < 0)
@@ -182,6 +182,7 @@ static int dw_i2c_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 		return log_msg_ret("read", -E2BIG);
 
 	debug("Doing %d speeds\n", size);
+	printf("path='%s'\n", path);
 	acpigen_write_scope(path);
 	for (i = 0; i < size; i++) {
 		ret = dw_i2c_gen_speed_config(dev, speeds[i], &config);

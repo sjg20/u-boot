@@ -68,6 +68,10 @@ int acpi_device_name(const struct udevice *dev, char *name)
 	if (!dev)
 		return -ENOENT;
 
+	ret = acpi_get_name(dev, name);
+	if (!ret)
+		return 0;
+
 	/* Walk up the tree to find if any parent can identify this device */
 	for (pdev = dev; pdev; pdev = dev_get_parent(pdev)) {
 		ret = soc_acpi_name(pdev, name);

@@ -188,7 +188,6 @@ static int dw_i2c_calc_timing(struct dw_i2c *priv, enum i2c_speed_mode mode,
 	sda_hold_time_ns = priv && priv->sda_hold_time_ns ?
 		 priv->sda_hold_time_ns : DEFAULT_SDA_HOLD_TIME;
 	config->sda_hold = calc_counts(ic_clk, sda_hold_time_ns);
-	printf("here\n");
 
 	debug("dw_i2c: hcnt = %d lcnt = %d sda hold = %d\n", hcnt, lcnt,
 	      config->sda_hold);
@@ -321,7 +320,8 @@ int dw_i2c_gen_speed_config(struct udevice *dev, int speed_hz,
 	}
 
 	ret = calc_bus_speed(priv, speed_hz, rate, config);
-	printf("%s: ret=%d\n", __func__, ret);
+	if (ret)
+		printf("%s: ret=%d\n", __func__, ret);
 	if (ret)
 		return log_msg_ret("calc_bus_speed", ret);
 
@@ -730,20 +730,13 @@ static int designware_i2c_probe_chip(struct udevice *bus, uint chip_addr,
 int designware_i2c_ofdata_to_platdata(struct udevice *bus)
 {
 	struct dw_i2c *priv = dev_get_priv(bus);
+	int ret;
 
 	if (!priv->regs)
 		priv->regs = (struct i2c_regs *)devfdt_get_addr_ptr(bus);
 	dev_read_u32(bus, "i2c-scl-rising-time-ns", &priv->scl_rise_time_ns);
 	dev_read_u32(bus, "i2c-scl-falling-time-ns", &priv->scl_fall_time_ns);
 	dev_read_u32(bus, "i2c-sda-hold-time-ns", &priv->sda_hold_time_ns);
-
-	return 0;
-}
-
-int designware_i2c_probe(struct udevice *bus)
-{
-	struct dw_i2c *priv = dev_get_priv(bus);
-	int ret;
 
 	ret = reset_get_bulk(bus, &priv->resets);
 	if (ret)
@@ -763,6 +756,13 @@ int designware_i2c_probe(struct udevice *bus)
 		return ret;
 	}
 #endif
+
+	return 0;
+}
+
+int designware_i2c_probe(struct udevice *bus)
+{
+	struct dw_i2c *priv = dev_get_priv(bus);
 
 	return __dw_i2c_init(priv->regs, 0, 0);
 }

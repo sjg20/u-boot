@@ -43,6 +43,8 @@ static char *ordering[] = {
 	"wifi",
 	"da-codec",
 	"tpm@50",
+	"elan-touchscreen@a",
+	"raydium-touchscreen@27",
 // 	"pci_mmc",
 	NULL,
 };

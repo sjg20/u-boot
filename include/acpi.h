@@ -30,15 +30,18 @@ struct acpi_ops {
 
 #define device_get_acpi_ops(dev)	(dev->driver->acpi_ops)
 
-int acpi_return_name(char *out_name, const char *name);
-
-int acpi_align(struct acpi_ctx *ctx);
-
 int acpi_dev_write_tables(struct acpi_ctx *ctx);
+
+int acpi_get_name(const struct udevice *dev, char *out_name);
 
 int acpi_fill_ssdt_generator(struct acpi_ctx *ctx);
 
 int acpi_inject_dsdt_generator(struct acpi_ctx *ctx);
+
+
+int acpi_return_name(char *out_name, const char *name);
+
+int acpi_align(struct acpi_ctx *ctx);
 
 void acpi_dump_items(void);
 
