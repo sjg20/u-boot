@@ -18,7 +18,9 @@
 // #include <stdint.h>
 // #include <spi-generic.h>
 #include <i2c.h>
+#include <irq.h>
 #include <spi.h>
+#include <asm-generic/gpio.h>
 
 struct irq;
 struct gpio_desc;
@@ -504,5 +506,57 @@ int acpi_device_write_gpio_desc(const struct gpio_desc *desc);
 int acpi_device_write_interrupt_irq(const struct irq *req_irq);
 int acpi_device_write_interrupt_or_gpio(struct udevice *dev, const char *prop);
 int acpi_device_write_i2c_dev(const struct udevice *dev);
+
+/**
+ * struct acpi_i2c_priv - Information read from device tree
+ *
+ * @disable_gpio_export_in_crs: Don't export GPIOs in the CRS
+ * @reset_gpio: GPIO used to reset the device
+ * @enable_gpio: GPIO used to enable the device
+ * @stop_gpio: GPIO used to stop the device
+ * @irq_gpio: GPIO used for interrupt (if @irq is not used)
+ * @irq: IRQ used for interrupt (if @irq_gpio is not used)
+ * @hid: _HID value for device (required)
+ * @cid: _CID value for device
+ * @uid: _UID value for device
+ * @desc: _DDN value for device
+ * @name: ACPI name
+ * @wake: Wake event, e.g. GPE0_DW1_15; 0 if none
+ * @property_count: Number of other DSD properties (currently always 0)
+ * @probed: true set set 'linux,probed' property
+ * @compat_string: Device tree compatible string to report through ACPI
+ * @has_power_resource: true if this device has a power resource
+ */
+struct acpi_i2c_priv {
+	bool disable_gpio_export_in_crs;
+	struct gpio_desc reset_gpio;
+	struct gpio_desc enable_gpio;
+	struct gpio_desc irq_gpio;
+	struct gpio_desc stop_gpio;
+	struct irq irq;
+	const char *hid;
+	const char *cid;
+	u32 uid;
+	const char *desc;
+	char name[ACPI_DEVICE_NAME_MAX];
+	u32 wake;
+	u32 property_count;
+	bool probed;
+	const char *compat_string;
+	bool has_power_resource;
+	u32 reset_delay_ms;
+	u32 reset_off_delay_ms;
+	u32 enable_delay_ms;
+	u32 enable_off_delay_ms;
+	u32 stop_delay_ms;
+	u32 stop_off_delay_ms;
+
+};
+
+extern struct acpi_ops i2c_acpi_ops;
+
+int acpi_i2c_ofdata_to_platdata(struct udevice *dev);
+void acpi_device_from_gpio_desc(const struct gpio_desc *desc,
+				struct acpi_gpio *gpio);
 
 #endif

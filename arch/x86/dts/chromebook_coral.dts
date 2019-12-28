@@ -377,11 +377,40 @@
 		i2c_3: i2c2@16,3 {
 			compatible = "intel,apl-i2c";
 			reg = <0x0200b110 0 0 0 0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <76>;
 			i2c-scl-falling-time-ns = <164>;
 			clock-frequency = <400000>;
 			i2c,speeds = <100000 400000>;
+			elan-touchscreen@a {
+				compatible = "i2c-chip";
+				reg = <0xa>;
+				acpi,hid = "ELAN0001";
+				acpi,desc = "ELAN Touchscreen";
+				interrupts-extended = <&acpi_gpe GPIO_21_IRQ 0>;
+				acpi,probed;
+				reset-gpio = <&gpio_n GPIO_36 GPIO_ACTIVE_HIGH>;
+				reset-delay-ms = <20>;
+				enable-gpio = <&gpio_n GPIO_152 GPIO_ACTIVE_HIGH>;
+				enable-delay-ms = <1>;
+				has-power-resource;
+			};
+
+			raydium-touchscreen@27 {
+				compatible = "i2c-chip";
+				reg = <0x27>;
+				acpi,hid = "RAYD0001";
+				acpi,desc = "Raydium Touchscreen";
+				interrupts-extended = <&acpi_gpe GPIO_21_IRQ 0>;
+				acpi,probed;
+				reset-gpio = <&gpio_n GPIO_36 GPIO_ACTIVE_HIGH>;
+				reset-delay-ms = <1>;
+				enable-gpio = <&gpio_n GPIO_152 GPIO_ACTIVE_HIGH>;
+				enable-delay-ms = <50>;
+				has-power-resource;
+			};
 		};
 
 		i2c_4: i2c2@17,0 {

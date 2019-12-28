@@ -12,6 +12,7 @@
  */
 
 #include <common.h>
+#include <acpi.h>
 #include <dm.h>
 #include <irq.h>
 #include <asm/acpigen.h>
@@ -384,26 +385,35 @@ int acpi_device_write_gpio(const struct acpi_gpio *gpio)
 
 		acpigen_emit_word(acpi_pin);
 	}
-	printf("%s: %d\n", __func__, __LINE__);
 
 	/* Fill in Resource Source Name Offset */
 	acpi_device_fill_from_len(resource_offset, start);
-	printf("%s: %d\n", __func__, __LINE__);
 
 	/* Resource Source Name String */
 	acpigen_emit_string(gpio->resource ? :
 			    pinctrl ? intel_pinctrl_acpi_path(pinctrl) : NULL);
-	printf("%s: %d\n", __func__, __LINE__);
 
 	/* Fill in Vendor Data Offset */
 	acpi_device_fill_from_len(vendor_data_offset, start);
-	printf("%s: %d\n", __func__, __LINE__);
 
 	/* Fill in GPIO Descriptor Length (account for len word) */
 	acpi_device_fill_len(desc_length);
-	printf("%s: %d\n", __func__, __LINE__);
 
 	return 0;
+}
+
+void acpi_device_from_gpio_desc(const struct gpio_desc *desc,
+			       struct acpi_gpio *gpio)
+{
+	memset(gpio, '\0', sizeof(gpio));
+	if (desc) {
+		gpio->type = ACPI_GPIO_TYPE_IO;
+		gpio->pull = ACPI_GPIO_PULL_DEFAULT;
+		gpio->io_restrict = ACPI_GPIO_IO_RESTRICT_OUTPUT;
+		gpio->polarity = ACPI_GPIO_ACTIVE_HIGH;
+		gpio->pin_count = 1;
+		gpio->pins[0] = pinctrl_get_pad_from_gpio(desc);
+	}
 }
 
 int acpi_device_write_gpio_desc(const struct gpio_desc *desc)
@@ -458,6 +468,9 @@ int acpi_device_write_interrupt_or_gpio(struct udevice *dev, const char *prop)
 
 		ret = gpio_request_by_name(dev, prop, 0, &req_gpio,
 					   GPIOD_IS_IN);
+		if (ret)
+			return log_msg_ret("no gpio", ret);
+		ret = acpi_device_write_gpio_desc(&req_gpio);
 		if (ret)
 			return log_msg_ret("gpio", ret);
 	}

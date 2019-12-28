@@ -56,7 +56,6 @@ static int acpi_add_item(struct udevice *dev, enum gen_type_t type, void *start)
 		printf("Too many items\n");
 		return log_msg_ret("mem", -ENOSPC);
 	}
-	printf("%s: line=%d, item_count=%d\n", __func__, __LINE__, item_count);
 
 	item = &acpi_item[item_count];
 	item->dev = dev;
@@ -64,14 +63,10 @@ static int acpi_add_item(struct udevice *dev, enum gen_type_t type, void *start)
 	item->size = end - start;
 	if (!item->size)
 		return 0;
-	printf("%s: line=%d, size=%x\n", __func__, __LINE__, item->size);
 	item->buf = malloc(item->size);
-	printf("%s: line=%d\n", __func__, __LINE__);
 	if (!item->buf)
 		return log_msg_ret("mem", -ENOMEM);
-	printf("%s: line=%d\n", __func__, __LINE__);
 	memcpy(item->buf, start, item->size);
-	printf("%s: line=%d\n", __func__, __LINE__);
 	item_count++;
 	printf("* %s: Added type %d, %p, size %x\n", dev->name, type, start,
 	       item->size);
@@ -147,6 +142,17 @@ int acpi_align(struct acpi_ctx *ctx)
 	ctx->current = ALIGN(ctx->current, 16);
 
 	return 0;
+}
+
+int acpi_get_name(const struct udevice *dev, char *out_name)
+{
+	struct acpi_ops *aops;
+
+	aops = device_get_acpi_ops(dev);
+	if (aops && aops->get_name)
+		return aops->get_name(dev, out_name);
+
+	return -ENOSYS;
 }
 
 int _acpi_dev_write_tables(struct udevice *parent, struct acpi_ctx *ctx)
