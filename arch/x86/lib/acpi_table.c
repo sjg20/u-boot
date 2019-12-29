@@ -1041,24 +1041,27 @@ ulong write_acpi_tables(ulong start)
 	}
 	current = ALIGN(current, 16);
 
-	/* Pack GNVS into the ACPI table area */
-	for (i = 0; i < dsdt->length; i++) {
-		u32 *gnvs = (u32 *)((u32)dsdt + i);
-		if (*gnvs == ACPI_GNVS_ADDR) {
-			debug("Fix up global NVS in DSDT to 0x%08x\n", current);
-			*gnvs = current;
-			break;
+	if (!IS_ENABLED(CONFIG_ACPI_GNVS_EXTERNAL)) {
+		/* Pack GNVS into the ACPI table area */
+		for (i = 0; i < dsdt->length; i++) {
+			u32 *gnvs = (u32 *)((u32)dsdt + i);
+			if (*gnvs == ACPI_GNVS_ADDR) {
+				debug("Fix up global NVS in DSDT to 0x%08x\n",
+				      current);
+				*gnvs = current;
+				break;
+			}
 		}
+
+		/* Update DSDT checksum since we patched the GNVS address */
+		dsdt->checksum = 0;
+		dsdt->checksum = table_compute_checksum((void *)dsdt, dsdt->length);
+
+		/* Fill in platform-specific global NVS variables */
+		acpi_create_gnvs((struct acpi_global_nvs *)current);
+		current += sizeof(struct acpi_global_nvs);
+		current = ALIGN(current, 16);
 	}
-
-	/* Update DSDT checksum since we patched the GNVS address */
-	dsdt->checksum = 0;
-	dsdt->checksum = table_compute_checksum((void *)dsdt, dsdt->length);
-
-	/* Fill in platform-specific global NVS variables */
-	acpi_create_gnvs((struct acpi_global_nvs *)current);
-	current += sizeof(struct acpi_global_nvs);
-	current = ALIGN(current, 16);
 
 	debug("ACPI:    * FADT\n");
 	fadt = (struct acpi_fadt *)current;
