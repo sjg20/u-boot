@@ -548,7 +548,6 @@ struct acpi_i2c_priv {
 	u32 enable_off_delay_ms;
 	u32 stop_delay_ms;
 	u32 stop_off_delay_ms;
-
 };
 
 extern struct acpi_ops i2c_acpi_ops;
