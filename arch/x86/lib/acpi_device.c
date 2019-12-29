@@ -18,6 +18,7 @@
 #include <asm/acpigen.h>
 #include <asm-generic/gpio.h>
 #include <asm/intel_pinctrl.h>
+#include <dt-bindings/interrupt-controller/irq.h>
 
 /*
 #include <string.h>
@@ -444,8 +445,11 @@ int acpi_device_write_interrupt_irq(const struct irq *req_irq)
 
 	memset(&irq, '\0', sizeof(irq));
 	irq.pin = req_irq->id;
-	irq.mode = ACPI_IRQ_EDGE_TRIGGERED;
-	irq.polarity = ACPI_IRQ_ACTIVE_LOW;
+	irq.mode = req_irq->flags & IRQ_TYPE_EDGE_BOTH ?
+		ACPI_IRQ_EDGE_TRIGGERED : ACPI_IRQ_LEVEL_TRIGGERED;
+	irq.polarity = req_irq->flags &
+		 (IRQ_TYPE_EDGE_FALLING | IRQ_TYPE_LEVEL_LOW) ?
+		 ACPI_IRQ_ACTIVE_LOW : ACPI_IRQ_ACTIVE_HIGH;
 	irq.shared = ACPI_IRQ_EXCLUSIVE;
 	irq.wake = ACPI_IRQ_NO_WAKE;
 	ret = acpi_device_write_interrupt(&irq);
@@ -513,7 +517,6 @@ void acpi_device_write_i2c(const struct acpi_i2c *i2c)
 	 *   [15:1]: 0 => Reserved
 	 *      [0]: 0 => 7bit, 1 => 10bit
 	 */
-	printf("i2c->mode_10bit %d\n", i2c->mode_10bit);
 	acpigen_emit_word(i2c->mode_10bit);
 
 	/* Byte 9: Type Specific Revision ID */

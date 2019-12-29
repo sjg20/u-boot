@@ -56,6 +56,7 @@ static int acpi_gpe_ofdata_to_platdata(struct udevice *dev)
 static int acpi_gpe_of_xlate(struct irq *irq, struct ofnode_phandle_args *args)
 {
 	irq->id = args->args[0];
+	irq->flags = args->args[1];
 
 	return 0;
 }

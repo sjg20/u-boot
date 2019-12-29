@@ -26,10 +26,12 @@ enum irq_dev_t {
  *
  * @dev: IRQ device that handles this irq
  * @id: ID to identify this irq with the device
+ * @flags: Flags associated with this interrupt (IRQ_TYPE_...)
  */
 struct irq {
 	struct udevice *dev;
 	ulong id;
+	ulong flags;
 };
 
 /**

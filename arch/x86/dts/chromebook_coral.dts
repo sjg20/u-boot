@@ -16,6 +16,7 @@
 #endif
 
 #include <dt-bindings/clock/intel-clock.h>
+#include <dt-bindings/interrupt-controller/irq.h>
 #include <asm/intel_pinctrl_defs.h>
 #include <asm/arch-apollolake/cpu.h>
 #include <asm/arch-apollolake/gpe.h>
@@ -325,7 +326,8 @@
 			da-codec {
 				reg = <0x1a>;
 				compatible = "dlg,da7219";
-				interrupts-extended = <&acpi_gpe (0x20 + 116) 0>;
+				interrupts-extended = <&acpi_gpe (0x20 + 116)
+					IRQ_TYPE_LEVEL_LOW>;
 				acpi-name = "DLG7";
 				acpi-ddn = "Dialog Semiconductor DA7219 Audio Codec";
 				dlg,btn-cfg = <50>;
@@ -368,7 +370,8 @@
 				compatible = "google,cr50";
 				u-boot,i2c-offset-len = <0>;
 				ready-gpios = <&gpio_n 28 GPIO_ACTIVE_LOW>;
-				interrupts-extended = <&acpi_gpe (0x20 + 0x1c) 0>;
+				interrupts-extended = <&acpi_gpe (0x20 + 0x1c)
+					 IRQ_TYPE_EDGE_FALLING>;
 				acpi-hid = "GOOG0005";
 				acpi-ddn = "I2C TPM";
 				acpi-name = "TPMI";
@@ -390,7 +393,8 @@
 				reg = <0x10>;
 				acpi,hid = "ELAN0001";
 				acpi,desc = "ELAN Touchscreen";
-				interrupts-extended = <&acpi_gpe GPIO_21_IRQ 0>;
+				interrupts-extended = <&acpi_gpe GPIO_21_IRQ
+					IRQ_TYPE_EDGE_FALLING>;
 				acpi,probed;
 				reset-gpios = <&gpio_n GPIO_36 GPIO_ACTIVE_HIGH>;
 				reset-delay-ms = <20>;
@@ -404,7 +408,8 @@
 				reg = <0x39>;
 				acpi,hid = "RAYD0001";
 				acpi,desc = "Raydium Touchscreen";
-				interrupts-extended = <&acpi_gpe GPIO_21_IRQ 0>;
+				interrupts-extended = <&acpi_gpe GPIO_21_IRQ
+					IRQ_TYPE_EDGE_FALLING>;
 				acpi,probed;
 				reset-gpios = <&gpio_n GPIO_36 GPIO_ACTIVE_HIGH>;
 				reset-delay-ms = <1>;
@@ -430,7 +435,8 @@
 				reg = <0x15>;
 				acpi,hid = "ELAN0000";
 				acpi,desc = "ELAN Touchpad";
-				interrupts-extended = <&acpi_gpe GPIO_18_IRQ 0>;
+				interrupts-extended = <&acpi_gpe GPIO_18_IRQ
+					 IRQ_TYPE_EDGE_FALLING>;
 				acpi,wake = <GPE0_DW1_15>;
 				acpi,probed;
 			};
@@ -440,7 +446,8 @@
 				acpi,hid = "PNP0C50";
 				acpi,cid = "PNP0C50";
 				acpi,desc = "Synaptics Touchpad";
-				interrupts-extended = <&acpi_gpe GPIO_18_IRQ 0>;
+				interrupts-extended = <&acpi_gpe GPIO_18_IRQ
+					 IRQ_TYPE_EDGE_FALLING>;
 				acpi,wake = <GPE0_DW1_15>;
 				acpi,probed;
 				acpi,hid-desc-reg-offset = <0x20>;
@@ -463,7 +470,8 @@
 				acpi,hid = "WCOM50C1";
 				acpi,cid = "PNP0C50";
 				acpi,desc = "WCOM Digitizer";
-				interrupts-extended = <&acpi_gpe GPIO_13_IRQ 0>;
+				interrupts-extended = <&acpi_gpe GPIO_13_IRQ
+					IRQ_TYPE_LEVEL_LOW>;
 				acpi,hid-desc-reg-offset = <0x1>;
 			};
 		};
