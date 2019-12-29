@@ -901,6 +901,18 @@ bool device_has_active_children(struct udevice *dev)
 	return false;
 }
 
+bool device_is_ancestor(struct udevice *child, struct udevice *ancestor)
+{
+	struct udevice *dev;
+
+	for (dev = child; dev; dev = dev_get_parent(dev)) {
+		if (dev == ancestor)
+			return true;
+	}
+
+	return false;
+}
+
 bool device_is_last_sibling(struct udevice *dev)
 {
 	struct udevice *parent = dev->parent;
