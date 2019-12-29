@@ -106,13 +106,13 @@ int apl_p2sb_ofdata_to_platdata(struct udevice *dev)
 		if (plat->bdf < 0)
 			return log_msg_ret("Cannot get p2sb PCI address",
 					   plat->bdf);
+		upriv->mmio_base = plat->mmio_base;
 	}
 #else
 	plat->mmio_base = plat->dtplat.early_regs[0];
 	plat->bdf = pci_ofplat_get_devfn(plat->dtplat.reg[0]);
-#endif
 	upriv->mmio_base = plat->mmio_base;
-	debug("p2sb: mmio_base=%x\n", (uint)plat->mmio_base);
+#endif
 
 	return 0;
 }
@@ -123,11 +123,13 @@ static int apl_p2sb_probe(struct udevice *dev)
 		return apl_p2sb_early_init(dev);
 	else {
 		struct p2sb_platdata *plat = dev_get_platdata(dev);
+		struct p2sb_uc_priv *upriv = dev_get_uclass_priv(dev);
 
 		plat->mmio_base = dev_read_addr_pci(dev);
 		/* Don't set BDF since it should not be used */
 		if (!plat->mmio_base || plat->mmio_base == FDT_ADDR_T_NONE)
 			return -EINVAL;
+		upriv->mmio_base = plat->mmio_base;
 
 		if (spl_phase() == PHASE_SPL)
 			return apl_p2sb_spl_init(dev);
