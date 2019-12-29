@@ -19,6 +19,7 @@
 #include <asm-generic/gpio.h>
 #include <asm/intel_pinctrl.h>
 #include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/interrupt-controller/x86-irq.h>
 
 /*
 #include <string.h>
@@ -194,8 +195,8 @@ const char *acpi_device_path_join(const struct udevice *dev, const char *name)
 
 int acpi_device_status(const struct udevice *dev)
 {
-	if (!device_active(dev))
-		return ACPI_STATUS_DEVICE_ALL_OFF;
+// 	if (!device_active(dev))
+// 		return ACPI_STATUS_DEVICE_ALL_OFF;
 	/*
 	 * TODO(sjg@chromium.org): Support hidden devices?
 	 * if (dev->hidden)
@@ -450,8 +451,10 @@ int acpi_device_write_interrupt_irq(const struct irq *req_irq)
 	irq.polarity = req_irq->flags &
 		 (IRQ_TYPE_EDGE_FALLING | IRQ_TYPE_LEVEL_LOW) ?
 		 ACPI_IRQ_ACTIVE_LOW : ACPI_IRQ_ACTIVE_HIGH;
-	irq.shared = ACPI_IRQ_EXCLUSIVE;
-	irq.wake = ACPI_IRQ_NO_WAKE;
+	irq.shared = req_irq->flags & X86_IRQ_TYPE_SHARED ?
+		ACPI_IRQ_SHARED : ACPI_IRQ_EXCLUSIVE;
+	irq.wake = req_irq->flags & X86_IRQ_TYPE_WAKE ? ACPI_IRQ_WAKE :
+		ACPI_IRQ_NO_WAKE;
 	ret = acpi_device_write_interrupt(&irq);
 	if (ret)
 		return log_msg_ret("irq", ret);

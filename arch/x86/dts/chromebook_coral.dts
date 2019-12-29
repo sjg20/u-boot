@@ -17,6 +17,7 @@
 
 #include <dt-bindings/clock/intel-clock.h>
 #include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/interrupt-controller/x86-irq.h>
 #include <asm/intel_pinctrl_defs.h>
 #include <asm/arch-apollolake/cpu.h>
 #include <asm/arch-apollolake/gpe.h>
@@ -326,8 +327,8 @@
 			da-codec {
 				reg = <0x1a>;
 				compatible = "dlg,da7219";
-				interrupts-extended = <&acpi_gpe (0x20 + 116)
-					IRQ_TYPE_LEVEL_LOW>;
+				interrupts-extended = <&acpi_gpe GPIO_116_IRQ
+					(IRQ_TYPE_LEVEL_LOW | X86_IRQ_TYPE_SHARED)>;
 				acpi-name = "DLG7";
 				acpi-ddn = "Dialog Semiconductor DA7219 Audio Codec";
 				dlg,btn-cfg = <50>;
@@ -370,7 +371,7 @@
 				compatible = "google,cr50";
 				u-boot,i2c-offset-len = <0>;
 				ready-gpios = <&gpio_n 28 GPIO_ACTIVE_LOW>;
-				interrupts-extended = <&acpi_gpe (0x20 + 0x1c)
+				interrupts-extended = <&acpi_gpe GPIO_28_IRQ
 					 IRQ_TYPE_EDGE_FALLING>;
 				acpi-hid = "GOOG0005";
 				acpi-ddn = "I2C TPM";
@@ -471,7 +472,7 @@
 				acpi,cid = "PNP0C50";
 				acpi,desc = "WCOM Digitizer";
 				interrupts-extended = <&acpi_gpe GPIO_13_IRQ
-					IRQ_TYPE_LEVEL_LOW>;
+					(IRQ_TYPE_LEVEL_LOW | X86_IRQ_TYPE_SHARED)>;
 				acpi,hid-desc-reg-offset = <0x1>;
 			};
 		};
