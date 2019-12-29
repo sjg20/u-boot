@@ -384,9 +384,9 @@
 			i2c-scl-falling-time-ns = <164>;
 			clock-frequency = <400000>;
 			i2c,speeds = <100000 400000>;
-			elan-touchscreen@a {
+			elan-touchscreen@10 {
 				compatible = "i2c-chip";
-				reg = <0xa>;
+				reg = <0x10>;
 				acpi,hid = "ELAN0001";
 				acpi,desc = "ELAN Touchscreen";
 				interrupts-extended = <&acpi_gpe GPIO_21_IRQ 0>;
@@ -395,12 +395,12 @@
 				reset-delay-ms = <20>;
 				enable-gpios = <&gpio_n GPIO_152 GPIO_ACTIVE_HIGH>;
 				enable-delay-ms = <1>;
-				has-power-resource;
+				acpi,has-power-resource;
 			};
 
-			raydium-touchscreen@27 {
+			raydium-touchscreen@39 {
 				compatible = "i2c-chip";
-				reg = <0x27>;
+				reg = <0x39>;
 				acpi,hid = "RAYD0001";
 				acpi,desc = "Raydium Touchscreen";
 				interrupts-extended = <&acpi_gpe GPIO_21_IRQ 0>;
@@ -409,7 +409,7 @@
 				reset-delay-ms = <1>;
 				enable-gpios = <&gpio_n GPIO_152 GPIO_ACTIVE_HIGH>;
 				enable-delay-ms = <50>;
-				has-power-resource;
+				acpi,has-power-resource;
 			};
 		};
 

@@ -402,12 +402,16 @@ static int acpigen_soc_set_gpio_val(unsigned int gpio_num, uint32_t val)
 	uint offset;
 	int ret;
 
+	printf("%s: gpio_num=%x\n", __func__, gpio_num);
 	ret = intel_pinctrl_get_pad(gpio_num, &dev, &offset);
 	if (ret)
 		return ret;
 	addr = intel_pinctrl_get_config_reg_addr(dev, offset);
+	printf("%s: dev=%s, offset=%x, addr=%x\n", __func__, dev->name, offset,
+	       addr);
 
 	acpigen_soc_get_dw0_in_local5(addr);
+	printf("%s: dev=%s, val=%x\n", __func__, dev->name, val);
 
 	if (val) {
 		/* Or (Local5, PAD_CFG0_TX_STATE, Local5) */

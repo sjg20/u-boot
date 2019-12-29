@@ -42,21 +42,25 @@ static int acpi_i2c_write_gpio(struct gpio_desc *gpio, int *curindex)
 
 int acpi_i2c_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 {
+	int reset_gpio_index = -1, enable_gpio_index = -1, irq_gpio_index = -1;
 	struct acpi_i2c_priv *priv = dev_get_priv(dev);
 	char scope[ACPI_DEVICE_PATH_MAX];
+	char name[ACPI_DEVICE_NAME_MAX];
 	struct acpi_dp *dsd = NULL;
 	int curindex = 0;
-	int reset_gpio_index = -1, enable_gpio_index = -1, irq_gpio_index = -1;
 	int ret;
 
 	printf("%s: start %s\n", __func__, dev->name);
+	ret = acpi_device_name(dev, name);
+	if (ret)
+		return log_msg_ret("name", ret);
 	ret = acpi_device_scope(dev, scope, sizeof(scope));
 	if (ret)
 		return log_msg_ret("scope", ret);
 
 	/* Device */
 	acpigen_write_scope(scope);
-	acpigen_write_device(priv->name);
+	acpigen_write_device(name);
 	acpigen_write_name_string("_HID", priv->hid);
 	if (priv->cid)
 		acpigen_write_name_string("_CID", priv->cid);
@@ -137,6 +141,9 @@ int acpi_i2c_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 		acpi_device_from_gpio_desc(&priv->reset_gpio, &reset_gpio);
 		acpi_device_from_gpio_desc(&priv->enable_gpio, &enable_gpio);
 		acpi_device_from_gpio_desc(&priv->stop_gpio, &stop_gpio);
+		printf("reset %x\n", reset_gpio.pins[0]);
+		printf("enable %x\n", enable_gpio.pins[0]);
+		printf("stop %x\n", stop_gpio.pins[0]);
 		const struct acpi_power_res_params power_res_params = {
 			&reset_gpio,
 			priv->reset_delay_ms,
@@ -160,7 +167,6 @@ int acpi_i2c_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 int acpi_i2c_ofdata_to_platdata(struct udevice *dev)
 {
 	struct acpi_i2c_priv *priv = dev_get_priv(dev);
-	int ret;
 
 	gpio_request_by_name(dev, "reset-gpios", 0, &priv->reset_gpio,
 			     GPIOD_IS_OUT);
@@ -176,9 +182,6 @@ int acpi_i2c_ofdata_to_platdata(struct udevice *dev)
 	priv->cid = dev_read_string(dev, "acpi,cid");
 	dev_read_u32(dev, "acpi,uid", &priv->uid);
 	priv->desc = dev_read_string(dev, "acpi,desc");
-	ret = acpi_device_name(dev, priv->name);
-	if (ret)
-		return log_msg_ret("name", ret);
 	dev_read_u32(dev, "acpi,wake", &priv->wake);
 	priv->probed = dev_read_bool(dev, "acpi,probed");
 	priv->compat_string = dev_read_string(dev, "acpi,compatible");
@@ -191,12 +194,11 @@ int acpi_i2c_ofdata_to_platdata(struct udevice *dev)
 static int acpi_i2c_get_name(const struct udevice *dev, char *out_name)
 {
 	struct dm_i2c_chip *chip = dev_get_parent_platdata(dev);
-	struct acpi_i2c_priv *priv = dev_get_priv(dev);
 
-	if (priv->name)
-		return acpi_return_name(out_name, priv->name);
+	printf("%s 1: dev='%s'\n", __func__, dev->name);
 
 	snprintf(out_name, ACPI_DEVICE_NAME_MAX, "D%03X", chip->chip_addr);
+	printf("%s 3: dev='%s', name=%s\n", __func__, dev->name, out_name);
 
 	return 0;
 }

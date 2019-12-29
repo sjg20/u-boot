@@ -520,7 +520,6 @@ int acpi_device_write_i2c_dev(const struct udevice *dev);
  * @cid: _CID value for device
  * @uid: _UID value for device
  * @desc: _DDN value for device
- * @name: ACPI name
  * @wake: Wake event, e.g. GPE0_DW1_15; 0 if none
  * @property_count: Number of other DSD properties (currently always 0)
  * @probed: true set set 'linux,probed' property
@@ -538,7 +537,6 @@ struct acpi_i2c_priv {
 	const char *cid;
 	u32 uid;
 	const char *desc;
-	char name[ACPI_DEVICE_NAME_MAX];
 	u32 wake;
 	u32 property_count;
 	bool probed;

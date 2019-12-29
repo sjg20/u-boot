@@ -65,10 +65,10 @@ int acpi_device_name(const struct udevice *dev, char *name)
 	const struct udevice *pdev;
 	int ret;
 
-	if (!dev)
-		return -ENOENT;
+	printf("%s: 1 dev='%s'\n", __func__, dev->name);
 
 	ret = acpi_get_name(dev, name);
+	printf("%s: 2 ret=%d\n", __func__, ret);
 	if (!ret)
 		return 0;
 
@@ -409,8 +409,8 @@ int acpi_device_write_gpio(const struct acpi_gpio *gpio)
 void acpi_device_from_gpio_desc(const struct gpio_desc *desc,
 			       struct acpi_gpio *gpio)
 {
-	memset(gpio, '\0', sizeof(gpio));
-	if (desc) {
+	memset(gpio, '\0', sizeof(*gpio));
+	if (dm_gpio_is_valid(desc)) {
 		gpio->type = ACPI_GPIO_TYPE_IO;
 		gpio->pull = ACPI_GPIO_PULL_DEFAULT;
 		gpio->io_restrict = ACPI_GPIO_IO_RESTRICT_OUTPUT;
