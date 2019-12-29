@@ -1079,18 +1079,18 @@ ulong write_acpi_tables(ulong start)
 		current = ALIGN(current, 16);
 	}
 
-	debug("ACPI:    * MADT\n");
-	madt = (struct acpi_madt *)current;
-	acpi_create_madt(madt);
-	current += madt->header.length;
-	acpi_add_table(rsdp, madt);
-	current = ALIGN(current, 16);
-
 	debug("ACPI:    * MCFG\n");
 	mcfg = (struct acpi_mcfg *)current;
 	acpi_create_mcfg(mcfg);
 	current += mcfg->header.length;
 	acpi_add_table(rsdp, mcfg);
+	current = ALIGN(current, 16);
+
+	debug("ACPI:    * MADT\n");
+	madt = (struct acpi_madt *)current;
+	acpi_create_madt(madt);
+	current += madt->header.length;
+	acpi_add_table(rsdp, madt);
 	current = ALIGN(current, 16);
 
 	debug("ACPI:    * TCPA\n");
@@ -1112,14 +1112,14 @@ ulong write_acpi_tables(ulong start)
 		acpi_add_table(rsdp, csrt);
 		current = ALIGN(current, 16);
 	}
-
+/*
 	debug("ACPI:    * SPCR\n");
 	spcr = (struct acpi_spcr *)current;
 	acpi_create_spcr(spcr);
 	current += spcr->header.length;
 	acpi_add_table(rsdp, spcr);
 	current = ALIGN(current, 16);
-
+*/
 	printf("before current = %x\n", current);
 	ctx.current = current;
 	ctx.rsdp = rsdp;

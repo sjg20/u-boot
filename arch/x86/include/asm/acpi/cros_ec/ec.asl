@@ -554,7 +554,6 @@ Device (EC0)
 #endif
 
 #ifdef EC_ENABLE_KEYBOARD_BACKLIGHT
-wefopij
 	#include "keyboard_backlight.asl"
 #endif
 
