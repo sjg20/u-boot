@@ -1024,10 +1024,8 @@ ulong write_acpi_tables(ulong start)
 	       dsdt->length - sizeof(struct acpi_table_header));
 
 	if (dsdt->length >= sizeof(struct acpi_table_header)) {
-		current += sizeof(struct acpi_table_header);
-
 		acpigen_set_current((char *)current);
-		printf("Injecting DSDT, current=%x\n", current);
+		printf("Injecting DSDT, dsdt=%p, current=%x\n", dsdt, current);
 		acpi_inject_dsdt_generator(NULL);
 		current = (ulong)acpigen_get_current();
 		printf("   - after=%x\n", current);

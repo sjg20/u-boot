@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <spl.h>
 #include <asm/acpi_table.h>
+#include <asm/cpu_common.h>
 #include <asm/lpc_common.h>
 #include <asm/pci.h>
 #include <asm/arch/iomap.h>
@@ -119,7 +120,7 @@ static int apl_acpi_lpc_get_name(const struct udevice *dev, char *out_name)
 struct acpi_ops apl_lpc_acpi_ops = {
 	.get_name	= apl_acpi_lpc_get_name,
 	.write_tables	= intel_southbridge_write_acpi_tables,
-// 	.inject_dsdt_generator = southbridge_inject_dsdt,
+	.inject_dsdt_generator = southbridge_inject_dsdt,
 };
 
 static const struct udevice_id apl_lpc_ids[] = {

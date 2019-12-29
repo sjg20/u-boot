@@ -14,6 +14,7 @@ enum {
 };
 
 struct cpu_info;
+struct acpi_ctx;
 
 /**
  * cpu_common_init() - Set up common CPU init
@@ -161,5 +162,6 @@ uint32_t cpu_get_max_turbo_ratio(void);
 
 void generate_p_state_entries(int core, int cores_per_package);
 void generate_t_state_entries(int core, int cores_per_package);
+int southbridge_inject_dsdt(struct udevice *dev, struct acpi_ctx *ctx);
 
 #endif

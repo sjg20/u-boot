@@ -29,7 +29,7 @@ struct acpi_item {
 static struct acpi_item acpi_item[MAX_ITEMS];
 static int item_count;
 
-static char *ordering[] = {
+static char *ordering_ssdt[] = {
 	"board",
 	"cpu@0",
 	"i2c2@16,0",
@@ -48,7 +48,14 @@ static char *ordering[] = {
 	"elan-touchpad@15",
 	"synaptics-touchpad@2c",
 	"wacom-digitizer@9",
-// 	"pci_mmc",
+
+	NULL,
+};
+
+static char *ordering_dsdt[] = {
+	"board",
+	"lpc",
+
 	NULL,
 };
 
@@ -114,12 +121,13 @@ static int build_type(void *start, enum gen_type_t type)
 	char **strp;
 
 	ptr = start;
-	for (strp = ordering; *strp; strp++) {
+	for (strp = type == TYPE_DSDT ? ordering_dsdt : ordering_ssdt; *strp;
+	     strp++) {
 		struct acpi_item *item;
 
 		item = find_item(*strp);
 		if (!item) {
-			printf("Failed to file item '%s'\n", *strp);
+			printf("Failed to find item '%s'\n", *strp);
 		} else if (item->type == type) {
 			printf("   - add %s\n", item->dev->name);
 			memcpy(ptr, item->buf, item->size);

@@ -7,12 +7,18 @@
 #define _ACPI_GNVS_H_
 
 /*
+ * If using an external GNVS, we don't need to locate it in DSDT, since it
+ * is created by code.
+ */
+#ifndef CONFIG_ACPI_GNVS_EXTERNAL
+/*
  * This file provides two ACPI global NVS macros: ACPI_GNVS_ADDR and
  * ACPI_GNVS_SIZE. They are to be used in platform's global_nvs.asl file
  * to declare the GNVS OperationRegion, as well as write_acpi_tables()
  * for the GNVS address runtime fix up.
  */
 #define ACPI_GNVS_ADDR	0xdeadbeef
+#endif
 #define ACPI_GNVS_SIZE	0x1000
 
 #endif /* _ACPI_GNVS_H_ */

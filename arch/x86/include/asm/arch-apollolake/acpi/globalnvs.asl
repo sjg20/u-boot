@@ -21,7 +21,9 @@
  *
  */
 
-OperationRegion (GNVS, SystemMemory, ACPI_GNVS_ADDR, ACPI_GNVS_SIZE)
+External (NVSA)
+
+OperationRegion (GNVS, SystemMemory, NVSA, ACPI_GNVS_SIZE)
 Field (GNVS, ByteAcc, NoLock, Preserve)
 {
 	/* Miscellaneous */

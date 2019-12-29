@@ -16,6 +16,7 @@
 
 #include <common.h>
 #include <acpi.h>
+#include <bloblist.h>
 #include <cpu.h>
 #include <dm.h>
 #include <asm/acpi_table.h>
@@ -28,6 +29,7 @@
 #include <asm/mpspec.h>
 #include <asm/smm.h>
 #include <asm/turbo.h>
+#include <asm/arch/global_nvs.h>
 #include <asm/arch/iomap.h>
 #include <asm/arch/pm.h>
 #include <asm/arch/systemagent.h>
@@ -257,30 +259,31 @@ __weak int acpi_create_gnvs(struct acpi_global_nvs *gnvs)
 	return 0;
 }
 
-#if 0
-void southbridge_inject_dsdt(struct udevice *dev)
+int southbridge_inject_dsdt(struct udevice *dev, struct acpi_ctx *ctx)
 {
-	struct global_nvs_t *gnvs;
+	struct acpi_global_nvs *gnvs;
+	int ret;
 
-	gnvs = cbmem_find(CBMEM_ID_ACPI_GNVS);
-	if (!gnvs) {
-		gnvs = cbmem_add(CBMEM_ID_ACPI_GNVS, sizeof(*gnvs));
-		if (gnvs)
-			memset(gnvs, 0, sizeof(*gnvs));
-	}
+	ret = bloblist_ensure_size(BLOBLISTT_ACPI_GNVS, sizeof(*gnvs),
+				   (void **)&gnvs);
+	if (ret)
+		return log_msg_ret("bloblist", ret);
+	memset(gnvs, '\0', sizeof(*gnvs));
 
-	if (gnvs) {
-		acpi_create_gnvs(gnvs);
-		/* And tell SMI about it */
-		smm_setup_structures(gnvs, NULL, NULL);
+	acpi_create_gnvs(gnvs);
 
-		/* Add it to DSDT.  */
-		acpigen_write_scope("\\");
-		acpigen_write_name_dword("NVSA", (uintptr_t) gnvs);
-		acpigen_pop_len();
-	}
+	/*
+	 * TODO(sjg@chromum.org): tell SMI about it
+	 * smm_setup_structures(gnvs, NULL, NULL);
+	 */
+
+	/* Add it to DSDT.  */
+	acpigen_write_scope("\\");
+	acpigen_write_name_dword("NVSA", (uintptr_t)gnvs);
+	acpigen_pop_len();
+
+	return 0;
 }
-#endif
 
 static int calculate_power(int tdp, int p1_ratio, int ratio)
 {
@@ -486,10 +489,10 @@ int generate_cpu_entries(struct udevice *dev, struct acpi_ctx *ctx)
 	}
 	/* PPKG is usually used for thermal management
 	   of the first and only package. */
-// 	acpigen_write_processor_package("PPKG", 0, cores_per_package);
+	acpigen_write_processor_package("PPKG", 0, cores_per_package);
 
 	/* Add a method to notify processor nodes */
-// 	acpigen_write_processor_cnot(cores_per_package);
+	acpigen_write_processor_cnot(cores_per_package);
 
 	return 0;
 }
