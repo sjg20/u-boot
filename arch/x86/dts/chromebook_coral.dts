@@ -423,6 +423,25 @@
 			i2c-scl-falling-time-ns = <164>;
 			clock-frequency = <400000>;
 			i2c,speeds = <100000 400000>;
+			elan-touchpad@15 {
+				compatible = "i2c-chip";
+				reg = <0x15>;
+				acpi,hid = "ELAN0000";
+				acpi,desc = "ELAN Touchpad";
+				interrupts-extended = <&acpi_gpe GPIO_18_IRQ>;
+				acpi,wake = <GPE0_DW1_15>;
+				acpi,probed;
+			};
+			synaptics-touchpad@2c {
+				compatible = "i2c-chip";
+				reg = <0x2c>;
+				acpi,hid = "PNP0C50";
+				acpi,desc = "Synaptics Touchpad";
+				interrupts-extended = <&acpi_gpe GPIO_18_IRQ>;
+				acpi,wake = <GPE0_DW1_15>;
+				acpi,probed;
+				acpi,hid-desc-reg-offset = <0x20>;
+			};
 		};
 
 		i2c_5: i2c2@17,1 {
