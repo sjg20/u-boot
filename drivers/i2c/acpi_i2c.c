@@ -50,7 +50,6 @@ int acpi_i2c_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	int curindex = 0;
 	int ret;
 
-	printf("%s: start %s\n", __func__, dev->name);
 	ret = acpi_device_name(dev, name);
 	if (ret)
 		return log_msg_ret("name", ret);
@@ -103,7 +102,6 @@ int acpi_i2c_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	    irq_gpio_index >= 0) {
 		const char *path = acpi_device_path(dev);
 
-		printf("** path='%s\n", path);
 		dsd = acpi_dp_new_table("_DSD");
 		if (priv->compat_string)
 			acpi_dp_add_string(dsd, "compatible",
@@ -141,9 +139,6 @@ int acpi_i2c_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 		acpi_device_from_gpio_desc(&priv->reset_gpio, &reset_gpio);
 		acpi_device_from_gpio_desc(&priv->enable_gpio, &enable_gpio);
 		acpi_device_from_gpio_desc(&priv->stop_gpio, &stop_gpio);
-		printf("reset %x\n", reset_gpio.pins[0]);
-		printf("enable %x\n", enable_gpio.pins[0]);
-		printf("stop %x\n", stop_gpio.pins[0]);
 		const struct acpi_power_res_params power_res_params = {
 			&reset_gpio,
 			priv->reset_delay_ms,
@@ -195,10 +190,7 @@ static int acpi_i2c_get_name(const struct udevice *dev, char *out_name)
 {
 	struct dm_i2c_chip *chip = dev_get_parent_platdata(dev);
 
-	printf("%s 1: dev='%s'\n", __func__, dev->name);
-
 	snprintf(out_name, ACPI_DEVICE_NAME_MAX, "D%03X", chip->chip_addr);
-	printf("%s 3: dev='%s', name=%s\n", __func__, dev->name, out_name);
 
 	return 0;
 }

@@ -86,7 +86,6 @@ int soc_acpi_name(const struct udevice *dev, char *out_name)
 	if (!name && id == UCLASS_PCI) {
 		struct pci_controller *hose = dev_get_uclass_priv(dev);
 
-		printf("hose->acpi_name = %s\n", hose->acpi_name);
 		if (hose->acpi_name)
 			name = hose->acpi_name;
 		else
@@ -139,7 +138,7 @@ int soc_acpi_name(const struct udevice *dev, char *out_name)
 	}
 	if (name != out_name)
 		memcpy(out_name, name, ACPI_DEVICE_NAME_MAX);
-	printf("acpi_name for '%s': %s\n", dev->name, name);
+// 	printf("acpi_name for '%s': %s\n", dev->name, name);
 
 	return 0;
 }

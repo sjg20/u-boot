@@ -200,9 +200,8 @@ int _acpi_fill_ssdt_generator(struct udevice *parent, struct acpi_ctx *ctx)
 	if (aops && aops->fill_ssdt_generator) {
 		void *start = acpigen_get_current();
 
-		debug("- %s %p\n", parent->name, aops->fill_ssdt_generator);
+		printf("\n- %s %p\n", parent->name, aops->fill_ssdt_generator);
 		ret = aops->fill_ssdt_generator(parent, ctx);
-		printf("%s: ret=%d\n", __func__, ret);
 		if (ret)
 			return ret;
 		ret = acpi_add_item(parent, TYPE_SSDT, start);
