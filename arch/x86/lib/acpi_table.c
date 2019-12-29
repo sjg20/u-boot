@@ -468,6 +468,64 @@ static int acpi_create_tcpa(struct acpi_tcpa *tcpa)
 	return 0;
 }
 
+static int get_tpm2_log(void **ptrp, int *sizep)
+{
+	const int tpm2_default_log_len = 0x10000;
+	int size;
+	int ret;
+
+	*sizep = 0;
+	size = tpm2_default_log_len;
+	ret = bloblist_ensure_size_ret(BLOBLISTT_TPM2_TCG_LOG, &size, ptrp);
+	if (ret)
+		return log_msg_ret("blob", ret);
+	*sizep = size;
+
+	return 0;
+}
+
+static int acpi_create_tpm2(struct acpi_tpm2 *tpm2)
+{
+	struct acpi_table_header *header = &tpm2->header;
+	int tpm2_log_len;
+	void *lasa;
+	int ret;
+
+	memset((void *)tpm2, 0, sizeof(struct acpi_tpm2));
+
+	/*
+	 * Some payloads like SeaBIOS depend on log area to use TPM2.
+	 * Get the memory size and address of TPM2 log area or initialize it.
+	 */
+	ret = get_tpm2_log(&lasa, &tpm2_log_len);
+	if (ret)
+		return ret;
+
+	/* Fill out header fields. */
+	acpi_fill_header(header, "TPM2");
+	memcpy(header->aslc_id, ASLC_ID, 4);
+
+	header->length = sizeof(struct acpi_tpm2);
+	header->revision = get_acpi_table_revision(TPM2);
+
+	/* Hard to detect for coreboot. Just set it to 0 */
+	tpm2->platform_class = 0;
+
+	/* Must be set to 0 for FIFO-interface support */
+	tpm2->control_area = 0;
+	tpm2->start_method = 6;
+	memset(tpm2->msp, 0, sizeof(tpm2->msp));
+
+	/* Fill the log area size and start address fields. */
+	tpm2->laml = tpm2_log_len;
+	tpm2->lasa = (uintptr_t)lasa;
+
+	/* Calculate checksum. */
+	header->checksum = acpi_checksum((void *)tpm2, header->length);
+
+	return 0;
+}
+
 __weak u32 acpi_fill_csrt(u32 current)
 {
 	return 0;
@@ -1086,6 +1144,21 @@ ulong write_acpi_tables(ulong start)
 	acpi_add_table(rsdp, mcfg);
 	current = ALIGN(current, 16);
 
+	if (IS_ENABLED(CONFIG_TPM_V2)) {
+		struct acpi_tpm2 *tpm2;
+
+		debug("ACPI:    * TPM2\n");
+		tpm2 = (struct acpi_tpm2 *)current;
+		ret = acpi_create_tpm2(tpm2);
+		if (!ret) {
+			current += tpm2->header.length;
+			current = ALIGN(current, 16);
+			acpi_add_table(rsdp, tpm2);
+		} else {
+			log_warning("TPM2 table creation failed\n");
+		}
+	}
+
 	debug("ACPI:    * MADT\n");
 	madt = (struct acpi_madt *)current;
 	acpi_create_madt(madt);
@@ -1112,14 +1185,16 @@ ulong write_acpi_tables(ulong start)
 		acpi_add_table(rsdp, csrt);
 		current = ALIGN(current, 16);
 	}
-/*
-	debug("ACPI:    * SPCR\n");
-	spcr = (struct acpi_spcr *)current;
-	acpi_create_spcr(spcr);
-	current += spcr->header.length;
-	acpi_add_table(rsdp, spcr);
-	current = ALIGN(current, 16);
-*/
+
+	if (0) {
+		debug("ACPI:    * SPCR\n");
+		spcr = (struct acpi_spcr *)current;
+		acpi_create_spcr(spcr);
+		current += spcr->header.length;
+		acpi_add_table(rsdp, spcr);
+		current = ALIGN(current, 16);
+	}
+
 	printf("before current = %x\n", current);
 	ctx.current = current;
 	ctx.rsdp = rsdp;

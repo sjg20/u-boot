@@ -194,6 +194,9 @@ int bloblist_new(ulong addr, uint size, uint flags)
 	hdr->chksum = 0;
 	gd->bloblist = hdr;
 
+	/* Zero the bloblist area */
+	memset((void *)hdr + hdr->alloced, '\0', size - hdr->alloced);
+
 	return 0;
 }
 
