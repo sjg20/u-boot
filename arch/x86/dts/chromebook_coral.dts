@@ -318,7 +318,7 @@
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <104>;
 			i2c-scl-falling-time-ns = <52>;
-			clock-frequency = <100000>;
+			clock-frequency = <400000>;
 			i2c,speeds = <100000 400000 1000000>;
 			#address-cells = <1>;
 			#size-cells = <0>;

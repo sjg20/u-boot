@@ -65,10 +65,7 @@ int acpi_device_name(const struct udevice *dev, char *name)
 	const struct udevice *pdev;
 	int ret;
 
-	printf("%s: 1 dev='%s'\n", __func__, dev->name);
-
 	ret = acpi_get_name(dev, name);
-	printf("%s: 2 ret=%d\n", __func__, ret);
 	if (!ret)
 		return 0;
 
