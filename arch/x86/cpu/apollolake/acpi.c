@@ -89,6 +89,7 @@ static struct acpi_cstate cstate_map[] = {
 		.power = 10,
 		.resource = {
 			.space_id = ACPI_ADDRESS_SPACE_IO,
+			.bit_width = 8,
 			.addrl = 0x415,
 		},
 	}, {
@@ -97,6 +98,7 @@ static struct acpi_cstate cstate_map[] = {
 		.power = 10,
 		.resource = {
 			.space_id = ACPI_ADDRESS_SPACE_IO,
+			.bit_width = 8,
 			.addrl = 0x419,
 		},
 	},
