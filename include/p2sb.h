@@ -138,6 +138,8 @@ int p2sb_set_port_id(struct udevice *dev, int portid);
  */
 int p2sb_get_port_id(struct udevice *dev);
 
+void *pcr_reg_address(struct udevice *dev, uint offset);
+
 #endif /* !__ACPI__ */
 
 #endif

@@ -264,12 +264,14 @@ int pinctrl_read_pads(struct udevice *dev, ofnode node, const char *prop,
 int pinctrl_count_pads(struct udevice *dev, u32 *pads, int size);
 
 /**
- * intel_pinctrl_get_config_reg_addr() - Get address of the pin config registers
+ * intel_pinctrl_get_config_reg_offset() - Get address of the pin config registers
  *
  * @dev: Pinctrl device
  * @offset: GPIO offset within this device
  * @return register offset within the GPIO p2sb region
  */
+u32 intel_pinctrl_get_config_reg_offset(struct udevice *dev, uint offset);
+
 u32 intel_pinctrl_get_config_reg_addr(struct udevice *dev, uint offset);
 
 /**
