@@ -278,6 +278,7 @@ static int pinctrl_select_state_simple(struct udevice *dev)
 	struct pinctrl_ops *ops;
 	int ret;
 
+	return 0;
 	/*
 	 * For most system, there is only one pincontroller device. But in
 	 * case of multiple pincontroller devices, probe the one with sequence

@@ -671,6 +671,7 @@ int arch_fsp_init_r(void)
 	if (ret)
 		return ret;
 
+	printf("get itss\n");
 	ret = irq_first_device_type(X86_IRQT_ITSS, &itss);
 	if (ret)
 		return log_msg_ret("no itss", ret);
