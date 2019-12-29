@@ -45,6 +45,9 @@ static char *ordering[] = {
 	"tpm@50",
 	"elan-touchscreen@10",
 	"raydium-touchscreen@39",
+	"elan-touchpad@15",
+	"synaptics-touchpad@2c",
+	"wacom-digitizer@9",
 // 	"pci_mmc",
 	NULL,
 };

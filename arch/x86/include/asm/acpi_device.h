@@ -525,6 +525,13 @@ int acpi_device_write_i2c_dev(const struct udevice *dev);
  * @probed: true set set 'linux,probed' property
  * @compat_string: Device tree compatible string to report through ACPI
  * @has_power_resource: true if this device has a power resource
+ * @reset_delay_ms: Delay after de-asserting reset, in ms
+ * @reset_off_delay_ms: Delay after asserting reset (during power off)
+ * @enable_delay_ms: Delay after asserting enable
+ * @enable_off_delay_ms: Delay after de-asserting enable (during power off)
+ * @stop_delay_ms: Delay after de-aserting stop
+ * @stop_off_delay_ms: Delay after asserting stop (during power off)
+ * @hid_desc_reg_offset: HID register offset (for Human Interface Devices)
  */
 struct acpi_i2c_priv {
 	bool disable_gpio_export_in_crs;
@@ -548,6 +555,11 @@ struct acpi_i2c_priv {
 	u32 enable_off_delay_ms;
 	u32 stop_delay_ms;
 	u32 stop_off_delay_ms;
+	u32 hid_desc_reg_offset;
+};
+
+struct dsm_i2c_hid_config {
+	uint8_t hid_desc_reg_offset;
 };
 
 extern struct acpi_ops i2c_acpi_ops;
@@ -555,5 +567,7 @@ extern struct acpi_ops i2c_acpi_ops;
 int acpi_i2c_ofdata_to_platdata(struct udevice *dev);
 void acpi_device_from_gpio_desc(const struct gpio_desc *desc,
 				struct acpi_gpio *gpio);
+
+void acpi_device_write_dsm_i2c_hid(struct dsm_i2c_hid_config *config);
 
 #endif

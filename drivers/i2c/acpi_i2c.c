@@ -152,6 +152,13 @@ int acpi_i2c_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 		};
 		acpi_device_add_power_res(&power_res_params);
 	}
+	if (priv->hid_desc_reg_offset) {
+		struct dsm_i2c_hid_config dsm_config = {
+			.hid_desc_reg_offset = priv->hid_desc_reg_offset,
+		};
+
+		acpi_device_write_dsm_i2c_hid(&dsm_config);
+	}
 
 	acpigen_pop_len(); /* Device */
 	acpigen_pop_len(); /* Scope */
@@ -180,13 +187,17 @@ int acpi_i2c_ofdata_to_platdata(struct udevice *dev)
 	dev_read_u32(dev, "acpi,wake", &priv->wake);
 	priv->probed = dev_read_bool(dev, "acpi,probed");
 	priv->compat_string = dev_read_string(dev, "acpi,compatible");
-	priv->has_power_resource = dev_read_bool(dev, "acpi,has-power-resource");
+	priv->has_power_resource = dev_read_bool(dev,
+						 "acpi,has-power-resource");
+	dev_read_u32(dev, "acpi,hid-desc-reg-offset",
+		     &priv->hid_desc_reg_offset);
 	dev_read_u32(dev, "reset-delay-ms", &priv->reset_delay_ms);
 	dev_read_u32(dev, "reset-off-delay-ms", &priv->reset_off_delay_ms);
 	dev_read_u32(dev, "enable-delay-ms", &priv->enable_delay_ms);
 	dev_read_u32(dev, "enable-off-delay-ms", &priv->enable_off_delay_ms);
 	dev_read_u32(dev, "stop-delay-ms", &priv->stop_delay_ms);
 	dev_read_u32(dev, "stop-off-delay-ms", &priv->stop_off_delay_ms);
+	dev_read_u32(dev, "stop-off-delay-ms", &priv->hid_desc_reg_offset);
 
 	return 0;
 }
@@ -195,8 +206,11 @@ int acpi_i2c_ofdata_to_platdata(struct udevice *dev)
 static int acpi_i2c_get_name(const struct udevice *dev, char *out_name)
 {
 	struct dm_i2c_chip *chip = dev_get_parent_platdata(dev);
+	struct acpi_i2c_priv *priv = dev_get_priv(dev);
 
-	snprintf(out_name, ACPI_DEVICE_NAME_MAX, "D%03X", chip->chip_addr);
+	snprintf(out_name, ACPI_DEVICE_NAME_MAX,
+		 priv->hid_desc_reg_offset ? "H%03X" : "D%03X",
+		 chip->chip_addr);
 
 	return 0;
 }

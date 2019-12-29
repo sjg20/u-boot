@@ -74,6 +74,8 @@ static int pci_mmc_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	struct acpi_dp *dp;
 	int ret;
 
+	if (!dev_of_valid(dev))
+		return 0;
 	gpio_request_by_name(dev, "cd-gpios", 0, &cd_gpio, GPIOD_IS_IN);
 
 	memset(&gpio, '\0', sizeof(gpio));

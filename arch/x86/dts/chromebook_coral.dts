@@ -417,6 +417,8 @@
 		i2c_4: i2c2@17,0 {
 			compatible = "intel,apl-i2c";
 			reg = <0x0200b110 0 0 0 0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
 			clocks = <&clk CLK_I2C>;
 			i2c-sda-hold-time-ns = <350>;
 			i2c-scl-rising-time-ns = <114>;
@@ -428,7 +430,7 @@
 				reg = <0x15>;
 				acpi,hid = "ELAN0000";
 				acpi,desc = "ELAN Touchpad";
-				interrupts-extended = <&acpi_gpe GPIO_18_IRQ>;
+				interrupts-extended = <&acpi_gpe GPIO_18_IRQ 0>;
 				acpi,wake = <GPE0_DW1_15>;
 				acpi,probed;
 			};
@@ -436,8 +438,9 @@
 				compatible = "i2c-chip";
 				reg = <0x2c>;
 				acpi,hid = "PNP0C50";
+				acpi,cid = "PNP0C50";
 				acpi,desc = "Synaptics Touchpad";
-				interrupts-extended = <&acpi_gpe GPIO_18_IRQ>;
+				interrupts-extended = <&acpi_gpe GPIO_18_IRQ 0>;
 				acpi,wake = <GPE0_DW1_15>;
 				acpi,probed;
 				acpi,hid-desc-reg-offset = <0x20>;
@@ -447,11 +450,22 @@
 		i2c_5: i2c2@17,1 {
 			compatible = "intel,apl-i2c";
 			reg = <0x0200b110 0 0 0 0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <76>;
 			i2c-scl-falling-time-ns = <164>;
 			clock-frequency = <400000>;
 			i2c,speeds = <100000 400000 1000000>;
+			wacom-digitizer@9 {
+				compatible = "i2c-chip";
+				reg = <0x9>;
+				acpi,hid = "WCOM50C1";
+				acpi,cid = "PNP0C50";
+				acpi,desc = "WCOM Digitizer";
+				interrupts-extended = <&acpi_gpe GPIO_13_IRQ 0>;
+				acpi,hid-desc-reg-offset = <0x1>;
+			};
 		};
 
 		i2c_6: i2c2@17,2 {
