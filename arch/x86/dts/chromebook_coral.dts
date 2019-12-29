@@ -308,7 +308,7 @@
 			wifi {
 				compatible = "intel,generic-wifi";
 				acpi-ddn = "Intel WiFi";
-				acpi-name = "WIFI";
+				acpi-name = "WF00";
 				gpe-wake = <GPE0_DW3_00>;
 				interrupts-extended = <&acpi_gpe 0x3c 0>;
 			};
@@ -351,6 +351,7 @@
 			compatible = "intel,apl-i2c";
 			reg = <0x0200b110 0 0 0 0>;
 			clocks = <&clk CLK_I2C>;
+			clock-frequency = <400000>;
 			i2c,speeds = <100000 400000 1000000 3400000>;
 			i2c-scl-rising-time-ns = <52>;
 			i2c-scl-falling-time-ns = <52>;

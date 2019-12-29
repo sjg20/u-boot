@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-// #include <variant/ec.h>
+#include "variant_ec.h"
 #include "variant_gpio.h"
 #include <asm/acpi_table.h>
 #include <asm/acpi/global_nvs.h>

@@ -181,11 +181,24 @@ static int dw_i2c_acpi_fill_ssdt(struct udevice *dev, struct acpi_ctx *ctx)
 	if (ret)
 		return log_msg_ret("read", -E2BIG);
 
-	debug("Doing %d speeds\n", size);
-	printf("path='%s'\n", path);
-	acpigen_write_scope(path);
-	for (i = 0; i < size; i++) {
-		ret = dw_i2c_gen_speed_config(dev, speeds[i], &config);
+	if (0) {
+		debug("Doing %d speeds\n", size);
+		printf("path='%s'\n", path);
+		acpigen_write_scope(path);
+		for (i = 0; i < size; i++) {
+			ret = dw_i2c_gen_speed_config(dev, speeds[i], &config);
+			if (ret)
+				printf("%s: ret=%d\n", __func__, ret);
+			if (ret)
+				return log_msg_ret("config", ret);
+			dw_i2c_acpi_write_speed_config(&config);
+		}
+	} else {
+		uint speed;
+
+		speed = dev_read_u32_default(dev, "clock-frequency", 100000);
+		acpigen_write_scope(path);
+		ret = dw_i2c_gen_speed_config(dev, speed, &config);
 		if (ret)
 			printf("%s: ret=%d\n", __func__, ret);
 		if (ret)
