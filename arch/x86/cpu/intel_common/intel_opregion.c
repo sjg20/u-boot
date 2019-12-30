@@ -14,6 +14,7 @@
 
 #include <common.h>
 #include <binman.h>
+#include <bloblist.h>
 #include <dm.h>
 #include <spi_flash.h>
 #include <asm/intel_opregion.h>
@@ -103,6 +104,7 @@ int intel_gma_init_igd_opregion(struct udevice *dev,
 		log_err("GMA: VBT couldn't be found\n");
 		return log_msg_ret("find vbt", ret);
 	}
+	vbt = (struct optionrom_vbt *)vbt_buf;
 
 	memset(opregion, '\0', sizeof(struct igd_opregion));
 
@@ -111,11 +113,24 @@ int intel_gma_init_igd_opregion(struct udevice *dev,
 	memcpy(opregion->header.vbios_version, vbt->coreblock_biosbuild,
 					ARRAY_SIZE(vbt->coreblock_biosbuild));
 	/* Extended VBT support */
+	printf("size=%d\n", vbt->hdr_vbt_size);
 	if (vbt->hdr_vbt_size > sizeof(opregion->vbt.gvd1)) {
-		log_err("GMA: Unable to add Ext VBT to cbmem\n");
-		return -E2BIG;
+		struct optionrom_vbt *ext_vbt;
+
+		ret = bloblist_ensure_size(BLOBLISTT_INTEL_VBT,
+					   vbt->hdr_vbt_size,
+					   (void **)&ext_vbt);
+		if (ret) {
+			log_err("GMA: Unable to add Ext VBT to bloblist\n");
+			return log_msg_ret("blob", ret);
+		}
+
+		memcpy(ext_vbt, vbt, vbt->hdr_vbt_size);
+		opregion->mailbox3.rvda = (uintptr_t)ext_vbt;
+		opregion->mailbox3.rvds = vbt->hdr_vbt_size;
 	} else {
 		/* Raw VBT size which can fit in gvd1 */
+		printf("copy to %p\n", opregion->vbt.gvd1);
 		memcpy(opregion->vbt.gvd1, vbt, vbt->hdr_vbt_size);
 	}
 
