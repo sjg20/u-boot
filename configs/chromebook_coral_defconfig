@@ -23,7 +23,7 @@ CONFIG_BOOTSTAGE_REPORT=y
 CONFIG_SPL_BOOTSTAGE_RECORD_COUNT=10
 CONFIG_BOOTSTAGE_STASH=y
 CONFIG_USE_BOOTARGS=y
-CONFIG_BOOTARGS="console=ttyS2,115200n8 loglevel=9 init=/sbin/init oops=panic panic=-1 root=PARTUUID=35c775e7-3735-d745-93e5-d9e0238f7ed0/PARTNROFF=1 rootwait rw noinitrd noresume noswap"
+CONFIG_BOOTARGS="nr_cpus=1 console=ttyS2,115200n8 loglevel=9 init=/sbin/init oops=panic panic=-1 root=PARTUUID=35c775e7-3735-d745-93e5-d9e0238f7ed0/PARTNROFF=1 rootwait rw noinitrd noresume noswap"
 CONFIG_SYS_CONSOLE_INFO_QUIET=y
 CONFIG_SPL_LOG=y
 CONFIG_LOG_DEFAULT_LEVEL=7
