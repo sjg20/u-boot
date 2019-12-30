@@ -8,9 +8,10 @@
 
 enum fsp_phase {
 	/* Notification code for post PCI enuermation */
-	INIT_PHASE_PCI	= 0x20,
+	INIT_PHASE_PCI		= 0x20,
 	/* Notification code before transferring control to the payload */
-	INIT_PHASE_BOOT	= 0x40
+	INIT_PHASE_BOOT		= 0x40,
+	INIT_PHASE_END_FIRMWARE	= 0xf0,
 };
 
 struct fsp_notify_params {

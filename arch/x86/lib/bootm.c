@@ -39,6 +39,7 @@ void bootm_announce_and_cleanup(void)
 	bootstage_report();
 #endif
 
+
 	/*
 	 * Call remove function of all devices with a removal flag set.
 	 * This may be useful for last-stage operations, like cancelling

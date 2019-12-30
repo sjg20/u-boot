@@ -23,7 +23,7 @@ CONFIG_BOOTSTAGE_REPORT=y
 CONFIG_SPL_BOOTSTAGE_RECORD_COUNT=10
 CONFIG_BOOTSTAGE_STASH=y
 CONFIG_USE_BOOTARGS=y
-CONFIG_BOOTARGS="nr_cpus=1 console=ttyS2,115200n8 loglevel=9 cros_secure console= loglevel=7 init=/sbin/init cros_secure oops=panic panic=-1 root=PARTUUID=35c775e7-3735-d745-93e5-d9e0238f7ed0/PARTNROFF=1 rootwait rw noinitrd vt.global_cursor_default=0 kern_guid=35c775e7-3735-d745-93e5-d9e0238f7ed0 add_efi_memmap boot=local noresume noswap i915.modeset=1 tpm_tis.force=1 tpm_tis.interrupts=0 nmi_watchdog=panic,lapic disablevmx=off"
+CONFIG_BOOTARGS="dyndbg='file drivers/pci/probe.c +p' nr_cpus=1 console=ttyS2,115200n8 loglevel=9 cros_secure console= loglevel=7 init=/sbin/init cros_secure oops=panic panic=-1 root=PARTUUID=35c775e7-3735-d745-93e5-d9e0238f7ed0/PARTNROFF=1 rootwait ro noinitrd vt.global_cursor_default=0 kern_guid=35c775e7-3735-d745-93e5-d9e0238f7ed0 add_efi_memmap boot=local noresume noswap i915.modeset=1 tpm_tis.force=1 tpm_tis.interrupts=0 nmi_watchdog=panic,lapic disablevmx=off"
 CONFIG_SYS_CONSOLE_INFO_QUIET=y
 CONFIG_SPL_LOG=y
 CONFIG_LOG_DEFAULT_LEVEL=7
