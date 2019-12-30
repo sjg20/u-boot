@@ -147,6 +147,36 @@ static int apl_p2sb_probe(struct udevice *dev)
 	return 0;
 }
 
+#if 0
+static void p2sb_set_hide_bit(struct udevice *dev, bool hide)
+{
+	const uint16_t reg = PCH_P2SB_E0 + 1;
+	const uint8_t mask = HIDE_BIT;
+	uint8_t val;
+
+	val = pci_read_config8(P2SB_GET_DEV, reg);
+	val &= ~mask;
+	if (hide)
+		val |= mask;
+	pci_write_config8(P2SB_GET_DEV, reg, val);
+}
+
+static void p2sb_hide(struct udevice *dev))
+{
+	p2sb_set_hide_bit(dev, 1);
+
+	if (pci_read_config16(P2SB_GET_DEV, PCI_VENDOR_ID) !=
+			0xFFFF)
+		die_with_post_code(POST_HW_INIT_FAILURE,
+				   "Unable to hide PCH_DEV_P2SB device !\n");
+}
+#endif
+
+static int apl_p2sb_remove(struct udevice *dev)
+{
+	return 0;
+}
+
 static int p2sb_child_post_bind(struct udevice *dev)
 {
 #if !CONFIG_IS_ENABLED(OF_PLATDATA)
@@ -173,9 +203,11 @@ U_BOOT_DRIVER(apl_p2sb_drv) = {
 	.id		= UCLASS_P2SB,
 	.of_match	= apl_p2sb_ids,
 	.probe		= apl_p2sb_probe,
+	.remove		= apl_p2sb_remove,
 	.ofdata_to_platdata = apl_p2sb_ofdata_to_platdata,
 	.platdata_auto_alloc_size = sizeof(struct p2sb_platdata),
 	.per_child_platdata_auto_alloc_size =
 		sizeof(struct p2sb_child_platdata),
 	.child_post_bind = p2sb_child_post_bind,
+	.flags		= DM_FLAG_OS_PREPARE,
 };

@@ -218,6 +218,31 @@ static int apl_acpi_hb_write_tables(struct udevice *dev, struct acpi_ctx *ctx)
 	return 0;
 }
 
+static int apl_hostbridge_remove(struct udevice *dev)
+{
+	printf("%s: remove\n", __func__);
+
+	/*
+	 * Before hiding P2SB device and dropping privilege level,
+	 * dump CSE status and disable HECI1 interface.
+	 */
+// 	heci_cse_lockdown();
+
+	/* Hide the P2SB device to align with previous behavior. */
+	/* done in p2sb driver */
+// 	p2sb_hide();
+
+	/*
+	 * As per guidelines BIOS is recommended to drop CPU privilege
+	 * level to IA_UNTRUSTED. After that certain device registers
+	 * and MSRs become inaccessible supposedly increasing system
+	 * security.
+	 */
+// 	drop_privilege_all();
+
+	return 0;
+}
+
 static ulong sa_read_reg(struct udevice *dev, int reg)
 {
 	u32 val;
@@ -259,6 +284,8 @@ U_BOOT_DRIVER(apl_hostbridge_drv) = {
 	.of_match	= apl_hostbridge_ids,
 	.ofdata_to_platdata = apl_hostbridge_ofdata_to_platdata,
 	.probe		= apl_hostbridge_probe,
+	.remove		= apl_hostbridge_remove,
 	.platdata_auto_alloc_size = sizeof(struct apl_hostbridge_platdata),
 	acpi_ops_ptr(&apl_hostbridge_acpi_ops)
+	.flags		= DM_FLAG_OS_PREPARE,
 };
