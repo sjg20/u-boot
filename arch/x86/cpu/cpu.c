@@ -218,6 +218,12 @@ int last_stage_init(void)
 	}
 #endif
 
+	/*
+	 * TODO(sjg@chromium.org): Move this to  bootm_announce_and_cleanup()
+	 * once FSP-S at 0x200000 does not overlap with the bzimage at 0x100000.
+	*/
+	board_final_cleanup();
+
 	return 0;
 }
 #endif
