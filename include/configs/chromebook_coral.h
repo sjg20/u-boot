@@ -11,6 +11,7 @@
 #define __CONFIG_H
 
 #define CONFIG_BOOTCOMMAND	\
+	"tpm init; tpm startup TPM2_SU_CLEAR; " \
 	"usb start; ext2load usb 0:1 111000 vmlinuz; " \
 	"echo; echo; echo !!!!!!! warning hard-coded serial; echo; echo; " \
 	"zboot 111000"
