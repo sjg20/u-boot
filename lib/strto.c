@@ -163,3 +163,11 @@ long trailing_strtol(const char *str)
 {
 	return trailing_strtoln(str, NULL);
 }
+
+void str_to_upper(const char *in, char *out, int len)
+{
+	while ((len == -1 || len-- > 0) && *in)
+		*out++ = toupper(*in++);
+	if (len && !*in)
+		*out = '\0';
+}

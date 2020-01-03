@@ -9,22 +9,13 @@
 #include <command.h>
 #include <config.h>
 #include <fat.h>
+#include <vsprintf.h>
 #include <asm/byteorder.h>
 #include <part.h>
 #include <linux/ctype.h>
 #include <div64.h>
 #include <linux/math64.h>
 #include "fat.c"
-
-static void uppercase(char *str, int len)
-{
-	int i;
-
-	for (i = 0; i < len; i++) {
-		*str = toupper(*str);
-		str++;
-	}
-}
 
 static int total_sector;
 static int disk_write(__u32 block, __u32 nr_blocks, void *buf)
@@ -64,7 +55,7 @@ static void set_name(dir_entry *dirent, const char *filename)
 		return;
 
 	strcpy(s_name, filename);
-	uppercase(s_name, len);
+	str_to_upper(s_name, s_name, len);
 
 	period = strchr(s_name, '.');
 	if (period == NULL) {
