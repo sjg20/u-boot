@@ -11,7 +11,10 @@
 #ifndef __UBOOT_SPI_MEM_H
 #define __UBOOT_SPI_MEM_H
 
-struct udevice;
+#include <common.h>
+#include <dm.h>
+#include <errno.h>
+#include <spi.h>
 
 #define SPI_MEM_OP_CMD(__opcode, __buswidth)			\
 	{							\

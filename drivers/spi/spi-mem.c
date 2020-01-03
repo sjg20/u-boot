@@ -11,10 +11,6 @@
 #include <linux/pm_runtime.h>
 #include "internals.h"
 #else
-#include <common.h>
-#include <dm.h>
-#include <errno.h>
-#include <spi.h>
 #include <spi.h>
 #include <spi-mem.h>
 #endif
