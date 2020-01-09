@@ -2,6 +2,8 @@
 /*
  * Copyright (C) 2017 DENX Software Engineering
  * Lukasz Majewski, DENX Software Engineering, lukma@denx.de
+ *
+ * (for Andre: taken from display5/spl.c)
  */
 
 #include <common.h>
@@ -114,19 +116,9 @@ iomux_v3_cfg_t const uart_console_pads[] = {
 	MX6_PAD_CSI0_DAT19__UART5_CTS_B | MUX_PAD_CTRL(UART_PAD_CTRL),
 };
 
-void displ5_set_iomux_uart_spl(void)
+void set_iomux_uart_spl(void)
 {
 	SETUP_IOMUX_PADS(uart_console_pads);
-}
-
-iomux_v3_cfg_t const misc_pads_spl[] = {
-	/* Emergency recovery pin */
-	MX6_PAD_EIM_D29__GPIO3_IO29 | MUX_PAD_CTRL(NO_PAD_CTRL),
-};
-
-void displ5_set_iomux_misc_spl(void)
-{
-	SETUP_IOMUX_PADS(misc_pads_spl);
 }
 
 #ifdef CONFIG_MXC_SPI
@@ -268,15 +260,11 @@ static void spl_dram_init(void)
 #endif
 }
 
-#ifdef CONFIG_SPL_SPI_SUPPORT
-static void displ5_init_ecspi(void)
+static void init_ecspi(void)
 {
 	displ5_set_iomux_ecspi_spl();
 	enable_spi_clk(1, 1);
 }
-#else
-static inline void displ5_init_ecspi(void) { }
-#endif
 
 #ifdef CONFIG_SPL_MMC_SUPPORT
 static struct fsl_esdhc_cfg usdhc_cfg = {
@@ -295,9 +283,18 @@ int board_mmc_init(bd_t *bd)
 }
 #endif
 
-void board_init_f(ulong dummy)
+void board_debug_uart_init(void)
 {
 	ccgr_init();
+	set_iomux_uart_spl();
+
+	/* Turn on the RS232 transceiver */
+	gpio_direction_output(IMX_GPIO_NR(1, 9), 1);
+}
+
+void board_init_f(ulong dummy)
+{
+	board_debug_uart_init();
 
 	arch_cpu_init();
 
@@ -306,42 +303,24 @@ void board_init_f(ulong dummy)
 	/* setup GP timer */
 	timer_init();
 
-	displ5_set_iomux_uart_spl();
-
-	/* Turn on the RS232 transceiver */
-	gpio_direction_output(IMX_GPIO_NR(1, 9), 1);
-
 	/* UART clocks enabled and gd valid - init serial console */
 	preloader_console_init();
 
-	displ5_init_ecspi();
+	if (IS_ENABLED(CONFIG_SPL_SPI_SUPPORT))
+		init_ecspi();
 
 	/* DDR initialization */
 	spl_dram_init();
 
 	/* Clear the BSS. */
-	memset(__bss_start, 0, __bss_end - __bss_start);
-
-	displ5_set_iomux_misc_spl();
+	memset(__bss_start, '\0', __bss_end - __bss_start);
 
 	/* Initialize and reset WDT in SPL */
-	hw_watchdog_init();
-	WATCHDOG_RESET();
+// 	hw_watchdog_init();
+// 	WATCHDOG_RESET();
 
 	/* load/boot image from boot device */
 	board_init_r(NULL, 0);
-}
-
-#define EM_PAD IMX_GPIO_NR(3, 29)
-int board_check_emergency_pad(void)
-{
-	int ret;
-
-	ret = gpio_direction_input(EM_PAD);
-	if (ret)
-		return ret;
-
-	return !gpio_get_value(EM_PAD);
 }
 
 void board_boot_order(u32 *spl_boot_list)
@@ -352,13 +331,7 @@ void board_boot_order(u32 *spl_boot_list)
 	spl_boot_list[2] = BOOT_DEVICE_UART;
 	spl_boot_list[3] = BOOT_DEVICE_NONE;
 
-	/*
-	 * In case of emergency PAD pressed, we always boot
-	 * to proper u-boot and perform recovery tasks there.
-	 */
-	if (board_check_emergency_pad())
-		return;
-
+	/* Example of reading env */
 #ifdef CONFIG_SPL_ENV_SUPPORT
 	/* 'fastboot' */
 	const char *s;
@@ -379,22 +352,6 @@ void reset_cpu(ulong addr) {}
 #ifdef CONFIG_SPL_LOAD_FIT
 int board_fit_config_name_match(const char *name)
 {
-	return 0;
-}
-#endif
-
-#ifdef CONFIG_SPL_OS_BOOT
-/* Return: 1 - boot to U-Boot. 0 - boot OS (falcon mode) */
-int spl_start_uboot(void)
-{
-	/* break into full u-boot on 'c' */
-	if (serial_tstc() && serial_getc() == 'c')
-		return 1;
-
-#ifdef CONFIG_SPL_ENV_SUPPORT
-	if (env_get_yesno("boot_os") != 1)
-		return 1;
-#endif
 	return 0;
 }
 #endif

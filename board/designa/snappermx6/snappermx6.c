@@ -32,6 +32,11 @@ DECLARE_GLOBAL_DATA_PTR;
 	PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm | PAD_CTL_HYS |	\
 	PAD_CTL_ODE | PAD_CTL_SRE_FAST)
 
+void board_debug_uart_init(void)
+{
+	/* Done in SPL */
+}
+
 int dram_init(void)
 {
 	gd->ram_size = SZ_1G;

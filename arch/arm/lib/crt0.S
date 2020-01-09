@@ -109,6 +109,10 @@ ENTRY(_main)
 	mov	r9, r0
 	bl	board_init_f_init_reserve
 
+#ifdef CONFIG_DEBUG_UART
+        /* Earliest point to set up early debug uart */
+        bl      debug_uart_init
+#endif
 #if defined(CONFIG_SPL_EARLY_BSS)
 	SPL_CLEAR_BSS
 #endif

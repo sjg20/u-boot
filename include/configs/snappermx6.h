@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright (C) Stefano Babic <sbabic@denx.de>
+ * Copright 2020 Designa Electronics Ltd
  */
 
 
@@ -10,13 +11,12 @@
 #include "mx6_common.h"
 #include "imx6_spl.h"
 
-#define CONFIG_MX6Q
-
+#if 0
 /* Thermal */
 #define CONFIG_IMX_THERMAL
+#endif
 
 /* Serial */
-#define CONFIG_MXC_UART
 #define CONFIG_MXC_UART_BASE	       UART5_BASE
 
 /* Size of malloc() pool */
@@ -30,11 +30,11 @@
 #define CONFIG_FEC_MXC_PHYADDR		0x00
 
 /* Physical Memory Map */
-#define PHYS_SDRAM                     MMDC0_ARB_BASE_ADDR
+#define PHYS_SDRAM			MMDC0_ARB_BASE_ADDR
+#define CONFIG_SYS_SDRAM_BASE		PHYS_SDRAM
 
-#define CONFIG_SYS_SDRAM_BASE          PHYS_SDRAM
-#define CONFIG_SYS_INIT_RAM_ADDR       IRAM_BASE_ADDR
-#define CONFIG_SYS_INIT_RAM_SIZE       IRAM_SIZE
+#define CONFIG_SYS_INIT_RAM_ADDR	IRAM_BASE_ADDR
+#define CONFIG_SYS_INIT_RAM_SIZE	IRAM_SIZE
 
 #define CONFIG_SYS_INIT_SP_OFFSET \
 	(CONFIG_SYS_INIT_RAM_SIZE - GENERATED_GBL_DATA_SIZE)
@@ -44,9 +44,6 @@
 /* MMC Configs */
 #define CONFIG_SYS_FSL_ESDHC_ADDR	0
 #define CONFIG_SYS_FSL_USDHC_NUM	1
-
-/* Environment organization */
-#define CONFIG_SYS_MMC_ENV_DEV		0
 
 /* Default environment */
 #define CONFIG_EXTRA_ENV_SETTINGS \

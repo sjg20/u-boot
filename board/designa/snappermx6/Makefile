@@ -4,4 +4,8 @@
 #
 # (C) Copyright 2011 Freescale Semiconductor, Inc.
 
-obj-y	:= snappermx6.o
+ifdef CONFIG_SPL_BUILD
+obj-y = spl.o
+else
+obj-y := snappermx6.o
+endif
