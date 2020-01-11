@@ -11,6 +11,7 @@
 #include <malloc.h>
 #include <reset.h>
 #include <spi.h>
+#include <dm/device_compat.h>
 #include <linux/err.h>
 #include <linux/errno.h>
 #include "cadence_qspi.h"

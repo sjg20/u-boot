@@ -7,7 +7,9 @@
 
 #include <cpu_func.h>
 #include <dm.h>
+#include <malloc.h>
 #include <nand.h>
+#include <dm/device_compat.h>
 #include <dm/devres.h>
 #include <linux/bitfield.h>
 #include <linux/dma-direction.h>

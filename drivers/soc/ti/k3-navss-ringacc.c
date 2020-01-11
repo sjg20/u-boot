@@ -11,6 +11,7 @@
 #include <asm/dma-mapping.h>
 #include <asm/bitops.h>
 #include <dm.h>
+#include <dm/device_compat.h>
 #include <dm/devres.h>
 #include <dm/read.h>
 #include <dm/uclass.h>
