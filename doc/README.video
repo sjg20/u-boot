@@ -84,7 +84,7 @@ U-Boot supports the use of antialiased TrueType fonts on some platforms. This
 has been tested in x86, ARMv7 and sandbox.
 
 To enable this, select CONFIG_CONSOLE_TRUETYPE. You can choose between several
-fonts, with CONSOLE_TRUETYPE_NIMBUS being the default.
+fonts, with CONSOLE_TRUETYPE_ROBOTO being the default.
 
 TrueType support requires floating point at present. On ARMv7 platforms you
 need to disable use of the private libgcc. You can do this by disabling

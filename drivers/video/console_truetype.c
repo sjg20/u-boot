@@ -466,14 +466,14 @@ struct font_info {
 	.end = __ttf_ ## _name ## _end, \
 	}
 
-FONT_DECL(nimbus_sans_l_regular);
+FONT_DECL(roboto_regular);
 FONT_DECL(ankacoder_c75_r);
 FONT_DECL(rufscript010);
 FONT_DECL(cantoraone_regular);
 
 static struct font_info font_table[] = {
-#ifdef CONFIG_CONSOLE_TRUETYPE_NIMBUS
-	FONT_ENTRY(nimbus_sans_l_regular),
+#ifdef CONFIG_CONSOLE_TRUETYPE_ROBOTO
+	FONT_ENTRY(roboto_regular),
 #endif
 #ifdef CONFIG_CONSOLE_TRUETYPE_ANKACODER
 	FONT_ENTRY(ankacoder_c75_r),

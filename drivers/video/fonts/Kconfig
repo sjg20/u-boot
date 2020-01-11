@@ -4,19 +4,19 @@
 
 menu "TrueType Fonts"
 
-config CONSOLE_TRUETYPE_NIMBUS
-	bool "Nimbus Sans Regular"
+config CONSOLE_TRUETYPE_ROBOTO
+	bool "Roboto Regular"
 	depends on CONSOLE_TRUETYPE
 	default y
 	help
-	  Nimbus Sans L is a version of Nimbus Sans using Adobe font sources.
-	  It was designed in 1987. A subset of Nimbus Sans L were released
-	  under the GPL. Although the characters are not exactly the same,
-	  Nimbus Sans L has metrics almost identical to Helvetica and Arial.
-	  (From Wikipedia, the free encyclopedia)
-	  From: https://fontlibrary.org/en/font/nimbus-sans-l
-	  License: GNU GPL v3
-	  http://www.gnu.org/copyleft/gpl.html
+	  Roboto was created in 2011 by Christian Robertson at Google, and
+	  received a significant redesign in 2014. It is a sans-serif grotesque,
+	  which is the same classification as Helvetica and Akzidenz-Grotesk.
+	  Roboto is the default font on the Android mobile phone operating
+	  system.
+	  From: https://fontlibrary.org/en/font/roboto
+	  License: Apache 2.0
+	  https://www.apache.org/licenses/LICENSE-2.0
 
 config CONSOLE_TRUETYPE_ANKACODER
 	bool "Anka Coder Narrow"
