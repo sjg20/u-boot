@@ -364,8 +364,8 @@ int _dm_gpio_free(struct udevice *dev, uint offset)
 	uc_priv = dev_get_uclass_priv(dev);
 	if (!uc_priv->name[offset])
 		return -ENXIO;
-	if (gpio_get_ops(dev)->free) {
-		ret = gpio_get_ops(dev)->free(dev, offset);
+	if (gpio_get_ops(dev)->rfree) {
+		ret = gpio_get_ops(dev)->rfree(dev, offset);
 		if (ret)
 			return ret;
 	}
