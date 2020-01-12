@@ -593,7 +593,8 @@ static int device_find_by_ofnode(ofnode node, struct udevice **devp)
 }
 #endif
 
-int device_get_child(struct udevice *parent, int index, struct udevice **devp)
+int device_get_child(const struct udevice *parent, int index,
+		     struct udevice **devp)
 {
 	struct udevice *dev;
 
@@ -605,7 +606,7 @@ int device_get_child(struct udevice *parent, int index, struct udevice **devp)
 	return -ENODEV;
 }
 
-int device_get_child_count(struct udevice *parent)
+int device_get_child_count(const struct udevice *parent)
 {
 	struct udevice *dev;
 	int count = 0;
@@ -616,7 +617,7 @@ int device_get_child_count(struct udevice *parent)
 	return count;
 }
 
-int device_find_child_by_seq(struct udevice *parent, int seq_or_req_seq,
+int device_find_child_by_seq(const struct udevice *parent, int seq_or_req_seq,
 			     bool find_req_seq, struct udevice **devp)
 {
 	struct udevice *dev;
@@ -636,7 +637,7 @@ int device_find_child_by_seq(struct udevice *parent, int seq_or_req_seq,
 	return -ENODEV;
 }
 
-int device_get_child_by_seq(struct udevice *parent, int seq,
+int device_get_child_by_seq(const struct udevice *parent, int seq,
 			    struct udevice **devp)
 {
 	struct udevice *dev;
@@ -654,7 +655,7 @@ int device_get_child_by_seq(struct udevice *parent, int seq,
 	return device_get_device_tail(dev, ret, devp);
 }
 
-int device_find_child_by_of_offset(struct udevice *parent, int of_offset,
+int device_find_child_by_of_offset(const struct udevice *parent, int of_offset,
 				   struct udevice **devp)
 {
 	struct udevice *dev;
@@ -671,7 +672,7 @@ int device_find_child_by_of_offset(struct udevice *parent, int of_offset,
 	return -ENODEV;
 }
 
-int device_get_child_by_of_offset(struct udevice *parent, int node,
+int device_get_child_by_of_offset(const struct udevice *parent, int node,
 				  struct udevice **devp)
 {
 	struct udevice *dev;
@@ -714,7 +715,7 @@ int device_get_global_by_ofnode(ofnode ofnode, struct udevice **devp)
 	return device_get_device_tail(dev, dev ? 0 : -ENOENT, devp);
 }
 
-int device_find_first_child(struct udevice *parent, struct udevice **devp)
+int device_find_first_child(const struct udevice *parent, struct udevice **devp)
 {
 	if (list_empty(&parent->child_head)) {
 		*devp = NULL;
@@ -741,7 +742,7 @@ int device_find_next_child(struct udevice **devp)
 	return 0;
 }
 
-int device_find_first_inactive_child(struct udevice *parent,
+int device_find_first_inactive_child(const struct udevice *parent,
 				     enum uclass_id uclass_id,
 				     struct udevice **devp)
 {
@@ -759,7 +760,7 @@ int device_find_first_inactive_child(struct udevice *parent,
 	return -ENODEV;
 }
 
-int device_find_first_child_by_uclass(struct udevice *parent,
+int device_find_first_child_by_uclass(const struct udevice *parent,
 				      enum uclass_id uclass_id,
 				      struct udevice **devp)
 {
@@ -776,7 +777,7 @@ int device_find_first_child_by_uclass(struct udevice *parent,
 	return -ENODEV;
 }
 
-int device_find_child_by_name(struct udevice *parent, const char *name,
+int device_find_child_by_name(const struct udevice *parent, const char *name,
 			      struct udevice **devp)
 {
 	struct udevice *dev;
@@ -829,7 +830,7 @@ bool device_has_children(const struct udevice *dev)
 	return !list_empty(&dev->child_head);
 }
 
-bool device_has_active_children(struct udevice *dev)
+bool device_has_active_children(const struct udevice *dev)
 {
 	struct udevice *child;
 
@@ -843,7 +844,7 @@ bool device_has_active_children(struct udevice *dev)
 	return false;
 }
 
-bool device_is_last_sibling(struct udevice *dev)
+bool device_is_last_sibling(const struct udevice *dev)
 {
 	struct udevice *parent = dev->parent;
 
@@ -869,7 +870,7 @@ int device_set_name(struct udevice *dev, const char *name)
 }
 
 #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
-bool device_is_compatible(struct udevice *dev, const char *compat)
+bool device_is_compatible(const struct udevice *dev, const char *compat)
 {
 	return ofnode_device_is_compatible(dev_ofnode(dev), compat);
 }
