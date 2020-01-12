@@ -902,8 +902,8 @@ struct dm_pci_ops {
 	 * @size:	Access size
 	 * @return 0 if OK, -ve on error
 	 */
-	int (*read_config)(struct udevice *bus, pci_dev_t bdf, uint offset,
-			   ulong *valuep, enum pci_size_t size);
+	int (*read_config)(const struct udevice *bus, pci_dev_t bdf,
+			   uint offset, ulong *valuep, enum pci_size_t size);
 	/**
 	 * write_config() - Write a PCI configuration value
 	 *
@@ -977,7 +977,7 @@ int dm_pci_bus_find_bdf(pci_dev_t bdf, struct udevice **devp);
  * @devp:	Returns the device for this address, if found
  * @return 0 if OK, -ENODEV if not found
  */
-int pci_bus_find_devfn(struct udevice *bus, pci_dev_t find_devfn,
+int pci_bus_find_devfn(const struct udevice *bus, pci_dev_t find_devfn,
 		       struct udevice **devp);
 
 /**
@@ -1526,8 +1526,8 @@ struct dm_pci_emul_ops {
 	 * @size:	Access size
 	 * @return 0 if OK, -ve on error
 	 */
-	int (*read_config)(struct udevice *dev, uint offset, ulong *valuep,
-			   enum pci_size_t size);
+	int (*read_config)(const struct udevice *dev, uint offset,
+			   ulong *valuep, enum pci_size_t size);
 	/**
 	 * write_config() - Write a PCI configuration value
 	 *
@@ -1612,7 +1612,7 @@ struct dm_pci_emul_ops {
  * @emulp:	Returns emulated device if found
  * @return 0 if found, -ENODEV if not found
  */
-int sandbox_pci_get_emul(struct udevice *bus, pci_dev_t find_devfn,
+int sandbox_pci_get_emul(const struct udevice *bus, pci_dev_t find_devfn,
 			 struct udevice **containerp, struct udevice **emulp);
 
 /**

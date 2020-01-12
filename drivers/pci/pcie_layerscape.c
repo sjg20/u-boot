@@ -271,7 +271,7 @@ int ls_pcie_conf_address(struct udevice *bus, pci_dev_t bdf,
 	return 0;
 }
 
-static int ls_pcie_read_config(struct udevice *bus, pci_dev_t bdf,
+static int ls_pcie_read_config(const struct udevice *bus, pci_dev_t bdf,
 			       uint offset, ulong *valuep,
 			       enum pci_size_t size)
 {

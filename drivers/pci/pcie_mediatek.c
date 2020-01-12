@@ -77,7 +77,7 @@ static int mtk_pcie_config_address(struct udevice *udev, pci_dev_t bdf,
 	return 0;
 }
 
-static int mtk_pcie_read_config(struct udevice *bus, pci_dev_t bdf,
+static int mtk_pcie_read_config(const struct udevice *bus, pci_dev_t bdf,
 				uint offset, ulong *valuep,
 				enum pci_size_t size)
 {

@@ -119,7 +119,7 @@ static int pci_phytium_conf_address(struct udevice *bus, pci_dev_t bdf,
  * space of the device identified by the bus, device & function numbers in @bdf
  * on the PCI bus @bus.
  */
-static int pci_phytium_read_config(struct udevice *bus, pci_dev_t bdf,
+static int pci_phytium_read_config(const struct udevice *bus, pci_dev_t bdf,
 				   uint offset, ulong *valuep,
 				   enum pci_size_t size)
 {

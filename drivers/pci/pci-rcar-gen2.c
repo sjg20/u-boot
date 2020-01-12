@@ -126,7 +126,7 @@ static u32 setup_bus_address(struct udevice *dev, pci_dev_t bdf, u32 offset)
 	return get_bus_address(dev, bdf, offset);
 }
 
-static int rcar_gen2_pci_read_config(struct udevice *dev, pci_dev_t bdf,
+static int rcar_gen2_pci_read_config(const struct udevice *dev, pci_dev_t bdf,
 				     uint offset, ulong *value,
 				     enum pci_size_t size)
 {

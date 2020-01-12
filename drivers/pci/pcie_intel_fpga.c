@@ -326,7 +326,7 @@ static int _pcie_intel_fpga_write_config(struct intel_fpga_pcie *pcie,
 				   byte_en, data);
 }
 
-static int pcie_intel_fpga_read_config(struct udevice *bus, pci_dev_t bdf,
+static int pcie_intel_fpga_read_config(const struct udevice *bus, pci_dev_t bdf,
 				       uint offset, ulong *valuep,
 				       enum pci_size_t size)
 {

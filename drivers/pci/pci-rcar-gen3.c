@@ -204,7 +204,7 @@ static int rcar_gen3_pcie_addr_valid(pci_dev_t d, uint where)
 	return 0;
 }
 
-static int rcar_gen3_pcie_read_config(struct udevice *dev, pci_dev_t bdf,
+static int rcar_gen3_pcie_read_config(const struct udevice *dev, pci_dev_t bdf,
 				      uint where, ulong *val,
 				      enum pci_size_t size)
 {
