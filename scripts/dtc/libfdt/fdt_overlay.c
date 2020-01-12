@@ -250,7 +250,7 @@ static int overlay_update_local_node_references(void *fdto,
 			return tree_len;
 		}
 
-		for (i = 0; i < (fixup_len / sizeof(uint32_t)); i++) {
+		for (i = 0; i < (int)(fixup_len / sizeof(uint32_t)); i++) {
 			fdt32_t adj_val;
 			uint32_t poffset;
 
