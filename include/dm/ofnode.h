@@ -521,12 +521,25 @@ int ofnode_count_phandle_with_args(ofnode node, const char *list_name,
 ofnode ofnode_path(const char *path);
 
 /**
- * ofnode_get_chosen_string() - get the value of a chosen property
+ * ofnode_get_chosen_prop() - get the value of a chosen property
  *
  * This looks for a property within the /chosen node and returns its value
  *
  * @propname: Property name to look for
+ * @sizep: Returns size of property, or FDT_ERR_... error code if function
+ *	returns NULL
  * @return property value if found, else NULL
+ */
+const void *ofnode_get_chosen_prop(const char *propname, int *sizep);
+
+/**
+ * ofnode_get_chosen_string() - get the string value of a chosen property
+ *
+ * This looks for a property within the /chosen node and returns its value,
+ * checking that it is a valid nul-terminated string
+ *
+ * @propname: Property name to look for
+ * @return string value if found, else NULL
  */
 const char *ofnode_get_chosen_string(const char *propname);
 
