@@ -33,6 +33,18 @@
 struct acpi_ctx;
 
 /*
+ * The assigned ACPI ID for the coreboot project is 'BOOT'
+ * http://www.uefi.org/acpi_id_list
+ */
+#define COREBOOT_ACPI_ID	"BOOT"      /* ACPI ID for coreboot HIDs */
+
+/* List of ACPI HID that use the coreboot ACPI ID */
+enum coreboot_acpi_ids {
+	COREBOOT_ACPI_ID_CBTABLE	= 0x0000, /* BOOT0000 */
+	COREBOOT_ACPI_ID_MAX		= 0xFFFF, /* BOOTFFFF */
+};
+
+/*
  * RSDP (Root System Description Pointer)
  * Note: ACPI 1.0 didn't have length, xsdt_address, and ext_checksum
  */
