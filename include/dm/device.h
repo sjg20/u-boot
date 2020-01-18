@@ -618,6 +618,8 @@ bool device_has_children(const struct udevice *dev);
  */
 bool device_has_active_children(const struct udevice *dev);
 
+bool device_is_ancestor(const struct udevice *child, struct udevice *ancestor);
+
 /**
  * device_is_last_sibling() - check if a device is the last sibling
  *
