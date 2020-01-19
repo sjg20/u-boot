@@ -6,6 +6,8 @@
  * Copyright (C) 2016, Bin Meng <bmeng.cn@gmail.com>
  */
 
+#define LOG_CATEGORY LOGC_ACPI
+
 #include <common.h>
 #include <acpigen.h>
 #include <acpi_device.h>
@@ -18,12 +20,18 @@
 #include <serial.h>
 #include <version.h>
 #include <asm/acpi/global_nvs.h>
+#include <asm/cpu.h>
 #include <asm/ioapic.h>
 #include <asm/lapic.h>
 #include <asm/mpspec.h>
+#include <asm/processor.h>
+#include <asm/smm.h>
 #include <asm/tables.h>
 #include <asm/arch/global_nvs.h>
+#include <asm/arch/iomap.h>
+#include <asm/arch/pm.h>
 #include <dm/acpi.h>
+#include <power/acpi_pmc.h>
 
 /*
  * IASL compiles the dsdt entries and writes the hex values
@@ -376,13 +384,14 @@ static int acpi_create_tpm2(struct acpi_tpm2 *tpm2)
 
 __weak u32 acpi_fill_csrt(u32 current)
 {
-	return current;
+	return 0;
 }
 
-static void acpi_create_csrt(struct acpi_csrt *csrt)
+static int acpi_create_csrt(struct acpi_csrt *csrt)
 {
 	struct acpi_table_header *header = &(csrt->header);
 	u32 current = (u32)csrt + sizeof(struct acpi_csrt);
+	uint ptr;
 
 	memset((void *)csrt, 0, sizeof(struct acpi_csrt));
 
@@ -391,11 +400,16 @@ static void acpi_create_csrt(struct acpi_csrt *csrt)
 	header->length = sizeof(struct acpi_csrt);
 	header->revision = 0;
 
-	current = acpi_fill_csrt(current);
+	ptr = acpi_fill_csrt(current);
+	if (!ptr)
+		return -ENOENT;
+	current = ptr;
 
 	/* (Re)calculate length and checksum */
 	header->length = current - (u32)csrt;
 	header->checksum = table_compute_checksum((void *)csrt, header->length);
+
+	return 0;
 }
 
 static void acpi_create_spcr(struct acpi_spcr *spcr)
@@ -900,15 +914,18 @@ ulong write_acpi_tables(ulong start_addr)
 
 	debug("ACPI:    * CSRT\n");
 	csrt = ctx->current;
-	acpi_create_csrt(csrt);
-	acpi_inc_align(ctx, csrt->header.length);
-	acpi_add_table(ctx, csrt);
+	if (!acpi_create_csrt(csrt)) {
+		acpi_inc_align(ctx, csrt->header.length);
+		acpi_add_table(ctx, csrt);
+	}
 
-	debug("ACPI:    * SPCR\n");
-	spcr = ctx->current;
-	acpi_create_spcr(spcr);
-	acpi_inc_align(ctx, spcr->header.length);
-	acpi_add_table(ctx, spcr);
+	if (0) {
+		debug("ACPI:    * SPCR\n");
+		spcr = ctx->current;
+		acpi_create_spcr(spcr);
+		acpi_inc_align(ctx, spcr->header.length);
+		acpi_add_table(ctx, spcr);
+	}
 
 	acpi_write_dev_tables(ctx);
 

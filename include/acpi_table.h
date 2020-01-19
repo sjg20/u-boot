@@ -13,6 +13,8 @@
 #ifndef __ACPI_TABLE_H__
 #define __ACPI_TABLE_H__
 
+#include <dm/acpi.h>
+
 #define RSDP_SIG		"RSD PTR "	/* RSDP pointer signature */
 #define OEM_ID			"U-BOOT"	/* U-Boot */
 #define OEM_TABLE_ID		"U-BOOTBL"	/* U-Boot Table */
@@ -27,6 +29,7 @@
 
 #if !defined(__ACPI__)
 
+struct udevice;
 struct acpi_ctx;
 
 /*
@@ -59,7 +62,7 @@ struct acpi_rsdp {
 
 /* Generic ACPI header, provided by (almost) all tables */
 struct __packed acpi_table_header {
-	char signature[4];	/* ACPI signature (4 ASCII characters) */
+	char signature[ACPI_NAME_LEN];	/* ACPI signature (4 ASCII chars) */
 	u32 length;		/* Table length in bytes (incl. header) */
 	u8 revision;		/* Table version (not ACPI version!) */
 	volatile u8 checksum;	/* To make sum of entire table == 0 */
@@ -197,6 +200,7 @@ struct __packed acpi_fadt {
 	u8 res1;
 	u8 preferred_pm_profile;
 	u16 sci_int;
+
 	u32 smi_cmd;
 	u8 acpi_enable;
 	u8 acpi_disable;
@@ -204,10 +208,12 @@ struct __packed acpi_fadt {
 	u8 pstate_cnt;
 	u32 pm1a_evt_blk;
 	u32 pm1b_evt_blk;
+
 	u32 pm1a_cnt_blk;
 	u32 pm1b_cnt_blk;
 	u32 pm2_cnt_blk;
 	u32 pm_tmr_blk;
+
 	u32 gpe0_blk;
 	u32 gpe1_blk;
 	u8 pm1_evt_len;
@@ -218,6 +224,7 @@ struct __packed acpi_fadt {
 	u8 gpe1_blk_len;
 	u8 gpe1_base;
 	u8 cst_cnt;
+
 	u16 p_lvl2_lat;
 	u16 p_lvl3_lat;
 	u16 flush_size;
@@ -229,14 +236,17 @@ struct __packed acpi_fadt {
 	u8 century;
 	u16 iapc_boot_arch;
 	u8 res2;
+
 	u32 flags;
 	struct acpi_gen_regaddr reset_reg;
+
 	u8 reset_value;
 	u16 arm_boot_arch;
 	u8 minor_revision;
 	u32 x_firmware_ctl_l;
 	u32 x_firmware_ctl_h;
 	u32 x_dsdt_l;
+
 	u32 x_dsdt_h;
 	struct acpi_gen_regaddr x_pm1a_evt_blk;
 	struct acpi_gen_regaddr x_pm1b_evt_blk;
@@ -266,7 +276,7 @@ struct __packed acpi_fadt {
 
 /* FACS (Firmware ACPI Control Structure) */
 struct acpi_facs {
-	char signature[4];		/* "FACS" */
+	char signature[ACPI_NAME_LEN];	/* "FACS" */
 	u32 length;			/* Length in bytes (>= 64) */
 	u32 hardware_signature;		/* Hardware signature */
 	u32 firmware_waking_vector;	/* Firmware waking vector */
@@ -623,6 +633,29 @@ int acpi_create_dmar_rmrr(struct acpi_ctx *ctx, uint segment, u64 bar,
 void acpi_dmar_rmrr_fixup(struct acpi_ctx *ctx, void *base);
 void acpi_dmar_drhd_fixup(struct acpi_ctx *ctx, void *base);
 
+/* These can be used by the target port */
+void acpi_fill_header(struct acpi_table_header *header, char *signature);
+void acpi_create_fadt(struct acpi_fadt *fadt, struct acpi_facs *facs,
+		      void *dsdt);
+int acpi_create_madt_lapics(u32 current);
+int acpi_create_madt_ioapic(struct acpi_madt_ioapic *ioapic, u8 id,
+			    u32 addr, u32 gsi_base);
+int acpi_create_madt_irqoverride(struct acpi_madt_irqoverride *irqoverride,
+				 u8 bus, u8 source, u32 gsirq, u16 flags);
+int acpi_create_madt_lapic_nmi(struct acpi_madt_lapic_nmi *lapic_nmi,
+			       u8 cpu, u16 flags, u8 lint);
+int acpi_create_mcfg_mmconfig(struct acpi_mcfg_mmconfig *mmconfig, u32 base,
+			      u16 seg_nr, u8 start, u8 end);
+u32 acpi_fill_csrt(u32 current);
+
+/**
+ * acpi_create_gnvs() - Create a GNVS (Global Non Volatile Storage) table
+ *
+ * @gnvs: Table to fill in
+ * @return 0 if OK, -ve on error
+ */
+int acpi_create_gnvs(struct acpi_global_nvs *gnvs);
+
 /**
  * acpi_create_dmar() - Create a DMA Remapping Reporting (DMAR) table
  *
@@ -632,10 +665,29 @@ void acpi_dmar_drhd_fixup(struct acpi_ctx *ctx, void *base);
  */
 int acpi_create_dmar(struct acpi_dmar *dmar, enum dmar_flags flags);
 
-void acpi_create_dbg2(struct acpi_dbg2_header *dbg2,
-		      int port_type, int port_subtype,
-		      struct acpi_gen_regaddr *address, uint32_t address_size,
-		      const char *device_path);
+ulong write_acpi_tables(ulong start);
+
+/**
+ * acpi_get_rsdp_addr() - get ACPI RSDP table address
+ *
+ * This routine returns the ACPI RSDP table address in the system memory.
+ *
+ * @return:	ACPI RSDP table address
+ */
+ulong acpi_get_rsdp_addr(void);
+
+/* to convert */
+int soc_read_sci_irq_select(void);
+int soc_write_sci_irq_select(uint scis);
+int soc_madt_sci_irq_polarity(int sci);
+struct acpi_cstate *soc_get_cstate_map(size_t *entries);
+
+void intel_acpi_fill_fadt(struct acpi_fadt *fadt);
+int soc_acpi_name(const struct udevice *dev, char *out_name);
+
+u8 acpi_checksum(u8 *table, u32 length);
+int intel_southbridge_write_acpi_tables(const struct udevice *dev,
+					struct acpi_ctx *ctx);
 
 int acpi_create_dmar_ds_pci_br(struct acpi_ctx *ctx, pci_dev_t bdf);
 int acpi_create_dmar_ds_pci(struct acpi_ctx *ctx, pci_dev_t bdf);
