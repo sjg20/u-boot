@@ -648,11 +648,13 @@ ulong write_acpi_tables(ulong start_addr)
 		acpi_add_table(ctx, csrt);
 	}
 
-	debug("ACPI:    * SPCR\n");
-	spcr = ctx->current;
-	acpi_create_spcr(spcr);
-	acpi_inc_align(ctx, spcr->header.length);
-	acpi_add_table(ctx, spcr);
+	if (0) {
+		debug("ACPI:    * SPCR\n");
+		spcr = ctx->current;
+		acpi_create_spcr(spcr);
+		acpi_inc_align(ctx, spcr->header.length);
+		acpi_add_table(ctx, spcr);
+	}
 
 	acpi_write_dev_tables(ctx);
 

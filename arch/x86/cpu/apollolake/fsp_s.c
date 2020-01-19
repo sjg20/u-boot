@@ -226,3 +226,121 @@ int arch_fsp_init_r(void)
 
 	return 0;
 }
+
+#if 0
+static void soc_final(void *data)
+{
+	/* Disable global reset, just in case */
+	pmc_global_reset_enable(0);
+	/* Make sure payload/OS can't trigger global reset */
+	pmc_global_reset_lock();
+}
+
+static void drop_privilege_all(void)
+{
+	/* Drop privilege level on all the CPUs */
+	if (mp_run_on_all_cpus(&cpu_enable_untrusted_mode, NULL) < 0)
+		printk(BIOS_ERR, "failed to enable untrusted mode\n");
+}
+
+static void configure_xhci_host_mode_port0(void)
+{
+	uint32_t *cfg0;
+	uint32_t *cfg1;
+	const struct resource *res;
+	uint32_t reg;
+	struct stopwatch sw;
+	struct device *xhci_dev = PCH_DEV_XHCI;
+
+	printk(BIOS_INFO, "Putting xHCI port 0 into host mode.\n");
+	res = find_resource(xhci_dev, PCI_BASE_ADDRESS_0);
+	cfg0 = (void *)(uintptr_t)(res->base + DUAL_ROLE_CFG0);
+	cfg1 = (void *)(uintptr_t)(res->base + DUAL_ROLE_CFG1);
+	reg = read32(cfg0);
+	if (!(reg & SW_IDPIN_EN_MASK))
+		return;
+
+	reg &= ~(SW_IDPIN_MASK | SW_VBUS_VALID_MASK);
+	write32(cfg0, reg);
+
+	stopwatch_init_msecs_expire(&sw, 10);
+	/* Wait for the host mode status bit. */
+	while ((read32(cfg1) & DRD_MODE_MASK) != DRD_MODE_HOST) {
+		if (stopwatch_expired(&sw)) {
+			printk(BIOS_ERR, "Timed out waiting for host mode.\n");
+			return;
+		}
+	}
+
+	printk(BIOS_INFO, "xHCI port 0 host switch over took %lu ms\n",
+		stopwatch_duration_msecs(&sw));
+}
+
+static int check_xdci_enable(void)
+{
+	struct device *dev = PCH_DEV_XDCI;
+
+	return !!dev->enabled;
+}
+
+void platform_fsp_notify_status(enum fsp_notify_phase phase)
+{
+	if (phase == END_OF_FIRMWARE) {
+
+		/*
+		 * Before hiding P2SB device and dropping privilege level,
+		 * dump CSE status and disable HECI1 interface.
+		 */
+		heci_cse_lockdown();
+
+		/* Hide the P2SB device to align with previous behavior. */
+		p2sb_hide();
+
+		/*
+		 * As per guidelines BIOS is recommended to drop CPU privilege
+		 * level to IA_UNTRUSTED. After that certain device registers
+		 * and MSRs become inaccessible supposedly increasing system
+		 * security.
+		 */
+		drop_privilege_all();
+
+		/*
+		 * When USB OTG is set, GLK FSP enables xHCI SW ID pin and
+		 * configures USB-C as device mode. Force USB-C into host mode.
+		 */
+		if (check_xdci_enable())
+			configure_xhci_host_mode_port0();
+
+		/*
+		 * Override GLK xhci clock gating register(XHCLKGTEN) to
+		 * mitigate usb device suspend and resume failure.
+		 */
+		if (CONFIG(SOC_INTEL_GLK)) {
+			uint32_t *cfg;
+			const struct resource *res;
+			uint32_t reg;
+			struct device *xhci_dev = PCH_DEV_XHCI;
+
+			res = find_resource(xhci_dev, PCI_BASE_ADDRESS_0);
+			cfg = (void *)(uintptr_t)(res->base + CFG_XHCLKGTEN);
+			reg = SRAMPGTEN | SSLSE | USB2PLLSE | IOSFSTCGE |
+				HSTCGE | HSUXDMIPLLSE | SSTCGE | XHCFTCLKSE |
+				XHCBBTCGIPISO | XHCUSB2PLLSDLE | SSPLLSUE |
+				XHCBLCGE | HSLTCGE | SSLTCGE | IOSFBTCGE |
+				IOSFGBLCGE;
+			write32(cfg, reg);
+		}
+	}
+}
+
+/*
+ * spi_flash init() needs to run unconditionally on every boot (including
+ * resume) to allow write protect to be disabled for eventlog and nvram
+ * updates. This needs to be done as early as possible in ramstage. Thus, add a
+ * callback for entry into BS_PRE_DEVICE.
+ */
+static void spi_flash_init_cb(void *unused)
+{
+	fast_spi_init();
+}
+#endif
