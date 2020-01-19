@@ -120,6 +120,7 @@ struct arch_global_data {
 	ulong backup_mem;		/* Backup memory address for S3 */
 #ifdef CONFIG_FSP_VERSION2
 	struct fsp_header *fsp_s_hdr;	/* Pointer to FSP-S header */
+	const void *soc_config;		/* SOC-specific configuration */
 #endif
 	void *itss_priv;		/* Private ITSS data pointer */
 	ulong acpi_start;		/* Start address of ACPI tables */
