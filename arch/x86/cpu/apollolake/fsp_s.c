@@ -350,8 +350,10 @@ int fsps_update_config(struct udevice *dev, ulong rom_offset,
 
 	apl = malloc(sizeof(*apl));
 	if (!apl)
-		return log_msg_ret("config", -ENOMEM);
-	get_config(dev, apl);
+		return log_msg_ret("alloc", -ENOMEM);
+	ret = get_config(dev, apl);
+	if (ret)
+		return log_msg_ret("config", ret);
 
 	cfg->ish_enable = 0;
 	cfg->enable_sata = 0;

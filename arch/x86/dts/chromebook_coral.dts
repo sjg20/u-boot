@@ -497,13 +497,13 @@
 	 * If the Board has PERST_0 signal, assign the GPIO
 	 * If the Board does not have PERST_0, assign GPIO_PRT0_UDEF
 	 *
-	 * This are not used yet, so comment them out for now.
-	 *
-	 * prt0-gpio = <GPIO_122>;
-	 *
-	 * GPIO for SD card detect
-	 * sdcard-cd-gpio = <GPIO_177>;
+	 * This should be converted to real GPIOs and ideally stored in the
+	 * device they relate to.
 	 */
+	prt0-gpio = <GPIO_122>;
+
+	/* GPIO for SD card detect */
+	sdcard-cd-gpio = <GPIO_177>;
 
 	/*
 	 * Order is emmc-tx-data-cntl1, emmc-tx-data-cntl2,
