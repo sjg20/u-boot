@@ -422,7 +422,20 @@ ulong write_acpi_tables(ulong start_addr)
 	memcpy(ctx->current,
 	       (char *)&AmlCode + sizeof(struct acpi_table_header),
 	       dsdt->length - sizeof(struct acpi_table_header));
-	acpi_inc_align(ctx, dsdt->length - sizeof(struct acpi_table_header));
+
+	if (dsdt->length >= sizeof(struct acpi_table_header)) {
+		acpi_inject_dsdt(ctx);
+		memcpy(ctx->current,
+		       (char *)AmlCode + sizeof(struct acpi_table_header),
+		       dsdt->length - sizeof(struct acpi_table_header));
+		acpi_inc(ctx, dsdt->length - sizeof(struct acpi_table_header));
+
+		/* (Re)calculate length and checksum. */
+		dsdt->length = ctx->current - (void *)dsdt;
+		dsdt->checksum = 0;
+		dsdt->checksum = table_compute_checksum(dsdt, dsdt->length);
+	}
+	acpi_align(ctx);
 
 	/* Pack GNVS into the ACPI table area */
 	for (i = 0; i < dsdt->length; i++) {
