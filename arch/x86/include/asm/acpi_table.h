@@ -9,6 +9,8 @@
 #ifndef __ASM_ACPI_TABLE_H__
 #define __ASM_ACPI_TABLE_H__
 
+#ifndef __ACPI__
+
 /* These can be used by the target port */
 
 void acpi_fill_header(struct acpi_table_header *header, char *signature);
@@ -50,5 +52,7 @@ int arch_read_sci_irq_select(void);
 int arch_write_sci_irq_select(uint scis);
 int arch_madt_sci_irq_polarity(int sci);
 struct acpi_cstate *arch_get_cstate_map(size_t *entries);
+
+#endif /* !__ACPI__ */
 
 #endif /* __ASM_ACPI_TABLE_H__ */
