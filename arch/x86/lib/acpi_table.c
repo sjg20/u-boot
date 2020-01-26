@@ -468,6 +468,25 @@ static void acpi_create_spcr(struct acpi_spcr *spcr)
 	header->checksum = table_compute_checksum((void *)spcr, header->length);
 }
 
+static void acpi_ssdt_write_cbtable(struct acpi_ctx *ctx)
+{
+	uintptr_t base;
+	u32 size;
+
+	base = 0;
+	size = 0;
+
+	acpigen_write_device(ctx, "CTBL");
+	acpigen_write_coreboot_hid(ctx, COREBOOT_ACPI_ID_CBTABLE);
+	acpigen_write_name_integer(ctx, "_UID", 0);
+	acpigen_write_sta(ctx, ACPI_DSTATUS_HIDDEN_ON);
+	acpigen_write_name(ctx, "_CRS");
+	acpigen_write_resourcetemplate_header(ctx);
+	acpigen_write_mem32fixed(ctx, 0, base, size);
+	acpigen_write_resourcetemplate_footer(ctx);
+	acpigen_pop_len(ctx);
+}
+
 void acpi_create_ssdt(struct acpi_ctx *ctx, struct acpi_table_header *ssdt,
 		      const char *oem_table_id)
 {
@@ -480,6 +499,8 @@ void acpi_create_ssdt(struct acpi_ctx *ctx, struct acpi_table_header *ssdt,
 
 	acpi_inc(ctx, sizeof(struct acpi_table_header));
 
+	/* Write object to declare coreboot tables */
+	acpi_ssdt_write_cbtable(ctx);
 	acpi_fill_ssdt(ctx);
 
 	/* (Re)calculate length and checksum. */
