@@ -418,6 +418,26 @@ enum acpi_upc_type {
 	UPC_TYPE_HUB
 };
 
+enum dev_scope_type {
+	SCOPE_PCI_ENDPOINT = 1,
+	SCOPE_PCI_SUB = 2,
+	SCOPE_IOAPIC = 3,
+	SCOPE_MSI_HPET = 4,
+	SCOPE_ACPI_NAMESPACE_DEVICE = 5
+};
+
+struct __packed dev_scope {
+	u8 type;
+	u8 length;
+	u8 reserved[2];
+	u8 enumeration;
+	u8 start_bus;
+	struct {
+		u8 dev;
+		u8 fn;
+	} __packed path[0];
+};
+
 enum dmar_type {
 	DMAR_DRHD = 0,
 	DMAR_RMRR = 1,
@@ -578,6 +598,13 @@ enum acpi_tables {
  */
 int acpi_get_table_revision(enum acpi_tables table);
 
+int acpi_create_dmar_drhd(struct acpi_ctx *ctx, uint flags, uint segment,
+			  u64 bar);
+int acpi_create_dmar_rmrr(struct acpi_ctx *ctx, uint segment, u64 bar,
+			  u64 limit);
+void acpi_dmar_rmrr_fixup(struct acpi_ctx *ctx, void *base);
+void acpi_dmar_drhd_fixup(struct acpi_ctx *ctx, void *base);
+
 /**
  * acpi_create_dmar() - Create a DMA Remapping Reporting (DMAR) table
  *
@@ -591,6 +618,16 @@ void acpi_create_dbg2(struct acpi_dbg2_header *dbg2,
 		      int port_type, int port_subtype,
 		      struct acpi_gen_regaddr *address, uint32_t address_size,
 		      const char *device_path);
+
+int acpi_create_dmar_ds_pci_br(struct acpi_ctx *ctx, pci_dev_t bdf);
+int acpi_create_dmar_ds_pci(struct acpi_ctx *ctx, pci_dev_t bdf);
+int acpi_create_dmar_ds_ioapic(struct acpi_ctx *ctx, uint enumeration_id,
+			       pci_dev_t bdf);
+int acpi_create_dmar_ds_msi_hpet(struct acpi_ctx *ctx, uint enumeration_id,
+				 pci_dev_t bdf);
+void acpi_fadt_common(struct acpi_fadt *fadt, struct acpi_facs *facs,
+		      void *dsdt);
+void intel_acpi_fill_fadt(struct acpi_fadt *fadt);
 
 /**
  * acpi_fill_header() - Set up a new table header
