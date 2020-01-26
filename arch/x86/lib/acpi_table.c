@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <acpigen.h>
 #include <cpu.h>
 #include <dm.h>
 #include <dm/uclass-internal.h>
@@ -344,6 +345,46 @@ static void acpi_create_spcr(struct acpi_spcr *spcr)
 	header->checksum = table_compute_checksum((void *)spcr, header->length);
 }
 
+static void acpi_ssdt_write_cbtable(struct acpi_ctx *ctx)
+{
+	uintptr_t base;
+	u32 size;
+
+	base = 0;
+	size = 0;
+
+	acpigen_write_device(ctx, "CTBL");
+	acpigen_write_coreboot_hid(ctx, COREBOOT_ACPI_ID_CBTABLE);
+	acpigen_write_name_integer(ctx, "_UID", 0);
+	acpigen_write_sta(ctx, ACPI_STATUS_DEVICE_HIDDEN_ON);
+	acpigen_write_name(ctx, "_CRS");
+	acpigen_write_resourcetemplate_header(ctx);
+	acpigen_write_mem32fixed(ctx, 0, base, size);
+	acpigen_write_resourcetemplate_footer(ctx);
+	acpigen_pop_len(ctx);
+}
+
+void acpi_create_ssdt(struct acpi_ctx *ctx, struct acpi_table_header *ssdt,
+		      const char *oem_table_id)
+{
+	memset((void *)ssdt, '\0', sizeof(struct acpi_table_header));
+
+	acpi_fill_header(ssdt, "SSDT");
+	ssdt->revision = acpi_get_table_revision(ACPITAB_SSDT);
+	ssdt->aslc_revision = 1;
+	ssdt->length = sizeof(struct acpi_table_header);
+
+	acpi_inc(ctx, sizeof(struct acpi_table_header));
+
+	/* Write object to declare coreboot tables */
+	acpi_ssdt_write_cbtable(ctx);
+	acpi_fill_ssdt(ctx);
+
+	/* (Re)calculate length and checksum. */
+	ssdt->length = ctx->current - (void *)ssdt;
+	ssdt->checksum = table_compute_checksum((void *)ssdt, ssdt->length);
+}
+
 /*
  * QEMU's version of write_acpi_tables is defined in drivers/misc/qfw.c
  */
@@ -353,6 +394,7 @@ ulong write_acpi_tables(ulong start_addr)
 	struct acpi_facs *facs;
 	struct acpi_table_header *dsdt;
 	struct acpi_fadt *fadt;
+	struct acpi_table_header *ssdt;
 	struct acpi_mcfg *mcfg;
 	struct acpi_madt *madt;
 	struct acpi_csrt *csrt;
@@ -407,6 +449,14 @@ ulong write_acpi_tables(ulong start_addr)
 	acpi_inc_align(ctx, sizeof(struct acpi_fadt));
 	acpi_create_fadt(fadt, facs, dsdt);
 	acpi_add_table(ctx, fadt);
+
+	debug("ACPI:     * SSDT\n");
+	ssdt = (struct acpi_table_header *)ctx->current;
+	acpi_create_ssdt(ctx, ssdt, ACPI_TABLE_CREATOR);
+	if (ssdt->length > sizeof(struct acpi_table_header)) {
+		acpi_inc_align(ctx, ssdt->length);
+		acpi_add_table(ctx, ssdt);
+	}
 
 	debug("ACPI:    * MCFG\n");
 	mcfg = ctx->current;
