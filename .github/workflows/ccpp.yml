@@ -1,0 +1,17 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup tools
+      run: sudo apt-get -y install gcc-arm-linux-gnueabihf device-tree-compiler bison flex
+    - name: config
+      run: make snappermx6_defconfig CROSS_COMPILE=arm-linux-gnueabihf-
+    - name: build
+      run: make -j u-boot.imx CROSS_COMPILE=arm-linux-gnueabihf-
