@@ -564,6 +564,7 @@ config TARGET_SOMLABS_VISIONSOM_6ULL
 config TARGET_SNAPPERMX6
 	bool "snappermx6"
 	select SUPPORT_SPL
+	select MX6Q
 
 config TARGET_TBS2910
 	bool "TBS2910 Matrix ARM mini PC"

@@ -148,30 +148,6 @@ void displ5_set_iomux_ecspi_spl(void)
 void displ5_set_iomux_ecspi_spl(void) {}
 #endif
 
-#ifdef CONFIG_FSL_ESDHC_IMX
-iomux_v3_cfg_t const usdhc4_pads[] = {
-	MX6_PAD_SD4_CLK__SD4_CLK	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_SD4_CMD__SD4_CMD	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_SD4_DAT0__SD4_DATA0	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_SD4_DAT1__SD4_DATA1	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_SD4_DAT2__SD4_DATA2	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_SD4_DAT3__SD4_DATA3	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_SD4_DAT4__SD4_DATA4	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_SD4_DAT5__SD4_DATA5	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_SD4_DAT6__SD4_DATA6	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_SD4_DAT7__SD4_DATA7	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_NANDF_ALE__SD4_RESET	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-};
-
-void displ5_set_iomux_usdhc_spl(void)
-{
-	SETUP_IOMUX_PADS(usdhc4_pads);
-}
-
-#else
-void displ5_set_iomux_usdhc_spl(void) {}
-#endif
-
 static void ccgr_init(void)
 {
 	struct mxc_ccm_reg *ccm = (struct mxc_ccm_reg *)CCM_BASE_ADDR;
@@ -265,23 +241,6 @@ static void init_ecspi(void)
 	displ5_set_iomux_ecspi_spl();
 	enable_spi_clk(1, 1);
 }
-
-#ifdef CONFIG_SPL_MMC_SUPPORT
-static struct fsl_esdhc_cfg usdhc_cfg = {
-	.esdhc_base = USDHC4_BASE_ADDR,
-	.max_bus_width = 8,
-};
-
-int board_mmc_init(bd_t *bd)
-{
-	displ5_set_iomux_usdhc_spl();
-
-	usdhc_cfg.sdhc_clk = mxc_get_clock(MXC_ESDHC4_CLK);
-	gd->arch.sdhc_clk = usdhc_cfg.sdhc_clk;
-
-	return fsl_esdhc_initialize(bd, &usdhc_cfg);
-}
-#endif
 
 void board_debug_uart_init(void)
 {

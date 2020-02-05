@@ -15,22 +15,10 @@
 #include <miiphy.h>
 #include <netdev.h>
 
+#include "common.h"
+
 DECLARE_GLOBAL_DATA_PTR;
 
-#define UART_PAD_CTRL  (PAD_CTL_PUS_100K_UP |			\
-	PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm |			\
-	PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
-
-#define SPI_PAD_CTRL (PAD_CTL_HYS |				\
-	PAD_CTL_SPEED_MED |		\
-	PAD_CTL_DSE_40ohm | PAD_CTL_SRE_FAST)
-
-#define ENET_PAD_CTRL  (PAD_CTL_PUS_100K_UP |			\
-	PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm | PAD_CTL_HYS)
-
-#define I2C_PAD_CTRL    (PAD_CTL_PUS_100K_UP | 			\
-	PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm | PAD_CTL_HYS |	\
-	PAD_CTL_ODE | PAD_CTL_SRE_FAST)
 
 void board_debug_uart_init(void)
 {
@@ -91,25 +79,6 @@ static void setup_spi(void)
 {
 	SETUP_IOMUX_PADS(ecspi1_pads);
 }
-#endif
-
-#ifdef CONFIG_CMD_I2C
-struct i2c_pads_info i2c_pad_info0 = {
-	.scl = {
-		.i2c_mode = MX6_PAD_CSI0_DAT9__I2C1_SCL |
-				MUX_PAD_CTRL(I2C_PAD_CTRL),
-		.gpio_mode = MX6_PAD_CSI0_DAT9__GPIO5_IO27 |
-				MUX_PAD_CTRL(I2C_PAD_CTRL),
-		.gp = IMX_GPIO_NR(5, 27)
-	},
-	.sda = {
-		.i2c_mode = MX6_PAD_CSI0_DAT8__I2C1_SDA |
-				MUX_PAD_CTRL(I2C_PAD_CTRL),
-		.gpio_mode = MX6_PAD_CSI0_DAT8__GPIO5_IO26 |
-				MUX_PAD_CTRL(I2C_PAD_CTRL),
-		.gp = IMX_GPIO_NR(5, 26)
-	}
-};
 #endif
 
 static void setup_iomux_enet(void)
