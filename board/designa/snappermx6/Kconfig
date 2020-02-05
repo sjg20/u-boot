@@ -1,5 +1,8 @@
 if TARGET_SNAPPERMX6
 
+config IMX_CONFIG
+	default "board/designa/snappermx6/imximage.cfg"
+
 config SYS_BOARD
 	default "snappermx6"
 

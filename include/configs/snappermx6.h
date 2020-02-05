@@ -24,19 +24,10 @@
 
 /* Ethernet */
 #define IMX_FEC_BASE			ENET_BASE_ADDR
-#define CONFIG_FEC_XCV_TYPE		RGMII
+#define CONFIG_FEC_XCV_TYPE		MII100
+#define CONFIG_FEC_FIXED_SPEED			100 /* No autoneg, fix Gb */
 #define CONFIG_ETHPRIME			"FEC"
-#define CONFIG_FEC_MXC_PHYADDR		0x01
-
-#define CONFIG_PHY_MICREL_KSZ9021
-
-/* I2C Configs */
-#define CONFIG_SYS_I2C
-#define CONFIG_SYS_I2C_MXC
-#define CONFIG_SYS_I2C_MXC_I2C2
-#define CONFIG_SYS_I2C_SPEED		  100000
-
-/* Filesystem support */
+#define CONFIG_FEC_MXC_PHYADDR		0x00
 
 /* Physical Memory Map */
 #define PHYS_SDRAM                     MMDC0_ARB_BASE_ADDR
