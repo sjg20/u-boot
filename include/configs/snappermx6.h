@@ -41,10 +41,6 @@
 #define CONFIG_SYS_INIT_SP_ADDR \
 	(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET)
 
-/* MMC Configs */
-#define CONFIG_SYS_FSL_ESDHC_ADDR	0
-#define CONFIG_SYS_FSL_USDHC_NUM	1
-
 /* Default environment */
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"addcons=setenv bootargs ${bootargs} "				\
