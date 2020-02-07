@@ -16,7 +16,7 @@ jobs:
     - name: build
       run: make -j u-boot.imx CROSS_COMPILE=arm-linux-gnueabihf-
     - name: save output
-      run: mkdir -p release && cp -a u-boot.bin u-boot.imx u-boot release/
+      run: mkdir -p release && cp -a u-boot.bin u-boot.imx u-boot-with-spl.imx u-boot release/
     - uses: actions/upload-artifact@v1
       with:
         name: Binaries
