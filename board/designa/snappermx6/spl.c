@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright (C) 2017 DENX Software Engineering
- * Lukasz Majewski, DENX Software Engineering, lukma@denx.de
+ * Copyright (C) 2020 DesignA Electronics
+ * Andre Renaud, DesignA Electronics, arenaud@designa-electronics.com
  *
- * (for Andre: taken from display5/spl.c)
  */
 
 #include <common.h>
@@ -112,8 +111,6 @@ iomux_v3_cfg_t const uart_console_pads[] = {
 	/* UART5 */
 	MX6_PAD_CSI0_DAT14__UART5_TX_DATA | MUX_PAD_CTRL(UART_PAD_CTRL),
 	MX6_PAD_CSI0_DAT15__UART5_RX_DATA | MUX_PAD_CTRL(UART_PAD_CTRL),
-	MX6_PAD_CSI0_DAT18__UART5_RTS_B | MUX_PAD_CTRL(UART_PAD_CTRL),
-	MX6_PAD_CSI0_DAT19__UART5_CTS_B | MUX_PAD_CTRL(UART_PAD_CTRL),
 };
 
 void set_iomux_uart_spl(void)
@@ -122,30 +119,28 @@ void set_iomux_uart_spl(void)
 }
 
 #ifdef CONFIG_MXC_SPI
-iomux_v3_cfg_t const ecspi2_pads[] = {
-	/* SPI2, NOR Flash nWP, CS0 */
-	MX6_PAD_CSI0_DAT10__ECSPI2_MISO	| MUX_PAD_CTRL(SPI_PAD_CTRL),
-	MX6_PAD_CSI0_DAT9__ECSPI2_MOSI	| MUX_PAD_CTRL(SPI_PAD_CTRL),
-	MX6_PAD_CSI0_DAT8__ECSPI2_SCLK	| MUX_PAD_CTRL(SPI_PAD_CTRL),
-	MX6_PAD_CSI0_DAT11__GPIO5_IO29	| MUX_PAD_CTRL(NO_PAD_CTRL),
-	MX6_PAD_SD3_DAT5__GPIO7_IO00	| MUX_PAD_CTRL(NO_PAD_CTRL),
+iomux_v3_cfg_t const ecspi_pads[] = {
+	MX6_PAD_EIM_EB2__GPIO2_IO30 | MUX_PAD_CTRL(SPI_PAD_CTRL),
+	MX6_PAD_EIM_D18__ECSPI1_MOSI | MUX_PAD_CTRL(SPI_PAD_CTRL),
+	MX6_PAD_EIM_D17__ECSPI1_MISO | MUX_PAD_CTRL(SPI_PAD_CTRL),
+	MX6_PAD_EIM_D16__ECSPI1_SCLK | MUX_PAD_CTRL(SPI_PAD_CTRL),
 };
 
 int board_spi_cs_gpio(unsigned int bus, unsigned int cs)
 {
-	if (bus != 1 || cs != 0)
+	if (bus != 0 || cs != 0)
 		return -EINVAL;
 
-	return IMX_GPIO_NR(5, 29);
+	return IMX_GPIO_NR(2, 30);
 }
 
-void displ5_set_iomux_ecspi_spl(void)
+void snappermx6_set_iomux_ecspi_spl(void)
 {
-	SETUP_IOMUX_PADS(ecspi2_pads);
+	SETUP_IOMUX_PADS(ecspi_pads);
 }
 
 #else
-void displ5_set_iomux_ecspi_spl(void) {}
+void snappermx6_set_iomux_ecspi_spl(void) {}
 #endif
 
 static void ccgr_init(void)
@@ -238,7 +233,7 @@ static void spl_dram_init(void)
 
 static void init_ecspi(void)
 {
-	displ5_set_iomux_ecspi_spl();
+	snappermx6_set_iomux_ecspi_spl();
 	enable_spi_clk(1, 1);
 }
 
@@ -277,6 +272,11 @@ void board_init_f(ulong dummy)
 	/* Initialize and reset WDT in SPL */
 // 	hw_watchdog_init();
 // 	WATCHDOG_RESET();
+#ifdef CONFIG_SPL_SPI_BOOT
+	fsl_spi_spl_load_image(CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE,
+			       (uchar *)SPL_ENV_ADDR);
+	fsl_spi_boot();
+#endif
 
 	/* load/boot image from boot device */
 	board_init_r(NULL, 0);
