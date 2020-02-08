@@ -4,6 +4,14 @@
 #include <stdarg.h>
 #include <linux/compiler.h>
 
+/*
+ * Unfortunately later versions of xlib seem to call getc() during SDL init and
+ * thus hang the startup.
+ */
+#ifdef CONFIG_SANDBOX
+#define getc ub_getc
+#endif
+
 /* stdin */
 int getchar(void);
 int tstc(void);
