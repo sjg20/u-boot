@@ -305,4 +305,6 @@ static inline int vidconsole_memmove(struct udevice *dev, void *dst,
 
 #endif
 
+u8 *console_truetype_find_font(const char *find_name, int *sizep);
+
 #endif

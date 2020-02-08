@@ -487,6 +487,7 @@ struct font_info {
 	}
 
 FONT_DECL(nimbus_sans_l_regular);
+FONT_DECL(nimbus_sans_l_bold);
 FONT_DECL(ankacoder_c75_r);
 FONT_DECL(rufscript010);
 FONT_DECL(cantoraone_regular);
@@ -494,6 +495,9 @@ FONT_DECL(cantoraone_regular);
 static struct font_info font_table[] = {
 #ifdef CONFIG_CONSOLE_TRUETYPE_NIMBUS
 	FONT_ENTRY(nimbus_sans_l_regular),
+#endif
+#ifdef CONFIG_CONSOLE_TRUETYPE_NIMBUS_BOLD
+	FONT_ENTRY(nimbus_sans_l_bold),
 #endif
 #ifdef CONFIG_CONSOLE_TRUETYPE_ANKACODER
 	FONT_ENTRY(ankacoder_c75_r),
@@ -514,19 +518,22 @@ static struct font_info font_table[] = {
 /**
  * console_truetype_find_font() - Find a suitable font
  *
- * This searched for the first available font.
+ * This searches for the first available font.
  *
  * @return pointer to the font, or NULL if none is found
  */
-static u8 *console_truetype_find_font(void)
+u8 *console_truetype_find_font(const char *find_name, int *sizep)
 {
 	struct font_info *tab;
 
 	for (tab = font_table; tab->begin; tab++) {
-		if (abs(tab->begin - tab->end) > 4) {
+		ulong size = tab->end - tab->begin;
+
+		if (size > 4 && (!find_name || !strcmp(find_name, tab->name))) {
 			debug("%s: Font '%s', at %p, size %lx\n", __func__,
-			      tab->name, tab->begin,
-			      (ulong)(tab->end - tab->begin));
+			      tab->name, tab->begin, size);
+			if (sizep)
+				*sizep = size;
 			return tab->begin;
 		}
 	}
@@ -548,7 +555,7 @@ static int console_truetype_probe(struct udevice *dev)
 		priv->font_size = vid_priv->font_size;
 	else
 		priv->font_size = CONFIG_CONSOLE_TRUETYPE_SIZE;
-	priv->font_data = console_truetype_find_font();
+	priv->font_data = console_truetype_find_font(NULL, NULL);
 	if (!priv->font_data) {
 		debug("%s: Could not find any fonts\n", __func__);
 		return -EBFONT;

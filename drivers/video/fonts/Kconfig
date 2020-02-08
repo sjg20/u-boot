@@ -15,8 +15,14 @@ config CONSOLE_TRUETYPE_NIMBUS
 	  Nimbus Sans L has metrics almost identical to Helvetica and Arial.
 	  (From Wikipedia, the free encyclopedia)
 	  From: https://fontlibrary.org/en/font/nimbus-sans-l
-	  License: GNU GPL v3
-	  http://www.gnu.org/copyleft/gpl.html
+	  License: GNU GPL v2
+	  Licenses/gpl-2.0.txt
+
+config CONSOLE_TRUETYPE_NIMBUS_BOLD
+	bool "Nimbus Sans Bold"
+	depends on CONSOLE_TRUETYPE
+	help
+	  Nimbus bold variant
 
 config CONSOLE_TRUETYPE_ANKACODER
 	bool "Anka Coder Narrow"
@@ -37,7 +43,7 @@ config CONSOLE_TRUETYPE_RUFSCRIPT
 	  A laid-back handwritten font.
 	  Font: https://fontlibrary.org/en/font/rufscript
 	  License: GPL with font exception
-	  http://www.gnu.org/copyleft/gpl.html
+	  Licenses/gpl-2.0.txt
 
 config CONSOLE_TRUETYPE_CANTORAONE
 	bool "Cantoraone"
