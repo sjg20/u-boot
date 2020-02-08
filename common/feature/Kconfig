@@ -1,0 +1,6 @@
+config FEATURE
+	bool "Support U-Boot features"
+	help
+	  Features are simple GUI applications provided in U-Boot, such as a
+	  boot menu or firmware-based diagnostics. Features are provided as
+	  drivers in the 'feature' uclass.

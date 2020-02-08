@@ -1044,3 +1044,4 @@ config BLOBLIST_ADDR
 endmenu
 
 source "common/spl/Kconfig"
+source "common/feature/Kconfig"
