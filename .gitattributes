@@ -6,3 +6,4 @@
 *.ttf binary
 # MRC cache files are always binary data
 *mrc-cache binary
+*.png binary
