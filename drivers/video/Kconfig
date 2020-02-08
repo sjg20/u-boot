@@ -766,4 +766,14 @@ config IHS_VIDEO_OUT
 	  out On-screen Display (OSD) used on gdsys FPGAs to control dynamic
 	  textual overlays of the display outputs.
 
+config GUI
+	bool "Graphics User Interface support"
+	depends on DM_VIDEO
+	help
+	  Enable support for a GUI in U-Boot. This allows display of images
+	  and text laid out in a more sophistated way than is feasible with
+	  just the normal U-Boot console and image-blitting support. This can
+	  be used to implement the user interface for user-friendly diagnostics
+	  routines, for example.
+
 endmenu
