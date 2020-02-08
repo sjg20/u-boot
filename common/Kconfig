@@ -710,3 +710,5 @@ config SPL_IMAGE_SIGN_INFO
 	  Enable image_sign_info helper functions in SPL.
 
 endif
+
+source "common/feature/Kconfig"
