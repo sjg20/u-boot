@@ -120,6 +120,7 @@ else
 # Main U-Boot always uses the full printf support
 obj-y += vsprintf.o strto.o
 endif
+obj-$(CONFIG_FLOAT) += strtof.o
 
 obj-y += date.o
 

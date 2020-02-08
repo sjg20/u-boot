@@ -222,4 +222,30 @@ bool str2long(const char *p, ulong *num);
  * @hz: Value to convert
  */
 char *strmhz(char *buf, unsigned long hz);
+
+/**
+ * strtod() - Convert text floating-point number to double
+ *
+ * @str: String to convert
+ * @entptr: If non-NULL, set to point to the character after the last one that
+ *	was part of the floating-point number
+ * @return double-precision floating-point representation of the characters in
+ *	@str.
+ */
+double strtod(const char *str, char **endptr);
+
+/**
+ * strtod() - Convert text floating-point number to double
+ *
+ * @str: decimal ASCII floating-point number, optionally preceded by whitespace.
+ * Must have form "-I.FE-X", where I is the integer part of the mantissa, F is
+ * the fractional part of the mantissa, and X is the exponent.  Either of the
+ * signs may be "+", "-", or omitted.  Either I or F may be omitted, or both.
+ * The decimal point isn't necessary unless F is present. The "E" may actually
+ * be an "e".  E and X may both be omitted (but not just one).
+ * @return double-precision floating-point representation of the characters in
+ *	@str.
+ */
+double atof(const char *str);
+
 #endif
