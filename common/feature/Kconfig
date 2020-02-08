@@ -4,3 +4,20 @@ config FEATURE
 	  Features are simple GUI applications provided in U-Boot, such as a
 	  boot menu or firmware-based diagnostics. Features are provided as
 	  drivers in the 'feature' uclass.
+
+if FEATURE
+
+config FEATURE_CALCULATOR
+	bool "Simple calculator demo"
+	depends on GUI_NUKLEAR
+	help
+	  This is a simple calculator intended to demonstrate how to make use
+	  of the Nuklear GUI in U-Boot. It supports based arithmetic operations
+	  and makes use of the mouse, keyboard and display.
+
+	  It is not intended to be enabled on production boards since it is
+	  just a sample feature.
+
+	  The calculator code is mostly provided by Nuklear.
+
+endif
