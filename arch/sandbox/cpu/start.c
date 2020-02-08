@@ -174,6 +174,15 @@ static int sandbox_cmdline_cb_fdt(struct sandbox_state *state, const char *arg)
 }
 SANDBOX_CMDLINE_OPT_SHORT(fdt, 'd', 1, "Specify U-Boot's control FDT");
 
+static int sandbox_cmdline_cb_title(struct sandbox_state *state,
+				    const char *arg)
+{
+	state->window_title = arg;
+
+	return 0;
+}
+SANDBOX_CMDLINE_OPT_SHORT(title, 'W', 1, "Set the window title to display");
+
 static int sandbox_cmdline_cb_default_fdt(struct sandbox_state *state,
 					  const char *arg)
 {
