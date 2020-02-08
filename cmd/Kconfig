@@ -2311,4 +2311,18 @@ config CMD_UBIFS
 	help
 	  UBIFS is a file system for flash devices which works on top of UBI.
 
+menu "Feature commands"
+
+config CMD_FEATURE
+	depends on FEATURE
+	default y
+	bool "feature - list and launch U-Boot features"
+	help
+	  The 'feature' command provides access to simple GUI applications
+	  provided in U-Boot, such as a boot menu or firmware-based
+	  diagnostics. Features are provided as drivers in the 'feature'
+	  uclass.
+
+endmenu
+
 endmenu

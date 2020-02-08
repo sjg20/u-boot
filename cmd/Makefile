@@ -65,6 +65,7 @@ obj-$(CONFIG_CMD_EXT2) += ext2.o
 obj-$(CONFIG_CMD_FAT) += fat.o
 obj-$(CONFIG_CMD_FDT) += fdt.o
 obj-$(CONFIG_CMD_SQUASHFS) += sqfs.o
+obj-$(CONFIG_CMD_FEATURE) += feature.o
 obj-$(CONFIG_CMD_FLASH) += flash.o
 obj-$(CONFIG_CMD_FPGA) += fpga.o
 obj-$(CONFIG_CMD_FPGAD) += fpgad.o
