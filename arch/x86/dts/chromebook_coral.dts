@@ -40,6 +40,19 @@
 		i2c7 = &i2c_7;
 	};
 
+	binman {
+		chrome_col80 {
+			type = "blob";
+			offset = <0xff400000>;
+			filename = "tools/logos/chrome_col80.png";
+		};
+
+		careena {
+			type = "blob";
+			filename = "tools/logos/careena.png";
+		};
+	};
+
 	config {
 	       silent_console = <0>;
 	};
@@ -96,6 +109,16 @@
 		#interrupt-cells = <2>;
 	};
 
+	calculator {
+		compatible = "feature,calculator";
+		gui = <&nuklear>;
+	};
+
+	diagnostics {
+		compatible = "feature,diagnostics";
+		gui = <&nuklear>;
+	};
+
 	keyboard {
 		intel,duplicate-por;
 	};
@@ -131,6 +154,15 @@
 			u-boot,dm-pre-reloc;
 			reg = <0x00000800 0 0 0 0>;
 			compatible = "intel,apl-punit";
+		};
+
+		graphics {
+			compatible = "fsp-fb";
+			reg = <0x00001000 0 0 0 0>;
+			nuklear: nuklear {
+				compatible = "gui,nuklear";
+				theme = "red";
+			};
 		};
 
 		p2sb: p2sb@d,0 {
@@ -270,13 +302,39 @@
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <104>;
 			i2c-scl-falling-time-ns = <52>;
+			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000 1000000>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			da_codec: da-codec {
+				reg = <0x1a>;
+				compatible = "dlg,da7219";
+				acpi,name = "DLG7";
+				acpi,desc = "Dialog Semiconductor DA7219 Audio Codec";
+				dlg,btn-cfg = <50>;
+				dlg,mic-det-thr = <500>;
+				dlg,jack-ins-deb = <20>;
+				dlg,jack-det-rate = "32ms_64ms";
+				dlg,jack-rem-deb = <1>;
+				dlg,a-d-btn-thr = <0xa>;
+				dlg,d-b-btn-thr = <0x16>;
+				dlg,b-c-btn-thr = <0x21>;
+				dlg,c-mic-btn-thr = <0x3e>;
+				dlg,btn-avg = <4>;
+				dlg,adc-1bit-rpt = <1>;
+				dlg,micbias-lvl = <2600>;
+				dlg,mic-amp-in-sel = "diff";
+			};
 		};
 
 		i2c_1: i2c2@16,1 {
 			compatible = "intel,apl-i2c";
 			reg = <0x0200b110 0 0 0 0>;
 			clocks = <&clk CLK_I2C>;
-			status = "disabled";
+			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000 1000000 3400000>;
+			i2c-scl-rising-time-ns = <52>;
+			i2c-scl-falling-time-ns = <52>;
 		};
 
 		i2c_2: i2c2@16,2 {
@@ -285,53 +343,117 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000 1000000>;
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <57>;
 			i2c-scl-falling-time-ns = <28>;
-			tpm@50 {
+			tpm: tpm@50 {
 				reg = <0x50>;
 				compatible = "google,cr50";
 				u-boot,i2c-offset-len = <0>;
-				ready-gpio = <&gpio_n 28 GPIO_ACTIVE_LOW>;
-				interrupts-extended = <&acpi_gpe 0x3c 0>;
+				ready-gpios = <&gpio_n 28 GPIO_ACTIVE_LOW>;
+				acpi,hid = "GOOG0005";
+				acpi,desc = "I2C TPM";
+				acpi,name = "TPMI";
 			};
 		};
 
 		i2c_3: i2c2@16,3 {
 			compatible = "intel,apl-i2c";
-			reg = <0x0200b110 0 0 0 0>;
+			reg = <0x0200b310 0 0 0 0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <76>;
 			i2c-scl-falling-time-ns = <164>;
+			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000>;
+			elan_touchscreen: elan-touchscreen@10 {
+				compatible = "i2c-chip";
+				reg = <0x10>;
+				acpi,hid = "ELAN0001";
+				acpi,desc = "ELAN Touchscreen";
+				acpi,probed;
+				reset-gpios = <&gpio_n GPIO_36 GPIO_ACTIVE_HIGH>;
+				reset-delay-ms = <20>;
+				enable-gpios = <&gpio_n GPIO_152 GPIO_ACTIVE_HIGH>;
+				enable-delay-ms = <1>;
+				acpi,has-power-resource;
+			};
+
+			raydium_touchscreen: raydium-touchscreen@39 {
+				compatible = "i2c-chip";
+				reg = <0x39>;
+				acpi,hid = "RAYD0001";
+				acpi,desc = "Raydium Touchscreen";
+				acpi,probed;
+				reset-gpios = <&gpio_n GPIO_36 GPIO_ACTIVE_HIGH>;
+				reset-delay-ms = <1>;
+				enable-gpios = <&gpio_n GPIO_152 GPIO_ACTIVE_HIGH>;
+				enable-delay-ms = <50>;
+				acpi,has-power-resource;
+			};
 		};
 
 		i2c_4: i2c2@17,0 {
 			compatible = "intel,apl-i2c";
-			reg = <0x0200b110 0 0 0 0>;
+			reg = <0x0200b810 0 0 0 0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
 			clocks = <&clk CLK_I2C>;
 			i2c-sda-hold-time-ns = <350>;
 			i2c-scl-rising-time-ns = <114>;
 			i2c-scl-falling-time-ns = <164>;
+			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000>;
+			elan_touchpad: elan-touchpad@15 {
+				compatible = "i2c-chip";
+				reg = <0x15>;
+				acpi,hid = "ELAN0000";
+				acpi,desc = "ELAN Touchpad";
+				acpi,probed;
+			};
+			synaptics_touchpad: synaptics-touchpad@2c {
+				compatible = "i2c-chip";
+				reg = <0x2c>;
+				acpi,hid = "PNP0C50";
+				acpi,cid = "PNP0C50";
+				acpi,desc = "Synaptics Touchpad";
+				acpi,probed;
+				acpi,hid-desc-reg-offset = <0x20>;
+			};
 		};
 
 		i2c_5: i2c2@17,1 {
 			compatible = "intel,apl-i2c";
-			reg = <0x0200b110 0 0 0 0>;
+			reg = <0x0200b910 0 0 0 0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
 			clocks = <&clk CLK_I2C>;
 			i2c-scl-rising-time-ns = <76>;
 			i2c-scl-falling-time-ns = <164>;
+			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000 1000000>;
+			wacom_digitizer: wacom-digitizer@9 {
+				compatible = "i2c-chip";
+				reg = <0x9>;
+				acpi,hid = "WCOM50C1";
+				acpi,cid = "PNP0C50";
+				acpi,desc = "WCOM Digitizer";
+				acpi,hid-desc-reg-offset = <0x1>;
+			};
 		};
 
 		i2c_6: i2c2@17,2 {
 			compatible = "intel,apl-i2c";
-			reg = <0x0200b110 0 0 0 0>;
+			reg = <0x0200ba10 0 0 0 0>;
 			clocks = <&clk CLK_I2C>;
 			status = "disabled";
 		};
 
 		i2c_7: i2c2@17,3 {
 			compatible = "intel,apl-i2c";
-			reg = <0x0200b110 0 0 0 0>;
+			reg = <0x0200bb10 0 0 0 0>;
 			clocks = <&clk CLK_I2C>;
 			status = "disabled";
 		};

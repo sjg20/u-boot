@@ -11,7 +11,7 @@
 #define __CONFIG_H
 
 #define CONFIG_BOOTCOMMAND	\
-	"fatload mmc 1:c 1000000 syslinux/vmlinuz.A; zboot 1000000"
+	"usb start; feature run diagnostics"
 
 #include <configs/x86-common.h>
 #include <configs/x86-chromebook.h>
