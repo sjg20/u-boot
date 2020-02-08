@@ -3,3 +3,4 @@
 # Copyright 2020 Google LLC
 
 obj-y += feature-uclass.o
+obj-$(CONFIG_FEATURE_CALCULATOR) += calc.o
