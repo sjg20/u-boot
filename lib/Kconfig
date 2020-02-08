@@ -693,4 +693,17 @@ config LIB_ELF
 	  Supoort basic elf loading/validating functions.
 	  This supports fir 32 bit and 64 bit versions.
 
+config FLOAT
+	bool "Support floating-point functions"
+	help
+	  U-Boot does not normally make use of floating point and it is
+	  generally possible and desirable to avoid it within a bootloader.
+
+	  However there are libraries which need it. For example, U-Boot's
+	  Truetype font implementation needs floating point and some features
+	  such as the Nuklear GUI make use of it also.
+
+	  Enable this to compile in some basic library functions for floating
+	  point.
+
 endmenu
