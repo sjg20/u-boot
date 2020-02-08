@@ -8,6 +8,8 @@
 
 #include <errno.h>
 
+struct mouse_event;
+
 #ifdef CONFIG_SANDBOX_SDL
 
 /**
@@ -79,6 +81,8 @@ int sandbox_sdl_sound_stop(void);
  * @return 0 if OK, -ENODEV if no sound is available
  */
 int sandbox_sdl_sound_init(int rate, int channels);
+
+int sandbox_sdl_get_mouse_event(struct mouse_event *evt);
 
 #else
 static inline int sandbox_sdl_init_display(int width, int height, int log2_bpp,
