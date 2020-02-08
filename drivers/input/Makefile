@@ -15,3 +15,6 @@ obj-$(CONFIG_TEGRA_KEYBOARD) += input.o tegra-kbc.o
 obj-$(CONFIG_TWL4030_INPUT) += twl4030.o
 obj-$(CONFIG_TWL6030_INPUT) += twl6030.o
 endif
+
+obj-$(CONFIG_MOUSE) += mouse-uclass.o
+obj-$(CONFIG_SANDBOX) += sandbox_mouse.o
