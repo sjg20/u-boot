@@ -256,6 +256,8 @@ void vidconsole_position_cursor(struct udevice *dev, unsigned col,
  */
 u32 vid_console_color(struct video_priv *priv, unsigned int idx);
 
+u8 *console_truetype_find_font(const char *find_name, int *sizep);
+
 #endif
 
 #endif
