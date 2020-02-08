@@ -41,7 +41,7 @@ rawfb_pl;
 
 
 /* All functions are thread-safe */
-NK_API struct rawfb_context *nk_rawfb_init(void *fb, void *tex_mem, const unsigned int w, const unsigned int h, const unsigned int pitch, const rawfb_pl pl);
+NK_API struct rawfb_context *nk_rawfb_init(void *fb, void *tex_mem, const unsigned int w, const unsigned int h, const unsigned int pitch, const rawfb_pl pl, void *userdata_ptr);
 NK_API void                  nk_rawfb_render(const struct rawfb_context *rawfb, const struct nk_color clear, const unsigned char enable_clear);
 NK_API void                  nk_rawfb_shutdown(struct rawfb_context *rawfb);
 NK_API void                  nk_rawfb_resize_fb(struct rawfb_context *rawfb, void *fb, const unsigned int w, const unsigned int h, const unsigned int pitch, const rawfb_pl pl);
@@ -61,12 +61,17 @@ struct rawfb_image {
     rawfb_pl pl;
     enum nk_font_atlas_format format;
 };
+
+#define RAWFB_MAX_IMAGES    20
+
 struct rawfb_context {
     struct nk_context ctx;
     struct nk_rect scissors;
     struct rawfb_image fb;
     struct rawfb_image font_tex;
+    struct rawfb_image img[RAWFB_MAX_IMAGES];
     struct nk_font_atlas atlas;
+    int num_images;
 };
 
 #ifndef MIN
@@ -813,7 +818,7 @@ nk_rawfb_clear(const struct rawfb_context *rawfb, const struct nk_color col)
 
 NK_API struct rawfb_context*
 nk_rawfb_init(void *fb, void *tex_mem, const unsigned int w, const unsigned int h,
-    const unsigned int pitch, const rawfb_pl pl)
+    const unsigned int pitch, const rawfb_pl pl, void *userdata_ptr)
 {
     const void *tex;
     struct rawfb_context *rawfb;
@@ -841,16 +846,24 @@ nk_rawfb_init(void *fb, void *tex_mem, const unsigned int w, const unsigned int 
 	return NULL;
     }
 
+    rawfb->ctx.userdata.ptr = userdata_ptr;
     if (0 == nk_init_default(&rawfb->ctx, 0)) {
+	perror("nk_rawfb_init(): nk_init_default() failed\n");
 	free(rawfb);
 	return NULL;
     }
 
     nk_font_atlas_init_default(&rawfb->atlas);
     nk_font_atlas_begin(&rawfb->atlas);
+    if (!nuk_add_fonts(&rawfb->atlas, userdata_ptr)) {
+	free(rawfb);
+	perror("nk_rawfb_init(): fonts failed\n");
+	return NULL;
+    }
     tex = nk_font_atlas_bake(&rawfb->atlas, &rawfb->font_tex.w, &rawfb->font_tex.h, rawfb->font_tex.format);
     if (!tex) {
 	free(rawfb);
+	perror("nk_rawfb_init(): tex failed\n");
 	return NULL;
     }
 
@@ -895,13 +908,26 @@ nk_rawfb_stretch_image(const struct rawfb_image *dst,
                     continue;
             }
             col = nk_rawfb_img_getpixel(src, (int)xoff, (int) yoff);
-	    if (col.r || col.g || col.b)
+	    if (!fg)
+	    {
+		int tmp;
+
+		tmp = col.r;
+		col.r = col.b;
+		col.b = tmp;
+//                 if (col.a && col.a != 255)
+//                     printf("%d ", col.a);
+// 		if (col.a)
+// 			nk_rawfb_img_setpixel(dst, i + (int)(dst_rect->x + 0.5f), j + (int)(dst_rect->y + 0.5f), col);
+	    }
+	    else if (col.r || col.g || col.b)
 	    {
 		col.r = fg->r;
 		col.g = fg->g;
 		col.b = fg->b;
 	    }
-            nk_rawfb_img_blendpixel(dst, i + (int)(dst_rect->x + 0.5f), j + (int)(dst_rect->y + 0.5f), col);
+	    nk_rawfb_img_blendpixel(dst, i + (int)(dst_rect->x + 0.5f),
+				    j + (int)(dst_rect->y + 0.5f), col);
             xoff += xinc;
         }
         xoff = src_rect->x;
@@ -950,6 +976,11 @@ nk_rawfb_draw_text(const struct rawfb_context *rawfb,
     int next_glyph_len = 0;
     struct nk_user_font_glyph g;
     if (!len || !text) return;
+
+    /* TODO: Simon: */
+    g.xadvance  = 0;
+    g.width = 0;
+    g.height = 0;
 
     x = 0;
     glyph_len = nk_utf_decode(text, &unicode, len);
@@ -1007,7 +1038,16 @@ nk_rawfb_drawimage(const struct rawfb_context *rawfb,
     dst_rect.y = y;
     dst_rect.w = w;
     dst_rect.h = h;
-    nk_rawfb_stretch_image(&rawfb->fb, &rawfb->font_tex, &dst_rect, &src_rect, &rawfb->scissors, col);
+//     printf("image %d %d %x %d %x\n", img->handle.id, x, y, w, h);
+    if (!img->handle.id) {
+        nk_rawfb_stretch_image(&rawfb->fb, &rawfb->font_tex, &dst_rect,
+                               &src_rect, &rawfb->scissors, col);
+	return;
+    }
+//     printf("image %d %d %d %d\n", (int)src_rect.x, (int)src_rect.y,
+// 	    (int)src_rect.w, (int)src_rect.h);
+    nk_rawfb_stretch_image(&rawfb->fb, &rawfb->img[img->handle.id - 1], &dst_rect,
+                               &src_rect, &rawfb->scissors, NULL);
 }
 
 NK_API void
