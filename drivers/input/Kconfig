@@ -83,3 +83,11 @@ config TWL4030_INPUT
 	bool "Enable TWL4030 Input controller"
 	help
 	  Enable TWL4030 Input controller
+
+config MOUSE
+	bool "Support for mice and other pointing devices"
+	help
+	  This allows U-Boot to access mouse input, typically needed for
+	  graphics boot menus and the like. The driver can provide mouse
+	  events based on user interaction and these can be used to control
+	  U-Boot's operation.

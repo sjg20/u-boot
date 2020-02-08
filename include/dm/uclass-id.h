@@ -69,6 +69,7 @@ enum uclass_id {
 	UCLASS_MISC,		/* Miscellaneous device */
 	UCLASS_MMC,		/* SD / MMC card or chip */
 	UCLASS_MOD_EXP,		/* RSA Mod Exp device */
+	UCLASS_MOUSE,		/* Mouse, trackpad or other pointing device */
 	UCLASS_MTD,		/* Memory Technology Device (MTD) device */
 	UCLASS_MUX,		/* Multiplexer device */
 	UCLASS_NOP,		/* No-op devices */
