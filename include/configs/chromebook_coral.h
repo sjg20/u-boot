@@ -10,6 +10,7 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+/*
 #define CONFIG_BOOTCOMMAND	\
 	"tpm init; tpm startup TPM2_SU_CLEAR; " \
 	"read mmc 2:2 100000 0 80; setexpr loader *001004f0; " \
@@ -23,6 +24,10 @@
 	"zboot start 100000 0 0 0 $setup cmdline; " \
 	"zboot load; zboot setup; zboot dump; zboot go;" \
 	"fi"
+*/
+
+#define CONFIG_BOOTCOMMAND	\
+	"usb start; feature run diagnostics"
 
 #include <configs/x86-common.h>
 #include <configs/x86-chromebook.h>

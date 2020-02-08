@@ -79,6 +79,19 @@
 		};
 	};
 
+	binman {
+		chrome_col80 {
+			type = "blob";
+			offset = <0xff400000>;
+			filename = "tools/logos/chrome_col80.png";
+		};
+
+		careena {
+			type = "blob";
+			filename = "tools/logos/careena.png";
+		};
+	};
+
 	config {
 	       silent_console = <0>;
 	};
@@ -144,6 +157,16 @@
 		#interrupt-cells = <2>;
 	};
 
+	calculator {
+		compatible = "feature,calculator";
+		gui = <&nuklear>;
+	};
+
+	diagnostics {
+		compatible = "feature,diagnostics";
+		gui = <&nuklear>;
+	};
+
 	keyboard {
 		intel,duplicate-por;
 	};
@@ -189,6 +212,10 @@
 		gma@2,0 {
 			reg = <0x00001000 0 0 0 0>;
 			compatible = "fsp-fb";
+			nuklear: nuklear {
+				compatible = "gui,nuklear";
+				theme = "red";
+			};
 		};
 
 		p2sb: p2sb@d,0 {
@@ -375,7 +402,7 @@
 			da_codec: da-codec {
 				reg = <0x1a>;
 				compatible = "dlg,da7219";
-				interrupts-extended = <&acpi_gpe GPIO_116_IRQ
+\				interrupts-extended = <&acpi_gpe GPIO_116_IRQ
 					(IRQ_TYPE_LEVEL_LOW | X86_IRQ_TYPE_SHARED)>;
 				acpi,name = "DLG7";
 				acpi,ddn = "Dialog Semiconductor DA7219 Audio Codec";
