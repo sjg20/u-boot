@@ -979,4 +979,14 @@ config VIDEO_VCXK
 	  This enables VCXK driver which can be used with VC2K, VC4K
 	  and VC8K devices on various boards from BuS Elektronik GmbH.
 
+config GUI
+	bool "Graphics User Interface support"
+	depends on DM_VIDEO
+	help
+	  Enable support for a GUI in U-Boot. This allows display of images
+	  and text laid out in a more sophistated way than is feasible with
+	  just the normal U-Boot console and image-blitting support. This can
+	  be used to implement the user interface for user-friendly diagnostics
+	  routines, for example.
+
 endmenu
