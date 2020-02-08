@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: GPL-2.0+
+#
+
+obj-y += nuklear_buffer.o
+obj-y += nuklear_button.o
+obj-y += nuklear_chart.o
+obj-y += nuklear_color.o
+obj-y += nuklear_color_picker.o
+obj-y += nuklear_combo.o
+obj-y += nuklear_context.o
+obj-y += nuklear_contextual.o
+obj-y += nuklear_draw.o
+obj-y += nuklear_edit.o
+obj-y += nuklear_font.o
+obj-y += nuklear_group.o
+obj-y += nuklear.h
+obj-y += nuklear_image.o
+obj-y += nuklear_input.o
+obj-y += nuklear_internal.h
+obj-y += nuklear_layout.o
+obj-y += nuklear_list_view.o
+obj-y += nuklear_math.o
+obj-y += nuklear_menu.o
+obj-y += nuklear_page_element.o
+obj-y += nuklear_panel.o
+obj-y += nuklear_pool.o
+obj-y += nuklear_popup.o
+obj-y += nuklear_progress.o
+obj-y += nuklear_property.o
+obj-y += nuklear_scrollbar.o
+obj-y += nuklear_selectable.o
+obj-y += nuklear_slider.o
+obj-y += nuklear_string.o
+obj-y += nuklear_style.o
+obj-y += nuklear_table.o
+obj-y += nuklear_text.o
+obj-y += nuklear_text_editor.o
+obj-y += nuklear_toggle.o
+obj-y += nuklear_tooltip.o
+obj-y += nuklear_tree.o
+obj-y += nuklear_utf8.o
+obj-y += nuklear_util.o
+obj-y += nuklear_vertex.o
+obj-y += nuklear_widget.o
+obj-y += nuklear_window.o
+
+obj-y += stb_image.o

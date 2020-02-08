@@ -101,6 +101,7 @@ obj-y += linux_compat.o
 obj-y += linux_string.o
 obj-$(CONFIG_LMB) += lmb.o
 obj-y += membuff.o
+obj-$(CONFIG_$(SPL_)GUI_NUKLEAR) += nuklear/
 obj-$(CONFIG_REGEX) += slre.o
 obj-y += string.o
 obj-y += tables_csum.o

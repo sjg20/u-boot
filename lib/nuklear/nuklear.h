@@ -1,6 +1,8 @@
 #ifndef NK_NUKLEAR_H_
 #define NK_NUKLEAR_H_
 
+#include <nuklear/settings.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -3812,6 +3814,7 @@ NK_API const nk_rune *nk_font_chinese_glyph_ranges(void);
 NK_API const nk_rune *nk_font_cyrillic_glyph_ranges(void);
 NK_API const nk_rune *nk_font_korean_glyph_ranges(void);
 
+NK_API int nuk_add_fonts(struct nk_font_atlas *atlas, void *userdata_ptr);
 #ifdef NK_INCLUDE_DEFAULT_ALLOCATOR
 NK_API void nk_font_atlas_init_default(struct nk_font_atlas*);
 #endif

@@ -246,6 +246,8 @@ nk_tree_element_image_push_hashed_base(struct nk_context *ctx, enum nk_tree_type
         }
     } else text.background = style->window.background;
 
+    text.background = text.text;
+
     in = (!(layout->flags & NK_WINDOW_ROM)) ? &ctx->input: 0;
     in = (in && widget_state == NK_WIDGET_VALID) ? &ctx->input : 0;
 

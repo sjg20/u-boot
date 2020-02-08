@@ -989,4 +989,26 @@ config GUI
 	  be used to implement the user interface for user-friendly diagnostics
 	  routines, for example.
 
+config GUI_NUKLEAR
+	bool "Enable Nuklear GUI toolkit"
+	depends on GUI
+	help
+	  This enables building Nuklear into U-Boot.
+
+	  Nuklear is is a minimal-state, immediate-mode graphical user interface
+	  toolkit written in ANSI C and licensed under public domain. It was
+	  designed as a simple embeddable user interface for application and
+	  does not have any dependencies, a default render backend or OS
+	  window/input handling but instead provides a highly modular,
+	  library-based approach, with simple input state for input and draw
+	  commands describing primitive shapes as output. So instead of
+	  providing a layered library that tries to abstract over a number of
+	  platform and render backends, it focuses only on the actual UI.
+
+	  Nuklearf can be used to provide GUI features in U-Boot, e.g. for
+	  verified boot screens, booting information or firmware-based
+	  diagnostics.
+
+	  For more details see https://github.com/Immediate-Mode-UI/Nuklear
+
 endmenu
