@@ -20,4 +20,11 @@ config FEATURE_CALCULATOR
 
 	  The calculator code is mostly provided by Nuklear.
 
+config FEATURE_DIAGNOSTICS
+	bool "Hardware diagnostics"
+	depends on GUI_NUKLEAR
+	help
+	  This is a basic diagnostics feature which provides a few simple
+	  diagnostics to check that the hardware is working correctly.
+
 endif

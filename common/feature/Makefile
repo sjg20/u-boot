@@ -4,3 +4,4 @@
 
 obj-y += feature-uclass.o
 obj-$(CONFIG_FEATURE_CALCULATOR) += calc.o
+obj-$(CONFIG_FEATURE_DIAGNOSTICS) += diag.o
