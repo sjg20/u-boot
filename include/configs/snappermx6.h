@@ -11,11 +11,6 @@
 #include "mx6_common.h"
 #include "imx6_spl.h"
 
-#if 0
-/* Thermal */
-#define CONFIG_IMX_THERMAL
-#endif
-
 /* Serial */
 #define CONFIG_MXC_UART_BASE	       UART5_BASE
 
@@ -43,34 +38,88 @@
 
 /* Default environment */
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"addcons=setenv bootargs ${bootargs} "				\
-		"console=${console},${baudrate}\0"			\
-	"addip=setenv bootargs ${bootargs} "				\
-		"ip=${ipaddr}:${serverip}:${gatewayip}:"		\
-		"${netmask}:${hostname}:${netdev}:off\0"		\
-	"addmisc=setenv bootargs ${bootargs} ${miscargs}\0" 		\
-	"bootcmd=run mmcboot\0"						\
-	"bootfile=uImage\0"						\
-	"bootimage=uImage\0"						\
-	"console=ttymxc0\0"						\
-	"fdt_addr_r=0x18000000\0" 					\
-	"fdt_file=imx6dl-sks-cts.dtb\0"					\
-	"fdt_high=0xffffffff\0" 					\
-	"kernel_addr_r=" __stringify(CONFIG_LOADADDR) "\0" 		\
-	"miscargs=quiet\0"						\
-	"mmcargs=setenv bootargs root=${mmcroot} rw rootwait\0"		\
-	"mmcboot=if run mmcload;then " 					\
-		"run mmcargs addcons addmisc;"				\
-			"bootm;fi\0" 					\
-	"mmcload=mmc rescan;"						\
-		"load mmc 0:${mmcpart} ${kernel_addr_r} boot/fitImage\0"\
-	"mmcpart=1\0"							\
-	"mmcroot=/dev/mmcblk0p1\0"					\
-	"net_nfs=tftp ${kernel_addr_r} ${board_name}/${bootfile};"	\
-		"tftp ${fdt_addr_r} ${board_name}/${fdt_file};"		\
-		"run nfsargs addip addcons addmisc;"			\
-		"bootm ${kernel_addr_r} - ${fdt_addr_r}\0"		\
-	"nfsargs=setenv bootargs root=/dev/nfs "			\
-		"nfsroot=${serverip}:${nfsroot},v3 panic=1\0"
+	"script=boot.scr\0" \
+	"image=zImage\0" \
+	"fdt_file=" CONFIG_DEFAULT_FDT_FILE "\0" \
+	"fdt_addr=0x18000000\0" \
+	"initrd_addr=0x13000000\0" \
+	"boot_fdt=try\0" \
+	"ip_dyn=yes\0" \
+	"console=ttymx4\0" \
+	"fdt_high=0xffffffff\0"	  \
+	"initrd_high=0xffffffff\0" \
+	"nfsroot=/export/root\0" \
+	"netargs=setenv bootargs console=${console},${baudrate} " \
+		"root=/dev/nfs " \
+		"ip=dhcp nfsroot=${nfsroot},v3,tcp\0" \
+	"netboot=echo Booting from net ...; " \
+		"run netargs; " \
+		"if test ${ip_dyn} = yes; then " \
+			"setenv get_cmd dhcp; " \
+		"else " \
+			"setenv get_cmd tftp; " \
+		"fi; " \
+		"${get_cmd} ${image}; " \
+		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
+			"if ${get_cmd} ${fdt_addr} ${fdt_file}; then " \
+				"bootz ${loadaddr} - ${fdt_addr}; " \
+			"else " \
+				"if test ${boot_fdt} = try; then " \
+					"bootz; " \
+				"else " \
+					"echo WARN: Cannot load the DT; " \
+				"fi; " \
+			"fi; " \
+		"else " \
+			"bootz; " \
+		"fi;\0" \
+	"spiargs=setenv bootargs console=${console},${baudrate} " \
+		"root=/dev/ram imgset_idx=${imgset_idx}\0" \
+	"spiboot=echo Booting from spi ...; " \
+		"run spiargs; " \
+		"sf probe && " \
+		"sf read $loadaddr $kernel_sf_addr 0x780000 && " \
+		"bootm $loadaddr\0" \
+	"imgset_params_update=echo imgset_idx: ${imgset_idx}; " \
+		"if test ${imgset_idx} = 0; then " \
+			"setenv sf_env_addr 0xD0000; " \
+			"setenv kernel_sf_addr 0x100000; " \
+		"elif test ${imgset_idx} = 1; then " \
+			"setenv sf_env_addr 0xE0000; " \
+			"setenv kernel_sf_addr 0x880000; " \
+		"fi;\0" \
+	"sf_env_len=0x10000\0" \
+	"sf_env_import=sf read ${loadaddr} ${sf_env_addr} ${sf_env_len} && env import -c ${loadaddr} ${sf_env_len}\0" \
+	"imgset_bootcmd=run spiboot\0" \
+	"boot_active_imgset=echo attempting to load active image set...; " \
+		"sf probe; " \
+		"for idx in '0 1'; do " \
+		  "env default -f -a; " \
+		  "setenv imgset_idx ${idx} && run imgset_params_update; " \
+		  "run sf_env_import; " \
+		  "if test $? = 0 && test ${activeset} = 1; then " \
+		    "echo using active env ${imgset_idx} (${sf_env_addr}); " \
+		    "run imgset_bootcmd; " \
+		  "fi; " \
+		"done\0" \
+	"boot_inactive_imgset=echo attempting to load inactive image set...; " \
+		"sf probe; " \
+		"for idx in '0 1'; do " \
+		  "env default -f -a; " \
+		  "setenv imgset_idx ${idx} && run imgset_params_update; " \
+		  "run sf_env_import; " \
+		  "if test $? = 0; then " \
+		    "echo using inactive env ${imgset_idx} (${sf_env_addr}); " \
+		    "run imgset_bootcmd; " \
+		  "fi; " \
+		"done\0" \
+	"boot_default_imgset=echo attempting to load default image set...; " \
+		"sf probe; " \
+		"env default -f -a; " \
+		"setenv imgset_idx 0 && run imgset_params_update; " \
+		"run spiboot\0" \
+	"boot_imgset=run boot_active_imgset; run boot_inactive_imgset; run boot_default_imgset\0"
+
+#define CONFIG_BOOTCOMMAND  "run boot_imgset"
 
 #endif
