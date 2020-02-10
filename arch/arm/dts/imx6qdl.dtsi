@@ -139,7 +139,7 @@
 		interrupts = <0 94 IRQ_TYPE_LEVEL_HIGH>;
 	};
 
-	soc {
+	soc: soc {
 		#address-cells = <1>;
 		#size-cells = <1>;
 		compatible = "simple-bus";
@@ -913,7 +913,7 @@
 			};
 		};
 
-		aips-bus@2100000 { /* AIPS2 */
+		aips2: aips-bus@2100000 { /* AIPS2 */
 			compatible = "fsl,aips-bus", "simple-bus";
 			#address-cells = <1>;
 			#size-cells = <1>;

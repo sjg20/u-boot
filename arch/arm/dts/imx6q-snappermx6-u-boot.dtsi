@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright 2020 Designa Electronics Ltd
+ */
+
+/ {
+	chosen {
+		stdout-path = &uart5;
+	};
+};
+
+&aips2 {
+	u-boot,dm-pre-reloc;
+};
+
+&soc {
+	u-boot,dm-pre-reloc;
+};
+
+&uart5 {
+	u-boot,dm-pre-reloc;
+};

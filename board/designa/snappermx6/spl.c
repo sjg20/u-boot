@@ -248,6 +248,8 @@ void board_debug_uart_init(void)
 
 void board_init_f(ulong dummy)
 {
+	int ret;
+
 	board_debug_uart_init();
 
 	arch_cpu_init();
@@ -256,6 +258,10 @@ void board_init_f(ulong dummy)
 
 	/* setup GP timer */
 	timer_init();
+
+	ret = spl_early_init();
+	if (ret)
+		panic("SPL early init failed");
 
 	/* UART clocks enabled and gd valid - init serial console */
 	preloader_console_init();
