@@ -247,6 +247,7 @@ int usb_host_eth_scan(int mode);
  * Appendix B of HID Device Class Definition 1.11
  */
 #define USB_KBD_BOOT_REPORT_SIZE 8
+#define USB_MOUSE_BOOT_REPORT_SIZE 8
 
 int drv_usb_kbd_init(void);
 int usb_kbd_deregister(int force);
