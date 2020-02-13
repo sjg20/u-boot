@@ -372,6 +372,7 @@ static int video_post_bind(struct udevice *dev)
 	struct video_uc_priv *uc_priv;
 	ulong addr;
 	ulong size;
+	int ret;
 
 	/* Before relocation there is nothing to do here */
 	if (!(gd->flags & GD_FLG_RELOC))
@@ -396,6 +397,10 @@ static int video_post_bind(struct udevice *dev)
 	debug("%s: Claiming %lx bytes at %lx for video device '%s'\n",
 	      __func__, size, addr, dev->name);
 	uc_priv->video_ptr = addr;
+
+	ret = dm_scan_fdt_dev(dev);
+	if (ret)
+		return log_msg_ret("bind", ret);
 
 	return 0;
 }
