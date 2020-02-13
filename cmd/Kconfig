@@ -2246,6 +2246,15 @@ config CMD_LOG
 	  maximum log level for emitting of records). It also provides access
 	  to a command used for testing the log system.
 
+config CMD_MOUSE
+	bool "mouse - Show mouse input"
+	default y if MOUSE
+	help
+	  This shows the data produced by a mouse. If a mouse device is
+	  available records are printed when the mouse is moved. This can be
+	  useful for checking that a mouse is working correctly within
+	  U-Boot.
+
 config CMD_TRACE
 	bool "trace - Support tracing of function calls and timing"
 	help
