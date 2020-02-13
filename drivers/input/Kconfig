@@ -91,3 +91,11 @@ config MOUSE
 	  graphics boot menus and the like. The driver can provide mouse
 	  events based on user interaction and these can be used to control
 	  U-Boot's operation.
+
+config USB_MOUSE
+	bool "USB mouse support"
+	help
+	  This enables using a USB mouse to control a feature in U-Boot,
+	  typically a boot menu. The driver uses the USB boot interface of
+	  the mouse and attempts to auto-configure itself for normal
+	  operation.

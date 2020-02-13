@@ -18,3 +18,4 @@ endif
 
 obj-$(CONFIG_MOUSE) += mouse-uclass.o
 obj-$(CONFIG_SANDBOX) += sandbox_mouse.o
+obj-$(CONFIG_USB_MOUSE) += usb_mouse.o
