@@ -22,6 +22,8 @@
 #define MMCSD_MODE_FS		2
 #define MMCSD_MODE_EMMCBOOT	3
 
+struct image_header;
+
 /*
  * u_boot_first_phase() - check if this is the first U-Boot phase
  *
