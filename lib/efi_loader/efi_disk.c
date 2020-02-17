@@ -389,7 +389,7 @@ int efi_disk_create_partitions(efi_handle_t parent, struct blk_desc *desc,
 {
 	int disks = 0;
 	char devname[32] = { 0 }; /* dp->str is u16[32] long */
-	disk_partition_t info;
+	struct disk_partition info;
 	int part;
 	struct efi_device_path *dp = NULL;
 	efi_status_t ret;
