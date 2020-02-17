@@ -12,6 +12,7 @@
 #include <s_record.h>
 #include <net.h>
 #include <ata.h>
+#include <asm/cache.h>
 #include <asm/io.h>
 #include <mapmem.h>
 #include <part.h>

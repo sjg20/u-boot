@@ -6,6 +6,7 @@
 
 #include <bootcount.h>
 #include <cpu_func.h>
+#include <asm/cache.h>
 #include <linux/compiler.h>
 
 /* Now implement the generic default functions */

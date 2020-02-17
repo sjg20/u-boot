@@ -13,6 +13,7 @@
 #include <console.h>
 #include <env.h>
 #include <init.h>
+#include <net.h>
 #include <version.h>
 
 /*

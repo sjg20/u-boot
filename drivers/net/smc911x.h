@@ -8,6 +8,7 @@
 #ifndef _SMC911X_H_
 #define _SMC911X_H_
 
+#include <net.h>
 #include <linux/types.h>
 
 #define DRIVERNAME "smc911x"

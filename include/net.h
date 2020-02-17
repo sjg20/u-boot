@@ -12,6 +12,7 @@
 #ifndef __NET_H__
 #define __NET_H__
 
+#include <linux/types.h>
 #include <asm/cache.h>
 #include <asm/byteorder.h>	/* for nton* / ntoh* stuff */
 #include <env.h>
@@ -20,7 +21,9 @@
 #include <linux/if_ether.h>
 #include <rand.h>
 
+struct bd_info;
 struct cmd_tbl_s;
+struct udevice;
 
 #define DEBUG_LL_STATE 0	/* Link local state machine changes */
 #define DEBUG_DEV_PKT 0		/* Packets or info directed to the device */
@@ -188,7 +191,7 @@ struct eth_device {
 	phys_addr_t iobase;
 	int state;
 
-	int (*init)(struct eth_device *, bd_t *);
+	int (*init)(struct eth_device *, struct bd_info *);
 	int (*send)(struct eth_device *, void *packet, int length);
 	int (*recv)(struct eth_device *);
 	void (*halt)(struct eth_device *);
@@ -246,7 +249,7 @@ static __always_inline void eth_halt_state_only(void)
 int eth_write_hwaddr(struct eth_device *dev, const char *base_name,
 		     int eth_number);
 
-int usb_eth_initialize(bd_t *bi);
+int usb_eth_initialize(struct bd_info *bi);
 #endif
 
 int eth_initialize(void);		/* Initialize network subsystem */

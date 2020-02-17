@@ -15,6 +15,7 @@
 #include <mmc.h>
 #include <sdhci.h>
 #include <dm.h>
+#include <asm/cache.h>
 
 #if defined(CONFIG_FIXED_SDHCI_ALIGNED_BUFFER)
 void *aligned_buffer = (void *)CONFIG_FIXED_SDHCI_ALIGNED_BUFFER;

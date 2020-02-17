@@ -1,3 +1,4 @@
+
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*------------------------------------------------------------------------
  . smc91111.h - macros for the LAN91C111 Ethernet Driver
@@ -30,6 +31,7 @@
 
 #include <asm/types.h>
 #include <config.h>
+#include <net.h>
 
 /*
  * This function may be called by the board specific initialisation code

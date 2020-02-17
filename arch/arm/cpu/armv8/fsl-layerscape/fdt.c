@@ -6,6 +6,7 @@
 #include <common.h>
 #include <clock_legacy.h>
 #include <efi_loader.h>
+#include <asm/cache.h>
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <phy.h>
