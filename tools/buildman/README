@@ -1079,7 +1079,7 @@ When doing builds, Buildman's return code will reflect the overall result:
 
     0 (success)     No errors or warnings found
     128             Errors found
-    129             Warnings found
+    129             Warnings found (use -W to return 0 in this case)
 
 
 How to change from MAKEALL
