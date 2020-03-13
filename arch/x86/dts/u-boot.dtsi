@@ -138,6 +138,10 @@
 		filename = CONFIG_FSP_FILE_S;
 	};
 #endif
+	private_files: private-files {
+		type = "files";
+		pattern = "*.dat";
+	};
 #if IS_ENABLED(CONFIG_HAVE_MRC) || IS_ENABLED(CONFIG_FSP_VERSION2)
 	rw-mrc-cache {
 		type = "blob";
