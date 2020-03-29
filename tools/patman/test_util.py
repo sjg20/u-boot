@@ -52,7 +52,8 @@ def RunTestCoverage(prog, filter_fname, exclude_list, build_dir, required=None,
     glob_list += exclude_list
     glob_list += ['*libfdt.py', '*site-packages*', '*dist-packages*']
     glob_list += ['*concurrencytest*']
-    test_cmd = 'test' if 'binman' in prog or 'patman' in prog else '-t'
+    test_cmd = ('test' if 'binman' in prog or 'patman' in prog
+                or 'labman' in prog else '-t')
     prefix = ''
     if build_dir:
         prefix = 'PYTHONPATH=$PYTHONPATH:%s/sandbox_spl/tools ' % build_dir

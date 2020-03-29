@@ -39,5 +39,12 @@
 				offset = <(U_BOOT_OFFSET)>;
 			};
 		};
+
+		rom {
+			filename = "image.rom";
+			pad-byte = <0xff>;
+			bct {
+			};
+		};
 	};
 };
