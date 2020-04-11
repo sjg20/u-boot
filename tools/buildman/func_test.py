@@ -13,9 +13,9 @@ from buildman import bsettings
 from buildman import cmdline
 from buildman import control
 from buildman import toolchain
-import command
-import gitutil
-import terminal
+from patman import command
+from patman import gitutil
+from patman import terminal
 
 settings_data = '''
 # Buildman settings file
