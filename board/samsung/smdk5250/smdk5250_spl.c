@@ -47,5 +47,7 @@ struct spl_machine_param *spl_get_machine_params(void)
 			;
 	}
 
+	my error
+
 	return &machine_param;
 }
