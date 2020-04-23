@@ -10,12 +10,15 @@
 
 #include <common.h>
 #include <dm.h>
+#include <hexdump.h>
 #include <log.h>
+#include <tables_csum.h>
 #include <uuid.h>
 #include <acpi/acpigen.h>
 #include <acpi/acpi_device.h>
 #include <acpi/acpi_table.h>
 #include <dm/acpi.h>
+#include <linux/ioport.h>
 
 /* CPU path format */
 #define ACPI_CPU_STRING "\\_PR.CP%02d"
@@ -130,6 +133,11 @@ void acpigen_write_one(struct acpi_ctx *ctx)
 	acpigen_emit_byte(ctx, ONE_OP);
 }
 
+void acpigen_write_ones(struct acpi_ctx *ctx)
+{
+	acpigen_emit_byte(ctx, ONES_OP);
+}
+
 void acpigen_write_integer(struct acpi_ctx *ctx, u64 data)
 {
 	if (data == 0)
@@ -213,6 +221,14 @@ void acpigen_write_string(struct acpi_ctx *ctx, const char *str)
 {
 	acpigen_emit_byte(ctx, STRING_PREFIX);
 	acpigen_emit_string(ctx, str);
+}
+
+void acpigen_write_coreboot_hid(struct acpi_ctx *ctx, enum coreboot_acpi_ids id)
+{
+	char hid[9]; /* BOOTxxxx */
+
+	snprintf(hid, sizeof(hid), "%.4s%04X", COREBOOT_ACPI_ID, id);
+	acpigen_write_name_string(ctx, "_HID", hid);
 }
 
 /*
@@ -341,6 +357,202 @@ void acpigen_write_method_serialized(struct acpi_ctx *ctx, const char *name,
 	acpigen_write_method_internal(ctx, name,
 				      (nargs & ACPI_METHOD_NARGS_MASK) |
 				      ACPI_METHOD_SERIALIZED_MASK);
+}
+
+/*
+ * Generate ACPI AML code for OperationRegion
+ * Arg0: Pointer to struct opregion opreg = OPREGION(rname, space, offset, len)
+ * where rname is region name, space is region space, offset is region offset &
+ * len is region length.
+ * OperationRegion(regionname, regionspace, regionoffset, regionlength)
+ */
+void acpigen_write_opregion(struct acpi_ctx *ctx, struct opregion *opreg)
+{
+	/* OpregionOp */
+	acpigen_emit_ext_op(ctx, OPREGION_OP);
+	/* NameString 4 chars only */
+	acpigen_emit_simple_namestring(ctx, opreg->name);
+	/* RegionSpace */
+	acpigen_emit_byte(ctx, opreg->regionspace);
+	/* RegionOffset & RegionLen, it can be byte word or double word */
+	acpigen_write_integer(ctx, opreg->regionoffset);
+	acpigen_write_integer(ctx, opreg->regionlen);
+}
+
+static void acpigen_write_field_length(struct acpi_ctx *ctx, u32 len)
+{
+	u8 i, j;
+	u8 emit[4];
+
+	i = 1;
+	if (len < 0x40) {
+		emit[0] = len & 0x3F;
+	} else {
+		emit[0] = len & 0xF;
+		len >>= 4;
+		while (len) {
+			emit[i] = len & 0xFF;
+			i++;
+			len >>= 8;
+		}
+	}
+	/* Update bit 7:6 : Number of bytes followed by emit[0] */
+	emit[0] |= (i - 1) << 6;
+
+	for (j = 0; j < i; j++)
+		acpigen_emit_byte(ctx, emit[j]);
+}
+
+static int acpigen_write_field_offset(struct acpi_ctx *ctx, u32 offset,
+				      u32 current_bit_pos)
+{
+	u32 diff_bits;
+
+	if (offset < current_bit_pos) {
+		log_warning("Cannot move offset backward");
+		return -ESPIPE;
+	}
+
+	diff_bits = offset - current_bit_pos;
+	/* Upper limit */
+	if (diff_bits > 0xFFFFFFF) {
+		log_warning("Offset very large to encode");
+		return E2BIG;
+	}
+
+	acpigen_emit_byte(ctx, 0);
+	acpigen_write_field_length(ctx, diff_bits);
+
+	return 0;
+}
+
+static void acpigen_write_field_name(struct acpi_ctx *ctx, const char *name,
+				     u32 size)
+{
+	acpigen_emit_simple_namestring(ctx, name);
+	acpigen_write_field_length(ctx, size);
+}
+
+/*
+ * Generate ACPI AML code for Field
+ * Arg0: region name
+ * Arg1: Pointer to struct fieldlist.
+ * Arg2: no. of entries in Arg1
+ * Arg3: flags which indicate filed access type, lock rule  & update rule.
+ * Example with fieldlist
+ * struct fieldlist l[] = {
+ *	FIELDLIST_OFFSET(0x84),
+ *	FIELDLIST_NAMESTR("PMCS", 2),
+ *	};
+ * acpigen_write_field("UART", l, ARRAY_SIZE(l), FIELD_ANYACC | FIELD_NOLOCK |
+ *								FIELD_PRESERVE);
+ * Output:
+ * Field (UART, AnyAcc, NoLock, Preserve)
+ *	{
+ *		Offset (0x84),
+ *		PMCS,   2
+ *	}
+ */
+int acpigen_write_field(struct acpi_ctx *ctx, const char *name,
+			struct fieldlist *l, size_t count, uint flags)
+{
+	int i;
+	u32 current_bit_pos = 0;
+	int ret;
+
+	/* FieldOp */
+	acpigen_emit_ext_op(ctx, FIELD_OP);
+	/* Package Length */
+	acpigen_write_len_f(ctx);
+	/* NameString 4 chars only */
+	acpigen_emit_simple_namestring(ctx, name);
+	/* Field Flag */
+	acpigen_emit_byte(ctx, flags);
+
+	for (i = 0; i < count; i++) {
+		switch (l[i].type) {
+		case NAME_STRING:
+			acpigen_write_field_name(ctx, l[i].name, l[i].bits);
+			current_bit_pos += l[i].bits;
+			break;
+		case OFFSET:
+			ret = acpigen_write_field_offset(ctx, l[i].bits,
+							 current_bit_pos);
+			if (ret)
+				return log_msg_ret("field", ret);
+			current_bit_pos = l[i].bits;
+			break;
+		default:
+			log_err("Invalid field type %#x\n", l[i].type);
+			return -EDOM;
+		}
+	}
+	acpigen_pop_len(ctx);
+
+	return 0;
+}
+
+/*
+ * Generate ACPI AML code for IndexField
+ * Arg0: region name
+ * Arg1: Pointer to struct fieldlist.
+ * Arg2: no. of entries in Arg1
+ * Arg3: flags which indicate filed access type, lock rule  & update rule.
+ * Example with fieldlist
+ * struct fieldlist l[] = {
+ *	FIELDLIST_OFFSET(0x84),
+ *	FIELDLIST_NAMESTR("PMCS", 2),
+ *	};
+ * acpigen_write_field("IDX", "DATA" l, ARRAY_SIZE(l), FIELD_ANYACC |
+ *						       FIELD_NOLOCK |
+ *						       FIELD_PRESERVE);
+ * Output:
+ * IndexField (IDX, DATA, AnyAcc, NoLock, Preserve)
+ *	{
+ *		Offset (0x84),
+ *		PMCS,   2
+ *	}
+ */
+int acpigen_write_indexfield(struct acpi_ctx *ctx, const char *idx,
+			     const char *data, struct fieldlist *l,
+			     size_t count, uint flags)
+{
+	u16 i;
+	u32 current_bit_pos = 0;
+	int ret;
+
+	/* FieldOp */
+	acpigen_emit_ext_op(ctx, INDEX_FIELD_OP);
+	/* Package Length */
+	acpigen_write_len_f(ctx);
+	/* NameString 4 chars only */
+	acpigen_emit_simple_namestring(ctx, idx);
+	/* NameString 4 chars only */
+	acpigen_emit_simple_namestring(ctx, data);
+	/* Field Flag */
+	acpigen_emit_byte(ctx, flags);
+
+	for (i = 0; i < count; i++) {
+		switch (l[i].type) {
+		case NAME_STRING:
+			acpigen_write_field_name(ctx, l[i].name, l[i].bits);
+			current_bit_pos += l[i].bits;
+			break;
+		case OFFSET:
+			ret = acpigen_write_field_offset(ctx, l[i].bits,
+							 current_bit_pos);
+			if (ret)
+				return log_msg_ret("field", ret);
+			current_bit_pos = l[i].bits;
+			break;
+		default:
+			log_err("Invalid field type 0x%X\n", l[i].type);
+			return -EDOM;
+		}
+	}
+	acpigen_pop_len(ctx);
+
+	return 0;
 }
 
 void acpigen_write_processor(struct acpi_ctx *ctx, uint cpuindex,
@@ -658,6 +870,39 @@ void acpigen_write_tsd_package(struct acpi_ctx *ctx, u32 domain, u32 numprocs,
 	acpigen_pop_len(ctx);
 }
 
+void acpigen_write_mem32fixed(struct acpi_ctx *ctx, int readwrite, u32 base,
+			      u32 size)
+{
+	/*
+	 * ACPI 4.0 section 6.4.3.4: 32-Bit Fixed Memory Range Descriptor
+	 * Byte 0:
+	 *   Bit7  : 1 => big item
+	 *   Bit6-0: 0000110 (0x6) => 32-bit fixed memory
+	 */
+	acpigen_emit_byte(ctx, 0x86);
+	/* Byte 1+2: length (0x0009) */
+	acpigen_emit_byte(ctx, 0x09);
+	acpigen_emit_byte(ctx, 0x00);
+	/* bit1-7 are ignored */
+	acpigen_emit_byte(ctx, readwrite ? 0x01 : 0x00);
+	acpigen_emit_dword(ctx, base);
+	acpigen_emit_dword(ctx, size);
+}
+
+void acpigen_write_irq(struct acpi_ctx *ctx, u16 mask)
+{
+	/*
+	 * ACPI 3.0b section 6.4.2.1: IRQ Descriptor
+	 * Byte 0:
+	 *   Bit7  : 0 => small item
+	 *   Bit6-3: 0100 (0x4) => IRQ port descriptor
+	 *   Bit2-0: 010 (0x2) => 2 Bytes long
+	 */
+	acpigen_emit_byte(ctx, 0x22);
+	acpigen_emit_byte(ctx, mask & 0xff);
+	acpigen_emit_byte(ctx, (mask >> 8) & 0xff);
+}
+
 /*
  * ToUUID(uuid)
  *
@@ -729,6 +974,14 @@ void acpigen_write_store(struct acpi_ctx *ctx)
 	acpigen_emit_byte(ctx, STORE_OP);
 }
 
+/* Store (src, dst) */
+void acpigen_write_store_ops(struct acpi_ctx *ctx, u8 src, u8 dst)
+{
+	acpigen_write_store(ctx);
+	acpigen_emit_byte(ctx, src);
+	acpigen_emit_byte(ctx, dst);
+}
+
 /* Or (arg1, arg2, res) */
 void acpigen_write_or(struct acpi_ctx *ctx, u8 arg1, u8 arg2, u8 res)
 {
@@ -763,10 +1016,35 @@ void acpigen_write_debug_string(struct acpi_ctx *ctx, const char *str)
 	acpigen_emit_ext_op(ctx, DEBUG_OP);
 }
 
+/* Store (val, DEBUG) */
+void acpigen_write_debug_integer(struct acpi_ctx *ctx, u64 val)
+{
+	acpigen_write_store(ctx);
+	acpigen_write_integer(ctx, val);
+	acpigen_emit_ext_op(ctx, DEBUG_OP);
+}
+
+/* Store (op, DEBUG) */
+void acpigen_write_debug_op(struct acpi_ctx *ctx, u8 op)
+{
+	acpigen_write_store(ctx);
+	acpigen_emit_byte(ctx, op);
+	acpigen_emit_ext_op(ctx, DEBUG_OP);
+}
+
 void acpigen_write_if(struct acpi_ctx *ctx)
 {
 	acpigen_emit_byte(ctx, IF_OP);
 	acpigen_write_len_f(ctx);
+}
+
+/* If (And (arg1, arg2)) */
+void acpigen_write_if_and(struct acpi_ctx *ctx, u8 arg1, u8 arg2)
+{
+	acpigen_write_if(ctx);
+	acpigen_emit_byte(ctx, AND_OP);
+	acpigen_emit_byte(ctx, arg1);
+	acpigen_emit_byte(ctx, arg2);
 }
 
 void acpigen_write_if_lequal_op_int(struct acpi_ctx *ctx, uint op, u64 val)
@@ -831,6 +1109,33 @@ void acpigen_write_return_byte(struct acpi_ctx *ctx, uint arg)
 	acpigen_write_byte(ctx, arg);
 }
 
+void acpigen_write_return_integer(struct acpi_ctx *ctx, u64 arg)
+{
+	acpigen_emit_byte(ctx, RETURN_OP);
+	acpigen_write_integer(ctx, arg);
+}
+
+void acpigen_write_return_string(struct acpi_ctx *ctx, const char *arg)
+{
+	acpigen_emit_byte(ctx, RETURN_OP);
+	acpigen_write_string(ctx, arg);
+}
+
+void acpigen_write_upc(struct acpi_ctx *ctx, enum acpi_upc_type type)
+{
+	acpigen_write_name(ctx, "_UPC");
+	acpigen_write_package(ctx, 4);
+	/* Connectable */
+	acpigen_write_byte(ctx, type == UPC_TYPE_UNUSED ? 0 : 0xff);
+	/* Type */
+	acpigen_write_byte(ctx, type);
+	/* Reserved0 */
+	acpigen_write_zero(ctx);
+	/* Reserved1 */
+	acpigen_write_zero(ctx);
+	acpigen_pop_len(ctx);
+}
+
 void acpigen_write_dsm_start(struct acpi_ctx *ctx)
 {
 	/* Method (_DSM, 4, Serialized) */
@@ -885,6 +1190,269 @@ void acpigen_write_dsm_end(struct acpi_ctx *ctx)
 	acpigen_pop_len(ctx);	/* Method _DSM */
 }
 
+#define CPPC_PACKAGE_NAME "\\GCPC"
+
+int acpigen_write_cppc_package(struct acpi_ctx *ctx,
+			       const struct cppc_config *config)
+{
+	u32 i;
+	u32 max;
+
+	switch (config->version) {
+	case 1:
+		max = CPPC_MAX_FIELDS_VER_1;
+		break;
+	case 2:
+		max = CPPC_MAX_FIELDS_VER_2;
+		break;
+	case 3:
+		max = CPPC_MAX_FIELDS_VER_3;
+		break;
+	default:
+		log_err("CPPC version %u is not implemented\n",
+			config->version);
+		return -EDOM;
+	}
+	acpigen_write_name(ctx, CPPC_PACKAGE_NAME);
+
+	/* Adding 2 to account for length and version fields */
+	acpigen_write_package(ctx, max + 2);
+	acpigen_write_dword(ctx, max + 2);
+
+	acpigen_write_byte(ctx, config->version);
+
+	for (i = 0; i < max; ++i) {
+		const struct acpi_gen_regaddr *reg = &config->regs[i];
+
+		if (reg->space_id == ACPI_ADDRESS_SPACE_MEMORY &&
+		    reg->bit_width == 32 && reg->access_size == 0) {
+			acpigen_write_dword(ctx, reg->addrl);
+		} else {
+			acpigen_write_register_resource(ctx, reg);
+		}
+	}
+	acpigen_pop_len(ctx);
+
+	return 0;
+}
+
+void acpigen_write_cppc_method(struct acpi_ctx *ctx)
+{
+	acpigen_write_method(ctx, "_CPC", 0);
+	acpigen_emit_byte(ctx, RETURN_OP);
+	acpigen_emit_namestring(ctx, CPPC_PACKAGE_NAME);
+	acpigen_pop_len(ctx);
+}
+
+/*
+ * Generate ACPI AML code for _ROM method.
+ * This function takes as input ROM data and ROM length.
+ *
+ * The ACPI spec isn't clear about what should happen at the end of the
+ * ROM. Tests showed that it shouldn't truncate, but fill the remaining
+ * bytes in the returned buffer with zeros.
+ *
+ * Arguments passed into _DSM method:
+ * Arg0 = Offset in Bytes
+ * Arg1 = Bytes to return
+ *
+ * Example:
+ *   acpigen_write_rom(0xdeadbeef, 0x10000)
+ *
+ * AML code generated would look like:
+ * Method (_ROM, 2, NotSerialized) {
+ *
+ *	OperationRegion("ROMS", SYSTEMMEMORY, 0xdeadbeef, 0x10000)
+ *	Field (ROMS, AnyAcc, NoLock, Preserve)
+ *	{
+ *		Offset (0),
+ *		RBF0,   0x80000
+ *	}
+ *
+ *	Store (Arg0, Local0)
+ *	Store (Arg1, Local1)
+ *
+ *	If (LGreater (Local1, 0x1000))
+ *	{
+ *		Store (0x1000, Local1)
+ *	}
+ *
+ *	Store (Local1, Local3)
+ *
+ *	If (LGreater (Local0, 0x10000))
+ *	{
+ *		Return(Buffer(Local1){0})
+ *	}
+ *
+ *	If (LGreater (Local0, 0x0f000))
+ *	{
+ *		Subtract (0x10000, Local0, Local2)
+ *		If (LGreater (Local1, Local2))
+ *		{
+ *			Store (Local2, Local1)
+ *		}
+ *	}
+ *
+ *	Name (ROM1, Buffer (Local3) {0})
+ *
+ *	Multiply (Local0, 0x08, Local0)
+ *	Multiply (Local1, 0x08, Local1)
+ *
+ *	CreateField (RBF0, Local0, Local1, TMPB)
+ *	Store (TMPB, ROM1)
+ *	Return (ROM1)
+ * }
+ */
+int acpigen_write_rom(struct acpi_ctx *ctx, void *bios, const size_t length)
+{
+	int ret;
+
+	assert(bios);
+	assert(length);
+
+	/* Method (_ROM, 2, Serialized) */
+	acpigen_write_method_serialized(ctx, "_ROM", 2);
+
+	/* OperationRegion("ROMS", SYSTEMMEMORY, current, length) */
+	struct opregion opreg = OPREGION("ROMS", SYSTEMMEMORY,
+			(uintptr_t)bios, length);
+	acpigen_write_opregion(ctx, &opreg);
+
+	struct fieldlist l[] = {
+		FIELDLIST_OFFSET(0),
+		FIELDLIST_NAMESTR("RBF0", 8 * length),
+	};
+
+	/*
+	 * Field (ROMS, AnyAcc, NoLock, Preserve)
+	 * {
+	 *  Offset (0),
+	 *  RBF0,   0x80000
+	 * }
+	 */
+	ret = acpigen_write_field(ctx, opreg.name, l, 2, FIELD_ANYACC |
+				  FIELD_NOLOCK | FIELD_PRESERVE);
+	if (ret)
+		return log_msg_ret("field", ret);
+
+	/* Store (Arg0, Local0) */
+	acpigen_write_store(ctx);
+	acpigen_emit_byte(ctx, ARG0_OP);
+	acpigen_emit_byte(ctx, LOCAL0_OP);
+
+	/* Store (Arg1, Local1) */
+	acpigen_write_store(ctx);
+	acpigen_emit_byte(ctx, ARG1_OP);
+	acpigen_emit_byte(ctx, LOCAL1_OP);
+
+	/* ACPI SPEC requires to return at maximum 4KiB */
+	/* If (LGreater (Local1, 0x1000)) */
+	acpigen_write_if(ctx);
+	acpigen_emit_byte(ctx, LGREATER_OP);
+	acpigen_emit_byte(ctx, LOCAL1_OP);
+	acpigen_write_integer(ctx, 0x1000);
+
+	/* Store (0x1000, Local1) */
+	acpigen_write_store(ctx);
+	acpigen_write_integer(ctx, 0x1000);
+	acpigen_emit_byte(ctx, LOCAL1_OP);
+
+	/* Pop if */
+	acpigen_pop_len(ctx);
+
+	/* Store (Local1, Local3) */
+	acpigen_write_store(ctx);
+	acpigen_emit_byte(ctx, LOCAL1_OP);
+	acpigen_emit_byte(ctx, LOCAL3_OP);
+
+	/* If (LGreater (Local0, length)) */
+	acpigen_write_if(ctx);
+	acpigen_emit_byte(ctx, LGREATER_OP);
+	acpigen_emit_byte(ctx, LOCAL0_OP);
+	acpigen_write_integer(ctx, length);
+
+	/* Return(Buffer(Local1){0}) */
+	acpigen_emit_byte(ctx, RETURN_OP);
+	acpigen_emit_byte(ctx, BUFFER_OP);
+	acpigen_write_len_f(ctx);
+	acpigen_emit_byte(ctx, LOCAL1_OP);
+	acpigen_emit_byte(ctx, 0);
+	acpigen_pop_len(ctx);
+
+	/* Pop if */
+	acpigen_pop_len(ctx);
+
+	/* If (LGreater (Local0, length - 4096)) */
+	acpigen_write_if(ctx);
+	acpigen_emit_byte(ctx, LGREATER_OP);
+	acpigen_emit_byte(ctx, LOCAL0_OP);
+	acpigen_write_integer(ctx, length - 4096);
+
+	/* Subtract (length, Local0, Local2) */
+	acpigen_emit_byte(ctx, SUBTRACT_OP);
+	acpigen_write_integer(ctx, length);
+	acpigen_emit_byte(ctx, LOCAL0_OP);
+	acpigen_emit_byte(ctx, LOCAL2_OP);
+
+	/* If (LGreater (Local1, Local2)) */
+	acpigen_write_if(ctx);
+	acpigen_emit_byte(ctx, LGREATER_OP);
+	acpigen_emit_byte(ctx, LOCAL1_OP);
+	acpigen_emit_byte(ctx, LOCAL2_OP);
+
+	/* Store (Local2, Local1) */
+	acpigen_write_store(ctx);
+	acpigen_emit_byte(ctx, LOCAL2_OP);
+	acpigen_emit_byte(ctx, LOCAL1_OP);
+
+	/* Pop if */
+	acpigen_pop_len(ctx);
+
+	/* Pop if */
+	acpigen_pop_len(ctx);
+
+	/* Name (ROM1, Buffer (Local3) {0}) */
+	acpigen_write_name(ctx, "ROM1");
+	acpigen_emit_byte(ctx, BUFFER_OP);
+	acpigen_write_len_f(ctx);
+	acpigen_emit_byte(ctx, LOCAL3_OP);
+	acpigen_emit_byte(ctx, 0);
+	acpigen_pop_len(ctx);
+
+	/* Multiply (Local1, 0x08, Local1) */
+	acpigen_emit_byte(ctx, MULTIPLY_OP);
+	acpigen_emit_byte(ctx, LOCAL1_OP);
+	acpigen_write_integer(ctx, 0x08);
+	acpigen_emit_byte(ctx, LOCAL1_OP);
+
+	/* Multiply (Local0, 0x08, Local0) */
+	acpigen_emit_byte(ctx, MULTIPLY_OP);
+	acpigen_emit_byte(ctx, LOCAL0_OP);
+	acpigen_write_integer(ctx, 0x08);
+	acpigen_emit_byte(ctx, LOCAL0_OP);
+
+	/* CreateField (RBF0, Local0, Local1, TMPB) */
+	acpigen_emit_ext_op(ctx, CREATEFIELD_OP);
+	acpigen_emit_namestring(ctx, "RBF0");
+	acpigen_emit_byte(ctx, LOCAL0_OP);
+	acpigen_emit_byte(ctx, LOCAL1_OP);
+	acpigen_emit_namestring(ctx, "TMPB");
+
+	/* Store (TMPB, ROM1) */
+	acpigen_write_store(ctx);
+	acpigen_emit_namestring(ctx, "TMPB");
+	acpigen_emit_namestring(ctx, "ROM1");
+
+	/* Return (ROM1) */
+	acpigen_emit_byte(ctx, RETURN_OP);
+	acpigen_emit_namestring(ctx, "ROM1");
+
+	/* Pop method */
+	acpigen_pop_len(ctx);
+
+	return 0;
+}
+
 /**
  * acpigen_get_dw0_in_local5() - Generate code to put dw0 cfg0 in local5
  *
@@ -924,6 +1492,11 @@ static int acpigen_set_gpio_val(struct acpi_ctx *ctx, u32 tx_state_val,
 				struct acpi_gpio *gpio, bool val)
 {
 	acpigen_get_dw0_in_local5(ctx, dw0_read, gpio->pin0_addr);
+
+	/* Store (0x40, Local0) */
+	acpigen_write_store(ctx);
+	acpigen_write_integer(ctx, tx_state_val);
+	acpigen_emit_byte(ctx, LOCAL0_OP);
 
 	/* Store (0x40, Local0) */
 	acpigen_write_store(ctx);

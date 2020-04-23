@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <irq.h>
 #include <log.h>
+#include <malloc.h>
 #include <usb.h>
 #include <acpi/acpigen.h>
 #include <acpi/acpi_device.h>
