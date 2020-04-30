@@ -7,8 +7,6 @@
  * Murray.Jensen@cmst.csiro.au, 27-Jan-01.
  */
 
-#define DEBUG
-
 #include <common.h>
 #include <command.h>
 #include <config.h>
@@ -1011,7 +1009,6 @@ int usb_gadget_register_driver(struct usb_gadget_driver *driver)
 {
 	int ret;
 
-        debug("%s: here\n", __func__);
 	if (!driver)
 		return -EINVAL;
 	if (!driver->bind || !driver->setup || !driver->disconnect)
@@ -1024,10 +1021,8 @@ int usb_gadget_register_driver(struct usb_gadget_driver *driver)
 #else
 	ret = usb_lowlevel_init(0, USB_INIT_DEVICE, (void **)&controller.ctrl);
 #endif
-	if (ret) {
-            debug("%s: bad ret %d\n", __func__, ret);
+	if (ret)
 		return ret;
-        }
 
 	ret = ci_udc_probe();
 	if (ret) {

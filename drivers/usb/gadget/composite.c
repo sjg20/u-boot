@@ -5,7 +5,7 @@
  * Copyright (C) 2006-2008 David Brownell
  * U-Boot porting: Lukasz Majewski <l.majewski@samsung.com>
  */
-#define DEBUG
+#undef DEBUG
 
 #include <dm/devres.h>
 #include <linux/bitops.h>
@@ -1159,7 +1159,6 @@ int usb_composite_register(struct usb_composite_driver *driver)
 {
 	int res;
 
-        debug("%s: here\n", __func__);
 	if (!driver || !driver->dev || !driver->bind || composite)
 		return -EINVAL;
 
@@ -1167,7 +1166,6 @@ int usb_composite_register(struct usb_composite_driver *driver)
 		driver->name = "composite";
 	composite = driver;
 
-        debug("%s: register\n", __func__);
 	res = usb_gadget_register_driver(&composite_driver);
 	if (res != 0)
 		composite = NULL;

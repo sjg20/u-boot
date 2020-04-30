@@ -328,7 +328,6 @@ int usb_gadget_probe_driver(struct usb_gadget_driver *driver)
 	if (!driver || !driver->bind || !driver->setup)
 		return -EINVAL;
 
-        debug("%s: here\n", __func__);
 	mutex_lock(&udc_lock);
 	list_for_each_entry(udc, &udc_list, list) {
 		/* For now we take the first one */
