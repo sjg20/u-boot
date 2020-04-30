@@ -591,7 +591,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	struct spl_image_info spl_image;
 	int ret;
 
-	debug(">>" SPL_TPL_PROMPT "board_init_r()\n");
+	printf(">>" SPL_TPL_PROMPT "board_init_r()\n");
 
 	spl_set_bd();
 
