@@ -6,6 +6,9 @@
  *
  * All rights reserved.
  */
+
+#define DEBUG
+
 #include <common.h>
 #include <cpu_func.h>
 #include <dm.h>
@@ -1141,6 +1144,7 @@ int usb_lowlevel_init(int index, enum usb_init_type init, void **controller)
 	uint tweaks = 0;
 	int rc;
 
+        debug("%s: here\n", __func__);
 	/**
 	 * Set ops to default_ehci_ops, ehci_hcd_init should call
 	 * ehci_set_controller_priv to change any of these function pointers.
