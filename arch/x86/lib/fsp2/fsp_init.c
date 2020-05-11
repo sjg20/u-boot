@@ -75,19 +75,22 @@ static int get_cbfs_fsp(enum fsp_type_t type, ulong map_base,
 {
 	ulong cbfs_base = 0;
 	struct cbfs_cachenode node;
+	const char *name;
 	int ret;
 
 	cbfs_base = CONFIG_IS_ENABLED(CONFIG_FSP_FROM_CBFS,
 				      (CONFIG_FSP_CBFS_BASE), (0));
-	ret = file_cbfs_find_uncached_base(map_base + cbfs_base, "fspm.bin",
-					   &node);
+	name = type == FSP_S ? "fsps.bin" : "fspm.bin";
+	log_debug("Looking for %s in CBFS at %lx\n", name,
+		  map_base + cbfs_base);
+	ret = file_cbfs_find_uncached_base(map_base + cbfs_base, name, &node);
 	log_debug("find ret=%d\n", ret);
 	if (ret)
 		return log_msg_ret("cbfs", ret);
 
 	entry->image_pos = (ulong)node.data;
 	entry->size = node.data_length;
-	log_debug("Found FSP at %p\n", node.data);
+	log_debug("Found FSP %s at %p\n", name, node.data);
 
 	return 0;
 }
@@ -144,12 +147,18 @@ int fsp_locate_fsp(enum fsp_type_t type, struct binman_entry *entry,
 		}
 	} else {
 		ret = -ENOENT;
-		if (false)
+		if (type != FSP_M)
+			return -EPROTONOSUPPORT;
+		if (IS_ENABLED(CONFIG_FSP_FROM_CBFS)) {
 			/*
 			 * Support using a hybrid image build by coreboot. See
 			 * the function comments for details
 			 */
 			ret = get_cbfs_fsp(type, map_base, entry);
+			if (ret)
+				return log_msg_ret("cbfs", ret);
+			entry->image_pos -= rom_offset;
+		}
 		if (ret) {
 			ulong mask = CONFIG_ROM_SIZE - 1;
 
