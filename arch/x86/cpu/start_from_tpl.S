@@ -15,6 +15,10 @@
 .type _start, @function
 _start:
 	/* Set up memory using the existing stack */
+#ifdef CONFIG_FSP_FROM_CBFS
+	/* But when booting from coreboot we don't get enough stack */
+	mov	$0xfef10000, %esp
+#endif
 	mov	%esp, %eax
 	call	board_init_f_alloc_reserve
 	mov	%eax, %esp
