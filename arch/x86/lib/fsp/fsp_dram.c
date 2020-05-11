@@ -46,7 +46,7 @@ int dram_init_banksize(void)
 	phys_addr_t low_end;
 	uint bank;
 
-	if (!ll_boot_init()) {
+	if (!ll_boot_init() || IS_ENABLED(CONFIG_SKIP_DRAM_INIT)) {
 		gd->bd->bi_dram[0].start = 0;
 		gd->bd->bi_dram[0].size = gd->ram_size;
 

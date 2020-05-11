@@ -468,6 +468,12 @@ config IFWI_INPUT_FILE
 	  IFWI. Put this in the board directory. The IFWI contains U-Boot TPL,
 	  microcode and other internal items.
 
+config SKIP_DRAM_INIT
+	bool "Skip using FSP-M to init DRAM"
+	help
+	  This allows skipping DRAM init, useful if it has already be done by
+	  a previous boot loader, but we cannot detect this automatically.
+
 endif
 
 config FSP_TEMP_RAM_ADDR

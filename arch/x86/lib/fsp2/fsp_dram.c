@@ -20,9 +20,10 @@ int dram_init(void)
 {
 	int ret;
 
-	if (!ll_boot_init()) {
+	if (!ll_boot_init() ||  IS_ENABLED(CONFIG_SKIP_DRAM_INIT)) {
 		/* Use a small and safe amount of 1GB */
 		gd->ram_size = SZ_1G;
+		printf("DRAM: Skipping init, using 1GB\n");
 
 		return 0;
 	}
@@ -76,7 +77,7 @@ int dram_init(void)
 
 ulong board_get_usable_ram_top(ulong total_size)
 {
-	if (!ll_boot_init())
+	if (!ll_boot_init() || IS_ENABLED(CONFIG_SKIP_DRAM_INIT))
 		return gd->ram_size;
 
 #if CONFIG_IS_ENABLED(HANDOFF)
