@@ -14,6 +14,8 @@ static data.
 import collections
 import copy
 import sys
+import os
+import re
 
 from dtoc import fdt
 from dtoc import fdt_util
@@ -149,6 +151,20 @@ class DtbPlatdata(object):
         self._outfile = None
         self._lines = []
         self._aliases = {}
+        self._drivers = []
+        self._driver_aliases = {}
+
+    def get_normalized_compat_name(self, node):
+        compat_c, aliases_c = get_compat_name(node)
+        if compat_c not in self._drivers:
+            try: # pragma: no cover
+                compat_c_old = compat_c
+                compat_c = self._driver_aliases[compat_c]
+                aliases_c = [compat_c_old] + aliases
+            except:
+                print('WARNING: the driver %s was not found in the driver list' % (compat_c))
+
+        return compat_c, aliases_c
 
     def setup_output(self, fname):
         """Set up the output destination
@@ -242,6 +258,34 @@ class DtbPlatdata(object):
                 i += 1 + num_args
             return PhandleInfo(max_args, args)
         return None
+
+    def scan_driver(self, fn):
+        f = open(fn)
+
+        b = f.read()
+
+        drivers = re.findall('U_BOOT_DRIVER\((.*)\)', b)
+
+        for d in drivers:
+            self._drivers.append(d)
+
+        driver_aliases = re.findall('U_BOOT_DRIVER_ALIAS\(\s*(\w+)\s*,\s*(\w+)\s*\)', b)
+
+        for a in driver_aliases: # pragma: no cover
+            try:
+                self._driver_aliases[a[1]] = a[0]
+            except:
+                pass
+
+    def scan_drivers(self):
+        """Scan the driver folders to build a list of driver names and possible
+        aliases
+        """
+        for (dirpath, dirnames, filenames) in os.walk('./'):
+            for fn in filenames:
+                if not fn.endswith('.c'):
+                    continue
+                self.scan_driver(dirpath + '/' + fn)
 
     def scan_dtb(self):
         """Scan the device tree to obtain a tree of nodes and properties
@@ -353,7 +397,7 @@ class DtbPlatdata(object):
         """
         structs = {}
         for node in self._valid_nodes:
-            node_name, _ = get_compat_name(node)
+            node_name, _ = self.get_normalized_compat_name(node)
             fields = {}
 
             # Get a list of all the valid properties in this node.
@@ -377,14 +421,14 @@ class DtbPlatdata(object):
 
         upto = 0
         for node in self._valid_nodes:
-            node_name, _ = get_compat_name(node)
+            node_name, _ = self.get_normalized_compat_name(node)
             struct = structs[node_name]
             for name, prop in node.props.items():
                 if name not in PROP_IGNORE_LIST and name[0] != '#':
                     prop.Widen(struct[name])
             upto += 1
 
-            struct_name, aliases = get_compat_name(node)
+            struct_name, aliases = self.get_normalized_compat_name(node)
             for alias in aliases:
                 self._aliases[alias] = struct_name
 
@@ -461,7 +505,7 @@ class DtbPlatdata(object):
         Args:
             node: node to output
         """
-        struct_name, _ = get_compat_name(node)
+        struct_name, _ = self.get_normalized_compat_name(node)
         var_name = conv_name_to_c(node.name)
         self.buf('static const struct %s%s %s%s = {\n' %
                  (STRUCT_PREFIX, struct_name, VAL_PREFIX, var_name))
@@ -562,6 +606,7 @@ def run_steps(args, dtb_file, include_disabled, output):
         raise ValueError('Please specify a command: struct, platdata')
 
     plat = DtbPlatdata(dtb_file, include_disabled)
+    plat.scan_drivers()
     plat.scan_dtb()
     plat.scan_tree()
     plat.scan_reg_sizes()
