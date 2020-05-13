@@ -28,6 +28,7 @@ struct driver_info {
 	const void *platdata;
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
 	uint platdata_size;
+	struct udevice *dev;
 #endif
 };
 
@@ -43,4 +44,9 @@ struct driver_info {
 #define U_BOOT_DEVICES(__name)						\
 	ll_entry_declare_list(struct driver_info, __name, driver_info)
 
+/* Get a pointer to a given driver */
+#define DM_GET_DEVICE(__name)						\
+	ll_entry_get(struct driver_info, __name, driver_info)
+
+void populate_phandle_data(void);
 #endif
