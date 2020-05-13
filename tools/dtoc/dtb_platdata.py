@@ -228,7 +228,7 @@ class DtbPlatdata(object):
         Return:
             Number of argument cells is this is a phandle, else None
         """
-        if prop.name in ['clocks']:
+        if prop.name in ['clocks', 'cd-gpios']:
             if not isinstance(prop.value, list):
                 prop.value = [prop.value]
             val = prop.value
@@ -248,11 +248,14 @@ class DtbPlatdata(object):
                 if not target:
                     raise ValueError("Cannot parse '%s' in node '%s'" %
                                      (prop.name, node_name))
-                prop_name = '#clock-cells'
-                cells = target.props.get(prop_name)
+                cells = None
+                for prop_name in ['#clock-cells', '#gpio-cells']:
+                    cells = target.props.get(prop_name)
+                    if cells:
+                        break
                 if not cells:
-                    raise ValueError("Node '%s' has no '%s' property" %
-                            (target.name, prop_name))
+                    raise ValueError("Node '%s' has no cells property" %
+                            (target.name))
                 num_args = fdt_util.fdt32_to_cpu(cells.value)
                 max_args = max(max_args, num_args)
                 args.append(num_args)
