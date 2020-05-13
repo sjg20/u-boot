@@ -153,6 +153,7 @@ class DtbPlatdata(object):
         self._aliases = {}
         self._drivers = []
         self._driver_aliases = {}
+        self._links = []
 
     def get_normalized_compat_name(self, node):
         compat_c, aliases_c = get_compat_name(node)
@@ -507,7 +508,7 @@ class DtbPlatdata(object):
         """
         struct_name, _ = self.get_normalized_compat_name(node)
         var_name = conv_name_to_c(node.name)
-        self.buf('static const struct %s%s %s%s = {\n' %
+        self.buf('static struct %s%s %s%s = {\n' %
                  (STRUCT_PREFIX, struct_name, VAL_PREFIX, var_name))
         for pname in sorted(node.props):
             prop = node.props[pname]
@@ -526,6 +527,7 @@ class DtbPlatdata(object):
                 if info:
                     # Process the list as pairs of (phandle, id)
                     pos = 0
+                    item = 0
                     for args in info.args:
                         phandle_cell = prop.value[pos]
                         phandle = fdt_util.fdt32_to_cpu(phandle_cell)
@@ -535,8 +537,10 @@ class DtbPlatdata(object):
                         for i in range(args):
                             arg_values.append(str(fdt_util.fdt32_to_cpu(prop.value[pos + 1 + i])))
                         pos += 1 + args
-                        vals.append('\t{&%s%s, {%s}}' % (VAL_PREFIX, name,
-                                                     ', '.join(arg_values)))
+                        vals.append('\t{NULL, {%s}}' % (', '.join(arg_values)))
+                        phandle_entry = '%s%s.%s[%d].node = DM_GET_DEVICE(%s)' % (VAL_PREFIX, var_name, member_name, item, name)
+                        self._links.append(phandle_entry)
+                        item += 1
                     for val in vals:
                         self.buf('\n\t\t%s,' % val)
                 else:
@@ -559,6 +563,7 @@ class DtbPlatdata(object):
         self.buf('\t.name\t\t= "%s",\n' % struct_name)
         self.buf('\t.platdata\t= &%s%s,\n' % (VAL_PREFIX, var_name))
         self.buf('\t.platdata_size\t= sizeof(%s%s),\n' % (VAL_PREFIX, var_name))
+        self.buf('\t.dev\t\t= NULL,\n')
         self.buf('};\n')
         self.buf('\n')
 
@@ -592,6 +597,12 @@ class DtbPlatdata(object):
             self.output_node(node)
             nodes_to_output.remove(node)
 
+        self.buf('void populate_phandle_data(void) {\n')
+        for l in self._links:
+            self.buf(('\t%s;\n' % l))
+        self.buf('}\n')
+
+        self.out(''.join(self.get_buf()))
 
 def run_steps(args, dtb_file, include_disabled, output):
     """Run all the steps of the dtoc tool
