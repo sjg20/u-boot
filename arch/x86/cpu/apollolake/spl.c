@@ -6,6 +6,7 @@
 #include <common.h>
 #include <binman_sym.h>
 #include <bootstage.h>
+#include <cbfs.h>
 #include <dm.h>
 #include <image.h>
 #include <log.h>
@@ -26,12 +27,15 @@ static int rom_load_image(struct spl_image_info *spl_image,
 {
 	ulong spl_pos = spl_get_image_pos();
 	ulong spl_size = spl_get_image_size();
+	ulong cbfs_base;
 	struct udevice *dev;
 	ulong map_base;
 	size_t map_size;
 	uint offset;
 	int ret;
 
+	cbfs_base = CONFIG_IS_ENABLED(CONFIG_FSP_FROM_CBFS,
+				      (CONFIG_FSP_CBFS_BASE_U_BOOT), (0));
 	spl_image->size = CONFIG_SYS_MONITOR_LEN;  /* We don't know SPL size */
 	spl_image->entry_point = spl_phase() == PHASE_TPL ?
 		CONFIG_SPL_TEXT_BASE : CONFIG_SYS_TEXT_BASE;
@@ -55,9 +59,26 @@ static int rom_load_image(struct spl_image_info *spl_image,
 		if (ret)
 			return ret;
 	}
-	spl_pos += map_base & ~0xff000000;
-	debug(", base %lx, pos %lx\n", map_base, spl_pos);
-	bootstage_start(BOOTSTAGE_ID_ACCUM_MMAP_SPI, "mmap_spi");
+	if (IS_ENABLED(CONFIG_FSP_FROM_CBFS)) {
+		struct cbfs_cachenode node;
+		const char *name = "altfw/u-boot";
+
+		debug("Looking for %s in CBF at offset %lx = %lx\n", name,
+		      cbfs_base, map_base + cbfs_base);
+		ret = file_cbfs_find_uncached_base(map_base + cbfs_base, name,
+						   &node);
+		debug("ret=%d\n", ret);
+		if (ret)
+			return log_msg_ret("cbfs", ret);
+		spl_pos = (ulong)node.data;
+		spl_size = node.data_length;
+	} else {
+		debug("Reading from mapped SPI %lx, size %lx", spl_pos,
+		      spl_size);
+		spl_pos += map_base & ~0xff000000;
+		debug(", base %lx, pos %lx\n", map_base, spl_pos);
+		bootstage_start(BOOTSTAGE_ID_ACCUM_MMAP_SPI, "mmap_spi");
+	}
 	memcpy((void *)spl_image->load_addr, (void *)spl_pos, spl_size);
 	cpu_flush_l1d_to_l2();
 	bootstage_accum(BOOTSTAGE_ID_ACCUM_MMAP_SPI);

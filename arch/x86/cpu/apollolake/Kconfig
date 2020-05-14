@@ -127,4 +127,19 @@ config FSP_CBFS_BASE
 
 	  'COREBOOT' (CBFS, size 1814528, offset 2117632).
 
+config FSP_CBFS_BASE_U_BOOT
+	hex "Base offset of CBFS containing U-Boot"
+	depends on FSP_FROM_CBFS
+	default 0xd70000
+	help
+	  This holds the base offset of the CBFS holding U-Boot, where 0 is the
+	  start of the ROM. The size of the CBFS is stored in the header which
+	  is at a fixed offset from the base address given here. Note that the memory
+	  address associated with this offset depends on the SPI-flash mapping
+	  used by the platform.
+
+	  Use the 'cbfstool <image> layout' command to get these values, e.g.:
+
+	  'COREBOOT' (CBFS, size 1814528, offset 2117632).
+
 endif
