@@ -104,4 +104,27 @@ config APL_BOOT_FROM_FAST_SPI_FLASH
 config VBT_ADDR
 	default 0xff3f1000
 
+config FSP_FROM_CBFS
+	bool "Read FSP files from CBFS"
+	help
+	  Select this to read FSP files from CBFS instead of using binmnan.
+	  This can be useful for running U-Boot with an image created by
+	  coreboot, which uses CBFS (Coreboot Filesystem) to store files. In
+	  this case the location of the CBFS must be known.
+
+config FSP_CBFS_BASE
+	hex "Base offset of CBFS"
+	depends on FSP_FROM_CBFS
+	default 0x205000
+	help
+	  This holds the base offset of CBFS, where 0 is the start of the
+	  ROM. The size of the CBFS is stored in the header which is at a
+	  fixed offset from the base address given here. Note that the memory
+	  address associated with this offset depends on the SPI-flash mapping
+	  used by the platform.
+
+	  Use the 'cbfstool <image> layout' command to get these values, e.g.:
+
+	  'COREBOOT' (CBFS, size 1814528, offset 2117632).
+
 endif

@@ -73,30 +73,21 @@ binman_sym_declare(ulong, intel_fsp_m, size);
 static int get_cbfs_fsp(enum fsp_type_t type, ulong map_base,
 			struct binman_entry *entry)
 {
-	/*
-	 * Use a hard-coded position of CBFS in the ROM for now. It would be
-	 * possible to read the position using the FMAP in the ROM, but since
-	 * this code is only used for development, it doesn't seem worth it.
-	 * Use the 'cbfstool <image> layout' command to get these values, e.g.:
-	 * 'COREBOOT' (CBFS, size 1814528, offset 2117632).
-	 */
-	ulong cbfs_base = 0x205000;
-	struct cbfs_priv *cbfs;
+	ulong cbfs_base = 0;
+	struct cbfs_cachenode node;
 	int ret;
 
-	ret = cbfs_init_mem(map_base + cbfs_base, &cbfs);
+	cbfs_base = CONFIG_IS_ENABLED(CONFIG_FSP_FROM_CBFS,
+				      (CONFIG_FSP_CBFS_BASE), (0));
+	ret = file_cbfs_find_uncached_base(map_base + cbfs_base, "fspm.bin",
+					   &node);
+	log_debug("find ret=%d\n", ret);
 	if (ret)
-		return ret;
-	if (!ret) {
-		const struct cbfs_cachenode *node;
+		return log_msg_ret("cbfs", ret);
 
-		node = cbfs_find_file(cbfs, "fspm.bin");
-		if (!node)
-			return log_msg_ret("fspm node", -ENOENT);
-
-		entry->image_pos = (ulong)node->data;
-		entry->size = node->data_length;
-	}
+	entry->image_pos = (ulong)node.data;
+	entry->size = node.data_length;
+	log_debug("Found FSP at %p\n", node.data);
 
 	return 0;
 }
@@ -135,11 +126,22 @@ int fsp_locate_fsp(enum fsp_type_t type, struct binman_entry *entry,
 	if (spl_phase() >= PHASE_BOARD_F) {
 		if (type != FSP_S)
 			return -EPROTONOSUPPORT;
-		ret = binman_entry_find("intel-fsp-s", entry);
-		if (ret)
-			return log_msg_ret("binman entry", ret);
 		if (!use_spi_flash)
 			rom_offset = (map_base & mask) - CONFIG_ROM_SIZE;
+		if (IS_ENABLED(CONFIG_FSP_FROM_CBFS)) {
+			/*
+			 * Support using a hybrid image build by coreboot. See
+			 * the function comments for details
+			 */
+			ret = get_cbfs_fsp(type, map_base, entry);
+			if (ret)
+				return log_msg_ret("cbfs", ret);
+			entry->image_pos -= rom_offset;
+		} else {
+			ret = binman_entry_find("intel-fsp-s", entry);
+			if (ret)
+				return log_msg_ret("binman entry", ret);
+		}
 	} else {
 		ret = -ENOENT;
 		if (false)
@@ -161,7 +163,7 @@ int fsp_locate_fsp(enum fsp_type_t type, struct binman_entry *entry,
 				if (use_spi_flash)
 					entry->image_pos &= mask;
 				else
-					entry->image_pos += (map_base & mask);
+					rom_offset = map_base & mask;
 			} else {
 				ret = -ENOENT;
 			}
@@ -169,6 +171,8 @@ int fsp_locate_fsp(enum fsp_type_t type, struct binman_entry *entry,
 	}
 	if (ret)
 		return log_msg_ret("Cannot find FSP", ret);
+	log_debug("image_pos=%x, rom_offset=%lx\n", entry->image_pos,
+		  rom_offset);
 	entry->image_pos += rom_offset;
 
 	/*
@@ -177,6 +181,7 @@ int fsp_locate_fsp(enum fsp_type_t type, struct binman_entry *entry,
 	 */
 	if (!use_spi_flash)
 		bootstage_start(BOOTSTAGE_ID_ACCUM_MMAP_SPI, "mmap_spi");
+	log_debug("Get header %x\n", entry->image_pos);
 	ret = fsp_get_header(entry->image_pos, entry->size, use_spi_flash,
 			     hdrp);
 	if (!use_spi_flash)
@@ -186,6 +191,8 @@ int fsp_locate_fsp(enum fsp_type_t type, struct binman_entry *entry,
 	*devp = dev;
 	if (rom_offsetp)
 		*rom_offsetp = rom_offset;
+	log_debug("FSP type %d: Found entry at %lx, address %x\n", type,
+		  entry->image_pos - rom_offset, entry->image_pos);
 
 	return 0;
 }
