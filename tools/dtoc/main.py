@@ -87,6 +87,8 @@ if __name__ != '__main__':
 parser = OptionParser()
 parser.add_option('-B', '--build-dir', type='string', default='b',
         help='Directory containing the build output')
+parser.add_option('-c', '--config', action='store',
+                  help='Select .config filename')
 parser.add_option('-d', '--dtb-file', action='store',
                   help='Specify the .dtb input file')
 parser.add_option('--include-disabled', action='store_true',
@@ -110,5 +112,5 @@ elif options.test_coverage:
     RunTestCoverage()
 
 else:
-    dtb_platdata.run_steps(args, options.dtb_file, options.include_disabled,
-                           options.output)
+    dtb_platdata.run_steps(args, options.dtb_file, options.config,
+                           options.include_disabled, options.output)

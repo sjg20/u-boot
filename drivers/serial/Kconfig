@@ -108,6 +108,24 @@ config DM_SERIAL
 	  implements serial_putc() etc. The uclass interface is
 	  defined in include/serial.h.
 
+config SPL_TINY_SERIAL
+	bool "Support tiny serial drivers in SPL"
+	depends on SPL_TINY
+	default y
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
+
+config TPL_TINY_SERIAL
+	bool "Support tiny serial drivers in TPL"
+	depends on TPL_TINY
+	default y
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
+
 config SERIAL_RX_BUFFER
 	bool "Enable RX buffer for serial input"
 	depends on DM_SERIAL
@@ -622,7 +640,8 @@ config SYS_NS16550
 
 config NS16550_DYNAMIC
 	bool "Allow NS16550 to be configured at runtime"
-	default y if SYS_COREBOOT || SYS_SLIMBOOTLOADER
+	depends on SYS_NS16550
+	default y if SYS_COREBOOT || SYS_SLIMBOOTLOADER || TINY_SERIAL
 	help
 	  Enable this option to allow device-tree control of the driver.
 

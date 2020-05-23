@@ -271,7 +271,7 @@ int device_bind_by_name(struct udevice *parent, bool pre_reloc_only,
 		return ret;
 
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
-	info->dev = *devp;
+// 	info->dev = *devp;
 #endif
 
 	return ret;

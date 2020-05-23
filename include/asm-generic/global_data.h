@@ -105,6 +105,7 @@ typedef struct global_data {
 	int pcidelay_done;
 #endif
 	struct udevice *cur_serial_dev;	/* current serial device */
+	struct tiny_dev *tiny_serial;
 	struct arch_global_data arch;	/* architecture-specific data */
 #ifdef CONFIG_CONSOLE_RECORD
 	struct membuff console_out;	/* console output */

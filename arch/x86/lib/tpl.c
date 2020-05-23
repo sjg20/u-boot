@@ -41,7 +41,7 @@ static int x86_tpl_init(void)
 	ret = arch_cpu_init();
 	if (ret) {
 		debug("%s: arch_cpu_init() failed\n", __func__);
-		return ret;
+		return log_msg_ret("arch", ret);
 	}
 	ret = arch_cpu_init_dm();
 	if (ret) {
@@ -59,7 +59,7 @@ void board_init_f(ulong flags)
 
 	ret = x86_tpl_init();
 	if (ret) {
-		debug("Error %d\n", ret);
+		printf("Error %d\n", ret);
 		panic("x86_tpl_init fail");
 	}
 

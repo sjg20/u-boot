@@ -90,4 +90,8 @@ int device_bind_driver_to_node(struct udevice *parent, const char *drv_name,
 			       const char *dev_name, ofnode node,
 			       struct udevice **devp);
 
+struct tiny_dev *tiny_dev_find(enum uclass_id uclass_id, int seq);
+
+int tiny_dev_probe(struct tiny_dev *tdev);
+
 #endif

@@ -36,6 +36,43 @@ config TPL_DM
 	  CONFIG_SPL_SYS_MALLOC_F_LEN for more details on how to enable it.
 	  Disable this for very small implementations.
 
+config SPL_TINY
+	bool "Support tiny drivers in TPL without full driver-model support"
+	depends on SPL_OF_PLATDATA
+	default y
+	help
+	  Enable support for reducing driver-model overhead with 'tiny'
+	  devices. These drivers have very basic support and do not support
+	  the full driver-model infrastructure. This can be useful for saving
+	  memory in SPL.
+
+config SPL_TINY_RELOC
+	bool "Relocate devices into allocated memory before using them"
+	help
+	  Some architectures load SPL into read-only memory. U-Boot needs write
+	  access to tiny devices (specifically struct tiny_dev) so this cannot
+	  work. If this option is enabled, U-Boot relocates these devices into
+	  RAM when they are needed.
+
+config TPL_TINY
+	bool "Support tiny drivers in TPL without full driver-model support"
+	depends on TPL_OF_PLATDATA
+	default y
+	help
+	  Enable support for reducing driver-model overhead with 'tiny'
+	  devices. These drivers have very basic support and do not support
+	  the full driver-model infrastructure. This can be useful for saving
+	  memory in TPL.
+
+config TPL_TINY_RELOC
+	bool "Relocate devices into allocated memory before using them"
+	default y if X86
+	help
+	  Some architectures load SPL into read-only memory. U-Boot needs write
+	  access to tiny devices (specifically struct tiny_dev) so this cannot
+	  work. If this option is enabled, U-Boot relocates these devices into
+	  RAM when they are needed.
+
 config DM_WARN
 	bool "Enable warnings in driver model"
 	depends on DM

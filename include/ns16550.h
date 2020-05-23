@@ -233,12 +233,11 @@ void NS16550_reinit(NS16550_t com_port, int baud_divisor);
  * Given the UART input clock and required baudrate, calculate the divisor
  * that should be used.
  *
- * @port:	UART port
  * @clock:	UART input clock speed in Hz
  * @baudrate:	Required baud rate
  * @return baud rate divisor that should be used
  */
-int ns16550_calc_divisor(NS16550_t port, int clock, int baudrate);
+int ns16550_calc_divisor(int clock, int baudrate);
 
 /**
  * ns16550_serial_ofdata_to_platdata() - convert DT to platform data
@@ -266,3 +265,7 @@ int ns16550_serial_probe(struct udevice *dev);
  * These should be used by the client driver for the driver's 'ops' member
  */
 extern const struct dm_serial_ops ns16550_serial_ops;
+
+int ns16550_tiny_probe_plat(struct ns16550_platdata *plat);
+int ns16550_tiny_setbrg(struct ns16550_platdata *plat, int baud_rate);
+int ns16550_tiny_putc(struct ns16550_platdata *plat, const char ch);

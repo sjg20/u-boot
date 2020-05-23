@@ -19,6 +19,8 @@
 #include <linux/compiler.h>
 #include <asm/state.h>
 
+#if !CONFIG_IS_ENABLED(TINY_SERIAL)
+
 DECLARE_GLOBAL_DATA_PTR;
 
 struct sandbox_serial_platdata {
@@ -131,23 +133,6 @@ static int sandbox_serial_getc(struct udevice *dev)
 	return membuff_getbyte(&priv->buf);
 }
 
-#ifdef CONFIG_DEBUG_UART_SANDBOX
-
-#include <debug_uart.h>
-
-static inline void _debug_uart_init(void)
-{
-}
-
-static inline void _debug_uart_putc(int ch)
-{
-	os_putc(ch);
-}
-
-DEBUG_UART_FUNCS
-
-#endif /* CONFIG_DEBUG_UART_SANDBOX */
-
 static int sandbox_serial_getconfig(struct udevice *dev, uint *serial_config)
 {
 	uint config = SERIAL_DEFAULT_CONFIG;
@@ -235,8 +220,8 @@ static const struct udevice_id sandbox_serial_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(serial_sandbox) = {
-	.name	= "serial_sandbox",
+U_BOOT_DRIVER(sandbox_serial) = {
+	.name	= "sandbox_serial",
 	.id	= UCLASS_SERIAL,
 	.of_match = sandbox_serial_ids,
 	.ofdata_to_platdata = sandbox_serial_ofdata_to_platdata,
@@ -253,6 +238,46 @@ static const struct sandbox_serial_platdata platdata_non_fdt = {
 };
 
 U_BOOT_DEVICE(serial_sandbox_non_fdt) = {
-	.name = "serial_sandbox",
+	.name = "sandbox_serial",
 	.platdata = &platdata_non_fdt,
 };
+
+#else /* TINY_SERIAL */
+
+static int sandbox_serial_tiny_putc(struct tiny_dev *tdev, const char ch)
+{
+	os_putc(ch);
+
+	return 0;
+}
+
+struct tiny_serial_ops sandbox_serial_tiny_ops = {
+	.probe	= sandbox_serial_tiny_probe,
+	.setbrg	= sandbox_serial_tiny_setbrg,
+	.putc	= sandbox_serial_tiny_putc,
+};
+
+U_BOOT_TINY_DRIVER(sandbox_serial) = {
+	.uclass_id	= UCLASS_SERIAL,
+	.probe		= sandbox_serial_tiny_probe,
+	.ops		= &sandbox_serial_tiny_ops,
+};
+
+#endif
+
+#ifdef CONFIG_DEBUG_UART_SANDBOX
+
+#include <debug_uart.h>
+
+static inline void _debug_uart_init(void)
+{
+}
+
+static inline void _debug_uart_putc(int ch)
+{
+	os_putc(ch);
+}
+
+DEBUG_UART_FUNCS
+
+#endif /* CONFIG_DEBUG_UART_SANDBOX */

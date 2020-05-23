@@ -21,6 +21,7 @@ import re
 
 from dtoc import fdt
 from dtoc import fdt_util
+from patman import tools
 
 # When we see these properties we ignore them - i.e. do not create a structure
 # member
@@ -56,6 +57,22 @@ VAL_PREFIX = 'dtv_'
 #     phandles is len(args). This is a list of integers.
 PhandleInfo = collections.namedtuple('PhandleInfo', ['max_args', 'args'])
 
+class DriverInfo:
+    def __init__(self, name, uclass_id, compat):
+        self.name = name
+        self.uclass_id = uclass_id
+        self.compat = compat
+        self.priv_size = 0
+
+    def __eq__(self, other):
+        return (self.name == other.name and
+                self.uclass_id == other.uclass_id and
+                self.compat == other.compat and
+                self.priv_size == other.priv_size)
+
+    def __repr__(self):
+        return ("DriverInfo(name='%s', uclass_id='%s', compat=%s, priv_size=%s)" %
+                (self.name, self.uclass_id, self.compat, self.priv_size))
 
 def conv_name_to_c(name):
     """Convert a device-tree name to a C identifier
@@ -144,22 +161,33 @@ class DtbPlatdata(object):
     Properties:
         _fdt: Fdt object, referencing the device tree
         _dtb_fname: Filename of the input device tree binary file
+        _config_fname: Filename of the .config file for the build
         _valid_nodes: A list of Node object with compatible strings
         _include_disabled: true to include nodes marked status = "disabled"
         _outfile: The current output file (sys.stdout or a real file)
         _lines: Stashed list of output lines for outputting in the future
+        _aliases: Dict of aliases read from the DT:
+            key: alias name
+            value: node path
+        _tiny_uclasses: List of uclass names that are marked as 'tiny'
     """
-    def __init__(self, dtb_fname, include_disabled):
+    def __init__(self, dtb_fname, config_fname, include_disabled):
         self._fdt = None
         self._dtb_fname = dtb_fname
+        self._config_fname = config_fname
         self._valid_nodes = None
         self._include_disabled = include_disabled
         self._outfile = None
         self._lines = []
-        self._aliases = {}
-        self._drivers = []
+        self._compat_aliases = {}
+        self._drivers = {}
         self._driver_aliases = {}
         self._links = []
+        self._aliases = {}
+        self._aliases_by_path = {}
+        self._tiny_uclasses = []
+        self._of_match = {}
+        self._compat_to_driver = {}
 
     def get_normalized_compat_name(self, node):
         compat_c, aliases_c = get_compat_name(node)
@@ -169,7 +197,8 @@ class DtbPlatdata(object):
                 compat_c = self._driver_aliases[compat_c]
                 aliases_c = [compat_c_old] + aliases
             except:
-                print('WARNING: the driver %s was not found in the driver list' % (compat_c))
+                pass
+                #print('WARNING: the driver %s was not found in the driver list' % (compat_c))
 
         return compat_c, aliases_c
 
@@ -186,6 +215,10 @@ class DtbPlatdata(object):
             self._outfile = sys.stdout
         else:
             self._outfile = open(fname, 'w')
+
+    def close_output(self):
+        if self._outfile is not sys.stdout:
+            self._outfile.close()
 
     def out(self, line):
         """Output a string to the output file
@@ -279,12 +312,82 @@ class DtbPlatdata(object):
 
         b = f.read()
 
-        drivers = re.findall('U_BOOT_DRIVER\((.*)\)', b)
+        drivers = {}
+        m_drivers = re.findall(r'U_BOOT_DRIVER\((.*)\)', b)
+        if m_drivers:
+            driver_name = None
+            uclass_id = None
+            ids_name = None
+            compat_list = []
+            compat = None
+            re_id = re.compile(r'\s*\.id\s*=\s*(UCLASS_[A-Z0-9_]+)')
+            re_ids = re.compile('struct udevice_id (.*)\[\]\s*=')
+            re_compat = re.compile('{\s*.compatible\s*=\s*"(.*)"\s*},')
+            re_of_match = re.compile('\.of_match\s*=\s*([a-z0-9_]+),')
+            re_tiny_priv = re.compile('^\s*DM_TINY_PRIV\((.*)\)$')
+            tiny_name = None
 
-        for d in drivers:
-            self._drivers.append(d)
+            for line in b.splitlines():
+                if driver_name:
+                    id_m = re_id.search(line)
+                    id_of_match = re_of_match.search(line)
+                    if id_m:
+                        uclass_id = id_m.group(1)
+                    elif id_of_match:
+                        compat = id_of_match.group(1)
+                    elif '};' in line:
+                        if uclass_id and compat:
+                            if compat not in self._of_match:
+                                raise ValueError("%s: Unknown compatible var '%s' (found %s)" %
+                                                 (fn, compat, ','.join(self._of_match.keys())))
+                            drivers[driver_name] = DriverInfo(
+                                driver_name, uclass_id, self._of_match[compat])
+                            for val in self._of_match[compat]:
+                                self._compat_to_driver[val] = drivers[driver_name]
+                        else:
+                            pass
+                            #print("%s: Cannot find .id/.of_match in driver '%s': uclass_id=%s, compat=%s" %
+                                  #(fn, driver_name, uclass_id, compat))
+                        driver_name = None
+                        uclass_id = None
+                        ids_name = None
+                        compat = None
+                        compat_list = []
+                elif tiny_name:
+                    tiny_priv = re_tiny_priv.match(line)
+                    if tiny_priv:
+                        drivers[tiny_name].priv_size = tiny_priv.group(1)
+                    elif '};' in line:
+                        tiny_name = None
+                elif ids_name:
+                    compat_m = re_compat.search(line)
+                    if compat_m:
+                        compat_list.append(compat_m.group(1))
+                    elif '};' in line:
+                        self._of_match[ids_name] = compat_list
+                        ids_name = None
+                elif 'U_BOOT_DRIVER' in line:
+                    match = re.search(r'U_BOOT_DRIVER\((.*)\)', line)
+                    if match:
+                        driver_name = match.group(1)
+                elif 'U_BOOT_TINY_DRIVER' in line:
+                    match = re.search(r'U_BOOT_TINY_DRIVER\((.*)\)', line)
+                    if match:
+                        tiny_name = match.group(1)
+                        if tiny_name not in drivers:
+                            raise ValueError("%s: Tiny driver '%s' must have a corresponding full driver in the same file (found %s)" %
+                                             (fn, tiny_name, drivers))
+                else:
+                    ids_m = re_ids.search(line)
+                    if ids_m:
+                        ids_name = ids_m.group(1)
 
-        driver_aliases = re.findall('U_BOOT_DRIVER_ALIAS\(\s*(\w+)\s*,\s*(\w+)\s*\)', b)
+        #for d in m_drivers:
+            #self._drivers.append(d)
+        self._drivers.update(drivers)
+
+        driver_aliases = re.findall(
+            r'U_BOOT_DRIVER_ALIAS\(\s*(\w+)\s*,\s*(\w+)\s*\)', b)
 
         for a in driver_aliases: # pragma: no cover
             try:
@@ -296,7 +399,7 @@ class DtbPlatdata(object):
         """Scan the driver folders to build a list of driver names and possible
         aliases
         """
-        for (dirpath, dirnames, filenames) in os.walk('./'):
+        for (dirpath, dirnames, filenames) in os.walk('/home/sglass/u'):
             for fn in filenames:
                 if not fn.endswith('.c'):
                     continue
@@ -310,23 +413,30 @@ class DtbPlatdata(object):
         """
         self._fdt = fdt.FdtScan(self._dtb_fname)
 
-    def scan_node(self, root):
+    def scan_node(self, parent, level):
         """Scan a node and subnodes to build a tree of node and phandle info
 
         This adds each node to self._valid_nodes.
 
         Args:
-            root: Root node for scan
+            parent: Parent node for scan
         """
-        for node in root.subnodes:
+        for node in parent.subnodes:
             if 'compatible' in node.props:
                 status = node.props.get('status')
                 if (not self._include_disabled and not status or
                         status.value != 'disabled'):
                     self._valid_nodes.append(node)
 
+            if level == 0 and node.name == 'aliases':
+                for prop in node.props.values():
+                    self._aliases[prop.name] = prop.value
+                    match = re.match('^(.*[a-z])[0-9]+', prop.name)
+                    if match:
+                        self._aliases_by_path[prop.value] = match.group(1)
+
             # recurse to handle any subnodes
-            self.scan_node(node)
+            self.scan_node(node, level + 1)
 
     def scan_tree(self):
         """Scan the device tree for useful information
@@ -336,7 +446,20 @@ class DtbPlatdata(object):
                 platform data
         """
         self._valid_nodes = []
-        return self.scan_node(self._fdt.GetRoot())
+        self.scan_node(self._fdt.GetRoot(), 0)
+
+    def parse_config(self, config_data):
+        tiny_list = re.findall(r'CONFIG_[ST]PL_TINY_(.*)=y', config_data)
+        self._tiny_uclasses = [n.lower() for n in tiny_list]
+
+    def scan_config(self):
+        if self._config_fname:
+            self.parse_config(tools.ReadFile(self._config_fname, binary=False))
+        for node in self._valid_nodes:
+            node.is_tiny = False
+            alias = self._aliases_by_path.get(node.path)
+            if alias and alias in self._tiny_uclasses:
+                node.is_tiny = True
 
     @staticmethod
     def get_num_cells(node):
@@ -446,7 +569,7 @@ class DtbPlatdata(object):
 
             struct_name, aliases = self.get_normalized_compat_name(node)
             for alias in aliases:
-                self._aliases[alias] = struct_name
+                self._compat_aliases[alias] = struct_name
 
         return structs
 
@@ -510,7 +633,7 @@ class DtbPlatdata(object):
                 self.out(';\n')
             self.out('};\n')
 
-        for alias, struct_name in self._aliases.items():
+        for alias, struct_name in self._compat_aliases.items():
             if alias not in sorted(structs):
                 self.out('#define %s%s %s%s\n'% (STRUCT_PREFIX, alias,
                                                  STRUCT_PREFIX, struct_name))
@@ -548,7 +671,8 @@ class DtbPlatdata(object):
                             prop.value[pos + 1 + i])))
                     pos += 1 + args
                     vals.append('\t{NULL, {%s}}' % (', '.join(arg_values)))
-                    phandle_entry = '%s%s.%s[%d].node = DM_GET_DEVICE(%s)' % (VAL_PREFIX, var_name, member_name, item, name)
+                    phandle_entry = ('%s%s.%s[%d].node = DM_GET_DEVICE(%s)' %
+                        (VAL_PREFIX, var_name, member_name, item, name))
                     self._links.append(phandle_entry)
                     item += 1
                     for val in vals:
@@ -566,6 +690,8 @@ class DtbPlatdata(object):
 
         struct_name, _ = self.get_normalized_compat_name(node)
         var_name = conv_name_to_c(node.name)
+
+        # Tiny devices don't have 'static' since it is used by the driver
         self.buf('static struct %s%s %s%s = {\n' %
                  (STRUCT_PREFIX, struct_name, VAL_PREFIX, var_name))
         for pname in sorted(node.props):
@@ -583,14 +709,51 @@ class DtbPlatdata(object):
             self.buf(',\n')
         self.buf('};\n')
 
-        # Add a device declaration
-        self.buf('U_BOOT_DEVICE(%s) = {\n' % var_name)
-        self.buf('\t.name\t\t= "%s",\n' % struct_name)
-        self.buf('\t.platdata\t= &%s%s,\n' % (VAL_PREFIX, var_name))
-        self.buf('\t.platdata_size\t= sizeof(%s%s),\n' % (VAL_PREFIX, var_name))
-        self.buf('\t.dev\t\t= NULL,\n')
-        self.buf('};\n')
-        self.buf('\n')
+        if node.is_tiny:
+            val = node.props['compatible'].value
+            if not isinstance(val, list):
+                val = [val]
+            for compat in val:
+                driver = self._compat_to_driver.get(compat)
+                if driver:
+                    break
+            if not driver:
+                raise ValueError("Cant' find driver for compatible '%s' (%s)'" %
+                                 (', '.val))
+            self.buf('DM_DECL_TINY_DRIVER(%s);\n' % driver.name);
+            priv_name = None
+            inline = True
+            if inline and driver.priv_size:
+                parts = driver.priv_size.split(',')
+                if len(parts) == 2:
+                    hdr, size = parts
+                else:
+                    hdr = None
+                    size = parts[0]
+                priv_name = '_%s_priv' % var_name
+                if hdr:
+                    self.buf('#include %s\n' % hdr)
+                section = '__attribute__ ((section (".data")))'
+
+                self.buf('u8 %s[%s] %s;\n' % (priv_name, size.strip(), section))
+
+            self.buf('U_BOOT_TINY_DEVICE(%s) = {\n' % var_name)
+            self.buf('\t.dtplat\t\t= &%s%s,\n' % (VAL_PREFIX, var_name))
+            self.buf('\t.drv\t\t= DM_REF_TINY_DRIVER(%s),\n' % driver.name)
+            if priv_name:
+                self.buf('\t.priv\t\t= %s,\n' % priv_name)
+            self.buf('};\n')
+            self.buf('\n')
+        else:
+            # Add a device declaration
+            self.buf('U_BOOT_DEVICE(%s) = {\n' % var_name)
+            self.buf('\t.name\t\t= "%s",\n' % struct_name)
+            self.buf('\t.platdata\t= &%s%s,\n' % (VAL_PREFIX, var_name))
+            self.buf('\t.platdata_size\t= sizeof(%s%s),\n' %
+                     (VAL_PREFIX, var_name))
+            self.buf('\t.dev\t\t= NULL,\n')
+            self.buf('};\n')
+            self.buf('\n')
 
         self.out(''.join(self.get_buf()))
 
@@ -608,6 +771,15 @@ class DtbPlatdata(object):
         self.out('#include <common.h>\n')
         self.out('#include <dm.h>\n')
         self.out('#include <dt-structs.h>\n')
+        self.out('\n')
+
+        self.out('/*\n')
+        self.out(' * Tiny uclasses: %s\n' % (', '.join(self._tiny_uclasses)))
+        self.out(' * Aliases with CONFIG_SPL_TINY_... enabled\n')
+        for path, alias in self._aliases_by_path.items():
+            if alias in self._tiny_uclasses:
+                self.out(' * %s: %s\n' % (path, alias))
+        self.out('*/\n')
         self.out('\n')
         nodes_to_output = list(self._valid_nodes)
 
@@ -628,8 +800,9 @@ class DtbPlatdata(object):
         self.buf('}\n')
 
         self.out(''.join(self.get_buf()))
+        self.close_output()
 
-def run_steps(args, dtb_file, include_disabled, output):
+def run_steps(args, dtb_file, config_file, include_disabled, output):
     """Run all the steps of the dtoc tool
 
     Args:
@@ -643,10 +816,11 @@ def run_steps(args, dtb_file, include_disabled, output):
     if not args:
         raise ValueError('Please specify a command: struct, platdata')
 
-    plat = DtbPlatdata(dtb_file, include_disabled)
+    plat = DtbPlatdata(dtb_file, config_file, include_disabled)
     plat.scan_drivers()
     plat.scan_dtb()
     plat.scan_tree()
+    plat.scan_config()
     plat.scan_reg_sizes()
     plat.setup_output(output)
     structs = plat.scan_structs()
@@ -660,3 +834,4 @@ def run_steps(args, dtb_file, include_disabled, output):
         else:
             raise ValueError("Unknown command '%s': (use: struct, platdata)" %
                              cmd)
+    return plat
