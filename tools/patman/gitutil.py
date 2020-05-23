@@ -379,7 +379,6 @@ def BuildEmailList(in_list, tag=None, alias=None, raise_on_error=True):
         raw += LookupEmail(item, alias, raise_on_error=raise_on_error)
     result = []
     for item in raw:
-        item = tools.FromUnicode(item)
         if not item in result:
             result.append(item)
     if tag:
@@ -490,7 +489,7 @@ def EmailPatches(series, cover_fname, args, dry_run, raise_on_error, cc_fname,
     if smtp_server:
         cmd.append('--smtp-server=%s' % smtp_server)
     if in_reply_to:
-        cmd.append('--in-reply-to="%s"' % tools.FromUnicode(in_reply_to))
+        cmd.append('--in-reply-to="%s"' % in_reply_to)
     if thread:
         cmd.append('--thread')
 
