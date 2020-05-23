@@ -87,9 +87,9 @@ def BytesToValue(data):
             return Type.STRING, [s.decode() for s in strings[:-1]]
     if size % 4:
         if size == 1:
-            return Type.BYTE, tools.ToChar(data[0])
+            return Type.BYTE, chr(data[0])
         else:
-            return Type.BYTE, [tools.ToChar(ch) for ch in list(data)]
+            return Type.BYTE, [chr(ch) for ch in list(data)]
     val = []
     for i in range(0, size, 4):
         val.append(data[i:i + 4])
