@@ -521,6 +521,49 @@ class DtbPlatdata(object):
         Args:
             node (fdt.Node): node to output
         """
+        def _output_list(node, prop):
+            """Output the C code for a devicetree property that holds a list
+
+            Args:
+                node (fdt.Node): Node to output
+                prop (fdt.Prop): Prop to output
+            """
+            self.buf('{')
+            vals = []
+            # For phandles, output a reference to the platform data
+            # of the target node.
+            info = self.get_phandle_argc(prop, node.name)
+            if info:
+                # Process the list as pairs of (phandle, id)
+                pos = 0
+                item = 0
+                for args in info.args:
+                    phandle_cell = prop.value[pos]
+                    phandle = fdt_util.fdt32_to_cpu(phandle_cell)
+                    target_node = self._fdt.phandle_to_node[phandle]
+                    name = conv_name_to_c(target_node.name)
+                    arg_values = []
+                    for i in range(args):
+                        arg_values.append(str(fdt_util.fdt32_to_cpu(
+                            prop.value[pos + 1 + i])))
+                    pos += 1 + args
+                    vals.append('\t{NULL, {%s}}' % (', '.join(arg_values)))
+                    phandle_entry = '%s%s.%s[%d].node = DM_GET_DEVICE(%s)' % (VAL_PREFIX, var_name, member_name, item, name)
+                    self._links.append(phandle_entry)
+                    item += 1
+\                    for val in vals:
+                    self.buf('\n\t\t%s,' % val)
+            else:
+                for val in prop.value:
+                    vals.append(get_value(prop.type, val))
+
+                # Put 8 values per line to avoid very long lines.
+                for i in range(0, len(vals), 8):
+                    if i:
+                        self.buf(',\n\t\t')
+                    self.buf(', '.join(vals[i:i + 8]))
+            self.buf('}')
+
         struct_name, _ = self.get_normalized_compat_name(node)
         var_name = conv_name_to_c(node.name)
         self.buf('static struct %s%s %s%s = {\n' %
@@ -534,41 +577,7 @@ class DtbPlatdata(object):
 
             # Special handling for lists
             if isinstance(prop.value, list):
-                self.buf('{')
-                vals = []
-                # For phandles, output a reference to the platform data
-                # of the target node.
-                info = self.get_phandle_argc(prop, node.name)
-                if info:
-                    # Process the list as pairs of (phandle, id)
-                    pos = 0
-                    item = 0
-                    for args in info.args:
-                        phandle_cell = prop.value[pos]
-                        phandle = fdt_util.fdt32_to_cpu(phandle_cell)
-                        target_node = self._fdt.phandle_to_node[phandle]
-                        name = conv_name_to_c(target_node.name)
-                        arg_values = []
-                        for i in range(args):
-                            arg_values.append(str(fdt_util.fdt32_to_cpu(
-                                prop.value[pos + 1 + i])))
-                        pos += 1 + args
-                        vals.append('\t{NULL, {%s}}' % (', '.join(arg_values)))
-                        phandle_entry = '%s%s.%s[%d].node = DM_GET_DEVICE(%s)' % (VAL_PREFIX, var_name, member_name, item, name)
-                        self._links.append(phandle_entry)
-                        item += 1
-\                    for val in vals:
-                        self.buf('\n\t\t%s,' % val)
-                else:
-                    for val in prop.value:
-                        vals.append(get_value(prop.type, val))
-
-                    # Put 8 values per line to avoid very long lines.
-                    for i in range(0, len(vals), 8):
-                        if i:
-                            self.buf(',\n\t\t')
-                        self.buf(', '.join(vals[i:i + 8]))
-                self.buf('}')
+                _output_list(node, prop)
             else:
                 self.buf(get_value(prop.type, prop.value))
             self.buf(',\n')
