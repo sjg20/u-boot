@@ -9,6 +9,8 @@
 
 This supports converting device tree data to C structures definitions and
 static data.
+
+See doc/driver-model/of-plat.rst for more informaiton
 """
 
 import collections
@@ -19,9 +21,9 @@ import sys
 
 from dtoc import fdt
 from dtoc import fdt_util
-from patman import tools
 
-# When we see these properties we ignore them - i.e. do not create a structure member
+# When we see these properties we ignore them - i.e. do not create a structure
+# member
 PROP_IGNORE_LIST = [
     '#address-cells',
     '#gpio-cells',
@@ -62,9 +64,9 @@ def conv_name_to_c(name):
     (400ms for 1m calls versus 1000ms for the 're' version).
 
     Args:
-        name:   Name to convert
+        name (str): Name to convert
     Return:
-        String containing the C version of this name
+        str: String containing the C version of this name
     """
     new = name.replace('@', '_at_')
     new = new.replace('-', '_')
@@ -76,11 +78,11 @@ def tab_to(num_tabs, line):
     """Append tabs to a line of text to reach a tab stop.
 
     Args:
-        num_tabs: Tab stop to obtain (0 = column 0, 1 = column 8, etc.)
-        line: Line of text to append to
+        num_tabs (int): Tab stop to obtain (0 = column 0, 1 = column 8, etc.)
+        line (str): Line of text to append to
 
     Returns:
-        line with the correct number of tabs appeneded. If the line already
+        str: line with the correct number of tabs appeneded. If the line already
         extends past that tab stop then a single space is appended.
     """
     if len(line) >= num_tabs * 8:
@@ -96,28 +98,31 @@ def get_value(ftype, value):
     For booleans this return 'true'
 
     Args:
-        type: Data type (fdt_util)
-        value: Data value, as a string of bytes
+        ftype (fdt.Type): Data type (fdt_util)
+        value (bytes): Data value, as a string of bytes
+
+    Returns:
+        str: String representation of the value
     """
     if ftype == fdt.Type.INT:
         return '%#x' % fdt_util.fdt32_to_cpu(value)
     elif ftype == fdt.Type.BYTE:
         ch = value[0]
-        return '%#x' % (ord(ch) if type(ch) == str else ch)
+        return '%#x' % (ord(ch) if isinstance(ch, str) else ch)
     elif ftype == fdt.Type.STRING:
         # Handle evil ACPI backslashes by adding another backslash before them.
         # So "\\_SB.GPO0" in the device tree effectively stays like that in C
         return '"%s"' % value.replace('\\', '\\\\')
     elif ftype == fdt.Type.BOOL:
         return '"%s"' % value
-    elif ftype == fdt.Type.INT64:
+    else:  # ftype == fdt.Type.INT64:
         return '%#x' % value
 
 def get_compat_name(node):
     """Get the node's list of compatible string as a C identifiers
 
     Args:
-        node: Node object to check
+        node (fdt.Node): Node object to check
     Return:
         List of C identifiers for all the compatible strings
     """
@@ -207,7 +212,7 @@ class DtbPlatdata(object):
         file.
 
         Args:
-            fname: Filename to send output to, or '-' for stdout
+            fname (str): Filename to send output to, or '-' for stdout
         """
         if fname == '-':
             self._outfile = sys.stdout
@@ -218,7 +223,7 @@ class DtbPlatdata(object):
         """Output a string to the output file
 
         Args:
-            line: String to output
+            line (str): String to output
         """
         self._outfile.write(line)
 
@@ -226,7 +231,7 @@ class DtbPlatdata(object):
         """Buffer up a string to send later
 
         Args:
-            line: String to add to our 'buffer' list
+            line (str): String to add to our 'buffer' list
         """
         self._lines.append(line)
 
@@ -234,7 +239,7 @@ class DtbPlatdata(object):
         """Get the contents of the output buffer, and clear it
 
         Returns:
-            The output buffer, which is then cleared for future use
+            list(str): The output buffer, which is then cleared for future use
         """
         lines = self._lines
         self._lines = []
@@ -257,9 +262,14 @@ class DtbPlatdata(object):
         or not. As an interim measure, use a list of known property names.
 
         Args:
-            prop: Prop object to check
-        Return:
-            Number of argument cells is this is a phandle, else None
+            prop (fdt.Prop): Prop object to check
+            node_name (str): Node name, only used for raising an error
+        Returns:
+            int or None: Number of argument cells is this is a phandle,
+                else None
+        Raises:
+            ValueError: if the phandle cannot be parsed or the required property
+                is not present
         """
         if prop.name in ['clocks', 'cd-gpios']:
             if not isinstance(prop.value, list):
@@ -288,7 +298,7 @@ class DtbPlatdata(object):
                         break
                 if not cells:
                     raise ValueError("Node '%s' has no cells property" %
-                            (target.name))
+                                     (target.name))
                 num_args = fdt_util.fdt32_to_cpu(cells.value)
                 max_args = max(max_args, num_args)
                 args.append(num_args)
@@ -393,7 +403,7 @@ class DtbPlatdata(object):
         """Get the number of cells in addresses and sizes for this node
 
         Args:
-            node: Node to check
+            node (fdt.None): Node to check
 
         Returns:
             Tuple:
@@ -429,9 +439,10 @@ class DtbPlatdata(object):
                 raise ValueError("Node '%s' reg property is not an int" %
                                  node.name)
             if len(reg.value) % total:
-                raise ValueError("Node '%s' reg property has %d cells "
-                        'which is not a multiple of na + ns = %d + %d)' %
-                        (node.name, len(reg.value), na, ns))
+                raise ValueError(
+                    "Node '%s' reg property has %d cells "
+                    'which is not a multiple of na + ns = %d + %d)' %
+                    (node.name, len(reg.value), na, ns))
             reg.na = na
             reg.ns = ns
             if na != 1 or ns != 1:
@@ -559,7 +570,7 @@ class DtbPlatdata(object):
         """Output the C code for a node
 
         Args:
-            node: node to output
+            node (fdt.Node): node to output
         """
         struct_name, _ = self.get_normalized_compat_name(node)
         var_name = conv_name_to_c(node.name)
@@ -590,7 +601,8 @@ class DtbPlatdata(object):
                         name = conv_name_to_c(target_node.name)
                         arg_values = []
                         for i in range(args):
-                            arg_values.append(str(fdt_util.fdt32_to_cpu(prop.value[pos + 1 + i])))
+                            arg_values.append(str(fdt_util.fdt32_to_cpu(
+                                prop.value[pos + 1 + i])))
                         pos += 1 + args
                         # node member is filled with NULL as the real value
                         # will be update at run-time during dm_init_and_scan()
@@ -602,7 +614,7 @@ class DtbPlatdata(object):
                         # dm_populate_phandle_data()
                         self._links.append({'var_node': var_node, 'dev_name': name})
                         item += 1
-                    for val in vals:
+\                    for val in vals:
                         self.buf('\n\t\t%s,' % val)
                 else:
                     for val in prop.value:
@@ -673,10 +685,12 @@ def run_steps(args, dtb_file, include_disabled, output, warning_disabled=False,
     """Run all the steps of the dtoc tool
 
     Args:
-        args: List of non-option arguments provided to the problem
-        dtb_file: Filename of dtb file to process
-        include_disabled: True to include disabled nodes
-        output: Name of output file
+        args (list): List of non-option arguments provided to the problem
+        dtb_file (str): Filename of dtb file to process
+        include_disabled (bool): True to include disabled nodes
+        output (str): Name of output file
+    Raises:
+        ValueError: if args has no command, or an unknown command
     """
     if not args:
         raise ValueError('Please specify a command: struct, platdata')
