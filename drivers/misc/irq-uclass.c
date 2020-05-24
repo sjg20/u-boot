@@ -69,8 +69,6 @@ int irq_get_by_driver_info(struct udevice *dev,
 {
 	int ret;
 
-	if (index != 0)
-		return -ENOSYS;
 	ret = device_get_by_driver_info(cells[0].node, &irq->dev);
 	if (ret)
 		return ret;

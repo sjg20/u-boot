@@ -551,8 +551,8 @@ class DtbPlatdata(object):
                     phandle_entry = '%s%s.%s[%d].node = DM_GET_DEVICE(%s)' % (VAL_PREFIX, var_name, member_name, item, name)
                     self._links.append(phandle_entry)
                     item += 1
-\                    for val in vals:
-                    self.buf('\n\t\t%s,' % val)
+                    for val in vals:
+                        self.buf('\n\t\t%s,' % val)
             else:
                 for val in prop.value:
                     vals.append(get_value(prop.type, val))

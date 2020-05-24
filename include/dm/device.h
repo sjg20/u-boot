@@ -548,7 +548,8 @@ int device_get_global_by_ofnode(ofnode node, struct udevice **devp);
  * @devp: Returns pointer to device if found, otherwise this is set to NULL
  * @return 0 if OK, -ve on error
  */
-int device_get_by_driver_info(struct driver_info * info, struct udevice **devp);
+int device_get_by_driver_info(const struct driver_info *info,
+                              struct udevice **devp);
 
 /**
  * device_find_first_child() - Find the first child of a device

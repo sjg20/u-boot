@@ -741,7 +741,8 @@ int device_get_global_by_ofnode(ofnode ofnode, struct udevice **devp)
 }
 
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
-int device_get_by_driver_info(struct driver_info * info, struct udevice **devp)
+int device_get_by_driver_info(const struct driver_info *info,
+                              struct udevice **devp)
 {
 	struct udevice *dev;
 
