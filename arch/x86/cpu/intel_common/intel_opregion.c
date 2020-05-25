@@ -9,6 +9,7 @@
 #include <common.h>
 #include <binman.h>
 #include <bloblist.h>
+#include <cbfs.h>
 #include <dm.h>
 #include <spi_flash.h>
 #include <asm/intel_opregion.h>
@@ -23,28 +24,41 @@ static int locate_vbt(char **vbtp, int *sizep)
 	int size;
 	int ret;
 
-	ret = binman_entry_find("intel-vbt", &vbt);
-	if (ret)
-		return log_msg_ret("find VBT", ret);
-	ret = uclass_first_device_err(UCLASS_SPI_FLASH, &dev);
-	if (ret)
-		return log_msg_ret("find flash", ret);
-	size = vbt.size;
-	if (size > sizeof(vbt_data))
-		return log_msg_ret("vbt", -E2BIG);
-	ret = spi_flash_read_dm(dev, vbt.image_pos, size, vbt_data);
-	if (ret)
-		return log_msg_ret("read", ret);
+	if (IS_ENABLED(CONFIG_FSP_FROM_CBFS)) {
+		ulong rom_offset = binman_get_rom_offset();
+		struct cbfs_cachenode node;
+		ulong base = rom_offset + 2117632;
 
-	memcpy(&vbtsig, vbt_data, sizeof(vbtsig));
-	if (vbtsig != VBT_SIGNATURE) {
-		log_err("Missing/invalid signature in VBT data file!\n");
-		return -EINVAL;
+		ret = file_cbfs_find_uncached_base(base, "vbt.bin", &node);
+		if (ret)
+			return log_msg_ret("cbfs", ret);
+		printf("data=%p, data_length=%x\n", node.data, node.data_length);
+		size = node.data_length;
+		*vbtp = node.data;
+	} else {
+		ret = binman_entry_find("intel-vbt", &vbt);
+		if (ret)
+			return log_msg_ret("find VBT", ret);
+		ret = uclass_first_device_err(UCLASS_SPI_FLASH, &dev);
+		if (ret)
+			return log_msg_ret("find flash", ret);
+		size = vbt.size;
+		if (size > sizeof(vbt_data))
+			return log_msg_ret("vbt", -E2BIG);
+		ret = spi_flash_read_dm(dev, vbt.image_pos, size, vbt_data);
+		if (ret)
+			return log_msg_ret("read", ret);
+
+		memcpy(&vbtsig, vbt_data, sizeof(vbtsig));
+		*vbtp = vbt_data;
+		if (vbtsig != VBT_SIGNATURE) {
+			log_err("Missing/invalid signature in VBT data file!\n");
+			return -EINVAL;
+		}
 	}
 
 	log_info("Found a VBT of %u bytes\n", size);
 	*sizep = size;
-	*vbtp = vbt_data;
 
 	return 0;
 }

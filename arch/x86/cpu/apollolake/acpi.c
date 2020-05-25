@@ -31,6 +31,7 @@
 #include <asm/arch/iomap.h>
 #include <asm/arch/gpio.h>
 #include <asm/arch/pm.h>
+#include <asm/arch/soc_config.h>
 #include <asm/arch/systemagent.h>
 #include <dm/acpi.h>
 #include <dm/uclass-internal.h>
@@ -67,15 +68,20 @@ int arch_write_sci_irq_select(uint scis)
 
 int acpi_create_gnvs(struct acpi_global_nvs *gnvs)
 {
-	struct udevice *cpu;
+	const struct apl_config *cfg = gd->arch.soc_config;
+	struct udevice *cpu, *pinctrl;
+	uint offset;
 	int ret;
+
+	if (!cfg)
+		return log_msg_ret("cfg", -EINVAL);
 
 	/* Clear out GNV */
 	memset(gnvs, '\0', sizeof(*gnvs));
 
 	/* TODO(sjg@chromium.org): Add the console log to gnvs->cbmc */
 
-#ifdef CONFIG_CHROMEOS
+#ifdef CONFIG_CHROMEOSx
 	/* Initialise Verified Boot data */
 	chromeos_init_acpi(&gnvs->chromeos);
 	gnvs->chromeos.vbt2 = ACTIVE_ECFW_RO;
@@ -90,6 +96,30 @@ int acpi_create_gnvs(struct acpi_global_nvs *gnvs)
 		ret = cpu_get_count(cpu);
 		if (ret > 0)
 			gnvs->pcnt = ret;
+	}
+
+	/* Enable DPTF based on mainboard configuration */
+	gnvs->dpte = cfg->dptf_enable;
+
+	/* Assign address of PERST_0 if GPIO is defined in devicetree */
+	if (0 && cfg->prt0_gpio != GPIO_PRT0_UDEF) {
+		ret = intel_pinctrl_get_pad(cfg->prt0_gpio, &pinctrl, &offset);
+		if (ret)
+			return log_msg_ret("prt0", ret);
+		gnvs->prt0 = intel_pinctrl_get_config_reg_addr(pinctrl, offset);
+	}
+
+	/*
+	 * Get sdcard cd GPIO portid if GPIO is defined in devicetree.
+	 * Get offset of sdcard cd pin.
+	 */
+	if (0 && cfg->sdcard_cd_gpio) {
+		ret = intel_pinctrl_get_pad(cfg->sdcard_cd_gpio, &pinctrl,
+					    &offset);
+		if (ret)
+			return log_msg_ret("sdcd", ret);
+		gnvs->scdp = p2sb_get_port_id(pinctrl);
+		gnvs->scdo = intel_pinctrl_get_acpi_pin(pinctrl, offset);
 	}
 
 	return 0;
@@ -116,6 +146,9 @@ int arch_madt_sci_irq_polarity(int sci)
 
 void fill_fadt(struct acpi_fadt *fadt)
 {
+	const struct apl_config *cfg = gd->arch.soc_config;
+
+	assert(cfg);
 	fadt->pm_tmr_blk = IOMAP_ACPI_BASE + PM1_TMR;
 
 	fadt->p_lvl2_lat = ACPI_FADT_C2_NOT_SUPPORTED;
@@ -129,13 +162,18 @@ void fill_fadt(struct acpi_fadt *fadt)
 	fadt->x_pm_tmr_blk.space_id = 1;
 	fadt->x_pm_tmr_blk.bit_width = fadt->pm_tmr_len * 8;
 	fadt->x_pm_tmr_blk.addrl = IOMAP_ACPI_BASE + PM1_TMR;
+
+	if (cfg->lpss_s0ix_enable)
+		fadt->flags |= ACPI_FADT_LOW_PWR_IDLE_S0;
 }
 
 void acpi_create_fadt(struct acpi_fadt *fadt, struct acpi_facs *facs,
 		      void *dsdt)
 {
+	const struct apl_config *cfg = gd->arch.soc_config;
 	struct acpi_table_header *header = &fadt->header;
 
+	assert(cfg);
 	acpi_fadt_common(fadt, facs, dsdt);
 	intel_acpi_fill_fadt(fadt);
 	fill_fadt(fadt);

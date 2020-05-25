@@ -260,7 +260,7 @@ static int pci_hose_config_device(struct pci_controller *hose, pci_dev_t dev,
 	}
 
 	/* Configure Cache Line Size Register */
-	pci_hose_write_config_byte(hose, dev, PCI_CACHE_LINE_SIZE, 0x08);
+	pci_hose_write_config_byte(hose, dev, PCI_CACHE_LINE_SIZE, 0x10);
 
 	/* Configure Latency Timer */
 	pci_hose_write_config_byte(hose, dev, PCI_LATENCY_TIMER, 0x80);

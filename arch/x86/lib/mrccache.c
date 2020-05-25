@@ -145,6 +145,9 @@ static int mrccache_update(struct udevice *sf, struct mrc_region *entry,
 		return -EINVAL;
 	}
 
+	if (CONFIG_IS_ENABLED(APL_TINY))
+		return 0;
+
 	/* Find the last used block */
 	base_addr = entry->base + entry->offset;
 	debug("Updating MRC cache data\n");

@@ -467,11 +467,12 @@ int x86_cpu_init_f(void)
 	if (ll_boot_init())
 		setup_cpu_features();
 	setup_identity();
-	setup_mtrr();
+	if (ll_boot_init())
+		setup_mtrr();
 	setup_pci_ram_top();
 
 	/* Set up the i8254 timer if required */
-	if (IS_ENABLED(CONFIG_I8254_TIMER))
+	if (ll_boot_init() && IS_ENABLED(CONFIG_I8254_TIMER))
 		i8254_init();
 
 	return 0;

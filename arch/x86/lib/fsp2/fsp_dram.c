@@ -36,7 +36,7 @@ int dram_init(void)
 		ret = fsp_memory_init(s3wake,
 			      IS_ENABLED(CONFIG_APL_BOOT_FROM_FAST_SPI_FLASH));
 		if (ret) {
-			debug("Memory init failed (err=%x)\n", ret);
+			log_debug("Memory init failed (err=%x)\n", ret);
 			return ret;
 		}
 
@@ -61,7 +61,7 @@ int dram_init(void)
 		struct spl_handoff *ho = gd->spl_handoff;
 
 		if (!ho) {
-			debug("No SPL handoff found\n");
+			log_debug("No SPL handoff found\n");
 			return -ESTRPIPE;
 		}
 		gd->ram_size = ho->ram_size;

@@ -42,6 +42,8 @@ int binman_entry_map(ofnode parent, const char *name, void **bufp, int *sizep);
  */
 void binman_set_rom_offset(int rom_offset);
 
+int binman_get_rom_offset(void);
+
 /**
  * binman_entry_find() - Find a binman symbol
  *

@@ -760,6 +760,10 @@ config ARCH_FIXUP_FDT_MEMORY
 	  used for booting OS with different memory setup where the part of
 	  the memory location should be used for different purpose.
 
+config CHROMEOS
+	bool "Enable Chrome OS booting"
+# 	default y
+
 endmenu		# Boot images
 
 source "api/Kconfig"

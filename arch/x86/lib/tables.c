@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <init.h>
 #include <log.h>
 #include <malloc.h>
 #include <smbios.h>
@@ -74,6 +75,10 @@ void write_tables(void)
 #endif
 	int i;
 
+	if (!ll_boot_init() && !IS_ENABLED(CONFIG_APL_DO_TABLES)) {
+		printf("Leaving previous bootloader tables intact\n");
+		return;
+	}
 	debug("Writing tables to %x:\n", rom_table_start);
 	for (i = 0; i < ARRAY_SIZE(table_list); i++) {
 		const struct table_info *table = &table_list[i];

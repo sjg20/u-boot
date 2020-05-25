@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <binman.h>
+#include <cbfs.h>
 #include <dm.h>
 #include <log.h>
 #include <malloc.h>
@@ -172,11 +173,28 @@ int nhlt_endpoint_add_formats(struct nhlt_endpoint *endp,
 		if (!cfg->settings_file)
 			continue;
 
-		ret = binman_entry_map(node, cfg->settings_file, &data, &size);
-		if (ret) {
-			log_warning("Failed to find settings file %s\n",
-				    cfg->settings_file);
-			return log_msg_ret("settings", ret);
+		if (IS_ENABLED(CONFIG_FSP_FROM_CBFS)) {
+			ulong rom_offset = binman_get_rom_offset();
+			struct cbfs_cachenode node;
+			ulong base = rom_offset + 2117632;
+			char fname[40];
+
+			strcpy(fname, cfg->settings_file);
+			strcpy(fname + strlen(fname) - 3, "bin");
+			printf("fname=%s\n", fname);
+			ret = file_cbfs_find_uncached_base(base, fname, &node);
+			if (ret)
+				return log_msg_ret("cbfs", ret);
+			printf("data=%p, data_length=%x\n", node.data, node.data_length);
+			data = node.data;
+			size = node.data_length;
+		} else {
+			ret = binman_entry_map(node, cfg->settings_file, &data, &size);
+			if (ret) {
+				log_warning("Failed to find settings file %s\n",
+					    cfg->settings_file);
+				return log_msg_ret("settings", ret);
+			}
 		}
 
 		ret = nhlt_format_append_config(fmt, data, size);

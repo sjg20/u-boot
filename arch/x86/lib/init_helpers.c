@@ -30,7 +30,7 @@ int init_cache_f_r(void)
 			return ret;
 	}
 
-	if (!ll_boot_init())
+	if (!ll_boot_init() && !IS_ENABLED(CONFIG_APL_DO_CPUS))
 		return 0;
 
 	/* Initialise the CPU cache(s) */

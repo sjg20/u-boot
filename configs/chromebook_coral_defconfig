@@ -22,13 +22,13 @@ CONFIG_X86_OFFSET_U_BOOT=0xffd00000
 CONFIG_X86_OFFSET_SPL=0xffe80000
 CONFIG_INTEL_GENERIC_WIFI=y
 CONFIG_BOOTSTAGE=y
-CONFIG_SPL_BOOTSTAGE=y
+# CONFIG_SPL_BOOTSTAGE=y
 CONFIG_TPL_BOOTSTAGE=y
 CONFIG_BOOTSTAGE_REPORT=y
 CONFIG_SPL_BOOTSTAGE_RECORD_COUNT=10
 CONFIG_BOOTSTAGE_STASH=y
 CONFIG_USE_BOOTARGS=y
-CONFIG_BOOTARGS="console=ttyS2,115200n8 cros_legacy loglevel=9 init=/sbin/init oops=panic panic=-1 root=PARTUUID=35c775e7-3735-d745-93e5-d9e0238f7ed0/PARTNROFF=1 rootwait rw noinitrd vt.global_cursor_default=0 add_efi_memmap boot=local noresume noswap i915.modeset=1 nmi_watchdog=panic,lapic disablevmx=off"
+CONFIG_BOOTARGS="earlycon=uart8250,mmio32,0xddffc000,115200n8 keep_bootcon console=ttyS2,115200n8 cros_legacy loglevel=9 init=/sbin/init oops=panic panic=-1 root=PARTUUID=35c775e7-3735-d745-93e5-d9e0238f7ed0/PARTNROFF=1 rootwait rw noinitrd vt.global_cursor_default=0 add_efi_memmap boot=local noresume noswap i915.modeset=1 nmi_watchdog=panic,lapic disablevmx=off"
 CONFIG_SYS_CONSOLE_INFO_QUIET=y
 CONFIG_SPL_LOG=y
 CONFIG_LOG_DEFAULT_LEVEL=4
@@ -114,3 +114,19 @@ CONFIG_CMD_DHRYSTONE=y
 CONFIG_TPM=y
 # CONFIG_GZIP is not set
 # CONFIG_EFI_LOADER is not set
+CONFIG_CMD_READ=y
+CONFIG_CMD_SETEXPR=y
+CONFIG_NET=y
+CONFIG_FAT_WRITE=y
+CONFIG_FS_CBFS=y
+CONFIG_CMD_CBFS=y
+# CONFIG_SPL_APL_TINY=y
+# CONFIG_FSP_FROM_CBFS=y
+# CONFIG_APL_RUN_FSPS=y
+# CONFIG_APL_DO_TABLES=y
+# CONFIG_APL_DO_VIDEO=y
+# CONFIG_APL_DO_PCI=y
+# CONFIG_APL_DO_MTRRS
+# CONFIG_APL_DO_CPUS
+# CONFIG_APL_FROM_EARLY_RAMSTAGE=y
+CONFIG_LOGF_FUNC=y

@@ -165,7 +165,25 @@ int p2sb_unhide(void)
 /* Overwrites the SCI IRQ if another IRQ number is given by device tree */
 static void set_sci_irq(void)
 {
-	/* Skip this for now */
+#if 0 // TODO
+	struct soc_intel_apollolake_config *cfg;
+	uint32_t scis;
+
+	cfg = config_of_soc();
+
+	/* Change only if a device tree entry exists. */
+	if (cfg->sci_irq) {
+		scis = soc_read_sci_irq_select();
+		scis &= ~SCI_IRQ_MASK;
+		scis |= (cfg->sci_irq << SCI_IRQ_SHIFT) & SCI_IRQ_MASK;
+		soc_write_sci_irq_select(scis);
+	}
+#endif
+}
+
+static bool skip_fsps(void)
+{
+	return !ll_boot_init() && !IS_ENABLED(CONFIG_APL_RUN_FSPS);
 }
 
 int arch_fsps_preinit(void)
@@ -173,7 +191,7 @@ int arch_fsps_preinit(void)
 	struct udevice *itss;
 	int ret;
 
-	if (!ll_boot_init())
+	if (skip_fsps())
 		return 0;
 	ret = irq_first_device_type(X86_IRQT_ITSS, &itss);
 	if (ret)
@@ -196,8 +214,10 @@ int arch_fsp_init_r(void)
 	struct udevice *dev, *itss;
 	int ret;
 
-	if (!ll_boot_init())
+	if (skip_fsps()) {
+		printf("Skipping FSP-S\n");
 		return 0;
+	}
 
 	s3wake = IS_ENABLED(CONFIG_HAVE_ACPI_RESUME) &&
 		gd->arch.prev_sleep_state == ACPI_S3;

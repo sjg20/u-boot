@@ -88,6 +88,8 @@ int fsp_memory_init(bool s3wake, bool use_spi_flash)
 		delay = 0;
 	}
 
+	print_buffer(0, &upd, 1, sizeof(upd), 0);
+
 	if (delay)
 		printf("SDRAM training (%d seconds)...", delay);
 	else

@@ -142,4 +142,28 @@ config FSP_CBFS_BASE_U_BOOT
 
 	  'COREBOOT' (CBFS, size 1814528, offset 2117632).
 
+config SPL_APL_TINY
+	bool "Make SPL as small as possible"
+
+config APL_RUN_FSPS
+	bool "Run FSP-S even if booted from coreboot"
+
+config APL_DO_TABLES
+	bool "Generate ACPI tables even if booted from coreboot"
+
+config APL_DO_VIDEO
+	bool "Do FSP video setup even if booted from coreboot"
+
+config APL_DO_PCI
+	bool "Do PCI setup even if booted from coreboot"
+
+config APL_DO_MTRRS
+	bool "Update MTRRs even if booted from coreboot"
+
+config APL_DO_CPUS
+	bool "Update CPUs even if booted from coreboot"
+
+config APL_FROM_EARLY_RAMSTAGE
+	bool "Run U-Boot from early in ramstage"
+
 endif

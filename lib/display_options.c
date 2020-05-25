@@ -169,7 +169,7 @@ int print_buffer(ulong addr, const void *data, uint width, uint count,
 				x = lb.us[i] = *(volatile uint16_t *)data;
 			else
 				x = lb.uc[i] = *(volatile uint8_t *)data;
-#if defined(CONFIG_SPL_BUILD)
+#if defined(CONFIG_SPL_BUILD) && CONFIG_IS_ENABLED(USE_TINY_PRINTF)
 			printf(" %x", (uint)x);
 #else
 			printf(" %0*lx", width * 2, x);
@@ -197,8 +197,8 @@ int print_buffer(ulong addr, const void *data, uint width, uint count,
 		count -= thislinelen;
 
 #ifndef CONFIG_SPL_BUILD
-		if (ctrlc())
-			return -1;
+// 		if (ctrlc())
+// 			return -1;
 #endif
 	}
 

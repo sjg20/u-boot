@@ -37,6 +37,8 @@ int fsp_get_header(ulong offset, ulong size, bool use_spi_flash,
 	 */
 	log_debug("offset=%x buf=%x, use_spi_flash=%d\n", (uint)offset,
 		  (uint)buf, use_spi_flash);
+	if (IS_ENABLED(CONFIG_SPL_APL_TINY))
+		use_spi_flash = false;
 	if (use_spi_flash) {
 		ret = uclass_first_device_err(UCLASS_SPI_FLASH, &dev);
 		if (ret)

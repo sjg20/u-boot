@@ -6,6 +6,8 @@
  * Parts taken from coreboot
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <dm.h>
 #include <i2c.h>
@@ -54,13 +56,13 @@ static int da7219_acpi_fill_ssdt(const struct udevice *dev,
 	acpigen_write_name(ctx, "_CRS");
 	acpigen_write_resourcetemplate_header(ctx);
 	ret = acpi_device_write_i2c_dev(ctx, dev);
-	if (ret)
+	if (ret < 0)
 		return log_msg_ret("i2c", ret);
 
 	/* Use either Interrupt() or GpioInt() */
 	ret = acpi_device_write_interrupt_or_gpio(ctx, (struct udevice *)dev,
 						  "req-gpios");
-	if (ret)
+	if (ret < 0)
 		return log_msg_ret("irq_gpio", ret);
 	acpigen_write_resourcetemplate_footer(ctx);
 

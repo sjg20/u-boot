@@ -18,6 +18,7 @@
 
 #include <common.h>
 #include <cpu_func.h>
+#include <init.h>
 #include <log.h>
 #include <sort.h>
 #include <asm/cache.h>
@@ -142,6 +143,10 @@ int mtrr_commit(bool do_caches)
 	int ret;
 	int i;
 
+	if (!ll_boot_init() && !IS_ENABLED(CONFIG_APL_DO_MTRRS)) {
+		printf("Leaving previous bootloader MTRRs intact\n");
+		return 0;
+	}
 	debug("%s: enabled=%d, count=%d\n", __func__, gd->arch.has_mtrr,
 	      gd->arch.mtrr_req_count);
 	if (!gd->arch.has_mtrr)

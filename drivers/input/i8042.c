@@ -11,6 +11,7 @@
 #include <env.h>
 #include <errno.h>
 #include <i8042.h>
+#include <init.h>
 #include <input.h>
 #include <keyboard.h>
 #include <log.h>
@@ -277,9 +278,11 @@ static int i8042_start(struct udevice *dev)
 			keymap = KBD_GER;
 	}
 
-	for (try = 0; kbd_reset(priv->quirks) != 0; try++) {
-		if (try >= KBD_RESET_TRIES)
-			return -1;
+	if (ll_boot_init()) {
+		for (try = 0; kbd_reset(priv->quirks) != 0; try++) {
+			if (try >= KBD_RESET_TRIES)
+				return -1;
+		}
 	}
 
 	ret = input_add_tables(input, keymap == KBD_GER);

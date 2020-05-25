@@ -116,10 +116,6 @@ enum {
 	NOR_OP			= 0x7e,
 	XOR_OP			= 0x7f,
 	NOT_OP			= 0x80,
-	DEVICE_OP		= 0x82,
-	PROCESSOR_OP		= 0x83,
-	POWER_RES_OP		= 0x84,
-	NOTIFY_OP		= 0x86,
 	FD_SHIFT_LEFT_BIT_OR	= 0x81,
 	FD_SHIFT_RIGHT_BIT_OR	= 0x82,
 	DEREF_OP		= 0x83,
@@ -1174,66 +1170,29 @@ void acpigen_write_tsd_package(struct acpi_ctx *ctx, uint domain, uint numprocs,
 			       enum psd_coord coordtype);
 
 void acpigen_write_byte_buffer(struct acpi_ctx *ctx, u8 *arr, size_t size);
-void acpigen_write_return_byte_buffer(struct acpi_ctx *ctx, u8 *arr,
-				      size_t size);
-void acpigen_write_return_singleton_buffer(struct acpi_ctx *ctx, u8 arg);
-void acpigen_write_return_byte(struct acpi_ctx *ctx, u8 arg);
 void acpigen_write_upc(struct acpi_ctx *ctx, enum acpi_upc_type type);
 
 void acpigen_write_return_integer(struct acpi_ctx *ctx, u64 arg);
 void acpigen_write_return_string(struct acpi_ctx *ctx, const char *arg);
-void acpigen_write_len_f(struct acpi_ctx *ctx);
-void acpigen_pop_len(struct acpi_ctx *ctx);
-void acpigen_set_current(struct acpi_ctx *ctx, char *curr);
-char *acpigen_write_package(struct acpi_ctx *ctx, int nr_el);
-void acpigen_write_zero(struct acpi_ctx *ctx);
-void acpigen_write_one(struct acpi_ctx *ctx);
 void acpigen_write_ones(struct acpi_ctx *ctx);
-void acpigen_write_byte(struct acpi_ctx *ctx, unsigned int data);
-void acpigen_emit_namestring(struct acpi_ctx *ctx, const char *namepath);
 void acpigen_emit_eisaid(struct acpi_ctx *ctx, const char *eisaid);
-void acpigen_write_word(struct acpi_ctx *ctx, unsigned int data);
-void acpigen_write_dword(struct acpi_ctx *ctx, unsigned int data);
-void acpigen_write_qword(struct acpi_ctx *ctx, u64 data);
-void acpigen_write_integer(struct acpi_ctx *ctx, u64 data);
-void acpigen_write_string(struct acpi_ctx *ctx, const char *string);
 void acpigen_write_coreboot_hid(struct acpi_ctx *ctx,
 				enum coreboot_acpi_ids id);
-void acpigen_write_name(struct acpi_ctx *ctx, const char *name);
 void acpigen_write_name_zero(struct acpi_ctx *ctx, const char *name);
 void acpigen_write_name_one(struct acpi_ctx *ctx, const char *name);
-void acpigen_write_name_string(struct acpi_ctx *ctx, const char *name,
-			       const char *string);
-void acpigen_write_name_dword(struct acpi_ctx *ctx, const char *name, u32 val);
-void acpigen_write_name_qword(struct acpi_ctx *ctx, const char *name, u64 val);
-void acpigen_write_name_integer(struct acpi_ctx *ctx, const char *name,
-				u64 val);
-void acpigen_write_scope(struct acpi_ctx *ctx, const char *name);
-void acpigen_write_method(struct acpi_ctx *ctx, const char *name, int nargs);
-void acpigen_write_method_serialized(struct acpi_ctx *ctx, const char *name,
-				     int nargs);
-void acpigen_write_device(struct acpi_ctx *ctx, const char *name);
+
+void acpigen_write_empty_pct(struct acpi_ctx *ctx);
+void acpigen_write_empty_ptc(struct acpi_ctx *ctx);
+void acpigen_write_tpc(struct acpi_ctx *ctx, const char *gnvs_tpc_limit);
 
 void acpigen_write_mem32fixed(struct acpi_ctx *ctx, int readwrite, u32 base,
 			      u32 size);
-void acpigen_write_register_resource(struct acpi_ctx *ctx,
-				     const struct acpi_gen_regaddr *addr);
 void acpigen_write_irq(struct acpi_ctx *ctx, u16 mask);
-void acpigen_write_resourcetemplate_header(struct acpi_ctx *ctx);
-void acpigen_write_resourcetemplate_footer(struct acpi_ctx *ctx);
-int acpigen_write_uuid(struct acpi_ctx *ctx, const char *uuid);
 void acpigen_write_sleep(struct acpi_ctx *ctx, u64 sleep_ms);
-void acpigen_write_store(struct acpi_ctx *ctx);
 void acpigen_write_store_ops(struct acpi_ctx *ctx, u8 src, u8 dst);
-void acpigen_write_or(struct acpi_ctx *ctx, u8 arg1, u8 arg2, u8 res);
-void acpigen_write_and(struct acpi_ctx *ctx, u8 arg1, u8 arg2, u8 res);
-void acpigen_write_not(struct acpi_ctx *ctx, u8 arg, u8 res);
-void acpigen_write_debug_string(struct acpi_ctx *ctx, const char *str);
 void acpigen_write_debug_integer(struct acpi_ctx *ctx, u64 val);
 void acpigen_write_debug_op(struct acpi_ctx *ctx, u8 op);
-void acpigen_write_if(struct acpi_ctx *ctx);
 void acpigen_write_if_and(struct acpi_ctx *ctx, u8 arg1, u8 arg2);
-void acpigen_write_if_lequal_op_int(struct acpi_ctx *ctx, u8 op, u64 val);
 
 /*
  * Generate ACPI AML code for _CPC (struct acpi_ctx *ctx, Continuous Perfmance

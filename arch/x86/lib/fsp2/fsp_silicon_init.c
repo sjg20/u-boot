@@ -13,6 +13,7 @@
 #include <bootstage.h>
 #include <dm.h>
 #include <log.h>
+#include <malloc.h>
 #include <asm/arch/fsp/fsp_configs.h>
 #include <asm/arch/fsp/fsp_s_upd.h>
 #include <asm/fsp/fsp_infoheader.h>
@@ -20,7 +21,7 @@
 
 int fsp_silicon_init(bool s3wake, bool use_spi_flash)
 {
-	struct fsps_upd upd, *fsp_upd;
+	struct fsps_upd upd, *fsp_upd, *copy;
 	fsp_silicon_init_func func;
 	struct fsp_header *hdr;
 	struct binman_entry entry;
@@ -46,9 +47,20 @@ int fsp_silicon_init(bool s3wake, bool use_spi_flash)
 	ret = fsps_update_config(dev, rom_offset, &upd);
 	if (ret)
 		return log_msg_ret("Could not setup config", ret);
+
+	/* Make a copy of the config for later use */
+	copy = malloc(sizeof(upd));
+	if (!copy)
+		return log_msg_ret("alloc", -ENOMEM);
+	memcpy(copy, &upd, sizeof(upd));
+	gd->arch.soc_config = copy;
+
+// 	print_buffer(0, &upd, 1, sizeof(upd), 0);
+
+	init_addr = hdr->img_base + hdr->fsp_silicon_init;
 	log_debug("Silicon init @ %x...", init_addr);
 	bootstage_start(BOOTSTAGE_ID_ACCUM_FSP_S, "fsp-s");
-	func = (fsp_silicon_init_func)(hdr->img_base + hdr->fsp_silicon_init);
+	func = (fsp_silicon_init_func)init_addr;
 	ret = func(&upd);
 	bootstage_accum(BOOTSTAGE_ID_ACCUM_FSP_S);
 	if (ret)
