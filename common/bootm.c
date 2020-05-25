@@ -540,6 +540,68 @@ static int fixup_silent_linux(char *buf, int maxlen)
 	return 0;
 }
 
+/**
+ * process_subst() - Handle substitution of %x fields in the environment
+ *
+ * For every "%x" found, it is replaced with the value of envvar "bootargs_x"
+ * where x is a case-sensitive alphanumeric character. If that environment
+ * variable does not exist, no substitution is made and the %x remains, to
+ * allow for plain % characters in the string.
+ *
+ * @buf: Buffer containing the string to process
+ * @maxlen: Maximum length of buffer
+ * @return 0 if OK, -ENOSPC if @maxlen is too small
+ */
+static int process_subst(char *buf, int maxlen)
+{
+	const char *in;
+	char *cmdline, *out;
+	bool percent;
+	int size;
+
+	/* Move to end of buffer */
+	size = strlen(buf) + 1;
+	cmdline = buf + maxlen - size;
+	if (buf + size > cmdline)
+		return -ENOSPC;
+	memmove(cmdline, buf, size);
+
+	/* Replace %c with value of envvar 'bootargs_%c' */
+	percent = false;
+	for (in = cmdline, out = buf; *in; in++) {
+		/* If we catch up with the input string, we're out of space */
+		if (out >= in)
+			return -ENOSPC;
+		if (percent) {
+			char var[12];
+			const char *val;
+
+			snprintf(var, sizeof(var), "bootargs_%c", *in);
+			val = env_get(var);
+			if (val) {
+				for (; *val; val++) {
+					if (out >= in)
+						return -ENOSPC;
+					*out++ = *val;
+				}
+				percent = false;
+				continue;
+			} else {
+				/* No value, put the % back */
+				*out++ = '%';
+			}
+		} else if (*in == '%') {
+			percent = true;
+			continue;
+		}
+		*out++ = *in;
+		percent = false;
+	}
+	*out++ = '\0';
+
+	return 0;
+}
+
 int bootm_process_cmdline(char *buf, int maxlen, int flags)
 {
 	int ret;
@@ -549,6 +611,11 @@ int bootm_process_cmdline(char *buf, int maxlen, int flags)
 	    !IS_ENABLED(CONFIG_SILENT_U_BOOT_ONLY) &&
 	    (flags & BOOTM_CL_SILENT)) {
 		ret = fixup_silent_linux(buf, maxlen);
+		if (ret)
+			return log_msg_ret("silent", ret);
+	}
+	if (IS_ENABLED(CONFIG_BOOTARGS_SUBST) && (flags & BOOTM_CL_SUBST)) {
+		ret = process_subst(buf, maxlen);
 		if (ret)
 			return log_msg_ret("silent", ret);
 	}
@@ -567,7 +634,7 @@ int bootm_process_cmdline_env(int flags)
 	/* First check if any action is needed */
 	do_silent = IS_ENABLED(CONFIG_SILENT_CONSOLE) &&
 	    !IS_ENABLED(CONFIG_SILENT_U_BOOT_ONLY) && (flags & BOOTM_CL_SILENT);
-	if (!do_silent)
+	if (!do_silent && !IS_ENABLED(CONFIG_BOOTARGS_SUBST))
 		return 0;
 
 	env = env_get("bootargs");
@@ -700,8 +767,7 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (!ret && (states & BOOTM_STATE_OS_BD_T))
 		ret = boot_fn(BOOTM_STATE_OS_BD_T, argc, argv, images);
 	if (!ret && (states & BOOTM_STATE_OS_PREP)) {
-		ret = bootm_process_cmdline_env(images->os.os == IH_OS_LINUX ?
-						BOOTM_CL_SILENT : 0);
+		ret = bootm_process_cmdline_env(images->os.os == IH_OS_LINUX);
 		if (ret) {
 			printf("Cmdline setup failed (err=%d)\n", ret);
 			ret = CMD_RET_FAILURE;

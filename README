@@ -3229,6 +3229,22 @@ List of environment variables (most likely not complete):
 
   bootargs	- Boot arguments when booting an RTOS image
 
+  bootargs_subst - Substitution parameters for bootargs. These are applied after
+		  the commandline has been built. The format is:
+
+		    <key>=<value>[!<key>=<value>...]
+
+		  where
+		    <key> is a string to replace
+		    <value> is the value to replace it with (either a simple
+		       string or an environment variable starting with $
+
+		  One use for this is to insert the root-disk UUID into the
+		  command line where bootargs contains "root=%U"
+
+		    part uuid mmc 2:2 uuid
+		    setenv cmdline_repl %U=$uuid
+
   bootfile	- Name of the image to load with TFTP
 
   bootm_low	- Memory range available for image processing in the bootm
