@@ -44,7 +44,7 @@ tiboot3.bin: image_check FORCE
 	$(srctree)/tools/k3_gen_x509_cert.sh -c 16 -b $(obj)/u-boot-spl.bin \
 				-o $@ -l $(CONFIG_SPL_TEXT_BASE) -k $(KEY)
 
-ALL-y	+= tiboot3.bin
+INPUTS-y	+= tiboot3.bin
 endif
 
 ifdef CONFIG_ARM64
@@ -55,23 +55,23 @@ $(SPL_ITS): FORCE
 	$(srctree)/tools/k3_fit_atf.sh \
 	$(patsubst %,$(obj)/dts/%.dtb,$(subst ",,$(CONFIG_SPL_OF_LIST))) > $@
 
-ALL-y	+= tispl.bin_HS
+INPUTS-y	+= tispl.bin_HS
 else
 SPL_ITS := u-boot-spl-k3.its
 $(SPL_ITS): FORCE
 	$(srctree)/tools/k3_fit_atf.sh \
 	$(patsubst %,$(obj)/dts/%.dtb,$(subst ",,$(CONFIG_SPL_OF_LIST))) > $@
 
-ALL-y	+= tispl.bin
+INPUTS-y	+= tispl.bin
 endif
 endif
 
 else
 
 ifeq ($(CONFIG_TI_SECURE_DEVICE),y)
-ALL-y	+= u-boot.img_HS
+INPUTS-y	+= u-boot.img_HS
 else
-ALL-y	+= u-boot.img
+INPUTS-y	+= u-boot.img
 endif
 endif
 
