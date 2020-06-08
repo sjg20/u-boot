@@ -954,8 +954,10 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_ARCH_ROCKCHIP)$(CONFIG_SPL),yy)
-INPUTS-y += u-boot-rockchip.bin
+ifeq ($(CONFIG_MPC85xx)$(CONFIG_OF_SEPARATE),yy)
+ifeq ($(CONFIG_MPC85XX_HAVE_RESET_VECTOR),y)
+INPUTS-y += u-boot-br.bin
+endif
 endif
 
 INPUTS-$(CONFIG_X86) += u-boot-x86-start16.bin u-boot-x86-reset16.bin \
@@ -1583,10 +1585,6 @@ u-boot-with-nand-spl.sfp: spl/u-boot-spl.sfp u-boot.img FORCE
 endif
 
 ifeq ($(CONFIG_MPC85xx)$(CONFIG_OF_SEPARATE),yy)
-u-boot-with-dtb.bin: u-boot.bin u-boot.dtb \
-	$(if $(CONFIG_MPC85XX_HAVE_RESET_VECTOR), u-boot-br.bin) FORCE
-	$(call if_changed,binman)
-
 ifeq ($(CONFIG_MPC85XX_HAVE_RESET_VECTOR),y)
 OBJCOPYFLAGS_u-boot-br.bin := -O binary -j .bootpg -j .resetvec
 u-boot-br.bin: u-boot FORCE
