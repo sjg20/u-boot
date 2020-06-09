@@ -50,6 +50,7 @@ class Entry_section(Entry):
         self._skip_at_start = None
         self._end_4gb = False
         self._allow_missing = False
+        self.missing = False
 
     def ReadNode(self):
         """Read properties from the image node"""
@@ -543,7 +544,9 @@ class Entry_section(Entry):
         Args:
             allow_missing: True if allowed, False if not allowed
         """
-        self._allow_missing = allow_missing
+        super().SetAllowMissing(allow_missing)
+        for entry in self._entries.values():
+            entry.SetAllowMissing(allow_missing)
 
     def GetAllowMissing(self):
         """Get whether a section allows missing external blobs
@@ -552,3 +555,14 @@ class Entry_section(Entry):
             True if allowed, False if not allowed
         """
         return self._allow_missing
+
+    def CheckMissing(self, missing_list):
+        """Check if any entries in this section have missing external blobs
+
+        If there are missing blobs, the entries are added to the list
+
+        Args:
+            missing_list: List of Entry objects to be added to
+        """
+        for entry in self._entries.values():
+            entry.CheckMissing(missing_list)
