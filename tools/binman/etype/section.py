@@ -49,6 +49,7 @@ class Entry_section(Entry):
         self._sort = False
         self._skip_at_start = None
         self._end_4gb = False
+        self._allow_missing = False
 
     def ReadNode(self):
         """Read properties from the image node"""
@@ -535,3 +536,19 @@ class Entry_section(Entry):
 
     def WriteChildData(self, child):
         return True
+
+    def SetAllowMissing(self, allow_missing):
+        """Set whether a section allows missing external blobs
+
+        Args:
+            allow_missing: True if allowed, False if not allowed
+        """
+        self._allow_missing = allow_missing
+
+    def GetAllowMissing(self):
+        """Get whether a section allows missing external blobs
+
+        Returns:
+            True if allowed, False if not allowed
+        """
+        return self._allow_missing
