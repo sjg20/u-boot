@@ -1490,6 +1490,7 @@ ifeq ($(CONFIG_ARM64),y)
 OBJCOPYFLAGS_u-boot-rockchip.bin = -I binary -O binary \
 	--pad-to=$(CONFIG_SPL_PAD_TO) --gap-fill=0xff
 u-boot-rockchip.bin: idbloader.img u-boot.itb FORCE
+	echo rockchip
 	$(call if_changed,pad_cat)
 endif # CONFIG_ARM64
 
