@@ -9,6 +9,7 @@
 #include <dt-bindings/pinctrl/rockchip.h>
 #include <dt-bindings/clock/rk3228-cru.h>
 #include <dt-bindings/thermal/thermal.h>
+#include "rk322x-u-boot.dtsi"
 
 / {
 	#address-cells = <1>;

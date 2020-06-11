@@ -4,6 +4,7 @@
  */
 
 #include "rockchip-u-boot.dtsi"
+#include "rk322x-u-boot.dtsi"
 
 / {
 	chosen {
