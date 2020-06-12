@@ -925,7 +925,10 @@ ifeq ($(CONFIG_ARCH_SUNXI)$(CONFIG_ARM64)$(CONFIG_SPL),yyy)
 INPUTS-y += u-boot-sunxi-with-spl.bin
 endif
 
+# Generate this input file for binman
+ifeq ($(CONFIG_SPL),)
 INPUTS-$(CONFIG_ARCH_MEDIATEK) += u-boot-mtk.bin
+endif
 
 # Add optional build target if defined in board/cpu/soc headers
 ifneq ($(CONFIG_BUILD_TARGET),)
@@ -1691,9 +1694,6 @@ u-boot-elf.lds: arch/u-boot-elf.lds prepare FORCE
 
 ifeq ($(CONFIG_SPL),y)
 spl/u-boot-spl-mtk.bin: spl/u-boot-spl
-
-u-boot-mtk.bin: u-boot.dtb u-boot.img spl/u-boot-spl-mtk.bin FORCE
-	$(call if_changed,binman)
 else
 MKIMAGEFLAGS_u-boot-mtk.bin = -T mtk_image \
 	-a $(CONFIG_SYS_TEXT_BASE) -e $(CONFIG_SYS_TEXT_BASE) \
