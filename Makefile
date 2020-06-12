@@ -939,8 +939,19 @@ ifeq ($(CONFIG_INIT_SP_RELATIVE)$(CONFIG_OF_SEPARATE),yy)
 INPUTS-y += init_sp_bss_offset_check
 endif
 
-ifeq ($(CONFIG_MPC85xx)$(CONFIG_OF_SEPARATE),yy)
-INPUTS-y += u-boot-with-dtb.bin
+ifeq ($(CONFIG_ARCH_ROCKCHIP),y)
+# On ARM64 this target is produced by binman so we don't need this dep
+ifeq ($(CONFIG_ARM64),y)
+ifeq ($(CONFIG_SPL),y)
+# TODO: Get binman to generate this too
+INPUTS-y += u-boot-rockchip.bin
+endif
+else
+ifeq ($(CONFIG_SPL),y)
+# Generate these inputs for binman which will create the output files
+INPUTS-y += idbloader.img u-boot.img
+endif
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_ROCKCHIP)$(CONFIG_SPL),yy)
@@ -1461,10 +1472,7 @@ idbloader.img: spl/u-boot-spl.bin FORCE
 	$(call if_changed,mkimage)
 endif
 
-ifeq ($(CONFIG_ARM64),)
-u-boot-rockchip.bin: idbloader.img u-boot.img FORCE
-	$(call if_changed,binman)
-else
+ifeq ($(CONFIG_ARM64),y)
 OBJCOPYFLAGS_u-boot-rockchip.bin = -I binary -O binary \
 	--pad-to=$(CONFIG_SPL_PAD_TO) --gap-fill=0xff
 u-boot-rockchip.bin: idbloader.img u-boot.itb FORCE
