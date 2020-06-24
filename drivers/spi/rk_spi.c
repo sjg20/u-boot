@@ -45,10 +45,6 @@ struct rockchip_spi_platdata {
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
 	struct dtd_rockchip_rk3288_spi of_plat;
 #endif
-	s32 frequency;		/* Default clock frequency, -1 for none */
-	fdt_addr_t base;
-	uint deactivate_delay_us;	/* Delay to wait after deactivate */
-	uint activate_delay_us;		/* Delay to wait after activate */
 };
 
 #define SPI_FIFO_DEPTH		32
@@ -125,17 +121,16 @@ static int rkspi_wait_till_not_busy(struct rockchip_spi *regs)
 static void spi_cs_activate(struct udevice *dev, uint cs)
 {
 	struct udevice *bus = dev->parent;
-	struct rockchip_spi_platdata *plat = bus->platdata;
 	struct rockchip_spi_priv *priv = dev_get_priv(bus);
 	struct rockchip_spi *regs = priv->regs;
 
 	/* If it's too soon to do another transaction, wait */
-	if (plat->deactivate_delay_us && priv->last_transaction_us) {
+	if (priv->deactivate_delay_us && priv->last_transaction_us) {
 		ulong delay_us;		/* The delay completed so far */
 		delay_us = timer_get_us() - priv->last_transaction_us;
-		if (delay_us < plat->deactivate_delay_us) {
+		if (delay_us < priv->deactivate_delay_us) {
 			ulong additional_delay_us =
-				plat->deactivate_delay_us - delay_us;
+				priv->deactivate_delay_us - delay_us;
 			debug("%s: delaying by %ld us\n",
 			      __func__, additional_delay_us);
 			udelay(additional_delay_us);
@@ -144,14 +139,13 @@ static void spi_cs_activate(struct udevice *dev, uint cs)
 
 	debug("activate cs%u\n", cs);
 	writel(1 << cs, &regs->ser);
-	if (plat->activate_delay_us)
-		udelay(plat->activate_delay_us);
+	if (priv->activate_delay_us)
+		udelay(priv->activate_delay_us);
 }
 
 static void spi_cs_deactivate(struct udevice *dev, uint cs)
 {
 	struct udevice *bus = dev->parent;
-	struct rockchip_spi_platdata *plat = bus->platdata;
 	struct rockchip_spi_priv *priv = dev_get_priv(bus);
 	struct rockchip_spi *regs = priv->regs;
 
@@ -159,7 +153,7 @@ static void spi_cs_deactivate(struct udevice *dev, uint cs)
 	writel(0, &regs->ser);
 
 	/* Remember time of this transaction so we can honour the bus delay */
-	if (plat->deactivate_delay_us)
+	if (priv->deactivate_delay_us)
 		priv->last_transaction_us = timer_get_us();
 }
 
@@ -171,8 +165,8 @@ static int conv_of_platdata(struct udevice *dev)
 	struct rockchip_spi_priv *priv = dev_get_priv(dev);
 	int ret;
 
-	plat->base = dtplat->reg[0];
-	plat->frequency = 20000000;
+	priv->base = dtplat->reg[0];
+	priv->frequency = 20000000;
 	ret = clk_get_by_driver_info(dev, dtplat->clocks, &priv->clk);
 	if (ret < 0)
 		return ret;
@@ -185,11 +179,10 @@ static int conv_of_platdata(struct udevice *dev)
 static int rockchip_spi_ofdata_to_platdata(struct udevice *bus)
 {
 #if !CONFIG_IS_ENABLED(OF_PLATDATA)
-	struct rockchip_spi_platdata *plat = dev_get_platdata(bus);
 	struct rockchip_spi_priv *priv = dev_get_priv(bus);
 	int ret;
 
-	plat->base = dev_read_addr(bus);
+	priv->base = dev_read_addr(bus);
 
 	ret = clk_get_by_index(bus, 0, &priv->clk);
 	if (ret < 0) {
@@ -198,16 +191,16 @@ static int rockchip_spi_ofdata_to_platdata(struct udevice *bus)
 		return ret;
 	}
 
-	plat->frequency =
+	priv->frequency =
 		dev_read_u32_default(bus, "spi-max-frequency", 50000000);
-	plat->deactivate_delay_us =
+	priv->deactivate_delay_us =
 		dev_read_u32_default(bus, "spi-deactivate-delay", 0);
-	plat->activate_delay_us =
+	priv->activate_delay_us =
 		dev_read_u32_default(bus, "spi-activate-delay", 0);
 
 	debug("%s: base=%x, max-frequency=%d, deactivate_delay=%d\n",
-	      __func__, (uint)plat->base, plat->frequency,
-	      plat->deactivate_delay_us);
+	      __func__, (uint)priv->base, priv->frequency,
+	      priv->deactivate_delay_us);
 #endif
 
 	return 0;
@@ -243,7 +236,6 @@ static int rockchip_spi_calc_modclk(ulong max_freq)
 
 static int rockchip_spi_probe(struct udevice *bus)
 {
-	struct rockchip_spi_platdata *plat = dev_get_platdata(bus);
 	struct rockchip_spi_priv *priv = dev_get_priv(bus);
 	int ret;
 
@@ -253,10 +245,10 @@ static int rockchip_spi_probe(struct udevice *bus)
 	if (ret)
 		return ret;
 #endif
-	priv->regs = (struct rockchip_spi *)plat->base;
+	priv->regs = (struct rockchip_spi *)priv->base;
 
 	priv->last_transaction_us = timer_get_us();
-	priv->max_freq = plat->frequency;
+	priv->max_freq = priv->frequency;
 
 	/* Clamp the value from the DTS against any hardware limits */
 	if (priv->max_freq > ROCKCHIP_SPI_MAX_RATE)
