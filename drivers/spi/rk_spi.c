@@ -23,6 +23,7 @@
 #include <asm/io.h>
 #include <asm/arch-rockchip/clock.h>
 #include <asm/arch-rockchip/periph.h>
+#include <asm/arch-rockchip/spi.h>
 #include <dm/pinctrl.h>
 #include "rk_spi.h"
 
@@ -48,17 +49,6 @@ struct rockchip_spi_platdata {
 	fdt_addr_t base;
 	uint deactivate_delay_us;	/* Delay to wait after deactivate */
 	uint activate_delay_us;		/* Delay to wait after activate */
-};
-
-struct rockchip_spi_priv {
-	struct rockchip_spi *regs;
-	struct clk clk;
-	unsigned int max_freq;
-	unsigned int mode;
-	ulong last_transaction_us;	/* Time of last transaction end */
-	unsigned int speed_hz;
-	unsigned int last_speed_hz;
-	uint input_rate;
 };
 
 #define SPI_FIFO_DEPTH		32
