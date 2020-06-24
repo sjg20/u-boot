@@ -22,6 +22,8 @@ struct rockchip_spi_priv {
 	fdt_addr_t base;
 	uint deactivate_delay_us;	/* Delay to wait after deactivate */
 	uint activate_delay_us;		/* Delay to wait after activate */
+	/* RXFIFO overruns and TXFIFO underruns stop the master clock */
+	bool master_manages_fifo;
 };
 
 #endif

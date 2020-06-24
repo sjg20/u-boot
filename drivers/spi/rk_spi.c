@@ -36,9 +36,9 @@
  */
 #define ROCKCHIP_SPI_MAX_TRANLEN		0xffff
 
-struct rockchip_spi_params {
-	/* RXFIFO overruns and TXFIFO underruns stop the master clock */
-	bool master_manages_fifo;
+enum rockchip_spi_type {
+	RK_SPI_BASE,
+	RK_SPI_RK33XX,
 };
 
 struct rockchip_spi_platdata {
@@ -262,6 +262,8 @@ static int rockchip_spi_probe(struct udevice *bus)
 		return ret;
 	}
 	priv->input_rate = ret;
+	if (dev_get_driver_data(bus) == RK_SPI_RK33XX)
+		priv->master_manages_fifo = true;
 	debug("%s: rate = %u\n", __func__, priv->input_rate);
 
 	return 0;
@@ -335,8 +337,6 @@ static inline int rockchip_spi_16bit_reader(struct udevice *dev,
 					    u8 **din, int *len)
 {
 	struct udevice *bus = dev->parent;
-	const struct rockchip_spi_params * const data =
-		(void *)dev_get_driver_data(bus);
 	struct rockchip_spi_priv *priv = dev_get_priv(bus);
 	struct rockchip_spi *regs = priv->regs;
 	const u32 saved_ctrlr0 = readl(&regs->ctrlr0);
@@ -356,7 +356,7 @@ static inline int rockchip_spi_16bit_reader(struct udevice *dev,
 	 * we the allow largest possible chunk size that can be
 	 * represented in CTRLR1.
 	 */
-	if (data && data->master_manages_fifo)
+	if (priv->master_manages_fifo)
 		max_chunk_size = ROCKCHIP_SPI_MAX_TRANLEN;
 
 	// rockchip_spi_configure(dev, mode, size)
@@ -522,18 +522,14 @@ static const struct dm_spi_ops rockchip_spi_ops = {
 	 */
 };
 
-const  struct rockchip_spi_params rk3399_spi_params = {
-	.master_manages_fifo = true,
-};
-
 static const struct udevice_id rockchip_spi_ids[] = {
 	{ .compatible = "rockchip,rk3066-spi" },
 	{ .compatible = "rockchip,rk3288-spi" },
 	{ .compatible = "rockchip,rk3328-spi" },
 	{ .compatible = "rockchip,rk3368-spi",
-	  .data = (ulong)&rk3399_spi_params },
+	  .data = RK_SPI_RK33XX },
 	{ .compatible = "rockchip,rk3399-spi",
-	  .data = (ulong)&rk3399_spi_params },
+	  .data = RK_SPI_RK33XX },
 	{ }
 };
 
