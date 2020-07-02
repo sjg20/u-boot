@@ -399,7 +399,7 @@ static int spl_common_init(bool setup_malloc)
 	if (ret) {
 		debug("%s: Failed to set up bootstage: ret=%d\n", __func__,
 		      ret);
-		return ret;
+		return log_msg_ret("bootstage", ret);
 	}
 #ifdef CONFIG_BOOTSTAGE_STASH
 	if (!u_boot_first_phase()) {
@@ -418,17 +418,17 @@ static int spl_common_init(bool setup_malloc)
 	ret = log_init();
 	if (ret) {
 		debug("%s: Failed to set up logging\n", __func__);
-		return ret;
+		return log_msg_ret("log", ret);
 	}
 #endif
 	if (CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)) {
 		ret = fdtdec_setup();
 		if (ret) {
 			debug("fdtdec_setup() returned error %d\n", ret);
-			return ret;
+			return log_msg_ret("fdtdec", ret);
 		}
 	}
-	if (CONFIG_IS_ENABLED(DM)) {
+	if (CONFIG_IS_ENABLED(DM) && !CONFIG_IS_ENABLED(TINY_ONLY)) {
 		bootstage_start(BOOTSTAGE_ID_ACCUM_DM_SPL,
 				spl_phase() == PHASE_TPL ? "dm tpl" : "dm_spl");
 		/* With CONFIG_SPL_OF_PLATDATA, bring in all devices */
@@ -436,7 +436,7 @@ static int spl_common_init(bool setup_malloc)
 		bootstage_accum(BOOTSTAGE_ID_ACCUM_DM_SPL);
 		if (ret) {
 			debug("dm_init_and_scan() returned error %d\n", ret);
-			return ret;
+			return log_msg_ret("init", ret);
 		}
 	}
 
@@ -819,9 +819,10 @@ ulong spl_relocate_stack_gd(void)
 	ptr = CONFIG_SPL_STACK_R_ADDR - roundup(sizeof(gd_t),16);
 	new_gd = (gd_t *)ptr;
 	memcpy(new_gd, (void *)gd, sizeof(gd_t));
-#if CONFIG_IS_ENABLED(DM)
-	dm_fixup_for_gd_move(new_gd);
-#endif
+	if (CONFIG_IS_ENABLED(DM) && !CONFIG_IS_ENABLED(TINY_ONLY))
+		dm_fixup_for_gd_move(new_gd);
+	if (CONFIG_IS_ENABLED(LOG))
+		log_fixup_for_gd_move(new_gd);
 #if !defined(CONFIG_ARM) && !defined(CONFIG_RISCV)
 	gd = new_gd;
 #endif

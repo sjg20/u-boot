@@ -171,7 +171,7 @@ static void early_ec_init(void)
 
 static int arch_cpu_init_tpl(void)
 {
-	struct udevice *pmc, *sa, *p2sb, *serial, *spi, *lpc;
+	struct udevice *pmc, *sa, *p2sb, *spi, *lpc;
 	int ret;
 
 	ret = uclass_first_device_err(UCLASS_ACPI_PMC, &pmc);
@@ -192,9 +192,6 @@ static int arch_cpu_init_tpl(void)
 	if (ret)
 		return log_msg_ret("northbridge", ret);
 	gd->baudrate = CONFIG_BAUDRATE;
-	ret = uclass_first_device_err(UCLASS_SERIAL, &serial);
-	if (ret)
-		return log_msg_ret("serial", ret);
 	if (CONFIG_IS_ENABLED(SPI_FLASH_SUPPORT)) {
 		ret = uclass_first_device_err(UCLASS_SPI, &spi);
 		if (ret)

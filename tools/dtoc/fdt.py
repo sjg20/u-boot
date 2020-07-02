@@ -60,9 +60,9 @@ def BytesToValue(data):
             Type of data
             Data, either a single element or a list of elements. Each element
             is one of:
-                Type.STRING: str/bytes value from the property
-                Type.INT: a byte-swapped integer stored as a 4-byte str/bytes
-                Type.BYTE: a byte stored as a single-byte str/bytes
+                Type.STRING: str value from the property
+                Type.INT: a big-endian integer stored as a 4-byte bytes
+                Type.BYTE: a byte stored as a single-byte bytes
     """
     data = bytes(data)
     size = len(data)
@@ -104,6 +104,7 @@ class Prop:
 
     Properties:
         name: Property name (as per the device tree)
+        bytes: Property value as raw bytes
         value: Property value as a string of bytes, or a list of strings of
             bytes
         type: Value type

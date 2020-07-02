@@ -303,10 +303,12 @@ $(obj)/$(SPL_BIN).dtb: dts/dt-spl.dtb FORCE
 pythonpath = PYTHONPATH=scripts/dtc/pylibfdt
 
 quiet_cmd_dtocc = DTOC C  $@
-cmd_dtocc = $(pythonpath) $(srctree)/tools/dtoc/dtoc -d $(obj)/$(SPL_BIN).dtb -o $@ platdata
+cmd_dtocc = $(pythonpath) $(srctree)/tools/dtoc/dtoc -d $(obj)/$(SPL_BIN).dtb \
+	-o $@ -c $(KCONFIG_CONFIG) -s $(srctree) platdata
 
 quiet_cmd_dtoch = DTOC H  $@
-cmd_dtoch = $(pythonpath) $(srctree)/tools/dtoc/dtoc -d $(obj)/$(SPL_BIN).dtb -o $@ struct
+cmd_dtoch = $(pythonpath) $(srctree)/tools/dtoc/dtoc -d $(obj)/$(SPL_BIN).dtb \
+	-o $@ -s $(srctree) struct
 
 quiet_cmd_plat = PLAT    $@
 cmd_plat = $(CC) $(c_flags) -c $< -o $(filter-out $(PHONY),$@)

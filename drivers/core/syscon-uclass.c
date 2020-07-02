@@ -16,6 +16,17 @@
 #include <dm/root.h>
 #include <linux/err.h>
 
+void *syscon_get_first_range(ulong driver_data)
+{
+	struct regmap *map;
+
+	map = syscon_get_regmap_by_driver_data(driver_data);
+	if (IS_ERR(map))
+		return map;
+	return regmap_get_range(map, 0);
+}
+
+#if !CONFIG_IS_ENABLED(TINY_SYSCON)
 /*
  * Caution:
  * This API requires the given device has already been bound to the syscon
@@ -56,7 +67,7 @@ static int syscon_pre_probe(struct udevice *dev)
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
 	struct syscon_base_platdata *plat = dev_get_platdata(dev);
 
-	return regmap_init_mem_platdata(dev, plat->reg, ARRAY_SIZE(plat->reg),
+	return regmap_init_mem_platdata(plat->reg, ARRAY_SIZE(plat->reg),
 					&priv->regmap);
 #else
 	return regmap_init_mem(dev_ofnode(dev), &priv->regmap);
@@ -159,16 +170,6 @@ struct regmap *syscon_get_regmap_by_driver_data(ulong driver_data)
 	return priv->regmap;
 }
 
-void *syscon_get_first_range(ulong driver_data)
-{
-	struct regmap *map;
-
-	map = syscon_get_regmap_by_driver_data(driver_data);
-	if (IS_ERR(map))
-		return map;
-	return regmap_get_range(map, 0);
-}
-
 UCLASS_DRIVER(syscon) = {
 	.id		= UCLASS_SYSCON,
 	.name		= "syscon",
@@ -212,3 +213,48 @@ struct regmap *syscon_node_to_regmap(ofnode node)
 
 	return r;
 }
+#else
+struct tinydev *tiny_syscon_get_by_driver_data(ulong driver_data)
+{
+	struct tinydev *tdev;
+
+	tdev = tiny_dev_get_by_drvdata(UCLASS_SYSCON, driver_data);
+	if (!tdev)
+		return NULL;
+
+	return tdev;
+}
+
+struct regmap *syscon_get_regmap_by_driver_data(ulong driver_data)
+{
+	struct syscon_uc_info *uc_priv;
+	struct tinydev *tdev;
+
+	tdev = tiny_syscon_get_by_driver_data(driver_data);
+	if (!tdev)
+		return ERR_PTR(-ENODEV);
+	/*
+	 * We assume that the device has struct syscon_uc_info at the start of
+	 * its private data
+	 */
+	uc_priv = tinydev_get_priv(tdev);
+
+	return uc_priv->regmap;
+}
+
+int tiny_syscon_setup(struct tinydev *tdev)
+{
+	struct syscon_uc_info *priv = tinydev_get_priv(tdev);
+
+	/*
+	 * With OF_PLATDATA we really have no way of knowing the format of
+	 * the device-specific platform data. So we assume that it starts with
+	 * a 'reg' member, and this holds a single address and size. Drivers
+	 * using OF_PLATDATA will need to ensure that this is true.
+	 */
+	struct syscon_base_platdata *plat = tdev->dtplat;
+
+	return regmap_init_mem_platdata(plat->reg, ARRAY_SIZE(plat->reg),
+					&priv->regmap);
+}
+#endif

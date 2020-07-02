@@ -63,9 +63,8 @@ struct clk {
 	long long rate;	/* in HZ */
 	u32 flags;
 	int enable_count;
-	/*
-	 * Written by of_xlate. In the future, we might add more fields here.
-	 */
+
+	/* Written by of_xlate. In the future, we might add more fields here */
 	unsigned long id;
 	unsigned long data;
 };
@@ -87,10 +86,21 @@ struct clk_bulk {
 	unsigned int count;
 };
 
+struct tiny_clk {
+	struct tinydev *tdev;
+	long long rate;	/* in HZ */
+
+	/* Written by of_xlate. In the future, we might add more fields here */
+	unsigned long id;
+};
+
 #if CONFIG_IS_ENABLED(OF_CONTROL) && CONFIG_IS_ENABLED(CLK)
 struct phandle_1_arg;
 int clk_get_by_driver_info(struct udevice *dev,
 			   struct phandle_1_arg *cells, struct clk *clk);
+
+int tiny_clk_get_by_driver_info(struct phandle_1_arg *cells,
+				struct tiny_clk *tclk);
 
 /**
  * clk_get_by_index - Get/request a clock by integer index.
@@ -455,6 +465,10 @@ int clk_get_by_id(ulong id, struct clk **clkp);
  */
 bool clk_dev_binded(struct clk *clk);
 
+int tiny_clk_request(struct tinydev *tdev, struct tiny_clk *tclk);
+
+ulong tiny_clk_set_rate(struct tiny_clk *tclk, ulong rate);
+
 #else /* CONFIG_IS_ENABLED(CLK) */
 
 static inline int clk_request(struct udevice *dev, struct clk *clk)
@@ -526,6 +540,7 @@ static inline bool clk_dev_binded(struct clk *clk)
 {
 	return false;
 }
+
 #endif /* CONFIG_IS_ENABLED(CLK) */
 
 /**
@@ -537,6 +552,17 @@ static inline bool clk_dev_binded(struct clk *clk)
 static inline bool clk_valid(struct clk *clk)
 {
 	return clk && !!clk->dev;
+}
+
+/**
+ * tiny_clk_valid() - check if clk is valid
+ *
+ * @tiny_clk:	the clock to check
+ * @return true if valid, or false
+ */
+static inline bool tiny_clk_valid(struct tiny_clk *tclk)
+{
+	return tclk && !!tclk->tdev;
 }
 
 int soc_clk_dump(void);

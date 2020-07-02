@@ -80,3 +80,34 @@ void malloc_simple_info(void)
 	log_info("malloc_simple: %lx bytes used, %lx remain\n", gd->malloc_ptr,
 		 CONFIG_VAL(SYS_MALLOC_F_LEN) - gd->malloc_ptr);
 }
+
+uint malloc_ptr_to_ofs(void *ptr)
+{
+	ulong addr = map_to_sysmem(ptr);
+	ulong offset;
+
+	offset = addr - gd->malloc_base;
+	if (offset >= gd->malloc_limit) {
+		log_debug("Invalid malloc ptr %p (base=%lx, size=%lx)\n", ptr,
+			  gd->malloc_base, gd->malloc_limit);
+		panic("malloc ptr invalid");
+	}
+
+	return offset;
+}
+
+void *malloc_ofs_to_ptr(uint offset)
+{
+	void *base = map_sysmem(gd->malloc_base, gd->malloc_limit);
+	void *ptr;
+
+	if (offset >= gd->malloc_limit) {
+		log_debug("Invalid malloc offset %lx (size=%lx)\n",
+			  gd->malloc_base, gd->malloc_limit);
+		panic("malloc offset invalid");
+	}
+	ptr = base + offset;
+	unmap_sysmem(base);
+
+	return ptr;
+}

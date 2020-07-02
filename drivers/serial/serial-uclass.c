@@ -4,9 +4,11 @@
  */
 
 #include <common.h>
+#include <debug_uart.h>
 #include <dm.h>
 #include <env_internal.h>
 #include <errno.h>
+#include <log.h>
 #include <malloc.h>
 #include <os.h>
 #include <serial.h>
@@ -18,6 +20,8 @@
 #include <linux/delay.h>
 
 DECLARE_GLOBAL_DATA_PTR;
+
+#if !CONFIG_IS_ENABLED(TINY_SERIAL)
 
 /*
  * Table with supported baudrates (defined in config_xyz.h)
@@ -509,4 +513,77 @@ UCLASS_DRIVER(serial) = {
 	.pre_remove	= serial_pre_remove,
 	.per_device_auto_alloc_size = sizeof(struct serial_dev_priv),
 };
+#endif
+
+#else /* TINY_SERIAL */
+
+int serial_init(void)
+{
+	struct tinydev *tdev;
+	int ret;
+
+	tdev = tiny_dev_find(UCLASS_SERIAL, 0);
+	if (!tdev) {
+		if (IS_ENABLED(CONFIG_REQUIRE_SERIAL_CONSOLE))
+			panic_str("No serial");
+		return -ENODEV;
+	}
+	ret = tiny_dev_probe(tdev);
+	if (ret)
+		return log_msg_ret("probe", ret);
+	ret = tiny_serial_setbrg(tdev, gd->baudrate);
+	if (ret)
+		return log_msg_ret("brg", ret);
+	gd->tiny_serial = tdev;
+	gd->flags |= GD_FLG_SERIAL_READY;
+
+	return 0;
+}
+
+int serial_getc(void)
+{
+	return -ENOSYS;
+}
+
+void serial_putc(const char ch)
+{
+	struct tinydev *tdev = gd->tiny_serial;
+	struct tiny_serial_ops *ops;
+
+	/*
+	 * If we don't have a serial port or the driver is broken, try the
+	 * debug UART. This helps with debugging the serial driver in early
+	 * bringup, and adds very little to code size.
+	 */
+	if (!tdev)
+		goto err;
+	ops = tiny_serial_get_ops(tdev);
+	if (IS_ENABLED(CONFIG_TINY_CHECK) && !ops->putc)
+		goto err;
+	if (ch == '\n')
+		ops->putc(tdev, '\r');
+	ops->putc(tdev, ch);
+
+	return;
+err:
+	if (IS_ENABLED(DEBUG_UART))
+		printch(ch);
+}
+
+void serial_puts(const char *str)
+{
+	for (const char *s = str; *s; s++)
+		serial_putc(*s);
+}
+
+int tiny_serial_setbrg(struct tinydev *tdev, int baudrate)
+{
+	const struct tiny_serial_ops *ops = tiny_serial_get_ops(tdev);
+
+	if (IS_ENABLED(CONFIG_TINY_CHECK) && !ops)
+		return -ENOSYS;
+
+	return ops->setbrg(tdev, baudrate);
+}
+
 #endif

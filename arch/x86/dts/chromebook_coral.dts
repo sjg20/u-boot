@@ -47,6 +47,7 @@
 		i2c6 = &i2c_6;
 		i2c7 = &i2c_7;
 		mmc1 = &sdmmc;
+		serial0 = &serial;
 	};
 
 	board: board {

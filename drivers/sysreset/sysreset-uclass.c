@@ -21,6 +21,7 @@
 #include <linux/delay.h>
 #include <linux/err.h>
 
+#if !CONFIG_IS_ENABLED(TINY_SYSRESET)
 int sysreset_request(struct udevice *dev, enum sysreset_t type)
 {
 	struct sysreset_ops *ops = sysreset_get_ops(dev);
@@ -49,25 +50,6 @@ int sysreset_get_last(struct udevice *dev)
 		return -ENOSYS;
 
 	return ops->get_last(dev);
-}
-
-int sysreset_walk(enum sysreset_t type)
-{
-	struct udevice *dev;
-	int ret = -ENOSYS;
-
-	while (ret != -EINPROGRESS && type < SYSRESET_COUNT) {
-		for (uclass_first_device(UCLASS_SYSRESET, &dev);
-		     dev;
-		     uclass_next_device(&dev)) {
-			ret = sysreset_request(dev, type);
-			if (ret == -EINPROGRESS)
-				break;
-		}
-		type++;
-	}
-
-	return ret;
 }
 
 int sysreset_get_last_walk(void)
@@ -162,3 +144,74 @@ UCLASS_DRIVER(sysreset) = {
 	.name		= "sysreset",
 	.post_bind	= sysreset_post_bind,
 };
+#else
+int tiny_sysreset_request(struct tinydev *tdev, enum sysreset_t type)
+{
+	struct tiny_sysreset_ops *ops = tiny_sysreset_get_ops(tdev);
+
+	if (!ops->request)
+		return -ENOSYS;
+
+	return ops->request(tdev, type);
+}
+#endif
+
+int sysreset_walk(enum sysreset_t type)
+{
+	int ret = -ENOSYS;
+
+	while (ret != -EINPROGRESS && type < SYSRESET_COUNT) {
+		if (!CONFIG_IS_ENABLED(TINY_SYSRESET)) {
+			struct udevice *dev;
+
+			for (uclass_first_device(UCLASS_SYSRESET, &dev);
+			     dev;
+			     uclass_next_device(&dev)) {
+				ret = sysreset_request(dev, type);
+				if (ret == -EINPROGRESS)
+					break;
+			}
+		} else {
+			struct tinydev *tdev;
+
+			tdev = tiny_dev_get(UCLASS_SYSRESET, 0);
+			if (tdev)
+				ret = tiny_sysreset_request(tdev, type);
+		}
+		type++;
+	}
+
+	return ret;
+}
+
+void sysreset_walk_halt(enum sysreset_t type)
+{
+	int ret;
+
+	ret = sysreset_walk(type);
+
+	/* Wait for the reset to take effect */
+	if (ret == -EINPROGRESS)
+		mdelay(100);
+
+	/* Still no reset? Give up */
+	log_err("System reset not supported on this platform\n");
+	hang();
+}
+
+/**
+ * reset_cpu() - calls sysreset_walk(SYSRESET_WARM)
+ */
+void reset_cpu(ulong addr)
+{
+	sysreset_walk_halt(SYSRESET_WARM);
+}
+
+int do_reset(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
+{
+	printf("resetting ...\n");
+
+	sysreset_walk_halt(SYSRESET_COLD);
+
+	return 0;
+}

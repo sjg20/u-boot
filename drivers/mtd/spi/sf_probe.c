@@ -17,6 +17,7 @@
 
 #include "sf_internal.h"
 
+#if !CONFIG_IS_ENABLED(TINY_SPI_FLASH)
 /**
  * spi_flash_probe_slave() - Probe for a SPI flash device on a bus
  *
@@ -173,3 +174,6 @@ U_BOOT_DRIVER(jedec_spi_nor) = {
 U_BOOT_DRIVER_ALIAS(jedec_spi_nor, spansion_m25p16)
 
 #endif /* CONFIG_DM_SPI_FLASH */
+#else /* TINY_SPI_FLASH */
+#endif
+

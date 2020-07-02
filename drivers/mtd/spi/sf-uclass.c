@@ -3,8 +3,11 @@
  * Copyright (c) 2014 Google, Inc
  */
 
+#define LOG_CATEGORY UCLASS_SPI_FLASH
+
 #include <common.h>
 #include <dm.h>
+#include <dt-structs.h>
 #include <log.h>
 #include <malloc.h>
 #include <spi.h>
@@ -14,6 +17,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#if !CONFIG_IS_ENABLED(TINY_SPI_FLASH)
 int spi_flash_read_dm(struct udevice *dev, u32 offset, size_t len, void *buf)
 {
 	return log_ret(sf_get_ops(dev)->read(dev, offset, len, buf));
@@ -102,3 +106,75 @@ UCLASS_DRIVER(spi_flash) = {
 	.post_bind	= spi_flash_post_bind,
 	.per_device_auto_alloc_size = sizeof(struct spi_flash),
 };
+#else /* TINY_SPI_FLASH */
+static int tiny_sf_probe(struct tinydev *tdev)
+{
+	const struct dtd_jedec_spi_nor *dtplat = tdev->dtplat;
+	struct tiny_spi_nor *nor = tinydev_get_priv(tdev);
+	struct dm_spi_slave_platdata *slave_plat;
+	struct spi_slave *slave;
+	bool exists;
+	int ret;
+
+	slave = tinydev_ensure_data(tdev, DEVDATAT_PARENT_PRIV, sizeof(*slave),
+				    &exists);
+	if (!slave)
+		return log_msg_ret("slave", -ENOMEM);
+	if (!exists) {
+		slave->tdev = tdev;
+		slave->max_hz = dtplat->spi_max_frequency;
+		slave->wordlen = SPI_DEFAULT_WORDLEN;
+		/* Leave mode as the default 0 */
+		nor->spi = slave;
+		nor->tdev = tdev;
+		log_debug("slave->max_hz=%d\n", slave->max_hz);
+	}
+	slave_plat = tinydev_ensure_data(tdev, DEVDATAT_PARENT_PLAT,
+					 sizeof(*slave_plat), &exists);
+	if (!slave_plat)
+		return log_msg_ret("plat", -ENOMEM);
+	if (!exists) {
+		slave_plat->cs = dtplat->reg[0];
+		slave_plat->max_hz = dtplat->spi_max_frequency;
+		/* Leave mode as the default 0 */
+	}
+
+	log_debug("start spi_nor_scan\n");
+	ret = spi_nor_scan(nor);
+	if (ret)
+		return ret;
+
+	return 0;
+}
+
+static int tiny_sf_read(struct tinydev *tdev, u32 offset, size_t len, void *buf)
+{
+	return log_ret(tiny_spi_flash_read(tdev, offset, len, buf));
+}
+
+struct tiny_spi_flash_ops tiny_sf_ops = {
+	.read		= tiny_sf_read,
+};
+
+U_BOOT_TINY_DRIVER(jedec_spi_nor) = {
+	.uclass_id	= UCLASS_SPI_FLASH,
+	.probe		= tiny_sf_probe,
+	.ops		= &tiny_sf_ops,
+	DM_TINY_PRIV(<spi_flash.h>, sizeof(struct tiny_spi_nor))
+};
+
+int tiny_spi_flash_read(struct tinydev *tdev, u32 offset, size_t len,
+			void *buf)
+{
+	struct tiny_spi_nor *nor = tinydev_get_priv(tdev);
+	struct tiny_mtd_info *mtd = &nor->mtd;
+	size_t retlen;
+	int ret;
+
+	ret = tiny_spi_nor_read(mtd, offset, len, &retlen, buf);
+	if (ret)
+		return log_ret(ret);
+
+	return 0;
+}
+#endif

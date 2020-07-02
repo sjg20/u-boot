@@ -9,12 +9,14 @@
  */
 
 #include <common.h>
+#include <dm.h>
 #include <image.h>
 #include <log.h>
 #include <spi.h>
 #include <spi_flash.h>
 #include <errno.h>
 #include <spl.h>
+#include <dm/of_extra.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -55,7 +57,7 @@ static int spi_load_image_os(struct spl_image_info *spl_image,
 static ulong spl_spi_fit_read(struct spl_load_info *load, ulong sector,
 			      ulong count, void *buf)
 {
-	struct spi_flash *flash = load->dev;
+	struct spi_flash *flash = load->legacy_dev;
 	ulong ret;
 
 	ret = spi_flash_read(flash, sector, count, buf);
@@ -70,6 +72,21 @@ unsigned int __weak spl_spi_get_uboot_offs(struct spi_flash *flash)
 	return CONFIG_SYS_SPI_U_BOOT_OFFS;
 }
 
+static int spl_read(struct spl_load_info *load, u32 offset, size_t len,
+		    void *buf)
+{
+	int ret;
+
+	if (!CONFIG_IS_ENABLED(TINY_SPI_FLASH))
+		ret = spi_flash_read(load->legacy_dev, offset, len, buf);
+	else
+		ret = tiny_spi_flash_read(load->tdev, offset, len, buf);
+
+	if (ret)
+		return log_ret(ret);
+
+	return 0;
+}
 /*
  * The main entry for SPI booting. It's necessary that SDRAM is already
  * configured and available since this code loads the main U-Boot image
@@ -80,41 +97,53 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 {
 	int err = 0;
 	unsigned int payload_offs;
+	struct spl_load_info load;
 	struct spi_flash *flash;
 	struct image_header *header;
+	struct tinydev *tdev;
 
 	/*
 	 * Load U-Boot image from SPI flash into RAM
 	 * In DM mode: defaults speed and mode will be
 	 * taken from DT when available
 	 */
-
-	flash = spi_flash_probe(CONFIG_SF_DEFAULT_BUS,
-				CONFIG_SF_DEFAULT_CS,
-				CONFIG_SF_DEFAULT_SPEED,
-				CONFIG_SF_DEFAULT_MODE);
-	if (!flash) {
-		puts("SPI probe failed.\n");
-		return -ENODEV;
-	}
-
-	payload_offs = spl_spi_get_uboot_offs(flash);
-
-	header = spl_get_load_buffer(-sizeof(*header), sizeof(*header));
-
-#if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
-	payload_offs = fdtdec_get_config_int(gd->fdt_blob,
+	memset(&load, '\0', sizeof(load));
+	if (!CONFIG_IS_ENABLED(TINY_SPI_FLASH)) {
+		flash = spi_flash_probe(CONFIG_SF_DEFAULT_BUS,
+					CONFIG_SF_DEFAULT_CS,
+					CONFIG_SF_DEFAULT_SPEED,
+					CONFIG_SF_DEFAULT_MODE);
+		if (!flash) {
+			puts("SPI probe failed\n");
+			return -ENODEV;
+		}
+		payload_offs = spl_spi_get_uboot_offs(flash);
+		if (CONFIG_IS_ENABLED(OF_CONTROL) &&
+		    !CONFIG_IS_ENABLED(OF_PLATDATA)) {
+			payload_offs = ofnode_read_config_int(
 					     "u-boot,spl-payload-offset",
 					     payload_offs);
-#endif
+		}
+		load.legacy_dev = flash;
+	} else {
+		tdev = tiny_dev_get(UCLASS_SPI_FLASH, 0);
+		if (!tdev) {
+			puts("SPI probe failed\n");
+			return -ENODEV;
+		}
+		load.tdev = tdev;
+		payload_offs = CONFIG_SYS_SPI_U_BOOT_OFFS;
+	}
+
+	header = spl_get_load_buffer(-sizeof(*header), sizeof(*header));
 
 #ifdef CONFIG_SPL_OS_BOOT
 	if (spl_start_uboot() || spi_load_image_os(spl_image, flash, header))
 #endif
 	{
-		/* Load u-boot, mkimage header is 64 bytes. */
-		err = spi_flash_read(flash, payload_offs, sizeof(*header),
-				     (void *)header);
+		/* Load U-Boot, mkimage header is 64 bytes. */
+		err = spl_read(&load, payload_offs, sizeof(*header),
+			       (void *)header);
 		if (err) {
 			debug("%s: Failed to read from SPI flash (err=%d)\n",
 			      __func__, err);
@@ -123,30 +152,23 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 
 		if (IS_ENABLED(CONFIG_SPL_LOAD_FIT_FULL) &&
 		    image_get_magic(header) == FDT_MAGIC) {
-			err = spi_flash_read(flash, payload_offs,
-					     roundup(fdt_totalsize(header), 4),
-					     (void *)CONFIG_SYS_LOAD_ADDR);
+			err = spl_read(&load, payload_offs,
+				       roundup(fdt_totalsize(header), 4),
+				       (void *)CONFIG_SYS_LOAD_ADDR);
 			if (err)
 				return err;
 			err = spl_parse_image_header(spl_image,
-					(struct image_header *)CONFIG_SYS_LOAD_ADDR);
+				(struct image_header *)CONFIG_SYS_LOAD_ADDR);
 		} else if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
 			   image_get_magic(header) == FDT_MAGIC) {
-			struct spl_load_info load;
-
 			debug("Found FIT\n");
-			load.dev = flash;
 			load.priv = NULL;
 			load.filename = NULL;
 			load.bl_len = 1;
 			load.read = spl_spi_fit_read;
 			err = spl_load_simple_fit(spl_image, &load,
-						  payload_offs,
-						  header);
+						  payload_offs, header);
 		} else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER)) {
-			struct spl_load_info load;
-
-			load.dev = flash;
 			load.priv = NULL;
 			load.filename = NULL;
 			load.bl_len = 1;
@@ -158,9 +180,8 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 			err = spl_parse_image_header(spl_image, header);
 			if (err)
 				return err;
-			err = spi_flash_read(flash, payload_offs,
-					     spl_image->size,
-					     (void *)spl_image->load_addr);
+			err = spl_read(&load, payload_offs, spl_image->size,
+				       (void *)spl_image->load_addr);
 		}
 	}
 

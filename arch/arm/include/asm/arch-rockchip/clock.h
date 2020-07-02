@@ -6,6 +6,9 @@
 #ifndef _ASM_ARCH_CLOCK_H
 #define _ASM_ARCH_CLOCK_H
 
+/* Include this so that struct syscon_uc_info is available for dt-platdata */
+#include <syscon.h>
+
 /* define pll mode */
 #define RKCLK_PLL_MODE_SLOW		0
 #define RKCLK_PLL_MODE_NORMAL		1
@@ -156,9 +159,15 @@ void *rockchip_get_pmucru(void);
 struct rockchip_cru;
 struct rk3288_grf;
 
+int rockchip_cru_setup_sysreset(struct udevice *dev);
+
+int rockchip_cru_setup_tiny_sysreset(struct tinydev *tdev);
+
 void rk3288_clk_configure_cpu(struct rockchip_cru *cru, struct rk3288_grf *grf);
 
 int rockchip_get_clk(struct udevice **devp);
+
+struct tinydev *tiny_rockchip_get_clk(void);
 
 /*
  * rockchip_reset_bind() - Bind soft reset device as child of clock device

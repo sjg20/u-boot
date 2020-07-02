@@ -935,6 +935,9 @@ int initf_malloc(void);
 void *malloc_simple(size_t size);
 void *memalign_simple(size_t alignment, size_t bytes);
 
+uint malloc_ptr_to_ofs(void *ptr);
+void *malloc_ofs_to_ptr(uint offset);
+
 #pragma GCC visibility push(hidden)
 # if __STD_C
 

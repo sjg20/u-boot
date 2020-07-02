@@ -50,6 +50,13 @@ struct sysreset_ops {
 
 #define sysreset_get_ops(dev)        ((struct sysreset_ops *)(dev)->driver->ops)
 
+struct tiny_sysreset_ops {
+	int (*request)(struct tinydev *tdev, enum sysreset_t type);
+};
+
+#define tiny_sysreset_get_ops(dev)	\
+	((struct tiny_sysreset_ops *)(dev)->drv->ops)
+
 /**
  * sysreset_request() - request a sysreset
  *
@@ -115,5 +122,7 @@ void sysreset_walk_halt(enum sysreset_t type);
  * reset_cpu() - calls sysreset_walk(SYSRESET_WARM)
  */
 void reset_cpu(ulong addr);
+
+int tiny_sysreset_request(struct tinydev *tdev, enum sysreset_t type);
 
 #endif

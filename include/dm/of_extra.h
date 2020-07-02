@@ -86,4 +86,10 @@ int ofnode_decode_memory_region(ofnode config_node, const char *mem_type,
 				const char *suffix, fdt_addr_t *basep,
 				fdt_size_t *sizep);
 
+ofnode ofnode_get_config_node(void);
+
+int ofnode_read_config_int(const char *prop_name, int default_val);
+int ofnode_read_config_bool(const char *prop_name);
+const char *ofnode_read_config_string(const char *prop_name);
+
 #endif

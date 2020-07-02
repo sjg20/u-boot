@@ -11,6 +11,7 @@ tool.
 
 import collections
 import os
+import re
 import struct
 import sys
 import tempfile
@@ -18,6 +19,7 @@ import unittest
 
 from dtoc import dtb_platdata
 from dtb_platdata import conv_name_to_c
+from dtb_platdata import DriverInfo
 from dtb_platdata import get_compat_name
 from dtb_platdata import get_value
 from dtb_platdata import tab_to
@@ -53,6 +55,38 @@ C_EMPTY_POPULATE_PHANDLE_DATA = '''void dm_populate_phandle_data(void) {
 }
 '''
 
+CONFIG_FILE_DATA = '''
+CONFIG_SOMETHING=1234
+CONFIG_SPL_TINY_SPI=y
+# CONFIG_SPL_TINY_SPI is not set
+CONFIG_SPL_TINY_I2C=y
+CONFIG_SOMETHING_ELSE=5678
+'''
+
+DRIVER_FILE_DATA = '''
+static const struct udevice_id xhci_usb_ids[] = {
+	{ .compatible = "rockchip,rk3328-xhci" },
+	{ }
+};
+
+U_BOOT_DRIVER(usb_xhci) = {
+	.name	= "xhci_rockchip",
+	.id	= UCLASS_USB,
+	.of_match = xhci_usb_ids,
+	.ops	= &xhci_usb_ops,
+};
+
+static const struct udevice_id usb_phy_ids[] = {
+	{ .compatible = "rockchip,rk3328-usb3-phy" },
+	{ }
+};
+
+U_BOOT_DRIVER(usb_phy) = {
+	.name = "usb_phy_rockchip",
+	.id	= UCLASS_PHY,
+	.of_match = usb_phy_ids,
+};
+'''
 
 def get_dtb_file(dts_fname, capture_stderr=False):
     """Compile a .dts file to a .dtb
@@ -77,7 +111,8 @@ class TestDtoc(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        tools._RemoveOutputDir()
+        #tools._RemoveOutputDir()
+        pass
 
     def _WritePythonString(self, fname, data):
         """Write a string with tabs expanded as done in this Python file
@@ -858,3 +893,57 @@ U_BOOT_DEVICE(spl_test2) = {
         with test_util.capture_sys_output() as (stdout, stderr):
             dtb_platdata.run_steps(['struct'], dtb_file, False, output, True,
                                [driver_fn])
+
+    def testAliases(self):
+        """Test we can get a list of aliases"""
+        dtb_file = get_dtb_file('dtoc_test_simple.dts')
+        plat = dtb_platdata.DtbPlatdata(dtb_file, False)
+        plat.scan_dtb()
+        plat.scan_tree()
+        self.assertEqual({'i2c0': '/i2c@0'}, plat._aliases)
+
+    def testReadConfig(self):
+        """Test we can get a list of 'tiny' uclasses"""
+        plat = dtb_platdata.DtbPlatdata(None, None, None)
+        plat.parse_config(CONFIG_FILE_DATA)
+        self.assertEqual(['serial', 'i2c'], plat._tiny_uclasses)
+
+    def do_platdata_run(self):
+        dtb_file = get_dtb_file('dtoc_test_simple.dts')
+        output = tools.GetOutputFilename('output')
+        config_file = tools.GetOutputFilename('config')
+        tools.WriteFile(config_file, CONFIG_FILE_DATA, binary=False)
+        plat = dtb_platdata.run_steps(['platdata'], dtb_file, config_file,
+                                      False, output)
+        return plat, output
+
+    def testDetectTiny(self):
+        """Test we detect devices that need to be 'tiny'"""
+        plat, _ = self.do_platdata_run()
+        tiny_nodes = [node.name for node in plat._valid_nodes if node.is_tiny]
+        self.assertEqual(['i2c@0'], tiny_nodes)
+
+    def testTinyNoStruct(self):
+        """Test we don't output U_BOOT_DEVICE for 'tiny' devices"""
+        plat, output = self.do_platdata_run()
+        data = tools.ReadFile(output)
+        dev_list = re.findall(b'U_BOOT_DEVICE\((.*)\)', data)
+        self.assertNotIn(b'i2c_at_0', dev_list)
+
+        # Find dtd declarations with 'static' in them
+        #dtv_list = re.findall(b'(.*)struct dtd.* dtv_(.*) =', data)
+        #has_static = [b for a, b in dtv_list if a == 'static ']
+        #self.assertNotIn(b'i2c_at_0', has_static)
+
+    def testTinyUclass(self):
+        plat = dtb_platdata.DtbPlatdata(None, None, None)
+        driver_file = tools.GetOutputFilename('driver.c')
+        tools.WriteFile(driver_file, DRIVER_FILE_DATA, binary=False)
+        plat.scan_driver(driver_file)
+        self.assertEqual(['usb_phy', 'usb_xhci'], sorted(plat._drivers.keys()))
+        self.assertEqual(DriverInfo(name='usb_phy', uclass_id='UCLASS_PHY',
+                                    compat=['rockchip,rk3328-usb3-phy']),
+                         plat._drivers['usb_phy'])
+        self.assertEqual(DriverInfo(name='usb_xhci', uclass_id='UCLASS_USB',
+                                    compat=['rockchip,rk3328-xhci']),
+                         plat._drivers['usb_xhci'])

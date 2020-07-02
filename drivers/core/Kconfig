@@ -35,6 +35,94 @@ config TPL_DM
 	  CONFIG_SPL_SYS_MALLOC_F_LEN for more details on how to enable it.
 	  Disable this for very small implementations.
 
+config SPL_TINY
+	bool "Support tiny drivers in TPL without full driver-model support"
+	depends on SPL_OF_PLATDATA
+	default y
+	help
+	  Enable support for reducing driver-model overhead with 'tiny'
+	  devices. These drivers have very basic support and do not support
+	  the full driver-model infrastructure. This can be useful for saving
+	  memory in SPL.
+
+config TIMYDEV_SHRINK_DATA
+	bool "Use smaller data structures"
+	help
+	  Tinydev supports storing some data structures in a smaller form to
+	  save memory. However this does increase code sixe so only enable
+	  this option if you have quite a lot of devices used by your board
+	  in SPL/TPL.
+
+config TINYDEV_DATA_MAX_COUNT
+	int "Number of tinydev data records to allow"
+	default 10
+	help
+	  With tinydev each device has a single priv pointer but it is possible
+	  to attach other kinds of pointers to tiny devices using a separate
+	  mechanism. This sets the maximum number that can be attached. See
+	  struct tinydev_info for the details. Mostly these slots are used by
+	  buses, so if you have a lot of I2C or SPI devices you may need to
+	  increase it.
+
+config SPL_TINY_RELOC
+	bool "Relocate devices into allocated memory before using them"
+	depends on SPL_TINY
+	help
+	  Some architectures load SPL into read-only memory. U-Boot needs write
+	  access to tiny devices (specifically struct tinydev) so this cannot
+	  work. If this option is enabled, U-Boot relocates these devices into
+	  RAM when they are needed.
+
+config SPL_TINY_ONLY
+	bool "Only support tiny drivers in SPL, not full drivers"
+	depends on SPL_TINY
+	help
+	  Enable this to drop support for full drivers in SPL. This enables
+	  'tiny' drivers for all subsystems and removes the core driver-model
+	  support for full drivers. This can same space, but only works if all
+	  the subsystems used by your board support tiny drivers.
+
+config TPL_TINY
+	bool "Support tiny drivers in TPL without full driver-model support"
+	depends on TPL_OF_PLATDATA
+	default y
+	help
+	  Enable support for reducing driver-model overhead with 'tiny'
+	  devices. These drivers have very basic support and do not support
+	  the full driver-model infrastructure. This can be useful for saving
+	  memory in TPL.
+
+config TPL_TINY_RELOC
+	bool "Relocate devices into allocated memory before using them"
+	depends on TPL_TINY
+	default y if X86
+	help
+	  Some architectures load SPL into read-only memory. U-Boot needs write
+	  access to tiny devices (specifically struct tinydev) so this cannot
+	  work. If this option is enabled, U-Boot relocates these devices into
+	  RAM when they are needed.
+
+config TPL_TINY_ONLY
+	bool "Only support tiny drivers in SPL, not full drivers"
+	depends on TPL_TINY
+	help
+	  Enable this to drop support for full drivers in SPL. This enables
+	  'tiny' drivers for all subsystems and removes the core driver-model
+	  support for full drivers. This can same space, but only works if all
+	  the subsystems used by your board support tiny drivers.
+
+config TINY_CHECK
+	bool "Enable run-time consistency checks"
+	default y
+	help
+	  Enabling this catches some errors like drivers with required but
+	  missing options. It adds slightly to code size. Provided that your
+	  code is written correct and doesn't produce errors with this option
+	  enabled, it is generally safe to disable it for production.
+
+	  Note that this does not add checks for drivers without an operations
+	  struct. A few drivers don't need operations. Otherwise, don't do that.
+
 config DM_WARN
 	bool "Enable warnings in driver model"
 	depends on DM
@@ -147,6 +235,15 @@ config SPL_SYSCON
 	  by this uclass, including accessing registers via regmap and
 	  assigning a unique number to each.
 
+config SPL_TINY_SYSCON
+	bool "Support tiny syscon drivers in SPL"
+	depends on SPL_TINY
+	default y if SPL_TINY_ONLY
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
+
 config TPL_SYSCON
 	bool "Support system controllers in TPL"
 	depends on TPL_REGMAP
@@ -155,6 +252,15 @@ config TPL_SYSCON
 	  as a group by a single driver. Some common functionality is provided
 	  by this uclass, including accessing registers via regmap and
 	  assigning a unique number to each.
+
+config TPL_TINY_SYSCON
+	bool "Support tiny syscon drivers in TPL"
+	depends on TPL_TINY
+	default y if TPL_TINY_ONLY
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
 
 config DEVRES
 	bool "Managed device resources"

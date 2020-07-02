@@ -100,4 +100,15 @@ struct clk_ops {
 	int (*disable)(struct clk *clk);
 };
 
+struct tiny_clk_ops {
+	/**
+	 * set_rate() - Set current clock rate.
+	 *
+	 * @tclk:	The clock to manipulate.
+	 * @rate:	New clock rate in Hz.
+	 * @return new rate, or -ve error code.
+	 */
+	ulong (*set_rate)(struct tiny_clk *tclk, ulong rate);
+};
+
 #endif

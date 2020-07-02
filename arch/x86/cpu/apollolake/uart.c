@@ -8,10 +8,12 @@
  */
 
 #include <common.h>
+#include <debug_uart.h>
 #include <dm.h>
 #include <dt-structs.h>
 #include <malloc.h>
 #include <ns16550.h>
+#include <serial.h>
 #include <spl.h>
 #include <asm/io.h>
 #include <asm/pci.h>
@@ -64,6 +66,7 @@ void apl_uart_init(pci_dev_t bdf, ulong base)
 	uart_lpss_init((void *)base);
 }
 
+#if !CONFIG_IS_ENABLED(TINY_SERIAL)
 /*
  * This driver uses its own compatible string but almost everything else from
  * the standard ns16550 driver. This allows us to provide an of-platdata
@@ -132,3 +135,56 @@ U_BOOT_DRIVER(apl_ns16550) = {
 	.ofdata_to_platdata = apl_ns16550_ofdata_to_platdata,
 	.probe = apl_ns16550_probe,
 };
+
+#else /* TINY_SERIAL */
+
+static int apl_ns16550_tiny_probe(struct tinydev *tdev)
+{
+	struct dtd_intel_apl_ns16550 *dtplat = tdev->dtplat;
+	struct ns16550_platdata *plat = tdev->priv;
+	ulong base;
+	pci_dev_t bdf;
+
+	base = dtplat->early_regs[0];
+	bdf = pci_ofplat_get_devfn(dtplat->reg[0]);
+
+	if (!CONFIG_IS_ENABLED(PCI))
+		apl_uart_init(bdf, base);
+
+	plat->base = base;
+	plat->reg_shift = dtplat->reg_shift;
+	plat->reg_width = 1;
+	plat->clock = dtplat->clock_frequency;
+	plat->fcr = UART_FCR_DEFVAL;
+
+	return ns16550_tiny_probe_plat(plat);
+}
+
+static int apl_ns16550_tiny_setbrg(struct tinydev *tdev, int baudrate)
+{
+	struct ns16550_platdata *plat = tdev->priv;
+
+	return ns16550_tiny_setbrg(plat, baudrate);
+}
+
+static int apl_ns16550_tiny_putc(struct tinydev *tdev, const char ch)
+{
+	struct ns16550_platdata *plat = tdev->priv;
+
+	return ns16550_tiny_putc(plat, ch);
+}
+
+struct tiny_serial_ops apl_ns16550_tiny_ops = {
+	.probe	= apl_ns16550_tiny_probe,
+	.setbrg	= apl_ns16550_tiny_setbrg,
+	.putc	= apl_ns16550_tiny_putc,
+};
+
+U_BOOT_TINY_DRIVER(apl_ns16550) = {
+	.uclass_id	= UCLASS_SERIAL,
+	.probe		= apl_ns16550_tiny_probe,
+	.ops		= &apl_ns16550_tiny_ops,
+	DM_TINY_PRIV(<ns16550.h>, sizeof(struct ns16550_platdata))
+};
+
+#endif

@@ -2,7 +2,9 @@
 #
 # Copyright (c) 2013 Google, Inc
 
+ifeq ($(CONFIG_$(SPL_TPL_)TINY_ONLY),)
 obj-y	+= device.o fdtaddr.o lists.o root.o uclass.o util.o
+endif
 obj-$(CONFIG_$(SPL_TPL_)ACPIGEN) += acpi.o
 obj-$(CONFIG_DEVRES) += devres.o
 obj-$(CONFIG_$(SPL_)DM_DEVICE_REMOVE)	+= device-remove.o
@@ -16,5 +18,6 @@ ifndef CONFIG_DM_DEV_READ_INLINE
 obj-$(CONFIG_OF_CONTROL) += read.o
 endif
 obj-$(CONFIG_OF_CONTROL) += of_extra.o ofnode.o read_extra.o
+obj-$(CONFIG_$(SPL_TPL_)TINY) += tiny.o
 
 ccflags-$(CONFIG_DM_DEBUG) += -DDEBUG

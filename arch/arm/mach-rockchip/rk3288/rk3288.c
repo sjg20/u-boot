@@ -145,6 +145,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 	return 0;
 }
 
+#if !CONFIG_IS_ENABLED(TINY_CLK)
 static int do_clock(struct cmd_tbl *cmdtp, int flag, int argc,
 		    char *const argv[])
 {
@@ -195,3 +196,4 @@ U_BOOT_CMD(
 	"display information about clocks",
 	""
 );
+#endif

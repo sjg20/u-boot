@@ -3,6 +3,8 @@
  * Copyright (c) 2014 Google, Inc
  */
 
+#define LOG_CATEGORY UCLASS_SPI
+
 #include <common.h>
 #include <dm.h>
 #include <errno.h>
@@ -17,6 +19,8 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 #define SPI_DEFAULT_SPEED_HZ 100000
+
+#if !CONFIG_IS_ENABLED(TINY_SPI)
 
 static int spi_set_speed_mode(struct udevice *bus, int speed, int mode)
 {
@@ -520,3 +524,76 @@ U_BOOT_DRIVER(spi_generic_drv) = {
 	.name		= "spi_generic_drv",
 	.id		= UCLASS_SPI_GENERIC,
 };
+#else /* TINY_SPI */
+int tiny_spi_claim_bus(struct tinydev *tdev)
+{
+	log_debug("claim\n");
+	struct tinydev *bus = tinydev_get_parent(tdev);
+	struct tiny_spi_ops *ops = tiny_spi_get_ops(bus);
+	struct spi_slave *slave = tinydev_get_data(tdev, DEVDATAT_PARENT_PRIV);
+	int speed = 0;
+	int ret;
+
+	log_debug("bus=%s\n", bus->name);
+	log_debug("slave=%p\n", slave);
+	speed = slave->max_hz;
+	if (!speed)
+		speed = SPI_DEFAULT_SPEED_HZ;
+	log_debug("speed=%d\n", speed);
+	if (speed != slave->speed) {
+		int ret = tiny_spi_set_speed_mode(bus, speed, slave->mode);
+
+		if (ret)
+			return log_msg_ret("speed", ret);
+		slave->speed = speed;
+	}
+
+	if (ops->claim_bus) {
+		ret = ops->claim_bus(tdev);
+		if (ret)
+			return log_msg_ret("claim", ret);
+	}
+
+	return 0;
+}
+
+int tiny_spi_release_bus(struct tinydev *tdev)
+{
+	log_debug("release\n");
+	struct tinydev *bus = tinydev_get_parent(tdev);
+	struct tiny_spi_ops *ops = tiny_spi_get_ops(bus);
+	int ret;
+
+	if (ops->release_bus) {
+		ret = ops->release_bus(tdev);
+		if (ret)
+			return log_ret(ret);
+	}
+
+	return 0;
+}
+
+int tiny_spi_xfer(struct tinydev *tdev, unsigned int bitlen,
+		const void *dout, void *din, unsigned long flags)
+{
+	log_debug("xfer\n");
+	struct tinydev *bus = tinydev_get_parent(tdev);
+	struct tiny_spi_ops *ops = tiny_spi_get_ops(bus);
+
+	if (!ops->xfer)
+		return -ENOSYS;
+
+	return ops->xfer(tdev, bitlen, dout, din, flags);
+}
+
+int tiny_spi_set_speed_mode(struct tinydev *bus, uint hz, uint mode)
+{
+	struct tiny_spi_ops *ops = tiny_spi_get_ops(bus);
+
+	if (!ops->set_speed_mode)
+		return -ENOSYS;
+
+	return ops->set_speed_mode(bus, hz, mode);
+}
+
+#endif /* TINY_SPI */

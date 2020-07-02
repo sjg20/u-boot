@@ -187,15 +187,30 @@ int dram_init(void)
 	struct udevice *dev;
 	int ret;
 
-	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
-	if (ret) {
-		debug("DRAM init failed: %d\n", ret);
-		return ret;
-	}
-	ret = ram_get_info(dev, &ram);
-	if (ret) {
-		debug("Cannot get DRAM size: %d\n", ret);
-		return ret;
+	if (!CONFIG_IS_ENABLED(TINY_RAM)) {
+		ret = uclass_get_device(UCLASS_RAM, 0, &dev);
+		if (ret) {
+			debug("DRAM init failed: %d\n", ret);
+			return log_msg_ret("get", ret);
+		}
+		ret = ram_get_info(dev, &ram);
+		if (ret) {
+			debug("Cannot get DRAM size: %d\n", ret);
+			return log_msg_ret("info", ret);
+		}
+	} else {
+		struct tinydev *dev;
+
+		dev = tiny_dev_get(UCLASS_RAM, 0);
+		if (!dev) {
+			debug("DRAM init failed\n");
+			return log_msg_ret("get", -ENOKEY);
+		}
+		ret = tiny_ram_get_info(dev, &ram);
+		if (ret) {
+			debug("Cannot get DRAM size: %d\n", ret);
+			return log_msg_ret("info", ret);
+		}
 	}
 	gd->ram_size = ram.size;
 	debug("SDRAM base=%lx, size=%lx\n",

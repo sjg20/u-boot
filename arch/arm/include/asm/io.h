@@ -490,6 +490,24 @@ out:
 #define isa_check_signature(io,sig,len)	(0)
 
 #endif	/* __mem_isa */
+
+/*
+ * Provide dummy I/O access on ARM, to allow portable code to compile (e.g. the
+ * ns16550 driver). These functions do nothing and should be guarded by a CONFIG
+ * on ARM so that they are never executed.
+ */
+#define outb(val, port) ({ \
+	__maybe_unused ulong _val = (val); \
+	__maybe_unused ulong _port = (uintptr_t)(port); \
+})
+
+#define outw(val, port) outb(val, port)
+#define outl(val, port) outb(val, port)
+
+#define inb(port) ({ __maybe_unused ulong _port = (uintptr_t)(port); 0; })
+#define inw(port) inb(port)
+#define inl(port) inb(port)
+
 #endif	/* __KERNEL__ */
 
 #include <asm-generic/io.h>

@@ -10,6 +10,19 @@ config CLK
 	  feed into other clocks in a tree structure, with multiplexers to
 	  choose the source for each clock.
 
+config CLK_FIXED_RATE
+	bool "Enable fixed-rate clock support"
+	depends on CLK
+	default y
+	help
+	  This enables support for a simple fixed-rate clock. The rate
+	  is provided by the device tree and is set up when the device is
+	  probed. Obviously the clock rate cannot be changed after the device
+	  is set up.
+
+	  This also enables a clock with a fixed factor (divider and
+	  multipler) of its parent clock.
+
 config SPL_CLK
 	bool "Enable clock support in SPL"
 	depends on CLK && SPL && SPL_DM
@@ -20,6 +33,28 @@ config SPL_CLK
 	  setting up clocks within SPL, and allows the same drivers to be
 	  used as U-Boot proper.
 
+config SPL_CLK_FIXED_RATE
+	bool "Enable fixed-rate clock support in SPL"
+	depends on CLK_FIXED_RATE
+	default y
+	help
+	  This enables support for a simple fixed-rate clock in SPL. The rate
+	  is provided by the device tree and is set up when the device is
+	  probed. Obviously the clock rate cannot be changed after the device
+	  is set up.
+
+	  This also enables a clock with a fixed factor (divider and
+	  multipler) of its parent clock.
+
+config SPL_TINY_CLK
+	bool "Support tiny clock drivers in SPL"
+	depends on SPL_TINY
+	default y if SPL_TINY_ONLY
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
+
 config TPL_CLK
 	bool "Enable clock support in TPL"
 	depends on CLK && TPL_DM
@@ -29,6 +64,25 @@ config TPL_CLK
 	  SPL, enable this option. It might provide a cleaner interface to
 	  setting up clocks within TPL, and allows the same drivers to be
 	  used as U-Boot proper.
+
+config TPL_CLK_FIXED_RATE
+	bool "Enable fixed-rate clock support in TPL"
+	depends on TPL_CLK
+	default y
+	help
+	  This enables support for a simple fixed-rate clock in TPL. The rate
+	  is provided by the device tree and is set up when the device is
+	  probed. Obviously the clock rate cannot be changed after the device
+	  is set up.
+
+config TPL_TINY_CLK
+	bool "Support tiny clock drivers in TPL"
+	depends on TPL_TINY
+	default y if TPL_TINY_ONLY
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
 
 config CLK_BCM6345
 	bool "Clock controller driver for BCM6345"

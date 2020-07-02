@@ -273,7 +273,7 @@
 	};
 
 	/* Needs to be available prior to relocation */
-	uart0: serial {
+	serial0: serial {
 		u-boot,dm-spl;
 		compatible = "sandbox,serial";
 		sandbox,text-colour = "cyan";

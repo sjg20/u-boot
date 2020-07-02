@@ -16,6 +16,7 @@
 #include <linux/list.h>
 
 struct cmd_tbl;
+struct global_data;
 
 /** Log levels supported, ranging from most to least important */
 enum log_level_t {
@@ -60,6 +61,7 @@ enum log_category_t {
 	LOGC_DEVRES,	/* Device resources (devres_... functions) */
 	/* Advanced Configuration and Power Interface (ACPI) */
 	LOGC_ACPI,
+	LOGC_TINYDEV,	/* Tiny devices (struct tinydev) */
 
 	LOGC_COUNT,	/* Number of log categories */
 	LOGC_END,	/* Sentinel value for a list of log categories */
@@ -483,5 +485,9 @@ static inline int log_get_default_format(void)
 	       (IS_ENABLED(CONFIG_LOGF_LINE) ? BIT(LOGF_LINE) : 0) |
 	       (IS_ENABLED(CONFIG_LOGF_FUNC) ? BIT(LOGF_FUNC) : 0);
 }
+
+void log_check(const char *msg);
+
+void log_fixup_for_gd_move(struct global_data *new_gd);
 
 #endif

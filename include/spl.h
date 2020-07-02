@@ -158,19 +158,23 @@ struct spl_image_info {
 /**
  * Information required to load data from a device
  *
- * @dev: Pointer to the device, e.g. struct mmc *
+ * @dev: Pointer to the device (NULL if using tdev)
+ * @tdev: Pointer to the tiny device (NULL if using dev)
  * @priv: Private data for the device
  * @bl_len: Block length for reading in bytes
  * @filename: Name of the fit image file.
  * @read: Function to call to read from the device
+ * @legacy_dev: Pointer to the device, e.g. struct mmc *
  */
 struct spl_load_info {
-	void *dev;
+	struct udevice *dev;
+	struct tinydev *tdev;
 	void *priv;
 	int bl_len;
 	const char *filename;
 	ulong (*read)(struct spl_load_info *load, ulong sector, ulong count,
 		      void *buf);
+	void *legacy_dev;	/* Do not use */
 };
 
 /*

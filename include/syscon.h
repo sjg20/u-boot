@@ -102,4 +102,6 @@ void *syscon_get_first_range(ulong driver_data);
  */
 struct regmap *syscon_node_to_regmap(ofnode node);
 
+int tiny_syscon_setup(struct tinydev *tdev);
+
 #endif

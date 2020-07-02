@@ -866,7 +866,7 @@ static int conv_of_platdata(struct udevice *dev)
 	memcpy(&plat->base, of_plat->rockchip_sdram_params, sizeof(plat->base));
 	/* rk3188 supports dual-channel, set default channel num to 2 */
 	plat->num_channels = 1;
-	ret = regmap_init_mem_platdata(dev, of_plat->reg,
+	ret = regmap_init_mem_platdata(of_plat->reg,
 				       ARRAY_SIZE(of_plat->reg) / 2,
 				       &plat->map);
 	if (ret)

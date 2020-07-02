@@ -179,4 +179,11 @@ static inline int spi_flash_protect(struct spi_flash *flash, u32 ofs, u32 len,
 		return flash->flash_unlock(flash, ofs, len);
 }
 
+struct tiny_spi_flash_ops {
+	int (*read)(struct tinydev *tdev, u32 offset, size_t len, void *buf);
+};
+
+int tiny_spi_flash_read(struct tinydev *tdev, u32 offset, size_t len,
+			void *buf);
+
 #endif /* _SPI_FLASH_H_ */

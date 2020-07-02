@@ -10,6 +10,12 @@
 / {
 	#address-cells = <1>;
 	#size-cells = <1>;
+
+	aliases {
+		i2c0 = &i2c0;
+		serial0 = &serial0;
+	};
+
 	spl-test {
 		u-boot,dm-pre-reloc;
 		compatible = "sandbox,spl-test";
@@ -48,7 +54,7 @@
 		compatible = "sandbox,spl-test.2";
 	};
 
-	i2c@0 {
+	i2c0: i2c@0 {
 		compatible = "sandbox,i2c-test";
 		u-boot,dm-pre-reloc;
 		#address-cells = <1>;
@@ -59,5 +65,9 @@
 			reg = <9>;
 			low-power;
 		};
+	};
+
+	serial0: serial {
+		compatible = "sandbox,serial";
 	};
 };

@@ -45,11 +45,13 @@ const char *log_get_cat_name(enum log_category_t cat)
 	if (cat >= LOGC_NONE)
 		return log_cat_name[cat - LOGC_NONE];
 
-#if CONFIG_IS_ENABLED(DM)
-	name = uclass_get_name((enum uclass_id)cat);
-#else
-	name = NULL;
-#endif
+	/* With tiny-dm we don't have uclasses, so cannot get the name */
+	if (CONFIG_IS_ENABLED(TINY_ONLY))
+		return "tiny";
+	if (CONFIG_IS_ENABLED(DM))
+		name = uclass_get_name((enum uclass_id)cat);
+	else
+		name = NULL;
 
 	return name ? name : "<missing>";
 }
@@ -182,6 +184,21 @@ static bool log_passes_filters(struct log_device *ldev, struct log_rec *rec)
 	return false;
 }
 
+void log_check(const char *msg)
+{
+	struct log_device *ldev;
+	int count = 0;
+
+	list_for_each_entry(ldev, &gd->log_head, sibling_node) {
+		count++;
+		if (count > 1) {
+			printf("%s: %s error\n", msg, __func__);
+			panic("log");
+		}
+	}
+	printf("%s: log OK\n", msg);
+}
+
 /**
  * log_dispatch() - Send a log record to all log devices for processing
  *
@@ -305,6 +322,15 @@ int log_remove_filter(const char *drv_name, int filter_num)
 	}
 
 	return -ENOENT;
+}
+
+void log_fixup_for_gd_move(struct global_data *new_gd)
+{
+	/* The sentinel node has moved, so update things that point to it */
+	if (gd->log_head.next) {
+		new_gd->log_head.next->prev = &new_gd->log_head;
+		new_gd->log_head.prev->next = &new_gd->log_head;
+	}
 }
 
 int log_init(void)

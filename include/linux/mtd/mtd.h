@@ -332,6 +332,13 @@ struct mtd_info {
 };
 
 #if IS_ENABLED(CONFIG_DM)
+struct tiny_mtd_info {
+	uint64_t size;	 // Total size of the MTD
+// 	int (*_read) (struct mtd_info *mtd, loff_t from, size_t len,
+// 		      size_t *retlen, u_char *buf);
+	void *priv;
+};
+
 static inline void mtd_set_of_node(struct mtd_info *mtd,
 				   const struct device_node *np)
 {
@@ -354,7 +361,7 @@ static inline const struct device_node *mtd_get_of_node(struct mtd_info *mtd)
 {
 	return NULL;
 }
-#endif
+#endif /* DM */
 
 static inline bool mtd_is_partition(const struct mtd_info *mtd)
 {
@@ -402,7 +409,7 @@ int mtd_erase(struct mtd_info *mtd, struct erase_info *instr);
 int mtd_point(struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen,
 	      void **virt, resource_size_t *phys);
 int mtd_unpoint(struct mtd_info *mtd, loff_t from, size_t len);
-#endif
+#endif /* __UBOOT__ */
 unsigned long mtd_get_unmapped_area(struct mtd_info *mtd, unsigned long len,
 				    unsigned long offset, unsigned long flags);
 int mtd_read(struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen,
@@ -430,7 +437,7 @@ int mtd_lock_user_prot_reg(struct mtd_info *mtd, loff_t from, size_t len);
 #ifndef __UBOOT__
 int mtd_writev(struct mtd_info *mtd, const struct kvec *vecs,
 	       unsigned long count, loff_t to, size_t *retlen);
-#endif
+#endif /* __UBOOT__ */
 
 static inline void mtd_sync(struct mtd_info *mtd)
 {
@@ -456,7 +463,7 @@ static inline void mtd_resume(struct mtd_info *mtd)
 	if (mtd->_resume)
 		mtd->_resume(mtd);
 }
-#endif
+#endif /* __UBOOT__ */
 
 static inline uint32_t mtd_div_by_eb(uint64_t sz, struct mtd_info *mtd)
 {
@@ -533,7 +540,7 @@ struct mtd_notifier {
 
 extern void register_mtd_user (struct mtd_notifier *new);
 extern int unregister_mtd_user (struct mtd_notifier *old);
-#endif
+#endif /* __UBOOT__ */
 void *mtd_kmalloc_up_to(const struct mtd_info *mtd, size_t *size);
 
 #ifdef CONFIG_MTD_PARTITIONS
@@ -544,7 +551,7 @@ static inline void mtd_erase_callback(struct erase_info *instr)
 	if (instr->callback)
 		instr->callback(instr);
 }
-#endif
+#endif /* CONFIG_MTD_PARTITIONS */
 
 static inline int mtd_is_bitflip(int err) {
 	return err == -EUCLEAN;
@@ -580,7 +587,7 @@ static inline int del_mtd_partitions(struct mtd_info *mtd)
 {
 	return 0;
 }
-#endif
+#endif /* CONFIG_MTD_PARTITIONS */
 
 struct mtd_info *__mtd_next_device(int i);
 #define mtd_for_each_device(mtd)			\
@@ -598,5 +605,5 @@ bool mtd_dev_list_updated(void);
 int mtd_search_alternate_name(const char *mtdname, char *altname,
 			      unsigned int max_len);
 
-#endif
+#endif /* __UBOOT__ */
 #endif /* __MTD_MTD_H__ */

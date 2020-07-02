@@ -10,6 +10,15 @@
 #include "rk3288.dtsi"
 
 / {
+	aliases {
+		spi_flash0 = &spi_flash;
+		sysreset0 = &sysreset;
+		syscon0 = &grf;
+		syscon1 = &sgrf;
+		syscon2 = &pmu;
+		syscon3 = &noc;
+	};
+
 	memory {
 		reg = <0x0 0x80000000>;
 	};
@@ -303,7 +312,7 @@
 
 	spi_flash: spiflash@0 {
 		u-boot,dm-pre-reloc;
-		compatible = "spidev", "jedec,spi-nor";
+		compatible = "jedec,spi-nor";
 		spi-max-frequency = <20000000>; /* Reduce for Dediprog em100 pro */
 		reg = <0>;
 	};
@@ -315,7 +324,6 @@
 	clock-frequency = <400000>;
 	i2c-scl-falling-time-ns = <50>;		/* 2.5ns measured */
 	i2c-scl-rising-time-ns = <100>;		/* 45ns measured */
-	u-boot,dm-pre-reloc;
 
 	rk808: pmic@1b {
 		compatible = "rockchip,rk808";
@@ -328,7 +336,6 @@
 		rockchip,system-power-controller;
 		wakeup-source;
 		#clock-cells = <1>;
-		u-boot,dm-pre-reloc;
 
 		vcc1-supply = <&vcc33_sys>;
 		vcc2-supply = <&vcc33_sys>;
@@ -601,7 +608,6 @@
 };
 
 &pinctrl {
-	u-boot,dm-pre-reloc;
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <
 		/* Common for sleep and wake, but no owners */
@@ -825,16 +831,4 @@
 	status = "okay";
 	assigned-clocks = <&cru SCLK_USBPHY480M_SRC>;
 	assigned-clock-parents = <&cru SCLK_OTGPHY0>;
-};
-
-&sdmmc {
-	u-boot,dm-pre-reloc;
-};
-
-&gpio3 {
-	u-boot,dm-pre-reloc;
-};
-
-&gpio8 {
-	u-boot,dm-pre-reloc;
 };

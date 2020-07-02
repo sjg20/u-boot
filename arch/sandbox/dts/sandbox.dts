@@ -9,10 +9,11 @@
 	compatible = "sandbox";
 
 	aliases {
+		axi0 = &axi;
 		i2c0 = &i2c_0;
 		pci0 = &pcic;
 		rtc0 = &rtc_0;
-		axi0 = &axi;
+		serial0 = &serial0;
 		spi0 = &spi;
 	};
 

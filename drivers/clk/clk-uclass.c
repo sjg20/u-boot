@@ -32,6 +32,7 @@ struct clk *dev_get_clk_ptr(struct udevice *dev)
 
 #if CONFIG_IS_ENABLED(OF_CONTROL)
 # if CONFIG_IS_ENABLED(OF_PLATDATA)
+#  if !CONFIG_IS_ENABLED(TINY_CLK)
 int clk_get_by_driver_info(struct udevice *dev, struct phandle_1_arg *cells,
 			   struct clk *clk)
 {
@@ -45,6 +46,21 @@ int clk_get_by_driver_info(struct udevice *dev, struct phandle_1_arg *cells,
 
 	return 0;
 }
+#  else /* TINY CLK */
+int tiny_clk_get_by_driver_info(struct phandle_1_arg *cells,
+				struct tiny_clk *tclk)
+{
+	struct tinydev *tdev;
+
+	tdev = tiny_dev_get(UCLASS_CLK, 0);
+	if (!tdev)
+		return -ENODEV;
+	tclk->tdev = tdev;
+	tclk->id = cells->arg[0];
+
+	return 0;
+}
+#  endif
 # else
 static int clk_of_xlate_default(struct clk *clk,
 				struct ofnode_phandle_args *args)
@@ -732,7 +748,8 @@ void devm_clk_put(struct udevice *dev, struct clk *clk)
 	WARN_ON(rc);
 }
 
-int clk_uclass_post_probe(struct udevice *dev)
+#if !CONFIG_IS_ENABLED(TINY_CLK)
+static int clk_uclass_post_probe(struct udevice *dev)
 {
 	/*
 	 * when a clock provider is probed. Call clk_set_defaults()
@@ -750,3 +767,37 @@ UCLASS_DRIVER(clk) = {
 	.name		= "clk",
 	.post_probe	= clk_uclass_post_probe,
 };
+#else /* TINY_CLK */
+static inline const struct tiny_clk_ops *tiny_clk_dev_ops(struct tinydev *tdev)
+{
+	return (const struct tiny_clk_ops *)tdev->drv->ops;
+}
+
+ulong tiny_clk_set_rate(struct tiny_clk *tclk, ulong rate)
+{
+	const struct tiny_clk_ops *ops;
+
+	debug("%s(tclk=%p, rate=%lu)\n", __func__, tclk, rate);
+	if (!tiny_clk_valid(tclk))
+		return 0;
+	ops = tiny_clk_dev_ops(tclk->tdev);
+
+	if (!ops->set_rate)
+		return -ENOSYS;
+
+	return ops->set_rate(tclk, rate);
+}
+
+int tiny_clk_request(struct tinydev *tdev, struct tiny_clk *tclk)
+{
+	const struct tiny_clk_ops *ops;
+
+	debug("%s(tdev=%p, tclk=%p)\n", __func__, tdev, tclk);
+	if (!tclk)
+		return 0;
+	ops = tiny_clk_dev_ops(tdev);
+	tclk->tdev = tdev;
+
+	return 0;
+}
+#endif

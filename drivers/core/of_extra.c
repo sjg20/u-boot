@@ -79,11 +79,9 @@ int ofnode_decode_memory_region(ofnode config_node, const char *mem_type,
 	ofnode node;
 
 	if (!ofnode_valid(config_node)) {
-		config_node = ofnode_path("/config");
-		if (!ofnode_valid(config_node)) {
-			debug("%s: Cannot find /config node\n", __func__);
+		config_node = ofnode_get_config_node();
+		if (!ofnode_valid(config_node))
 			return -ENOENT;
-		}
 	}
 	if (!suffix)
 		suffix = "";
@@ -126,4 +124,47 @@ int ofnode_decode_memory_region(ofnode config_node, const char *mem_type,
 	*sizep = offset_size;
 
 	return 0;
+}
+
+ofnode ofnode_get_config_node(void)
+{
+	ofnode node;
+
+	node = ofnode_path("/config");
+	if (!ofnode_valid(node))
+		debug("%s: Cannot find /config node\n", __func__);
+
+	return node;
+}
+
+int ofnode_read_config_int(const char *prop_name, int default_val)
+{
+	ofnode node;
+
+	log_debug("%s\n", prop_name);
+	node = ofnode_get_config_node();
+	if (!ofnode_valid(node))
+		return default_val;
+
+	return ofnode_read_u32_default(node, prop_name, default_val);
+}
+
+int ofnode_read_config_bool(const char *prop_name)
+{
+	ofnode node;
+
+	log_debug("%s\n", prop_name);
+	node = ofnode_get_config_node();
+
+	return ofnode_read_bool(node, prop_name);
+}
+
+const char *ofnode_read_config_string(const char *prop_name)
+{
+	ofnode node;
+
+	log_debug("%s\n", prop_name);
+	node = ofnode_get_config_node();
+
+	return ofnode_read_string(node, prop_name);
 }

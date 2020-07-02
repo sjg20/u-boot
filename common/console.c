@@ -275,7 +275,7 @@ static inline void console_doenv(int file, struct stdio_dev *dev)
 	iomux_doenv(file, dev->name);
 }
 #endif
-#else
+#else  /* !CONSOLE_MUX */
 static inline int console_getc(int file)
 {
 	return stdio_devices[file]->getc(stdio_devices[file]);

@@ -42,6 +42,24 @@ config SPI_MEM
 
 if DM_SPI
 
+config SPL_TINY_SPI
+	bool "Support tiny SPI drivers in SPL"
+	depends on SPL_TINY
+	default y if SPL_TINY_ONLY
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
+
+config TPL_TINY_SPI
+	bool "Support tiny SPI drivers in TPL"
+	depends on TPL_TINY
+	default y if TPL_TINY_ONLY
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
+
 config ALTERA_SPI
 	bool "Altera SPI driver"
 	help

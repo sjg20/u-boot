@@ -106,10 +106,12 @@ static inline int serial_in_shift(void *addr, int shift)
 static void serial_out_dynamic(struct ns16550_platdata *plat, u8 *addr,
 			       int value)
 {
-	if (plat->flags & NS16550_FLAG_IO) {
+	if (IS_ENABLED(CONFIG_NS16550_SUPPORT_IO) &&
+	    (plat->flags & NS16550_FLAG_IO)) {
 		outb(value, addr);
 	} else if (plat->reg_width == 4) {
-		if (plat->flags & NS16550_FLAG_ENDIAN) {
+		if (IS_ENABLED(CONFIG_NS16550_SUPPORT_ENDIAN) &&
+		    (plat->flags & NS16550_FLAG_ENDIAN)) {
 			if (plat->flags & NS16550_FLAG_BE)
 				out_be32(addr, value);
 			else
@@ -117,7 +119,8 @@ static void serial_out_dynamic(struct ns16550_platdata *plat, u8 *addr,
 		} else {
 			writel(value, addr);
 		}
-	} else if (plat->flags & NS16550_FLAG_BE) {
+	} else if (IS_ENABLED(CONFIG_NS16550_SUPPORT_ENDIAN) &&
+		   (plat->flags & NS16550_FLAG_BE)) {
 		writeb(value, addr + (1 << plat->reg_shift) - 1);
 	} else {
 		writeb(value, addr);
@@ -126,10 +129,12 @@ static void serial_out_dynamic(struct ns16550_platdata *plat, u8 *addr,
 
 static int serial_in_dynamic(struct ns16550_platdata *plat, u8 *addr)
 {
-	if (plat->flags & NS16550_FLAG_IO) {
+	if (IS_ENABLED(CONFIG_NS16550_SUPPORT_IO) &&
+	    (plat->flags & NS16550_FLAG_IO)) {
 		return inb(addr);
 	} else if (plat->reg_width == 4) {
-		if (plat->flags & NS16550_FLAG_ENDIAN) {
+		if (IS_ENABLED(CONFIG_NS16550_SUPPORT_ENDIAN) &&
+		    (plat->flags & NS16550_FLAG_ENDIAN)) {
 			if (plat->flags & NS16550_FLAG_BE)
 				return in_be32(addr);
 			else
@@ -137,7 +142,8 @@ static int serial_in_dynamic(struct ns16550_platdata *plat, u8 *addr)
 		} else {
 			return readl(addr);
 		}
-	} else if (plat->flags & NS16550_FLAG_BE) {
+	} else if (IS_ENABLED(CONFIG_NS16550_SUPPORT_ENDIAN) &&
+		   (plat->flags & NS16550_FLAG_BE)) {
 		return readb(addr + (1 << plat->reg_shift) - 1);
 	} else {
 		return readb(addr);
@@ -156,13 +162,27 @@ static inline int serial_in_dynamic(struct ns16550_platdata *plat, u8 *addr)
 
 #endif /* CONFIG_NS16550_DYNAMIC */
 
+static u8 *ns16550_get_addr(struct ns16550_platdata *plat, int offset)
+{
+	offset *= 1 << plat->reg_shift;
+
+	return (u8 *)plat->base + offset + plat->reg_offset;
+}
+
+int ns16550_calc_divisor(int clock, int baudrate)
+{
+	const unsigned int mode_x_div = 16;
+
+	return DIV_ROUND_CLOSEST(clock, mode_x_div * baudrate);
+}
+
+#if !CONFIG_IS_ENABLED(TINY_SERIAL)
 static void ns16550_writeb(NS16550_t port, int offset, int value)
 {
 	struct ns16550_platdata *plat = port->plat;
 	unsigned char *addr;
 
-	offset *= 1 << plat->reg_shift;
-	addr = (unsigned char *)plat->base + offset + plat->reg_offset;
+	addr = ns16550_get_addr(plat, offset);
 
 	if (IS_ENABLED(CONFIG_NS16550_DYNAMIC))
 		serial_out_dynamic(plat, addr, value);
@@ -175,8 +195,7 @@ static int ns16550_readb(NS16550_t port, int offset)
 	struct ns16550_platdata *plat = port->plat;
 	unsigned char *addr;
 
-	offset *= 1 << plat->reg_shift;
-	addr = (unsigned char *)plat->base + offset + plat->reg_offset;
+	addr = ns16550_get_addr(plat, offset);
 
 	if (IS_ENABLED(CONFIG_NS16550_DYNAMIC))
 		return serial_in_dynamic(plat, addr);
@@ -204,13 +223,6 @@ static u32 ns16550_getfcr(NS16550_t port)
 	return UART_FCR_DEFVAL;
 }
 #endif
-
-int ns16550_calc_divisor(NS16550_t port, int clock, int baudrate)
-{
-	const unsigned int mode_x_div = 16;
-
-	return DIV_ROUND_CLOSEST(clock, mode_x_div * baudrate);
-}
 
 static void NS16550_setbrg(NS16550_t com_port, int baud_divisor)
 {
@@ -333,7 +345,7 @@ static inline void _debug_uart_init(void)
 	 * feasible. The better fix is to move all users of this driver to
 	 * driver model.
 	 */
-	baud_divisor = ns16550_calc_divisor(com_port, CONFIG_DEBUG_UART_CLOCK,
+	baud_divisor = ns16550_calc_divisor(CONFIG_DEBUG_UART_CLOCK,
 					    CONFIG_BAUDRATE);
 	serial_dout(&com_port->ier, CONFIG_SYS_NS16550_IER);
 	serial_dout(&com_port->mcr, UART_MCRVAL);
@@ -421,7 +433,7 @@ static int ns16550_serial_setbrg(struct udevice *dev, int baudrate)
 	struct ns16550_platdata *plat = com_port->plat;
 	int clock_divisor;
 
-	clock_divisor = ns16550_calc_divisor(com_port, plat->clock, baudrate);
+	clock_divisor = ns16550_calc_divisor(plat->clock, baudrate);
 
 	NS16550_setbrg(com_port, clock_divisor);
 
@@ -628,3 +640,147 @@ U_BOOT_DRIVER_ALIAS(ns16550_serial, ti_da830_uart)
 #endif /* SERIAL_PRESENT */
 
 #endif /* CONFIG_DM_SERIAL */
+#else /* TINY_SERIAL */
+
+static void serial_out_reg(struct ns16550_platdata *plat, int offset, int value)
+{
+	unsigned char *addr = ns16550_get_addr(plat, offset);
+
+	serial_out_dynamic(plat, addr, value);
+}
+
+static int serial_in_reg(struct ns16550_platdata *plat, int offset)
+{
+	unsigned char *addr = ns16550_get_addr(plat, offset);
+
+	return serial_in_dynamic(plat, addr);
+}
+
+#define ns16550_reg(field)	offsetof(struct NS16550, field)
+
+int ns16550_tiny_probe_plat(struct ns16550_platdata *plat)
+{
+	while (!(serial_in_reg(plat, ns16550_reg(lsr)) & UART_LSR_TEMT))
+		;
+
+	serial_out_reg(plat, ns16550_reg(ier), CONFIG_SYS_NS16550_IER);
+	serial_out_reg(plat, ns16550_reg(mcr), UART_MCRVAL);
+	serial_out_reg(plat, ns16550_reg(fcr), plat->fcr);
+
+	/* initialise serial config to 8N1 before writing baudrate */
+	serial_out_reg(plat, ns16550_reg(lcr), UART_LCRVAL);
+
+	return 0;
+}
+
+int ns16550_tiny_setbrg(struct ns16550_platdata *plat, int baud_rate)
+{
+	int baud_divisor;
+
+	baud_divisor = ns16550_calc_divisor(plat->clock, baud_rate);
+	serial_out_reg(plat, ns16550_reg(lcr), UART_LCR_BKSE | UART_LCRVAL);
+	serial_out_reg(plat, ns16550_reg(dll), baud_divisor & 0xff);
+	serial_out_reg(plat, ns16550_reg(dlm), (baud_divisor >> 8) & 0xff);
+	serial_out_reg(plat, ns16550_reg(lcr), UART_LCRVAL);
+
+	return 0;
+}
+
+int ns16550_tiny_putc(struct ns16550_platdata *plat, const char ch)
+{
+	while (!(serial_in_reg(plat, ns16550_reg(lsr)) & UART_LSR_THRE))
+		;
+	serial_out_reg(plat, ns16550_reg(thr), ch);
+
+	return 0;
+}
+
+#ifdef CONFIG_DEBUG_UART_NS16550
+
+#include <debug_uart.h>
+
+static inline void _debug_uart_init(void)
+{
+	struct NS16550 *com_port = (struct NS16550 *)CONFIG_DEBUG_UART_BASE;
+	int baud_divisor;
+
+	/*
+	 * We copy the code from above because it is already horribly messy.
+	 * Trying to refactor to nicely remove the duplication doesn't seem
+	 * feasible. The better fix is to move all users of this driver to
+	 * driver model.
+	 */
+	baud_divisor = ns16550_calc_divisor(CONFIG_DEBUG_UART_CLOCK,
+					    CONFIG_BAUDRATE);
+	serial_dout(&com_port->ier, CONFIG_SYS_NS16550_IER);
+	serial_dout(&com_port->mcr, UART_MCRVAL);
+	serial_dout(&com_port->fcr, UART_FCR_DEFVAL);
+
+	serial_dout(&com_port->lcr, UART_LCR_BKSE | UART_LCRVAL);
+	serial_dout(&com_port->dll, baud_divisor & 0xff);
+	serial_dout(&com_port->dlm, (baud_divisor >> 8) & 0xff);
+	serial_dout(&com_port->lcr, UART_LCRVAL);
+}
+
+static inline int NS16550_read_baud_divisor(struct NS16550 *com_port)
+{
+	int ret;
+
+	serial_dout(&com_port->lcr, UART_LCR_BKSE | UART_LCRVAL);
+	ret = serial_din(&com_port->dll) & 0xff;
+	ret |= (serial_din(&com_port->dlm) & 0xff) << 8;
+	serial_dout(&com_port->lcr, UART_LCRVAL);
+
+	return ret;
+}
+
+static inline void _debug_uart_putc(int ch)
+{
+	struct NS16550 *com_port = (struct NS16550 *)CONFIG_DEBUG_UART_BASE;
+
+	while (!(serial_din(&com_port->lsr) & UART_LSR_THRE)) {
+#ifdef CONFIG_DEBUG_UART_NS16550_CHECK_ENABLED
+		if (!NS16550_read_baud_divisor(com_port))
+			return;
+#endif
+	}
+	serial_dout(&com_port->thr, ch);
+}
+#if 0
+static inline void _debug_uart_init(void)
+{
+	struct ns16550_platdata plat;
+
+	plat.base = CONFIG_DEBUG_UART_BASE;
+	plat.reg_shift = 1 << CONFIG_DEBUG_UART_SHIFT;
+	plat.reg_width = 1;
+	plat.reg_offset = 0;
+	plat.clock = CONFIG_DEBUG_UART_CLOCK;
+	plat.fcr = UART_FCR_DEFVAL;
+	plat.flags = 0;
+	ns16550_tiny_probe_plat(&plat);
+	ns16550_tiny_setbrg(&plat, CONFIG_BAUDRATE);
+}
+
+static inline void _debug_uart_putc(int ch)
+{
+	struct ns16550_platdata plat;
+
+	plat.base = CONFIG_DEBUG_UART_BASE;
+	plat.reg_shift = 1 << CONFIG_DEBUG_UART_SHIFT;
+	plat.reg_width = 1;
+	plat.reg_offset = 0;
+	plat.clock = CONFIG_DEBUG_UART_CLOCK;
+	plat.fcr = UART_FCR_DEFVAL;
+	plat.flags = 0;
+	while (!(serial_in_reg(&plat, ns16550_reg(lsr)) & UART_LSR_THRE))
+		;
+	serial_out_reg(&plat, ns16550_reg(thr), ch);
+}
+#endif
+
+DEBUG_UART_FUNCS
+
+#endif
+
+#endif /* TINY_SERIAL */

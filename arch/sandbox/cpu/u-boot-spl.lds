@@ -5,9 +5,21 @@
  * found in the LICENSE file.
  */
 
+/* Put the tiny devices in the data section since they are changed at runtime */
 SECTIONS
 {
+	. = ALIGN(4);
+	.tiny_dev : {
+		__tiny_dev_start = .;
+		KEEP(*(SORT(.u_boot_list*tiny_dev*)));
+		__tiny_dev_end = .;
+	}
+}
 
+INSERT AFTER .data;
+
+SECTIONS
+{
 	. = ALIGN(4);
 	.u_boot_list : {
 		KEEP(*(SORT(.u_boot_list*)));

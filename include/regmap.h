@@ -318,7 +318,6 @@ int regmap_init_mem(ofnode node, struct regmap **mapp);
  * regmap_init_mem_platdata() - Set up a new memory register map for
  *				of-platdata
  *
- * @dev:	Device that uses this map
  * @reg:	List of address, size pairs
  * @count:	Number of pairs (e.g. 1 if the regmap has a single entry)
  * @mapp:	Returns allocated map
@@ -330,8 +329,7 @@ int regmap_init_mem(ofnode node, struct regmap **mapp);
  * Use regmap_uninit() to free it.
  *
  */
-int regmap_init_mem_platdata(struct udevice *dev, fdt_val_t *reg, int count,
-			     struct regmap **mapp);
+int regmap_init_mem_platdata(fdt_val_t *reg, int count, struct regmap **mapp);
 
 int regmap_init_mem_index(ofnode node, struct regmap **mapp, int index);
 

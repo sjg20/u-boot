@@ -12,6 +12,7 @@
 struct rockchip_spi_priv {
 	struct rockchip_spi *regs;
 	struct clk clk;
+	struct tiny_clk tiny_clk;
 	unsigned int max_freq;
 	unsigned int mode;
 	ulong last_transaction_us;	/* Time of last transaction end */

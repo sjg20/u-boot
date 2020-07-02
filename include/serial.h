@@ -51,6 +51,7 @@ int serial_initialize(void);
 #ifdef CONFIG_USB_TTY
 
 struct stdio_dev;
+struct tinydev;
 
 int usbtty_getc(struct stdio_dev *dev);
 void usbtty_putc(struct stdio_dev *dev, const char c);
@@ -157,7 +158,7 @@ struct serial_device_info {
 #define SERIAL_DEFAULT_CLOCK	(16 * 115200)
 
 /**
- * struct struct dm_serial_ops - Driver model serial operations
+ * struct dm_serial_ops - Driver model serial operations
  *
  * The uclass interface is implemented by all serial devices which use
  * driver model.
@@ -284,6 +285,48 @@ struct serial_dev_priv {
 
 /* Access the serial operations for a device */
 #define serial_get_ops(dev)	((struct dm_serial_ops *)(dev)->driver->ops)
+
+/**
+ * struct tiny_serial_ops - Tiny operations support for serial
+ *
+ * This interface is optional for serial drivers and depends on
+ * CONFIG_SPL/TPL_TINY_SERIAL
+ */
+struct tiny_serial_ops {
+	/**
+	 * setbrg() - Set up the baud rate generator
+	 *
+	 * Adjust baud rate divisors to set up a new baud rate for this
+	 * device. Not all devices will support all rates. If the rate
+	 * cannot be supported, the driver is free to select the nearest
+	 * available rate. or return -EINVAL if this is not possible.
+	 *
+	 * @dev: Device pointer
+	 * @baudrate: New baud rate to use
+	 * @return 0 if OK, -ve on error
+	 */
+	int (*setbrg)(struct tinydev *tdev, int baudrate);
+	/**
+	 * putc() - Write a character
+	 *
+	 * @dev: Device pointer
+	 * @ch: character to write
+	 * @return 0 if OK, -ve on error
+	 */
+	int (*putc)(struct tinydev *tdev, const char ch);
+};
+
+#define tiny_serial_get_ops(dev)   ((struct tiny_serial_ops *)(dev)->drv->ops)
+
+/**
+ * tiny_serial_setbrg() - Set the baud rate
+ *
+ * Set the baud rate for a tiny-serial device
+ *
+ * @tdev: Tiny device
+ * @baudrate: Baud rate to set (e.g. 115200)
+ */
+int tiny_serial_setbrg(struct tinydev *tdev, int baudrate);
 
 /**
  * serial_getconfig() - Get the uart configuration

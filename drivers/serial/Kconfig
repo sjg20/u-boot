@@ -107,6 +107,24 @@ config DM_SERIAL
 	  implements serial_putc() etc. The uclass interface is
 	  defined in include/serial.h.
 
+config SPL_TINY_SERIAL
+	bool "Support tiny serial drivers in SPL"
+	depends on SPL_TINY
+	default y if SPL_TINY_ONLY
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
+
+config TPL_TINY_SERIAL
+	bool "Support tiny serial drivers in TPL"
+	depends on TPL_TINY
+	default y if TPL_TINY_ONLY
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
+
 config SERIAL_RX_BUFFER
 	bool "Enable RX buffer for serial input"
 	depends on DM_SERIAL
@@ -641,7 +659,9 @@ config SYS_NS16550
 
 config NS16550_DYNAMIC
 	bool "Allow NS16550 to be configured at runtime"
+	depends on SYS_NS16550
 	default y if SYS_COREBOOT || SYS_SLIMBOOTLOADER
+	default y if SPL_TINY_SERIAL || TPL_TINY_SERIAL
 	help
 	  Enable this option to allow device-tree control of the driver.
 
@@ -659,6 +679,24 @@ config NS16550_DYNAMIC
 	  since it prevents the same driver being used for different types of
 	  UARTs in a system. This option avoids this problem at the cost of a
 	  slightly increased code size.
+
+config NS16550_SUPPORT_IO
+	bool "Support I/O access in the ns16550 driver"
+	default y if X86
+	help
+	  This enables I/O access in this driver, as wells the normal
+	  memory-mapped access. This is used on some architectures, such as
+	  x86. Note that I/O access is not supported on some more modern
+	  architectures, such as ARM.
+
+config NS16550_SUPPORT_ENDIAN
+	bool "Support endian-aware access in the ns16550 driver"
+	default y if POWERPC
+	help
+	  This enables in_be32() and the like in this driver, as wells the
+	  normal memory-mapped access. This is used on some architectures, such
+	  as PowerPC. Note that this access is not used on some architectures,
+	  such as ARM.
 
 config INTEL_MID_SERIAL
 	bool "Intel MID platform UART support"

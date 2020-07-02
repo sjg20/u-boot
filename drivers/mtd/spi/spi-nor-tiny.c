@@ -9,6 +9,9 @@
  * Synced from Linux v4.19
  */
 
+// #define LOG_DEBUG
+#define LOG_CATEGORY UCLASS_SPI_FLASH
+
 #include <common.h>
 #include <log.h>
 #include <dm/device_compat.h>
@@ -36,6 +39,138 @@
 
 #define DEFAULT_READY_WAIT_JIFFIES		(40UL * HZ)
 
+#if CONFIG_IS_ENABLED(TINY_SPI)
+
+#define spi_nor tiny_spi_nor
+#define mtd_info tiny_mtd_info
+
+/**
+ * spi_mem_adjust_op_size() - Adjust the data size of a SPI mem operation to
+ *				 match controller limitations
+ * @tdev: the SPI device (its parent being a bus)
+ * @op: the operation to adjust
+ *
+ * Some controllers have FIFO limitations and must split a data transfer
+ * operation into multiple ones, others require a specific alignment for
+ * optimized accesses. This function allows SPI mem drivers to split a single
+ * operation into multiple sub-operations when required.
+ *
+ * Return: a negative error code if the controller can't properly adjust @op,
+ *	   0 otherwise. Note that @op->data.nbytes will be updated if @op
+ *	   can't be handled in a single step.
+ */
+static int spi_mem_adjust_op_size_(struct tinydev *tdev, struct spi_mem_op *op)
+{
+	struct tinydev *bus = tinydev_get_parent(tdev);
+	struct tiny_spi_ops *ops = tiny_spi_get_ops(bus);
+
+	if (ops->adjust_op_size)
+		return ops->adjust_op_size(tdev, op);
+
+	return 0;
+}
+
+static int spi_mem_exec_op_(struct tinydev *tdev, const struct spi_mem_op *op)
+{
+	struct tinydev *bus = tinydev_get_parent(tdev);
+	struct tiny_spi_ops *ops = tiny_spi_get_ops(bus);
+	unsigned int pos = 0;
+	const u8 *tx_buf = NULL;
+	u8 *rx_buf = NULL;
+	int op_len;
+	u32 flag;
+	int ret;
+	int i;
+
+	log_debug("bus=%s\n", bus->name);
+	ret = tiny_spi_claim_bus(tdev);
+	if (ret < 0)
+		return ret;
+
+	if (ops->exec_op) {
+		ret = ops->exec_op(tdev, op);
+
+		/*
+		 * Some controllers only optimize specific paths (typically the
+		 * read path) and expect the core to use the regular SPI
+		 * interface in other cases.
+		 */
+		if (!ret || ret != -ENOTSUPP) {
+			tiny_spi_release_bus(tdev);
+			return ret;
+		}
+	}
+
+	if (op->data.nbytes) {
+		if (op->data.dir == SPI_MEM_DATA_IN)
+			rx_buf = op->data.buf.in;
+		else
+			tx_buf = op->data.buf.out;
+	}
+
+	op_len = sizeof(op->cmd.opcode) + op->addr.nbytes + op->dummy.nbytes;
+
+	/*
+	 * Avoid using malloc() here so that we can use this code in SPL where
+	 * simple malloc may be used. That implementation does not allow free()
+	 * so repeated calls to this code can exhaust the space.
+	 *
+	 * The value of op_len is small, since it does not include the actual
+	 * data being sent, only the op-code and address. In fact, it should be
+	 * possible to just use a small fixed value here instead of op_len.
+	 */
+	u8 op_buf[op_len];
+
+	op_buf[pos++] = op->cmd.opcode;
+
+	if (op->addr.nbytes) {
+		for (i = 0; i < op->addr.nbytes; i++)
+			op_buf[pos + i] = op->addr.val >>
+				(8 * (op->addr.nbytes - i - 1));
+
+		pos += op->addr.nbytes;
+	}
+
+	if (op->dummy.nbytes)
+		memset(op_buf + pos, 0xff, op->dummy.nbytes);
+
+	/* 1st transfer: opcode + address + dummy cycles */
+	flag = SPI_XFER_BEGIN;
+	/* Make sure to set END bit if no tx or rx data messages follow */
+	if (!tx_buf && !rx_buf)
+		flag |= SPI_XFER_END;
+
+	ret = tiny_spi_xfer(tdev, op_len * 8, op_buf, NULL, flag);
+	if (ret)
+		return ret;
+
+	/* 2nd transfer: rx or tx data path */
+	if (tx_buf || rx_buf) {
+		ret = tiny_spi_xfer(tdev, op->data.nbytes * 8, tx_buf, rx_buf,
+			       SPI_XFER_END);
+		if (ret)
+			return ret;
+	}
+
+	tiny_spi_release_bus(tdev);
+
+	for (i = 0; i < pos; i++)
+		debug("%02x ", op_buf[i]);
+	debug("| [%dB %s] ",
+	      tx_buf || rx_buf ? op->data.nbytes : 0,
+	      tx_buf || rx_buf ? (tx_buf ? "out" : "in") : "-");
+	for (i = 0; i < op->data.nbytes; i++)
+		debug("%02x ", tx_buf ? tx_buf[i] : rx_buf[i]);
+	debug("[ret %d]\n", ret);
+
+	if (ret < 0)
+		return ret;
+
+	return 0;
+}
+
+#endif /* TINY_SPI */
+
 static int spi_nor_read_write_reg(struct spi_nor *nor, struct spi_mem_op
 		*op, void *buf)
 {
@@ -43,7 +178,8 @@ static int spi_nor_read_write_reg(struct spi_nor *nor, struct spi_mem_op
 		op->data.buf.in = buf;
 	else
 		op->data.buf.out = buf;
-	return spi_mem_exec_op(nor->spi, op);
+
+	return spi_mem_exec_op_(nor->tdev, op);
 }
 
 static int spi_nor_read_reg(struct spi_nor *nor, u8 code, u8 *val, int len)
@@ -94,11 +230,11 @@ static ssize_t spi_nor_read_data(struct spi_nor *nor, loff_t from, size_t len,
 
 	while (remaining) {
 		op.data.nbytes = remaining < UINT_MAX ? remaining : UINT_MAX;
-		ret = spi_mem_adjust_op_size(nor->spi, &op);
+		ret = spi_mem_adjust_op_size_(nor->tdev, &op);
 		if (ret)
 			return ret;
 
-		ret = spi_mem_exec_op(nor->spi, &op);
+		ret = spi_mem_exec_op_(nor->tdev, &op);
 		if (ret)
 			return ret;
 
@@ -351,7 +487,8 @@ static int spi_nor_wait_till_ready(struct spi_nor *nor)
  * Erase an address range on the nor chip.  The address range may extend
  * one or more erase sectors.  Return an error is there is a problem erasing.
  */
-static int spi_nor_erase(struct mtd_info *mtd, struct erase_info *instr)
+__maybe_unused static int spi_nor_erase(struct mtd_info *mtd,
+					struct erase_info *instr)
 {
 	return -ENOTSUPP;
 }
@@ -380,8 +517,8 @@ static const struct flash_info *spi_nor_read_id(struct spi_nor *nor)
 	return ERR_PTR(-EMEDIUMTYPE);
 }
 
-static int spi_nor_read(struct mtd_info *mtd, loff_t from, size_t len,
-			size_t *retlen, u_char *buf)
+int tiny_spi_nor_read(struct mtd_info *mtd, loff_t from, size_t len,
+		      size_t *retlen, u_char *buf)
 {
 	struct spi_nor *nor = mtd_to_spi_nor(mtd);
 	int ret;
@@ -416,8 +553,8 @@ read_err:
  * FLASH_PAGESIZE chunks.  The address range may be any size provided
  * it is within the physical boundaries.
  */
-static int spi_nor_write(struct mtd_info *mtd, loff_t to, size_t len,
-			 size_t *retlen, const u_char *buf)
+__maybe_unused static int spi_nor_write(struct mtd_info *mtd, loff_t to,
+					size_t len, size_t *retlen, const u_char *buf)
 {
 	return -ENOTSUPP;
 }
@@ -723,10 +860,14 @@ int spi_nor_scan(struct spi_nor *nor)
 	struct spi_slave *spi = nor->spi;
 	int ret;
 
+	log_debug("start\n");
+
 	/* Reset SPI protocol for all commands. */
-	nor->reg_proto = SNOR_PROTO_1_1_1;
 	nor->read_proto = SNOR_PROTO_1_1_1;
+#if !CONFIG_IS_ENABLED(TINY_SPI)
+	nor->reg_proto = SNOR_PROTO_1_1_1;
 	nor->write_proto = SNOR_PROTO_1_1_1;
+#endif
 
 	if (spi->mode & SPI_RX_QUAD)
 		hwcaps.mask |= SNOR_HWCAPS_READ_1_1_4;
@@ -739,16 +880,17 @@ int spi_nor_scan(struct spi_nor *nor)
 	if (ret)
 		return ret;
 
-	mtd->name = "spi-flash";
 	mtd->priv = nor;
+	mtd->size = info->sector_size * info->n_sectors;
+#if !CONFIG_IS_ENABLED(TINY_SPI)
+	mtd->name = "spi-flash";
 	mtd->type = MTD_NORFLASH;
 	mtd->writesize = 1;
 	mtd->flags = MTD_CAP_NORFLASH;
-	mtd->size = info->sector_size * info->n_sectors;
 	mtd->_erase = spi_nor_erase;
 	mtd->_read = spi_nor_read;
 	mtd->_write = spi_nor_write;
-
+#endif
 	nor->size = mtd->size;
 
 	if (info->flags & USE_FSR)

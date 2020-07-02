@@ -22,6 +22,15 @@ config SPL_SYSRESET
 	  to effect a reset. The uclass will try all available drivers when
 	  reset_walk() is called.
 
+config SPL_TINY_SYSRESET
+	bool "Support tiny sysreset drivers in SPL"
+	depends on SPL_TINY
+	default y if SPL_TINY_ONLY
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
+
 config TPL_SYSRESET
 	bool "Enable support for system reset drivers in TPL mode"
 	depends on SYSRESET && TPL_DM
@@ -30,6 +39,15 @@ config TPL_SYSRESET
 	  board. Each driver can provide a reset method which will be called
 	  to effect a reset. The uclass will try all available drivers when
 	  reset_walk() is called.
+
+config TPL_TINY_SYSRESET
+	bool "Support tiny sysreset drivers in TPL"
+	depends on TPL_TINY
+	default y if TPL_TINY_ONLY
+	help
+	  In constrained environments the driver-model overhead of several KB
+	  of code and data structures can be problematic. Enable this to use a
+	  tiny implementation that only supports a single driver.
 
 if SYSRESET
 

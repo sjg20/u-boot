@@ -87,6 +87,8 @@ if __name__ != '__main__':
 parser = OptionParser()
 parser.add_option('-B', '--build-dir', type='string', default='b',
         help='Directory containing the build output')
+parser.add_option('-c', '--config', action='store',
+                  help='Select .config filename')
 parser.add_option('-d', '--dtb-file', action='store',
                   help='Specify the .dtb input file')
 parser.add_option('--include-disabled', action='store_true',
@@ -95,6 +97,8 @@ parser.add_option('-o', '--output', action='store', default='-',
                   help='Select output filename')
 parser.add_option('-P', '--processes', type=int,
                   help='set number of processes to use for running tests')
+parser.add_option('-s', '--srcpath', type='string',
+                  help='Specify the source directory for U-Boot')
 parser.add_option('-t', '--test', action='store_true', dest='test',
                   default=False, help='run tests')
 parser.add_option('-T', '--test-coverage', action='store_true',
@@ -110,5 +114,6 @@ elif options.test_coverage:
     RunTestCoverage()
 
 else:
-    dtb_platdata.run_steps(args, options.dtb_file, options.include_disabled,
-                           options.output)
+    dtb_platdata.run_steps(args, options.dtb_file, options.config,
+                           options.include_disabled, options.output,
+                           options.srcpath)

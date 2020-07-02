@@ -7,6 +7,11 @@
 #include "rockchip-optee.dtsi"
 
 / {
+	aliases {
+		ram0 = &dmc;
+		clk0 = &cru;
+	};
+
 	chosen {
 		u-boot,spl-boot-order = \
 			"same-as-spl", &emmc, &sdmmc;
@@ -51,6 +56,10 @@
 
 &cru {
 	u-boot,dm-pre-reloc;
+
+	sysreset {
+		u-boot,dm-pre-reloc;
+	};
 };
 
 &grf {
@@ -58,17 +67,13 @@
 };
 
 &vopb {
-	u-boot,dm-pre-reloc;
+	u-boot,dm-pre-proper;
 };
 
 &vopl {
-	u-boot,dm-pre-reloc;
+	u-boot,dm-pre-proper;
 };
 
 &noc {
-	u-boot,dm-pre-reloc;
-};
-
-&gpio7 {
 	u-boot,dm-pre-reloc;
 };
