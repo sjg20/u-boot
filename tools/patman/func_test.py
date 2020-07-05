@@ -847,15 +847,16 @@ Series-changes: 2
         self.patches = [patch1, patch2]
         count = 2
         new_rtag_list = [None] * count
+        review_list = [None, None]
 
         # Check that the tags are picked up on the first patch
-        status.find_new_responses(new_rtag_list, 0, commit1, patch1,
-                                  self._FakePatchwork2)
+        status.find_new_responses(new_rtag_list, review_list, 0, commit1,
+                                  patch1, self._FakePatchwork2)
         self.assertEqual(new_rtag_list[0], {'Reviewed-by': {self.joe}})
 
         # Now the second patch
-        status.find_new_responses(new_rtag_list, 1, commit2, patch2,
-                                  self._FakePatchwork2)
+        status.find_new_responses(new_rtag_list, review_list, 1, commit2,
+                                  patch2, self._FakePatchwork2)
         self.assertEqual(new_rtag_list[1], {
             'Reviewed-by': {self.mary, self.fred},
             'Tested-by': {self.ed}})
@@ -864,16 +865,16 @@ Series-changes: 2
         # 'new' tags when scanning comments
         new_rtag_list = [None] * count
         commit1.rtags =  {'Reviewed-by': {self.joe}}
-        status.find_new_responses(new_rtag_list, 0, commit1, patch1,
-                                  self._FakePatchwork2)
+        status.find_new_responses(new_rtag_list, review_list, 0, commit1,
+                                  patch1, self._FakePatchwork2)
         self.assertEqual(new_rtag_list[0], {})
 
         # For the second commit, add Ed and Fred, so only Mary should be left
         commit2.rtags = {
             'Tested-by': {self.ed},
             'Reviewed-by': {self.fred}}
-        status.find_new_responses(new_rtag_list, 1, commit2, patch2,
-                                  self._FakePatchwork2)
+        status.find_new_responses(new_rtag_list, review_list, 1, commit2,
+                                  patch2, self._FakePatchwork2)
         self.assertEqual(new_rtag_list[1], { 'Reviewed-by': {self.mary}})
 
         # Check that the output patches expectations:
@@ -888,7 +889,7 @@ Series-changes: 2
         series = Series()
         series.commits = [commit1, commit2]
         terminal.SetPrintTestMode()
-        status.check_patchwork_status(series, '1234', None, None, False,
+        status.check_patchwork_status(series, '1234', None, None, False, False,
                                       self._FakePatchwork2)
         lines = iter(terminal.GetPrintTestLines())
         col = terminal.Color()
@@ -1001,7 +1002,7 @@ Series-changes: 2
 
         terminal.SetPrintTestMode()
         status.check_patchwork_status(series, '1234', branch, dest_branch,
-                                      False, self._FakePatchwork3, repo)
+                                      False, False, self._FakePatchwork3, repo)
         lines = terminal.GetPrintTestLines()
         self.assertEqual(12, len(lines))
         self.assertEqual(
