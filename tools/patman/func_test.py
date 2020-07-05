@@ -609,6 +609,11 @@ Series-changes: 2
             os.chdir(orig_dir)
 
     def _FakePatchwork(self, subpath):
+        """Fake Patchwork server for the function below
+
+        This handles accessing a series, providing a list consisting of a
+        single patch
+        """
         re_series = re.match(r'series/(\d*)/$', subpath)
         if re_series:
             series_num = re_series.group(1)
@@ -786,6 +791,11 @@ Series-changes: 2
                          warnings)
 
     def _FakePatchwork2(self, subpath):
+        """Fake Patchwork server for the function below
+
+        This handles accessing series, patches and comments, providing the data
+        in self.patches to the caller
+        """
         re_series = re.match(r'series/(\d*)/$', subpath)
         re_patch = re.match(r'patches/(\d*)/$', subpath)
         re_comments = re.match(r'patches/(\d*)/comments/$', subpath)
@@ -829,6 +839,10 @@ Series-changes: 2
             'content': 'Reviewed-by: %s' % self.fred}
         patch2.comments = [comment2a, comment2b]
 
+        # This test works by setting up commits and patch for use by the fake
+        # Rest API function _FakePatchwork2(). It calls various functions in
+        # the status module after setting up tags in the commits, checking that
+        # things behaves as expected
         self.commits = [commit1, commit2]
         self.patches = [patch1, patch2]
         count = 2
@@ -874,7 +888,8 @@ Series-changes: 2
         series = Series()
         series.commits = [commit1, commit2]
         terminal.SetPrintTestMode()
-        status.check_patchwork_status(series, '1234', self._FakePatchwork2)
+        status.check_patchwork_status(series, '1234', None, None, False,
+                                      self._FakePatchwork2)
         lines = iter(terminal.GetPrintTestLines())
         col = terminal.Color()
         self.assertEqual(terminal.PrintLine('  1 Subject 1', col.BLUE),
@@ -906,4 +921,99 @@ Series-changes: 2
         self.assertEqual(terminal.PrintLine(self.mary, col.WHITE),
                          next(lines))
         self.assertEqual(terminal.PrintLine(
-            '1 new response available in patchwork', None), next(lines))
+            '1 new response available in patchwork (use -d to write them to a new branch)',
+            None), next(lines))
+
+    def _FakePatchwork3(self, subpath):
+        """Fake Patchwork server for the function below
+
+        This handles accessing series, patches and comments, providing the data
+        in self.patches to the caller
+        """
+        re_series = re.match(r'series/(\d*)/$', subpath)
+        re_patch = re.match(r'patches/(\d*)/$', subpath)
+        re_comments = re.match(r'patches/(\d*)/comments/$', subpath)
+        if re_series:
+            series_num = re_series.group(1)
+            if series_num == '1234':
+                return {'patches': self.patches}
+        elif re_patch:
+            patch_num = int(re_patch.group(1))
+            patch = self.patches[patch_num - 1]
+            return patch
+        elif re_comments:
+            patch_num = int(re_comments.group(1))
+            patch = self.patches[patch_num - 1]
+            return patch.comments
+        raise ValueError('Fake Patchwork does not understand: %s' % subpath)
+
+    @unittest.skipIf(not HAVE_PYGIT2, 'Missing python3-pygit2')
+    def testCreateBranch(self):
+        """Test operation of create_branch()"""
+        repo = self.make_git_tree()
+        branch = 'first'
+        dest_branch = 'first2'
+        count = 2
+        gitdir = os.path.join(self.gitdir, '.git')
+
+        # Set up the test git tree. We use branch 'first' which has two commits
+        # in it
+        series = patchstream.GetMetaDataForList(branch, gitdir, count)
+        self.assertEqual(2, len(series.commits))
+
+        patch1 = status.Patch('1')
+        patch1.parse_subject('[1/2] %s' % series.commits[0].subject)
+        patch1.name = patch1.raw_subject
+        patch1.content = 'This is my patch content'
+        comment1a = {'content': 'Reviewed-by: %s\n' % self.joe}
+
+        patch1.comments = [comment1a]
+
+        patch2 = status.Patch('2')
+        patch2.parse_subject('[2/2] %s' % series.commits[1].subject)
+        patch2.name = patch2.raw_subject
+        patch2.content = 'Some other patch content'
+        comment2a = {
+            'content': 'Reviewed-by: %s\nTested-by: %s\n' %
+                 (self.mary, self.ed)}
+        comment2b = {
+            'content': 'Reviewed-by: %s' % self.fred}
+        patch2.comments = [comment2a, comment2b]
+
+        # This test works by setting up patches for use by the fake Rest API
+        # function _FakePatchwork3(). The fake patch comments above should
+        # result in new review tags that are collected and added to the commits
+        # created in the destination branch.
+        self.patches = [patch1, patch2]
+        count = 2
+        new_rtag_list = [None] * count
+
+        # Expected output:
+        #   1 i2c: I2C things
+        #   + Reviewed-by: Joe Bloggs <joe@napierwallies.co.nz>
+        #   2 spi: SPI fixes
+        #   + Reviewed-by: Fred Bloggs <f.bloggs@napier.net>
+        #   + Reviewed-by: Mary Bloggs <mary@napierwallies.co.nz>
+        #   + Tested-by: Lord Edmund Blackaddër <weasel@blackadder.org
+        # 4 new responses available in patchwork
+        # 4 responses added from patchwork into new branch 'first2'
+        # <unittest.result.TestResult run=8 errors=0 failures=0>
+
+        terminal.SetPrintTestMode()
+        status.check_patchwork_status(series, '1234', branch, dest_branch,
+                                      False, self._FakePatchwork3, repo)
+        lines = terminal.GetPrintTestLines()
+        self.assertEqual(12, len(lines))
+        self.assertEqual(
+            "4 responses added from patchwork into new branch 'first2'",
+            lines[11].text)
+
+        # Check that the destination branch has the new tags
+        new_series = patchstream.GetMetaDataForList(dest_branch, gitdir, count)
+        self.assertEqual({
+            'Reviewed-by': {self.joe}},
+            new_series.commits[0].rtags)
+        self.assertEqual({
+            'Tested-by': {self.ed},
+            'Reviewed-by': {self.fred, self.mary}},
+            new_series.commits[1].rtags)
