@@ -187,6 +187,14 @@ Series-name: name
 	patman does not yet use it, but it is convenient to put the branch
 	name here to help you keep track of multiple upstreaming efforts.
 
+Series-link: url
+	Set the URL of the series in patchwork. You can set this after you send
+	out the series and look in patchwork for the resulting series. The
+	URL you want is the one for the series itself, not any particular patch.
+	E.g. http://patchwork.ozlabs.org/project/uboot/list/?series=187331
+	When this is set, patman can compare your local branch against patchwork
+	to see what new reviews your series has collected.
+
 Cover-letter:
 This is the patch set title
 blah blah
