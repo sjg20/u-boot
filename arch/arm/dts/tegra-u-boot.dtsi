@@ -41,9 +41,18 @@
 		};
 
 		rom {
-			filename = "image.rom";
+			filename = "u-boot.rom";
 			pad-byte = <0xff>;
-			bct {
+			tegra-bct {
+				filename = "/vid/software/devel/tegra/cbootimage-configs/tegra124/nvidia/norrin/PM370_Hynix_2GB_H5TC4G63AFR_PBA_924MHz_01212014.bct";
+				size = <0x10000>;
+			};
+			u-boot-spl {
+				size = <0x10000>;
+			};
+			u-boot {
+			};
+			fdtmap {
 			};
 		};
 	};

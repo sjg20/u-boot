@@ -35,6 +35,7 @@ class Part_sdwire(Part_bootdev):
         self._symlink = None
         self._verbose = False
         self._sleep = time.sleep
+        self.name = None
 
     def __str__(self):
         """Convert the object into a string for presentation to the user"""
