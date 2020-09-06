@@ -652,8 +652,9 @@ ulong write_acpi_tables(ulong start_addr)
 	       (char *)&AmlCode + sizeof(struct acpi_table_header),
 	       dsdt->length - sizeof(struct acpi_table_header));
 
-	acpi_inc_align(ctx, dsdt->length - sizeof(struct acpi_table_header));
+	acpi_inc(ctx, dsdt->length - sizeof(struct acpi_table_header));
 	dsdt->length = ctx->current - (void *)dsdt;
+        acpi_align(ctx);
 
 	if (!IS_ENABLED(CONFIG_ACPI_GNVS_EXTERNAL)) {
 		/* Pack GNVS into the ACPI table area */
