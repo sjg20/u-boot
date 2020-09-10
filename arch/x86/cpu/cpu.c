@@ -212,8 +212,10 @@ int last_stage_init(void)
 	}
 
 	ret = write_tables();
-	if (ret)
+	if (ret) {
+		printf("Failed to write tables\n");
 		return log_msg_ret("table", ret);
+	}
 
 	if (IS_ENABLED(CONFIG_GENERATE_ACPI_TABLE)) {
 		fadt = gd->acpi_ctx->fadt;

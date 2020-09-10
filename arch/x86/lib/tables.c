@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <bloblist.h>
 #include <init.h>
 #include <log.h>
 #include <malloc.h>
@@ -87,7 +88,16 @@ int write_tables(void)
 		printf("Leaving previous bootloader tables intact\n");
 		return 0;
 	}
-	rom_table_start = ROM_TABLE_ADDR;
+	if (IS_ENABLED(CONFIG_BLOBLIST_TABLES)) {
+		printf("\n\n\n\n**** bloblist\n\n\n\n");
+		rom_table_start = (ulong)bloblist_add(BLOBLISTT_X86_TABLES,
+						      CONFIG_ROM_TABLE_SIZE,
+						      0x1000);
+		if (!rom_table_start)
+			return log_msg_ret("bloblist", -ENOBUFS);
+	} else {
+		rom_table_start = ROM_TABLE_ADDR;
+	}
 
 	debug("Writing tables to %x:\n", rom_table_start);
 	for (i = 0; i < ARRAY_SIZE(table_list); i++) {
@@ -106,11 +116,18 @@ int write_tables(void)
 			cfg_tables[i].size = table_size;
 		} else {
 			printf("%d: no memory for configuration tables\n", i);
+			return -ENOSPC;
 		}
 #endif
 
 		debug("- wrote '%s' to %x, end %x\n", table->name,
 		      rom_table_start, rom_table_end);
+		if (rom_table_end - rom_table_start > CONFIG_ROM_TABLE_SIZE) {
+			log_err("Out of space for configuration tables: need %x, have %x\n",
+				rom_table_end - rom_table_start,
+				CONFIG_ROM_TABLE_SIZE);
+			return log_msg_ret("bloblist", -ENOSPC);
+		}
 		rom_table_start = rom_table_end;
 	}
 
