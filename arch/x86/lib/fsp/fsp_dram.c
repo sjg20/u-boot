@@ -3,6 +3,8 @@
  * Copyright (C) 2014, Bin Meng <bmeng.cn@gmail.com>
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <handoff.h>
 #include <init.h>
@@ -43,7 +45,7 @@ int dram_init_banksize(void)
 {
 	const struct hob_header *hdr;
 	struct hob_res_desc *res_desc;
-	phys_addr_t low_end;
+	phys_addr_t low_end, mtrr_top;
 	uint bank;
 
 	if (!ll_boot_init() || IS_ENABLED(CONFIG_SKIP_DRAM_INIT)) {
@@ -55,6 +57,7 @@ int dram_init_banksize(void)
 	}
 
 	low_end = 0;
+	mtrr_top = 0;
 	for (bank = 1, hdr = gd->arch.hob_list;
 	     bank < CONFIG_NR_DRAM_BANKS && !end_of_hob(hdr);
 	     hdr = get_next_hob(hdr)) {
@@ -65,8 +68,16 @@ int dram_init_banksize(void)
 		    res_desc->type != RES_MEM_RESERVED)
 			continue;
 		if (res_desc->phys_start < (1ULL << 32)) {
-			low_end = max(low_end,
-				      res_desc->phys_start + res_desc->len);
+			if (res_desc->type == RES_MEM_RESERVED) {
+				mtrr_top = max(mtrr_top, res_desc->phys_start +
+					      res_desc->len);
+			} else {
+				low_end = max(low_end, res_desc->phys_start +
+					      res_desc->len);
+			}
+			log_debug("   - fragment %d: %llx %llx\n",
+				  res_desc->type, res_desc->phys_start,
+				  res_desc->len);
 			continue;
 		}
 
@@ -81,8 +92,10 @@ int dram_init_banksize(void)
 	/* Add the memory below 4GB */
 	gd->bd->bi_dram[0].start = 0;
 	gd->bd->bi_dram[0].size = low_end;
+	log_debug("ram %llx %llx\n", gd->bd->bi_dram[0].start,
+		  gd->bd->bi_dram[0].size);
 
-	mtrr_add_request(MTRR_TYPE_WRBACK, 0, low_end);
+	mtrr_add_request(MTRR_TYPE_WRBACK, 0, mtrr_top);
 
 	return 0;
 }

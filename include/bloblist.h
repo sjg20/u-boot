@@ -68,7 +68,7 @@ enum bloblist_tag_t {
  *	the bloblist can grow up to this size. This starts out as
  *	sizeof(bloblist_hdr) since we need at least that much space to store a
  *	valid bloblist
- * @spare: Space space
+ * @spare: Spare space (for future use)
  * @chksum: CRC32 for the entire bloblist allocated area. Since any of the
  *	blobs can be altered after being created, this checksum is only valid
  *	when the bloblist is finalised before jumping to the next stage of boot.
@@ -209,6 +209,8 @@ int bloblist_check(ulong addr, uint size);
  * @return 0
  */
 int bloblist_finish(void);
+
+void bloblist_get_stats(ulong *basep, ulong *sizep, ulong *allocedp);
 
 /**
  * bloblist_get_stats() - Get information about the bloblist

@@ -14,6 +14,14 @@
 #include <asm/tables.h>
 #include <asm/coreboot_tables.h>
 
+#define ROM_TABLE_ADDR	CONFIG_ROM_TABLE_ADDR
+#define ROM_TABLE_END	(CONFIG_ROM_TABLE_ADDR + CONFIG_ROM_TABLE_SIZE - 1)
+
+#define ROM_TABLE_ALIGN	1024
+
+/* SeaBIOS expects coreboot tables at address range 0x0000-0x1000 */
+#define CB_TABLE_ADDR	0x800
+
 /**
  * Function prototype to write a specific configuration table
  *
@@ -67,7 +75,7 @@ void table_fill_string(char *dest, const char *src, size_t n, char pad)
 
 void write_tables(void)
 {
-	u32 rom_table_start = ROM_TABLE_ADDR;
+	u32 rom_table_start;
 	u32 rom_table_end;
 #ifdef CONFIG_SEABIOS
 	u32 high_table, table_size;
@@ -79,6 +87,8 @@ void write_tables(void)
 		printf("Leaving previous bootloader tables intact\n");
 		return;
 	}
+	rom_table_start = ROM_TABLE_ADDR;
+
 	debug("Writing tables to %x:\n", rom_table_start);
 	for (i = 0; i < ARRAY_SIZE(table_list); i++) {
 		const struct table_info *table = &table_list[i];

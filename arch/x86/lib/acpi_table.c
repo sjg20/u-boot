@@ -522,7 +522,7 @@ static int hack_in_golden_tables_cbfs(void)
 		rom_offset = 0xff081000;
 		binman_set_rom_offset(rom_offset);
 	}
-	printf("\n\nGolden tables\n");
+	printf("\n\nGolden tables (CBFS)\n");
 	base = rom_offset + 14090240;
 	printf("rom_offset=%lx\n", rom_offset);
 
@@ -571,7 +571,7 @@ static int hack_in_golden_tables(void)
 	int acpi_size, gnvs_size, f0000_size, smbios_size;
 	int ret;
 
-	printf("\n\nGolden tables\n");
+	printf("\n\nGolden tables (binman)\n");
 	ret = binman_entry_map(ofnode_null(), "acpi", &acpi, &acpi_size);
 	if (ret)
 		return log_msg_ret("acpi", ret);
@@ -609,7 +609,7 @@ static int hack_in_golden_tables(void)
  */
 ulong write_acpi_tables(ulong start_addr)
 {
-	struct acpi_ctx sctx, *ctx = &sctx;
+	struct acpi_ctx *ctx;
 	struct acpi_facs *facs;
 	struct acpi_table_header *dsdt;
 	struct acpi_fadt *fadt;
@@ -623,6 +623,11 @@ ulong write_acpi_tables(ulong start_addr)
 	ulong addr;
 	int ret;
 	int i;
+
+	ctx = calloc(1, sizeof(*ctx));
+	if (!ctx)
+		return log_msg_ret("mem", -ENOMEM);
+	gd->acpi_ctx = ctx;
 
 	start = map_sysmem(start_addr, 0);
 
@@ -690,6 +695,7 @@ ulong write_acpi_tables(ulong start_addr)
 
 	debug("ACPI:    * FADT\n");
 	fadt = ctx->current;
+	ctx->fadt = fadt;
 	acpi_inc_align(ctx, sizeof(struct acpi_fadt));
 	acpi_create_fadt(fadt, facs, dsdt);
 	acpi_add_table(ctx, fadt);

@@ -7,10 +7,13 @@
  */
 
 #include <common.h>
+#include <bloblist.h>
 #include <command.h>
+#include <dm.h>
 #include <env.h>
 #include <lmb.h>
 #include <net.h>
+#include <video.h>
 #include <vsprintf.h>
 #include <asm/cache.h>
 
@@ -66,6 +69,26 @@ __weak void arch_print_bdinfo(void)
 {
 }
 
+static void show_video_info(void)
+{
+	const struct udevice *dev;
+	struct uclass *uc;
+
+	uclass_id_foreach_dev(UCLASS_VIDEO, dev, uc) {
+		printf("%-12s= %s %sactive\n", "Video", dev->name,
+		       device_active(dev) ? "" : "in");
+		if (device_active(dev)) {
+			struct video_priv *upriv = dev_get_uclass_priv(dev);
+
+			print_phys_addr("FB base", (ulong)upriv->fb);
+			if (upriv->copy_fb)
+				print_phys_addr("FB copy", (ulong)upriv->copy_fb);
+			printf("%-12s= %dx%dx%d\n", "FB size", upriv->xsize,
+			       upriv->ysize, 1 << upriv->bpix);
+		}
+	}
+}
+
 int do_bdinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	struct bd_info *bd = gd->bd;
@@ -96,7 +119,9 @@ int do_bdinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	bdinfo_print_num("fdt_blob", (ulong)gd->fdt_blob);
 	bdinfo_print_num("new_fdt", (ulong)gd->new_fdt);
 	bdinfo_print_num("fdt_size", (ulong)gd->fdt_size);
-#if defined(CONFIG_LCD) || defined(CONFIG_VIDEO) || defined(CONFIG_DM_VIDEO)
+	if (IS_ENABLED(CONFIG_DM_VIDEO))
+		show_video_info();
+#if defined(CONFIG_LCD) || defined(CONFIG_VIDEO)
 	bdinfo_print_num("FB base  ", gd->fb_base);
 #endif
 #if CONFIG_IS_ENABLED(MULTI_DTB_FIT)
@@ -107,6 +132,14 @@ int do_bdinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 
 		lmb_init_and_reserve(&lmb, gd->bd, (void *)gd->fdt_blob);
 		lmb_dump_all_force(&lmb);
+	}
+	if (IS_ENABLED(CONFIG_BLOBLIST)) {
+		ulong base, size, alloced;
+
+		bloblist_get_stats(&base, &size, &alloced);
+		print_phys_addr("bloblist base", base);
+		bdinfo_print_num("bloblist size", size);
+		bdinfo_print_num("  alloced", alloced);
 	}
 
 	arch_print_bdinfo();

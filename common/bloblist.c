@@ -341,6 +341,9 @@ int bloblist_init(void)
 	} else {
 		log(LOGC_BLOBLIST, LOGL_DEBUG, "Found existing bloblist\n");
 	}
+	if (ret)
+		return log_ret(ret);
+	gd->flags |= GD_FLG_BLOBLIST_READY;
 
 	return ret;
 }

@@ -24,6 +24,8 @@
 #include <membuff.h>
 #include <linux/list.h>
 
+struct acpi_ctx;
+
 typedef struct global_data {
 	struct bd_info *bd;
 	unsigned long flags;
@@ -137,6 +139,9 @@ typedef struct global_data {
 #if CONFIG_IS_ENABLED(WDT)
 	struct udevice *watchdog_dev;
 #endif
+#ifdef CONFIG_GENERATE_ACPI_TABLE
+	struct acpi_ctx *acpi_ctx;
+#endif
 } gd_t;
 #endif
 
@@ -168,5 +173,6 @@ typedef struct global_data {
 #define GD_FLG_WDT_READY	0x10000 /* Watchdog is ready for use	   */
 #define GD_FLG_SKIP_LL_INIT	0x20000	/* Don't perform low-level init	   */
 #define GD_FLG_SMP_READY	0x40000	/* SMP init is complete		   */
+#define GD_FLG_BLOBLIST_READY	0x80000	/* Blob list has been set up       */
 
 #endif /* __ASM_GENERIC_GBL_DATA_H */

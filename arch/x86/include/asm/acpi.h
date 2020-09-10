@@ -9,15 +9,6 @@
 struct acpi_fadt;
 
 /**
- * acpi_find_fadt() - find ACPI FADT table in the system memory
- *
- * This routine parses the ACPI table to locate the ACPI FADT table.
- *
- * @return:	a pointer to the ACPI FADT table in the system memory
- */
-struct acpi_fadt *acpi_find_fadt(void);
-
-/**
  * acpi_find_wakeup_vector() - find OS installed wake up vector address
  *
  * This routine parses the ACPI table to locate the wake up vector installed
