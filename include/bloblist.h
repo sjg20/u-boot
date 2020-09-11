@@ -132,10 +132,11 @@ void *bloblist_find(uint tag, int size);
  *
  * @tag:	Tag to add (enum bloblist_tag_t)
  * @size:	Size of the blob
+ * @align:	Alignment of the blob (in bytes), 0 for none
  * @return pointer to the newly added block, or NULL if there is not enough
  *	space for the blob
  */
-void *bloblist_add(uint tag, int size);
+void *bloblist_add(uint tag, int size, int align);
 
 /**
  * bloblist_ensure_size() - Find or add a blob

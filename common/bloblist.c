@@ -87,18 +87,25 @@ static struct bloblist_rec *bloblist_findrec(uint tag)
 	return NULL;
 }
 
-static int bloblist_addrec(uint tag, int size, struct bloblist_rec **recp)
+static int bloblist_addrec(uint tag, int size, int align,
+			   struct bloblist_rec **recp)
 {
 	struct bloblist_hdr *hdr = gd->bloblist;
 	struct bloblist_rec *rec;
 	int data_start, new_alloced;
 
+	if (!align)
+		align = BLOBLIST_ALIGN;
+
 	/* Figure out where the new data will start */
-	data_start = hdr->alloced + sizeof(*rec);
-	data_start = ALIGN(data_start, BLOBLIST_ALIGN);
+	data_start = map_to_sysmem(hdr) + hdr->alloced + sizeof(*rec);
+
+	/* Align the address and then calculate the offset from ->alloced */
+	data_start = ALIGN(data_start, align) - map_to_sysmem(hdr);
 
 	/* Calculate the new allocated total */
-	new_alloced = data_start + ALIGN(size, BLOBLIST_ALIGN);
+	new_alloced = data_start + ALIGN(size, align);
+
 	if (new_alloced >= hdr->size) {
 		log(LOGC_BLOBLIST, LOGL_ERR,
 		    "Failed to allocate %x bytes size=%x, need size=%x\n",
@@ -134,7 +141,7 @@ static int bloblist_ensurerec(uint tag, struct bloblist_rec **recp, int size)
 	} else {
 		int ret;
 
-		ret = bloblist_addrec(tag, size, &rec);
+		ret = bloblist_addrec(tag, size, 0, &rec);
 		if (ret)
 			return ret;
 	}
@@ -156,11 +163,11 @@ void *bloblist_find(uint tag, int size)
 	return (void *)rec + rec->hdr_size;
 }
 
-void *bloblist_add(uint tag, int size)
+void *bloblist_add(uint tag, int size, int align)
 {
 	struct bloblist_rec *rec;
 
-	if (bloblist_addrec(tag, size, &rec))
+	if (bloblist_addrec(tag, size, align, &rec))
 		return NULL;
 
 	return (void *)rec + rec->hdr_size;
