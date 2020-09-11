@@ -7,7 +7,6 @@
  */
 
 #include <common.h>
-#include <bloblist.h>
 #include <command.h>
 #include <dm.h>
 #include <env.h>
@@ -132,14 +131,6 @@ int do_bdinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 
 		lmb_init_and_reserve(&lmb, gd->bd, (void *)gd->fdt_blob);
 		lmb_dump_all_force(&lmb);
-	}
-	if (IS_ENABLED(CONFIG_BLOBLIST)) {
-		ulong base, size, alloced;
-
-		bloblist_get_stats(&base, &size, &alloced);
-		print_phys_addr("bloblist base", base);
-		bdinfo_print_num("bloblist size", size);
-		bdinfo_print_num("  alloced", alloced);
 	}
 
 	arch_print_bdinfo();

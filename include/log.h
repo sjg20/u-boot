@@ -305,10 +305,16 @@ struct log_rec {
 
 struct log_device;
 
+enum log_device_flags {
+	LOGDF_ENABLE		= BIT(0),	/* Device is enabled */
+};
+
 /**
  * struct log_driver - a driver which accepts and processes log records
  *
  * @name: Name of driver
+ * @emit: Method to call to emit a log record via this device
+ * @flags: Initial value for flags (use LOGDF_ENABLE to enable on start-up)
  */
 struct log_driver {
 	const char *name;
@@ -319,6 +325,7 @@ struct log_driver {
 	 * for processing. The filter is checked before calling this function.
 	 */
 	int (*emit)(struct log_device *ldev, struct log_rec *rec);
+	unsigned short flags;
 };
 
 /**
@@ -331,12 +338,14 @@ struct log_driver {
  * @next_filter_num: Seqence number of next filter filter added (0=no filters
  *	yet). This increments with each new filter on the device, but never
  *	decrements
+ * @flags: Flags for this filter (enum log_device_flags)
  * @drv: Pointer to driver for this device
  * @filter_head: List of filters for this device
  * @sibling_node: Next device in the list of all devices
  */
 struct log_device {
-	int next_filter_num;
+	unsigned short next_filter_num;
+	unsigned short flags;
 	struct log_driver *drv;
 	struct list_head filter_head;
 	struct list_head sibling_node;
@@ -376,6 +385,10 @@ struct log_filter {
 
 #define LOG_DRIVER(_name) \
 	ll_entry_declare(struct log_driver, _name, log_driver)
+
+/* Get a pointer to a given driver */
+#define LOG_GET_DRIVER(__name)						\
+	ll_entry_get(struct log_driver, __name, log_driver)
 
 /**
  * log_get_cat_name() - Get the name of a category
