@@ -129,7 +129,8 @@ static int bloblist_addrec(uint tag, int size, int align,
 	return 0;
 }
 
-static int bloblist_ensurerec(uint tag, struct bloblist_rec **recp, int size)
+static int bloblist_ensurerec(uint tag, struct bloblist_rec **recp, int size,
+			      int align)
 {
 	struct bloblist_rec *rec;
 
@@ -142,7 +143,7 @@ static int bloblist_ensurerec(uint tag, struct bloblist_rec **recp, int size)
 	} else {
 		int ret;
 
-		ret = bloblist_addrec(tag, size, 0, &rec);
+		ret = bloblist_addrec(tag, size, align, &rec);
 		if (ret)
 			return ret;
 	}
@@ -174,12 +175,12 @@ void *bloblist_add(uint tag, int size, int align)
 	return (void *)rec + rec->hdr_size;
 }
 
-int bloblist_ensure_size(uint tag, int size, void **blobp)
+int bloblist_ensure_size(uint tag, int size, int align, void **blobp)
 {
 	struct bloblist_rec *rec;
 	int ret;
 
-	ret = bloblist_ensurerec(tag, &rec, size);
+	ret = bloblist_ensurerec(tag, &rec, size, align);
 	if (ret)
 		return ret;
 	*blobp = (void *)rec + rec->hdr_size;
@@ -191,7 +192,7 @@ void *bloblist_ensure(uint tag, int size)
 {
 	struct bloblist_rec *rec;
 
-	if (bloblist_ensurerec(tag, &rec, size))
+	if (bloblist_ensurerec(tag, &rec, size, 0))
 		return NULL;
 
 	return (void *)rec + rec->hdr_size;
@@ -202,7 +203,7 @@ int bloblist_ensure_size_ret(uint tag, int *sizep, void **blobp)
 	struct bloblist_rec *rec;
 	int ret;
 
-	ret = bloblist_ensurerec(tag, &rec, *sizep);
+	ret = bloblist_ensurerec(tag, &rec, *sizep, 0);
 	if (ret == -ESPIPE)
 		*sizep = rec->size;
 	else if (ret)
@@ -315,9 +316,9 @@ void bloblist_show_list(void)
 	printf("%-8s  %8s  Tag Name\n", "Address", "Size");
 	for (rec = bloblist_first_blob(hdr); rec;
 	     rec = bloblist_next_blob(hdr, rec)) {
-		printf("%08x  %8x  %3d %s\n",
-		       map_to_sysmem((void *)rec + rec->hdr_size), rec->size,
-		       rec->tag, bloblist_tag_name(rec->tag));
+		printf("%08lx  %8x  %3d %s\n",
+		       (ulong)map_to_sysmem((void *)rec + rec->hdr_size),
+		       rec->size, rec->tag, bloblist_tag_name(rec->tag));
 	}
 }
 
