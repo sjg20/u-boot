@@ -95,26 +95,27 @@ static int bloblist_test_blob(struct unit_test_state *uts)
 	hdr = clear_bloblist();
 	ut_assertnull(bloblist_find(TEST_TAG, TEST_BLOBLIST_SIZE));
 	ut_assertok(bloblist_new(TEST_ADDR, TEST_BLOBLIST_SIZE, 0));
+	ut_asserteq(map_to_sysmem(hdr), TEST_ADDR);
 
 	/* Add a record and check that we can find it */
 	data = bloblist_add(TEST_TAG, TEST_SIZE);
 	rec = (void *)(hdr + 1);
-	ut_asserteq_ptr(rec + 1, data);
+	ut_asserteq_addr(rec + 1, data);
 	data = bloblist_find(TEST_TAG, TEST_SIZE);
-	ut_asserteq_ptr(rec + 1, data);
+	ut_asserteq_addr(rec + 1, data);
 
 	/* Check the data is zeroed */
 	ut_assertok(check_zero(data, TEST_SIZE));
 
 	/* Check the 'ensure' method */
-	ut_asserteq_ptr(data, bloblist_ensure(TEST_TAG, TEST_SIZE));
+	ut_asserteq_addr(data, bloblist_ensure(TEST_TAG, TEST_SIZE));
 	ut_assertnull(bloblist_ensure(TEST_TAG, TEST_SIZE2));
 	rec2 = (struct bloblist_rec *)(data + ALIGN(TEST_SIZE, BLOBLIST_ALIGN));
 	ut_assertok(check_zero(data, TEST_SIZE));
 
 	/* Check for a non-existent record */
-	ut_asserteq_ptr(data, bloblist_ensure(TEST_TAG, TEST_SIZE));
-	ut_asserteq_ptr(rec2 + 1, bloblist_ensure(TEST_TAG2, TEST_SIZE2));
+	ut_asserteq_addr(data, bloblist_ensure(TEST_TAG, TEST_SIZE));
+	ut_asserteq_addr(rec2 + 1, bloblist_ensure(TEST_TAG2, TEST_SIZE2));
 	ut_assertnull(bloblist_find(TEST_TAG_MISSING, 0));
 
 	return 0;
@@ -140,7 +141,7 @@ static int bloblist_test_blob_ensure(struct unit_test_state *uts)
 	/* Check that we get the same thing again */
 	ut_assertok(bloblist_ensure_size_ret(TEST_TAG, &size, &data2));
 	ut_asserteq(TEST_SIZE, size);
-	ut_asserteq_ptr(data, data2);
+	ut_asserteq_addr(data, data2);
 
 	/* Check that the size remains the same */
 	size = TEST_SIZE2;
@@ -164,8 +165,8 @@ static int bloblist_test_bad_blob(struct unit_test_state *uts)
 	ut_assertok(bloblist_new(TEST_ADDR, TEST_BLOBLIST_SIZE, 0));
 	data = hdr + 1;
 	data += sizeof(struct bloblist_rec);
-	ut_asserteq_ptr(data, bloblist_ensure(TEST_TAG, TEST_SIZE));
-	ut_asserteq_ptr(data, bloblist_ensure(TEST_TAG, TEST_SIZE));
+	ut_asserteq_addr(data, bloblist_ensure(TEST_TAG, TEST_SIZE));
+	ut_asserteq_addr(data, bloblist_ensure(TEST_TAG, TEST_SIZE));
 
 	return 0;
 }
