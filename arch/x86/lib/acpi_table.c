@@ -510,7 +510,7 @@ void acpi_create_ssdt(struct acpi_ctx *ctx, struct acpi_table_header *ssdt,
 	ssdt->checksum = table_compute_checksum((void *)ssdt, ssdt->length);
 }
 
-static int hack_in_golden_tables_cbfs(void)
+int hack_in_golden_tables_cbfs(void)
 {
 	ulong rom_offset = binman_get_rom_offset();
 	ulong base;
@@ -565,7 +565,7 @@ static int hack_in_golden_tables_cbfs(void)
 	return 0;
 }
 
-static int hack_in_golden_tables(void)
+int hack_in_golden_tables(void)
 {
 	void *acpi, *gnvs, *f0000, *smbios;
 	int acpi_size, gnvs_size, f0000_size, smbios_size;
@@ -768,13 +768,6 @@ ulong write_acpi_tables(ulong start_addr)
 
 	acpi_rsdp_addr = (unsigned long)ctx->rsdp;
 	debug("ACPI: done\n");
-
-	if (IS_ENABLED(CONFIG_FSP_FROM_CBFS))
-		ret = hack_in_golden_tables_cbfs();
-	else
-		ret = hack_in_golden_tables();
-	if (ret)
-		panic("need tables");
 
 	return addr;
 }

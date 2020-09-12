@@ -700,6 +700,19 @@ int acpi_add_table(struct acpi_ctx *ctx, void *table);
  */
 void acpi_setup_base_tables(struct acpi_ctx *ctx, void *start);
 
+/**
+ * acpi_write_rsdp() - Write out an RSDP indicating where the ACPI tables are
+ *
+ * @rsdp: Address to write RSDP
+ * @rsdt: Address of RSDT
+ * @xsdt: Address of XSDT
+ */
+void acpi_write_rsdp(struct acpi_rsdp *rsdp, struct acpi_rsdt *rsdt,
+		     struct acpi_xsdt *xsdt);
+
+int hack_in_golden_tables_cbfs(void);
+int hack_in_golden_tables(void);
+
 #endif /* !__ACPI__*/
 
 #include <asm/acpi_table.h>

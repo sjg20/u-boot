@@ -80,6 +80,7 @@ int write_tables(void)
 	u32 rom_table_end;
 	u32 high_table, table_size;
 	struct memory_area cfg_tables[ARRAY_SIZE(table_list) + 1];
+	int ret;
 	int i;
 
 	if (!ll_boot_init() && !IS_ENABLED(CONFIG_APL_DO_TABLES)) {
@@ -135,6 +136,27 @@ int write_tables(void)
 		cfg_tables[i].size = 0;
 		write_coreboot_table(CB_TABLE_ADDR, cfg_tables);
 	}
+
+	if (IS_ENABLED(CONFIG_BLOBLIST_TABLES)) {
+		struct acpi_ctx *ctx = gd->acpi_ctx;
+		void *ptr = (void *)CONFIG_ROM_TABLE_ADDR;
+
+		/* Write an RSDP pointing to the tables */
+		if (IS_ENABLED(CONFIG_GENERATE_ACPI_TABLE)) {
+			acpi_write_rsdp(ptr, ctx->rsdt, ctx->xsdt);
+			ptr += ALIGN(sizeof(struct acpi_rsdp), 16);
+		}
+		if (IS_ENABLED(CONFIG_GENERATE_SMBIOS_TABLE)) {
+		}
+	}
+
+	if (IS_ENABLED(CONFIG_FSP_FROM_CBFS))
+		ret = hack_in_golden_tables_cbfs();
+	else
+		ret = hack_in_golden_tables();
+	if (ret)
+		panic("need tables");
+
 	debug("- done writing tables\n");
 
 	return 0;
