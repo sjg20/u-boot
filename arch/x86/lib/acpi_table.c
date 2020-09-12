@@ -569,37 +569,44 @@ int hack_in_golden_tables(void)
 {
 	void *acpi, *gnvs, *f0000, *smbios;
 	int acpi_size, gnvs_size, f0000_size, smbios_size;
+	bool doit = true;
 	int ret;
 
 	printf("\n\nGolden tables (binman)\n");
+
 	ret = binman_entry_map(ofnode_null(), "acpi", &acpi, &acpi_size);
 	if (ret)
 		return log_msg_ret("acpi", ret);
 	print_buffer((ulong)acpi, acpi, 1, 0x20, 0);
-	printf("data=%p, data_length=%x\n", acpi, acpi_size);
-	memcpy((void *)0x7aaf1000, acpi, acpi_size);
-	*(ulong *)0xf0010 = 0x7aaf1030;
+	printf("acpi=%p, length=%x\n", acpi, acpi_size);
+	if (doit) {
+		memcpy((void *)0x7aaf1000, acpi, acpi_size);
+		*(ulong *)0xf0010 = 0x7aaf1030;
+	}
 
 	ret = binman_entry_map(ofnode_null(), "gnvs", &gnvs, &gnvs_size);
 	if (ret)
 		return log_msg_ret("gnvs", ret);
 	print_buffer((ulong)gnvs, gnvs, 1, 0x20, 0);
-	printf("data=%p, data_length=%x\n", gnvs, gnvs_size);
-	memcpy((void *)0x7ab2d000, gnvs, gnvs_size);
+	printf("gnvs=%p, length=%x\n", gnvs, gnvs_size);
+	if (doit)
+		memcpy((void *)0x7ab2d000, gnvs, gnvs_size);
 
 	ret = binman_entry_map(ofnode_null(), "f0000", &f0000, &f0000_size);
 	if (ret)
 		return log_msg_ret("f0000", ret);
 	print_buffer((ulong)f0000, f0000, 1, 0x20, 0);
-	printf("data=%p, data_length=%x\n", f0000, f0000_size);
-	memcpy((void *)0xf0000, f0000, f0000_size);
+	printf("f0000=%p, length=%x\n", f0000, f0000_size);
+	if (doit)
+		memcpy((void *)0xf0000, f0000, f0000_size);
 
 	ret = binman_entry_map(ofnode_null(), "smbios", &smbios, &smbios_size);
 	if (ret)
 		return log_msg_ret("smbios", ret);
 	print_buffer((ulong)smbios, smbios, 1, 0x20, 0);
-	printf("data=%p, data_length=%x\n", smbios, smbios_size);
-	memcpy((void *)0x7a9de000, smbios, smbios_size);
+	printf("smbios=%p, length=%x\n", smbios, smbios_size);
+	if (doit)
+		memcpy((void *)0x7a9de000, smbios, smbios_size);
 
 	return 0;
 }

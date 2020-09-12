@@ -36,7 +36,8 @@ enum bloblist_tag_t {
 	BLOBLISTT_INTEL_VBT,		/* Intel Video-BIOS table */
 	BLOBLISTT_TPM2_TCG_LOG,		/* TPM v2 log space */
 	BLOBLISTT_TCPA_LOG,		/* TPM log space */
-	BLOBLISTT_X86_TABLES,		/* Various tables for x86 */
+	BLOBLISTT_ACPI_TABLES,		/* ACPI tables for x86 */
+	BLOBLISTT_SMBIOS_TABLES,	/* SMBIOS tables for x86 */
 
 	BLOBLISTT_COUNT
 };
@@ -116,7 +117,7 @@ struct bloblist_rec {
  * Searches the bloblist and returns the blob with the matching tag
  *
  * @tag:	Tag to search for (enum bloblist_tag_t)
- * @size:	Expected size of the blob
+ * @size:	Expected size of the blob, or 0 for any size
  * @return pointer to blob if found, or NULL if not found, or a blob was found
  *	but it is the wrong size
  */

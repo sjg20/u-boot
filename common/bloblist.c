@@ -37,7 +37,8 @@ static const char *tag_name[] = {
 	[BLOBLISTT_INTEL_VBT]		= "Intel Video-BIOS table",
 	[BLOBLISTT_TPM2_TCG_LOG]	= "TPM v2 log space",
 	[BLOBLISTT_TCPA_LOG]		= "TPM log space",
-	[BLOBLISTT_X86_TABLES]		= "x86 tables",
+	[BLOBLISTT_ACPI_TABLES]		= "ACPI tables",
+	[BLOBLISTT_SMBIOS_TABLES]	= "SMBIOS tables",
 };
 
 const char *bloblist_tag_name(enum bloblist_tag_t tag)
