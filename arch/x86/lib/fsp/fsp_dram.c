@@ -3,8 +3,6 @@
  * Copyright (C) 2014, Bin Meng <bmeng.cn@gmail.com>
  */
 
-#define LOG_DEBUG
-
 #include <common.h>
 #include <handoff.h>
 #include <init.h>
