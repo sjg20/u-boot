@@ -200,6 +200,7 @@ __weak void board_final_cleanup(void)
 int last_stage_init(void)
 {
 	struct acpi_fadt *fadt;
+	int ret;
 
 	board_final_init();
 
@@ -210,7 +211,9 @@ int last_stage_init(void)
 			acpi_resume(fadt);
 	}
 
-	write_tables();
+	ret = write_tables();
+	if (ret)
+		return log_msg_ret("table", ret);
 
 	if (IS_ENABLED(CONFIG_GENERATE_ACPI_TABLE)) {
 		fadt = gd->acpi_ctx->fadt;

@@ -73,7 +73,7 @@ void table_fill_string(char *dest, const char *src, size_t n, char pad)
 		dest[i] = pad;
 }
 
-void write_tables(void)
+int write_tables(void)
 {
 	u32 rom_table_start;
 	u32 rom_table_end;
@@ -85,7 +85,7 @@ void write_tables(void)
 
 	if (!ll_boot_init() && !IS_ENABLED(CONFIG_APL_DO_TABLES)) {
 		printf("Leaving previous bootloader tables intact\n");
-		return;
+		return 0;
 	}
 	rom_table_start = ROM_TABLE_ADDR;
 
@@ -120,4 +120,6 @@ void write_tables(void)
 	write_coreboot_table(CB_TABLE_ADDR, cfg_tables);
 #endif
 	debug("- done writing tables\n");
+
+	return 0;
 }
