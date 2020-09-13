@@ -36,6 +36,7 @@ enum bloblist_tag_t {
 	BLOBLISTT_INTEL_VBT,		/* Intel Video-BIOS table */
 	BLOBLISTT_TPM2_TCG_LOG,		/* TPM v2 log space */
 	BLOBLISTT_TCPA_LOG,		/* TPM log space */
+	BLOBLISTT_X86_TABLES,		/* Various tables for x86 */
 
 	BLOBLISTT_COUNT
 };

@@ -14,6 +14,7 @@ endif
 ifndef CONFIG_SPL_BUILD
 obj-$(CONFIG_CMD_BOOTM) += bootm.o
 endif
+obj-y	+= bdinfo.o
 obj-y	+= cmd_boot.o
 obj-$(CONFIG_SEABIOS) += coreboot_table.o
 obj-y	+= early_cmos.o
