@@ -13,6 +13,8 @@
 #include <asm/cpu_x86.h>
 #include <asm/intel_acpi.h>
 #include <asm/msr.h>
+#include <asm/arch/cpu.h>
+#include <asm/arch/iomap.h>
 #include <dm/acpi.h>
 
 #define CSTATE_RES(address_space, width, offset, address)		\
@@ -86,6 +88,91 @@ static int acpi_cpu_fill_ssdt(const struct udevice *dev, struct acpi_ctx *ctx)
 	return 0;
 }
 
+/* Set MSR_PMG_CST_CONFIG_CONTROL[3:0] for Package C-State limit */
+#define   PKG_C_STATE_LIMIT_C2_MASK	0x2
+/* Set MSR_PMG_CST_CONFIG_CONTROL[7:4] for Core C-State limit*/
+#define   CORE_C_STATE_LIMIT_C10_MASK	0x70
+/* Set MSR_PMG_CST_CONFIG_CONTROL[10] to IO redirect to MWAIT */
+#define   IO_MWAIT_REDIRECT_MASK	0x400
+/* Set MSR_PMG_CST_CONFIG_CONTROL[15] to lock CST_CFG [0-15] bits */
+#define   CST_CFG_LOCK_MASK	0x8000
+
+#define MSR_PMG_IO_CAPTURE_BASE	0xe4
+
+/* CST Range (R/W) IO port block size */
+#define PMG_IO_BASE_CST_RNG_BLK_SIZE	0x5
+/* ACPI PMIO Offset to C-state register*/
+#define ACPI_PMIO_CST_REG	(ACPI_BASE_ADDRESS + 0x14)
+
+#define MSR_IA32_MISC_ENABLES	0x1a0
+/* Disable the Monitor Mwait FSM feature */
+#define MONITOR_MWAIT_DIS_MASK	0x40000
+
+#define MSR_FEATURE_CONFIG	0x13c
+#define   FEATURE_CONFIG_RESERVED_MASK	0x3ULL
+#define   FEATURE_CONFIG_LOCK	(1 << 0)
+
+static void setup_core_msrs(void)
+{
+	wrmsrl(MSR_PMG_CST_CONFIG_CONTROL,
+	       PKG_C_STATE_LIMIT_C2_MASK | CORE_C_STATE_LIMIT_C10_MASK |
+	       IO_MWAIT_REDIRECT_MASK | CST_CFG_LOCK_MASK);
+	/* Power Management I/O base address for I/O trapping to C-states */
+	wrmsrl(MSR_PMG_IO_CAPTURE_BASE, ACPI_PMIO_CST_REG |
+	       (PMG_IO_BASE_CST_RNG_BLK_SIZE << 16));
+	/* Disable C1E */
+	msr_clrsetbits_64(MSR_POWER_CTL, 0x2, 0);
+	/* Disable support for MONITOR and MWAIT instructions */
+	msr_clrsetbits_64(MSR_IA32_MISC_ENABLES, MONITOR_MWAIT_DIS_MASK, 0);
+	/*
+	 * Enable and Lock the Advanced Encryption Standard (AES-NI)
+	 * feature register
+	 */
+	msr_clrsetbits_64(MSR_FEATURE_CONFIG, FEATURE_CONFIG_RESERVED_MASK,
+			  FEATURE_CONFIG_LOCK);
+}
+
+static int soc_core_init(void)
+{
+	struct udevice *pmc;
+	int ret;
+
+	/* Clear out pending MCEs */
+	/* TODO(adurbin): This should only be done on a cold boot. Also, some
+	 * of these banks are core vs package scope. For now every CPU clears
+	 * every bank. */
+	cpu_mca_configure();
+
+	/* Set core MSRs */
+	setup_core_msrs();
+	/*
+	 * Enable ACPI PM timer emulation, which also lets microcode know
+	 * location of ACPI_BASE_ADDRESS. This also enables other features
+	 * implemented in microcode.
+	*/
+	ret = uclass_first_device_err(UCLASS_ACPI_PMC, &pmc);
+	if (ret)
+		return log_msg_ret("PMC", ret);
+	enable_pm_timer_emulation(pmc);
+
+	return 0;
+}
+
+static int cpu_apl_probe(struct udevice *dev)
+{
+	if (gd->flags & GD_FLG_RELOC) {
+		uint core_id = dev->req_seq;
+		int ret;
+
+		printf("probe cpu %d\n", core_id);
+		ret = soc_core_init();
+		if (ret)
+			return log_ret(ret);
+	}
+
+	return 0;
+}
+
 struct acpi_ops apl_cpu_acpi_ops = {
 	.fill_ssdt	= acpi_cpu_fill_ssdt,
 };
@@ -107,6 +194,7 @@ U_BOOT_DRIVER(cpu_x86_apl_drv) = {
 	.id		= UCLASS_CPU,
 	.of_match	= cpu_x86_apl_ids,
 	.bind		= cpu_x86_bind,
+	.probe		= cpu_apl_probe,
 	.ops		= &cpu_x86_apl_ops,
 	ACPI_OPS_PTR(&apl_cpu_acpi_ops)
 	.flags		= DM_FLAG_PRE_RELOC,

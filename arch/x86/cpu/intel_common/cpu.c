@@ -306,3 +306,25 @@ int cpu_get_cores_per_package(void)
 
 	return cores;
 }
+
+#define IA32_MCG_CAP		0x179
+#define IA32_MC0_CTL			0x400
+#define IA32_MC0_STATUS			0x401
+
+void cpu_mca_configure(void)
+{
+	msr_t msr;
+	int i;
+	int num_banks;
+
+	msr = msr_read(IA32_MCG_CAP);
+	num_banks = msr.lo & 0xff;
+	msr.lo = msr.hi = 0;
+	for (i = 0; i < num_banks; i++) {
+		/* Clear the machine check status */
+		msr_write(IA32_MC0_STATUS + (i * 4), msr);
+		/* Initialize machine checks */
+		msr_write(IA32_MC0_CTL + i * 4,
+			  (msr_t) {.lo = 0xffffffff, .hi = 0xffffffff});
+	}
+}
