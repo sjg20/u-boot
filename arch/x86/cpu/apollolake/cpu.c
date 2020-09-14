@@ -13,6 +13,7 @@
 #include <asm/cpu_x86.h>
 #include <asm/intel_acpi.h>
 #include <asm/msr.h>
+#include <asm/mtrr.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/iomap.h>
 #include <dm/acpi.h>
@@ -112,6 +113,28 @@ static int acpi_cpu_fill_ssdt(const struct udevice *dev, struct acpi_ctx *ctx)
 #define   FEATURE_CONFIG_RESERVED_MASK	0x3ULL
 #define   FEATURE_CONFIG_LOCK	(1 << 0)
 
+static void update_fixed_mtrss(void)
+{
+	native_write_msr(MTRR_FIX_64K_00000_MSR,
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK),
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK));
+	native_write_msr(MTRR_FIX_16K_80000_MSR,
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK),
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK));
+	native_write_msr(MTRR_FIX_4K_E0000_MSR,
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK),
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK));
+	native_write_msr(MTRR_FIX_4K_E8000_MSR,
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK),
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK));
+	native_write_msr(MTRR_FIX_4K_F0000_MSR,
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK),
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK));
+	native_write_msr(MTRR_FIX_4K_F8000_MSR,
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK),
+			 MTRR_FIX_TYPE(MTRR_TYPE_WRBACK));
+}
+
 static void setup_core_msrs(void)
 {
 	wrmsrl(MSR_PMG_CST_CONFIG_CONTROL,
@@ -130,6 +153,8 @@ static void setup_core_msrs(void)
 	 */
 	msr_clrsetbits_64(MSR_FEATURE_CONFIG, FEATURE_CONFIG_RESERVED_MASK,
 			  FEATURE_CONFIG_LOCK);
+
+	update_fixed_mtrss();
 }
 
 static int soc_core_init(void)
