@@ -178,6 +178,10 @@
 		type = "blob";
 		filename = "board/google/chromebook_coral/smbios.bin";
 	};
+	coreboot {
+		type = "blob";
+		filename = "board/google/chromebook_coral/coreboot.bin";
+	};
 #ifdef CONFIG_HAVE_CMC
 	intel-cmc {
 		filename = CONFIG_CMC_FILE;

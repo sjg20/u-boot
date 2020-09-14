@@ -475,8 +475,9 @@ static void acpi_ssdt_write_cbtable(struct acpi_ctx *ctx)
 	uintptr_t base;
 	u32 size;
 
-	base = 0;
-	size = 0;
+	/* hack */
+	base = 0x7ab33000;
+	size = 0x8000;
 
 	acpigen_write_device(ctx, "CTBL");
 	acpigen_write_coreboot_hid(ctx, COREBOOT_ACPI_ID_CBTABLE);
@@ -567,8 +568,8 @@ int hack_in_golden_tables_cbfs(void)
 
 int hack_in_golden_tables(void)
 {
-	void *acpi, *gnvs, *f0000, *smbios;
-	int acpi_size, gnvs_size, f0000_size, smbios_size;
+	void *acpi, *gnvs, *f0000, *smbios, *coreboot;
+	int acpi_size, gnvs_size, f0000_size, smbios_size, coreboot_size;
 	bool doit = true;
 	int ret;
 
@@ -607,6 +608,15 @@ int hack_in_golden_tables(void)
 	printf("smbios=%p, length=%x\n", smbios, smbios_size);
 	if (doit)
 		memcpy((void *)0x7a9de000, smbios, smbios_size);
+
+	ret = binman_entry_map(ofnode_null(), "coreboot", &coreboot,
+			       &coreboot_size);
+	if (ret)
+		return log_msg_ret("coreboot", ret);
+	print_buffer((ulong)coreboot, coreboot, 1, 0x20, 0);
+	printf("coreboot=%p, length=%x\n", coreboot, coreboot_size);
+	if (doit)
+		memcpy((void *)0x7ab33000, coreboot, coreboot_size);
 
 	return 0;
 }
