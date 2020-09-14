@@ -38,6 +38,7 @@ enum bloblist_tag_t {
 	BLOBLISTT_TCPA_LOG,		/* TPM log space */
 	BLOBLISTT_ACPI_TABLES,		/* ACPI tables for x86 */
 	BLOBLISTT_SMBIOS_TABLES,	/* SMBIOS tables for x86 */
+	BLOBLISTT_RAMOOPS,		/* Space for kernel crash dump */
 
 	BLOBLISTT_COUNT
 };

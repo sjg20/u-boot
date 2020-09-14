@@ -39,6 +39,7 @@ static const char *tag_name[] = {
 	[BLOBLISTT_TCPA_LOG]		= "TPM log space",
 	[BLOBLISTT_ACPI_TABLES]		= "ACPI tables",
 	[BLOBLISTT_SMBIOS_TABLES]	= "SMBIOS tables",
+	[BLOBLISTT_RAMOOPS]		= "Linux ramoops"
 };
 
 const char *bloblist_tag_name(enum bloblist_tag_t tag)
