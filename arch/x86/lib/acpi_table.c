@@ -570,7 +570,7 @@ int hack_in_golden_tables(void)
 {
 	void *acpi, *gnvs, *f0000, *smbios, *coreboot;
 	int acpi_size, gnvs_size, f0000_size, smbios_size, coreboot_size;
-	bool doit = true;
+	bool doit = false;
 	int ret;
 
 	printf("\n\nGolden tables (binman)\n");
