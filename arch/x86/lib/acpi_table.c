@@ -628,6 +628,7 @@ int hack_in_golden_tables(void)
  */
 ulong write_acpi_tables(ulong start_addr)
 {
+	const int thl = sizeof(struct acpi_table_header);
 	struct acpi_ctx *ctx;
 	struct acpi_facs *facs;
 	struct acpi_table_header *dsdt;
@@ -639,6 +640,7 @@ ulong write_acpi_tables(ulong start_addr)
 	struct acpi_csrt *csrt;
 	struct acpi_spcr *spcr;
 	void *start;
+	int aml_len;
 	ulong addr;
 	int ret;
 	int i;
@@ -665,16 +667,24 @@ ulong write_acpi_tables(ulong start_addr)
 	dsdt = ctx->current;
 
 	/* Put the table header first */
-	memcpy(dsdt, &AmlCode, sizeof(struct acpi_table_header));
-	log_debug("Copy AML code size %x to %p\n", dsdt->length, dsdt);
-	acpi_inc(ctx, dsdt->length);
+	memcpy(dsdt, &AmlCode, thl);
+	acpi_inc(ctx, thl);
+	log_debug("DSDT starts at %p, hdr ends at %p\n", dsdt, ctx->current);
 
 	/* If the table is not empty, allow devices to inject things */
-	if (dsdt->length >= sizeof(struct acpi_table_header)) {
-		memcpy(dsdt, &AmlCode, dsdt->length);
+	aml_len = dsdt->length - thl;
+	if (aml_len) {
+		void *base = ctx->current;
+
 		acpi_inject_dsdt(ctx);
-		log_debug("Added %x bytes from inject_dsdt\n",
-			  ctx->current - (void *)dsdt - dsdt->length);
+		log_debug("Added %x bytes from inject_dsdt, now at %p\n",
+			  ctx->current - base, ctx->current);
+		print_buffer(thl, base, 1, ctx->current - base, 0);
+		log_debug("Copy AML code size %x to %p\n", aml_len,
+			  ctx->current);
+		print_buffer((ulong)ctx->current, AmlCode + thl, 1, 0x40, 0);
+		memcpy(ctx->current, AmlCode + thl, aml_len);
+		acpi_inc(ctx, aml_len);
 	}
 
 	dsdt->length = ctx->current - (void *)dsdt;
