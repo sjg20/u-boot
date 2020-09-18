@@ -6,6 +6,8 @@
  * Parts taken from coreboot
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <audio_codec.h>
 #include <dm.h>
@@ -123,6 +125,7 @@ static int max98357a_acpi_setup_nhlt(const struct udevice *dev,
 	u32 hwlink;
 	int ret;
 
+	log_debug("here\n");
 	if (dev_read_u32(dev, "acpi,audio-link", &hwlink))
 		return log_msg_ret("link", -EINVAL);
 

@@ -279,24 +279,6 @@
 			gpe0-en = <0x30>;
 		};
 
-		audio@e,0 {
-			reg = <0x7000 0 0 0 0>;
-			compatible = "simple-bus";
-			acpi,name = "HDAS";
-			i2s {
-				compatible = "fred";
-			};
-			maxim_codec: maxim-codec {
-				compatible = "maxim,max98357a";
-				acpi,ddn = "Maxim Integrated 98357A Amplifier";
-				sdmode-gpios = <&gpio_n GPIO_76 GPIO_ACTIVE_HIGH>;
-				sdmode-delay = <5>;
-				acpi,name = "MAXM";
-				acpi,hid = "MX98357A";
-				acpi,audio-link = <AUDIO_LINK_SSP5>;
-			};
-		};
-
 		spi: fast-spi@d,2 {
 			u-boot,dm-pre-reloc;
 			reg = <0x02006a10 0 0 0 0>;
@@ -372,6 +354,24 @@
 					dlg,btn-avg = <4>;
 					dlg,adc-1bit-rpt = <1>;
 				};
+			};
+		};
+
+		audio@e,0 {
+			reg = <0x7000 0 0 0 0>;
+			compatible = "simple-bus";
+			acpi,name = "HDAS";
+			i2s {
+				compatible = "fred";
+			};
+			maxim_codec: maxim-codec {
+				compatible = "maxim,max98357a";
+				acpi,ddn = "Maxim Integrated 98357A Amplifier";
+				sdmode-gpios = <&gpio_n GPIO_76 GPIO_ACTIVE_HIGH>;
+				sdmode-delay = <5>;
+				acpi,name = "MAXM";
+				acpi,hid = "MX98357A";
+				acpi,audio-link = <AUDIO_LINK_SSP5>;
 			};
 		};
 

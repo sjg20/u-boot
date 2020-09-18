@@ -1495,13 +1495,6 @@ static int acpigen_set_gpio_val(struct acpi_ctx *ctx, u32 tx_state_val,
 
 	acpigen_get_dw0_in_local5(ctx, dw0_read, gpio->pin0_addr);
 
-	/* Store (0x40, Local0) */
-	acpigen_write_store(ctx);
-	acpigen_write_integer(ctx, tx_state_val);
-	acpigen_emit_byte(ctx, LOCAL0_OP);
-
-	acpigen_get_dw0_in_local5(ctx, dw0_read, gpio->pin0_addr);
-
 	if (!broken) {
 		/* Store (0x40, Local0) */
 		acpigen_write_store(ctx);

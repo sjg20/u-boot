@@ -10,6 +10,7 @@
  */
 
 #define LOG_CATEGORY UCLASS_NORTHBRIDGE
+#define LOG_DEBUG
 
 #include <common.h>
 #include <dm.h>
@@ -331,6 +332,7 @@ static int apl_acpi_setup_nhlt(const struct udevice *dev, struct acpi_ctx *ctx)
 	u32 channels;
 	ofnode node;
 
+	log_debug("here\n");
 	node = ofnode_find_subnode(dev_ofnode(dev), "nhlt");
 	if (ofnode_read_u32(node, "intel,dmic-channels", &channels))
 		return log_msg_ret("channels", -EINVAL);
