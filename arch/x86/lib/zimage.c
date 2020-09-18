@@ -298,15 +298,14 @@ static unsigned int do_install_e820_map(unsigned int max_entries,
 	add_entry(entries, i++, 0x100000, 0xff00000, E820_RAM);
 	add_entry(entries, i++, 0x10000000, 0x2151000, E820_RESERVED);
 
-
-
-	bloblist_get_stats(&base, &size, &alloced);
-	printf("bloblist at %lx\n", base);
-	add_entry(entries, i++, 0x12151000, base - 0x12151000, E820_RAM);
 	if (USE_GOLDEN) {
 		add_entry(entries, i++, 0x12151000, 0x6888d000, E820_RAM);
 		add_entry(entries, i++, 0x7a9de000, 0x622000, E820_RESERVED);
 	} else {
+		bloblist_get_stats(&base, &size, &alloced);
+		printf("bloblist at %lx\n", base);
+		add_entry(entries, i++, 0x12151000, base - 0x12151000,
+			  E820_RAM);
 		add_entry(entries, i++, base, 0x7b000000 - base, E820_RESERVED);
 		add_entry(entries, i++, 0x7b000000, 0x5000000, E820_RESERVED);
 	}
