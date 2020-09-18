@@ -4,6 +4,9 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_CATEGORY LOGC_ARCH
+#define LOG_DEBUG
+
 #include <common.h>
 #include <handoff.h>
 #include <init.h>
@@ -82,6 +85,8 @@ ulong board_get_usable_ram_top(ulong total_size)
 
 #if CONFIG_IS_ENABLED(HANDOFF)
 	struct spl_handoff *ho = gd->spl_handoff;
+
+	log_debug("usable_ram_top = %lx\n", ho->arch.usable_ram_top);
 
 	return ho->arch.usable_ram_top;
 #endif

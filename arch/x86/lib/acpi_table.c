@@ -14,6 +14,7 @@
 #include <cbfs.h>
 #include <cpu.h>
 #include <dm.h>
+#include <init.h>
 #include <log.h>
 #include <dm/uclass-internal.h>
 #include <mapmem.h>
@@ -570,7 +571,7 @@ int hack_in_golden_tables(void)
 {
 	void *acpi, *gnvs, *f0000, *smbios, *coreboot;
 	int acpi_size, gnvs_size, f0000_size, smbios_size, coreboot_size;
-	bool doit = false;
+	bool doit = USE_GOLDEN;
 	int ret;
 
 	printf("\n\nGolden tables (binman)\n");

@@ -12,6 +12,8 @@
 
 #include <linux/types.h>
 
+#define USE_GOLDEN	1
+
 struct global_data;
 
 #ifndef __ASSEMBLY__		/* put C only stuff in this section */

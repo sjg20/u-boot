@@ -43,6 +43,8 @@ int fsp_scan_for_ram_size(void)
 
 int dram_init_banksize(void)
 {
+	efi_guid_t tseg = FSP_HOB_RESOURCE_OWNER_TSEG_GUID;
+	efi_guid_t fsp = FSP_HOB_RESOURCE_OWNER_FSP_GUID;
 	const struct hob_header *hdr;
 	struct hob_res_desc *res_desc;
 	phys_addr_t low_end, mtrr_top;
@@ -57,41 +59,42 @@ int dram_init_banksize(void)
 	}
 
 	low_end = 0;
-	mtrr_top = 0;
+	mtrr_top = 0x80000000;
 	for (bank = 1, hdr = gd->arch.hob_list;
 	     bank < CONFIG_NR_DRAM_BANKS && !end_of_hob(hdr);
 	     hdr = get_next_hob(hdr)) {
 		if (hdr->type != HOB_TYPE_RES_DESC)
 			continue;
 		res_desc = (struct hob_res_desc *)hdr;
+		if (!guidcmp(&res_desc->owner, &tseg)) {
+			ulong addr = res_desc->phys_start + res_desc->len;
+
+			mtrr_add_request(MTRR_TYPE_UNCACHEABLE, addr,
+					 0x7c000000 - addr);
+			mtrr_add_request(MTRR_TYPE_UNCACHEABLE, 0x7c000000,
+					 0x4000000);
+		}
+// 			mtrr_top = res_desc->phys_start + res_desc->len;
+		if (!guidcmp(&res_desc->owner, &fsp))
+			low_end = res_desc->phys_start;
 		if (res_desc->type != RES_SYS_MEM &&
 		    res_desc->type != RES_MEM_RESERVED)
 			continue;
-		if (res_desc->phys_start < (1ULL << 32)) {
-			if (res_desc->type == RES_MEM_RESERVED) {
-				mtrr_top = max(mtrr_top, res_desc->phys_start +
-					      res_desc->len);
-			} else {
-				low_end = max(low_end, res_desc->phys_start +
-					      res_desc->len);
-			}
-			log_debug("   - fragment %d: %llx %llx\n",
-				  res_desc->type, res_desc->phys_start,
-				  res_desc->len);
-			continue;
+		if (res_desc->phys_start >= (1ULL << 32)) {
+			gd->bd->bi_dram[bank].start = res_desc->phys_start;
+			gd->bd->bi_dram[bank].size = res_desc->len;
+			mtrr_add_request(MTRR_TYPE_WRBACK, res_desc->phys_start,
+					 res_desc->len);
+			log_debug("ram %llx %llx\n",
+				  gd->bd->bi_dram[bank].start,
+				  gd->bd->bi_dram[bank].size);
 		}
-
-		gd->bd->bi_dram[bank].start = res_desc->phys_start;
-		gd->bd->bi_dram[bank].size = res_desc->len;
-		mtrr_add_request(MTRR_TYPE_WRBACK, res_desc->phys_start,
-				 res_desc->len);
-		log_debug("ram %llx %llx\n", gd->bd->bi_dram[bank].start,
-			  gd->bd->bi_dram[bank].size);
 	}
 
 	/* Add the memory below 4GB */
 	gd->bd->bi_dram[0].start = 0;
 	gd->bd->bi_dram[0].size = low_end;
+
 	log_debug("ram %llx %llx\n", gd->bd->bi_dram[0].start,
 		  gd->bd->bi_dram[0].size);
 
@@ -169,7 +172,7 @@ unsigned int install_e820_map(unsigned int max_entries,
 #if CONFIG_IS_ENABLED(HANDOFF) && IS_ENABLED(CONFIG_USE_HOB)
 int handoff_arch_save(struct spl_handoff *ho)
 {
-	ho->arch.usable_ram_top = fsp_get_usable_lowmem_top(gd->arch.hob_list);
+	ho->arch.usable_ram_top = gd->bd->bi_dram[0].size;
 	ho->arch.hob_list = gd->arch.hob_list;
 
 	return 0;

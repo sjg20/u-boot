@@ -33,7 +33,7 @@ u32 fsp_get_usable_lowmem_top(const void *hob_list)
 				/* Need memory above 1MB to be collected here */
 				if (phys_start >= FSP_LOWMEM_BASE &&
 				    phys_start < (phys_addr_t)FSP_HIGHMEM_BASE)
-					top += (u32)(res_desc->len);
+					top += (u32)res_desc->len;
 			}
 		}
 

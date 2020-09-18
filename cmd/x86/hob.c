@@ -51,6 +51,7 @@ static struct guid_name {
 	{ FSP_HOB_RESOURCE_OWNER_PCD_DATABASE_GUID2, "PCD database 93" },
 	{ FSP_HOB_RESOURCE_OWNER_PEIM_DXE_GUID, "PEIM Init DXE" },
 	{ FSP_HOB_RESOURCE_OWNER_ALLOC_STACK_GUID, "Alloc stack" },
+	{ FSP_HOB_RESOURCE_OWNER_SMBIOS_MEMORY_GUID, "SMBIOS memory" },
 	{ {}, "zero-guid" },
 	{}
 };
