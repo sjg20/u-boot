@@ -6,6 +6,7 @@
  * Copyright (C) 2016, Bin Meng <bmeng.cn@gmail.com>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_ACPI
 
 #include <common.h>
@@ -651,6 +652,7 @@ ulong write_acpi_tables(ulong start_addr)
 
 	debug("ACPI: Writing ACPI tables at %lx\n", start_addr);
 
+	acpi_reset_items();
 	acpi_setup_base_tables(ctx, start);
 
 	debug("ACPI:    * FACS\n");
@@ -664,20 +666,21 @@ ulong write_acpi_tables(ulong start_addr)
 
 	/* Put the table header first */
 	memcpy(dsdt, &AmlCode, sizeof(struct acpi_table_header));
-	acpi_inc(ctx, sizeof(struct acpi_table_header));
+	log_debug("Copy AML code size %x to %p\n", dsdt->length, dsdt);
+	acpi_inc(ctx, dsdt->length);
 
 	/* If the table is not empty, allow devices to inject things */
-	if (dsdt->length >= sizeof(struct acpi_table_header))
+	if (dsdt->length >= sizeof(struct acpi_table_header)) {
+		memcpy(dsdt, &AmlCode, dsdt->length);
 		acpi_inject_dsdt(ctx);
+		log_debug("Added %x bytes from inject_dsdt\n",
+			  ctx->current - (void *)dsdt - dsdt->length);
+	}
 
-	/* Copy in the AML code itself if any (after the header) */
-	memcpy(ctx->current,
-	       (char *)&AmlCode + sizeof(struct acpi_table_header),
-	       dsdt->length - sizeof(struct acpi_table_header));
-
-	acpi_inc(ctx, dsdt->length - sizeof(struct acpi_table_header));
 	dsdt->length = ctx->current - (void *)dsdt;
         acpi_align(ctx);
+	log_debug("Updated DSDT length to %x, total %x\n", dsdt->length,
+		  ctx->current - (void *)dsdt);
 
 	if (!IS_ENABLED(CONFIG_ACPI_GNVS_EXTERNAL)) {
 		/* Pack GNVS into the ACPI table area */

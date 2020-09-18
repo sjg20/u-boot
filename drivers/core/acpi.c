@@ -6,7 +6,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
 #define LOG_CATEOGRY	LOGC_ACPI
 
 #include <common.h>
@@ -300,7 +299,6 @@ int acpi_fill_ssdt(struct acpi_ctx *ctx)
 	int ret;
 
 	log_debug("Writing SSDT tables\n");
-	item_count = 0;
 	ret = acpi_recurse_method(ctx, dm_root(), METHOD_FILL_SSDT, TYPE_SSDT);
 	log_debug("Writing SSDT finished, err=%d\n", ret);
 	ret = sort_acpi_item_type(ctx, start, TYPE_SSDT);
@@ -316,7 +314,6 @@ int acpi_inject_dsdt(struct acpi_ctx *ctx)
 	int ret;
 
 	log_debug("Writing DSDT tables\n");
-	item_count = 0;
 	ret = acpi_recurse_method(ctx, dm_root(), METHOD_INJECT_DSDT,
 				  TYPE_DSDT);
 	log_debug("Writing DSDT finished, err=%d\n", ret);
@@ -325,6 +322,11 @@ int acpi_inject_dsdt(struct acpi_ctx *ctx)
 		return log_msg_ret("build", ret);
 
 	return ret;
+}
+
+void acpi_reset_items(void)
+{
+	item_count = 0;
 }
 
 int acpi_write_dev_tables(struct acpi_ctx *ctx)
