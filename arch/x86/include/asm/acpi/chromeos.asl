@@ -3,8 +3,6 @@
  * Copyright (C) 2011 The ChromiumOS Authors.  All rights reserved.
  */
 
-#ifdef CONFIG_CHROMEOS
-
 #define CONFIG_VBOOT_VBNV_OFFSET 0x26
 
 #include <asm/acpi/vbnv_layout.h>
@@ -104,5 +102,3 @@ Device (CRHW)
 }
 
 #include "ramoops.asl"
-
-#endif
