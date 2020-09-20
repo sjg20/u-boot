@@ -53,6 +53,42 @@ static int smbios_add_string(char *start, const char *str)
 }
 
 /**
+ * smbios_add_prop_default() - Add a property from the device tree or default
+ *
+ * @start:	string area start address
+ * @node:	node containing the information to write (ofnode_null() if none)
+ * @prop:	property to write
+ * @def:	default string if the node has no such property
+ * @return 0 if not found, else SMBIOS string number (1 or more)
+ */
+static int smbios_add_prop_default(char *start, ofnode node, const char *prop,
+				   const char *def)
+{
+	const char *str;
+
+	str = ofnode_read_string(node, prop);
+	if (str)
+		return smbios_add_string(start, str);
+	else if (def)
+		return smbios_add_string(start, def);
+
+	return 0;
+}
+
+/**
+ * smbios_add_prop() - Add a property from the device tree
+ *
+ * @start:	string area start address
+ * @node:	node containing the information to write (ofnode_null() if none)
+ * @prop:	property to write
+ * @return 0 if not found, else SMBIOS string number (1 or more)
+ */
+static int smbios_add_prop(char *start, ofnode node, const char *prop)
+{
+	return smbios_add_prop_default(start, node, prop, NULL);
+}
+
+/**
  * smbios_string_table_len() - compute the string area size
  *
  * This computes the size of the string area including the string terminator.
@@ -120,11 +156,15 @@ static int smbios_write_type1(ulong *current, int handle, ofnode node)
 	t = map_sysmem(*current, len);
 	memset(t, 0, sizeof(struct smbios_type1));
 	fill_smbios_header(t, SMBIOS_SYSTEM_INFORMATION, len, handle);
-	t->manufacturer = smbios_add_string(t->eos, CONFIG_SMBIOS_MANUFACTURER);
-	t->product_name = smbios_add_string(t->eos, CONFIG_SMBIOS_PRODUCT_NAME);
+	t->manufacturer = smbios_add_prop_default(t->eos, node, "manufactuer",
+						  CONFIG_SMBIOS_MANUFACTURER);
+	t->product_name = smbios_add_prop_default(t->eos, node, "product",
+						  CONFIG_SMBIOS_PRODUCT_NAME);
 	if (serial_str) {
-		strncpy((char *)t->uuid, serial_str, sizeof(t->uuid));
 		t->serial_number = smbios_add_string(t->eos, serial_str);
+		strncpy((char *)t->uuid, serial_str, sizeof(t->uuid));
+	} else {
+		t->serial_number = smbios_add_prop(t->eos, node, "serial");
 	}
 
 	len = t->length + smbios_string_table_len(t->eos);
@@ -142,8 +182,10 @@ static int smbios_write_type2(ulong *current, int handle, ofnode node)
 	t = map_sysmem(*current, len);
 	memset(t, 0, sizeof(struct smbios_type2));
 	fill_smbios_header(t, SMBIOS_BOARD_INFORMATION, len, handle);
-	t->manufacturer = smbios_add_string(t->eos, CONFIG_SMBIOS_MANUFACTURER);
-	t->product_name = smbios_add_string(t->eos, CONFIG_SMBIOS_PRODUCT_NAME);
+	t->manufacturer = smbios_add_prop_default(t->eos, node, "manufactuer",
+						  CONFIG_SMBIOS_MANUFACTURER);
+	t->product_name = smbios_add_prop_default(t->eos, node, "product",
+						  CONFIG_SMBIOS_PRODUCT_NAME);
 	t->feature_flags = SMBIOS_BOARD_FEATURE_HOSTING;
 	t->board_type = SMBIOS_BOARD_MOTHERBOARD;
 
@@ -162,7 +204,8 @@ static int smbios_write_type3(ulong *current, int handle, ofnode node)
 	t = map_sysmem(*current, len);
 	memset(t, 0, sizeof(struct smbios_type3));
 	fill_smbios_header(t, SMBIOS_SYSTEM_ENCLOSURE, len, handle);
-	t->manufacturer = smbios_add_string(t->eos, CONFIG_SMBIOS_MANUFACTURER);
+	t->manufacturer = smbios_add_prop_default(t->eos, node, "manufactuer",
+						  CONFIG_SMBIOS_MANUFACTURER);
 	t->chassis_type = SMBIOS_ENCLOSURE_DESKTOP;
 	t->bootup_state = SMBIOS_STATE_SAFE;
 	t->power_supply_state = SMBIOS_STATE_SAFE;
