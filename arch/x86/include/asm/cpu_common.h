@@ -184,4 +184,6 @@ int cpu_get_max_turbo_ratio(void);
  */
 int cpu_get_cores_per_package(void);
 
+void cpu_mca_configure(void);
+
 #endif

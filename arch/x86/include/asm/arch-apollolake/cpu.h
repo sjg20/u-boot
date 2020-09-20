@@ -15,6 +15,13 @@
 #ifndef __ASSEMBLY__
 /* Flush L1D to L2 */
 void cpu_flush_l1d_to_l2(void);
+
+/**
+ * Enable emulation of the PM timer
+ *
+ * @pmc: PMC device
+ */
+void enable_pm_timer_emulation(const struct udevice *pmc);
 #endif
 
 #endif /* _ASM_ARCH_CPU_H */
