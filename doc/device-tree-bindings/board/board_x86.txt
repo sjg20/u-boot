@@ -1,0 +1,33 @@
+.. SPDX-License-Identifier: GPL-2.0+
+.. Copyright 2020 Google LLC
+
+x86 board driver
+================
+
+This driver allows providing board-specific features such as power control
+GPIOs. In addition, the SMBIOS values can be specified in the device tree,
+as below:
+
+An optional 'smbios' subnode can be used to provide these properties.
+
+Optional properties::
+  - manufactuer:  Product manuafacturer for system / baseboard
+  - product:     Product name
+  - serial:      Serial number for system (overriden by serial# environment var)
+
+
+Example::
+
+	board {
+		compatible = "google,coral";
+
+		smbios {
+			manufacturer = "Google";
+			product = "Coral";
+			version = "rev2";
+			serial = "123456789";
+			sku = "sku3";
+			family = "Google_Coral";
+			asset-tag = "ABC123";
+		};
+	};
