@@ -304,6 +304,7 @@ struct log_device;
  * struct log_driver - a driver which accepts and processes log records
  *
  * @name: Name of driver
+ * @emit: Method to call to emit a log record via this device
  */
 struct log_driver {
 	const char *name;
