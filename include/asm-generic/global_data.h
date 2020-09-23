@@ -24,6 +24,8 @@
 #include <membuff.h>
 #include <linux/list.h>
 
+struct acpi_ctx;
+
 typedef struct global_data {
 	struct bd_info *bd;
 	unsigned long flags;
@@ -136,6 +138,9 @@ typedef struct global_data {
 #endif
 #if CONFIG_IS_ENABLED(WDT)
 	struct udevice *watchdog_dev;
+#endif
+#ifdef CONFIG_GENERATE_ACPI_TABLE
+	struct acpi_ctx *acpi_ctx;
 #endif
 } gd_t;
 #endif
