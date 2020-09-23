@@ -9,63 +9,6 @@
 #include <asm/io.h>
 #include <asm/tables.h>
 
-static struct acpi_rsdp *acpi_valid_rsdp(struct acpi_rsdp *rsdp)
-{
-	if (strncmp((char *)rsdp, RSDP_SIG, sizeof(RSDP_SIG) - 1) != 0)
-		return NULL;
-
-	debug("Looking on %p for valid checksum\n", rsdp);
-
-	if (table_compute_checksum((void *)rsdp, 20) != 0)
-		return NULL;
-	debug("acpi rsdp checksum 1 passed\n");
-
-	if ((rsdp->revision > 1) &&
-	    (table_compute_checksum((void *)rsdp, rsdp->length) != 0))
-		return NULL;
-	debug("acpi rsdp checksum 2 passed\n");
-
-	return rsdp;
-}
-
-struct acpi_fadt *acpi_find_fadt(void)
-{
-	char *p, *end;
-	struct acpi_rsdp *rsdp = NULL;
-	struct acpi_rsdt *rsdt;
-	struct acpi_fadt *fadt = NULL;
-	int i;
-
-	/* Find RSDP */
-	for (p = (char *)ROM_TABLE_ADDR; p < (char *)ROM_TABLE_END; p += 16) {
-		rsdp = acpi_valid_rsdp((struct acpi_rsdp *)p);
-		if (rsdp)
-			break;
-	}
-
-	if (!rsdp)
-		return NULL;
-
-	debug("RSDP found at %p\n", rsdp);
-	rsdt = (struct acpi_rsdt *)(uintptr_t)rsdp->rsdt_address;
-
-	end = (char *)rsdt + rsdt->header.length;
-	debug("RSDT found at %p ends at %p\n", rsdt, end);
-
-	for (i = 0; ((char *)&rsdt->entry[i]) < end; i++) {
-		fadt = (struct acpi_fadt *)(uintptr_t)rsdt->entry[i];
-		if (strncmp((char *)fadt, "FACP", 4) == 0)
-			break;
-		fadt = NULL;
-	}
-
-	if (!fadt)
-		return NULL;
-
-	debug("FADT found at %p\n", fadt);
-	return fadt;
-}
-
 void *acpi_find_wakeup_vector(struct acpi_fadt *fadt)
 {
 	struct acpi_facs *facs;

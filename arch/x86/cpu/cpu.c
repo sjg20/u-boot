@@ -199,13 +199,13 @@ __weak void board_final_cleanup(void)
 
 int last_stage_init(void)
 {
-	struct acpi_fadt __maybe_unused *fadt;
+	struct acpi_fadt *fadt;
 	int ret;
 
 	board_final_init();
 
 	if (IS_ENABLED(CONFIG_HAVE_ACPI_RESUME)) {
-		fadt = acpi_find_fadt();
+		fadt = gd->acpi_ctx->fadt;
 
 		if (fadt && gd->arch.prev_sleep_state == ACPI_S3)
 			acpi_resume(fadt);
@@ -218,7 +218,7 @@ int last_stage_init(void)
 	}
 
 	if (IS_ENABLED(CONFIG_GENERATE_ACPI_TABLE)) {
-		fadt = acpi_find_fadt();
+		fadt = gd->acpi_ctx->fadt;
 
 		/* Don't touch ACPI hardware on HW reduced platforms */
 		if (fadt && !(fadt->flags & ACPI_FADT_HW_REDUCED_ACPI)) {

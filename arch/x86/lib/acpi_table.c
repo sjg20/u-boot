@@ -590,6 +590,7 @@ ulong write_acpi_tables(ulong start_addr)
 
 	debug("ACPI:    * FADT\n");
 	fadt = ctx->current;
+	ctx->fadt = fadt;
 	acpi_inc_align(ctx, sizeof(struct acpi_fadt));
 	acpi_create_fadt(fadt, facs, dsdt);
 	acpi_add_table(ctx, fadt);
