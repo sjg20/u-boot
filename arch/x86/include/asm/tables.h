@@ -8,14 +8,6 @@
 
 #include <tables_csum.h>
 
-#define ROM_TABLE_ADDR	CONFIG_ROM_TABLE_ADDR
-#define ROM_TABLE_END	(CONFIG_ROM_TABLE_ADDR + CONFIG_ROM_TABLE_SIZE - 1)
-
-#define ROM_TABLE_ALIGN	1024
-
-/* SeaBIOS expects coreboot tables at address range 0x0000-0x1000 */
-#define CB_TABLE_ADDR	0x800
-
 /**
  * table_compute_checksum() - Compute a table checksum
  *
