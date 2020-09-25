@@ -759,6 +759,14 @@ config ARCH_FIXUP_FDT_MEMORY
 	  used for booting OS with different memory setup where the part of
 	  the memory location should be used for different purpose.
 
+config CHROMEOS
+	bool "Support booting Chrome OS"
+	help
+	  Chrome OS requires U-Boot to set up a table indicating the boot mode
+	  (e.g. Developer mode) and a few other things. Enable this if you are
+	  booting on a Chromebook to avoid getting an error about an invalid
+	  firmware ID.
+
 endmenu		# Boot images
 
 source "api/Kconfig"
