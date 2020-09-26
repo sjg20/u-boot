@@ -75,15 +75,22 @@ void board_quiesce_devices(void);
  */
 void switch_to_non_secure_mode(void);
 
+/* Flags to control bootm_process_cmdline() */
+enum bootm_cmdline_t {
+	BOOTM_CL_SILENT	= 1 << 0,	/* Do silent console processing */
+
+	BOOTM_CL_ALL	= 1,		/* All substitutions */
+};
+
 /**
  * bootm_process_cmdline_env() - Process fix-ups for the command line
  *
  * Updates the 'bootargs' envvar as required. This handles making Linux boot
  * silently if requested ('silent_linux' envvar)
  *
- * @do_silent: Process bootargs for silent console
+ * @flags: Flags to control what happens (see bootm_cmdline_t)
  * @return 0 if OK, -ENOMEM if out of memory
  */
-int bootm_process_cmdline_env(bool do_silent);
+int bootm_process_cmdline_env(int flags);
 
 #endif
