@@ -75,4 +75,7 @@ void board_quiesce_devices(void);
  */
 void switch_to_non_secure_mode(void);
 
+/* Adjust the 'bootargs' to ensure that Linux boots silently, if required */
+void fixup_silent_linux(void);
+
 #endif
