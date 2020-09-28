@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <dm.h>
 #include <env.h>
 #include <mapmem.h>
 #include <smbios.h>
@@ -13,7 +14,6 @@
 #include <version.h>
 #ifdef CONFIG_CPU
 #include <cpu.h>
-#include <dm.h>
 #include <dm/uclass-internal.h>
 #endif
 
