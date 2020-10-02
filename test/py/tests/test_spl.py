@@ -20,10 +20,9 @@ def test_spl(u_boot_console, ut_spl_subtest):
 
     Args:
         u_boot_console (ConsoleBase): U-Boot console
-        ut_subtest (str): test to be executed via command ut, e.g 'foo bar' to
-            execute command 'ut foo bar'
+        ut_subtest (str): SPL test to be executed (e.g. 'dm platdata_phandle')
     """
     cons = u_boot_console
-    cons.restart_uboot_with_flags(['-u', ut_spl_subtest])
+    cons.restart_uboot_with_flags(['-u', '-k', ut_spl_subtest.split()[1]])
     output = cons.get_spawn_output().replace('\r', '')
     assert 'Failures: 0' in output
