@@ -19,6 +19,7 @@
 #include <dm/util.h>
 #include <fdtdec.h>
 #include <linux/compiler.h>
+#include <linux/err.h>
 
 struct driver *lists_driver_lookup_name(const char *name)
 {
@@ -51,29 +52,138 @@ struct uclass_driver *lists_uclass_lookup(enum uclass_id id)
 	return NULL;
 }
 
-int lists_bind_drivers(struct udevice *parent, bool pre_reloc_only)
+static int bind_drivers_pass(struct udevice *parent, bool pre_reloc_only)
 {
 	struct driver_info *info =
 		ll_entry_start(struct driver_info, driver_info);
 	const int n_ents = ll_entry_count(struct driver_info, driver_info);
+	const struct driver_info *waiting = NULL;
+	bool missing_parent = false;
+	bool done = false;
 	int result = 0;
 	uint idx;
 
+	/*
+	 * Do one iteration through the driver_info records. For of-platdata,
+	 * bind only devices whose parent is already bound. If we find any
+	 * device we can't bind, set missing_parent to true, which will cause
+	 * this function to be called again.
+	 *
+	 * Some conditions in this function are redundant since they are already
+	 * in the caller. They are kept here for clarity and in case the special
+	 * case is removed from the caller, with this function being called even
+	 * for !OF_PLATDATA
+	 */
 	for (idx = 0; idx < n_ents; idx++) {
+		struct udevice *par = parent;
 		const struct driver_info *entry = info + idx;
 		struct driver_rt *drt = gd_dm_driver_rt() + idx;
 		struct udevice *dev;
 		int ret;
 
-		ret = device_bind_by_name(parent, pre_reloc_only, entry, &dev);
+		if (CONFIG_IS_ENABLED(OF_PLATDATA)) {
+			int parent_idx = driver_info_parent_id(entry);
+
+			if (drt->dev)
+				continue;
+
+			if (CONFIG_IS_ENABLED(OF_PLATDATA_PARENT) &&
+			    parent_idx != -1) {
+				struct driver_rt *parent_drt;
+
+				parent_drt = gd_dm_driver_rt() + parent_idx;
+				if (!parent_drt->dev) {
+					missing_parent = true;
+					waiting = info + parent_idx;
+					continue;
+				}
+
+				par = parent_drt->dev;
+
+				/*
+				 * We've already tried to bind the parent and
+				 * failed. Nake this device a parent of @parent
+				 * instead.
+				 */
+				if (IS_ERR(par))
+					par = parent;
+			}
+		}
+		ret = device_bind_by_name(par, pre_reloc_only, entry, &dev);
 		if (!ret) {
-			if (CONFIG_IS_ENABLED(OF_PLATDATA))
-				drt->dev = dev;
+			done = true;
 		} else if (ret != -EPERM) {
 			dm_warn("No match for driver '%s'\n", entry->name);
 			if (!result || ret != -ENOENT)
 				result = ret;
 		}
+		if (CONFIG_IS_ENABLED(OF_PLATDATA)) {
+			if (CONFIG_IS_ENABLED(OF_PLATDATA_PARENT) &&
+			    ret == -ENOENT)
+				drt->dev = ERR_PTR(ret);
+			else if (!ret)
+				drt->dev = dev;
+		}
+	}
+
+	/*
+	 * This indicates an internal error, i.e. a bug in the above code or
+	 * an incorrect assumption. Each time this function is called we should
+	 * write to at least one entry in the driver_rt array, even if it is
+	 * just an error. If a child was waiting on a parent last time, then
+	 * this time at least one of its ancestors should be bound. Whether that
+	 * bind succeeds, its ->dev pointer is updated.
+	 *
+	 */
+	if (CONFIG_IS_ENABLED(OF_PLATDATA_PARENT) && !done && waiting) {
+		log_err("Stuck on binding '%s'\n", waiting->name);
+		return -EXDEV;
+	}
+
+	return result ? result : missing_parent ? -EAGAIN : 0;
+}
+
+int lists_bind_drivers(struct udevice *parent, bool pre_reloc_only)
+{
+	int result = 0;
+	int pass;
+
+	if (CONFIG_IS_ENABLED(OF_PLATDATA)) {
+		const int n_ents =
+			ll_entry_count(struct driver_info, driver_info);
+		struct driver_rt *drt, *end;
+
+		/*
+		 * 10 passes is 10 levels deep in the devicetree, which is
+		 * plenty.
+		 */
+		for (pass = 0; pass < 10; pass++) {
+			int ret;
+
+			ret = bind_drivers_pass(parent, pre_reloc_only);
+			if (!ret)
+				break;
+			if (CONFIG_IS_ENABLED(OF_PLATDATA_PARENT) &&
+			    ret == -EXDEV)
+				result = ret;
+			else if (ret != -EAGAIN && !result)
+				result = ret;
+		}
+
+		/* Change any errors to NULL */
+		for (drt = gd_dm_driver_rt(), end = drt + n_ents; drt < end;
+		     drt++) {
+			if (IS_ERR(drt->dev))
+				drt->dev = NULL;
+		}
+	} else {
+		/*
+		 * If OF_PLATDATA_PARENT is not enabled, then
+		 * bind_drivers_pass() will always succeed on the first pass.
+		 * Have a special case for this since it reduces code size
+		 * slightly
+		 */
+		result = bind_drivers_pass(parent, pre_reloc_only);
 	}
 
 	return result;
