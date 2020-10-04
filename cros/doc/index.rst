@@ -18,3 +18,4 @@ purposes.
    data
    cros_dts
    cros_sandbox
+   cros_coral

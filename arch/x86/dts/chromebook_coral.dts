@@ -12,9 +12,9 @@
 #include "tsc_timer.dtsi"
 
 #if defined(CONFIG_CHROMEOS_VBOOT) && defined(CONFIG_ROM_SIZE)
-#include "chromeos-x86.dtsi"
+#include "chromeos-coral.dtsi"
 #include "flashmap-x86-ro.dtsi"
-#include "flashmap-16mb-rw.dtsi"
+#include "flashmap-16mb-x86-rw.dtsi"
 #endif
 
 #include <dt-bindings/clock/intel-clock.h>
@@ -31,6 +31,7 @@
 #include <asm/arch-apollolake/fsp/fsp_m_upd.h>
 #include <asm/arch-apollolake/fsp/fsp_s_upd.h>
 #include <dt-bindings/sound/nhlt.h>
+#include <dt-bindings/cros/nvdata.h>
 
 / {
 	model = "Google Coral";
@@ -50,6 +51,7 @@
 		i2c7 = &i2c_7;
 		mmc0 = &emmc;
 		mmc1 = &sdmmc;
+		cros-vboot-ec0 = &cros_ec_vboot;
 	};
 
 	board: board {
@@ -69,6 +71,18 @@
 		 *	&gpio_nw GPIO_17 GPIO_ACTIVE_HIGH>;
 		 */
 		smbios {
+			/* Type 0 table */
+			bios {
+				/*
+				 * Allow at least 66 bytes for version so
+				 * Chrome OS can insert a new string later, of
+				 * at least 64 bytes plus terminator, which is
+				 * the size of chromeos_acpi_gnvs->fwid. See
+				 * vboot_update_acpi().
+				 */
+				version = "                                                                ";
+			};
+
 			/* Type 1 table */
 			system {
 				manufacturer = "Google";
@@ -350,6 +364,7 @@
 		spi: fast-spi@d,2 {
 			u-boot,dm-pre-proper;
 			u-boot,dm-spl;
+			u-boot,dm-vpl;
 			reg = <0x02006a10 0 0 0 0>;
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -362,6 +377,7 @@
 				#address-cells = <1>;
 				u-boot,dm-pre-proper;
 				u-boot,dm-spl;
+				u-boot,dm-vpl;
 				reg = <0>;
 				m25p,fast-read;
 				compatible = "winbond,w25q128fw",
@@ -461,6 +477,14 @@
 				acpi,hid = "GOOG0005";
 				acpi,ddn = "I2C TPM";
 				acpi,name = "TPMI";
+
+				secdata {
+					u-boot,dm-vpl;
+					compatible = "google,tpm-secdata";
+					nvdata,types = <CROS_NV_SECDATAF
+						CROS_NV_SECDATAK
+						CROS_NV_MRC_REC_HASH>;
+				};
 			};
 		};
 
@@ -624,9 +648,36 @@
 					 */
 					#address-cells = <1>;
 					#size-cells = <1>;
+
 					flash@8000000 {
 						reg = <0x08000000 0x20000>;
 						erase-value = <0xff>;
+					};
+
+					cros_ec_vboot: vboot {
+						compatible = "google,cros-ec-vboot";
+					};
+
+					nvdata-vstore {
+						u-boot,dm-vpl;
+						compatible = "google,cros-ec-nvdata";
+						nvdata,types = <CROS_NV_VSTORE>;
+					};
+
+					lid-open {
+						u-boot,dm-vpl;
+						/*
+						 * Ignore lid transitions after
+						 * boot
+						 */
+						primary-only;
+						compatible = "google,cros-ec-flag";
+					};
+
+					recovery {
+						u-boot,dm-vpl;
+						compatible = "google,cros-ec-flag";
+						primary-only;
 					};
 				};
 			};
@@ -1253,5 +1304,11 @@
 &rtc {
 	#address-cells = <1>;
 	#size-cells = <0>;
-	u-boot,dm-pre-proper;
+	u-boot,dm-vpl;
+	nvdata {
+		u-boot,dm-vpl;
+		compatible = "google,cmos-nvdata";
+		reg = <0x26>;
+		nvdata,types = <CROS_NV_DATA>;
+	};
 };

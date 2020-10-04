@@ -135,6 +135,7 @@ static int spl_fast_spi_load_image(struct spl_image_info *spl_image,
 SPL_LOAD_IMAGE_METHOD("Fast SPI", 1, BOOT_DEVICE_FAST_SPI,
 		      spl_fast_spi_load_image);
 
+#if !defined(CONFIG_CHROMEOS_VBOOT)
 void board_boot_order(u32 *spl_boot_list)
 {
 	bool use_spi_flash = IS_ENABLED(CONFIG_APL_BOOT_FROM_FAST_SPI_FLASH);
@@ -147,11 +148,14 @@ void board_boot_order(u32 *spl_boot_list)
 		spl_boot_list[1] = BOOT_DEVICE_FAST_SPI;
 	}
 }
+#endif
 
 #else
 
+#if !defined(CONFIG_CHROMEOS_VBOOT)
 void board_boot_order(u32 *spl_boot_list)
 {
 	spl_boot_list[0] = BOOT_DEVICE_SPI_MMAP;
 }
+#endif
 #endif
