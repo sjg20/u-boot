@@ -983,6 +983,17 @@ config TPL_ACPI_GPE
 
 	  See https://queue.acm.org/blogposting.cfm?id=18977 for more info
 
+config VPL_ACPI_GPE
+	bool "Support ACPI general-purpose events in VPL"
+	help
+	  Enable a driver for ACPI GPEs to allow peripherals to send interrupts
+	  via ACPI to the OS. In U-Boot this is only used when U-Boot itself
+	  needs access to these interrupts. This can happen when it uses a
+	  peripheral that is set up to use GPEs and so cannot use the normal
+	  GPIO mechanism for polling an input.
+
+	  See https://queue.acm.org/blogposting.cfm?id=18977 for more info
+
 config SA_PCIEX_LENGTH
 	hex
 	default 0x10000000 if (PCIEX_LENGTH_256MB)
