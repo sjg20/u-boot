@@ -58,7 +58,9 @@ static inline bool u_boot_first_phase(void)
 }
 
 enum u_boot_phase {
+	PHASE_NONE,	/* Invalid phase, signifying before U-Boot */
 	PHASE_TPL,	/* Running in TPL */
+	PHASE_VPL,	/* Running in VPL */
 	PHASE_SPL,	/* Running in SPL */
 	PHASE_BOARD_F,	/* Running in U-Boot before relocation */
 	PHASE_BOARD_R,	/* Running in U-Boot after relocation */
@@ -111,7 +113,9 @@ static inline enum u_boot_phase spl_phase(void)
 {
 #ifdef CONFIG_TPL_BUILD
 	return PHASE_TPL;
-#elif CONFIG_SPL_BUILD
+#elif defined(CONFIG_VPL_BUILD)
+	return PHASE_VPL;
+#elif defined(CONFIG_SPL_BUILD)
 	return PHASE_SPL;
 #else
 	DECLARE_GLOBAL_DATA_PTR;
@@ -122,11 +126,28 @@ static inline enum u_boot_phase spl_phase(void)
 		return PHASE_BOARD_R;
 #endif
 }
+static inline enum u_boot_phase spl_prev_phase(void)
+{
+#ifdef CONFIG_TPL_BUILD
+	return PHASE_NONE;
+#elif defined(CONFIG_VPL_BUILD)
+	return PHASE_TPL;	/* VPL requires TPL */
+#elif defined(CONFIG_SPL_BUILD)
+	return IS_ENABLED(CONFIG_VPL) ? PHASE_VPL :
+		IS_ENABLED(CONFIG_TPL) ? PHASE_TPL :
+		PHASE_NONE;
+#else
+	return IS_ENABLED(CONFIG_SPL) ? PHASE_SPL :
+		PHASE_NONE;
+#endif
+}
 
 /* A string name for SPL or TPL */
 #ifdef CONFIG_SPL_BUILD
 # ifdef CONFIG_TPL_BUILD
 #  define SPL_TPL_NAME	"TPL"
+# elif defined(CONFIG_VPL_BUILD)
+#  define SPL_TPL_NAME	"VPL"
 # else
 #  define SPL_TPL_NAME	"SPL"
 # endif

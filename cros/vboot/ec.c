@@ -10,6 +10,7 @@
 #include <common.h>
 #include <dm.h>
 #include <cros_ec.h>
+#include <log.h>
 #include <malloc.h>
 #include <vb2_api.h>
 #include <cros/cros_common.h>
@@ -18,6 +19,7 @@
 #include <cros/vboot_ec.h>
 #include <cros/vboot_flag.h>
 #include <cros/aux_fw.h>
+#include <linux/delay.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

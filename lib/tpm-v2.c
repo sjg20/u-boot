@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <log.h>
 #include <tpm-common.h>
 #include <tpm-v2.h>
 #include <linux/bitops.h>
@@ -47,9 +48,10 @@ u32 tpm2_self_test(struct udevice *dev, enum tpm2_yes_no full_test)
 u32 tpm2_clear(struct udevice *dev, u32 handle, const char *pw,
 	       const ssize_t pw_sz)
 {
+	uint offset = 27;
 	u8 command_v2[COMMAND_BUFFER_SIZE] = {
 		tpm_u16(TPM2_ST_SESSIONS),	/* TAG */
-		tpm_u32(27 + pw_sz),		/* Length */
+		tpm_u32(offset + pw_sz),	/* Length */
 		tpm_u32(TPM2_CC_CLEAR),		/* Command code */
 
 		/* HANDLE */
@@ -64,7 +66,6 @@ u32 tpm2_clear(struct udevice *dev, u32 handle, const char *pw,
 		tpm_u16(pw_sz),			/* Size of <hmac/password> */
 		/* STRING(pw)			   <hmac/password> (if any) */
 	};
-	unsigned int offset = 27;
 	int ret;
 
 	/*
@@ -80,11 +81,70 @@ u32 tpm2_clear(struct udevice *dev, u32 handle, const char *pw,
 	return tpm_sendrecv_command(dev, command_v2, NULL, NULL);
 }
 
+u32 tpm2_nv_define_space(struct udevice *dev, u32 space_index,
+			 size_t space_size, u32 nv_attributes,
+			 const uint8_t *nv_policy, size_t nv_policy_size)
+{
+	uint offset = 10 + 8 + 9 + 14;
+	u8 command_v2[COMMAND_BUFFER_SIZE] = {
+		/* header 10 bytes */
+		tpm_u16(TPM2_ST_SESSIONS),	/* TAG */
+		tpm_u32(offset + nv_policy_size),/* Length */
+		tpm_u32(TPM2_CC_NV_DEFINE_SPACE),/* Command code */
+
+		/* handles 8 bytes */
+		tpm_u32(TPM2_RH_PLATFORM),	/* Primary platform seed */
+
+		/* session header 9 bytes */
+		tpm_u32(9),			/* Header size */
+		tpm_u32(TPM2_RS_PW),		/* Password authorisation */
+		tpm_u16(0),			/* nonce_size */
+		0,				/* session_attrs */
+		tpm_u16(0),			/* auth_size */
+
+		/* message 14 bytes + policy */
+		tpm_u16(12 + nv_policy_size),	/* size */
+		tpm_u32(space_index),
+		tpm_u16(TPM2_ALG_SHA256),
+		tpm_u32(nv_attributes),
+		tpm_u16(nv_policy_size),
+		/* nv_policy */
+	};
+	int ret;
+
+	/*
+	 * Fill the command structure starting from the first buffer:
+	 *     - the password (if any)
+	 */
+	ret = pack_byte_string(command_v2, sizeof(command_v2), "s",
+			       offset, nv_policy, nv_policy_size);
+	offset += nv_policy_size;
+	if (ret)
+		return TPM_LIB_ERROR;
+
+	return tpm_sendrecv_command(dev, command_v2, NULL, NULL);
+#if 0
+	if (!response)
+		return TPM_E_NO_DEVICE;
+
+	/* Map TPM2 retrun codes into common vboot represenation */
+	switch (response->hdr.tpm_code) {
+	case TPM2_RC_SUCCESS:
+		return TPM_SUCCESS;
+	case TPM2_RC_NV_DEFINED:
+		return TPM_E_NV_DEFINED;
+	default:
+		return TPM_E_INTERNAL_INCONSISTENCY;
+	}
+#endif
+}
+
 u32 tpm2_pcr_extend(struct udevice *dev, u32 index, const uint8_t *digest)
 {
+	uint offset = 33;
 	u8 command_v2[COMMAND_BUFFER_SIZE] = {
 		tpm_u16(TPM2_ST_SESSIONS),	/* TAG */
-		tpm_u32(33 + TPM2_DIGEST_LEN),	/* Length */
+		tpm_u32(offset + TPM2_DIGEST_LEN),	/* Length */
 		tpm_u32(TPM2_CC_PCR_EXTEND),	/* Command code */
 
 		/* HANDLE */
@@ -98,11 +158,12 @@ u32 tpm2_pcr_extend(struct udevice *dev, u32 index, const uint8_t *digest)
 		0,				/* Attributes: Cont/Excl/Rst */
 		tpm_u16(0),			/* Size of <hmac/password> */
 						/* <hmac/password> (if any) */
+
+		/* hashes */
 		tpm_u32(1),			/* Count (number of hashes) */
 		tpm_u16(TPM2_ALG_SHA256),	/* Algorithm of the hash */
 		/* STRING(digest)		   Digest */
 	};
-	unsigned int offset = 33;
 	int ret;
 
 	/*
@@ -111,15 +172,91 @@ u32 tpm2_pcr_extend(struct udevice *dev, u32 index, const uint8_t *digest)
 	 */
 	ret = pack_byte_string(command_v2, sizeof(command_v2), "s",
 			       offset, digest, TPM2_DIGEST_LEN);
-	offset += TPM2_DIGEST_LEN;
 	if (ret)
 		return TPM_LIB_ERROR;
 
 	return tpm_sendrecv_command(dev, command_v2, NULL, NULL);
 }
 
-u32 tpm2_pcr_read(struct udevice *dev, u32 idx, unsigned int idx_min_sz,
-		  void *data, unsigned int *updates)
+u32 tpm2_nv_read_value(struct udevice *dev, u32 index, void *data, u32 count)
+{
+	u8 command_v2[COMMAND_BUFFER_SIZE] = {
+		/* header 10 bytes */
+		tpm_u16(TPM2_ST_SESSIONS),	/* TAG */
+		tpm_u32(10 + 8 + 4 + 9 + 4),	/* Length */
+		tpm_u32(TPM2_CC_NV_READ),	/* Command code */
+
+		/* handles 8 bytes */
+		tpm_u32(TPM2_RH_PLATFORM),	/* Primary platform seed */
+		tpm_u32(HR_NV_INDEX + index),	/* Password authorisation */
+
+		/* AUTH_SESSION */
+		tpm_u32(9),			/* Authorization size */
+		tpm_u32(TPM2_RS_PW),		/* Session handle */
+		tpm_u16(0),			/* Size of <nonce> */
+						/* <nonce> (if any) */
+		0,				/* Attributes: Cont/Excl/Rst */
+		tpm_u16(0),			/* Size of <hmac/password> */
+						/* <hmac/password> (if any) */
+
+		tpm_u16(count),			/* Number of bytes */
+		tpm_u16(0),			/* Offset */
+	};
+	size_t response_len = COMMAND_BUFFER_SIZE;
+	u8 response[COMMAND_BUFFER_SIZE];
+	int ret;
+	u16 tag;
+	u32 size, code;
+
+	ret = tpm_sendrecv_command(dev, command_v2, response, &response_len);
+	if (ret)
+		return log_msg_ret("read", ret);
+	if (unpack_byte_string(response, response_len, "wdds",
+			       0, &tag, 2, &size, 6, &code,
+			       16, data, count))
+		return TPM_LIB_ERROR;
+
+	return 0;
+}
+
+u32 tpm2_nv_write_value(struct udevice *dev, u32 index, const void *data,
+			u32 count)
+{
+	uint offset = 10 + 8 + 9;
+	u8 command_v2[COMMAND_BUFFER_SIZE] = {
+		/* header 10 bytes */
+		tpm_u16(TPM2_ST_SESSIONS),	/* TAG */
+		tpm_u32(offset + count + 2),	/* Length */
+		tpm_u32(TPM2_CC_NV_READ),	/* Command code */
+
+		/* handles 8 bytes */
+		tpm_u32(TPM2_RH_PLATFORM),	/* Primary platform seed */
+		tpm_u32(index),			/* Password authorisation */
+
+		/* AUTH_SESSION */
+		tpm_u32(9),			/* Authorization size */
+		tpm_u32(TPM2_RS_PW),		/* Session handle */
+		tpm_u16(0),			/* Size of <nonce> */
+						/* <nonce> (if any) */
+		0,				/* Attributes: Cont/Excl/Rst */
+		tpm_u16(0),			/* Size of <hmac/password> */
+						/* <hmac/password> (if any) */
+	};
+	size_t response_len = COMMAND_BUFFER_SIZE;
+	u8 response[COMMAND_BUFFER_SIZE];
+	int ret;
+
+	ret = pack_byte_string(command_v2, sizeof(command_v2), "sw",
+			       offset, data, count,
+			       offset + count, 0);
+	if (ret)
+		return TPM_LIB_ERROR;
+
+	return tpm_sendrecv_command(dev, command_v2, response, &response_len);
+}
+
+u32 tpm2_pcr_read_full(struct udevice *dev, u32 idx, unsigned int idx_min_sz,
+		       void *data, unsigned int *updates)
 {
 	u8 idx_array_sz = max(idx_min_sz, DIV_ROUND_UP(idx, 8));
 	u8 command_v2[COMMAND_BUFFER_SIZE] = {

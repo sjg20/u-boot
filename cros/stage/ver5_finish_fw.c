@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <bloblist.h>
+#include <log.h>
 #include <cros/cros_common.h>
 #include <cros/nvdata.h>
 #include <cros/vboot.h>

@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <log.h>
 #include <malloc.h>
 #include <spi_flash.h>
 #include <cros/cros_common.h>
@@ -176,6 +177,9 @@ static int fwstore_spi_get_sw_write_prot(struct udevice *dev)
 
 int fwstore_spi_probe(struct udevice *dev)
 {
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
+	printf("%s: fix\n", __func__);
+#else
 	struct fwstore_spi_priv *priv = dev_get_priv(dev);
 	struct ofnode_phandle_args args;
 	int ret;
@@ -195,6 +199,7 @@ int fwstore_spi_probe(struct udevice *dev)
 			  dev->name, ofnode_get_name(args.node), ret);
 		return ret;
 	}
+#endif
 
 	return 0;
 }
@@ -210,8 +215,8 @@ static struct udevice_id fwstore_spi_ids[] = {
 	{ },
 };
 
-U_BOOT_DRIVER(fwstore_spi) = {
-	.name	= "fwstore_spi",
+U_BOOT_DRIVER(cros_fwstore_spi) = {
+	.name	= "cros_fwstore_spi",
 	.id	= UCLASS_CROS_FWSTORE,
 	.of_match = fwstore_spi_ids,
 	.ops	= &fwstore_spi_ops,

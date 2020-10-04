@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <errno.h>
+#include <log.h>
 #include <spl.h>
 #include <sysreset.h>
 #include <cros/nvdata.h>
@@ -26,8 +27,8 @@ struct vboot_stage {
  * selection process. We only build in the code that is actually needed by each
  * stage.
  */
-struct vboot_stage stages[] = {
-#ifdef CONFIG_TPL_BUILD
+struct vboot_stage stages[VBOOT_STAGE_COUNT] = {
+#if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_VPL_BUILD)
 	/* Verification stage: figures out which firmware to run */
 	[VBOOT_STAGE_VER_INIT] = {"ver_init", vboot_ver_init},
 	[VBOOT_STAGE_VER1_VBINIT] = {"ver1_vbinit", vboot_ver1_vbinit},
@@ -36,14 +37,16 @@ struct vboot_stage stages[] = {
 	[VBOOT_STAGE_VER4_LOCATEFW] = {"ver4_locatefw", vboot_ver4_locate_fw,},
 	[VBOOT_STAGE_VER_FINISH] = {"ver5_finishfw", vboot_ver5_finish_fw,},
 	[VBOOT_STAGE_VER_JUMP] = {"ver_jump", vboot_ver6_jump_fw,},
-#elif defined(CONFIG_SPL_BUILD)
+#endif
+#if !defined(CONFIG_SPL_BUILD) || \
+		(!defined(CONFIG_TPL_BUILD) && !defined(CONFIG_VPL_BUILD))
 	/* SPL stage: Sets up SDRAM and jumps to U-Boot proper */
 	[VBOOT_STAGE_SPL_INIT] = {"spl_init", vboot_spl_init,},
 	[VBOOT_STAGE_SPL_JUMP_U_BOOT] =
 		{"spl_jump_u_boot", vboot_spl_jump_u_boot,},
 	[VBOOT_STAGE_RW_INIT] = {},
-#else
-	/* U-Boot stage: Boots the kernel */
+#endif
+#if !defined(CONFIG_SPL_BUILD)	/* U-Boot stage: Boots the kernel */
 	[VBOOT_STAGE_RW_INIT] = {"rw_init", vboot_rw_init,},
 	[VBOOT_STAGE_RW_SELECTKERNEL] =
 		{"rw_selectkernel", vboot_rw_select_kernel,},
@@ -91,7 +94,7 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
 	struct vboot_stage *stage = &stages[stagenum];
 	int ret;
 
-	log_debug("Running stage '%s'\n", stage->name);
+	log_info("Running stage '%s'\n", stage->name);
 	if (!stage->run) {
 		log_debug("   - Stage '%s' not available\n", stage->name);
 		return -EPERM;
@@ -227,26 +230,36 @@ int vboot_run_auto(struct vboot_info *vboot, uint flags)
 void board_boot_order(u32 *spl_boot_list)
 {
 	spl_boot_list[0] = BOOT_DEVICE_CROS_VBOOT;
+#ifdef CONFIG_X86
+	spl_boot_list[1] = BOOT_DEVICE_SPI_MMAP;
+#else
 	spl_boot_list[1] = BOOT_DEVICE_BOARD;
+#endif
 }
 
-#ifdef CONFIG_TPL_BUILD
-static int cros_load_image_tpl(struct spl_image_info *spl_image,
+#ifdef CONFIG_VPL_BUILD
+static int cros_load_image_vpl(struct spl_image_info *spl_image,
 			       struct spl_boot_device *bootdev)
 {
 	struct vboot_info *vboot;
 	int ret;
 
-	printf("tpl: load image\n");
+	printf("vpl: load image\n");
 	ret = vboot_alloc(&vboot);
 	if (ret)
 		return ret;
 	vboot->spl_image = spl_image;
 
-	return vboot_run_auto(vboot, 0);
+	ret = vboot_run_auto(vboot, 0);
+	if (ret)
+		printf("VPL error %d\n", ret);
+
+	return 0;
 }
-SPL_LOAD_IMAGE_METHOD("chromium_vboot_tpl", 0, BOOT_DEVICE_CROS_VBOOT,
-		      cros_load_image_tpl);
+SPL_LOAD_IMAGE_METHOD("chromium_vboot_vpl", 0, BOOT_DEVICE_CROS_VBOOT,
+		      cros_load_image_vpl);
+
+#elif defined(CONFIG_TPL_BUILD)
 
 #elif defined(CONFIG_SPL_BUILD)
 static int cros_load_image_spl(struct spl_image_info *spl_image,

@@ -18,7 +18,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 static bootm_headers_t linux_images;
 
-static void boot_go_set_os(cmd_tbl_t *cmdtp, int flag, int argc,
+static void boot_go_set_os(struct cmd_tbl *cmdtp, int flag, int argc,
 			   char * const argv[],
 			   bootm_headers_t *images)
 {
@@ -79,7 +79,7 @@ static void boot_start_lmb(bootm_headers_t *images)
 static inline void boot_start_lmb(bootm_headers_t *images) { }
 #endif
 
-int do_boot_linux(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+int do_boot_linux(struct cmd_tbl *cmdtp, int flag, int argc, char * const argv[])
 {
 	boot_os_fn *boot_fn;
 	bootm_headers_t *images = &linux_images;
@@ -126,7 +126,7 @@ U_BOOT_CMD(bootl, CONFIG_SYS_MAXARGS, 1, do_boot_linux,
 #endif
 
 #if defined(CONFIG_CMD_BOOTD) && !defined(CONFIG_CMD_BOOTM)
-int do_bootd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+int do_bootd(struct cmd_tbl *cmdtp, int flag, int argc, char * const argv[])
 {
 	return run_command(env_get("bootcmd"), flag);
 }

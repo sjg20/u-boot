@@ -33,8 +33,12 @@ static int rom_load_image(struct spl_image_info *spl_image,
 	int ret;
 
 	spl_image->size = CONFIG_SYS_MONITOR_LEN;  /* We don't know SPL size */
-	spl_image->entry_point = spl_phase() == PHASE_TPL ?
-		CONFIG_SPL_TEXT_BASE : CONFIG_SYS_TEXT_BASE;
+#if CONFIG_IS_ENABLED(CHROMEOS_VBOOT)
+		spl_image->entry_point = CONFIG_VPL_TEXT_BASE;
+#else
+		spl_image->entry_point = spl_phase() == PHASE_TPL ?
+			CONFIG_SPL_TEXT_BASE : CONFIG_SYS_TEXT_BASE;
+#endif
 	spl_image->load_addr = spl_image->entry_point;
 	spl_image->os = IH_OS_U_BOOT;
 	spl_image->name = "U-Boot";
@@ -161,11 +165,14 @@ static int spl_fast_spi_load_image(struct spl_image_info *spl_image,
 SPL_LOAD_IMAGE_METHOD("Fast SPI", 1, BOOT_DEVICE_FAST_SPI,
 		      spl_fast_spi_load_image);
 
+#ifndef CONFIG_CHROMEOS_VBOOT
 void board_boot_order(u32 *spl_boot_list)
 {
 	bool use_spi_flash = IS_ENABLED(CONFIG_APL_BOOT_FROM_FAST_SPI_FLASH);
 
-	if (use_spi_flash) {
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
+		spl_boot_list[0] = BOOT_DEVICE_CROS_VBOOT;
+	} else if (use_spi_flash) {
 		spl_boot_list[0] = BOOT_DEVICE_FAST_SPI;
 		spl_boot_list[1] = BOOT_DEVICE_SPI_MMAP;
 	} else {
@@ -173,11 +180,14 @@ void board_boot_order(u32 *spl_boot_list)
 		spl_boot_list[1] = BOOT_DEVICE_FAST_SPI;
 	}
 }
+#endif
 
 #else
 
+#ifndef CONFIG_CHROMEOS_VBOOT
 void board_boot_order(u32 *spl_boot_list)
 {
 	spl_boot_list[0] = BOOT_DEVICE_SPI_MMAP;
 }
+#endif
 #endif

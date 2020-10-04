@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <log.h>
 #include <cros/vboot.h>
 
 int vboot_ver6_jump_fw(struct vboot_info *vboot)

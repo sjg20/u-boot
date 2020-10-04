@@ -248,10 +248,13 @@ static int apl_hostbridge_ofdata_to_platdata(struct udevice *dev)
 		return log_msg_ret("Cannot get host-bridge PCI address", root);
 	plat->bdf = root;
 
-	ret = pinctrl_read_pads(pinctrl, dev_ofnode(dev), "early-pads",
-				&plat->early_pads, &plat->early_pads_count);
-	if (ret)
-		return log_msg_ret("early-pads", ret);
+	if (spl_phase() != PHASE_VPL) {
+		ret = pinctrl_read_pads(pinctrl, dev_ofnode(dev), "early-pads",
+					&plat->early_pads,
+					&plat->early_pads_count);
+		if (ret)
+			return log_msg_ret("early-pads", ret);
+	}
 #else
 	struct dtd_intel_apl_hostbridge *dtplat = &plat->dtplat;
 	int size;
@@ -396,7 +399,7 @@ static const struct udevice_id apl_hostbridge_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(apl_hostbridge_drv) = {
+U_BOOT_DRIVER(intel_apl_hostbridge) = {
 	.name		= "intel_apl_hostbridge",
 	.id		= UCLASS_NORTHBRIDGE,
 	.of_match	= apl_hostbridge_ids,

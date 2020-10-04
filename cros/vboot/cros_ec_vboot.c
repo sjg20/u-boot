@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <log.h>
 #include <cros_ec.h>
 #include <cros/vboot.h>
 #include <cros/vboot_ec.h>
@@ -238,8 +239,8 @@ static const struct udevice_id cros_ec_vboot_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(cros_ec_vboot) = {
-	.name		= "cros_ec_vboot",
+U_BOOT_DRIVER(google_cros_ec_vboot) = {
+	.name		= "google_cros_ec_vboot",
 	.id		= UCLASS_CROS_VBOOT_EC,
 	.of_match	= cros_ec_vboot_ids,
 	.ops		= &cros_ec_vboot_ops,

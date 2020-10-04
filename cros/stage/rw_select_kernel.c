@@ -7,6 +7,7 @@
 #include <common.h>
 #include <cros_ec.h>
 #include <ec_commands.h>
+#include <log.h>
 #include <mapmem.h>
 #include <sysreset.h>
 #include <cros/vboot.h>

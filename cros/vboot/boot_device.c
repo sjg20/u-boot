@@ -8,6 +8,7 @@
 #include <common.h>
 #include <bootstage.h>
 #include <dm.h>
+#include <log.h>
 #include <part.h>
 #include <usb.h>
 #include <cros/cros_common.h>

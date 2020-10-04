@@ -13,8 +13,7 @@
 #include <common.h>
 #include <log.h>
 #include <tpm-common.h>
-#include <tpm-v1.h>
-#include <tpm-v2.h>
+#include <tpm_api.h>
 #include <cros/nvdata.h>
 #include <cros/cros_common.h>
 #include <cros/vboot.h>
@@ -87,7 +86,7 @@ static u32 extend_pcr(struct vboot_info *vboot, int pcr,
 	if (size < TPM_PCR_MINIMUM_DIGEST_SIZE)
 		return VB2_ERROR_UNKNOWN;
 
-	return tpm_extend(vboot->tpm, pcr, buffer, out);
+	return tpm_pcr_extend(vboot->tpm, pcr, buffer, out);
 }
 
 int cros_tpm_extend_pcrs(struct vboot_info *vboot)
@@ -171,7 +170,7 @@ static int v1_factory_initialise_tpm(struct vboot_info *vboot)
 	struct tpm_permanent_flags pflags;
 	int ret;
 
-	ret = tpm_get_permanent_flags(vboot->tpm, &pflags);
+	ret = tpm1_get_permanent_flags(vboot->tpm, &pflags);
 	if (ret != TPM_SUCCESS)
 		return -EIO;
 
@@ -241,11 +240,22 @@ int cros_tpm_factory_initialise(struct vboot_info *vboot)
 	if (ret)
 		return -EIO;
 
-	ret = version == TPM_V1 ?
-		v1_factory_initialise_tpm(vboot) :
-		v2_factory_initialise_tpm(vboot);
+	ret = -ENOSYS;
+	switch (version) {
+	case TPM_V1:
+		if (IS_ENABLED(CONFIG_TPM_V1))
+			ret = v1_factory_initialise_tpm(vboot);
+		break;
+	case TPM_V2:
+		if (IS_ENABLED(CONFIG_TPM_V1))
+			ret = v1_factory_initialise_tpm(vboot);
+		break;
+		if (IS_ENABLED(CONFIG_TPM_V2))
+			ret = v2_factory_initialise_tpm(vboot);
+		break;
 	if (ret)
 		return ret;
+	}
 
 	log_debug("TPM: factory initialisation successful\n");
 
@@ -256,7 +266,7 @@ static u32 tpm_get_flags(struct udevice *dev, bool *disablep,
 			 bool *deactivatedp, bool *nvlockedp)
 {
 	struct tpm_permanent_flags pflags;
-	u32 ret = tpm_get_permanent_flags(dev, &pflags);
+	u32 ret = tpm1_get_permanent_flags(dev, &pflags);
 
 	if (ret == TPM_SUCCESS) {
 		if (disablep)
@@ -337,6 +347,7 @@ static u32 do_setup(struct vboot_info *vboot, bool s3flag)
 {
 	u32 ret;
 
+	printf("Setting up TPM (s3=%d):\n", s3flag);
 	ret = tpm_open(vboot->tpm);
 	if (ret != TPM_SUCCESS) {
 		log_err("TPM: Can't initialise\n");
@@ -352,12 +363,14 @@ static u32 do_setup(struct vboot_info *vboot, bool s3flag)
 		return TPM_SUCCESS;
 	}
 
+	printf("TPM startup:\n");
 	ret = tpm_startup(vboot->tpm, TPM_ST_CLEAR);
 	if (ret != TPM_SUCCESS) {
 		log_err("TPM: Can't run startup command\n");
 		goto out;
 	}
 
+	printf("TPM presence:\n");
 	ret = tpm_tsc_physical_presence(vboot->tpm,
 					TPM_PHYSICAL_PRESENCE_PRESENT);
 	if (ret != TPM_SUCCESS) {
@@ -382,6 +395,8 @@ static u32 do_setup(struct vboot_info *vboot, bool s3flag)
 	}
 
 	if (tpm_get_version(vboot->tpm) == TPM_V1) {
+		if (!IS_ENABLED(CONFIG_TPM_V1))
+			return log_msg_ret("tpm_v1", -ENOSYS);
 		ret = tpm1_invoke_state_machine(vboot, vboot->tpm);
 		if (ret != TPM_SUCCESS)
 			return ret;

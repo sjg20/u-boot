@@ -7,7 +7,10 @@
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
+#include <blk.h>
 #include <dm.h>
+#include <env.h>
+#include <log.h>
 #include <mapmem.h>
 #ifdef CONFIG_X86
 #include <asm/bootm.h>
@@ -170,7 +173,7 @@ static int boot_kernel(struct vboot_info *vboot,
 
 #ifndef CONFIG_X86
 	/* Chromium OS kernel has to be loaded at fixed location */
-	cmd_tbl_t cmdtp;
+	struct cmd_tbl cmdtp;
 	ulong addr = map_to_sysmem(kparams->kernel_buffer);
 	char address[20];
 	char *argv[] = { "bootm", address };
@@ -232,11 +235,11 @@ static int boot_kernel(struct vboot_info *vboot,
 		device_remove(dev, DM_REMOVE_NORMAL);
 
 #ifdef CONFIG_X86
-	vboot_update_acpi(vboot);
+// 	vboot_update_acpi(vboot);
 
 	params = (struct boot_params *)(uintptr_t)
 		(kparams->bootloader_address - CROS_PARAMS_SIZE);
-	if (!setup_zimage(params, cmdline, 0, 0, 0))
+	if (!setup_zimage(params, cmdline, 0, 0, 0, 0))
 		boot_linux_kernel((ulong)params, (ulong)kparams->kernel_buffer,
 				  false);
 #else

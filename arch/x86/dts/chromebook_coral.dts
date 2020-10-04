@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /dts-v1/;
 
+#include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/gpio/x86-gpio.h>
 
 /include/ "skeleton.dtsi"
@@ -12,7 +13,7 @@
 #ifdef CONFIG_CHROMEOS_VBOOT
 #include "chromeos-x86.dtsi"
 #include "flashmap-x86-ro.dtsi"
-#include "flashmap-16mb-rw.dtsi"
+#include "flashmap-16mb-x86-rw.dtsi"
 #endif
 
 #include <dt-bindings/clock/intel-clock.h>
@@ -394,8 +395,10 @@
 		};
 
 		i2c_2: i2c2@16,2 {
-			compatible = "intel,apl-i2c";
+			compatible = "intel,apl-i2c", "snps,designware-i2c-pci";
 			reg = <0x0200b210 0 0 0 0>;
+			early-regs = <IOMAP_I2C2_BASE 0x1000>;
+			u-boot,dm-pre-reloc;
 			#address-cells = <1>;
 			#size-cells = <0>;
 			clock-frequency = <400000>;
@@ -1184,4 +1187,14 @@
 		PAD_CFG_GPI(GPIO_72, UP_20K, DEEP)	 /* GP_CAMERASB10 */
 		PAD_CFG_GPI(GPIO_73, UP_20K, DEEP)	 /* GP_CAMERASB11 */
 	>;
+};
+
+&rtc {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	nvdata {
+		u-boot,dm-pre-reloc;
+		compatible = "google,cmos-nvdata";
+		reg = <0x26>;
+	};
 };

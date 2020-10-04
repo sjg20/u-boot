@@ -7,6 +7,7 @@
 #include <common.h>
 #include <bloblist.h>
 #include <dm.h>
+#include <log.h>
 #include <cros/vboot.h>
 
 int vboot_spl_init(struct vboot_info *vboot)

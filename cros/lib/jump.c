@@ -9,6 +9,8 @@
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
+#include <image.h>
+#include <log.h>
 #include <os.h>
 #include <spl.h>
 #include <cros/fwstore.h>

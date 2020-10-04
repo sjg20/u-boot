@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <log.h>
 #include <rtc.h>
 #include <cros/nvdata.h>
 
@@ -79,8 +80,8 @@ static const struct udevice_id cmos_nvdata_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(cmos_nvdata_drv) = {
-	.name		= "cmos-nvdata",
+U_BOOT_DRIVER(google_cmos_nvdata) = {
+	.name		= "google_cmos_nvdata",
 	.id		= UCLASS_CROS_NVDATA,
 	.of_match	= cmos_nvdata_ids,
 	.ops		= &cmos_nvdata_ops,
