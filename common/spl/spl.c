@@ -141,7 +141,7 @@ void spl_fixup_fdt(void *fdt_blob)
 ulong spl_get_image_pos(void)
 {
 #ifdef CONFIG_VPL
-	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT) && spl_phase() == PHASE_VPL)
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT) && spl_phase() == PHASE_TPL)
 		return binman_sym(ulong, vpl, image_pos);
 #endif
 	return spl_phase() == PHASE_TPL ?
@@ -152,7 +152,7 @@ ulong spl_get_image_pos(void)
 ulong spl_get_image_size(void)
 {
 #ifdef CONFIG_VPL
-	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT))
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT) && spl_phase() == PHASE_TPL)
 		return binman_sym(ulong, vpl, size);
 #endif
 	return spl_phase() == PHASE_TPL ?
@@ -762,6 +762,15 @@ void preloader_console_init(void)
 #if CONFIG_IS_ENABLED(BANNER_PRINT)
 	puts("\nU-Boot " SPL_TPL_NAME " " PLAIN_VERSION " (" U_BOOT_DATE " - "
 	     U_BOOT_TIME " " U_BOOT_TZ ")\n");
+#endif
+#ifdef CONFIG_SPL_BUILD
+	printf("spl\n");
+#endif
+#ifdef CONFIG_VPL_BUILD
+	printf("vpl\n");
+#endif
+#ifdef CONFIG_TPL_BUILD
+	printf("Tpl\n");
 #endif
 #ifdef CONFIG_SPL_DISPLAY_PRINT
 	spl_display_print();

@@ -129,6 +129,7 @@ typedef struct global_data {
 	int default_log_level;		/* For devices with no filters */
 	struct list_head log_head;	/* List of struct log_device */
 	int log_fmt;			/* Mask containing log format info */
+	bool log_processing;		/* message is being processed */
 #endif
 #if CONFIG_IS_ENABLED(BLOBLIST)
 	struct bloblist_hdr *bloblist;	/* Bloblist information */

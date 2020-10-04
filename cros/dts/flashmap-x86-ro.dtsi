@@ -74,9 +74,9 @@
 		};
 #endif
 #ifdef CONFIG_HAVE_INTEL_ME
-	intel-me {
-		filename = CONFIG_INTEL_ME_FILE;
-	};
+		intel-me {
+			filename = CONFIG_INTEL_ME_FILE;
+		};
 #endif
 		vpl {
 			type = "section";
