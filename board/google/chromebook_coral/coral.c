@@ -61,6 +61,14 @@ int arch_misc_init(void)
 	return 0;
 }
 
+/* This function is needed if CONFIG_CMDLINE is not enabled */
+__weak int board_run_command(const char *cmdline)
+{
+	printf("No command line\n");
+
+	return 0;
+}
+
 static int get_memconfig(struct udevice *dev)
 {
 	struct gpio_desc gpios[4];
