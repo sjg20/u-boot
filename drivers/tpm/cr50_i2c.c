@@ -658,11 +658,9 @@ static int cr50_i2c_ofdata_to_platdata(struct udevice *dev)
 	if (!ret) {
 		priv->irq = irq;
 		priv->use_irq = true;
-		printf("irq=%s/%ld\n", priv->irq.dev->name, priv->irq.id);
 	} else {
 		ret = gpio_request_by_name(dev, "ready-gpios", 0,
 					   &priv->ready_gpio, GPIOD_IS_IN);
-		printf("GPIO ret=%d\n", ret);
 		if (ret) {
 			log_warning("Cr50 does not have an ready GPIO/interrupt (err=%d)\n",
 				    ret);
@@ -696,7 +694,7 @@ static int cr50_i2c_probe(struct udevice *dev)
 		mdelay(10);
 	}
 	if (vendor != CR50_DID_VID) {
-		log_debug("DID_VID %08x not recognised\n", vendor);
+		log_warning("DID_VID %08x not recognised\n", vendor);
 		return log_msg_ret("vendor-id", -EXDEV);
 	}
 	priv->vendor = vendor;

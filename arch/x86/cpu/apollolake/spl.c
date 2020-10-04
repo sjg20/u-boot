@@ -35,12 +35,12 @@ static int rom_load_image(struct spl_image_info *spl_image,
 	int ret;
 
 	spl_image->size = CONFIG_SYS_MONITOR_LEN;  /* We don't know SPL size */
-	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT))
-		spl_image->entry_point = CONFIG_IS_ENABLED(VPL_TEXT_BASE,
-						   (CONFIG_VPL_TEXT_BASE), (0));
-	else
+#ifdef CONFIG_CHROMEOS_VBOOT
+		spl_image->entry_point = CONFIG_VPL_TEXT_BASE;
+#else
 		spl_image->entry_point = spl_phase() == PHASE_TPL ?
 			CONFIG_SPL_TEXT_BASE : CONFIG_SYS_TEXT_BASE;
+#endif
 
 	spl_image->load_addr = spl_image->entry_point;
 	spl_image->os = IH_OS_U_BOOT;
