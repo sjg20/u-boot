@@ -658,9 +658,11 @@ static int cr50_i2c_ofdata_to_platdata(struct udevice *dev)
 	if (!ret) {
 		priv->irq = irq;
 		priv->use_irq = true;
+		printf("irq=%s/%ld\n", priv->irq.dev->name, priv->irq.id);
 	} else {
 		ret = gpio_request_by_name(dev, "ready-gpios", 0,
 					   &priv->ready_gpio, GPIOD_IS_IN);
+		printf("GPIO ret=%d\n", ret);
 		if (ret) {
 			log_warning("Cr50 does not have an ready GPIO/interrupt (err=%d)\n",
 				    ret);
@@ -720,8 +722,8 @@ static const struct udevice_id cr50_i2c_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(cr50_i2c) = {
-	.name   = "cr50_i2c",
+U_BOOT_DRIVER(google_cr50) = {
+	.name   = "google_cr50",
 	.id     = UCLASS_TPM,
 	.of_match = cr50_i2c_ids,
 	.ops    = &cr50_i2c_ops,

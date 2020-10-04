@@ -124,6 +124,7 @@
 	};
 
 	acpi_gpe: general-purpose-events {
+		u-boot,dm-pre-reloc;
 		reg = <IOMAP_ACPI_BASE IOMAP_ACPI_SIZE>;
 		compatible = "intel,acpi-gpe";
 		interrupt-controller;
@@ -409,6 +410,7 @@
 			tpm: tpm@50 {
 				reg = <0x50>;
 				compatible = "google,cr50";
+				u-boot,dm-pre-reloc;
 				u-boot,i2c-offset-len = <0>;
 				ready-gpios = <&gpio_n 28 GPIO_ACTIVE_LOW>;
 				interrupts-extended = <&acpi_gpe GPIO_28_IRQ

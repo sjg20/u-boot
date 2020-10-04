@@ -343,7 +343,6 @@ int log_init(void)
 	if (!gd->default_log_level)
 		gd->default_log_level = CONFIG_LOG_DEFAULT_LEVEL;
 	gd->log_fmt = log_get_default_format();
-	printf("log_init\n");
 
 	return 0;
 }

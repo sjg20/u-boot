@@ -3,7 +3,6 @@
  * Copyright 2019 Google LLC
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_BOOT
 
 #include <common.h>
@@ -35,10 +34,10 @@ static int rom_load_image(struct spl_image_info *spl_image,
 	uint offset;
 	int ret;
 
-	printf("here %p\n", spl_image);
 	spl_image->size = CONFIG_SYS_MONITOR_LEN;  /* We don't know SPL size */
-	if (CONFIG_IS_ENABLED(CHROMEOS_VBOOT))
-		spl_image->entry_point = CONFIG_VPL_TEXT_BASE;
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT))
+		spl_image->entry_point = CONFIG_IS_ENABLED(VPL_TEXT_BASE,
+						   (CONFIG_VPL_TEXT_BASE), (0));
 	else
 		spl_image->entry_point = spl_phase() == PHASE_TPL ?
 			CONFIG_SPL_TEXT_BASE : CONFIG_SYS_TEXT_BASE;
@@ -70,7 +69,6 @@ static int rom_load_image(struct spl_image_info *spl_image,
 	memcpy((void *)spl_image->load_addr, (void *)spl_pos, spl_size);
 	cpu_flush_l1d_to_l2();
 	bootstage_accum(BOOTSTAGE_ID_ACCUM_MMAP_SPI);
-	printf("done\n");
 
 	return 0;
 }

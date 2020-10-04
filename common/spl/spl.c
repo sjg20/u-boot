@@ -763,15 +763,6 @@ void preloader_console_init(void)
 	puts("\nU-Boot " SPL_TPL_NAME " " PLAIN_VERSION " (" U_BOOT_DATE " - "
 	     U_BOOT_TIME " " U_BOOT_TZ ")\n");
 #endif
-#ifdef CONFIG_SPL_BUILD
-	printf("spl\n");
-#endif
-#ifdef CONFIG_VPL_BUILD
-	printf("vpl\n");
-#endif
-#ifdef CONFIG_TPL_BUILD
-	printf("Tpl\n");
-#endif
 #ifdef CONFIG_SPL_DISPLAY_PRINT
 	spl_display_print();
 #endif
