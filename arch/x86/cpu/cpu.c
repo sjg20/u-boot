@@ -21,6 +21,7 @@
 #define LOG_CATEGORY	UCLASS_CPU
 
 #include <common.h>
+#include <binman.h>
 #include <bootstage.h>
 #include <command.h>
 #include <cpu_func.h>
@@ -203,6 +204,12 @@ int last_stage_init(void)
 {
 	struct acpi_fadt __maybe_unused *fadt;
 	int ret;
+
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
+		ret = binman_select_subnode("read-write-a");
+		if (ret)
+			return log_msg_ret("binman", ret);
+	}
 
 	board_final_init();
 

@@ -30,7 +30,7 @@ int arch_misc_init(void)
 }
 
 /* This function is needed if CONFIG_CMDLINE is not enabled */
-int board_run_command(const char *cmdline)
+__weak int board_run_command(const char *cmdline)
 {
 	printf("No command line\n");
 
