@@ -5,7 +5,7 @@
 # Entry-type module for vpl/u-boot-vpl.bin
 #
 
-import binman.elf
+from binman import elf
 from binman.entry import Entry
 from binman.etype.blob import Entry_blob
 
@@ -15,7 +15,7 @@ class Entry_u_boot_vpl(Entry_blob):
     Properties / Entry arguments:
         - filename: Filename of u-boot-vpl.bin (default 'vpl/u-boot-vpl.bin')
 
-    This is the U-Boot VPL (Tertiary Program Loader) binary. This is a small
+    This is the U-Boot VPL (Verifying Program Loader) binary. This is a small
     binary which loads before SPL, typically into on-chip SRAM. It is
     responsible for locating, loading and jumping to SPL, the next-stage
     loader. Note that VPL is not relocatable so must be loaded to the correct
@@ -32,7 +32,7 @@ class Entry_u_boot_vpl(Entry_blob):
     binman uses that to look up symbols to write into the VPL binary.
     """
     def __init__(self, section, etype, node):
-        Entry_blob.__init__(self, section, etype, node)
+        super.__init__(section, etype, node)
         self.elf_fname = 'vpl/u-boot-vpl'
 
     def GetDefaultFilename(self):

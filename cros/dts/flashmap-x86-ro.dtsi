@@ -61,7 +61,8 @@
 				ifwi-replace;
 				ifwi-subpart = "IBBP";
 				ifwi-entry = "IBBL";
-				u-boot-tpl {
+				tpl {
+					type = "u-boot-tpl";
 				};
 				x86-start16-tpl {
 					offset = <0x7800>;
@@ -73,13 +74,16 @@
 		};
 #endif
 #ifdef CONFIG_HAVE_INTEL_ME
-intel-me {
-	filename = CONFIG_INTEL_ME_FILE;
-};
+	intel-me {
+		filename = CONFIG_INTEL_ME_FILE;
+	};
 #endif
-		u-boot-vpl-nodtb {
-		};
-		u-boot-vpl-dtb {
+		vpl {
+			type = "section";
+			u-boot-vpl-nodtb {
+			};
+			u-boot-vpl-dtb {
+			};
 		};
 		fmap {
 			offset = <(0xff200000 - RO_BASE)>;
@@ -146,7 +150,12 @@ intel-me {
 			type = "u-boot-spl";
 /*			offset = <(CONFIG_X86_OFFSET_SPL - RO_BASE)>;*/
 		};
-		u-boot-spl-dtb {
+		spl {
+			type = "section";
+			u-boot-spl {
+			};
+			u-boot-spl-dtb {
+			};
 		};
 #ifdef CONFIG_HAVE_MRC
 		intel-mrc {

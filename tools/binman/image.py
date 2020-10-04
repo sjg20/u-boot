@@ -332,11 +332,12 @@ class Image(section.Entry_section):
             for entry in to_add.values():
                 self._CollectEntries(entries, entry.GetEntries())
 
-    def LookupImageSymbol(self, sym_name, optional, msg):
+    def LookupImageSymbol(self, sym_name, optional, msg, base_addr):
         entries = OrderedDict()
         self._CollectEntries(entries, self.GetEntries())
         entries_by_name = {}
         for entry in entries.values():
             entries_by_name[entry.name] = entry
-        return self.LookupSymbol(sym_name, optional, msg, entries_by_name)
+        return self.LookupSymbol(sym_name, optional, msg, base_addr,
+                                 entries_by_name)
 

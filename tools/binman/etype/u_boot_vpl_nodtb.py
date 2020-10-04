@@ -22,7 +22,7 @@ class Entry_u_boot_vpl_nodtb(Entry_blob):
     both VPL and the device tree).
     """
     def __init__(self, section, etype, node):
-        Entry_blob.__init__(self, section, etype, node)
+        super().__init__(section, etype, node)
 
     def GetDefaultFilename(self):
         return 'vpl/u-boot-vpl-nodtb.bin'
