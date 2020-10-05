@@ -782,13 +782,13 @@ int designware_i2c_ofdata_to_platdata(struct udevice *bus)
 #if CONFIG_IS_ENABLED(CLK)
 	ret = clk_get_by_index(bus, 0, &priv->clk);
 	if (ret)
-		return ret;
+		return log_msg_ret("clk", ret);
 
 	ret = clk_enable(&priv->clk);
 	if (ret && ret != -ENOSYS && ret != -ENOTSUPP) {
 		clk_free(&priv->clk);
 		dev_err(bus, "failed to enable clock\n");
-		return ret;
+		return log_msg_ret("enable", ret);
 	}
 #endif
 

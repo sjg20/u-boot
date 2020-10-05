@@ -85,6 +85,7 @@
 	clk: clock {
 		compatible = "intel,apl-clk";
 		#clock-cells = <1>;
+		u-boot,dm-pre-reloc;
 	};
 
 	cpus {
