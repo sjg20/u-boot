@@ -419,6 +419,11 @@
 				acpi,hid = "GOOG0005";
 				acpi,ddn = "I2C TPM";
 				acpi,name = "TPMI";
+
+				secdata {
+					u-boot,dm-pre-reloc;
+					compatible = "google,tpm-secdata";
+				};
 			};
 		};
 

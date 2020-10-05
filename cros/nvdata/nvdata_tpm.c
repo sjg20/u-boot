@@ -186,8 +186,9 @@ static int tpm_secdata_lock(struct udevice *dev, uint index)
 	enum tpm_version version = tpm_get_version(tpm);
 
 	if (version == TPM_V2) {
+		printf("TPM v2 not supported\n");
 		/* TODO: return tlcl_lock_nv_write(dev, index) */
-		return -ENOSYS;
+		return -ENOTSUPP;
 	} else {
 		/*
 		 * We only have a global lock. Lock it when the firmware space
