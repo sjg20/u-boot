@@ -839,8 +839,8 @@ static int ich_init_controller(struct udevice *dev,
 
 	/* Work out the maximum speed we can support */
 	ctlr->max_speed = 20000000;
-	if (plat->ich_version == ICHV_9 && ich9_can_do_33mhz(dev))
-		ctlr->max_speed = 33000000;
+// 	if (plat->ich_version == ICHV_9 && ich9_can_do_33mhz(dev))
+// 		ctlr->max_speed = 33000000;
 	debug("ICH SPI: Version ID %d detected at %lx, speed %ld\n",
 	      plat->ich_version, plat->mmio_base, ctlr->max_speed);
 
