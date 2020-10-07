@@ -9,6 +9,7 @@
 #include <common.h>
 #include <dm.h>
 #include <cros_ec.h>
+#include <log.h>
 #include <cros/nvdata.h>
 
 static int cros_ec_nvdata_read(struct udevice *dev, uint index, u8 *data,

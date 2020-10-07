@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <blk.h>
+#include <command.h>
 #include <dm.h>
 #include <env.h>
 #include <log.h>

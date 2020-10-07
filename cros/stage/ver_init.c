@@ -34,7 +34,6 @@ static int vb2_init_blob(struct vboot_blob *blob, int work_buffer_size)
 	int ret;
 
 	/* initialise the vb2_context */
-	memset(blob, '\0', sizeof(*blob));
 	ctx->workbuf_size = work_buffer_size;
 	ctx->workbuf = memalign(VBOOT_CONTEXT_ALIGN, ctx->workbuf_size);
 	if (!ctx->workbuf)
@@ -54,7 +53,8 @@ int vboot_ver_init(struct vboot_info *vboot)
 
 	printf("vboot is at %p, size %lx, bloblist %p\n", vboot,
 	       (ulong)sizeof(*vboot), gd->bloblist);
-	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, sizeof(struct vboot_blob), 0);
+	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, sizeof(struct vboot_blob),
+			    VBOOT_CONTEXT_ALIGN);
 	if (!blob)
 		return log_msg_ret("set up vboot context", -ENOSPC);
 
@@ -72,6 +72,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 	vboot->ctx = ctx;
 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
+	printf("ctx=%p\n", ctx);
 
 	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
 	if (ret)

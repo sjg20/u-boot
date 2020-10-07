@@ -111,7 +111,7 @@ libs-y += dts/
 libs-y += fs/
 libs-$(CONFIG_SPL_POST_MEM_SUPPORT) += post/drivers/
 libs-$(CONFIG_SPL_NET_SUPPORT) += net/
-libs-$(CONFIG_SPL_UNIT_TEST) += test/
+libs-$(CONFIG_$(SPL_TPL_)UNIT_TEST) += test/
 
 libs-$(CONFIG_$(SPL_TPL_)CHROMEOS) += cros/
 

@@ -4,6 +4,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
@@ -74,24 +75,31 @@ static int handle_digest_result(struct vboot_info *vboot, void *slot_hash,
 	 * Chrome EC is the only support for vboot_save_hash() &
 	 * vboot_retrieve_hash(), if Chrome EC is not enabled then return.
 	 */
-	if (!IS_ENABLED(CONFIG_CROS_EC))
+	if (!IS_ENABLED(CONFIG_CROS_EC)) {
+		log_info("No Chrome OS EC\n");
 		return 0;
+	}
 
 	/*
 	 * Nothing to do since resuming on the platform doesn't require
 	 * vboot verification again.
 	 */
-	if (!vboot->resume_path_same_as_boot)
+	if (!vboot->resume_path_same_as_boot) {
+		log_info("Resume does not require verification\n");
 		return 0;
+	}
 
 	/*
 	 * If RW memory init code is not used, then we don't need to worry
 	 * about hashing
 	 */
-	if (vboot->meminit_in_ro)
+	if (vboot->meminit_in_ro) {
+		log_info("Memory init is in read-only flash\n");
 		return 0;
+	}
 
 	is_resume = vboot_platform_is_resuming();
+	log_info("is_resume=%d\n", is_resume);
 	if (is_resume > 0) {
 		u8 saved_hash[VBOOT_MAX_HASH_SIZE];
 		const size_t saved_hash_sz = sizeof(saved_hash);
@@ -139,10 +147,9 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 	u8 hash_digest[VBOOT_MAX_HASH_SIZE];
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	u8 block[TODO_BLOCK_SIZE];
-	u32 expected_size;
-	int ret;
+	uint expected_size;
+	int ret, blk;
 
-	log_err("Hashing firmware body\n");
 	/*
 	 * Clear the full digest so that any hash digests less than the
 	 * max size have trailing zeros
@@ -152,11 +159,12 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 	bootstage_mark(BOOTSTAGE_VBOOT_START_HASH_BODY);
 
 	expected_size = fwstore_reader_size(fw_main);
+	log_err("Hashing firmware body, expected size %x\n", expected_size);
 
 	/* Start the body hash */
 	ret = vb2api_init_hash(ctx, VB2_HASH_TAG_FW_BODY, &expected_size);
 	if (ret)
-		return log_msg_ret("init hash", ret);
+		return log_msg_retz("init hash", ret);
 
 	/*
 	 * Honor vboot's RW slot size. The expected size is pulled out of
@@ -171,11 +179,13 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 	}
 
 	/* Extend over the body */
-	while (1) {
+	for (blk = 0; ; blk++) {
 		int nbytes;
 
 		bootstage_start(BOOTSTAGE_ACCUM_VBOOT_FIRMWARE_READ, NULL);
 		nbytes = misc_read(fw_main, -1, block, TODO_BLOCK_SIZE);
+		log_debug("blk %x: read %x:\n", blk, nbytes);
+		print_buffer(0, block, 1, nbytes > 0x20 ? 0x20 : nbytes, 0);
 		bootstage_accum(BOOTSTAGE_ACCUM_VBOOT_FIRMWARE_READ);
 		if (nbytes < 0)
 			return log_msg_ret("Read fwstore", nbytes);
@@ -184,20 +194,21 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 
 		ret = vb2api_extend_hash(ctx, block, nbytes);
 		if (ret)
-			return log_msg_ret("extend hash", ret);
+			return log_msg_retz("extend hash", ret);
 	}
 	bootstage_mark(BOOTSTAGE_VBOOT_DONE_HASHING);
 
 	/* Check the result (with RSA signature verification) */
 	ret = vb2api_check_hash_get_digest(ctx, hash_digest, hash_digest_sz);
 	if (ret)
-		return log_msg_ret("check hash", ret);
+		return log_msg_retz("check hash", ret);
 
 	bootstage_mark(BOOTSTAGE_VBOOT_END_HASH_BODY);
 
 	if (handle_digest_result(vboot, hash_digest, hash_digest_sz))
-		return log_msg_ret("handle result", ret);
+		return log_msg_retz("handle result", ret);
 	vboot->fw_size = expected_size;
+	log_debug("done\n");
 
 	return VB2_SUCCESS;
 }
@@ -212,6 +223,8 @@ int vboot_ver4_locate_fw(struct vboot_info *vboot)
 		entry = &vboot->fmap.readwrite_a.spl;
 	else
 		entry = &vboot->fmap.readwrite_b.spl;
+	log_info("Setting up firmware reader at %x, size %x\n", entry->offset,
+		 entry->length);
 	ret = fwstore_get_reader_dev(vboot->fwstore, entry->offset,
 				     entry->length, &dev);
 	/* TODO(sjg@chromium.org): Perhaps this should be fatal? */

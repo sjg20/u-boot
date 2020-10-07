@@ -112,6 +112,7 @@
 			align = <0x40>;
 		};
 		boot-rec {
+			align = <0x1000>;
 /*			offset = <(0xffed0000 - RO_BASE)>;*/
 			u-boot,dm-pre-reloc;
 			type = "u-boot";
