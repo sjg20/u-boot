@@ -44,7 +44,7 @@ static int resource_read(struct vboot_info *vboot,
 
 	print_buffer(pos, buf, 1, /*size > 0x80 ? 0x80 :*/ size, 0);
 
-	return log_msg_ret("failed to read resource", ret);
+	return log_msg_ret("resource", ret);
 }
 
 int vb2ex_read_resource(struct vb2_context *ctx, enum vb2_resource_index index,

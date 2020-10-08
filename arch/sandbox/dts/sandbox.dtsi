@@ -285,6 +285,12 @@
 	tpm {
 		u-boot,dm-pre-reloc;
 		compatible = "google,sandbox-tpm";
+
+		nvdata {
+			u-boot,dm-pre-reloc;
+			compatible = "google,tpm-secdata";
+		};
+
 	};
 
 	tpm2 {

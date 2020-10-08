@@ -280,6 +280,7 @@ int bloblist_finish(void)
 	struct bloblist_hdr *hdr = gd->bloblist;
 
 	hdr->chksum = bloblist_calc_chksum(hdr);
+	bloblist_show_list();
 
 	return 0;
 }

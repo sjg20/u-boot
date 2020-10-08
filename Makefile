@@ -1085,7 +1085,7 @@ inputs: $(INPUTS-y)
 
 all: .binman_stamp inputs $(if $(CONFIG_CHROMEOS_VBOOT),image.bin)
 ifeq ($(CONFIG_BINMAN),y)
-ifeq ($(CONFIG_TARGET_CHROMEOS_CORAL),)
+ifeq ($(CONFIG_CHROMEOS_VBOOT),)
 	$(call if_changed,binman)
 endif
 endif

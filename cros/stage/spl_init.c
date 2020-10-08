@@ -18,7 +18,7 @@ int vboot_spl_init(struct vboot_info *vboot)
 
 	blob = bloblist_find(BLOBLISTT_VBOOT_CTX, sizeof(*blob));
 	if (!blob)
-		return log_msg_ret("Cannot set up vboot context", -ENOENT);
+		return log_msg_ret("Cannot find bloblist", -ENOENT);
 	vboot->blob = blob;
 	ctx = &blob->ctx;
 	vboot->ctx = ctx;
