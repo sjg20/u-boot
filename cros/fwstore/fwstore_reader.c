@@ -50,7 +50,7 @@ int fwstore_reader_restrict(struct udevice *dev, int offset, int size)
 	struct fwstore_reader_platdata *plat = dev_get_platdata(dev);
 
 	if (offset < 0 || offset >= plat->size)
-		return -EINVAL;
+		return log_ret(-EINVAL);
 	if (offset + size > plat->size)
 		size = plat->size - offset;
 

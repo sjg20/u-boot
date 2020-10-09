@@ -175,7 +175,7 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 	ret = fwstore_reader_restrict(fw_main, 0, expected_size);
 	if (ret) {
 		log_err("Unable to restrict firmware size\n");
-		return ret;
+		return log_msg_ret("restrict", ret);
 	}
 
 	/* Extend over the body */

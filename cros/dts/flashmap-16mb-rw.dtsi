@@ -75,7 +75,7 @@
 			u-boot,dm-pre-reloc;
 			type = "section";
 			label-prefix = "rw-b-";
-			size = <0x3c0000>;
+			align = <0x100000>;
 			block-offset = /bits/ 64 <0x00084400>;
 
 			vblock {

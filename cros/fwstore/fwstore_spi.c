@@ -5,6 +5,7 @@
  * Copyright 2018 Google LLC
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_CROS_FWSTORE
 
 #include <common.h>
@@ -36,14 +37,14 @@ static int border_check(struct udevice *sf, uint offset, uint count)
 
 	if (offset >= flash->size) {
 		log_debug("at EOF: offset=%x, size=%x\n", offset, flash->size);
-		return -ESPIPE;
+		return log_msg_ret("eof", -ESPIPE);
 	}
 
 	/* max_offset will be less than offset iff overflow occurred */
 	if (max_offset < offset || max_offset > flash->size) {
 		log_debug("exceed range offset=%x, max_offset=%x, flash->size=%x\n",
 			  offset, max_offset, flash->size);
-		return -ERANGE;
+		return log_msg_ret("range", -ERANGE);
 	}
 
 	return 0;
