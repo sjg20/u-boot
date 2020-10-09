@@ -17,7 +17,7 @@
 
 	chromeos-config {
 		u-boot,dm-pre-reloc;
-		detachable-ui;
+		/*detachable-ui;*/
 		recovery-mode-mrc-cache;
 
 		/* Kernel start address and size */

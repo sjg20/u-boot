@@ -50,6 +50,10 @@ int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
 	if (entry->compress_algo == FMAP_COMPRESS_LZ4) {
 		size_t out_size = buf_size;
 
+		log_info("Decompress lz4 length=%x, unc=%x, buf_size=%x, start=%p\n",
+			 entry->length, entry->unc_length, buf_size, start);
+		print_buffer(0, start, 1, 0x80, 0);
+		start += sizeof(u32);	/* skip uncompressed size */
 		ret = ulz4fn(start, entry->length, buf, &out_size);
 		if (ret)
 			return log_msg_ret("decompress lz4", ret);
@@ -84,8 +88,8 @@ int fwstore_get_reader_dev(struct udevice *fwstore, int offset, int size,
 int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
 		       u8 **imagep, int *image_sizep)
 {
-	void *data, *buf;
-	size_t buf_size;
+	void *data, *buf, *in;
+	size_t buf_size, comp_len;
 	int ret;
 
 	if (!entry->length)
@@ -107,7 +111,12 @@ int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
 		buf = malloc(buf_size);
 		if (!buf)
 			return log_msg_ret("allocate decomp buf", -ENOMEM);
-		ret = ulz4fn(data, entry->length, buf, &buf_size);
+		log_info("Decompress lz4 length=%x, buf_size=%zx\n",
+			 entry->length, buf_size);
+		print_buffer(0, data, 1, 0x80, 0);
+		comp_len = *(u32 *)data;
+		in = data + sizeof(u32);	/* skip uncompressed size */
+		ret = ulz4fn(in, comp_len, buf, &buf_size);
 		if (ret)
 			return log_msg_ret("decompress lz4", ret);
 		*imagep = buf;

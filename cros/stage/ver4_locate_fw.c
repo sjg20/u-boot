@@ -184,8 +184,8 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 
 		bootstage_start(BOOTSTAGE_ACCUM_VBOOT_FIRMWARE_READ, NULL);
 		nbytes = misc_read(fw_main, -1, block, TODO_BLOCK_SIZE);
-		log_debug("blk %x: read %x:\n", blk, nbytes);
-		print_buffer(0, block, 1, nbytes > 0x20 ? 0x20 : nbytes, 0);
+// 		log_debug("blk %x: read %x:\n", blk, nbytes);
+// 		print_buffer(0, block, 1, nbytes > 0x20 ? 0x20 : nbytes, 0);
 		bootstage_accum(BOOTSTAGE_ACCUM_VBOOT_FIRMWARE_READ);
 		if (nbytes < 0)
 			return log_msg_ret("Read fwstore", nbytes);

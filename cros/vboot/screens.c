@@ -95,7 +95,7 @@ struct menu {
 	u32 count;
 };
 
-static int load_archive(const char *str, struct directory **dest)
+static int load_archive(const char *locale_name, struct directory **dest)
 {
 	struct vboot_info *vboot = vboot_get();
 	struct fmap_entry fentry;
@@ -104,9 +104,10 @@ static int load_archive(const char *str, struct directory **dest)
 	int size, ret, i;
 	u8 *data;
 
-	ret = cros_ofnode_find_locale(str, &fentry);
+	log_info("Load locale file '%s'\n", locale_name);
+	ret = cros_ofnode_find_locale(locale_name, &fentry);
 	if (ret) {
-		log_err("Cannot read file '%s'\n", str);
+		log_err("Cannot read file '%s'\n", locale_name);
 		return VBERROR_INVALID_BMPFV;
 	}
 
@@ -1177,20 +1178,20 @@ static int vboot_init_locale(struct vboot_info *vboot)
 
 	ret = cros_ofnode_find_locale("locales", &fentry);
 	if (ret)
-		return log_msg_ret("Cannot read locales list\n", ret);
+		return log_msg_ret("find locales\n", ret);
 
 	locale_data.count = 0;
 
 	/* Load locale list */
 	ret = fwstore_load_image(vboot->fwstore, &fentry, &locales, &size);
 	if (ret)
-		return log_msg_ret("locale list not found", ret);
+		return log_msg_ret("read locales", ret);
 
 	/* Copy the file and null-terminate it */
 	loc_start = malloc(size + 1);
 	if (!loc_start) {
 		free(locales);
-		return log_msg_ret("cannot allocate locales", -ENOMEM);
+		return log_msg_ret("locales", -ENOMEM);
 	}
 	memcpy(loc_start, locales, size);
 	loc_start[size] = '\0';
