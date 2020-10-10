@@ -12,6 +12,7 @@
 		/* Kernel start address and size */
 		kernel-addr = <0x01008000 0x2000000>;
 		ec-software-sync;
+		resume-path-same-as-boot;
 	};
 
 	chromeos {

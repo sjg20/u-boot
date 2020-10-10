@@ -7,6 +7,8 @@
 #define LOG_DEBUG
 #define LOG_CATEGORY LOGC_VBOOT
 
+#define NEED_VB20_INTERNALS
+
 #include <common.h>
 #include <ec_commands.h>
 #include <misc.h>
@@ -16,6 +18,7 @@
 #include <cros/fwstore.h>
 #include <cros/nvdata.h>
 #include <cros/vboot.h>
+#include <vb2_api.h>
 
 /* The max hash size to expect is for SHA512 */
 #define VBOOT_MAX_HASH_SIZE	VB2_SHA512_DIGEST_SIZE
@@ -178,6 +181,12 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 		return log_msg_ret("restrict", ret);
 	}
 
+	struct vb2_shared_data *sd = vb2_get_sd(ctx);
+	struct vb2_digest_context *dc = (struct vb2_digest_context *)
+		(ctx->workbuf + sd->workbuf_hash_offset);
+
+	printf("extend, ctx=%p, sd=%p, dc=%p, sd->workbuf_hash_size=%x\n",
+	       ctx, sd, dc, sd->workbuf_hash_size);
 	/* Extend over the body */
 	for (blk = 0; ; blk++) {
 		int nbytes;
@@ -185,12 +194,16 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 		bootstage_start(BOOTSTAGE_ACCUM_VBOOT_FIRMWARE_READ, NULL);
 		nbytes = misc_read(fw_main, -1, block, TODO_BLOCK_SIZE);
 // 		log_debug("blk %x: read %x:\n", blk, nbytes);
-// 		print_buffer(0, block, 1, nbytes > 0x20 ? 0x20 : nbytes, 0);
+#if 0
+		print_buffer(blk * TODO_BLOCK_SIZE, block, 1,
+			     nbytes /* > 0x20 ? 0x20 : nbytes*/, 0);
+#endif
 		bootstage_accum(BOOTSTAGE_ACCUM_VBOOT_FIRMWARE_READ);
 		if (nbytes < 0)
 			return log_msg_ret("Read fwstore", nbytes);
 		else if (!nbytes)
 			break;
+// 		printf("   - got %x\n", nbytes);
 
 		ret = vb2api_extend_hash(ctx, block, nbytes);
 		if (ret)
