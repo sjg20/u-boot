@@ -142,6 +142,34 @@ static inline enum u_boot_phase spl_prev_phase(void)
 #endif
 }
 
+static inline enum u_boot_phase spl_next_phase(void)
+{
+#ifdef CONFIG_TPL_BUILD
+	return IS_ENABLED(CONFIG_VPL) ? PHASE_VPL : PHASE_SPL;
+#elif defined(CONFIG_VPL_BUILD)
+	return PHASE_SPL;
+#else
+	return PHASE_BOARD_F;
+#endif
+}
+
+static inline const char *spl_phase_name(enum u_boot_phase phase)
+{
+	switch (phase) {
+	case PHASE_TPL:
+		return "TPL";
+	case PHASE_VPL:
+		return "VPL";
+	case PHASE_SPL:
+		return "SPL";
+	case PHASE_BOARD_F:
+	case PHASE_BOARD_R:
+		return "U-Boot";
+	default:
+		return "phase?";
+	}
+}
+
 /* A string name for SPL or TPL */
 #ifdef CONFIG_SPL_BUILD
 # ifdef CONFIG_TPL_BUILD

@@ -112,12 +112,8 @@ int spl_spi_load_image(void)
 
 void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 {
-	if (IS_ENABLED(CONFIG_VPL))
-		debug("Jumping to U-Boot VPL at %lx\n",
-		      (ulong)spl_image->entry_point);
-	else
-		debug("Jumping to U-Boot SPL at %lx\n",
-		      (ulong)spl_image->entry_point);
+	debug("Jumping to %s at %lx\n", spl_phase_name(spl_next_phase()),
+	      (ulong)spl_image->entry_point);
 	jump_to_spl(spl_image->entry_point);
 	hang();
 }

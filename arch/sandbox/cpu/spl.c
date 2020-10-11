@@ -64,12 +64,13 @@ void spl_board_init(void)
 		ret = dm_test_main(state->select_unittests);
 		/* continue execution into U-Boot */
 	}
-
+/*
 	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
 		void cros_do_stage(void);
 
 		cros_do_stage();
 	}
+*/
 }
 
 void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)

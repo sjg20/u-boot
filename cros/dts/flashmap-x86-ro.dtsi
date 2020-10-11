@@ -81,6 +81,7 @@
 		vpl {
 			type = "section";
 			u-boot-vpl-nodtb {
+				spl-pad;
 			};
 			u-boot-vpl-dtb {
 			};

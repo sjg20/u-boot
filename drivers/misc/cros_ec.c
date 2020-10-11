@@ -1289,9 +1289,7 @@ int cros_ec_check_feature(struct udevice *dev, int feature)
 	struct ec_response_get_features r;
 	int rv;
 
-	log_info("start");
 	rv = ec_command(dev, EC_CMD_GET_FEATURES, 0, &r, sizeof(r), NULL, 0);
-	log_info("rv = %d", rv);
 	if (rv)
 		return rv;
 
@@ -1359,6 +1357,7 @@ bool cros_ec_is_uhepi_supported(struct udevice *dev)
 #define UHEPI_NOT_SUPPORTED 2
 	static int uhepi_support;
 
+	printf("uhepi_support=%d\n", uhepi_support);
 	if (!uhepi_support) {
 		uhepi_support = cros_ec_check_feature(dev,
 			EC_FEATURE_UNIFIED_WAKE_MASKS) > 0 ? UHEPI_SUPPORTED :
