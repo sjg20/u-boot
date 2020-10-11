@@ -76,12 +76,16 @@ __weak void board_init_f_init_stack_protection(void)
 
 ulong board_init_f_alloc_reserve(ulong top)
 {
+	printch('x');
 	/* Reserve early malloc arena */
 #if CONFIG_VAL(SYS_MALLOC_F_LEN)
 	top -= CONFIG_VAL(SYS_MALLOC_F_LEN);
 #endif
 	/* LAST : reserve GD (rounded up to a multiple of 16 bytes) */
 	top = rounddown(top-sizeof(struct global_data), 16);
+	printch(' ');
+	printhex8(top);
+	printch(' ');
 
 	return top;
 }
@@ -136,20 +140,27 @@ void board_init_f_init_reserve(ulong base)
 	 * clear GD entirely and set it up.
 	 * Use gd_ptr, as gd may not be properly set yet.
 	 */
+	printch('!');
+	printhex8(base);
+	printch(' ');
 
 	gd_ptr = (struct global_data *)base;
 	/* zero the area */
+	printch('#');
 	memset(gd_ptr, '\0', sizeof(*gd));
 	/* set GD unless architecture did it already */
+	printch('a');
 #if !defined(CONFIG_ARM)
 	arch_setup_gd(gd_ptr);
 #endif
+	printch('b');
 
 	if (CONFIG_IS_ENABLED(SYS_REPORT_STACK_F_USAGE))
 		board_init_f_init_stack_protection_addr(base);
 
 	/* next alloc will be higher by one GD plus 16-byte alignment */
 	base += roundup(sizeof(struct global_data), 16);
+	printch('c');
 
 	/*
 	 * record early malloc arena start.
@@ -160,6 +171,7 @@ void board_init_f_init_reserve(ulong base)
 	/* go down one 'early malloc arena' */
 	gd->malloc_base = base;
 #endif
+	printch('d');
 
 	if (CONFIG_IS_ENABLED(SYS_REPORT_STACK_F_USAGE))
 		board_init_f_init_stack_protection();

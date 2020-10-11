@@ -23,14 +23,15 @@
  * Enable this to read into RAM. If undefined, it read directly from FLASH,
  * which only works if flash is memory-mapped, as on x86.
  */
-#define USE_RAM		!IS_ENABLED(CONFIG_X86)
+#define USE_RAM		true
+//!IS_ENABLED(CONFIG_X86)
 
 int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry)
 {
 	struct spl_image_info *spl_image = vboot->spl_image;
 	int ret;
 #if USE_RAM
-	u32 addr = CONFIG_SYS_TEXT_BASE;
+	u32 addr = CONFIG_SPL_TEXT_BASE;
 	char *buf = (char *)(ulong)addr;
 #else
 	ulong mask = CONFIG_ROM_SIZE - 1;
@@ -62,8 +63,10 @@ int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry)
 #else
 	log_info("Locating firmware offset %x (rom_offset %x, addr %x, size %x)\n",
 		 entry->offset, rom_offset, addr, entry->length);
-	print_buffer(addr, (void *)addr, 1, 0x20, 0);
 #endif
+	printf("sp %p, pc %p, spl_image %p\n", &addr, vboot_jump, spl_image);
+	print_buffer(addr, (void *)addr, 1, 0x20, 0);
+	cpu_flush_l1d_to_l2();
 	spl_image->size = entry->length;
 	spl_image->entry_point = addr;
 	spl_image->load_addr = addr;
