@@ -83,6 +83,7 @@ enum tpm2_command_codes {
 	TPM2_CC_HIERCHANGEAUTH	= 0x0129,
 	TPM2_CC_NV_DEFINE_SPACE	= 0x012a,
 	TPM2_CC_PCR_SETAUTHPOL	= 0x012c,
+	TPM2_CC_WRITELOCK	= 0x0138.
 	TPM2_CC_DAM_RESET	= 0x0139,
 	TPM2_CC_DAM_PARAMETERS	= 0x013a,
 	TPM2_CC_NV_READ         = 0x014e,
@@ -379,5 +380,7 @@ u32 tpm2_pcr_setauthvalue(struct udevice *dev, const char *pw,
  * @return return code of the operation
  */
 u32 tpm2_get_random(struct udevice *dev, void *data, u32 count);
+
+u32 tpm2_write_lock(struct udevice *dev, u32 index);
 
 #endif /* __TPM_V2_H */

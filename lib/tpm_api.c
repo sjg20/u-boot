@@ -89,7 +89,7 @@ u32 tpm_clear_and_reenable(struct udevice *dev)
 	return TPM_SUCCESS;
 }
 
-u32 tpm_nv_set_locked(struct udevice *dev)
+u32 tpm_nv_enable_locking(struct udevice *dev)
 {
 	if (is_tpm1(dev))
 		return tpm1_nv_define_space(dev, TPM_NV_INDEX_LOCK, 0, 0);
@@ -119,14 +119,26 @@ u32 tpm_set_global_lock(struct udevice *dev)
 	return tpm_nv_write_value(dev, TPM_NV_INDEX_0, NULL, 0);
 }
 
+u32 tpm_write_lock(struct udevice *dev, u32 index)
+{
+	if (is_tpm1(dev))
+		return -ENOSYS;
+	else
+		return tpm2_write_lock(dev, index);
+}
+
 u32 tpm_pcr_extend(struct udevice *dev, u32 index, const void *in_digest,
 		   void *out_digest)
 {
+	printf("%s: func %d\n", __func__, is_tpm1(dev));
 	if (is_tpm1(dev)) {
 		return tpm1_pcr_extend(dev, index, in_digest, out_digest);
 	} else {
-		if (out_digest)
-			return -EINVAL;
+		printf("%s: 1\n", __func__);
+// 		if (out_digest)
+// 			return -EINVAL;
+		printf("%s: 1\n", __func__);
+		printf("%s: calling func %d\n", __func__, is_tpm1(dev));
 		return tpm2_pcr_extend(dev, index, in_digest);
 	}
 }

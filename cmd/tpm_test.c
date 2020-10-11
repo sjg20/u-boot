@@ -239,7 +239,7 @@ static void initialise_spaces(struct udevice *dev)
 	uint32_t perm = TPM_NV_PER_WRITE_STCLEAR | TPM_NV_PER_PPWRITE;
 
 	printf("\tInitialising spaces\n");
-	tpm_nv_set_locked(dev);  /* useful only the first time */
+	tpm_nv_enable_locking(dev);  /* useful only the first time */
 	tpm1_nv_define_space(dev, INDEX0, perm, 4);
 	tpm_nv_write_value(dev, INDEX0, (uint8_t *)&zero, 4);
 	tpm1_nv_define_space(dev, INDEX1, perm, 4);

@@ -566,7 +566,7 @@ u32 tpm1_get_random(struct udevice *dev, void *data, u32 count);
 u32 tpm1_finalise_physical_presence(struct udevice *dev);
 
 /**
- * tpm_nv_set_locked() - lock the non-volatile space
+ * tpm_nv_enable_locking() - lock the non-volatile space
  *
  * @param dev		TPM device
  * @return return code of the operation (0 = success)

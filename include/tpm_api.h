@@ -287,12 +287,12 @@ u32 tpm_get_random(struct udevice *dev, void *data, u32 count);
 u32 tpm_finalise_physical_presence(struct udevice *dev);
 
 /**
- * tpm_nv_set_locked() - lock the non-volatile space
+ * tpm_nv_enable_locking() - lock the non-volatile space
  *
  * @param dev		TPM device
  * @return return code of the operation (0 = success)
  */
-u32 tpm_nv_set_locked(struct udevice *dev);
+u32 tpm_nv_enable_locking(struct udevice *dev);
 
 /**
  * tpm_set_global_lock() - set the global lock
@@ -303,6 +303,15 @@ u32 tpm_nv_set_locked(struct udevice *dev);
 u32 tpm_set_global_lock(struct udevice *dev);
 
 /**
+ * tpm_write_lock() - lock the non-volatile space
+ *
+ * @param dev		TPM device
+ * @param index		Index of space to lock
+ * @return return code of the operation (0 = success)
+ */
+u32 tpm_write_lock(struct udevice *dev, u32 index);
+
+/**
  * tpm_resume() - start up the TPM from resume (after suspend)
  *
  * @param dev		TPM device
@@ -311,3 +320,4 @@ u32 tpm_set_global_lock(struct udevice *dev);
 u32 tpm_resume(struct udevice *dev);
 
 #endif /* __TPM_APL_H */
+w

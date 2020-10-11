@@ -165,13 +165,16 @@ static int tpm_secdata_setup(struct udevice *dev, uint index, uint attr,
 			     int nv_policy_size)
 {
 	struct udevice *tpm = dev_get_parent(dev);
+	enum tpm_version version = tpm_get_version(tpm);
 	int ret;
 
-	if (IS_ENABLED(CONFIG_TPM_V1) && tpm_get_version(dev) == TPM_V1)
+	if (IS_ENABLED(CONFIG_TPM_V1) && version == TPM_V1)
 		ret = safe_define_space(tpm, index, attr, size);
-	else if (IS_ENABLED(CONFIG_TPM_V2) )
+	else if (IS_ENABLED(CONFIG_TPM_V2) && version == TPM_V2)
 		ret = set_space(dev, index, attr, size, nv_policy,
 				nv_policy_size);
+	else
+		return log_msg_ret("no tpm", -ENOENT);
 	if (ret != TPM_SUCCESS) {
 		log_err("Failed to setup secdata (err=%x)\n", ret);
 		return -EIO;
@@ -185,11 +188,7 @@ static int tpm_secdata_lock(struct udevice *dev, uint index)
 	struct udevice *tpm = dev_get_parent(dev);
 	enum tpm_version version = tpm_get_version(tpm);
 
-	if (version == TPM_V2) {
-		printf("TPM v2 not supported\n");
-		/* TODO: return tlcl_lock_nv_write(dev, index) */
-		return -ENOTSUPP;
-	} else {
+	if (IS_ENABLED(CONFIG_TPM_V1) && version == TPM_V1) {
 		/*
 		 * We only have a global lock. Lock it when the firmware space
 		 * is requested, and do nothing otherwise. This ensures that the
@@ -197,6 +196,10 @@ static int tpm_secdata_lock(struct udevice *dev, uint index)
 		 */
 		if (index == CROS_NV_SECDATA)
 			return tpm_set_global_lock(tpm);
+	} else if (IS_ENABLED(CONFIG_TPM_V2) && version == TPM_V2) {
+		return log_msg_retz(tpm2_write_lock(ttpm, index));
+	} else {
+		return log_msg_ret("no tpm", -ENOENT);
 	}
 
 	return 0;

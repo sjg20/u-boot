@@ -29,7 +29,6 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMPCR);
 
 	/* Lock TPM */
-
 	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMLOCK);
 	ret = cros_nvdata_lock_walk(CROS_NV_SECDATA);
 	if (ret) {
