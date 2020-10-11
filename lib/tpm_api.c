@@ -130,17 +130,10 @@ u32 tpm_write_lock(struct udevice *dev, u32 index)
 u32 tpm_pcr_extend(struct udevice *dev, u32 index, const void *in_digest,
 		   void *out_digest)
 {
-	printf("%s: func %d\n", __func__, is_tpm1(dev));
-	if (is_tpm1(dev)) {
+	if (is_tpm1(dev))
 		return tpm1_pcr_extend(dev, index, in_digest, out_digest);
-	} else {
-		printf("%s: 1\n", __func__);
-// 		if (out_digest)
-// 			return -EINVAL;
-		printf("%s: 1\n", __func__);
-		printf("%s: calling func %d\n", __func__, is_tpm1(dev));
+	else
 		return tpm2_pcr_extend(dev, index, in_digest);
-	}
 }
 
 u32 tpm_pcr_read(struct udevice *dev, u32 index, void *data, size_t count)

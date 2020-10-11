@@ -320,4 +320,4 @@ u32 tpm_write_lock(struct udevice *dev, u32 index);
 u32 tpm_resume(struct udevice *dev);
 
 #endif /* __TPM_APL_H */
-w
+

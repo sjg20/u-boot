@@ -133,7 +133,6 @@ int vboot_ver_init(struct vboot_info *vboot)
 	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, ctx->secdata,
 				    sizeof(ctx->secdata));
 	printf("cros_nvdata_read_walk ret=%d\n", ret);
-	dm_dump_all();
 	if (ret == -ENOENT)
 		printf("SKIP factory init\n");
 // 		ret = cros_tpm_factory_initialise(vboot);

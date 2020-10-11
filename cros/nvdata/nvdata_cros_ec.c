@@ -12,7 +12,7 @@
 #include <log.h>
 #include <cros/nvdata.h>
 
-static int cros_ec_nvdata_read(struct udevice *dev, uint index, u8 *data,
+static int cros_ec_nvdata_read(struct udevice *dev, enum cros_nvdata_type type, u8 *data,
 			       int size)
 {
 	struct udevice *cros_ec = dev_get_parent(dev);
@@ -25,7 +25,7 @@ static int cros_ec_nvdata_read(struct udevice *dev, uint index, u8 *data,
 	return cros_ec_read_nvdata(cros_ec, data, size);
 }
 
-static int cros_ec_nvdata_write(struct udevice *dev, uint index,
+static int cros_ec_nvdata_write(struct udevice *dev, enum cros_nvdata_type type,
 				const u8 *data, int size)
 {
 	struct udevice *cros_ec = dev_get_parent(dev);

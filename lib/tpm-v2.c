@@ -605,19 +605,17 @@ u32 tpm2_get_random(struct udevice *dev, void *data, u32 count)
 	return 0;
 }
 
-	nv_wl.nvIndex = HR_NV_INDEX + index;
-
 u32 tpm2_write_lock(struct udevice *dev, u32 index)
 {
 	u8 command_v2[COMMAND_BUFFER_SIZE] = {
 		/* header 10 bytes */
 		tpm_u16(TPM2_ST_SESSIONS),	/* TAG */
-		tpm_u32(offset + nv_policy_size), /* Length */
-		tpm_u32(TPM2_CC_WRITELOCK), /* Command code */
+		tpm_u32(10 + 8 + 13), /* Length */
+		tpm_u32(TPM2_CC_NV_WRITELOCK), /* Command code */
 
 		/* handles 8 bytes */
 		tpm_u32(TPM2_RH_PLATFORM),	/* Primary platform seed */
-		tpm_u32(index),			/* Password authorisation */
+		tpm_u32(HR_NV_INDEX + index),	/* Password authorisation */
 
 		/* session header 9 bytes */
 		tpm_u32(9),			/* Header size */
@@ -625,18 +623,7 @@ u32 tpm2_write_lock(struct udevice *dev, u32 index)
 		tpm_u16(0),			/* nonce_size */
 		0,				/* session_attrs */
 		tpm_u16(0),			/* auth_size */
-
-		/* message 14 bytes + policy */
-		tpm_u16(12 + nv_policy_size),	/* size */
-		tpm_u32(space_index),
-		tpm_u16(TPM2_ALG_SHA256),
-		tpm_u32(nv_attributes),
-		tpm_u16(nv_policy_size),
-		/* nv_policy */
 	};
-		struct tpm2_nv_write_lock_cmd nv_wl;
 
-	nv_wl.nvIndex = HR_NV_INDEX + index;
-	return tpm_get_response_code(TPM2_NV_WriteLock, &nv_wl);
-	return 0;
+	return tpm_sendrecv_command(dev, command_v2, NULL, NULL);
 }

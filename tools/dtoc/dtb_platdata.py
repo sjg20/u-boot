@@ -631,7 +631,7 @@ class DtbPlatdata(object):
         struct_name, _ = self.get_normalized_compat_name(node)
         var_name = conv_name_to_c(node.name)
         self.buf('/* Node %s index %d */\n' % (node.path, node.idx))
-        self.buf('static struct %s%s %s%s = {\n' %
+        self.buf('static struct %s%s __attribute__((section (".data.of-platdata"))) %s%s = {\n' %
                  (STRUCT_PREFIX, struct_name, VAL_PREFIX, var_name))
         for pname in sorted(node.props):
             prop = node.props[pname]

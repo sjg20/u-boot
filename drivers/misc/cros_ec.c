@@ -1289,7 +1289,9 @@ int cros_ec_check_feature(struct udevice *dev, int feature)
 	struct ec_response_get_features r;
 	int rv;
 
+	log_info("start");
 	rv = ec_command(dev, EC_CMD_GET_FEATURES, 0, &r, sizeof(r), NULL, 0);
+	log_info("rv = %d", rv);
 	if (rv)
 		return rv;
 
@@ -1384,6 +1386,8 @@ static int cros_ec_get_mask(struct udevice *dev, uint type)
 
 static int cros_ec_clear_mask(struct udevice *dev, uint type, u64 mask)
 {
+	log_info("dev=%p %s\n", dev, dev->name);
+	log_info("UHEPI %d\n", cros_ec_is_uhepi_supported(dev));
 	if (cros_ec_is_uhepi_supported(dev))
 		return cros_ec_uhepi_cmd(dev, type, EC_HOST_EVENT_CLEAR, &mask);
 
@@ -1400,7 +1404,7 @@ uint64_t cros_ec_get_events_b(struct udevice *dev)
 
 int cros_ec_clear_events_b(struct udevice *dev, uint64_t mask)
 {
-	log_debug("Chrome EC: clear events_b mask to 0x%016llx\n", mask);
+	log_info("Chrome EC: clear events_b mask to 0x%016llx\n", mask);
 
 	return cros_ec_clear_mask(dev, EC_HOST_EVENT_B, mask);
 }

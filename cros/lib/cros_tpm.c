@@ -107,17 +107,17 @@ int cros_tpm_extend_pcrs(struct vboot_info *vboot)
 	return 0;
 }
 
-static int setup_space(struct udevice *dev, enum cros_nvdata_index index,
+static int setup_space(struct udevice *dev, enum cros_nvdata_type type,
 		       uint attr, const void *nv_policy, uint nv_policy_size,
 		       const void *data, uint size)
 {
 	int ret;
 
-	ret = cros_nvdata_setup_walk(index, attr, size, nv_policy,
+	ret = cros_nvdata_setup_walk(type, attr, size, nv_policy,
 				     nv_policy_size);
 	if (ret)
 		return ret;
-	ret = cros_nvdata_write_walk(index, data, size);
+	ret = cros_nvdata_write_walk(type, data, size);
 	if (ret)
 		return ret;
 
