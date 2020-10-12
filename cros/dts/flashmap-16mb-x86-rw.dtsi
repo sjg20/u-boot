@@ -45,9 +45,16 @@
 			type = "u-boot-spl";
 		};
 		u-boot {
+			type = "section";
+			align = <0x1000>;
 			u-boot,dm-pre-reloc;
-			type = "u-boot";
 			compress = "lz4";
+			section {
+				u-boot-nodtb {
+				};
+				u-boot-dtb {
+				};
+			};
 			hash {
 				u-boot,dm-pre-reloc;
 				algo = "sha256";
@@ -99,12 +106,19 @@
 			type = "u-boot-spl";
 		};
 		u-boot {
+			type = "section";
+			align = <0x1000>;
 			u-boot,dm-pre-reloc;
-			type = "u-boot";
 			compress = "lz4";
-			hash {
-				u-boot,dm-pre-reloc;
-				algo = "sha256";
+			section {
+				u-boot-nodtb {
+				};
+				u-boot-dtb {
+				};
+				hash {
+					u-boot,dm-pre-reloc;
+					algo = "sha256";
+				};
 			};
 		};
 		cros-ec-rw {
