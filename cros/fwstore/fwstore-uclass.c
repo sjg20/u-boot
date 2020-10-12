@@ -32,28 +32,29 @@ int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
 	int ret;
 
 	if (!ops->read)
-		return -ENOSYS;
+		return log_ret(-ENOSYS);
 
 	/* Read the data into the buffer */
 	if (entry->compress_algo == FMAP_COMPRESS_NONE) {
 		start = buf;
 	} else {
 		if (buf_size < entry->unc_length)
-			return -ENOSPC;
-		start = buf + (buf_size - entry->unc_length);
+			return log_ret(-ENOSPC);
+		start = buf + ALIGN(buf_size - entry->unc_length, 4);
 	}
 	ret = ops->read(dev, entry->offset, entry->length, start);
 	if (ret)
 		return log_ret(ret);
 
 	/* Decompress if needed */
+	printf("entry->compress_algo %d\n", entry->compress_algo);
 	if (entry->compress_algo == FMAP_COMPRESS_LZ4) {
 		size_t out_size = buf_size;
 
 		log_info("Decompress lz4 length=%x, unc=%x, buf_size=%x, start=%p\n",
 			 entry->length, entry->unc_length, buf_size, start);
 		print_buffer(0, start, 1, 0x80, 0);
-		start += sizeof(u32);	/* skip uncompressed size */
+		start += sizeof(u32);	/* skip compressed size */
 		ret = ulz4fn(start, entry->length, buf, &out_size);
 		if (ret)
 			return log_msg_ret("decompress lz4", ret);

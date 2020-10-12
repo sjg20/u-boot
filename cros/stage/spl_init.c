@@ -28,10 +28,10 @@ int vboot_spl_init(struct vboot_info *vboot)
 	ret = uclass_first_device_err(UCLASS_CROS_FWSTORE, &vboot->fwstore);
 	if (ret)
 		return log_msg_ret("Cannot set up fwstore", ret);
-#if defined(CONFIG_SANDBOX) && CONFIG_IS_ENABLED(CROS_EC)
+
 	/* Probe the EC so that it will read and write its state */
-	uclass_get_device(UCLASS_CROS_EC, 0, &vboot->cros_ec);
-#endif
+	if (IS_ENABLED(CONFIG_SANDBOX) && CONFIG_IS_ENABLED(CROS_EC))
+		uclass_get_device(UCLASS_CROS_EC, 0, &vboot->cros_ec);
 
 	return 0;
 }

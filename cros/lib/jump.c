@@ -12,6 +12,7 @@
 #include <dm.h>
 #include <image.h>
 #include <log.h>
+#include <mapmem.h>
 #include <os.h>
 #include <spi.h>
 #include <spl.h>
@@ -31,8 +32,12 @@ int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry)
 	struct spl_image_info *spl_image = vboot->spl_image;
 	int ret;
 #if USE_RAM
-	u32 addr = CONFIG_SPL_TEXT_BASE;
-	char *buf = (char *)(ulong)addr;
+	u32 addr;
+	char *buf;
+
+	addr = spl_next_phase() == PHASE_SPL ? CONFIG_SPL_TEXT_BASE :
+		 CONFIG_SYS_TEXT_BASE;
+	buf = map_sysmem(addr, 0);
 #else
 	ulong mask = CONFIG_ROM_SIZE - 1;
 	struct udevice *sf;
@@ -56,8 +61,9 @@ int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry)
 #if USE_RAM
 	log_info("Reading firmware offset %x (addr %x, size %x)\n",
 		 entry->offset, addr, entry->length);
-	ret = cros_fwstore_read(vboot->fwstore, entry->offset, entry->length,
-				buf);
+	/* TODO(sjg@chromium.org): Find out the real end of the buffer */
+	ret = fwstore_read_decomp(vboot->fwstore, entry, buf,
+				  entry->length * 3);
 	if (ret)
 		return log_msg_ret("Read fwstore", ret);
 #else
@@ -66,7 +72,7 @@ int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry)
 #endif
 	printf("sp %p, pc %p, spl_image %p\n", &addr, vboot_jump, spl_image);
 	print_buffer(addr, (void *)addr, 1, 0x20, 0);
-	cpu_flush_l1d_to_l2();
+// 	cpu_flush_l1d_to_l2();
 	spl_image->size = entry->length;
 	spl_image->entry_point = addr;
 	spl_image->load_addr = addr;

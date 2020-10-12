@@ -297,7 +297,6 @@ static int cros_load_image_spl(struct spl_image_info *spl_image,
 	struct vboot_info *vboot;
 	int ret;
 
-	printf("spl_load image\n");
 	ret = vboot_alloc(&vboot);
 	if (ret)
 		return ret;
