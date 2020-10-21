@@ -7,4 +7,5 @@
 # MRC cache files are always binary data
 *mrc-cache binary
 *CACHE binary
+*.dat binary
 
