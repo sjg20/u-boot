@@ -585,3 +585,21 @@ Series-changes: 2
         self.assertEqual([
             "Tag 'Series-changes' should be before sign-off / Change-Id"],
             pstrm.commit.warn)
+
+    @unittest.skipIf(not HAVE_PYGIT2, 'Missing python3-pygit2')
+    def testNoUpstream(self):
+        """Test CountCommitsToBranch when there is no upstream"""
+        repo = self.make_git_tree()
+        target = repo.lookup_reference('refs/heads/base')
+        self.repo.checkout(target, strategy=pygit2.GIT_CHECKOUT_FORCE)
+
+        # Check that it can detect the current branch
+        try:
+            orig_dir = os.getcwd()
+            os.chdir(self.gitdir)
+            with self.assertRaises(ValueError) as e:
+                gitutil.CountCommitsToBranch(None)
+            self.assertIn("Failed to determine upstream: fatal: no upstream configured for branch 'base'",
+                          str(e.exception))
+        finally:
+            os.chdir(orig_dir)
