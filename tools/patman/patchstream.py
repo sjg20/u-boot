@@ -66,7 +66,6 @@ class PatchStream:
         self.skip_blank = False          # True to skip a single blank line
         self.found_test = False          # Found a TEST= line
         self.lines_after_test = 0        # Number of lines found after TEST=
-        self.warn = []                   # List of warnings we have collected
         self.linenum = 1                 # Output line number we are up to
         self.in_section = None           # Name of start...END section we are in
         self.notes = []                  # Series notes
@@ -82,12 +81,17 @@ class PatchStream:
         self.commit = None               # Current commit
 
     def AddWarn(self, warn):
-        """Add a new warning to report to the user
+        """Add a new warning to report to the user about the current commit
+
+        The new warning is added to the current commit if not already present.
 
         Args:
             warn: Warning to report (str)
         """
-        self.warn.append(warn)
+        if not self.commit:
+            raise ValueError('Warning outside commit: %s' % warn)
+        if warn not in self.commit.warn:
+            self.commit.warn.append(warn)
 
     def AddToSeries(self, line, name, value):
         """Add a new Series-xxx tag.
@@ -595,7 +599,7 @@ def FixPatch(backup_dir, fname, series, commit):
     if backup_dir:
         shutil.copy(fname, os.path.join(backup_dir, os.path.basename(fname)))
     shutil.move(tmpname, fname)
-    return ps.warn
+    return commit.warn
 
 def FixPatches(series, fnames):
     """Fix up a list of patches identified by filenames
