@@ -81,6 +81,14 @@ class PatchStream:
         self.signoff = []                # Contents of signoff line
         self.commit = None               # Current commit
 
+    def AddWarn(self, warn):
+        """Add a new warning to report to the user
+
+        Args:
+            warn: Warning to report (str)
+        """
+        self.warn.append(warn)
+
     def AddToSeries(self, line, name, value):
         """Add a new Series-xxx tag.
 
@@ -228,7 +236,7 @@ class PatchStream:
             # but we are already in a section, this means 'END' is missing
             # for that section, fix it up.
             if self.in_section:
-                self.warn.append("Missing 'END' in section '%s'" % self.in_section)
+                self.AddWarn("Missing 'END' in section '%s'" % self.in_section)
                 if self.in_section == 'cover':
                     self.series.cover = self.section
                 elif self.in_section == 'notes':
@@ -238,14 +246,16 @@ class PatchStream:
                     if self.is_log:
                         self.commit.notes += self.section
                 else:
-                    self.warn.append("Unknown section '%s'" % self.in_section)
+                    # This should not happen
+                    raise ValueError("Unknown section '%s'" % self.in_section)
                 self.in_section = None
                 self.skip_blank = True
                 self.section = []
             # but we are already in a change list, that means a blank line
             # is missing, fix it up.
             if self.in_change:
-                self.warn.append("Missing 'blank line' in section '%s-changes'" % self.in_change)
+                self.AddWarn("Missing 'blank line' in section '%s-changes'" %
+                             self.in_change)
                 self.FinalizeChange()
                 self.in_change = None
                 self.change_version = 0
@@ -262,7 +272,8 @@ class PatchStream:
                     if self.is_log:
                         self.commit.notes += self.section
                 else:
-                    self.warn.append("Unknown section '%s'" % self.in_section)
+                    # This should not happen
+                    raise ValueError("Unknown section '%s'" % self.in_section)
                 self.in_section = None
                 self.skip_blank = True
                 self.section = []
@@ -352,7 +363,7 @@ class PatchStream:
                 self.in_change = 'Commit'
                 self.change_version = self.ParseVersion(value, line)
             else:
-                self.warn.append('Line %d: Ignoring Commit-%s' %
+                self.AddWarn('Line %d: Ignoring Commit-%s' %
                     (self.linenum, name))
 
         # Detect the start of a new commit
@@ -367,7 +378,7 @@ class PatchStream:
             # Remove Tested-by self, since few will take much notice
             if (rtag_type == 'Tested-by' and
                     who.find(os.getenv('USER') + '@') != -1):
-                self.warn.append("Ignoring %s" % line)
+                self.AddWarn("Ignoring %s" % line)
             elif rtag_type == 'Patch-cc':
                 self.commit.AddCc(who.split(','))
             else:
@@ -384,7 +395,7 @@ class PatchStream:
             # Look for space before tab
             m = re_space_before_tab.match(line)
             if m:
-                self.warn.append('Line %d/%d has space before tab' %
+                self.AddWarn('Line %d/%d has space before tab' %
                     (self.linenum, m.start()))
 
             # OK, we have a valid non-blank line
@@ -417,8 +428,7 @@ class PatchStream:
         self.FinalizeChange()
         self.CloseCommit()
         if self.lines_after_test:
-            self.warn.append('Found %d lines after TEST=' %
-                    self.lines_after_test)
+            self.AddWarn('Found %d lines after TEST=' % self.lines_after_test)
 
     def WriteMessageId(self, outfd):
         """Write the Message-Id into the output.
@@ -493,8 +503,8 @@ class PatchStream:
                     self.blank_count += 1
                 else:
                     if self.blank_count and (line == '-- ' or match):
-                        self.warn.append("Found possible blank line(s) at "
-                                "end of file '%s'" % last_fname)
+                        self.AddWarn("Found possible blank line(s) at end of file '%s'" %
+                                     last_fname)
                     outfd.write('+\n' * self.blank_count)
                     outfd.write(line + '\n')
                     self.blank_count = 0
