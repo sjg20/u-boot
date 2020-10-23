@@ -192,9 +192,9 @@ class TestFunctional(unittest.TestCase):
         os.remove(cc_file)
 
         lines = iter(out[0].splitlines())
-        self.assertIn('1 warnings for', next(lines))
+        self.assertIn('1 warning for', next(lines))
         self.assertEqual(
-            "\t Tag 'Commit-notes' should be before sign-off / Change-Id",
+            "\tTag 'Commit-notes' should be before sign-off / Change-Id",
             next(lines))
         self.assertEqual('Cleaned %s patches' % len(series.commits),
                          next(lines))
