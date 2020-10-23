@@ -14,7 +14,6 @@ cmd/pci.c:152:11: warning: format ‘%llx’ expects argument of type
 
 Fix it with a cast.
 
-Signed-off-by: Simon Glass <sjg@chromium.org>
 Commit-changes: 2
 - Changes only for this commit
 
@@ -24,6 +23,7 @@ about some things
 from the first commit
 END
 
+Signed-off-by: Simon Glass <sjg@chromium.org>
 Commit-notes:
 Some notes about
 the first commit

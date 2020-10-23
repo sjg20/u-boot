@@ -170,6 +170,9 @@ class TestFunctional(unittest.TestCase):
                 'fred': [self.fred],
         }
 
+        # NOTE: If you change this file you must also change the patch files in
+        # the same directory, since we assume that the metadata file matches the
+        # patched. If it doesn't, this test will fail.
         text = self.GetText('test01.txt')
         series = patchstream.GetMetaDataForTest(text)
         cover_fname, args = self.CreatePatchesForTest(series)
@@ -189,6 +192,10 @@ class TestFunctional(unittest.TestCase):
         os.remove(cc_file)
 
         lines = iter(out[0].splitlines())
+        self.assertIn('1 warnings for', next(lines))
+        self.assertEqual(
+            "\t Tag 'Commit-notes' should be before sign-off / Change-Id",
+            next(lines))
         self.assertEqual('Cleaned %s patches' % len(series.commits),
                          next(lines))
         self.assertEqual('Change log missing for v2', next(lines))
@@ -563,4 +570,18 @@ diff --git a/lib/efi_loader/efi_memory.c b/lib/efi_loader/efi_memory.c
         pstrm = PatchStream.ProcessText(text)
         self.assertEqual([
             "Found possible blank line(s) at end of file 'lib/fdtdec.c'"],
+            pstrm.commit.warn)
+
+    def testTagsAfterSignoff(self):
+        """Test detection of tags after the signoff"""
+        text = '''This is a patch
+
+Signed-off-by: Terminator 2
+Series-changes: 2
+- A change
+
+'''
+        pstrm = PatchStream.ProcessText(text)
+        self.assertEqual([
+            "Tag 'Series-changes' should be before sign-off / Change-Id"],
             pstrm.commit.warn)

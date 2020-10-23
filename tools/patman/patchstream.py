@@ -79,6 +79,8 @@ class PatchStream:
         self.blank_count = 0             # Number of blank lines stored up
         self.state = STATE_MSG_HEADER    # What state are we in?
         self.commit = None               # Current commit
+        self.saw_signoff = False         # Found sign-off line for this commit
+        self.saw_change_id = False       # Found Change-Id for this commit
 
     @staticmethod
     def ProcessText(text, is_comment=False):
@@ -170,6 +172,9 @@ class PatchStream:
             self.in_section = None
             self.skip_blank = True
             self.section = []
+
+        self.saw_signoff = False
+        self.saw_change_id = False
 
     def ParseVersion(self, value, line):
         """Parse a version from a *-changes tag
@@ -331,6 +336,10 @@ class PatchStream:
         elif cover_match:
             name = cover_match.group(1)
             value = cover_match.group(2)
+            if self.saw_signoff or self.saw_change_id:
+                self.AddWarn(
+                    "Tag 'Cover-%s' should be before sign-off / Change-Id" %
+                    name)
             if name == 'letter':
                 self.in_section = 'cover'
                 self.skip_blank = False
@@ -362,6 +371,10 @@ class PatchStream:
         elif series_tag_match:
             name = series_tag_match.group(1)
             value = series_tag_match.group(2)
+            if self.saw_signoff or self.saw_change_id:
+                self.AddWarn(
+                    "Tag 'Series-%s' should be before sign-off / Change-Id" %
+                    name)
             if name == 'changes':
                 # value is the version number: e.g. 1, or 2
                 self.in_change = 'Series'
@@ -373,6 +386,7 @@ class PatchStream:
         # Detect Change-Id tags
         elif change_id_match:
             value = change_id_match.group(1)
+            self.saw_change_id = True
             if self.is_log:
                 if self.commit.change_id:
                     raise ValueError("%s: Two Change-Ids: '%s' vs. '%s'" %
@@ -384,6 +398,10 @@ class PatchStream:
         elif commit_tag_match:
             name = commit_tag_match.group(1)
             value = commit_tag_match.group(2)
+            if self.saw_signoff or self.saw_change_id:
+                self.AddWarn(
+                    "Tag 'Commit-%s' should be before sign-off / Change-Id" %
+                    name)
             if name == 'notes':
                 self.AddToCommit(line, name, value)
                 self.skip_blank = True
@@ -414,6 +432,7 @@ class PatchStream:
 
         # Suppress duplicate signoffs
         elif signoff_match:
+            self.saw_signoff = True
             if (self.is_log or not self.commit or
                 self.commit.CheckDuplicateSignoff(signoff_match.group(1))):
                 out = [line]
@@ -514,6 +533,8 @@ class PatchStream:
         re_fname = re.compile('diff --git a/(.*) b/.*')
 
         self.WriteMessageId(outfd)
+        self.saw_signoff = False
+        self.saw_change_id = False
 
         while True:
             line = infd.readline()
@@ -615,6 +636,7 @@ def FixPatch(backup_dir, fname, series, commit):
     infd = open(fname, 'r', encoding='utf-8')
     ps = PatchStream(series)
     ps.commit = commit
+    commit.warn = []
     ps.ProcessStream(infd, outfd)
     infd.close()
     outfd.close()

@@ -161,7 +161,8 @@ How to add tags
 ===============
 
 To make this script useful you must add tags like the following into any
-commit. Most can only appear once in the whole series.
+commit. Most can only appear once in the whole series. Tags should be placed
+before the sign-off line / Change-Id.
 
 Series-to: email / alias
 	Email address / alias to send patch series to (you can add this

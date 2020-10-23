@@ -14,7 +14,6 @@ lib/fdtdec.c:1203:8: warning: format ‘%llx’ expects argument of type
 
 Fix it with a cast.
 
-Signed-off-by: Simon Glass <sjg@chromium.org>
 Series-to: u-boot
 Series-prefix: RFC
 Series-cc: Stefan Brüns <stefan.bruens@rwth-aachen.de>
@@ -40,6 +39,7 @@ This is a test of how the cover
 letter
 works
 END
+Signed-off-by: Simon Glass <sjg@chromium.org>
 ---
  fs/fat/fat.c                | 1 +
  lib/efi_loader/efi_memory.c | 1 +

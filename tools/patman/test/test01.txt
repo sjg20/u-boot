@@ -12,7 +12,6 @@ Date:   Sat Apr 15 15:39:08 2017 -0600
     
     Fix it with a cast.
     
-    Signed-off-by: Simon Glass <sjg@chromium.org>
     Commit-changes: 2
     - second revision change
 
@@ -22,6 +21,7 @@ Date:   Sat Apr 15 15:39:08 2017 -0600
     from the first commit
     END
     
+    Signed-off-by: Simon Glass <sjg@chromium.org>
     Commit-notes:
     Some notes about
     the first commit
@@ -41,7 +41,6 @@ Date:   Sat Apr 15 15:39:08 2017 -0600
     
     Fix it with a cast.
     
-    Signed-off-by: Simon Glass <sjg@chromium.org>
     Series-to: u-boot
     Series-prefix: RFC
     Series-cc: Stefan Brüns <stefan.bruens@rwth-aachen.de>
@@ -67,3 +66,4 @@ Date:   Sat Apr 15 15:39:08 2017 -0600
     letter
     works
     END
+    Signed-off-by: Simon Glass <sjg@chromium.org>
