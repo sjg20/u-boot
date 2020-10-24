@@ -17,6 +17,7 @@ from io import StringIO
 from patman import control
 from patman import gitutil
 from patman import patchstream
+from patman.patchstream import PatchStream
 from patman import settings
 from patman import terminal
 from patman import tools

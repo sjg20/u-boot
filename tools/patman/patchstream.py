@@ -77,7 +77,6 @@ class PatchStream:
         self.change_lines = []           # Lines of the current change
         self.blank_count = 0             # Number of blank lines stored up
         self.state = STATE_MSG_HEADER    # What state are we in?
-        self.signoff = []                # Contents of signoff line
         self.commit = None               # Current commit
 
     def AddWarn(self, warn):
