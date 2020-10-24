@@ -455,3 +455,20 @@ complicated as possible''')
             self.assertEqual(2, len(patch_files))
         finally:
             os.chdir(orig_dir)
+
+    def testTags(self):
+        """Test collection of tags in a patchstream"""
+        ed = (b'Lond Edmund Blackadd\xc3\xabr <weasel@blackadder.org'.
+              decode('utf-8'))
+        text = '''This is a patch
+
+Signed-off-by: Terminator
+Reviewed-by: Joe Bloggs <joe@napierwallies.co.nz>
+Reviewed-by: Mary Bloggs <mary@napierwallies.co.nz>
+Tested-by: %s
+''' % ed
+        pstrm = PatchStream.ProcessText(text)
+        self.assertEqual(pstrm.commit.rtags, {
+            'Reviewed-by': {'Mary Bloggs <mary@napierwallies.co.nz>',
+                            'Joe Bloggs <joe@napierwallies.co.nz>'},
+            'Tested-by': {ed}})
