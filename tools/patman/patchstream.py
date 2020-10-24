@@ -406,7 +406,7 @@ class PatchStream:
             # Remove Tested-by self, since few will take much notice
             if (rtag_type == 'Tested-by' and
                     who.find(os.getenv('USER') + '@') != -1):
-                self.AddWarn("Ignoring %s" % line)
+                self.AddWarn("Ignoring '%s'" % line)
             elif rtag_type == 'Patch-cc':
                 self.commit.AddCc(who.split(','))
             else:
