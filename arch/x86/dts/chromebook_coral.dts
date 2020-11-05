@@ -80,15 +80,17 @@
 	};
 
 	binman {
-		chrome_col80 {
-			type = "blob";
-			offset = <0xff400000>;
-			filename = "tools/logos/chrome_col80.png";
-		};
+		rom {
+			chrome_col80 {
+				type = "blob";
+				offset = <0xff400000>;
+				filename = "tools/logos/chrome_col80.png";
+			};
 
-		careena {
-			type = "blob";
-			filename = "tools/logos/careena.png";
+			careena {
+				type = "blob";
+				filename = "tools/logos/careena.png";
+			};
 		};
 	};
 
@@ -402,7 +404,7 @@
 			da_codec: da-codec {
 				reg = <0x1a>;
 				compatible = "dlg,da7219";
-\				interrupts-extended = <&acpi_gpe GPIO_116_IRQ
+				interrupts-extended = <&acpi_gpe GPIO_116_IRQ
 					(IRQ_TYPE_LEVEL_LOW | X86_IRQ_TYPE_SHARED)>;
 				acpi,name = "DLG7";
 				acpi,ddn = "Dialog Semiconductor DA7219 Audio Codec";

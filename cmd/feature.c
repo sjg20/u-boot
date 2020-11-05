@@ -55,7 +55,7 @@ int feature_run(struct udevice *dev)
 	return 0;
 }
 
-static int do_feature_run(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_feature_run(struct cmd_tbl *cmdtp, int flag, int argc,
 			  char *const argv[])
 {
 	struct udevice *dev;
@@ -88,7 +88,7 @@ static int do_feature_run(cmd_tbl_t *cmdtp, int flag, int argc,
 	return 0;
 }
 
-static int do_feature_list(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_feature_list(struct cmd_tbl *cmdtp, int flag, int argc,
 			   char *const argv[])
 {
 	struct udevice *dev;

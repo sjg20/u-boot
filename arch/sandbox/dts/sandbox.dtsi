@@ -63,6 +63,7 @@
 			 <&clk_sandbox 3>,
 			 <&clk_sandbox 2>;
 		clock-names = "fixed", "i2c", "spi", "uart2", "uart1";
+	};
 
 	gpio_a: gpios@0 {
 		u-boot,dm-pre-reloc;

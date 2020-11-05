@@ -12,7 +12,7 @@
 #include <dm.h>
 #include <mouse.h>
 
-static int do_mouse_dump(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_mouse_dump(struct cmd_tbl *cmdtp, int flag, int argc,
 			 char *const argv[])
 {
 	struct udevice *dev;

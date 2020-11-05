@@ -1,4 +1,5 @@
 #include <common.h>
+#include <log.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 

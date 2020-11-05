@@ -506,7 +506,8 @@ int gui_nuklear_render(struct udevice *dev)
 		struct udevice *vid = dev_get_parent(dev);
 		struct video_priv *upriv = dev_get_uclass_priv(vid);
 
-		memcpy(upriv->fb, priv->fb, priv->fb_size);
+		memcpy(upriv->copy_fb ? upriv->copy_fb : upriv->fb,
+		       priv->fb, priv->fb_size);
 	}
 
 	return 0;
