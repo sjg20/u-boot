@@ -55,9 +55,9 @@ struct vboot_fw_info {
  *	U-Boot slot
  */
 struct vboot_blob {
+	struct vb2_context ctx __aligned(VBOOT_CONTEXT_ALIGN);
 	struct fmap_entry spl_entry;
 	struct fmap_entry u_boot_entry;
-	struct vb2_context ctx __aligned(VBOOT_CONTEXT_ALIGN);
 };
 
 /*

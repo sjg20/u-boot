@@ -5,6 +5,8 @@
  * Copyright 2018 Google LLC
  */
 
+#define LOG_CATEGORY	UCLASS_TPM
+
 #include <common.h>
 #include <config.h>
 #include <tpm-v1.h>

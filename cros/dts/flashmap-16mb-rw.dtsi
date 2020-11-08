@@ -40,12 +40,12 @@
 				kernelkey = "kernel_subkey.vbpubk";
 				preamble-flags = <0>;
 			};
-			rw_a_spl: spl {
+			rw_a_spl: u-boot-spl {
 				u-boot,dm-pre-reloc;
 				type = "u-boot-spl-elf";
 				strip;
 			};
-			boot {
+			u-boot {
 				u-boot,dm-pre-reloc;
 				type = "u-boot-elf";
 				compress = "lz4";
@@ -75,7 +75,7 @@
 			u-boot,dm-pre-reloc;
 			type = "section";
 			label-prefix = "rw-b-";
-			size = <0x3c0000>;
+			align = <0x100000>;
 			block-offset = /bits/ 64 <0x00084400>;
 
 			vblock {

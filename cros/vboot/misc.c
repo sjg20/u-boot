@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <gpt.h>
+#include <log.h>
 #include <vb2_api.h>
 #include <cros/cros_common.h>
 #include <cros/vboot_flag.h>

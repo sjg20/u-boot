@@ -13,8 +13,7 @@
 #include <common.h>
 #include <log.h>
 #include <tpm-common.h>
-#include <tpm-v1.h>
-#include <tpm-v2.h>
+#include <tpm_api.h>
 #include <cros/nvdata.h>
 #include <cros/cros_common.h>
 #include <cros/vboot.h>
@@ -72,41 +71,53 @@ static const u8 v1_pcr0_unchanged_policy[0];
  */
 static const u8 rec_hash_data[REC_HASH_NV_SIZE] = {};
 
-static u32 extend_pcr(struct vboot_info *vboot, int pcr,
+static int extend_pcr(struct vboot_info *vboot, int pcr,
 		      enum vb2_pcr_digest which_digest)
 {
 	u8 buffer[VB2_PCR_DIGEST_RECOMMENDED_SIZE];
 	u8 out[VB2_PCR_DIGEST_RECOMMENDED_SIZE];
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	u32 size = sizeof(buffer);
-	int rv;
+	int ret;
 
-	rv = vb2api_get_pcr_digest(ctx, which_digest, buffer, &size);
-	if (rv != VB2_SUCCESS)
-		return rv;
+	ret = vb2api_get_pcr_digest(ctx, which_digest, buffer, &size);
+	if (ret)
+		return log_msg_retz("get", ret);
 	if (size < TPM_PCR_MINIMUM_DIGEST_SIZE)
-		return VB2_ERROR_UNKNOWN;
+		return log_msg_retz("size", VB2_ERROR_UNKNOWN);
 
-	return tpm_extend(vboot->tpm, pcr, buffer, out);
+	ret = tpm_pcr_extend(vboot->tpm, pcr, buffer, out);
+	if (ret)
+		return log_msg_retz("extend", VB2_ERROR_UNKNOWN);
+
+	return 0;
 }
 
 int cros_tpm_extend_pcrs(struct vboot_info *vboot)
 {
-	return extend_pcr(vboot, 0, BOOT_MODE_PCR) ||
-	       extend_pcr(vboot, 1, HWID_DIGEST_PCR);
+	int ret;
+
+	ret = extend_pcr(vboot, 0, BOOT_MODE_PCR);
+	if (ret)
+		return log_msg_retz("boot_mode", ret);
+	ret = extend_pcr(vboot, 1, HWID_DIGEST_PCR);
+	if (ret)
+		return log_msg_retz("hwid", ret);
+
+	return 0;
 }
 
-static int setup_space(struct udevice *dev, enum cros_nvdata_index index,
+static int setup_space(struct udevice *dev, enum cros_nvdata_type type,
 		       uint attr, const void *nv_policy, uint nv_policy_size,
 		       const void *data, uint size)
 {
 	int ret;
 
-	ret = cros_nvdata_setup_walk(index, attr, size, nv_policy,
+	ret = cros_nvdata_setup_walk(type, attr, size, nv_policy,
 				     nv_policy_size);
 	if (ret)
 		return ret;
-	ret = cros_nvdata_write_walk(index, data, size);
+	ret = cros_nvdata_write_walk(type, data, size);
 	if (ret)
 		return ret;
 
@@ -171,7 +182,7 @@ static int v1_factory_initialise_tpm(struct vboot_info *vboot)
 	struct tpm_permanent_flags pflags;
 	int ret;
 
-	ret = tpm_get_permanent_flags(vboot->tpm, &pflags);
+	ret = tpm1_get_permanent_flags(vboot->tpm, &pflags);
 	if (ret != TPM_SUCCESS)
 		return -EIO;
 
@@ -197,7 +208,7 @@ static int v1_factory_initialise_tpm(struct vboot_info *vboot)
 	log_debug("nv_locked=%d\n", pflags.nv_locked);
 	if (!pflags.nv_locked) {
 		log_debug("Enabling NV locking\n");
-		ret = tpm_nv_set_locked(vboot->tpm);
+		ret = tpm_nv_enable_locking(vboot->tpm);
 		if (ret != TPM_SUCCESS)
 			return -EIO;
 	}
@@ -241,11 +252,22 @@ int cros_tpm_factory_initialise(struct vboot_info *vboot)
 	if (ret)
 		return -EIO;
 
-	ret = version == TPM_V1 ?
-		v1_factory_initialise_tpm(vboot) :
-		v2_factory_initialise_tpm(vboot);
+	ret = -ENOSYS;
+	switch (version) {
+	case TPM_V1:
+		if (IS_ENABLED(CONFIG_TPM_V1))
+			ret = v1_factory_initialise_tpm(vboot);
+		break;
+	case TPM_V2:
+		if (IS_ENABLED(CONFIG_TPM_V1))
+			ret = v1_factory_initialise_tpm(vboot);
+		break;
+		if (IS_ENABLED(CONFIG_TPM_V2))
+			ret = v2_factory_initialise_tpm(vboot);
+		break;
 	if (ret)
 		return ret;
+	}
 
 	log_debug("TPM: factory initialisation successful\n");
 
@@ -256,7 +278,7 @@ static u32 tpm_get_flags(struct udevice *dev, bool *disablep,
 			 bool *deactivatedp, bool *nvlockedp)
 {
 	struct tpm_permanent_flags pflags;
-	u32 ret = tpm_get_permanent_flags(dev, &pflags);
+	u32 ret = tpm1_get_permanent_flags(dev, &pflags);
 
 	if (ret == TPM_SUCCESS) {
 		if (disablep)
@@ -337,6 +359,7 @@ static u32 do_setup(struct vboot_info *vboot, bool s3flag)
 {
 	u32 ret;
 
+	printf("Setting up TPM (s3=%d):\n", s3flag);
 	ret = tpm_open(vboot->tpm);
 	if (ret != TPM_SUCCESS) {
 		log_err("TPM: Can't initialise\n");
@@ -352,12 +375,14 @@ static u32 do_setup(struct vboot_info *vboot, bool s3flag)
 		return TPM_SUCCESS;
 	}
 
+	printf("TPM startup:\n");
 	ret = tpm_startup(vboot->tpm, TPM_ST_CLEAR);
 	if (ret != TPM_SUCCESS) {
 		log_err("TPM: Can't run startup command\n");
 		goto out;
 	}
 
+	printf("TPM presence:\n");
 	ret = tpm_tsc_physical_presence(vboot->tpm,
 					TPM_PHYSICAL_PRESENCE_PRESENT);
 	if (ret != TPM_SUCCESS) {
@@ -382,6 +407,8 @@ static u32 do_setup(struct vboot_info *vboot, bool s3flag)
 	}
 
 	if (tpm_get_version(vboot->tpm) == TPM_V1) {
+		if (!IS_ENABLED(CONFIG_TPM_V1))
+			return log_msg_ret("tpm_v1", -ENOSYS);
 		ret = tpm1_invoke_state_machine(vboot, vboot->tpm);
 		if (ret != TPM_SUCCESS)
 			return ret;
