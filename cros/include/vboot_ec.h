@@ -9,6 +9,14 @@
 #ifndef __CROS_VBOOT_EC_H
 #define __CROS_VBOOT_EC_H
 
+enum {
+	VBOOT_EC_MAX_HASH_SIZE	= 64,
+};
+
+struct vboot_ec_priv {
+	u8 hash_digest[VBOOT_EC_MAX_HASH_SIZE];
+};
+
 /**
  * struct vboot_ec_ops - EC operations required by vboot
  *
@@ -53,12 +61,14 @@ struct vboot_ec_ops {
 	 * @devidx:	Device index. 0: EC, 1: PD
 	 * @select:	Image to get hash of. RO or RW
 	 * @hash:	Pointer to the hash
-	 * @hash_sizep:	Pointer to the hash size
+	 * @hash_sizep:	Pointer to the hash size, which is set to the
+	 *	maximum allowed size on entry and must be updated to the actual
+	 *	size on exit
 	 *
 	 * @return 0 if OK, non-zero on error
 	 */
 	int (*hash_image)(struct udevice *dev, enum VbSelectFirmware_t select,
-			  const u8 **hashp, int *hash_sizep);
+			  u8 *hash, int *hash_sizep);
 
 	/**
 	 * update_image() - Update the selected EC image
@@ -80,7 +90,8 @@ struct vboot_ec_ops {
 	 * update_image() with the same region this boot will fail.
 	 *
 	 * @dev: UCLASS_CROS_VBOOT_EC device
-	 * @return 0 if OK, non-zero on error
+	 * @return 0 if OK, -EPERM if protection could not be set and a reboot
+	 *	is required, other non-zero on error
 	 */
 	int (*protect)(struct udevice *dev, enum VbSelectFirmware_t select);
 

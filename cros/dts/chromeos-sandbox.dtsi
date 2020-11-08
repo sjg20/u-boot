@@ -17,8 +17,9 @@
 
 	chromeos-config {
 		u-boot,dm-pre-reloc;
-		detachable-ui;
+		/*detachable-ui;*/
 		recovery-mode-mrc-cache;
+		resume-path-same-as-boot;
 
 		/* Kernel start address and size */
 		kernel-addr = <0x01008000 0x2000000>;

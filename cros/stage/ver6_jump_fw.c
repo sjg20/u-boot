@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <log.h>
 #include <cros/vboot.h>
 
 int vboot_ver6_jump_fw(struct vboot_info *vboot)
@@ -16,6 +17,7 @@ int vboot_ver6_jump_fw(struct vboot_info *vboot)
 	ret = vboot_jump(vboot, entry);
 	if (ret)
 		return log_msg_ret("Jump via fwstore", ret);
+	log_info("Ready to jump to firmware\n");
 
 	return 0;
 }

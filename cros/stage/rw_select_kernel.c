@@ -4,9 +4,13 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
+#define LOG_CATEGORY	LOGC_VBOOT
+
 #include <common.h>
 #include <cros_ec.h>
 #include <ec_commands.h>
+#include <log.h>
 #include <mapmem.h>
 #include <sysreset.h>
 #include <cros/vboot.h>
@@ -21,9 +25,11 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 	ret = vboot_load_config(vboot);
 	if (ret)
 		return log_msg_ret("Cannot load config", ret);
+	printf("config %s\n", ofnode_get_name(vboot->config));
 	kaddr = ofnode_get_addr_size(vboot->config, "kernel-addr", &ksize);
 	if (kaddr == FDT_ADDR_T_NONE)
 		return log_msg_ret("Cannot read kernel address", -EINVAL);
+	log_debug("Loading kernel to address %lx\n", (ulong)kaddr);
 	kparams->kernel_buffer = map_sysmem(kaddr, ksize);
 	kparams->kernel_buffer_size = ksize;
 
@@ -43,6 +49,10 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 	printf("Calling VbSelectAndLoadKernel().\n");
 	VbError_t res = VbSelectAndLoadKernel(&vboot->cparams, kparams);
 
+	if (res) {
+		printf("res=%d/%x\n", res, res);
+		while (1);
+	}
 	ret = 0;
 	if (res == VBERROR_EC_REBOOT_TO_RO_REQUIRED) {
 		printf("EC Reboot requested. Doing cold reboot.\n");

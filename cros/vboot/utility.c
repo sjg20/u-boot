@@ -3,16 +3,17 @@
  * Implementation of APIs provided by firmware and exported to vboot_reference.
  * They includes debug output, memory allocation, timer and delay, etc.
  *
- * TODO(sjg@chromium.org): Convert to use DM for sound
- *
  * Copyright 2018 Google LLC
  */
 
 #include <common.h>
+#include <dm.h>
+#include <log.h>
 #include <sound.h>
 #include <sysreset.h>
 #include <cros/cros_common.h>
 #include <cros/vboot.h>
+#include <linux/delay.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -58,8 +59,13 @@ void VbExSleepMs(u32 msec)
 
 VbError_t VbExBeep(u32 msec, u32 frequency)
 {
-#if defined CONFIG_SOUND
-	if (sound_init(gd->fdt_blob)) {
+	struct udevice *dev;
+	int ret;
+
+	ret = uclass_first_device_err(UCLASS_SOUND, &dev);
+	if (!ret)
+		ret = sound_setup(dev);
+	if (ret) {
 		log_debug("Failed to initialise sound.\n");
 		return VBERROR_NO_SOUND;
 	}
@@ -69,7 +75,7 @@ VbError_t VbExBeep(u32 msec, u32 frequency)
 		return VBERROR_NO_BACKGROUND_SOUND;
 
 	if (frequency) {
-		if (sound_play(msec, frequency)) {
+		if (sound_beep(dev, msec, frequency)) {
 			log_debug("Failed to play beep.\n");
 			return VBERROR_NO_SOUND;
 		}
@@ -78,11 +84,6 @@ VbError_t VbExBeep(u32 msec, u32 frequency)
 	}
 
 	return VBERROR_SUCCESS;
-#else
-	VbExSleepMs(msec);
-	printf("Beep!\n");
-	return VBERROR_NO_SOUND;
-#endif
 }
 
 u64 VbExGetTimer(void)

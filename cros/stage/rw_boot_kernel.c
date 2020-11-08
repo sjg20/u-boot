@@ -4,11 +4,17 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
+#include <blk.h>
+#include <command.h>
 #include <dm.h>
+#include <env.h>
+#include <log.h>
 #include <mapmem.h>
+#include <uuid.h>
 #ifdef CONFIG_X86
 #include <asm/bootm.h>
 #include <asm/zimage.h>
@@ -16,6 +22,19 @@
 #include <cros/cros_common.h>
 #include <cros/vboot.h>
 #include <dm/device-internal.h>
+
+/*
+ * The Chrome OS kernel file has the following format:
+ *
+ *  0		Vboot header (used by the vboot library). At offset 4f0 is the
+ *		bootloader address, assuming that the kernel (at 8000) is loaded
+ *		at CROS_32BIT_ENTRY_ADDR
+ *		This header is easy to recognise as the first bytes are
+ *		"CHROMEOS"
+ *  8000	Kernel start
+ *  BLO - 1000	Setup block (x86)
+ *  BLO - 2000	Command line
+ */
 
 enum {
 	CROS_32BIT_ENTRY_ADDR = 0x100000
@@ -70,12 +89,12 @@ static u32 get_dev_num(const struct udevice *dev)
  * @src: Input string
  * @devnum: Device number of the storage device we will mount
  * @partnum: Partition number of the root file system we will mount
- * @guid: GUID of the kernel partition
+ * @guid: GUID of the kernel partition as a string
  * @dst: Output string
  * @dst_size: Size of output string
  * @return zero if it succeeds, non-zero if it fails
  */
-static int update_cmdline(char *src, int devnum, int partnum, u8 *guid,
+static int update_cmdline(char *src, int devnum, int partnum, char *guid,
 			  char *dst, int dst_size)
 {
 	char *dst_end = dst + dst_size;
@@ -84,8 +103,8 @@ static int update_cmdline(char *src, int devnum, int partnum, u8 *guid,
 	/* sanity check on inputs */
 	if (devnum < 0 || devnum > 25 || partnum < 1 || partnum > 99 ||
 	    dst_size < 0 || dst_size > 10000) {
-		log_debug("insane input: %d, %d, %d\n", devnum, partnum,
-			  dst_size);
+		log_err("insane input: %d, %d, %d\n", devnum, partnum,
+			dst_size);
 		return 1;
 	}
 
@@ -137,8 +156,9 @@ static int update_cmdline(char *src, int devnum, int partnum, u8 *guid,
 			break;
 		case 'U':
 			/* GUID replacement needs 36 bytes */
-			CHECK_SPACE(36 + 1);
-			sprintf(dst, "%pU", guid);
+			CHECK_SPACE(UUID_STR_LEN + 1);
+			strncpy(dst, guid, UUID_STR_LEN);
+			dst += UUID_STR_LEN;
 			break;
 		default:
 			CHECK_SPACE(3);
@@ -160,17 +180,18 @@ static int boot_kernel(struct vboot_info *vboot,
 	/* sizeof(CHROMEOS_BOOTARGS) reserves extra 1 byte */
 	char cmdline_buf[sizeof(CHROMEOS_BOOTARGS) + CMDLINE_SIZE];
 	/* Reserve EXTRA_BUFFER bytes for update_cmdline's string replacement */
-	char cmdline_out[sizeof(CHROMEOS_BOOTARGS) + CMDLINE_SIZE +
-		EXTRA_BUFFER];
+// 	char cmdline_out[sizeof(CHROMEOS_BOOTARGS) + CMDLINE_SIZE +
+// 		EXTRA_BUFFER];
 	char *cmdline;
 	struct udevice *dev;
+	char guid[UUID_STR_LEN + 1];
 #ifdef CONFIG_X86
 	struct boot_params *params;
 #endif
 
 #ifndef CONFIG_X86
 	/* Chromium OS kernel has to be loaded at fixed location */
-	cmd_tbl_t cmdtp;
+	struct cmd_tbl cmdtp;
 	ulong addr = map_to_sysmem(kparams->kernel_buffer);
 	char address[20];
 	char *argv[] = { "bootm", address };
@@ -185,10 +206,10 @@ static int boot_kernel(struct vboot_info *vboot,
 	 * you have the offset.
 	 *
 	 * Note that kernel body load address is kept in kernel preamble but
-	 * actually serves no real purpose; for one, kernel buffer is not
+	 * actually serves no real purpose; for one, the kernel buffer is not
 	 * always allocated at that address (nor even recommended to be).
 	 *
-	 * Because this address does not effect kernel buffer location (or in
+	 * Because this address does not affect kernel-buffer location (or in
 	 * fact anything else), the current consensus is not to adjust this
 	 * address on a per-board basis.
 	 *
@@ -204,22 +225,28 @@ static int boot_kernel(struct vboot_info *vboot,
 	 */
 	strncat(cmdline_buf, cmdline, CMDLINE_SIZE);
 
-	log_debug("cmdline before update: ");
-	log_debug(cmdline_buf);
-	log_debug("\n");
+	printf("cmdline before update: ptr=%p, len %dn", cmdline_buf,
+	       strlen(cmdline_buf));
+	puts(cmdline_buf);
+	printf("\n");
+
+	uuid_bin_to_str(kparams->partition_guid, guid, UUID_STR_FORMAT_GUID);
+	log_info("partition_number=%d, guid=%s\n", kparams->partition_number,
+		 guid);
 
 	if (update_cmdline(cmdline_buf, get_dev_num(kparams->disk_handle),
-			   kparams->partition_number + 1,
-			   kparams->partition_guid, cmdline_out,
-			   sizeof(cmdline_out))) {
-		log_debug("failed replace %%[DUP] in command line\n");
+			   kparams->partition_number + 1, guid, cmdline,
+			   CMDLINE_SIZE)) {
+		log_err("failed replace %%[DUP] in command line\n");
 		return 1;
 	}
 
-	env_set("bootargs", cmdline_out);
-	log_debug("cmdline after update:  ");
-	log_debug(env_get("bootargs"));
-	log_debug("\n");
+	printf("cmdline after update: ptr=%p, len %d\n", cmdline,
+	       strlen(cmdline));
+	puts(cmdline);
+	printf("\n");
+
+	env_set("bootargs", cmdline);
 
 	boot_kernel_vboot_ptr = vboot;
 
@@ -232,13 +259,24 @@ static int boot_kernel(struct vboot_info *vboot,
 		device_remove(dev, DM_REMOVE_NORMAL);
 
 #ifdef CONFIG_X86
-	vboot_update_acpi(vboot);
+// 	vboot_update_acpi(vboot);
 
-	params = (struct boot_params *)(uintptr_t)
-		(kparams->bootloader_address - CROS_PARAMS_SIZE);
-	if (!setup_zimage(params, cmdline, 0, 0, 0))
+	params = (struct boot_params *)(cmdline + CMDLINE_SIZE);
+	printf("kernel_buffer=%p, size=%x, bootloader_address=%llx, size=%x, cmdline=%p, params=%p\n",
+	       kparams->kernel_buffer, kparams->kernel_buffer_size,
+	       kparams->bootloader_address, kparams->bootloader_size,
+	       cmdline, params);
+	print_buffer((ulong)params + 0x1f1, (void *)params + 0x1f1, 1, 0xf, 0);
+	if (!setup_zimage(params, cmdline, 0, 0, 0, 0)) {
+		zimage_dump(params);
+		print_buffer((ulong)kparams->kernel_buffer,
+			     kparams->kernel_buffer, 1, 0x100, 0);
+		printf("go %p, %p\n", params, kparams->kernel_buffer);
+		return 1;
+
 		boot_linux_kernel((ulong)params, (ulong)kparams->kernel_buffer,
 				  false);
+	}
 #else
 	cmdtp.name = "bootm";
 	do_bootm(&cmdtp, 0, ARRAY_SIZE(argv), argv);

@@ -9,6 +9,7 @@
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
+#include <log.h>
 #include <cros/fwstore.h>
 #include <cros/vboot.h>
 
@@ -33,6 +34,7 @@ static int resource_read(struct vboot_info *vboot,
 			entry = &vboot->fmap.readwrite_b.vblock;
 		break;
 	default:
+		log_err("Unknown index %d\n", index);
 		return -EINVAL;
 	}
 
@@ -40,7 +42,9 @@ static int resource_read(struct vboot_info *vboot,
 	log_info("Reading SPI flash offset=%x, size=%x\n", pos, size);
 	ret = cros_fwstore_read(vboot->fwstore, pos, size, buf);
 
-	return log_msg_ret("failed to read resource", ret);
+// 	print_buffer(pos, buf, 1, size > 0x80 ? 0x80 : size, 0);
+
+	return log_msg_ret("resource", ret);
 }
 
 int vb2ex_read_resource(struct vb2_context *ctx, enum vb2_resource_index index,

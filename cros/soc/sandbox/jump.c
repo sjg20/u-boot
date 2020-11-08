@@ -9,6 +9,7 @@
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
+#include <log.h>
 #include <os.h>
 #include <cros/fwstore.h>
 #include <cros/vboot.h>

@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <bloblist.h>
+#include <log.h>
 #include <cros/cros_common.h>
 #include <cros/nvdata.h>
 #include <cros/vboot.h>
@@ -28,7 +29,6 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMPCR);
 
 	/* Lock TPM */
-
 	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMLOCK);
 	ret = cros_nvdata_lock_walk(CROS_NV_SECDATA);
 	if (ret) {

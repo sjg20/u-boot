@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <bloblist.h>
+#include <log.h>
 #include <cros/vboot.h>
 
 int vboot_spl_jump_u_boot(struct vboot_info *vboot)

@@ -7,6 +7,7 @@
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
+#include <log.h>
 #include <cros/vboot.h>
 
 int vboot_ver2_select_fw(struct vboot_info *vboot)

@@ -11,7 +11,7 @@
 #ifndef __CROS_NVDATA_H
 #define __CROS_NVDATA_H
 
-enum cros_nvdata_index {
+enum cros_nvdata_type {
 	CROS_NV_DATA,		/* Standard data (can be lost) */
 	CROS_NV_SECDATA,	/* Secure data (e.g. stored in TPM) */
 	CROS_NV_SECDATAK,	/* Secure data for kernel */
@@ -39,7 +39,7 @@ struct cros_nvdata_ops {
 	 * Read data that was previously written to the device
 	 *
 	 * @dev:	Device to read from
-	 * @index:	Index describing what to read (CROS_NV_...)
+	 * @index:	Index describing what to read
 	 * @data:	Buffer for data read
 	 * @len:	Length of data to read
 	 * @return 0 if OK, -ENOSYS if the driver does not support this index,
@@ -48,7 +48,8 @@ struct cros_nvdata_ops {
 	 *	expectations, -EIO if the device failed, other -ve value on
 	 *	other error
 	 */
-	int (*read)(struct udevice *dev, uint index, u8 *data, int size);
+	int (*read)(struct udevice *dev, enum cros_nvdata_type type, u8 *data,
+		    int size);
 
 	/**
 	 * write() - write non-volatile data
@@ -63,8 +64,8 @@ struct cros_nvdata_ops {
 	 * @return 0 if OK, -EMSGSIZE if the length does not match expectations,
 	 *	-EIO if the device failed, other -ve value on other error
 	 */
-	int (*write)(struct udevice *dev, uint index, const u8 *data,
-		     int size);
+	int (*write)(struct udevice *dev, enum cros_nvdata_type type,
+		     const u8 *data, int size);
 
 	/**
 	 * setup() - set up the data in the device
@@ -80,7 +81,8 @@ struct cros_nvdata_ops {
 	 * @nv_policy_size: Size of device-specific policy data
 	 * @return 0 if OK, -ve value on error
 	 */
-	int (*setup)(struct udevice *dev, uint index, uint attr, uint size,
+	int (*setup)(struct udevice *dev, enum cros_nvdata_type type,
+		     uint attr, uint size,
 		     const u8 *nv_policy, int nv_policy_size);
 
 	/**
@@ -93,7 +95,7 @@ struct cros_nvdata_ops {
 	 * @index:	Index of data to lock
 	 * @return 0 if OK, -ve on error
 	 */
-	int (*lock)(struct udevice *dev, uint index);
+	int (*lock)(struct udevice *dev, enum cros_nvdata_type);
 };
 
 #define cros_nvdata_get_ops(dev) ((struct cros_nvdata_ops *)(dev)->driver->ops)
@@ -113,7 +115,8 @@ struct cros_nvdata_ops {
  *	expectations, -EIO if the device failed, other -ve value on
  *	other error
  */
-int cros_nvdata_read(struct udevice *dev, uint index, u8 *data, int size);
+int cros_nvdata_read(struct udevice *dev, enum cros_nvdata_type type,
+		     u8 *data, int size);
 
 /**
  * cros_nvdata_write() - write non-volatile data
@@ -128,8 +131,8 @@ int cros_nvdata_read(struct udevice *dev, uint index, u8 *data, int size);
  * @return 0 if OK, -EMSGSIZE if the length does not match expectations,
  *	-EIO if the device failed, other -ve value on other error
  */
-int cros_nvdata_write(struct udevice *dev, uint index, const u8 *data,
-		      int size);
+int cros_nvdata_write(struct udevice *dev, enum cros_nvdata_type type,
+		      const u8 *data, int size);
 
 /**
  * cros_nvdata_setup() - set up the data in the device
@@ -145,7 +148,8 @@ int cros_nvdata_write(struct udevice *dev, uint index, const u8 *data,
  * @nv_policy_size: Size of device-specific policy data
  * @return 0 if OK, -ve value on error
  */
-int cros_nvdata_setup(struct udevice *dev, uint index, uint attr, uint size,
+int cros_nvdata_setup(struct udevice *dev, enum cros_nvdata_type type,
+		      uint attr, uint size,
 		      const u8 *nv_policy, int nv_policy_size);
 
 /**
@@ -158,7 +162,7 @@ int cros_nvdata_setup(struct udevice *dev, uint index, uint attr, uint size,
  * @index:	Index of data to lock
  * @return 0 if OK, -ve on error
  */
-int cros_nvdata_lock(struct udevice *dev, uint index);
+int cros_nvdata_lock(struct udevice *dev, enum cros_nvdata_type );
 
 /**
  * cros_nvdata_read_walk() - walk all devices to read non-volatile data
@@ -173,7 +177,7 @@ int cros_nvdata_lock(struct udevice *dev, uint index);
  *	 -EIO if the device failed, -ENOSYS if no device could process this
  *	request, other -ve value on other error
  */
-int cros_nvdata_read_walk(uint index, u8 *data, int size);
+int cros_nvdata_read_walk(enum cros_nvdata_type type, u8 *data, int size);
 
 /**
  * cros_nvdata_write_walk() - walk all devices to write non-volatile data
@@ -188,7 +192,8 @@ int cros_nvdata_read_walk(uint index, u8 *data, int size);
  *	-EIO if the device failed, -ENOSYS if no device could process this
  *	request, other -ve value on other error
  */
-int cros_nvdata_write_walk(uint index, const u8 *data, int size);
+int cros_nvdata_write_walk(enum cros_nvdata_type type, const u8 *data,
+			   int size);
 
 /**
  * cros_nvdata_setup_walk() - walk all devices set up the data in the device
@@ -204,7 +209,7 @@ int cros_nvdata_write_walk(uint index, const u8 *data, int size);
  * @return 0 if OK, -ENOSYS if no device could process this request, other -ve
  *	 value on error
  */
-int cros_nvdata_setup_walk(uint index, uint attr, uint size,
+int cros_nvdata_setup_walk(enum cros_nvdata_type type, uint attr, uint size,
 			   const u8 *nv_policy, uint nv_policy_size);
 
 /**
@@ -217,6 +222,6 @@ int cros_nvdata_setup_walk(uint index, uint attr, uint size,
  * @return 0 if OK, -ENOSYS if no device could process this request, other -ve
  *	value  on error
  */
-int cros_nvdata_lock_walk(uint index);
+int cros_nvdata_lock_walk(enum cros_nvdata_type );
 
 #endif /* __CROS_NVDATA_H */

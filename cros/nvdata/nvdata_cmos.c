@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <log.h>
 #include <rtc.h>
 #include <cros/nvdata.h>
 
@@ -15,14 +16,15 @@ struct cmos_priv {
 	u32 base_reg;
 };
 
-static int cmos_nvdata_read(struct udevice *dev, uint index, u8 *data, int size)
+static int cmos_nvdata_read(struct udevice *dev, enum cros_nvdata_type type,
+			    u8 *data, int size)
 {
 	struct cmos_priv *priv = dev_get_priv(dev);
 	struct udevice *rtc = dev_get_parent(dev);
 	int i, val;
 
-	if (index != CROS_NV_DATA) {
-		log_err("Only CROS_NV_DATA supported (not %x)\n", index);
+	if (type != CROS_NV_DATA) {
+		log_err("Only CROS_NV_DATA supported (not %d)\n", type);
 		return -ENOSYS;
 	}
 
@@ -36,15 +38,15 @@ static int cmos_nvdata_read(struct udevice *dev, uint index, u8 *data, int size)
 	return 0;
 }
 
-static int cmos_nvdata_write(struct udevice *dev, uint index, const u8 *data,
+static int cmos_nvdata_write(struct udevice *dev, enum cros_nvdata_type type, const u8 *data,
 			     int size)
 {
 	struct cmos_priv *priv = dev_get_priv(dev);
 	struct udevice *rtc = dev_get_parent(dev);
 	int i, ret;
 
-	if (index != CROS_NV_DATA) {
-		log_err("Only CROS_NV_DATA supported (not %x)\n", index);
+	if (type != CROS_NV_DATA) {
+		log_err("Only CROS_NV_DATA supported (not %d)\n", type);
 		return -ENOSYS;
 	}
 
@@ -79,8 +81,8 @@ static const struct udevice_id cmos_nvdata_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(cmos_nvdata_drv) = {
-	.name		= "cmos-nvdata",
+U_BOOT_DRIVER(google_cmos_nvdata) = {
+	.name		= "google_cmos_nvdata",
 	.id		= UCLASS_CROS_NVDATA,
 	.of_match	= cmos_nvdata_ids,
 	.ops		= &cmos_nvdata_ops,
