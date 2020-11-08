@@ -136,7 +136,6 @@ void board_init_f_init_reserve(ulong base)
 	 * clear GD entirely and set it up.
 	 * Use gd_ptr, as gd may not be properly set yet.
 	 */
-
 	gd_ptr = (struct global_data *)base;
 	/* zero the area */
 	memset(gd_ptr, '\0', sizeof(*gd));

@@ -28,6 +28,14 @@ struct cros_gpio_info {
 	int flags;
 };
 
+/* This function is needed if CONFIG_CMDLINE is not enabled */
+__weak int board_run_command(const char *cmdline)
+{
+	printf("No command line\n");
+
+	return 0;
+}
+
 int arch_misc_init(void)
 {
 	return 0;

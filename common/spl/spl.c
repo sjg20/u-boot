@@ -53,6 +53,11 @@ binman_sym_declare(ulong, spl, image_pos);
 binman_sym_declare(ulong, spl, size);
 #endif
 
+#ifdef CONFIG_VPL
+binman_sym_declare(ulong, vpl, image_pos);
+binman_sym_declare(ulong, vpl, size);
+#endif
+
 /*
  * Board-specific Platform code can reimplement show_boot_progress () if needed
  */
@@ -132,6 +137,10 @@ void spl_fixup_fdt(void *fdt_blob)
 
 ulong spl_get_image_pos(void)
 {
+#ifdef CONFIG_VPL
+	if (DO_VBOOT && IS_ENABLED(CONFIG_CHROMEOS_VBOOT) && spl_phase() == PHASE_TPL)
+		return binman_sym(ulong, vpl, image_pos);
+#endif
 	return spl_phase() == PHASE_TPL ?
 		binman_sym(ulong, spl, image_pos) :
 		binman_sym(ulong, u_boot_any, image_pos);
@@ -139,6 +148,10 @@ ulong spl_get_image_pos(void)
 
 ulong spl_get_image_size(void)
 {
+#ifdef CONFIG_VPL
+	if (DO_VBOOT && IS_ENABLED(CONFIG_CHROMEOS_VBOOT) && spl_phase() == PHASE_TPL)
+		return binman_sym(ulong, vpl, size);
+#endif
 	return spl_phase() == PHASE_TPL ?
 		binman_sym(ulong, spl, size) :
 		binman_sym(ulong, u_boot_any, size);
@@ -146,6 +159,10 @@ ulong spl_get_image_size(void)
 
 ulong spl_get_image_text_base(void)
 {
+#ifdef CONFIG_CHROMEOS_VBOOT
+	if (DO_VBOOT)
+		return CONFIG_VPL_TEXT_BASE;
+#endif
 	return spl_phase() == PHASE_TPL ? CONFIG_SPL_TEXT_BASE :
 		CONFIG_SYS_TEXT_BASE;
 }
