@@ -240,6 +240,16 @@ config TPL_SYS_MALLOC_F_LEN
 	  particular needs this to operate, so that it can allocate the
 	  initial serial device and any others that are needed.
 
+config VPL_SYS_MALLOC_F_LEN
+	hex "Size of malloc() pool in VPL before relocation"
+	depends on SYS_MALLOC_F && VPL
+	default SYS_MALLOC_F_LEN
+	help
+	  Before relocation, memory is very limited on many platforms. Still,
+	  we can provide a small malloc() pool if needed. Driver model in
+	  particular needs this to operate, so that it can allocate the
+	  initial serial device and any others that are needed.
+
 menuconfig EXPERT
 	bool "Configure standard U-Boot features (expert users)"
 	default y
