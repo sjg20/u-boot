@@ -7,6 +7,7 @@
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
+#include <log.h>
 #include <cros/cros_common.h>
 #include <cros/vboot.h>
 

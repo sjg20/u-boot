@@ -5,11 +5,13 @@
  * Copyright 2018 Google LLC
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_CROS_EC
 
 #include <common.h>
 #include <dm.h>
 #include <cros_ec.h>
+#include <log.h>
 #include <malloc.h>
 #include <vb2_api.h>
 #include <cros/cros_common.h>
@@ -18,6 +20,7 @@
 #include <cros/vboot_ec.h>
 #include <cros/vboot_flag.h>
 #include <cros/aux_fw.h>
+#include <linux/delay.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -50,13 +53,12 @@ static int ec_get(int devidx, struct udevice **devp)
 	struct udevice *dev;
 	int ret;
 
-	log_debug("%s: %d\n", __func__, devidx);
 	ret = uclass_get_device_by_seq(UCLASS_CROS_VBOOT_EC, devidx, &dev);
 	if (ret) {
 		log_err("Get EC %d: err=%d\n", devidx, ret);
 		return VBERROR_UNKNOWN;
 	}
-	log_debug("EC = %s\n", dev->name);
+	log_debug("EC devidx=%d,name=%s\n", devidx, dev->name);
 	*devp = dev;
 
 	return 0;
@@ -131,6 +133,8 @@ VbError_t VbExEcHashImage(int devidx, enum VbSelectFirmware_t select,
 		return log_msg_ret("Cannot get EC", ret);
 
 	ret = vboot_ec_hash_image(dev, select, hashp, hash_sizep);
+	log_info("ret=%d, hash ptr=%p, hash_size=%x\n", ret, *hashp,
+		 *hash_sizep);
 	if (ret) {
 		log_err("Failed, err=%d\n", ret);
 		return VBERROR_UNKNOWN;
@@ -156,8 +160,10 @@ static struct fmap_entry *get_firmware_entry(struct vboot_info *vboot,
 	}
 	ec = &fw->ec[devidx];
 	entry = select == VB_SELECT_FIRMWARE_READONLY ? &ec->ro : &ec->rw;
-	log_debug("Selected devidx=%d, select=%s\n", devidx,
-		  select == VB_SELECT_FIRMWARE_READONLY ? "ro" : "rw");
+	log_info("Selected devidx=%d, select=%s\n", devidx,
+		 select == VB_SELECT_FIRMWARE_READONLY ? "ro" : "rw");
+	log_info("entry->hash=%p, hash_size=%x\n", entry->hash,
+		 entry->hash_size);
 
 	return entry;
 }
@@ -170,7 +176,7 @@ VbError_t VbExEcGetExpectedImage(int devidx, enum VbSelectFirmware_t select,
 	u8 *image;
 	int ret;
 
-	log_debug("%s: %d\n", __func__, devidx);
+	log_info("%s: %d\n", __func__, devidx);
 	entry = get_firmware_entry(vboot, devidx, select);
 	if (!entry)
 		return VBERROR_UNKNOWN;
@@ -190,13 +196,18 @@ VbError_t VbExEcGetExpectedImageHash(int devidx, enum VbSelectFirmware_t select,
 {
 	struct vboot_info *vboot = vboot_get();
 	struct fmap_entry *entry;
+	uint i;
 
-	log_debug("%s: %d\n", __func__, devidx);
+	log_info("devidx=%d\n", devidx);
 	entry = get_firmware_entry(vboot, devidx, select);
 	if (!entry)
 		return VBERROR_UNKNOWN;
 	*hash = entry->hash;
 	*hash_size = entry->hash_size;
+	log_info("Expected: ");
+	for (i = 0; i < entry->hash_size; i++)
+		printf("%02x", entry->hash[i]);
+	printf("\n");
 
 	return VBERROR_SUCCESS;
 }
@@ -207,7 +218,7 @@ VbError_t VbExEcUpdateImage(int devidx, enum VbSelectFirmware_t select,
 	struct udevice *dev;
 	int ret;
 
-	log_debug("%s: %d\n", __func__, devidx);
+	log_debug("%s:devidx=%d\n", __func__, devidx);
 	ret = ec_get(devidx, &dev);
 	if (ret)
 		return log_msg_ret("Cannot get EC", ret);

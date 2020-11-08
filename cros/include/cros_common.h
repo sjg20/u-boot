@@ -8,6 +8,8 @@
 #ifndef __CROS_COMMON_H
 #define __CROS_COMMON_H
 
+#include <bootstage.h>
+
 enum {
 	BOOTSTAGE_VBOOT_FIRST = BOOTSTAGE_ID_USER,
 

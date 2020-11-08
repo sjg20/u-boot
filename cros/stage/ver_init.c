@@ -31,14 +31,16 @@
 static int vb2_init_blob(struct vboot_blob *blob, int work_buffer_size)
 {
 	struct vb2_context *ctx = &blob->ctx;
+	int ret;
 
 	/* initialise the vb2_context */
-	memset(blob, '\0', sizeof(*blob));
 	ctx->workbuf_size = work_buffer_size;
 	ctx->workbuf = memalign(VBOOT_CONTEXT_ALIGN, ctx->workbuf_size);
 	if (!ctx->workbuf)
 		return -ENOMEM;
-	memset(ctx->workbuf, '\0', ctx->workbuf_size);
+	ret = vb2_init_context(ctx);
+	if (ret)
+		return log_msg_ret("init_context", ret);
 
 	return 0;
 }
@@ -49,52 +51,55 @@ int vboot_ver_init(struct vboot_info *vboot)
 	struct vb2_context *ctx;
 	int ret;
 
-	printf("vboot is at %p, size %lx\n", vboot, (ulong)sizeof(*vboot));
-	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, sizeof(struct vboot_blob));
+	printf("vboot is at %p, size %lx, bloblist %p\n", vboot,
+	       (ulong)sizeof(*vboot), gd->bloblist);
+	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, sizeof(struct vboot_blob),
+			    VBOOT_CONTEXT_ALIGN);
 	if (!blob)
-		return log_msg_ret("Cannot set up vboot context", -ENOSPC);
+		return log_msg_ret("set up vboot context", -ENOSPC);
 
 	bootstage_mark(BOOTSTAGE_VBOOT_START);
 
 	ret = vboot_load_config(vboot);
 	if (ret)
-		return log_msg_ret("Cannot load config", ret);
-
+		return log_msg_ret("load config", ret);
 	/* Set up context and work buffer */
 	ret = vb2_init_blob(blob, vboot->work_buffer_size);
 	if (ret)
-		return log_msg_ret("Cannot set up work context", ret);
+		return log_msg_ret("set up work context", ret);
 	vboot->blob = blob;
 	ctx = &blob->ctx;
 	vboot->ctx = ctx;
 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
+	printf("ctx=%p\n", ctx);
 
 	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
 	if (ret)
-		return log_msg_ret("Cannot find TPM", ret);
+		return log_msg_ret("find TPM", ret);
 	ret = cros_tpm_setup(vboot);
 	if (ret) {
 		log_err("TPM setup failed (err=%x)\n", ret);
-		return -EIO;
+		return log_msg_ret("tpm_setup", -EIO);
 	}
 
 	/* initialise and read nvdata from non-volatile storage */
 	ret = uclass_first_device_err(UCLASS_CROS_NVDATA, &vboot->nvdata_dev);
 	if (ret)
-		return log_msg_ret("Cannot find nvdata", ret);
+		return log_msg_ret("find nvdata", ret);
 	/* TODO(sjg@chromium.org): Support full-size context */
 	ret = cros_nvdata_read_walk(CROS_NV_DATA, ctx->nvdata,
 				    EC_VBNV_BLOCK_SIZE);
 	if (ret)
-		return log_msg_ret("Cannot read nvdata", ret);
+		return log_msg_ret("read nvdata", ret);
 
+#if 0
 	/* Force legacy mode */
 	ctx->nvdata[VB2_NV_OFFS_HEADER] = VB2_NV_HEADER_SIGNATURE_V1;
 	ctx->nvdata[VB2_NV_OFFS_DEV] |= VB2_NV_DEV_FLAG_LEGACY;
 	vb2_nv_regen_crc(ctx);
-
 	print_buffer(0, ctx->nvdata, 1, sizeof(ctx->nvdata), 0);
+#endif
 
 	ret = cros_ofnode_flashmap(&vboot->fmap);
 	if (ret)
@@ -102,12 +107,12 @@ int vboot_ver_init(struct vboot_info *vboot)
 	cros_ofnode_dump_fmap(&vboot->fmap);
 	ret = uclass_first_device_err(UCLASS_CROS_FWSTORE, &vboot->fwstore);
 	if (ret)
-		return log_msg_ret("Cannot set up fwstore", ret);
+		return log_msg_ret("set up fwstore", ret);
 
 	if (CONFIG_IS_ENABLED(CROS_EC)) {
 		ret = uclass_get_device(UCLASS_CROS_EC, 0, &vboot->cros_ec);
 		if (ret)
-			return log_msg_ret("Cannot locate Chromium OS EC", ret);
+			return log_msg_ret("locate Chromium OS EC", ret);
 	}
 	/*
 	 * Set S3 resume flag if vboot should behave differently when selecting
@@ -127,10 +132,26 @@ int vboot_ver_init(struct vboot_info *vboot)
 	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
 	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, ctx->secdata,
 				    sizeof(ctx->secdata));
+	printf("cros_nvdata_read_walk ret=%d\n", ret);
 	if (ret == -ENOENT)
-		ret = cros_tpm_factory_initialise(vboot);
+		printf("SKIP factory init\n");
+// 		ret = cros_tpm_factory_initialise(vboot);
 	else if (ret)
-		return log_msg_ret("Cannot read secdata", ret);
+		return log_msg_ret("read secdata", ret);
+#ifdef CONFIG_SANDBOX
+	ctx->secdata[0] = 2;
+	ctx->secdata[1] = 3;
+	ctx->secdata[2] = 1;
+	ctx->secdata[3] = 0;
+	ctx->secdata[4] = 1;
+	ctx->secdata[5] = 0;
+	ctx->secdata[6] = 0;
+	ctx->secdata[7] = 0;
+	ctx->secdata[8] = 0;
+	ctx->secdata[9] = 0x7a;
+#endif
+	printf("secdata:\n");
+	print_buffer(0, ctx->secdata, 1, sizeof(ctx->secdata), 0);
 
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
 

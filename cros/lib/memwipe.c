@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <inttypes.h>
+#include <log.h>
 #include <malloc.h>
 #include <physmem.h>
 #include <cros/cros_common.h>

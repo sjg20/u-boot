@@ -14,6 +14,8 @@
 	};
 };
 
+#define RO_BASE		0xff000000
+
 &chromeos {
 	filename = "image.bin";
 	u-boot,dm-pre-reloc;
@@ -22,17 +24,9 @@
 	pad-byte = <0xff>;
 	size = <CONFIG_ROM_SIZE>;
 	compatible = "chromeos,flashmap";
-#ifdef CONFIG_HAVE_INTEL_ME
-	intel-descriptor {
-		filename = CONFIG_FLASH_DESCRIPTOR_FILE;
-	};
-	intel-me {
-		filename = CONFIG_INTEL_ME_FILE;
-	};
-#endif
 	/* ---- Section: Vital-product data (VPD) ---- */
 	read-only-vpd {
-		offset = <0xffe00000>;
+		offset = <0xff800000>;
 		type = "section";
 		label-prefix = "ro-";
 		read-only;
@@ -43,17 +37,61 @@
 			fill-value = [ff];
 		};
 	};
+	fdtmap {
+	};
 	read-only {
 		u-boot,dm-pre-reloc;
 		type = "section";
 		label-prefix = "ro-";
 		sort-by-offset;
 		read-only;
+		offset = <0xff000000>;
+#if defined(CONFIG_HAVE_INTEL_ME) || defined(CONFIG_FSP_VERSION2)
+		intel-descriptor {
+			filename = CONFIG_FLASH_DESCRIPTOR_FILE;
+		};
+#endif
+#ifdef CONFIG_FSP_VERSION2
+		intel-ifwi {
+			filename = CONFIG_IFWI_INPUT_FILE;
+			convert-fit;
+
+			section {
+				size = <0x8000>;
+				ifwi-replace;
+				ifwi-subpart = "IBBP";
+				ifwi-entry = "IBBL";
+				tpl {
+					type = "u-boot-tpl";
+				};
+				x86-start16-tpl {
+					offset = <0x7800>;
+				};
+				x86-reset16-tpl {
+					offset = <0x7ff0>;
+				};
+			};
+		};
+#endif
+#ifdef CONFIG_HAVE_INTEL_ME
+		intel-me {
+			filename = CONFIG_INTEL_ME_FILE;
+		};
+#endif
+		vpl {
+			type = "section";
+			u-boot-vpl-nodtb {
+				spl-pad;
+			};
+			u-boot-vpl-dtb {
+			};
+		};
 		fmap {
-			offset = <(0xffe10000 - 0xffe10000)>;
+			offset = <(0xff200000 - RO_BASE)>;
 			size = <0x800>;
 		};
 		firmware-id {
+			u-boot,dm-pre-reloc;
 			size = <0x40>;
 			type = "text";
 			text-label = "frid";
@@ -75,9 +113,10 @@
 			align = <0x40>;
 		};
 		boot-rec {
-			offset = <(0xffed0000 - 0xffe10000)>;
+			align = <0x1000>;
+/*			offset = <(0xffed0000 - RO_BASE)>;*/
 			u-boot,dm-pre-reloc;
-			type = "u-boot-with-ucode-ptr";
+			type = "u-boot";
 			hash {
 				u-boot,dm-pre-reloc;
 				algo = "sha256";
@@ -88,46 +127,77 @@
 		u-boot-ucode {
 		};
 
-#ifdef CONFIG_TPL
-		x86-start16-tpl {
-			offset = <(CONFIG_SYS_X86_START16 - 0xffe10000)>;
-		};
-#elif defined(CONFIG_SPL)
-		x86-start16-spl {
-			offset = <(CONFIG_SYS_X86_START16 - 0xffe10000)>;
-		};
-#else
-		x86-start16 {
-			offset = <(CONFIG_SYS_X86_START16 - 0xffe10000)>;
-		};
-#endif
-
+#ifdef CONFIG_HAVE_MICROCODE
 		u-boot-tpl-with-ucode-ptr {
-			offset = <(CONFIG_TPL_TEXT_BASE - 0xffe10000)>;
+			offset = <(CONFIG_TPL_TEXT_BASE - RO_BASE)>;
 		};
 		u-boot-tpl-dtb-with-ucode {
 		};
-		spl-rec {
-			type = "u-boot-spl";
-			offset = <(CONFIG_SPL_TEXT_BASE - 0xffe10000)>;
+#endif
+#ifdef CONFIG_FSP_VERSION2
+		intel-fsp-m {
+			filename = CONFIG_FSP_FILE_M;
 		};
-		u-boot-spl-dtb {
+		intel-fsp-s {
+			filename = CONFIG_FSP_FILE_S;
+		};
+#ifdef CONFIG_HAVE_VBT
+		intel-vbt {
+			filename = CONFIG_VBT_FILE;
+		};
+#endif
+#endif
+		u-boot-spl-rec {
+			u-boot,dm-pre-reloc;
+			type = "u-boot-spl";
+/*			offset = <(CONFIG_X86_OFFSET_SPL - RO_BASE)>;*/
+		};
+		spl {
+			type = "section";
+			u-boot-spl {
+			};
+			u-boot-spl-dtb {
+			};
 		};
 #ifdef CONFIG_HAVE_MRC
 		intel-mrc {
-			offset = <(CONFIG_X86_MRC_ADDR - 0xffe10000)>;
+			offset = <(CONFIG_X86_MRC_ADDR - RO_BASE)>;
 		};
 #endif
 #ifdef CONFIG_HAVE_VGA_BIOS
 		intel-vga {
 			filename = CONFIG_VGA_BIOS_FILE;
-			offset = <(CONFIG_VGA_BIOS_ADDR - 0xffe10000)>;
+			offset = <(CONFIG_VGA_BIOS_ADDR - RO_BASE)>;
 		};
 #endif
 #ifdef CONFIG_HAVE_REFCODE
 		intel-refcode {
-			offset = <(CONFIG_X86_REFCODE_ADDR - 0xffe10000)>;
+			offset = <(CONFIG_X86_REFCODE_ADDR - RO_BASE)>;
 		};
+#endif
+#ifndef CONFIG_FSP_VERSION2
+#ifdef CONFIG_TPL
+		x86-start16-tpl {
+			offset = <(CONFIG_SYS_X86_START16 - RO_BASE)>;
+		};
+		x86-reset16-tpl {
+			offset = <(CONFIG_RESET_VEC_LOC - RO_BASE)>;
+		};
+#elif defined(CONFIG_SPL)
+		x86-start16-spl {
+			offset = <(CONFIG_SYS_X86_START16 - RO_BASE)>;
+		};
+		x86-reset16-spl {
+			offset = <(CONFIG_RESET_VEC_LOC - RO_BASE)>;
+		};
+#else
+		x86-start16 {
+			offset = <(CONFIG_SYS_X86_START16 - RO_BASE)>;
+		};
+		x86-reset16 {
+			offset = <(CONFIG_RESET_VEC_LOC - RO_BASE)>;
+		};
+#endif
 #endif
 	};
 };
