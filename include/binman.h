@@ -70,6 +70,8 @@ int binman_entry_find(const char *name, struct binman_entry *entry);
  */
 ofnode binman_section_find_node(const char *name);
 
+int binman_select_subnode(const char *name);
+
 /**
  * binman_init() - Set up the binman symbol information
  *

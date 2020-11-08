@@ -174,6 +174,7 @@ CPU performance is about 3500 DMIPS::
 Partial memory map
 ------------------
 
+<<<<<<< HEAD
 ::
 
     ffffffff       Top of ROM (and last byte of 32-bit address space)
@@ -181,7 +182,7 @@ Partial memory map
     ff000000       Bottom of ROM
     fefc0000       Top of CAR region
     fef96000       Stack for FSP-M
-    fef40000 59000 FSP-M
+    fef40000 59000 FSP-M (also VPL loads here)
     fef11000       SPL loaded here
     fef10000       CONFIG_BLOBLIST_ADDR
     fef10000       Stack top in TPL, SPL and U-Boot before relocation
@@ -193,6 +194,25 @@ Partial memory map
       120000       BSS (defined in u-boot-spl.lds)
       200000       FSP-S (which is run after U-Boot is relocated)
      1110000       CONFIG_SYS_TEXT_BASE
+=======
+ffffffff	Top of ROM (and last byte of 32-bit address space)
+ffff8000	TPL loaded here (from IFWI)
+ff000000	Bottom of ROM
+fefc000		 Top of CAR region
+fef96000	Stack for FSP-M
+fef40000 59000	FSP-M
+fef40000	VPL loaded here
+fef11000	SPL loaded here
+fef10000	CONFIG_BLOBLIST_ADDR
+fef10000	Stack top in TPL, SPL and U-Boot before relocation
+fef00000  1000	CONFIG_BOOTSTAGE_STASH_ADDR
+fef00000	Base of CAR region
+
+   f0000	CONFIG_ROM_TABLE_ADDR
+  120000	BSS (defined in u-boot-spl.lds)
+  200000	FSP-S (which is run after U-Boot is relocated)
+ 1110000	CONFIG_SYS_TEXT_BASE
+>>>>>>> 8cb090f62e1... wip
 
 
 Supported peripherals

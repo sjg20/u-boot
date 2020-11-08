@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /dts-v1/;
 
+#include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/gpio/x86-gpio.h>
 
 /include/ "skeleton.dtsi"
@@ -12,7 +13,7 @@
 #ifdef CONFIG_CHROMEOS_VBOOT
 #include "chromeos-x86.dtsi"
 #include "flashmap-x86-ro.dtsi"
-#include "flashmap-16mb-rw.dtsi"
+#include "flashmap-16mb-x86-rw.dtsi"
 #endif
 
 #include <dt-bindings/clock/intel-clock.h>
@@ -47,6 +48,7 @@
 		i2c6 = &i2c_6;
 		i2c7 = &i2c_7;
 		mmc1 = &sdmmc;
+		cros-vboot-ec0 = &cros_ec_vboot;
 	};
 
 	board: board {
@@ -99,6 +101,7 @@
 	clk: clock {
 		compatible = "intel,apl-clk";
 		#clock-cells = <1>;
+		u-boot,dm-pre-reloc;
 	};
 
 	cpus {
@@ -138,6 +141,7 @@
 	};
 
 	acpi_gpe: general-purpose-events {
+		u-boot,dm-pre-reloc;
 		reg = <IOMAP_ACPI_BASE IOMAP_ACPI_SIZE>;
 		compatible = "intel,acpi-gpe";
 		interrupt-controller;
@@ -409,8 +413,10 @@
 		};
 
 		i2c_2: i2c2@16,2 {
-			compatible = "intel,apl-i2c";
+			compatible = "intel,apl-i2c", "snps,designware-i2c-pci";
 			reg = <0x0200b210 0 0 0 0>;
+			early-regs = <IOMAP_I2C2_BASE 0x1000>;
+			u-boot,dm-pre-reloc;
 			#address-cells = <1>;
 			#size-cells = <0>;
 			clock-frequency = <400000>;
@@ -421,6 +427,7 @@
 			tpm: tpm@50 {
 				reg = <0x50>;
 				compatible = "google,cr50";
+				u-boot,dm-pre-reloc;
 				u-boot,i2c-offset-len = <0>;
 				ready-gpios = <&gpio_n 28 GPIO_ACTIVE_LOW>;
 				interrupts-extended = <&acpi_gpe GPIO_28_IRQ
@@ -428,6 +435,11 @@
 				acpi,hid = "GOOG0005";
 				acpi,ddn = "I2C TPM";
 				acpi,name = "TPMI";
+
+				secdata {
+					u-boot,dm-pre-reloc;
+					compatible = "google,tpm-secdata";
+				};
 			};
 		};
 
@@ -561,6 +573,12 @@
 			acpi,name = "SDCD";
 		};
 
+		emmc: emmc@1c,0 {
+			reg = <0x0000e000 0 0 0 0>;
+			compatible = "intel,apl-emmc";
+			non-removable;
+		};
+
 		pch: pch@1f,0 {
 			reg = <0x0000f800 0 0 0 0>;
 			compatible = "intel,apl-pch";
@@ -584,9 +602,14 @@
 					 */
 					#address-cells = <1>;
 					#size-cells = <1>;
+
 					flash@8000000 {
 						reg = <0x08000000 0x20000>;
 						erase-value = <0xff>;
+					};
+
+					cros_ec_vboot: vboot {
+						compatible = "google,cros-ec-vboot";
 					};
 				};
 			};
@@ -629,6 +652,7 @@
 				PAD_CFG0_TX_DISABLE | PAD_CFG0_ROUTE_IOAPIC |
 				PAD_CFG0_TRIG_LEVEL | PAD_CFG0_RX_POL_INVERT)
 			(PAD_CFG1_PULL_NONE | PAD_CFG1_IOSSTATE_TXD_RXE)
+		PAD_CFG_GPI(GPIO_25, UP_20K, DEEP)	 /* unused */
 
 		/*
 		 * WLAN_PE_RST - default to deasserted just in case FSP
@@ -1199,4 +1223,14 @@
 		PAD_CFG_GPI(GPIO_72, UP_20K, DEEP)	 /* GP_CAMERASB10 */
 		PAD_CFG_GPI(GPIO_73, UP_20K, DEEP)	 /* GP_CAMERASB11 */
 	>;
+};
+
+&rtc {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	nvdata {
+		u-boot,dm-pre-reloc;
+		compatible = "google,cmos-nvdata";
+		reg = <0x26>;
+	};
 };

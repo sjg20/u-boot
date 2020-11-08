@@ -2,6 +2,7 @@
 /*
  * Copyright (c) 2016 Google, Inc
  */
+#define DEBUG
 
 #include <common.h>
 #include <cpu_func.h>
@@ -115,8 +116,8 @@ static int x86_spl_init(void)
 	}
 
 #ifndef CONFIG_SYS_COREBOOT
-# ifndef CONFIG_TPL
 	memset(&__bss_start, 0, (ulong)&__bss_end - (ulong)&__bss_start);
+# ifndef CONFIG_TPL
 
 	/* TODO(sjg@chromium.org): Consider calling cpu_init_r() here */
 	ret = interrupt_init();
@@ -162,6 +163,7 @@ void board_init_f(ulong flags)
 {
 	int ret;
 
+	printf("\nboard_init_f - spl\n");
 	ret = x86_spl_init();
 	if (ret) {
 		printf("x86_spl_init: error %d\n", ret);
@@ -190,7 +192,8 @@ void board_init_f_r(void)
 
 u32 spl_boot_device(void)
 {
-	return BOOT_DEVICE_SPI_MMAP;
+	return IS_ENABLED(CONFIG_CHROMEOS) ? BOOT_DEVICE_CROS_VBOOT :
+		BOOT_DEVICE_SPI_MMAP;
 }
 
 int spl_start_uboot(void)

@@ -186,6 +186,12 @@ int arch_fsp_init_r(void)
 	s3wake = IS_ENABLED(CONFIG_HAVE_ACPI_RESUME) &&
 		gd->arch.prev_sleep_state == ACPI_S3;
 
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
+		ret = binman_select_subnode("read-only");
+		if (ret)
+			return log_msg_ret("binman", ret);
+	}
+
 	/*
 	 * This must be called before any devices are probed. Put any probing
 	 * into arch_fsps_preinit() above.

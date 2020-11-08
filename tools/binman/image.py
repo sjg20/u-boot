@@ -130,12 +130,7 @@ class Image(section.Entry_section):
         Returns:
             True if the new data size is OK, False if expansion is needed
         """
-        sizes_ok = True
-        for entry in self._entries.values():
-            if not entry.ProcessContents():
-                sizes_ok = False
-                tout.Debug("Entry '%s' size change" % self._node.path)
-        return sizes_ok
+        return super().ProcessContents()
 
     def WriteSymbols(self):
         """Write symbol values into binary files for access at run time"""
@@ -324,3 +319,20 @@ class Image(section.Entry_section):
             _DoLine(lines, _EntryToStrings(entry))
             selected_entries.append(entry)
         return selected_entries, lines, widths
+
+    def _CollectEntries(self, entries, to_add):
+        if to_add:
+            for entry in to_add.values():
+                entries[entry.GetPath()] = entry
+            for entry in to_add.values():
+                self._CollectEntries(entries, entry.GetEntries())
+
+    def LookupImageSymbol(self, sym_name, optional, msg, base_addr):
+        entries = OrderedDict()
+        self._CollectEntries(entries, self.GetEntries())
+        entries_by_name = {}
+        for entry in entries.values():
+            entries_by_name[entry.name] = entry
+        return self.LookupSymbol(sym_name, optional, msg, base_addr,
+                                 entries_by_name)
+

@@ -456,6 +456,7 @@ int main(int argc, char *argv[])
 #endif
 #if CONFIG_IS_ENABLED(LOG)
 	gd->default_log_level = state->default_log_level;
+	printf("Log level %d\n", gd->default_log_level);
 #endif
 	setup_ram_buf(state);
 

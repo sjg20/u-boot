@@ -5,6 +5,7 @@
  *
  * Aneesh V <aneesh@ti.com>
  */
+#define DEBUG
 
 #include <common.h>
 #include <bloblist.h>
@@ -51,6 +52,11 @@ binman_sym_declare(ulong, u_boot_any, size);
 #ifdef CONFIG_TPL
 binman_sym_declare(ulong, spl, image_pos);
 binman_sym_declare(ulong, spl, size);
+#endif
+
+#ifdef CONFIG_VPL
+binman_sym_declare(ulong, vpl, image_pos);
+binman_sym_declare(ulong, vpl, size);
 #endif
 
 /* Define board data structure */
@@ -135,6 +141,10 @@ void spl_fixup_fdt(void *fdt_blob)
 
 ulong spl_get_image_pos(void)
 {
+#ifdef CONFIG_VPL
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT) && spl_phase() == PHASE_TPL)
+		return binman_sym(ulong, vpl, image_pos);
+#endif
 	return spl_phase() == PHASE_TPL ?
 		binman_sym(ulong, spl, image_pos) :
 		binman_sym(ulong, u_boot_any, image_pos);
@@ -142,6 +152,10 @@ ulong spl_get_image_pos(void)
 
 ulong spl_get_image_size(void)
 {
+#ifdef CONFIG_VPL
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT) && spl_phase() == PHASE_TPL)
+		return binman_sym(ulong, vpl, size);
+#endif
 	return spl_phase() == PHASE_TPL ?
 		binman_sym(ulong, spl, size) :
 		binman_sym(ulong, u_boot_any, size);
@@ -683,7 +697,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 #endif
 	switch (spl_image.os) {
 	case IH_OS_U_BOOT:
-		debug("Jumping to U-Boot\n");
+		debug("Jumping to %s\n", spl_phase_name(spl_next_phase()));
 		break;
 #if CONFIG_IS_ENABLED(ATF)
 	case IH_OS_ARM_TRUSTED_FIRMWARE:

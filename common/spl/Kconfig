@@ -1,9 +1,12 @@
-menu "SPL / TPL"
+menu "SPL / TPL / VPL"
 
 config SUPPORT_SPL
 	bool
 
 config SUPPORT_TPL
+	bool
+
+config SUPPORT_VPL
 	bool
 
 config SPL_DFU_NO_RESET
@@ -267,6 +270,16 @@ config SPL_SEPARATE_BSS
 	  location is used. Normally we put the device tree at the end of BSS
 	  but with this option enabled, it goes at _image_binary_end.
 
+config TPL_SEPARATE_BSS
+	bool "BSS section is in a different memory region from text"
+	default y if SPL_SEPARATE_BSS
+	help
+	  Some platforms need a large BSS region in TPL and can provide this
+	  because RAM is already set up. In this case BSS can be moved to RAM.
+	  This option should then be enabled so that the correct device tree
+	  location is used. Normally we put the device tree at the end of BSS
+	  but with this option enabled, it goes at _image_binary_end.
+
 config SPL_BANNER_PRINT
 	bool "Enable output of the SPL banner 'U-Boot SPL ...'"
 	default y
@@ -282,6 +295,15 @@ config TPL_BANNER_PRINT
 	help
 	  If this option is enabled, TPL will print the banner with version
 	  info. Disabling this option could be useful to reduce TPL boot time
+	  (e.g. approx. 6 ms faster, when output on i.MX6 with 115200 baud).
+
+config VPL_BANNER_PRINT
+	bool "Enable output of the VPL banner 'U-Boot VPL ...'"
+	depends on VPL
+	default y
+	help
+	  If this option is enabled, VPL will print the banner with version
+	  info. Disabling this option could be useful to reduce VPL boot time
 	  (e.g. approx. 6 ms faster, when output on i.MX6 with 115200 baud).
 
 config SPL_EARLY_BSS
@@ -802,6 +824,27 @@ config SPL_DM_SPI_FLASH
 	  Enable support for SPI DM flash drivers in SPL.
 
 endif
+
+if TPL
+
+config VPL_CACHE
+	depends on CACHE
+	bool "Support cache drivers in SPL"
+	help
+	  Enable support for cache drivers in SPL.
+
+config VPL_DM_SPI
+	bool "Support SPI DM drivers in SPL"
+	help
+	  Enable support for SPI DM drivers in SPL.
+
+config VPL_DM_SPI_FLASH
+	bool "Support SPI DM FLASH drivers in SPL"
+	help
+	  Enable support for SPI DM flash drivers in SPL.
+
+endif
+
 if SPL_UBI
 config SPL_UBI_LOAD_BY_VOLNAME
 	bool "Support loading volumes by name"
@@ -1580,6 +1623,129 @@ config TPL_YMODEM_SUPPORT
 	  with a checksum to ensure correctness.
 
 endif # TPL
+
+config VPL
+	bool
+	depends on SUPPORT_SPL
+	prompt "Enable VPL"
+	help
+	  If you want to build VPL as well as the normal image, TPL and SPL,
+	  say Y.
+
+if VPL
+
+config VPL_FRAMEWORK
+	bool "Support VPL based upon the common SPL framework"
+	default y
+	help
+	  Enable the SPL framework under common/spl/ for VPL builds.
+	  This framework supports MMC, NAND and YMODEM and other methods
+	  loading of U-Boot's next stage. If unsure, say Y.
+
+config VPL_LIBCOMMON_SUPPORT
+	bool "Support common libraries"
+	default y if SPL_LIBCOMMON_SUPPORT
+	help
+	  Enable support for common U-Boot libraries within VPL. See
+	  SPL_LIBCOMMON_SUPPORT for details.
+
+config VPL_LIBGENERIC_SUPPORT
+	bool "Support generic libraries"
+	default y if SPL_LIBGENERIC_SUPPORT
+	help
+	  Enable support for generic U-Boot libraries within VPL. These
+	  libraries include generic code to deal with device tree, hashing,
+	  printf(), compression and the like. This option is enabled on many
+	  boards. Enable this option to build the code in lib/ as part of an
+	  SPL build.
+
+config VPL_DRIVERS_MISC_SUPPORT
+	bool "Support misc drivers"
+	default y if TPL_DRIVERS_MISC_SUPPORT
+	help
+	  Enable miscellaneous drivers in VPL. These drivers perform various
+	  tasks that don't fall nicely into other categories, Enable this
+	  option to build the drivers in drivers/misc as part of an VPL
+	  build, for those that support building in VPL (not all drivers do).
+
+config VPL_GPIO_SUPPORT
+	bool "Support GPIO in VPL"
+	default y if SPL_GPIO_SUPPORT
+	help
+	  Enable support for GPIOs (General-purpose Input/Output) in VPL.
+	  GPIOs allow U-Boot to read the state of an input line (high or
+	  low) and set the state of an output line. This can be used to
+	  drive LEDs, control power to various system parts and read user
+	  input. GPIOs can be useful in TPL to enable a 'sign-of-life' LED,
+	  for example. Enable this option to build the drivers in
+	  drivers/gpio as part of an TPL build.
+
+config VPL_I2C_SUPPORT
+	bool "Support I2C in VPL"
+	default y if SPL_I2C_SUPPORT
+	help
+	  Enable support for the I2C bus in TPL. Vee SPL_I2C_SUPPORT for
+	  details.
+
+config VPL_PCH_SUPPORT
+	bool "Support PCH drivers"
+	default y if TPL_PCH_SUPPORT
+	help
+	  Enable support for PCH (Platform Controller Hub) devices in VPL.
+	  These are used to set up GPIOs and the SPI peripheral early in
+	  boot. This enables the drivers in drivers/pch as part of a VPL
+	  build.
+
+config VPL_PCI
+	bool "Support PCI drivers"
+	default y if SPL_PCI
+	help
+	  Enable support for PCI in VPL. For platforms that need PCI to boot,
+	  or must perform some init using PCI in VPL, this provides the
+	  necessary driver support. This enables the drivers in drivers/pci
+	  as part of a VPL build.
+
+config VPL_RTC_SUPPORT
+	bool "Support RTC drivers"
+	help
+	  Enable RTC (Real-time Clock) support in VPL. This includes support
+	  for reading and setting the time. Some RTC devices also have some
+	  non-volatile (battery-backed) memory which is accessible if
+	  needed. This enables the drivers in drivers/rtc as part of an VPL
+	  build.
+
+config VPL_SERIAL_SUPPORT
+	bool "Support serial"
+	default y if TPL_SERIAL_SUPPORT
+	select VPL_PRINTF
+	select VPL_STRTO
+	help
+	  Enable support for serial in VPL. See SPL_SERIAL_SUPPORT for
+	  details.
+
+config VPL_SPI_SUPPORT
+	bool "Support SPI drivers"
+	help
+	  Enable support for using SPI in VPL. See SPL_SPI_SUPPORT for
+	  details.
+
+config VPL_SPI_FLASH_SUPPORT
+	bool "Support SPI flash drivers"
+	help
+	  Enable support for using SPI flash in VPL, and loading U-Boot from
+	  SPI flash. SPI flash (Serial Peripheral Bus flash) is named after
+	  the SPI bus that is used to connect it to a system. It is a simple
+	  but fast bidirectional 4-wire bus (clock, chip select and two data
+	  lines). This enables the drivers in drivers/mtd/spi as part of an
+	  VPL build. This normally requires VPL_SPI_SUPPORT.
+
+config VPL_TEXT_BASE
+	hex "VPL Text Base"
+	default 0x0
+	help
+	  The address in memory that VPL will be running from.
+
+endif
 
 config SPL_AT91_MCK_BYPASS
 	bool "Use external clock signal as a source of main clock for AT91 platforms"

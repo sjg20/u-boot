@@ -591,6 +591,25 @@ static int cros_ec_invalidate_hash(struct udevice *dev)
 	return 0;
 }
 
+static int ec_hello(struct udevice *dev, uint *handshakep)
+{
+	struct ec_params_hello req;
+	struct ec_response_hello *resp;
+
+	req.in_data = 0x12345678;
+	if (ec_command_inptr(dev, EC_CMD_HELLO, 0, &req, sizeof(req),
+			     (uint8_t **)&resp, sizeof(*resp)) < 0)
+		return -EIO;
+	if (resp->out_data != req.in_data + 0x01020304) {
+		printf("Received invalid handshake %x\n", resp->out_data);
+		if (handshakep)
+			*handshakep = req.in_data;
+		return -ENOTSYNC;
+	}
+
+	return 0;
+}
+
 int cros_ec_reboot(struct udevice *dev, enum ec_reboot_cmd cmd, uint8_t flags)
 {
 	struct ec_params_reboot_ec p;
@@ -603,18 +622,23 @@ int cros_ec_reboot(struct udevice *dev, enum ec_reboot_cmd cmd, uint8_t flags)
 		return -1;
 
 	if (!(flags & EC_REBOOT_FLAG_ON_AP_SHUTDOWN)) {
+		ulong start;
+
 		/*
 		 * EC reboot will take place immediately so delay to allow it
 		 * to complete.  Note that some reboot types (EC_REBOOT_COLD)
 		 * will reboot the AP as well, in which case we won't actually
 		 * get to this point.
 		 */
-		/*
-		 * TODO(rspangler@chromium.org): Would be nice if we had a
-		 * better way to determine when the reboot is complete.  Could
-		 * we poll a memory-mapped LPC value?
-		 */
-		udelay(50000);
+		mdelay(50);
+		start = get_timer(0);
+		while(ec_hello(dev, NULL)) {
+			if (get_timer(start) > 3000) {
+				log_err("EC did not return from reboot.\n");
+				return -ETIMEDOUT;
+			}
+			mdelay(5);
+		}
 	}
 
 	return 0;
@@ -738,7 +762,6 @@ static int cros_ec_check_version(struct udevice *dev)
 {
 	struct cros_ec_dev *cdev = dev_get_uclass_priv(dev);
 	struct ec_params_hello req;
-	struct ec_response_hello *resp;
 
 	struct dm_cros_ec_ops *ops;
 	int ret;
@@ -767,14 +790,14 @@ static int cros_ec_check_version(struct udevice *dev)
 	/* Try sending a version 3 packet */
 	cdev->protocol_version = 3;
 	req.in_data = 0;
-	if (ec_command_inptr(dev, EC_CMD_HELLO, 0, &req, sizeof(req),
-			     (uint8_t **)&resp, sizeof(*resp)) > 0)
+	ret = ec_hello(dev, NULL);
+	if (!ret || ret == -ENOTSYNC)
 		return 0;
 
 	/* Try sending a version 2 packet */
 	cdev->protocol_version = 2;
-	if (ec_command_inptr(dev, EC_CMD_HELLO, 0, &req, sizeof(req),
-			     (uint8_t **)&resp, sizeof(*resp)) > 0)
+	ret = ec_hello(dev, NULL);
+	if (!ret || ret == -ENOTSYNC)
 		return 0;
 
 	/*
@@ -790,18 +813,16 @@ static int cros_ec_check_version(struct udevice *dev)
 
 int cros_ec_test(struct udevice *dev)
 {
-	struct ec_params_hello req;
-	struct ec_response_hello *resp;
+	uint out_data;
+	int ret;
 
-	req.in_data = 0x12345678;
-	if (ec_command_inptr(dev, EC_CMD_HELLO, 0, &req, sizeof(req),
-		       (uint8_t **)&resp, sizeof(*resp)) < sizeof(*resp)) {
+	ret = ec_hello(dev, &out_data);
+	if (ret == -ENOTSYNC) {
+		printf("Received invalid handshake %x\n", out_data);
+		return ret;
+	} else if (ret) {
 		printf("ec_command_inptr() returned error\n");
-		return -1;
-	}
-	if (resp->out_data != req.in_data + 0x01020304) {
-		printf("Received invalid handshake %x\n", resp->out_data);
-		return -1;
+		return ret;
 	}
 
 	return 0;
@@ -1376,6 +1397,7 @@ bool cros_ec_is_uhepi_supported(struct udevice *dev)
 #define UHEPI_NOT_SUPPORTED 2
 	static int uhepi_support;
 
+	printf("uhepi_support=%d\n", uhepi_support);
 	if (!uhepi_support) {
 		uhepi_support = cros_ec_check_feature(dev,
 			EC_FEATURE_UNIFIED_WAKE_MASKS) > 0 ? UHEPI_SUPPORTED :
@@ -1403,6 +1425,8 @@ static int cros_ec_get_mask(struct udevice *dev, uint type)
 
 static int cros_ec_clear_mask(struct udevice *dev, uint type, u64 mask)
 {
+	log_info("dev=%p %s\n", dev, dev->name);
+	log_info("UHEPI %d\n", cros_ec_is_uhepi_supported(dev));
 	if (cros_ec_is_uhepi_supported(dev))
 		return cros_ec_uhepi_cmd(dev, type, EC_HOST_EVENT_CLEAR, &mask);
 
@@ -1419,7 +1443,7 @@ uint64_t cros_ec_get_events_b(struct udevice *dev)
 
 int cros_ec_clear_events_b(struct udevice *dev, uint64_t mask)
 {
-	log_debug("Chrome EC: clear events_b mask to 0x%016llx\n", mask);
+	log_info("Chrome EC: clear events_b mask to 0x%016llx\n", mask);
 
 	return cros_ec_clear_mask(dev, EC_HOST_EVENT_B, mask);
 }
@@ -1506,6 +1530,8 @@ UCLASS_DRIVER(cros_ec) = {
 	.id		= UCLASS_CROS_EC,
 	.name		= "cros-ec",
 	.per_device_auto_alloc_size = sizeof(struct cros_ec_dev),
+#if !CONFIG_IS_ENABLED(OF_PLATDATA)
 	.post_bind	= dm_scan_fdt_dev,
+#endif
 	.flags		= DM_UC_FLAG_ALLOC_PRIV_DMA,
 };

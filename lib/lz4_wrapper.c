@@ -6,6 +6,7 @@
 #include <common.h>
 #include <compiler.h>
 #include <image.h>
+#include <log.h>
 #include <lz4.h>
 #include <linux/kernel.h>
 #include <linux/types.h>
@@ -59,11 +60,13 @@ int ulz4fn(const void *src, size_t srcn, void *dst, size_t *dstn)
 
 		/* We assume there's always only a single, standard frame. */
 		if (magic != LZ4F_MAGIC || version != 1)
-			return -EPROTONOSUPPORT;	/* unknown format */
+			return log_msg_ret("magic-version",-EPROTONOSUPPORT);
+		/* reserved bits must be zero */
 		if ((flags & 0x03) || (block_desc & 0x8f))
-			return -EINVAL;	/* reserved bits must be zero */
+			return log_msg_ret("reserved", -EINVAL);
+		/* we can't support this yet */
 		if (!independent_blocks)
-			return -EPROTONOSUPPORT; /* we can't support this yet */
+			return log_msg_ret("blocks", -EPROTONOSUPPORT);
 
 		if (has_content_size) {
 			if (srcn < sizeof(u32) + 3*sizeof(u8) + sizeof(u64))

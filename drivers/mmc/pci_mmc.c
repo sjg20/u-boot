@@ -10,12 +10,18 @@
 #include <log.h>
 #include <malloc.h>
 #include <mapmem.h>
+#include <mmc.h>
 #include <sdhci.h>
 #include <acpi/acpigen.h>
 #include <acpi/acpi_device.h>
 #include <acpi/acpi_dp.h>
 #include <asm-generic/gpio.h>
 #include <dm/acpi.h>
+
+enum {
+	TYPE_SD,
+	TYPE_EMMC,
+};
 
 struct pci_mmc_plat {
 	struct mmc_config cfg;
@@ -34,7 +40,16 @@ static int pci_mmc_probe(struct udevice *dev)
 	struct pci_mmc_plat *plat = dev_get_platdata(dev);
 	struct pci_mmc_priv *priv = dev_get_priv(dev);
 	struct sdhci_host *host = &priv->host;
+	struct blk_desc *desc;
 	int ret;
+
+	ret = mmc_of_parse(dev, &plat->cfg);
+	if (ret)
+		return ret;
+	printf("\n\n* mmc %s: rem=%ld\n", dev->name,
+	       plat->cfg.host_caps & MMC_CAP_NONREMOVABLE);
+	desc = mmc_get_blk_desc(&plat->mmc);
+	desc->removable = !(plat->cfg.host_caps & MMC_CAP_NONREMOVABLE);
 
 	host->ioaddr = (void *)dm_pci_map_bar(dev, PCI_BASE_ADDRESS_0,
 					      PCI_REGION_MEM);
@@ -76,6 +91,8 @@ static int pci_mmc_acpi_fill_ssdt(const struct udevice *dev,
 	int ret;
 
 	if (!dev_of_valid(dev))
+		return 0;
+	if (dev_get_driver_data(dev) == TYPE_EMMC)
 		return 0;
 
 	ret = gpio_get_acpi(&priv->cd_gpio, &gpio);
@@ -120,7 +137,8 @@ struct acpi_ops pci_mmc_acpi_ops = {
 };
 
 static const struct udevice_id pci_mmc_match[] = {
-	{ .compatible = "intel,apl-sd" },
+	{ .compatible = "intel,apl-sd", .data = TYPE_SD },
+	{ .compatible = "intel,apl-emmc", .data = TYPE_EMMC },
 	{ }
 };
 
