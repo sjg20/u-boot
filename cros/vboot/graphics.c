@@ -13,7 +13,10 @@
 #include <common.h>
 #include <bmp_layout.h>
 #include <dm.h>
+#include <log.h>
+#include <lz4.h>
 #include <mapmem.h>
+#include <malloc.h>
 #include <video.h>
 #include <cros/cb_gfx.h>
 

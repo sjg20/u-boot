@@ -108,7 +108,7 @@ u32 VbExKeyboardRead(void)
 		goto out;
 
 	/* Read a non-Escape character or a standalone Escape character */
-	ch = getc();
+	ch = getchar();
 	if (ch != CSI_0 || !tstc()) {
 		/* Handle normal asci keys for FAFT keyboard matrix */
 		if (faft_key_remap(&ch, KEY_TYPE_ASCII) >= 0)
@@ -124,13 +124,13 @@ u32 VbExKeyboardRead(void)
 	}
 
 	/* Filter out non- Escape-[ sequence */
-	if (getc() != CSI_1) {
+	if (getchar() != CSI_1) {
 		ch = 0;
 		goto out;
 	}
 
 	/* Get special keys */
-	ch = getc();
+	ch = getchar();
 
 	/* Handle special keys for FAFT keyboard matrix */
 	if (faft_key_remap(&ch, KEY_TYPE_SPECIAL) >= 0)

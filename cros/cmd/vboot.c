@@ -30,7 +30,7 @@ int board_run_command(const char *cmd)
 	return 1;
 }
 
-static int do_vboot_go(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_vboot_go(struct cmd_tbl *cmdtp, int flag, int argc,
 		       char * const argv[])
 {
 	struct vboot_info *vboot = vboot_get_alloc();
@@ -91,7 +91,7 @@ static int do_vboot_go(cmd_tbl_t *cmdtp, int flag, int argc,
 	return ret ? 1 : 0;
 }
 
-static int do_vboot_list(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_vboot_list(struct cmd_tbl *cmdtp, int flag, int argc,
 			 char * const argv[])
 {
 	enum vboot_stage_t stagenum;
@@ -107,15 +107,15 @@ static int do_vboot_list(cmd_tbl_t *cmdtp, int flag, int argc,
 	return 0;
 }
 
-static cmd_tbl_t cmd_vboot_sub[] = {
+static struct cmd_tbl cmd_vboot_sub[] = {
 	U_BOOT_CMD_MKENT(go, 4, 0, do_vboot_go, "", ""),
 	U_BOOT_CMD_MKENT(list, 4, 0, do_vboot_list, "", ""),
 };
 
 /* Process a vboot sub-command */
-static int do_vboot(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+static int do_vboot(struct cmd_tbl *cmdtp, int flag, int argc, char * const argv[])
 {
-	cmd_tbl_t *c;
+	struct cmd_tbl *c;
 
 	/* Strip off leading 'vboot' command argument */
 	argc--;
@@ -132,7 +132,7 @@ U_BOOT_CMD(vboot, 4, 1, do_vboot, "Chromium OS Verified boot",
 	   "go -n [ro|rw|auto|start|next|<stage>]  Run verified boot stage (repeatable)\n"
 	   "vboot list           List verified boot stages");
 
-static int do_vboot_go_auto(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_vboot_go_auto(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char * const argv[])
 {
 	board_run_command("vboot");

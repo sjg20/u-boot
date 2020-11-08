@@ -10,6 +10,7 @@
 #include <common.h>
 #include <dm.h>
 #include <cros_ec.h>
+#include <log.h>
 #include <malloc.h>
 #include <vb2_api.h>
 #include <cros/cros_common.h>

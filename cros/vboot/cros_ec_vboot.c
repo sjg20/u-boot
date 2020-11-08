@@ -5,15 +5,17 @@
  * Copyright 2018 Google LLC
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
 #include <dm.h>
+#include <log.h>
 #include <cros_ec.h>
 #include <cros/vboot.h>
 #include <cros/vboot_ec.h>
 
-int cros_ec_vboot_running_rw(struct udevice *dev, int *in_rw)
+static int cros_ec_vboot_running_rw(struct udevice *dev, int *in_rw)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
 	enum ec_current_image image;
@@ -37,7 +39,7 @@ int cros_ec_vboot_running_rw(struct udevice *dev, int *in_rw)
 	return 0;
 }
 
-int cros_ec_vboot_jump_to_rw(struct udevice *dev)
+static int cros_ec_vboot_jump_to_rw(struct udevice *dev)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
 	int ret;
@@ -49,7 +51,7 @@ int cros_ec_vboot_jump_to_rw(struct udevice *dev)
 	return 0;
 }
 
-int cros_ec_vboot_disable_jump(struct udevice *dev)
+static int cros_ec_vboot_disable_jump(struct udevice *dev)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
 	int ret;
@@ -73,22 +75,32 @@ static u32 get_vboot_hash_offset(enum VbSelectFirmware_t select)
 	}
 }
 
-int cros_ec_vboot_hash_image(struct udevice *dev,
-			     enum VbSelectFirmware_t select,
-			     const u8 **hashp, int *hash_sizep)
+static int cros_ec_vboot_hash_image(struct udevice *dev,
+				    enum VbSelectFirmware_t select,
+				    u8 *hash, int *hash_sizep)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
 	static struct ec_response_vboot_hash resp;
 	u32 hash_offset;
 	int ret;
+	uint i;
 
 	hash_offset = get_vboot_hash_offset(select);
 
 	ret = cros_ec_read_hash(ec_dev, hash_offset, &resp);
 	if (ret)
-		return ret;
-	*hash_sizep = resp.size;
-	*hashp = resp.hash_digest;
+		return log_msg_ret("read", ret);
+	if (resp.digest_size > *hash_sizep)
+		return log_msg_ret("size", -E2BIG);
+	log_info("hash status=%x, hash_type=%x, digest_size=%x, offset=%x, size=%x\n",
+		 resp.status, resp.hash_type, resp.digest_size, resp.offset,
+		 resp.size);
+	memcpy(hash, resp.hash_digest, resp.digest_size);
+	for (i = 0; i < resp.digest_size; i++)
+		printf("%02x", hash[i]);
+	printf("\n");
+
+	*hash_sizep = resp.digest_size;
 
 	return 0;
 }
@@ -106,6 +118,7 @@ static int vboot_set_region_protection(struct udevice *ec_dev,
 		protected_region = EC_FLASH_PROTECT_RO_NOW;
 
 	/* Update protection */
+	log_debug("ec=%s, mask=%x, enable=%d\n", ec_dev->name, mask, enable);
 	ret = cros_ec_flash_protect(ec_dev, mask, enable ? mask : 0, &resp);
 	if (ret < 0) {
 		log_err("Failed to update EC flash protection\n");
@@ -152,9 +165,9 @@ static enum ec_flash_region vboot_to_ec_region(enum VbSelectFirmware_t select)
 	}
 }
 
-int cros_ec_vboot_update_image(struct udevice *dev,
-			       enum VbSelectFirmware_t select,
-			       const u8 *image, int image_size)
+static int cros_ec_vboot_update_image(struct udevice *dev,
+				      enum VbSelectFirmware_t select,
+				      const u8 *image, int image_size)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
 	u32 region_offset, region_size;
@@ -164,14 +177,16 @@ int cros_ec_vboot_update_image(struct udevice *dev,
 	region = vboot_to_ec_region(select);
 	ret = vboot_set_region_protection(ec_dev, select, 0);
 	if (ret)
-		return ret;
+		return log_msg_ret("prot", ret);
 
 	ret = cros_ec_flash_offset(ec_dev, region, &region_offset,
 				   &region_size);
 	if (ret)
 		return ret;
+	log_info("Updating region %d, offset=%x, size=%x\n", region,
+		 region_offset, region_size);
 	if (image_size > region_size)
-		return -EINVAL;
+		return log_msg_ret("size", -EINVAL);
 
 	/*
 	 * Erase the entire region, so that the EC doesn't see any garbage
@@ -183,29 +198,32 @@ int cros_ec_vboot_update_image(struct udevice *dev,
 	 */
 	ret = cros_ec_flash_erase(ec_dev, region_offset, region_size);
 	if (ret)
-		return ret;
+		return log_msg_ret("erase", ret);
 
 	/* Write the image */
 	ret = cros_ec_flash_write(ec_dev, image, region_offset, image_size);
 	if (ret)
-		return ret;
+		return log_msg_ret("write", ret);
 
 	/* Verify the image */
 	ret = cros_ec_efs_verify(ec_dev, region);
 	if (ret)
-		return ret;
+		return log_msg_ret("verify", ret);
+	log_info("EC image updated\n");
 
 	return 0;
 }
 
-int cros_ec_vboot_protect(struct udevice *dev, enum VbSelectFirmware_t select)
+static int cros_ec_vboot_protect(struct udevice *dev,
+				 enum VbSelectFirmware_t select)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
 
 	return vboot_set_region_protection(ec_dev, select, 1);
 }
 
-int cros_ec_vboot_entering_mode(struct udevice *dev, enum VbEcBootMode_t mode)
+static int cros_ec_vboot_entering_mode(struct udevice *dev,
+				       enum VbEcBootMode_t mode)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
 	int ret;
@@ -226,6 +244,7 @@ static const struct vboot_ec_ops cros_ec_vboot_ops = {
 	.running_rw	= cros_ec_vboot_running_rw,
 	.jump_to_rw	= cros_ec_vboot_jump_to_rw,
 	.running_rw	= cros_ec_vboot_running_rw,
+	.disable_jump	= cros_ec_vboot_disable_jump,
 	.hash_image	= cros_ec_vboot_hash_image,
 	.update_image	= cros_ec_vboot_update_image,
 	.protect	= cros_ec_vboot_protect,
@@ -238,8 +257,8 @@ static const struct udevice_id cros_ec_vboot_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(cros_ec_vboot) = {
-	.name		= "cros_ec_vboot",
+U_BOOT_DRIVER(google_cros_ec_vboot) = {
+	.name		= "google_cros_ec_vboot",
 	.id		= UCLASS_CROS_VBOOT_EC,
 	.of_match	= cros_ec_vboot_ids,
 	.ops		= &cros_ec_vboot_ops,

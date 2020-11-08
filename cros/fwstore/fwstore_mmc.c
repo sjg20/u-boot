@@ -10,6 +10,7 @@
 
 #include <common.h>
 #include <dm.h>
+#include <log.h>
 #include <malloc.h>
 #include <mmc.h>
 #include <cros/cros_common.h>

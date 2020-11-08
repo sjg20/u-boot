@@ -11,6 +11,7 @@
 #include <common.h>
 #include <bloblist.h>
 #include <cros_ec.h>
+#include <log.h>
 #include <vboot_struct.h>
 #include <cros/vboot.h>
 #include <cros/vboot_flag.h>
@@ -127,7 +128,7 @@ static int log_recovery_mode_switch(struct vboot_info *vboot)
 	/* Don't add this info if it is already there */
 	if (!bloblist_find(BLOBLISTT_EC_HOSTEVENT, sizeof(*events)))
 		return -EEXIST;
-	events = bloblist_add(BLOBLISTT_EC_HOSTEVENT, sizeof(*events));
+	events = bloblist_add(BLOBLISTT_EC_HOSTEVENT, sizeof(*events), 0);
 	if (!events)
 		return -ENOSPC;
 
@@ -156,19 +157,19 @@ int vboot_fill_handoff(struct vboot_info *vboot)
 	sd->workbuf_hash_size = 0;
 
 	log_info("creating vboot_handoff structure\n");
-	vh = bloblist_add(BLOBLISTT_VBOOT_HANDOFF, sizeof(*vh));
+	vh = bloblist_add(BLOBLISTT_VBOOT_HANDOFF, sizeof(*vh), 0);
 	if (!vh)
 		return log_msg_ret("failed to alloc vboot_handoff struct\n",
 				   -ENOSPC);
-
-	memset(vh, 0, sizeof(*vh));
 
 	/* needed until we finish transtion to vboot2 for kernel verification */
 	fill_handoff(vboot, vh, sd);
 	vboot->handoff = vh;
 
+	log_info("1\n");
 	/* Log the recovery mode switches if required, before clearing them */
 	log_recovery_mode_switch(vboot);
+	log_info("2\n");
 
 	/*
 	 * The recovery mode switch is cleared (typically backed by EC) here
@@ -180,6 +181,7 @@ int vboot_fill_handoff(struct vboot_info *vboot)
 	 * is known to be up.
 	 */
 	clear_recovery_mode_switch(vboot);
+	log_info("3\n");
 
 	return 0;
 }

@@ -8,6 +8,8 @@
 #ifndef __CROS_CB_GFX_H
 #define __CROS_CB_GFX_H
 
+#include <linux/bitops.h>
+
 /* API error codes */
 #define CBGFX_SUCCESS			0
 /* unknown error */

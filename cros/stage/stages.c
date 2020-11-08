@@ -9,6 +9,7 @@
 
 #include <common.h>
 #include <errno.h>
+#include <log.h>
 #include <spl.h>
 #include <sysreset.h>
 #include <cros/nvdata.h>
@@ -26,8 +27,8 @@ struct vboot_stage {
  * selection process. We only build in the code that is actually needed by each
  * stage.
  */
-struct vboot_stage stages[] = {
-#ifdef CONFIG_TPL_BUILD
+struct vboot_stage stages[VBOOT_STAGE_COUNT] = {
+#if CONFIG_IS_ENABLED(CHROMEOS_VBOOT_A)
 	/* Verification stage: figures out which firmware to run */
 	[VBOOT_STAGE_VER_INIT] = {"ver_init", vboot_ver_init},
 	[VBOOT_STAGE_VER1_VBINIT] = {"ver1_vbinit", vboot_ver1_vbinit},
@@ -36,13 +37,15 @@ struct vboot_stage stages[] = {
 	[VBOOT_STAGE_VER4_LOCATEFW] = {"ver4_locatefw", vboot_ver4_locate_fw,},
 	[VBOOT_STAGE_VER_FINISH] = {"ver5_finishfw", vboot_ver5_finish_fw,},
 	[VBOOT_STAGE_VER_JUMP] = {"ver_jump", vboot_ver6_jump_fw,},
-#elif defined(CONFIG_SPL_BUILD)
+#endif
+#if CONFIG_IS_ENABLED(CHROMEOS_VBOOT_B)
 	/* SPL stage: Sets up SDRAM and jumps to U-Boot proper */
 	[VBOOT_STAGE_SPL_INIT] = {"spl_init", vboot_spl_init,},
 	[VBOOT_STAGE_SPL_JUMP_U_BOOT] =
 		{"spl_jump_u_boot", vboot_spl_jump_u_boot,},
 	[VBOOT_STAGE_RW_INIT] = {},
-#else
+#endif
+#if CONFIG_IS_ENABLED(CHROMEOS_VBOOT_C)
 	/* U-Boot stage: Boots the kernel */
 	[VBOOT_STAGE_RW_INIT] = {"rw_init", vboot_rw_init,},
 	[VBOOT_STAGE_RW_SELECTKERNEL] =
@@ -91,7 +94,7 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
 	struct vboot_stage *stage = &stages[stagenum];
 	int ret;
 
-	log_debug("Running stage '%s'\n", stage->name);
+	log_info("Running stage '%s'\n", stage->name);
 	if (!stage->run) {
 		log_debug("   - Stage '%s' not available\n", stage->name);
 		return -EPERM;
@@ -100,7 +103,7 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
 	bootstage_mark_name(BOOTSTAGE_VBOOT_FIRST + stagenum, stage->name);
 	ret = (*stage->run)(vboot);
 	if (ret)
-		log_debug("Error: stage '%s' returned %d\n", stage->name, ret);
+		log_err("Error: stage '%s' returned %d\n", stage->name, ret);
 
 	return ret;
 }
@@ -113,6 +116,11 @@ static int save_if_needed(struct vboot_info *vboot)
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
 
+	log_warning("Skipping save\n");
+	return 0;
+
+	if (!ctx)
+		return -ENOENT;
 	if (ctx->flags & VB2_CONTEXT_NVDATA_CHANGED) {
 		log(LOGC_VBOOT, LOGL_INFO, "Saving nvdata\n");
 		print_buffer(0, ctx->nvdata, 1, sizeof(ctx->nvdata), 0);
@@ -153,6 +161,10 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 			break;
 	}
 
+	/* Success - ready to continue */
+	if (!ret)
+		return 0;
+
 #if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
 	malloc_simple_info();
 #endif
@@ -175,6 +187,8 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 		sysreset_walk_halt(SYSRESET_COLD);
 		return -ENOENT;  /* Try next boot method (which is recovery) */
 	}
+
+	return 0;
 
 	if (ret == VBERROR_REBOOT_REQUIRED) {
 		log_warning("Cold reboot\n");
@@ -204,22 +218,15 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 int vboot_run_auto(struct vboot_info *vboot, uint flags)
 {
 	enum vboot_stage_t stage;
-	int ret;
 
 	log_debug("start\n");
 
-	/* See if we are the first phase after power-on */
-	ret = sysreset_get_last_walk();
-	log_debug("power-on: returns %d (power-on-reset=%d)\n", ret,
-		  ret == SYSRESET_POWER);
-	if (ret == SYSRESET_POWER)
+	if (CONFIG_IS_ENABLED(CHROMEOS_VBOOT_A))
 		stage = VBOOT_STAGE_FIRST_VER;
-	else
-#ifdef CONFIG_SPL_BUILD
+	else if (CONFIG_IS_ENABLED(CHROMEOS_VBOOT_B))
 		stage = VBOOT_STAGE_FIRST_SPL;
-#else
+	else
 		stage = VBOOT_STAGE_FIRST_RW;
-#endif
 
 	return vboot_run_stages(vboot, stage, flags);
 }
@@ -227,26 +234,59 @@ int vboot_run_auto(struct vboot_info *vboot, uint flags)
 void board_boot_order(u32 *spl_boot_list)
 {
 	spl_boot_list[0] = BOOT_DEVICE_CROS_VBOOT;
+#ifdef CONFIG_X86
+	spl_boot_list[1] = BOOT_DEVICE_SPI_MMAP;
+#else
 	spl_boot_list[1] = BOOT_DEVICE_BOARD;
+#endif
 }
 
-#ifdef CONFIG_TPL_BUILD
-static int cros_load_image_tpl(struct spl_image_info *spl_image,
+int cros_do_stage(void)
+{
+	struct vboot_info *vboot;
+	int ret;
+
+	log_info("start");
+	if (!CONFIG_IS_ENABLED(CHROMEOS_VBOOT_A))
+		return 0;
+
+	printf("vpl: load image\n");
+	ret = vboot_alloc(&vboot);
+	if (ret)
+		return ret;
+// 	vboot->spl_image = spl_image;
+
+	ret = vboot_run_auto(vboot, 0);
+	if (ret)
+		printf("VPL error %d\n", ret);
+
+	return 0;
+}
+
+#ifdef CONFIG_VPL_BUILD
+static int cros_load_image_vpl(struct spl_image_info *spl_image,
 			       struct spl_boot_device *bootdev)
 {
 	struct vboot_info *vboot;
 	int ret;
 
-	printf("tpl: load image\n");
+	printf("vpl: load image\n");
 	ret = vboot_alloc(&vboot);
 	if (ret)
 		return ret;
 	vboot->spl_image = spl_image;
 
-	return vboot_run_auto(vboot, 0);
+	ret = vboot_run_auto(vboot, 0);
+	if (ret)
+		printf("VPL error %d\n", ret);
+	log_info("Completed loading image\n");
+
+	return 0;
 }
-SPL_LOAD_IMAGE_METHOD("chromium_vboot_tpl", 0, BOOT_DEVICE_CROS_VBOOT,
-		      cros_load_image_tpl);
+SPL_LOAD_IMAGE_METHOD("chromium_vboot_vpl", 0, BOOT_DEVICE_CROS_VBOOT,
+		      cros_load_image_vpl);
+
+#elif defined(CONFIG_TPL_BUILD)
 
 #elif defined(CONFIG_SPL_BUILD)
 static int cros_load_image_spl(struct spl_image_info *spl_image,
@@ -255,13 +295,17 @@ static int cros_load_image_spl(struct spl_image_info *spl_image,
 	struct vboot_info *vboot;
 	int ret;
 
-	printf("spl_load image\n");
 	ret = vboot_alloc(&vboot);
 	if (ret)
 		return ret;
 	vboot->spl_image = spl_image;
 
-	return vboot_run_auto(vboot, 0);
+	ret = vboot_run_auto(vboot, 0);
+	if (ret)
+		return log_msg_ret("vboot", ret);
+	log_info("Completed loading image\n");
+
+	return 0;
 }
 SPL_LOAD_IMAGE_METHOD("chromium_vboot_spl", 0, BOOT_DEVICE_CROS_VBOOT,
 		      cros_load_image_spl);

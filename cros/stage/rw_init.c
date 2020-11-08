@@ -8,8 +8,10 @@
 #define NEED_VB20_INTERNALS
 
 #include <common.h>
+#include <binman.h>
 #include <bloblist.h>
 #include <dm.h>
+#include <log.h>
 #include <mapmem.h>
 #include <cros/cros_ofnode.h>
 #include <cros/fwstore.h>
@@ -107,8 +109,8 @@ static int common_params_init(struct vboot_info *vboot, bool clear_shared_data)
 	if (clear_shared_data)
 		memset(cparams->shared_data_blob, '\0',
 		       cparams->shared_data_size);
-	log_info("Found shared_data_blob at %x, size %d\n",
-		 map_to_sysmem(cparams->shared_data_blob),
+	log_info("Found shared_data_blob at %lx, size %d\n",
+		 (ulong)map_to_sysmem(cparams->shared_data_blob),
 		 cparams->shared_data_size);
 
 	return 0;
@@ -263,17 +265,23 @@ int vboot_rw_init(struct vboot_info *vboot)
 	ctx = &blob->ctx;
 	vboot->ctx = ctx;
 	ctx->non_vboot_context = vboot;
-	printf("ctx = %p\n", ctx);
-	print_buffer(0, ctx->nvdata, 1, sizeof(ctx->nvdata), 0);
+// 	printf("ctx = %p\n", ctx);
+// 	print_buffer(0, ctx->nvdata, 1, sizeof(ctx->nvdata), 0);
 	vboot->valid = true;
 	log_warning("flags %x %d\n", ctx->flags,
 		    ((ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0));
+
+	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
+		ret = binman_select_subnode("read-write-a");
+		if (ret)
+			return log_msg_ret("binman", ret);
+	}
 
 	ret = vboot_load_config(vboot);
 	if (ret)
 		return log_msg_ret("Cannot load config", ret);
 
-	ret = uclass_first_device(UCLASS_TPM, &vboot->tpm);
+	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
 	if (ret)
 		return log_msg_ret("Cannot locate TPM", ret);
 
