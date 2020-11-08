@@ -492,6 +492,7 @@ static int do_zboot_go(struct cmd_tbl *cmdtp, int flag, int argc,
 	disable_interrupts();
 
 	/* we assume that the kernel is in place */
+	printf("go %p, %x\n", state.base_ptr, state.load_address);
 	ret = boot_linux_kernel((ulong)state.base_ptr, state.load_address,
 				false);
 	printf("Kernel returned! (err=%d)\n", ret);
