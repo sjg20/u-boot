@@ -219,6 +219,7 @@ static int log_dispatch(struct log_rec *rec)
 			ldev->drv->emit(ldev, rec);
 	}
 	gd->processing_msg = false;
+
 	return 0;
 }
 

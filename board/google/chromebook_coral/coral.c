@@ -28,8 +28,11 @@ struct cros_gpio_info {
 	int flags;
 };
 
-int arch_misc_init(void)
+/* This function is needed if CONFIG_CMDLINE is not enabled */
+__weak int board_run_command(const char *cmdline)
 {
+	printf("No command line\n");
+
 	return 0;
 }
 
@@ -98,6 +101,8 @@ static int get_skuconfig(struct udevice *dev)
 			return log_msg_ret("sku", ret);
 		}
 
+	if (ret < 0) {
+		log_debug("Cannot get GPIO list '%s' (%d)\n", dev->name, ret);
 		return ret;
 	}
 
