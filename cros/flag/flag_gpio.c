@@ -37,7 +37,7 @@ static int flag_gpio_probe(struct udevice *dev)
 
 	ret = gpio_request_by_name(dev, "gpio", 0, &priv->desc, GPIOD_IS_IN);
 	if (ret)
-		return ret;
+		return log_msg_ret("gpio", ret);
 #ifdef CONFIG_SANDBOX
 	u32 value;
 

@@ -180,6 +180,7 @@ def Prepare(images, dtb):
     output_fdt_info['u-boot-dtb'] = [dtb, 'u-boot.dtb', None]
     output_fdt_info['u-boot-spl-dtb'] = [dtb, 'spl/u-boot-spl.dtb', None]
     output_fdt_info['u-boot-tpl-dtb'] = [dtb, 'tpl/u-boot-tpl.dtb', None]
+    output_fdt_info['u-boot-vpl-dtb'] = [dtb, 'vpl/u-boot-vpl.dtb', None]
     if not use_fake_dtb:
         fdt_set = {}
         for image in images.values():
@@ -313,6 +314,16 @@ def AddString(node, prop, value):
     """
     for n in GetUpdateNodes(node):
         n.AddString(prop, value)
+
+def AddInt(node, prop, value):
+    """Add a new string property to affected device trees
+
+    Args:
+        prop_name: Name of property
+        val: Integer value of property
+    """
+    for n in GetUpdateNodes(node):
+        n.AddInt(prop, value)
 
 def SetInt(node, prop, value, for_repack=False):
     """Update an integer property in affected device trees with an integer value

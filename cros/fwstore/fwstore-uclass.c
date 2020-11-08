@@ -24,6 +24,33 @@ int cros_fwstore_read(struct udevice *dev, int offset, int count, void *buf)
 	return ops->read(dev, offset, count, buf);
 }
 
+int cros_fwstore_read_entry(struct udevice *dev, struct fmap_entry *entry,
+			    void *buf, int maxlen)
+{
+	int ret;
+
+	if (entry->length > maxlen)
+		return log_msg_ret("spc", -ENOSPC);
+
+	ret = cros_fwstore_read(dev, entry->offset, entry->length, buf);
+	if (ret)
+		return log_msg_ret("read", ret);
+
+	return 0;
+}
+
+int cros_fwstore_mmap(struct udevice *dev, uint offset, uint size,
+		      ulong *addrp)
+{
+	struct cros_fwstore_ops *ops = cros_fwstore_get_ops(dev);
+
+	if (!ops->mmap)
+		return -ENOSYS;
+
+	return ops->mmap(dev, offset, size, addrp);
+}
+
+
 int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
 			void *buf, int buf_size)
 {
@@ -47,13 +74,15 @@ int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
 		return log_ret(ret);
 
 	/* Decompress if needed */
-	printf("entry->compress_algo %d\n", entry->compress_algo);
+	log_debug("entry->compress_algo %d\n", entry->compress_algo);
 	if (entry->compress_algo == FMAP_COMPRESS_LZ4) {
 		size_t out_size = buf_size;
 
-		log_info("Decompress lz4 length=%x, unc=%x, buf_size=%x, start=%p\n",
-			 entry->length, entry->unc_length, buf_size, start);
+		log_debug("Decompress lz4 length=%x, unc=%x, buf_size=%x, start=%p\n",
+			  entry->length, entry->unc_length, buf_size, start);
+#ifdef DEBUG
 		print_buffer(0, start, 1, 0x80, 0);
+#endif
 		start += sizeof(u32);	/* skip compressed size */
 		ret = ulz4fn(start, entry->length, buf, &out_size);
 		if (ret)
@@ -108,13 +137,15 @@ int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
 		*image_sizep = entry->length;
 		break;
 	case FMAP_COMPRESS_LZ4:
-		buf_size = entry->unc_length;
+		buf_size = entry->unc_length + 100;
 		buf = malloc(buf_size);
 		if (!buf)
 			return log_msg_ret("allocate decomp buf", -ENOMEM);
-		log_info("Decompress lz4 length=%x, buf_size=%zx\n",
-			 entry->length, buf_size);
+		log_debug("Decompress lz4 length=%x, buf_size=%zx\n",
+			  entry->length, buf_size);
+#ifdef LOG_DEBUG
 		print_buffer(0, data, 1, 0x80, 0);
+#endif
 		comp_len = *(u32 *)data;
 		in = data + sizeof(u32);	/* skip uncompressed size */
 		ret = ulz4fn(in, comp_len, buf, &buf_size);
@@ -127,6 +158,12 @@ int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
 	}
 
 	return 0;
+}
+
+int fwstore_entry_mmap(struct udevice *dev, struct fmap_entry *entry,
+		       ulong *addrp)
+{
+	return cros_fwstore_mmap(dev, entry->offset, entry->length, addrp);
 }
 
 UCLASS_DRIVER(cros_fwstore) = {

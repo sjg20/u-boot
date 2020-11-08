@@ -8,7 +8,6 @@
 #define NEED_VB20_INTERNALS
 
 #include <common.h>
-#include <binman.h>
 #include <bloblist.h>
 #include <dm.h>
 #include <log.h>
@@ -23,6 +22,8 @@
 
 #include <gbb_header.h>
 #include <vboot_struct.h>
+
+#include <tpm-common.h>
 
 /**
  * gbb_copy_in() - Copy a portion of the GBB into vboot->cparams
@@ -71,10 +72,10 @@ static int gbb_init(struct vboot_info *vboot)
 	ret = gbb_copy_in(vboot, offset, 0, sizeof(GoogleBinaryBlockHeader));
 	if (ret)
 		return ret;
-	log_info("The GBB signature is at %p and is: ", hdr->signature);
+	log_debug("The GBB signature is at %p and is:", hdr->signature);
 	for (int i = 0; i < GBB_SIGNATURE_SIZE; i++)
-		log_info(" %02x", hdr->signature[i]);
-	log_info("\n");
+		log_debug(" %02x", hdr->signature[i]);
+	log_debug("\n");
 
 	ret = gbb_copy_in(vboot, offset, hdr->hwid_offset, hdr->hwid_size);
 	if (ret)
@@ -207,7 +208,7 @@ static void wipe_unused_memory(struct vboot_info *vboot)
 
 static int vboot_do_init_out_flags(struct vboot_info *vboot, u32 out_flags)
 {
-	if (out_flags & VB_INIT_OUT_CLEAR_RAM) {
+	if (0 && (out_flags & VB_INIT_OUT_CLEAR_RAM)) {
 		if (vboot->disable_memwipe)
 			log_warning("Memory wipe requested but not supported\n");
 		else
@@ -249,11 +250,16 @@ static int vboot_init_handoff(struct vboot_info *vboot)
 		vdat->flags |= VBSD_NOFAIL_BOOT;
 	}
 
-	return vboot_do_init_out_flags(vboot, handoff->init_params.out_flags);
+	ret = vboot_do_init_out_flags(vboot, handoff->init_params.out_flags);
+	if (ret)
+		return log_msg_ret("flags", ret);
+
+	return 0;
 }
 
 int vboot_rw_init(struct vboot_info *vboot)
 {
+	struct fmap_firmware_entry *fw_entry;
 	struct vboot_blob *blob;
 	struct vb2_context *ctx;
 	int ret;
@@ -265,17 +271,9 @@ int vboot_rw_init(struct vboot_info *vboot)
 	ctx = &blob->ctx;
 	vboot->ctx = ctx;
 	ctx->non_vboot_context = vboot;
-// 	printf("ctx = %p\n", ctx);
-// 	print_buffer(0, ctx->nvdata, 1, sizeof(ctx->nvdata), 0);
 	vboot->valid = true;
 	log_warning("flags %x %d\n", ctx->flags,
 		    ((ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0));
-
-	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
-		ret = binman_select_subnode("read-write-a");
-		if (ret)
-			return log_msg_ret("binman", ret);
-	}
 
 	ret = vboot_load_config(vboot);
 	if (ret)
@@ -298,11 +296,28 @@ int vboot_rw_init(struct vboot_info *vboot)
 	if (ret)
 		return log_msg_ret("Cannot set up fwstore", ret);
 
+	ret = cros_fwstore_read_entry(vboot->fwstore,
+				      &vboot->fmap.readonly.firmware_id,
+				      &vboot->readonly_firmware_id,
+				      sizeof(vboot->readonly_firmware_id));
+	if (ret)
+		return log_msg_ret("ro", ret);
+
+	if (vboot_is_slot_a(vboot))
+		fw_entry = &vboot->fmap.readwrite_a;
+	else
+		fw_entry = &vboot->fmap.readwrite_b;
+	ret = cros_fwstore_read_entry(vboot->fwstore,
+				      &fw_entry->firmware_id,
+				      &vboot->firmware_id,
+				      sizeof(vboot->firmware_id));
+	if (ret)
+		return log_msg_ret("rw", ret);
+
 #if CONFIG_IS_ENABLED(CROS_EC)
 	ret = uclass_get_device(UCLASS_CROS_EC, 0, &vboot->cros_ec);
 	if (ret)
 		return log_msg_ret("Cannot locate Chromium OS EC", ret);
-	printf("EC=%p\n", vboot->cros_ec);
 #endif
 	ret = vboot_init_handoff(vboot);
 	if (ret)

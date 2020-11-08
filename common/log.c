@@ -153,7 +153,7 @@ static bool log_passes_filters(struct log_device *ldev, struct log_rec *rec)
 {
 	struct log_filter *filt;
 
-	if (rec->force_debug)
+	if (rec->flags & LOGRECF_FORCE_DEBUG)
 		return true;
 
 	/* If there are no filters, filter on the default log level */
@@ -219,6 +219,7 @@ static int log_dispatch(struct log_rec *rec)
 			ldev->drv->emit(ldev, rec);
 	}
 	gd->processing_msg = false;
+
 	return 0;
 }
 
@@ -228,6 +229,7 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 	char buf[CONFIG_SYS_CBSIZE];
 	struct log_rec rec;
 	va_list args;
+	int len;
 
 	/* Check for message continuation */
 	if (cat == LOGC_CONT)
@@ -237,13 +239,18 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 
 	rec.cat = cat;
 	rec.level = level & LOGL_LEVEL_MASK;
-	rec.force_debug = level & LOGL_FORCE_DEBUG;
+	rec.flags = 0;
+	if (level & LOGL_FORCE_DEBUG)
+		rec.flags |= LOGRECF_FORCE_DEBUG;
+	if (gd->log_cont)
+		rec.flags |= LOGRECF_CONT;
 	rec.file = file;
 	rec.line = line;
 	rec.func = func;
 	va_start(args, fmt);
-	vsnprintf(buf, sizeof(buf), fmt, args);
+	len = vsnprintf(buf, sizeof(buf), fmt, args);
 	va_end(args);
+	gd->log_cont = len && buf[len - 1] != '\n';
 	rec.msg = buf;
 	if (!gd || !(gd->flags & GD_FLG_LOG_READY)) {
 		if (gd)

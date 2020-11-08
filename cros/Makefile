@@ -3,7 +3,9 @@
 # Copyright 2018 Google LLC
 #
 
+ifndef CONFIG_SPL_BUILD
 obj-$(CONFIG_CHROMEOS) += cmd/
+endif
 obj-$(CONFIG_CHROMEOS) += crypto/
 obj-$(CONFIG_CROS_FLAG) += flag/
 obj-$(CONFIG_CHROMEOS) += fwstore/

@@ -21,17 +21,6 @@ config CHROMEOS_VBOOT
 
 if CHROMEOS_VBOOT
 
-config VBOOT2
-	bool "Use Chromium OS vboot2 API where possible"
-	depends on CHROMEOS
-	default y
-	help
-	  Use vboot 2 API. This currently (August 2018) only supports the
-	  firmware selection process. It cannot be used for selecing and
-	  booting a kernel. The current U-Boot implementation only supports
-	  the vboot 2 API for firmware, so this option is required to be
-	  enabled.
-
 config VBOOT_DISABLE_DEV_ON_RECOVERY
 	bool "Disable developer mode when going into recovery"
 	depends on CHROMEOS

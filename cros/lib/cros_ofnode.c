@@ -4,7 +4,6 @@
  */
 
 #define LOG_CATEGORY LOGC_VBOOT
-#define LOG_DEBUG
 
 #include <common.h>
 #include <errno.h>
@@ -218,7 +217,6 @@ int cros_ofnode_flashmap(struct cros_fmap *config)
 				return log_msg_ret("Failed to process Flashmap",
 						   -EINVAL);
 		}
-		printf("no more subnodes\n");
 	}
 
 	return 0;
@@ -231,16 +229,18 @@ int cros_ofnode_find_locale(const char *name, struct fmap_entry *entry)
 
 	node = ofnode_by_compatible(ofnode_null(), "chromeos,locales");
 	if (!ofnode_valid(node))
-		return log_msg_ret("chromeos,locales node is missing",
-				   -EINVAL);
+		return log_msg_ret("node", -EINVAL);
 	subnode = ofnode_find_subnode(node, name);
 	if (!ofnode_valid(subnode)) {
 		log_err("Locale not found: %s\n", name);
-		return log_msg_ret("Locale not found", -ENOENT);
+		return log_msg_ret("subnode", -ENOENT);
 	}
 	ret = ofnode_read_fmap_entry(subnode, entry);
-	if (ret)
-		return log_msg_ret(ofnode_get_name(subnode), ret);
+	if (ret) {
+		log_err("Can't read entry for locale '%s': %s\n", name,
+			ofnode_get_name(subnode));
+		return log_msg_ret("entry", ret);
+	}
 
 	return 0;
 }
@@ -287,6 +287,14 @@ int cros_ofnode_memory(const char *name, struct fdt_memory *config)
 static void dump_fmap_entry(const char *path, struct fmap_entry *entry)
 {
 	log_debug("%-20s %08x:%08x\n", path, entry->offset, entry->length);
+	if (entry->hash) {
+		int i;
+
+		log_debug("   hash: ");
+		for (i = 0; i < entry->hash_size; i++)
+			log_debug("%02x", entry->hash[i]);
+		log_debug("\n");
+	}
 }
 
 static void dump_fmap_firmware_entry(const char *name,

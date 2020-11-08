@@ -99,8 +99,14 @@ FORCE_INLINE int LZ4_decompress_generic(
 
     /* Special cases */
     if ((partialDecoding) && (oexit> oend-MFLIMIT)) oexit = oend-MFLIMIT;                         /* targetOutputSize too high => decode everything */
-    if ((endOnInput) && (unlikely(outputSize==0))) return ((inputSize==1) && (*ip==0)) ? 0 : -1;  /* Empty output buffer */
-    if ((!endOnInput) && (unlikely(outputSize==0))) return (*ip==0?1:-1);
+    if ((endOnInput) && (unlikely(outputSize==0)))  {
+	    printf("empty output\n");
+	    return ((inputSize==1) && (*ip==0)) ? 0 : -1;  /* Empty output buffer */
+    }
+    if ((!endOnInput) && (unlikely(outputSize==0)))  {
+	    printf("empty output\n");
+	    return (*ip==0?1:-1);
+    }
 
 
     /* Main Loop */
@@ -121,8 +127,14 @@ FORCE_INLINE int LZ4_decompress_generic(
                 length += s;
             }
             while (likely((endOnInput)?ip<iend-RUN_MASK:1) && (s==255));
-            if ((safeDecode) && unlikely((size_t)(op+length)<(size_t)(op))) goto _output_error;   /* overflow detection */
-            if ((safeDecode) && unlikely((size_t)(ip+length)<(size_t)(ip))) goto _output_error;   /* overflow detection */
+            if ((safeDecode) && unlikely((size_t)(op+length)<(size_t)(op))) {
+		    printf("ov1\n");
+		    goto _output_error;   /* overflow detection */
+	    }
+            if ((safeDecode) && unlikely((size_t)(ip+length)<(size_t)(ip))) {
+		    printf("ov2\n");
+		    goto _output_error;   /* overflow detection */
+	    }
         }
 
         /* copy literals */
@@ -132,13 +144,25 @@ FORCE_INLINE int LZ4_decompress_generic(
         {
             if (partialDecoding)
             {
-                if (cpy > oend) goto _output_error;                           /* Error : write attempt beyond end of output buffer */
-                if ((endOnInput) && (ip+length > iend)) goto _output_error;   /* Error : read attempt beyond end of input buffer */
+                if (cpy > oend) {
+			printf("w1\n");
+			goto _output_error;                           /* Error : write attempt beyond end of output buffer */
+		}
+                if ((endOnInput) && (ip+length > iend)) {
+			printf("r1\n");
+			goto _output_error;   /* Error : read attempt beyond end of input buffer */
+		}
             }
             else
             {
-                if ((!endOnInput) && (cpy != oend)) goto _output_error;       /* Error : block decoding must stop exactly there */
-                if ((endOnInput) && ((ip+length != iend) || (cpy > oend))) goto _output_error;   /* Error : input must be consumed */
+                if ((!endOnInput) && (cpy != oend)) {
+			printf("blk\n");
+			goto _output_error;       /* Error : block decoding must stop exactly there */
+		}
+                if ((endOnInput) && ((ip+length != iend) || (cpy > oend))) {
+			printf("in\n");
+			goto _output_error;   /* Error : input must be consumed */
+		}
             }
             memcpy(op, ip, length);
             ip += length;
@@ -150,7 +174,10 @@ FORCE_INLINE int LZ4_decompress_generic(
 
         /* get offset */
         match = cpy - LZ4_readLE16(ip); ip+=2;
-        if ((checkOffset) && (unlikely(match < lowLimit))) goto _output_error;   /* Error : offset outside destination buffer */
+        if ((checkOffset) && (unlikely(match < lowLimit))) {
+		printf("ofs match=%p, lowLimit=%p\n", match, lowLimit);
+		goto _output_error;   /* Error : offset outside destination buffer */
+	}
 
         /* get matchlength */
         length = token & ML_MASK;
@@ -159,18 +186,27 @@ FORCE_INLINE int LZ4_decompress_generic(
             unsigned s;
             do
             {
-                if ((endOnInput) && (ip > iend-LASTLITERALS)) goto _output_error;
+                if ((endOnInput) && (ip > iend-LASTLITERALS)) {
+			printf("lit\n");
+			goto _output_error;
+		}
                 s = *ip++;
                 length += s;
             } while (s==255);
-            if ((safeDecode) && unlikely((size_t)(op+length)<(size_t)op)) goto _output_error;   /* overflow detection */
+            if ((safeDecode) && unlikely((size_t)(op+length)<(size_t)op)) {
+		printf("over\n");
+		goto _output_error;   /* overflow detection */
+	    }
         }
         length += MINMATCH;
 
         /* check external dictionary */
         if ((dict==usingExtDict) && (match < lowPrefix))
         {
-            if (unlikely(op+length > oend-LASTLITERALS)) goto _output_error;   /* doesn't respect parsing restriction */
+            if (unlikely(op+length > oend-LASTLITERALS)) {
+		    printf("parse\n");
+		    goto _output_error;   /* doesn't respect parsing restriction */
+	    }
 
             if (length <= (size_t)(lowPrefix-match))
             {
@@ -216,7 +252,10 @@ FORCE_INLINE int LZ4_decompress_generic(
 
         if (unlikely(cpy>oend-12))
         {
-            if (cpy > oend-LASTLITERALS) goto _output_error;    /* Error : last LASTLITERALS bytes must be literals */
+            if (cpy > oend-LASTLITERALS) {
+		    printf("last\n");
+		    goto _output_error;    /* Error : last LASTLITERALS bytes must be literals */
+	    }
             if (op < oend-8)
             {
                 LZ4_wildCopy(op, match, oend-8);
@@ -238,5 +277,6 @@ FORCE_INLINE int LZ4_decompress_generic(
 
     /* Overflow error detected */
 _output_error:
+    printf("ip=%p, source=%p\n", ip, source);
     return (int) (-(((const char*)ip)-source))-1;
 }

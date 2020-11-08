@@ -58,11 +58,15 @@ static inline bool u_boot_first_phase(void)
 }
 
 enum u_boot_phase {
+	PHASE_NONE,	/* Invalid phase, signifying before U-Boot */
 	PHASE_TPL,	/* Running in TPL */
+	PHASE_VPL,	/* Running in VPL */
 	PHASE_SPL,	/* Running in SPL */
 	PHASE_BOARD_F,	/* Running in U-Boot before relocation */
 	PHASE_BOARD_R,	/* Running in U-Boot after relocation */
 };
+
+#define DO_VBOOT 1
 
 /**
  * spl_phase() - Find out the phase of U-Boot
@@ -111,7 +115,9 @@ static inline enum u_boot_phase spl_phase(void)
 {
 #ifdef CONFIG_TPL_BUILD
 	return PHASE_TPL;
-#elif CONFIG_SPL_BUILD
+#elif defined(CONFIG_VPL_BUILD)
+	return DO_VBOOT ? PHASE_VPL : PHASE_SPL;
+#elif defined(CONFIG_SPL_BUILD)
 	return PHASE_SPL;
 #else
 	DECLARE_GLOBAL_DATA_PTR;
@@ -122,11 +128,56 @@ static inline enum u_boot_phase spl_phase(void)
 		return PHASE_BOARD_R;
 #endif
 }
+static inline enum u_boot_phase spl_prev_phase(void)
+{
+#ifdef CONFIG_TPL_BUILD
+	return PHASE_NONE;
+#elif defined(CONFIG_VPL_BUILD)
+	return DO_VBOOT ? PHASE_TPL : PHASE_NONE;	/* VPL requires TPL */
+#elif defined(CONFIG_SPL_BUILD)
+	return DO_VBOOT && IS_ENABLED(CONFIG_VPL) ? PHASE_VPL :
+		IS_ENABLED(CONFIG_TPL) ? PHASE_TPL :
+		PHASE_NONE;
+#else
+	return IS_ENABLED(CONFIG_SPL) ? PHASE_SPL :
+		PHASE_NONE;
+#endif
+}
+
+static inline enum u_boot_phase spl_next_phase(void)
+{
+#ifdef CONFIG_TPL_BUILD
+	return DO_VBOOT && IS_ENABLED(CONFIG_VPL) ? PHASE_VPL : PHASE_SPL;
+#elif defined(CONFIG_VPL_BUILD)
+	return PHASE_SPL;
+#else
+	return PHASE_BOARD_F;
+#endif
+}
+
+static inline const char *spl_phase_name(enum u_boot_phase phase)
+{
+	switch (phase) {
+	case PHASE_TPL:
+		return "TPL";
+	case PHASE_VPL:
+		return "VPL";
+	case PHASE_SPL:
+		return "SPL";
+	case PHASE_BOARD_F:
+	case PHASE_BOARD_R:
+		return "U-Boot";
+	default:
+		return "phase?";
+	}
+}
 
 /* A string name for SPL or TPL */
 #ifdef CONFIG_SPL_BUILD
 # ifdef CONFIG_TPL_BUILD
 #  define SPL_TPL_NAME	"TPL"
+# elif defined(CONFIG_VPL_BUILD)
+#  define SPL_TPL_NAME	"VPL"
 # else
 #  define SPL_TPL_NAME	"SPL"
 # endif
@@ -209,6 +260,8 @@ ulong spl_get_image_size(void);
  * of spl_load_simple_fit().
  */
 bool spl_load_simple_fit_skip_processing(void);
+
+ulong spl_get_image_text_base(void);
 
 /**
  * spl_load_simple_fit() - Loads a fit image from a device.

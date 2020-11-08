@@ -12,6 +12,7 @@
 #include <dm.h>
 #include <log.h>
 #include <cros/vboot_flag.h>
+#include <dm/device-internal.h>
 
 /* Names for all the flag we know about */
 static const char *const flag_name[] = {
@@ -26,18 +27,7 @@ static const char *const flag_name[] = {
 };
 
 /**
- * struct vboot_flag_uc_priv - uclass information for each device
- *
- * Each device in this uclass has its own version of this struct.
- *
- * @flag: Flag that this device handles
- */
-struct vboot_flag_uc_priv {
-	enum vboot_flag_t flag;
-};
-
-/**
- * struct vboot_flag_uc_priv - information private to the uclass
+ * struct vboot_flag_state - information private to the uclass
  *
  * @value: Last read value for each flag
  *
@@ -45,6 +35,11 @@ struct vboot_flag_uc_priv {
 struct vboot_flag_state {
 	int value[VBOOT_FLAG_COUNT];
 };
+
+const char *vboot_flag_name(enum vboot_flag_t flag)
+{
+	return flag_name[flag];
+}
 
 int vboot_flag_read(struct udevice *dev)
 {
@@ -56,17 +51,27 @@ int vboot_flag_read(struct udevice *dev)
 	return ops->read(dev);
 }
 
-int vboot_flag_read_walk_prev(enum vboot_flag_t flag, int *prevp)
+int vboot_flag_read_walk_prev(enum vboot_flag_t flag, int *prevp,
+			      struct udevice **devp)
 {
 	struct udevice *dev;
 	struct uclass *uc;
 	int ret;
 
-	uclass_foreach_dev_probe(UCLASS_CROS_VBOOT_FLAG, dev) {
-		struct vboot_flag_uc_priv *uc_priv = dev_get_uclass_priv(dev);
+	if (devp)
+		*devp = NULL;
+	if (prevp)
+		*prevp = -1;
+	uclass_id_foreach_dev(UCLASS_CROS_VBOOT_FLAG, dev, uc) {
+		struct vboot_flag_uc_priv *uc_priv;
 
-		if (uc_priv->flag == flag)
-			break;
+		ret = device_probe(dev);
+		if (!ret) {
+			uc_priv = dev_get_uclass_priv(dev);
+
+			if (uc_priv->flag == flag)
+				break;
+		}
 	}
 
 	if (!dev) {
@@ -75,12 +80,14 @@ int vboot_flag_read_walk_prev(enum vboot_flag_t flag, int *prevp)
 	}
 
 	ret = vboot_flag_read(dev);
-	if (ret >= 0 && !uclass_get(device_get_uclass_id(dev), &uc)) {
-		struct vboot_flag_state *state = uc->priv;
+	if (ret >= 0 && !uclass_get(UCLASS_CROS_VBOOT_FLAG, &uc)) {
+		struct vboot_flag_state *uc_priv = uc->priv;
 
 		if (prevp)
-			*prevp = state->value[flag];
-		state->value[flag] = ret;
+			*prevp = uc_priv->value[flag];
+		if (devp)
+			*devp = dev;
+		uc_priv->value[flag] = ret;
 	}
 
 	return ret;
@@ -88,7 +95,7 @@ int vboot_flag_read_walk_prev(enum vboot_flag_t flag, int *prevp)
 
 int vboot_flag_read_walk(enum vboot_flag_t flag)
 {
-	return vboot_flag_read_walk_prev(flag, NULL);
+	return vboot_flag_read_walk_prev(flag, NULL, NULL);
 }
 
 static int vboot_flag_pre_probe(struct udevice *dev)
@@ -111,11 +118,11 @@ static int vboot_flag_pre_probe(struct udevice *dev)
 
 static int vboot_flag_init(struct uclass *uc)
 {
-	struct vboot_flag_state *state = uc->priv;
+	struct vboot_flag_state *uc_priv = uc->priv;
 	int i;
 
 	for (i = 0; i < VBOOT_FLAG_COUNT; i++)
-		state->value[i] = -1;
+		uc_priv->value[i] = -1;
 
 	return 0;
 }

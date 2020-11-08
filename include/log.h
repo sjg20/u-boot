@@ -178,25 +178,29 @@ static inline int _log_nop(enum log_category_t cat, enum log_level_t level,
 #define log_io(_fmt...)		log_nop(LOG_CATEGORY, LOGL_DEBUG_IO, ##_fmt)
 #endif
 
-#if CONFIG_IS_ENABLED(LOG)
 #ifdef LOG_DEBUG
 #define _LOG_DEBUG	LOGL_FORCE_DEBUG
 #else
 #define _LOG_DEBUG	0
 #endif
 
+#if CONFIG_IS_ENABLED(LOG)
+
 /* Emit a log record if the level is less that the maximum */
 #define log(_cat, _level, _fmt, _args...) ({ \
 	int _l = _level; \
-	if (CONFIG_IS_ENABLED(LOG) && \
-	    (_LOG_DEBUG != 0 || _l <= _LOG_MAX_LEVEL)) \
+	if ((_LOG_DEBUG != 0 || _l <= _LOG_MAX_LEVEL)) \
 		_log((enum log_category_t)(_cat), \
 		     (enum log_level_t)(_l | _LOG_DEBUG), __FILE__, \
 		     __LINE__, __func__, \
 		      pr_fmt(_fmt), ##_args); \
 	})
 #else
-#define log(_cat, _level, _fmt, _args...)
+#define log(_cat, _level, _fmt, _args...) ({ \
+	int _l = _level; \
+	if ((_LOG_DEBUG != 0 || _l <= LOGL_INFO)) \
+		printf(_fmt, ##_args); \
+	})
 #endif
 
 #define log_nop(_cat, _level, _fmt, _args...) ({ \
@@ -312,11 +316,34 @@ void __assert_fail(const char *assertion, const char *file, unsigned int line,
 		    __ret); \
 	__ret; \
 	})
+#define log_retz(_ret) ({ \
+	int __ret = (_ret); \
+	if (__ret) \
+		log(LOG_CATEGORY, LOGL_ERR, "returning err=%d\n", __ret); \
+	__ret; \
+	})
+#define log_msg_retz(_msg, _ret) ({ \
+	int __ret = (_ret); \
+	if (__ret) \
+		log(LOG_CATEGORY, LOGL_ERR, "%s: returning err=%d\n", _msg, \
+		    __ret); \
+	__ret; \
+	})
 #else
 /* Non-logging versions of the above which just return the error code */
 #define log_ret(_ret) (_ret)
 #define log_msg_ret(_msg, _ret) ((void)(_msg), _ret)
+#define log_retz(_ret) (_ret)
+#define log_msg_retz(_msg, _ret) ((void)(_msg), _ret)
 #endif
+
+/** * enum log_rec_flags - Flags for a log record */
+enum log_rec_flags {
+	/** @LOGRECF_FORCE_DEBUG: Force output of debug record */
+	LOGRECF_FORCE_DEBUG	= BIT(0),
+	/** @LOGRECF_CONT: Continuation of previous log record */
+	LOGRECF_CONT		= BIT(1),
+};
 
 /**
  * struct log_rec - a single log record
@@ -333,7 +360,7 @@ void __assert_fail(const char *assertion, const char *file, unsigned int line,
  *
  * @cat: Category, representing a uclass or part of U-Boot
  * @level: Severity level, less severe is higher
- * @force_debug: Force output of debug
+ * @flags: Flags for log record (enum log_rec_flags)
  * @file: Name of file where the log record was generated (not allocated)
  * @line: Line number where the log record was generated
  * @func: Function where the log record was generated (not allocated)
@@ -342,7 +369,7 @@ void __assert_fail(const char *assertion, const char *file, unsigned int line,
 struct log_rec {
 	enum log_category_t cat;
 	enum log_level_t level;
-	bool force_debug;
+	u8 flags;
 	const char *file;
 	int line;
 	const char *func;

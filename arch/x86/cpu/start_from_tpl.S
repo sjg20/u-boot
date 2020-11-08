@@ -14,11 +14,14 @@
 .globl _start
 .type _start, @function
 _start:
+	movl	$(CONFIG_SYS_CAR_ADDR + CONFIG_SYS_CAR_SIZE - 4), %eax
+#ifdef CONFIG_DCACHE_RAM_MRC_VAR_SIZE
+	subl	$CONFIG_DCACHE_RAM_MRC_VAR_SIZE, %eax
+#endif
 	/* Set up memory using the existing stack */
-	mov	%esp, %eax
+	#mov	%esp, %eax
 	call	board_init_f_alloc_reserve
 	mov	%eax, %esp
-
 	call	board_init_f_init_reserve
 
 	xorl	%eax, %eax
@@ -48,3 +51,8 @@ die:
 	hlt
 	jmp	die
 	hlt
+
+.globl jump_to_spl
+.type jump_to_spl, @function
+jump_to_spl:
+	jmp	*%eax

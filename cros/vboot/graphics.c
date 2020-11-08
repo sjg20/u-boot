@@ -559,11 +559,11 @@ int cbgfx_init(struct udevice *dev)
 	fbinfo->reserved_mask_size = 0;
 	switch (priv->bpix) {
 	case VIDEO_BPP32:
-		fbinfo->red_mask_pos = 0;
+		fbinfo->red_mask_pos = 16;
 		fbinfo->red_mask_size = 8;
 		fbinfo->green_mask_pos = 8;
 		fbinfo->green_mask_size = 8;
-		fbinfo->blue_mask_pos = 16;
+		fbinfo->blue_mask_pos = 0;
 		fbinfo->blue_mask_size = 8;
 		break;
 	case VIDEO_BPP16:

@@ -385,7 +385,7 @@ class Entry_section(Entry):
                 return entry.GetData()
         source_entry.Raise("Cannot find entry for node '%s'" % node.name)
 
-    def LookupSymbol(self, sym_name, optional, msg, base_addr):
+    def LookupSymbol(self, sym_name, optional, msg, base_addr, entries=None):
         """Look up a symbol in an ELF file
 
         Looks up a symbol in an ELF file. Only entry types which come from an
@@ -428,18 +428,20 @@ class Entry_section(Entry):
                              (msg, sym_name))
         entry_name, prop_name = m.groups()
         entry_name = entry_name.replace('_', '-')
-        entry = self._entries.get(entry_name)
+        if not entries:
+            entries = self._entries
+        entry = entries.get(entry_name)
         if not entry:
             if entry_name.endswith('-any'):
                 root = entry_name[:-4]
-                for name in self._entries:
+                for name in entries:
                     if name.startswith(root):
                         rest = name[len(root):]
                         if rest in ['', '-img', '-nodtb']:
-                            entry = self._entries[name]
+                            entry = entries[name]
         if not entry:
             err = ("%s: Entry '%s' not found in list (%s)" %
-                   (msg, entry_name, ','.join(self._entries.keys())))
+                   (msg, entry_name, ','.join(entries.keys())))
             if optional:
                 print('Warning: %s' % err, file=sys.stderr)
                 return None
@@ -603,10 +605,12 @@ class Entry_section(Entry):
     def ReadData(self, decomp=True):
         tout.Info("ReadData path='%s'" % self.GetPath())
         parent_data = self.section.ReadData(True)
-        tout.Info('%s: Reading data from offset %#x-%#x, size %#x' %
-                  (self.GetPath(), self.offset, self.offset + self.size,
-                   self.size))
-        data = parent_data[self.offset:self.offset + self.size]
+        offset = self.offset - self.section._skip_at_start
+        data = parent_data[offset:offset + self.size]
+        tout.Info(
+            '%s: Reading data from offset %#x-%#x (real %#x), size %#x, got %#x' %
+                  (self.GetPath(), self.offset, self.offset + self.size, offset,
+                   self.size, len(data)))
         return data
 
     def ReadChildData(self, child, decomp=True):

@@ -456,6 +456,9 @@ int gpio_get_values_as_int(const int *gpio_list);
  */
 int dm_gpio_get_values_as_int(const struct gpio_desc *desc_list, int count);
 
+int dm_gpio_get_values_as_int_base3(struct gpio_desc *desc_list,
+				    int count);
+
 /**
  * gpio_claim_vector() - claim a number of GPIOs for input
  *
@@ -595,6 +598,8 @@ int gpio_dev_request_index(struct udevice *dev, const char *nodename,
  * dm_gpio_free() - Free a single GPIO
  *
  * This frees a single GPIOs previously returned from gpio_request_by_name().
+ * Note that @desc is not updated, so is still valid after this call. That means
+ * that the information can be used, even though the GPIO is no-longer claimed.
  *
  * @dev:	Device which requested the GPIO
  * @desc:	GPIO to free
@@ -664,6 +669,20 @@ int dm_gpio_set_dir(struct gpio_desc *desc);
  * @return 0 if OK, -ve on error, in which case desc->flags is not updated
  */
 int dm_gpio_set_dir_flags(struct gpio_desc *desc, ulong flags);
+
+/**
+ * dm_gpios_set_dir_flags() - Sets direction flags for a set of GPIOs
+ *
+ * This sets the same direction/pull/etc. flags for all GPIOs in a list. Note
+ * that the previous flags are overwritten, so be sure to include GPIOD_IS_IN
+ * or GPIOD_IS_OUT in your flags.
+ *
+ * @desc:	List of GPIOs to update
+ * @count:	Number of GPIOs in the list
+ * @flags:	New flags to use
+ * @return 0 if OK, -ve on error
+ */
+int dm_gpios_set_dir_flags(struct gpio_desc *desc, int count, ulong flags);
 
 /**
  * dm_gpio_get_dir_flags() - Get direction flags

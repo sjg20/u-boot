@@ -8,12 +8,14 @@
 #include <command.h>
 #include <dm.h>
 #include <log.h>
+#include <sysinfo.h>
 #include <acpi/acpigen.h>
 #include <asm-generic/gpio.h>
 #include <asm/acpi_nhlt.h>
 #include <asm/intel_gnvs.h>
 #include <asm/intel_pinctrl.h>
 #include <dm/acpi.h>
+#include <linux/delay.h>
 #include "variant_gpio.h"
 
 struct cros_gpio_info {
@@ -23,15 +25,111 @@ struct cros_gpio_info {
 	int flags;
 };
 
-int arch_misc_init(void)
+/* This function is needed if CONFIG_CMDLINE is not enabled */
+__weak int board_run_command(const char *cmdline)
 {
+	printf("No command line\n");
+
 	return 0;
 }
 
-/* This function is needed if CONFIG_CMDLINE is not enabled */
-int board_run_command(const char *cmdline)
+static int get_memconfig(struct udevice *dev)
 {
-	printf("No command line\n");
+	struct gpio_desc gpios[4];
+	int cfg;
+	int ret;
+
+	ret = gpio_request_list_by_name(dev, "memconfig-gpios", gpios,
+					ARRAY_SIZE(gpios),
+					GPIOD_IS_IN | GPIOD_PULL_UP);
+	if (ret < 0) {
+		log_debug("Cannot get GPIO list '%s' (%d)\n", dev->name, ret);
+		return ret;
+	}
+
+	/* Give the lines time to settle */
+	udelay(10);
+
+	ret = dm_gpio_get_values_as_int(gpios, ARRAY_SIZE(gpios));
+	if (ret < 0)
+		return log_msg_ret("get", ret);
+	cfg = ret;
+
+	ret = gpio_free_list(dev, gpios, ARRAY_SIZE(gpios));
+	if (ret)
+		return log_msg_ret("free", ret);
+
+	return cfg;
+}
+
+static int get_skuconfig(struct udevice *dev)
+{
+	struct gpio_desc gpios[2];
+	int cfg;
+	int ret;
+
+	ret = gpio_request_list_by_name(dev, "skuconfig-gpios", gpios,
+					ARRAY_SIZE(gpios),
+					GPIOD_IS_IN);
+	if (ret < 0) {
+		log_debug("Cannot get GPIO list '%s' (%d)\n", dev->name, ret);
+		return ret;
+	}
+
+	ret = dm_gpio_get_values_as_int_base3(gpios, ARRAY_SIZE(gpios));
+	if (ret < 0)
+		return log_msg_ret("get", ret);
+	cfg = ret;
+
+	ret = gpio_free_list(dev, gpios, ARRAY_SIZE(gpios));
+	if (ret)
+		return log_msg_ret("free", ret);
+
+	return cfg;
+}
+
+static int coral_get_str(struct udevice *dev, int id, size_t size, char *val)
+{
+	if (IS_ENABLED(CONFIG_SPL_BUILD))
+		return -ENOSYS;
+
+	switch (id) {
+	case SYSINFO_ID_SMBIOS_SYSTEM_VERSION:
+	case SYSINFO_ID_SMBIOS_BASEBOARD_VERSION: {
+		int ret = get_skuconfig(dev);
+
+		if (ret < 0)
+			return ret;
+		if (size < 15)
+			return -ENOSPC;
+		sprintf(val, "rev%d", ret);
+		break;
+	}
+	default:
+		return -ENOENT;
+	}
+
+	return 0;
+}
+
+int arch_misc_init(void)
+{
+	int mem_config, sku_config;
+	struct udevice *dev;
+	int ret;
+
+	ret = uclass_first_device_err(UCLASS_SYSINFO, &dev);
+	if (ret)
+		return log_msg_ret("board", ret);
+	ret = get_memconfig(dev);
+	if (ret < 0)
+		log_warning("Unable to read memconfig (err=%d)\n", ret);
+	mem_config = ret;
+	ret = get_skuconfig(dev);
+	if (ret < 0)
+		log_warning("Unable to read memconfig (err=%d)\n", ret);
+	sku_config = ret;
+	log_notice("Memconfig %d, SKU %d\n", mem_config, sku_config);
 
 	return 0;
 }
@@ -44,12 +142,15 @@ int chromeos_get_gpio(const struct udevice *dev, const char *prop,
 	int ret;
 
 	ret = gpio_request_by_name((struct udevice *)dev, prop, 0, &desc, 0);
-	if (ret == -ENOTBLK)
+	if (ret == -ENOTBLK) {
 		info->gpio_num = CROS_GPIO_VIRTUAL;
-	else if (ret)
+		log_info("GPIO '%s' is virtual\n", prop);
+	} else if (ret) {
 		return log_msg_ret("gpio", ret);
-	else
+	} else {
 		info->gpio_num = desc.offset;
+		dm_gpio_free((struct udevice *)dev, &desc);
+	}
 	info->linux_name = dev_read_string(desc.dev, "linux-name");
 	if (!info->linux_name)
 		return log_msg_ret("linux-name", -ENOENT);
@@ -144,6 +245,10 @@ struct acpi_ops coral_acpi_ops = {
 };
 
 #if !CONFIG_IS_ENABLED(OF_PLATDATA)
+struct sysinfo_ops coral_sysinfo_ops = {
+	.get_str	= coral_get_str,
+};
+
 static const struct udevice_id coral_ids[] = {
 	{ .compatible = "google,coral" },
 	{ }
@@ -154,5 +259,6 @@ U_BOOT_DRIVER(coral_drv) = {
 	.name		= "coral",
 	.id		= UCLASS_SYSINFO,
 	.of_match	= of_match_ptr(coral_ids),
+	.ops		= &coral_sysinfo_ops,
 	ACPI_OPS_PTR(&coral_acpi_ops)
 };

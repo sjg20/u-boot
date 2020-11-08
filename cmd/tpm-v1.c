@@ -7,9 +7,10 @@
 #include <command.h>
 #include <env.h>
 #include <malloc.h>
-#include <asm/unaligned.h>
+#include <tpm_api.h>
 #include <tpm-common.h>
 #include <tpm-v1.h>
+#include <asm/unaligned.h>
 #include "tpm-user-utils.h"
 
 static int do_tpm_startup(struct cmd_tbl *cmdtp, int flag, int argc,
@@ -55,7 +56,7 @@ static int do_tpm_nv_define_space(struct cmd_tbl *cmdtp, int flag, int argc,
 	perm = simple_strtoul(argv[2], NULL, 0);
 	size = simple_strtoul(argv[3], NULL, 0);
 
-	return report_return_code(tpm_nv_define_space(dev, index, perm, size));
+	return report_return_code(tpm1_nv_define_space(dev, index, perm, size));
 }
 
 static int do_tpm_nv_read_value(struct cmd_tbl *cmdtp, int flag, int argc,
@@ -130,7 +131,7 @@ static int do_tpm_extend(struct cmd_tbl *cmdtp, int flag, int argc,
 		return CMD_RET_FAILURE;
 	}
 
-	rc = tpm_extend(dev, index, in_digest, out_digest);
+	rc = tpm_pcr_extend(dev, index, in_digest, out_digest);
 	if (!rc) {
 		puts("PCR value after execution of the command:\n");
 		print_byte_string(out_digest, sizeof(out_digest));
@@ -304,7 +305,7 @@ static int do_tpm_nv_define(struct cmd_tbl *cmdtp, int flag, int argc,
 	index = simple_strtoul(argv[2], NULL, 0);
 	perm = simple_strtoul(argv[3], NULL, 0);
 
-	return report_return_code(tpm_nv_define_space(dev, index, perm, size));
+	return report_return_code(tpm1_nv_define_space(dev, index, perm, size));
 }
 
 static int do_tpm_nv_read(struct cmd_tbl *cmdtp, int flag, int argc,

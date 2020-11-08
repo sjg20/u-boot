@@ -3274,6 +3274,10 @@ TODO.
 
 For now: just type "help <command>".
 
+Note that the format of 'md' can be emulated from linux with:
+
+   hexdump -v -e '"%08.8_ax: " 16/1 "%02x " "   "' -e '16/1 "%_p" "\n" ' fname
+
 
 Environment Variables:
 ======================

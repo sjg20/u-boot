@@ -22,6 +22,10 @@ struct vboot_stage {
 	int (*run)(struct vboot_info *vboot);
 };
 
+#if CONFIG_IS_ENABLED(CHROMEOS_VBOOT_A) || \
+	CONFIG_IS_ENABLED(CHROMEOS_VBOOT_B) || \
+	CONFIG_IS_ENABLED(CHROMEOS_VBOOT_C)
+
 /* There are three groups here. TPL runs the early firmware-selection process,
  * then SPL sets up SDRAM and jumps to U-Boot proper, which does the kernel-
  * selection process. We only build in the code that is actually needed by each
@@ -103,7 +107,7 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
 	bootstage_mark_name(BOOTSTAGE_VBOOT_FIRST + stagenum, stage->name);
 	ret = (*stage->run)(vboot);
 	if (ret)
-		log_err("Error: stage '%s' returned %d\n", stage->name, ret);
+		log_err("Error: stage '%s' returned %x\n", stage->name, ret);
 
 	return ret;
 }
@@ -116,31 +120,42 @@ static int save_if_needed(struct vboot_info *vboot)
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
 
-	log_warning("Skipping save\n");
-	return 0;
-
 	if (!ctx)
 		return -ENOENT;
 	if (ctx->flags & VB2_CONTEXT_NVDATA_CHANGED) {
-		log(LOGC_VBOOT, LOGL_INFO, "Saving nvdata\n");
+		log_info("Saving nvdata\n");
+
+#ifdef DEBUG
 		print_buffer(0, ctx->nvdata, 1, sizeof(ctx->nvdata), 0);
+#endif
+		if (spl_phase() != PHASE_SPL)
+			vboot_dump_nvdata(ctx->nvdata, sizeof(ctx->nvdata));
 		ret = cros_nvdata_write_walk(CROS_NV_DATA, ctx->nvdata,
 					     sizeof(ctx->nvdata));
 		if (ret)
 			return log_msg_ret("save nvdata", ret);
 		ctx->flags &= ~VB2_CONTEXT_NVDATA_CHANGED;
 	}
+
 	if (ctx->flags & VB2_CONTEXT_SECDATA_CHANGED) {
-		log(LOGC_VBOOT, LOGL_INFO, "Saving secdata\n");
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->nvdata,
-					     sizeof(ctx->nvdata));
-		if (ret)
-			return log_msg_ret("save secdata", ret);
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->nvdata,
-					     sizeof(ctx->nvdata));
-		if (ret)
-			return log_msg_ret("save nvdata", ret);
+		log_info("Saving secdata\n");
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->secdata,
+					     sizeof(ctx->secdata));
+		if (ret) {
+			printf("write failed: %d\n", ret);
+			while (1);
+			return log_msg_ret("secdata", ret);
+		}
 		ctx->flags &= ~VB2_CONTEXT_SECDATA_CHANGED;
+	}
+
+	if (ctx->flags & VB2_CONTEXT_SECDATAK_CHANGED) {
+		log_info("Saving secdatak\n");
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK, ctx->secdatak,
+					     sizeof(ctx->secdatak));
+		if (ret)
+			return log_msg_ret("secdatak", ret);
+		ctx->flags &= ~VB2_CONTEXT_SECDATAK_CHANGED;
 	}
 
 	return 0;
@@ -157,6 +172,18 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 			break;
 		ret = vboot_run_stage(vboot, stagenum);
 		save_if_needed(vboot);
+
+		if (stagenum == VBOOT_STAGE_VER1_VBINIT &&
+		    ret == VB2_ERROR_API_PHASE1_RECOVERY) {
+			struct fmap_firmware_entry *fw = &vboot->fmap.readonly;
+			struct vb2_context *ctx = vboot_get_ctx(vboot);
+
+			vboot_set_selected_region(vboot, &fw->spl_rec, &fw->boot_rec);
+			log_warning("flags %x recovery=%d\n", ctx->flags,
+				    (ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0);
+			ret = 0;
+		}
+
 		if (ret)
 			break;
 	}
@@ -172,23 +199,6 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 	/* Allow dropping to the command line here for debugging */
 	if (flags & VBOOT_FLAG_CMDLINE)
 		return -EPERM;
-
-	if (ret == VB2_ERROR_API_PHASE1_RECOVERY) {
-		struct fmap_firmware_entry *fw = &vboot->fmap.readonly;
-		struct vb2_context *ctx = vboot_get_ctx(vboot);
-
-		vboot_set_selected_region(vboot, &fw->spl_rec, &fw->boot_rec);
-		ret = vboot_fill_handoff(vboot);
-		if (ret)
-			return log_msg_ret("Cannot setup vboot handoff", ret);
-		log_warning("flags %x %d\n", ctx->flags,
-			    (ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0);
-		ctx->flags |= VB2_CONTEXT_RECOVERY_MODE;
-		sysreset_walk_halt(SYSRESET_COLD);
-		return -ENOENT;  /* Try next boot method (which is recovery) */
-	}
-
-	return 0;
 
 	if (ret == VBERROR_REBOOT_REQUIRED) {
 		log_warning("Cold reboot\n");
@@ -231,6 +241,7 @@ int vboot_run_auto(struct vboot_info *vboot, uint flags)
 	return vboot_run_stages(vboot, stage, flags);
 }
 
+#if DO_VBOOT
 void board_boot_order(u32 *spl_boot_list)
 {
 	spl_boot_list[0] = BOOT_DEVICE_CROS_VBOOT;
@@ -240,6 +251,7 @@ void board_boot_order(u32 *spl_boot_list)
 	spl_boot_list[1] = BOOT_DEVICE_BOARD;
 #endif
 }
+#endif
 
 int cros_do_stage(void)
 {
@@ -250,7 +262,6 @@ int cros_do_stage(void)
 	if (!CONFIG_IS_ENABLED(CHROMEOS_VBOOT_A))
 		return 0;
 
-	printf("vpl: load image\n");
 	ret = vboot_alloc(&vboot);
 	if (ret)
 		return ret;
@@ -258,10 +269,14 @@ int cros_do_stage(void)
 
 	ret = vboot_run_auto(vboot, 0);
 	if (ret)
-		printf("VPL error %d\n", ret);
+		log_err("VPL error %d\n", ret);
 
 	return 0;
 }
+
+#endif /* CHROMEOS_VBOOT_A B or C */
+
+#if DO_VBOOT
 
 #ifdef CONFIG_VPL_BUILD
 static int cros_load_image_vpl(struct spl_image_info *spl_image,
@@ -270,7 +285,6 @@ static int cros_load_image_vpl(struct spl_image_info *spl_image,
 	struct vboot_info *vboot;
 	int ret;
 
-	printf("vpl: load image\n");
 	ret = vboot_alloc(&vboot);
 	if (ret)
 		return ret;
@@ -278,7 +292,7 @@ static int cros_load_image_vpl(struct spl_image_info *spl_image,
 
 	ret = vboot_run_auto(vboot, 0);
 	if (ret)
-		printf("VPL error %d\n", ret);
+		log_err("VPL error %d\n", ret);
 	log_info("Completed loading image\n");
 
 	return 0;
@@ -310,3 +324,4 @@ static int cros_load_image_spl(struct spl_image_info *spl_image,
 SPL_LOAD_IMAGE_METHOD("chromium_vboot_spl", 0, BOOT_DEVICE_CROS_VBOOT,
 		      cros_load_image_spl);
 #endif /* CONFIG_SPL_BUILD */
+#endif

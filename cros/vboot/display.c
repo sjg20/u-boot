@@ -180,7 +180,7 @@ VbError_t VbExDisplayDebugInfo(const char *info_str)
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExGetlocalisationCount(u32 *count)
+VbError_t VbExGetLocalizationCount(u32 *count)
 {
 	*count = vboot_get_locale_count();
 

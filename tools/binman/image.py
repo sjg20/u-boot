@@ -43,8 +43,11 @@ class Image(section.Entry_section):
         test: True if this is being called from a test of Images. This this case
             there is no device tree defining the structure of the section, so
             we create a section manually.
+        ignore_missing: Ignore any missing entry arguments (i.e. don't raise an
+            exception)
     """
-    def __init__(self, name, node, copy_to_orig=True, test=False):
+    def __init__(self, name, node, copy_to_orig=True, test=False,
+                 ignore_missing=False):
         super().__init__(None, 'section', node, test=test)
         self.copy_to_orig = copy_to_orig
         self.name = 'main-section'
@@ -53,6 +56,7 @@ class Image(section.Entry_section):
         self.fdtmap_dtb = None
         self.fdtmap_data = None
         self.allow_repack = False
+        self._ignore_missing = ignore_missing
         if not test:
             self.ReadNode()
 
@@ -100,7 +104,7 @@ class Image(section.Entry_section):
 
         # Return an Image with the associated nodes
         root = dtb.GetRoot()
-        image = Image('image', root, copy_to_orig=False)
+        image = Image('image', root, copy_to_orig=False, ignore_missing=True)
 
         image.image_node = fdt_util.GetString(root, 'image-node', 'image')
         image.fdtmap_dtb = dtb
@@ -130,12 +134,7 @@ class Image(section.Entry_section):
         Returns:
             True if the new data size is OK, False if expansion is needed
         """
-        sizes_ok = True
-        for entry in self._entries.values():
-            if not entry.ProcessContents():
-                sizes_ok = False
-                tout.Debug("Entry '%s' size change" % self._node.path)
-        return sizes_ok
+        return super().ProcessContents()
 
     def WriteSymbols(self):
         """Write symbol values into binary files for access at run time"""
@@ -324,3 +323,27 @@ class Image(section.Entry_section):
             _DoLine(lines, _EntryToStrings(entry))
             selected_entries.append(entry)
         return selected_entries, lines, widths
+
+    def _CollectEntries(self, entries, entries_by_name, add_entry):
+        entries[add_entry.GetPath()] = add_entry
+        to_add = add_entry.GetEntries()
+        if to_add:
+            for entry in to_add.values():
+                entries[entry.GetPath()] = entry
+            for entry in to_add.values():
+                self._CollectEntries(entries, entries_by_name, entry)
+        entries_by_name[add_entry.name] = add_entry
+
+    def LookupImageSymbol(self, sym_name, optional, msg, base_addr):
+        entries = OrderedDict()
+        entries_by_name = {}
+        self._CollectEntries(entries, entries_by_name, self)
+        #for entry in entries.values():
+            #entries_by_name[entry.name] = entry
+        return self.LookupSymbol(sym_name, optional, msg, base_addr,
+                                 entries_by_name)
+
+    def MissingArgs(self, missing):
+        if not self._ignore_missing:
+            self.Raise('Missing required properties/entry args: %s' %
+                       (', '.join(missing)))

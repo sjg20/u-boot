@@ -12,7 +12,7 @@
 #include <vb2_api.h>
 #include <cros/cros_ofnode.h>
 
-#define ID_LEN		256
+#define ID_LEN		256U
 
 /* Required alignment for struct vb2_context */
 #define VBOOT_CONTEXT_ALIGN	16
@@ -163,6 +163,15 @@ struct vboot_info {
 	char readonly_firmware_id[ID_LEN];
 	char firmware_id[ID_LEN];
 	struct spl_image_info *spl_image;
+};
+
+/** enum secdata_t - field that can be read/written in secdata */
+enum secdata_t {
+	SECDATA_DEV_MODE,
+	SECDATA_LAST_BOOT_DEV,
+
+	SECDATA_COUNT,
+	SECDATA_NONE
 };
 
 static inline struct vboot_info *ctx_to_vboot(struct vb2_context *ctx)
@@ -333,5 +342,31 @@ int cros_tpm_factory_initialise(struct vboot_info *vboot);
  * @return 0 if OK, non-zero on error
  */
 int cros_tpm_setup(struct vboot_info *vboot);
+
+/**
+ * vboot_dump_nvdata() - Dump the vboot non-volatile data
+ *
+ * This shows the NV data in human-readable form
+ *
+ * @nvdata: Pointer to context
+ * @size: Size of NV data (typically EC_VBNV_BLOCK_SIZE)
+ * @return 0 if it is valid, -ve error otherwise
+ */
+int vboot_dump_nvdata(const void *nvdata, int size);
+
+/**
+ * vboot_dump_nvdata() - Dump the vboot secure data
+ *
+ * This shows the context in human-readable form
+ *
+ * @nvdata: Pointer to context
+ * @size: Size of NV context (typically sizeof(struct vb2_secdata))
+ * @return 0 if it is valid, -ve error otherwise
+ */
+int vboot_secdata_dump(const void *secdata, int size);
+
+int vboot_secdata_set(void *secdata, int size, enum secdata_t field, int val);
+
+int vboot_secdata_get(const void *secdata, int size, enum secdata_t field);
 
 #endif /* __CROS_VBOOT_H */

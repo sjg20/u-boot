@@ -5,6 +5,10 @@
  * Copyright 2018 Google LLC
  */
 
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/gpio/x86-gpio.h>
+#include <asm/arch-apollolake/gpio.h>
+
 / {
 	chromeos-config {
 		compatible = "chromeos-config";
@@ -13,9 +17,11 @@
 		kernel-addr = /bits/ 64 <0x00100000 0x2000000>;
 		ec-software-sync;
 		resume-path-same-as-boot;
+		oprom-matters;
+		recovery-mode-mrc;
 	};
 
-	chromeos {
+	chromeos_dev: chromeos {
 		u-boot,dm-pre-reloc;
 		compatible = "simple-bus";
 		fwstore-spi {
@@ -23,20 +29,10 @@
 			compatible = "cros,fwstore-spi";
 			firmware-storage = <&fwstore_spi>;
 		};
-		write-protect {
-			u-boot,dm-pre-reloc;
-			compatible = "google,const-flag";
-			value = <0>;
-		};
 		developer {
 			u-boot,dm-pre-reloc;
 			compatible = "google,const-flag";
-			value = <1>;
-		};
-		lid-open {
-			u-boot,dm-pre-reloc;
-			compatible = "google,const-flag";
-			value = <1>;
+			value = <0>;
 		};
 		power-off {
 			u-boot,dm-pre-reloc;
@@ -48,16 +44,11 @@
 			compatible = "google,const-flag";
 			value = <0>;
 		};
+
+		/* Set up ec-in-rw in board .dts */
 		ec-in-rw {
-			u-boot,dm-pre-reloc;
-			compatible = "google,const-flag";
-			value = <0>;
 		};
-		recovery {
-			u-boot,dm-pre-reloc;
-			compatible = "google,const-flag";
-			value = <1>;
-		};
+
 		wipeout {
 			u-boot,dm-pre-reloc;
 			compatible = "google,const-flag";
