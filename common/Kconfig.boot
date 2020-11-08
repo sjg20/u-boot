@@ -401,9 +401,18 @@ config TPL_BOOTSTAGE
 	bool "Boot timing and reported in TPL"
 	depends on BOOTSTAGE
 	help
-	  Enable recording of boot time in SPL. To make this visible to U-Boot
+	  Enable recording of boot time in TPL. To make this visible to U-Boot
 	  proper, enable BOOTSTAGE_STASH as well. This will stash the timing
-	  information when TPL finishes and load it when U-Boot proper starts
+	  information when TPL finishes and load it when the next phase starts
+	  up.
+
+config VPL_BOOTSTAGE
+	bool "Boot timing and reported in VPL"
+	depends on BOOTSTAGE
+	help
+	  Enable recording of boot time in VPL. To make this visible to U-Boot
+	  proper, enable BOOTSTAGE_STASH as well. This will stash the timing
+	  information when VPL finishes and load it when the next phase starts
 	  up.
 
 config BOOTSTAGE_REPORT
@@ -441,6 +450,13 @@ config SPL_BOOTSTAGE_RECORD_COUNT
 
 config TPL_BOOTSTAGE_RECORD_COUNT
 	int "Number of boot stage records to store for TPL"
+	default 5
+	help
+	  This is the size of the bootstage record list and is the maximum
+	  number of bootstage records that can be recorded.
+
+config VPL_BOOTSTAGE_RECORD_COUNT
+	int "Number of boot stage records to store for VPL"
 	default 5
 	help
 	  This is the size of the bootstage record list and is the maximum
