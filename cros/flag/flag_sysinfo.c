@@ -81,5 +81,5 @@ U_BOOT_DRIVER(flag_sysinfo_drv) = {
 	.of_match	= flag_sysinfo_ids,
 	.probe		= flag_sysinfo_probe,
 	.ops		= &flag_sysinfo_ops,
-	.priv_auto_alloc_size	= sizeof(struct flag_sysinfo_priv),
+	.priv_auto	= sizeof(struct flag_sysinfo_priv),
 };

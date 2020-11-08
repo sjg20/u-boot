@@ -62,6 +62,8 @@ struct boot_params *load_zimage(char *image, unsigned long kernel_size,
 int setup_zimage(struct boot_params *setup_base, char *cmd_line, int auto_boot,
 		 ulong initrd_addr, ulong initrd_size, ulong cmdline_force);
 
+void zimage_dump(struct boot_params *base_ptr);
+
 void setup_video(struct screen_info *screen_info);
 void setup_efi_info(struct efi_info *efi_info);
 

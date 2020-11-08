@@ -1393,6 +1393,7 @@ u-boot.ldr:	u-boot
 # binman
 # ---------------------------------------------------------------------------
 # Use 'make BINMAN_DEBUG=1' to enable debugging
+# Use 'make BINMAN_VERBOSE=3' to set vebosity level
 default_dt := $(if $(DEVICE_TREE),$(DEVICE_TREE),$(CONFIG_DEFAULT_DEVICE_TREE))
 quiet_cmd_binman = BINMAN  $@
 cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
@@ -1707,7 +1708,7 @@ endif # CONFIG_X86
 ifneq ($(CONFIG_CHROMEOS_VBOOT),)
 BINMAN_image.bin := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
 	-abmpblk=$(KBUILD_SRC)/cros/data/bmpblk.bin -I $(KBUILD_SRC)/cros/data \
-	"-ahardware-id=TEST 999" \
+	"-ahardware-id=CORAL TEST 8594" \
 	"-afrid=123412 123" -acros-ec-rw-path=$(KBUILD_SRC)/cros/data/ecrw.bin \
 	 -m -i image
 image.bin: $(INPUTS-y) \

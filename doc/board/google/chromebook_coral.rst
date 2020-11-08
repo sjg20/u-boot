@@ -181,7 +181,7 @@ Partial memory map
     ff000000       Bottom of ROM
     fefc0000       Top of CAR region
     fef96000       Stack for FSP-M
-    fef40000 59000 FSP-M
+    fef40000 59000 FSP-M (also VPL loads here)
     fef11000       SPL loaded here
     fef10000       CONFIG_BLOBLIST_ADDR
     fef10000       Stack top in TPL, SPL and U-Boot before relocation

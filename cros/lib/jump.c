@@ -70,8 +70,10 @@ int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry)
 	log_info("Locating firmware offset %x (rom_offset %x, addr %x, size %x)\n",
 		 entry->offset, rom_offset, addr, entry->length);
 #endif
-	printf("sp %p, pc %p, spl_image %p\n", &addr, vboot_jump, spl_image);
+	log_debug("sp %p, pc %p, spl_image %p\n", &addr, vboot_jump, spl_image);
+#ifdef DEBUG
 	print_buffer(addr, (void *)addr, 1, 0x20, 0);
+#endif
 // 	cpu_flush_l1d_to_l2();
 	spl_image->size = entry->length;
 	spl_image->entry_point = addr;

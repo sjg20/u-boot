@@ -5,13 +5,13 @@
  * Copyright 2018 Google LLC
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_CROS_FWSTORE
 
 #include <common.h>
 #include <dm.h>
 #include <log.h>
 #include <malloc.h>
+#include <spi.h>
 #include <spi_flash.h>
 #include <cros/cros_common.h>
 #include <cros/cros_ofnode.h>
@@ -121,11 +121,11 @@ static int fwstore_spi_write(struct udevice *dev, ulong offset, ulong count,
 	log_debug("adjusted offset: %08x\n", pos);
 	if (pos > offset) {
 		log_debug("align incorrect: %08x > %08lx\n", pos, offset);
-		return -EINVAL;
+		return log_msg_ret("aligh", -EINVAL);
 	}
 
 	if (border_check(priv->sf, pos, len))
-		return -ERANGE;
+		return log_msg_ret("border", -ERANGE);
 
 	backup_buf = len > sizeof(static_buf) ? malloc(len) : static_buf;
 	if (!backup_buf)
@@ -176,6 +176,31 @@ static int fwstore_spi_get_sw_write_prot(struct udevice *dev)
 	return ret != 0;
 }
 
+static int fwstore_spi_mmap(struct udevice *dev, uint offset, uint size,
+			    ulong *addrp)
+{
+	struct fwstore_spi_priv *priv = dev_get_priv(dev);
+	ulong mask = CONFIG_ROM_SIZE - 1;
+	u32 rom_offset;
+	uint map_size;
+	ulong map_base;
+	uint mem_offset;
+	int ret;
+
+	/* Use the SPI driver to get the memory map */
+	ret = dm_spi_get_mmap(priv->sf, &map_base, &map_size, &mem_offset);
+	if (ret)
+		return log_msg_ret("Could not get flash mmap", ret);
+	rom_offset = (map_base & mask) - CONFIG_ROM_SIZE;
+	*addrp = offset + rom_offset;
+#ifdef LOG_DEBUG
+	log_debug("content:\n");
+	print_buffer(*addrp, (void *)*addrp, 1, 0x20, 0);
+#endif
+
+	return 0;
+}
+
 int fwstore_spi_probe(struct udevice *dev)
 {
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
@@ -190,7 +215,7 @@ int fwstore_spi_probe(struct udevice *dev)
 					 &args);
 	if (ret < 0) {
 		log_debug("fail to look up phandle for device %s\n", dev->name);
-		return ret;
+		return log_msg_ret("phandle", ret);
 	}
 
 	ret = uclass_get_device_by_ofnode(UCLASS_SPI_FLASH, args.node,
@@ -198,7 +223,7 @@ int fwstore_spi_probe(struct udevice *dev)
 	if (ret) {
 		log_debug("fail to init SPI flash at %s: %s: ret=%d\n",
 			  dev->name, ofnode_get_name(args.node), ret);
-		return ret;
+		return log_msg_ret("init", ret);
 	}
 #endif
 
@@ -209,6 +234,7 @@ static const struct cros_fwstore_ops fwstore_spi_ops = {
 	.read		= fwstore_spi_read,
 	.write		= fwstore_spi_write,
 	.sw_wp_enabled	= fwstore_spi_get_sw_write_prot,
+	.mmap		= fwstore_spi_mmap,
 };
 
 static struct udevice_id fwstore_spi_ids[] = {
@@ -222,5 +248,5 @@ U_BOOT_DRIVER(cros_fwstore_spi) = {
 	.of_match = fwstore_spi_ids,
 	.ops	= &fwstore_spi_ops,
 	.probe	= fwstore_spi_probe,
-	.priv_auto_alloc_size = sizeof(struct fwstore_spi_priv),
+	.priv_auto = sizeof(struct fwstore_spi_priv),
 };

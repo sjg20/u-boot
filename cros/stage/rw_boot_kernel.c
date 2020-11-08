@@ -4,11 +4,11 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
 #include <blk.h>
+#include <bloblist.h>
 #include <command.h>
 #include <dm.h>
 #include <env.h>
@@ -70,7 +70,7 @@ static char *get_kernel_config(void *kernel_buffer, size_t bootloader_offset)
 
 static u32 get_dev_num(const struct udevice *dev)
 {
-	const struct blk_desc *desc = dev_get_uclass_platdata(dev);
+	const struct blk_desc *desc = dev_get_uclass_plat(dev);
 
 	return desc->devnum;
 }
@@ -225,10 +225,12 @@ static int boot_kernel(struct vboot_info *vboot,
 	 */
 	strncat(cmdline_buf, cmdline, CMDLINE_SIZE);
 
+#ifdef LOG_DEBUG
 	printf("cmdline before update: ptr=%p, len %dn", cmdline_buf,
 	       strlen(cmdline_buf));
 	puts(cmdline_buf);
 	printf("\n");
+#endif
 
 	uuid_bin_to_str(kparams->partition_guid, guid, UUID_STR_FORMAT_GUID);
 	log_info("partition_number=%d, guid=%s\n", kparams->partition_number,
@@ -241,10 +243,12 @@ static int boot_kernel(struct vboot_info *vboot,
 		return 1;
 	}
 
+#ifdef LOG_DEBUG
 	printf("cmdline after update: ptr=%p, len %d\n", cmdline,
 	       strlen(cmdline));
 	puts(cmdline);
 	printf("\n");
+#endif
 
 	env_set("bootargs", cmdline);
 
@@ -258,22 +262,26 @@ static int boot_kernel(struct vboot_info *vboot,
 	if (dev)
 		device_remove(dev, DM_REMOVE_NORMAL);
 
+	log_info("Bloblist:\n");
+	bloblist_show_list();
 #ifdef CONFIG_X86
-// 	vboot_update_acpi(vboot);
+	vboot_update_acpi(vboot);
 
 	params = (struct boot_params *)(cmdline + CMDLINE_SIZE);
-	printf("kernel_buffer=%p, size=%x, bootloader_address=%llx, size=%x, cmdline=%p, params=%p\n",
-	       kparams->kernel_buffer, kparams->kernel_buffer_size,
-	       kparams->bootloader_address, kparams->bootloader_size,
-	       cmdline, params);
+	log_debug("kernel_buffer=%p, size=%x, bootloader_address=%llx, size=%x, cmdline=%p, params=%p\n",
+		  kparams->kernel_buffer, kparams->kernel_buffer_size,
+		  kparams->bootloader_address, kparams->bootloader_size,
+		  cmdline, params);
+#ifdef LOG_DEBUG
 	print_buffer((ulong)params + 0x1f1, (void *)params + 0x1f1, 1, 0xf, 0);
+#endif
 	if (!setup_zimage(params, cmdline, 0, 0, 0, 0)) {
+#ifdef LOG_DEBUG
 		zimage_dump(params);
 		print_buffer((ulong)kparams->kernel_buffer,
 			     kparams->kernel_buffer, 1, 0x100, 0);
-		printf("go %p, %p\n", params, kparams->kernel_buffer);
-		return 1;
-
+		log_debug("go %p, %p\n", params, kparams->kernel_buffer);
+#endif
 		boot_linux_kernel((ulong)params, (ulong)kparams->kernel_buffer,
 				  false);
 	}

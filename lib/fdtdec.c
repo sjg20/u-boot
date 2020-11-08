@@ -4,6 +4,7 @@
  */
 
 #ifndef USE_HOSTCC
+
 #include <common.h>
 #include <boot_fit.h>
 #include <dm.h>
@@ -600,7 +601,8 @@ int fdtdec_prepare_fdt(void)
 #ifdef CONFIG_SPL_BUILD
 		puts("Missing DTB\n");
 #else
-		puts("No valid device tree binary found - please append one to U-Boot binary, use u-boot-dtb.bin or define CONFIG_OF_EMBED. For sandbox, use -d <file.dtb>\n");
+		printf("No valid device tree binary found at %p\n",
+		       gd->fdt_blob);
 # ifdef DEBUG
 		if (gd->fdt_blob) {
 			printf("fdt_blob=%p\n", gd->fdt_blob);
@@ -758,9 +760,9 @@ int fdtdec_parse_phandle_with_args(const void *blob, int src_node,
 				node = fdt_node_offset_by_phandle(blob,
 								  phandle);
 				if (node < 0) {
-					debug("%s: could not find phandle\n",
+					debug("%s: could not find phandle %d\n",
 					      fdt_get_name(blob, src_node,
-							   NULL));
+							   NULL), phandle);
 					goto err;
 				}
 			}
@@ -1252,7 +1254,7 @@ __weak void *board_fdt_blob_setup(void)
 	void *fdt_blob = NULL;
 #ifdef CONFIG_SPL_BUILD
 	/* FDT is at end of BSS unless it is in a different memory region */
-	if (IS_ENABLED(CONFIG_SPL_SEPARATE_BSS))
+	if (CONFIG_IS_ENABLED(SEPARATE_BSS))
 		fdt_blob = (ulong *)&_image_binary_end;
 	else
 		fdt_blob = (ulong *)&__bss_end;

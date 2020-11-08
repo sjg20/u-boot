@@ -15,13 +15,13 @@
 #include <cros/fwstore.h>
 
 /**
- * struct fwstore_reader_platdata - information about a firmware reader
+ * struct fwstore_reader_plat - information about a firmware reader
  *
  * @cur: current position within the start/size region
  * @base_offset: start offset of region in fwstore
  * @size: size of region in fwstore
  */
-struct fwstore_reader_platdata {
+struct fwstore_reader_plat {
 	int cur;
 	int base_offset;
 	int size;
@@ -29,7 +29,7 @@ struct fwstore_reader_platdata {
 
 void fwstore_reader_setup(struct udevice *dev, int offset, int size)
 {
-	struct fwstore_reader_platdata *plat = dev_get_platdata(dev);
+	struct fwstore_reader_plat *plat = dev_get_plat(dev);
 
 	plat->base_offset = offset;
 	plat->size = size;
@@ -40,14 +40,14 @@ void fwstore_reader_setup(struct udevice *dev, int offset, int size)
 
 int fwstore_reader_size(struct udevice *dev)
 {
-	struct fwstore_reader_platdata *plat = dev_get_platdata(dev);
+	struct fwstore_reader_plat *plat = dev_get_plat(dev);
 
 	return plat->size;
 }
 
 int fwstore_reader_restrict(struct udevice *dev, int offset, int size)
 {
-	struct fwstore_reader_platdata *plat = dev_get_platdata(dev);
+	struct fwstore_reader_plat *plat = dev_get_plat(dev);
 
 	if (offset < 0 || offset >= plat->size)
 		return log_ret(-EINVAL);
@@ -66,7 +66,7 @@ int fwstore_reader_restrict(struct udevice *dev, int offset, int size)
 static int fwstore_reader_read(struct udevice *dev, int offset, void *buf,
 			       int size)
 {
-	struct fwstore_reader_platdata *plat = dev_get_platdata(dev);
+	struct fwstore_reader_plat *plat = dev_get_plat(dev);
 	int pos, ret;
 
 	/* Figure out where to read from, a do a range check */
@@ -97,6 +97,6 @@ static struct misc_ops fwstore_reader_ops = {
 U_BOOT_DRIVER(fwstore_reader) = {
 	.name		= "fwstore_reader",
 	.id		= UCLASS_MISC,
-	.platdata_auto_alloc_size = sizeof(struct fwstore_reader_platdata),
+	.plat_auto = sizeof(struct fwstore_reader_plat),
 	.ops		= &fwstore_reader_ops,
 };

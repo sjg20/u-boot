@@ -436,7 +436,7 @@ int ofnode_parse_phandle_with_args(ofnode node, const char *list_name,
 						     list_name, cells_name,
 						     cell_count, index, &args);
 		if (ret)
-			return ret;
+			return log_msg_ret("parse", ret);
 		ofnode_from_fdtdec_phandle_args(&args, out_args);
 	}
 

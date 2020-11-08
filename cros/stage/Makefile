@@ -24,5 +24,6 @@ endif
 ifneq ($(CONFIG_$(SPL_TPL_)CHROMEOS_VBOOT_C),)
 obj-y += rw_init.o
 obj-y += rw_select_kernel.o
+obj-y += rw_lock.o
 obj-y += rw_boot_kernel.o
 endif

@@ -93,5 +93,5 @@ enum aux_fw_severity aux_fw_get_severity(struct udevice *dev)
 UCLASS_DRIVER(cros_aux_fw) = {
 	.id		= UCLASS_CROS_AUX_FW,
 	.name		= "aux_fw",
-	.per_device_auto_alloc_size	= sizeof(struct aux_fw_uc_priv),
+	.per_device_auto	= sizeof(struct aux_fw_uc_priv),
 };

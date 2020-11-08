@@ -51,8 +51,8 @@ int vboot_ver_init(struct vboot_info *vboot)
 	struct vb2_context *ctx;
 	int ret;
 
-	printf("vboot is at %p, size %lx, bloblist %p\n", vboot,
-	       (ulong)sizeof(*vboot), gd->bloblist);
+	log_debug("vboot is at %p, size %lx, bloblist %p\n", vboot,
+		  (ulong)sizeof(*vboot), gd->bloblist);
 	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, sizeof(struct vboot_blob),
 			    VBOOT_CONTEXT_ALIGN);
 	if (!blob)
@@ -72,7 +72,6 @@ int vboot_ver_init(struct vboot_info *vboot)
 	vboot->ctx = ctx;
 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
-	printf("ctx=%p\n", ctx);
 
 	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
 	if (ret)
@@ -84,15 +83,12 @@ int vboot_ver_init(struct vboot_info *vboot)
 	}
 
 	/* initialise and read nvdata from non-volatile storage */
-	ret = uclass_first_device_err(UCLASS_CROS_NVDATA, &vboot->nvdata_dev);
-	if (ret)
-		return log_msg_ret("find nvdata", ret);
 	/* TODO(sjg@chromium.org): Support full-size context */
-	ret = cros_nvdata_read_walk(CROS_NV_DATA, ctx->nvdata,
-				    EC_VBNV_BLOCK_SIZE);
+	ret = cros_nvdata_read_walk(CROS_NV_DATA, ctx->nvdata, VBNV_BLOCK_SIZE);
 	if (ret)
 		return log_msg_ret("read nvdata", ret);
 
+	vboot_dump_nvdata(ctx->nvdata, EC_VBNV_BLOCK_SIZE);
 #if 0
 	/* Force legacy mode */
 	ctx->nvdata[VB2_NV_OFFS_HEADER] = VB2_NV_HEADER_SIGNATURE_V1;
@@ -107,7 +103,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 	cros_ofnode_dump_fmap(&vboot->fmap);
 	ret = uclass_first_device_err(UCLASS_CROS_FWSTORE, &vboot->fwstore);
 	if (ret)
-		return log_msg_ret("set up fwstore", ret);
+		return log_msg_ret("fwstore", ret);
 
 	if (CONFIG_IS_ENABLED(CROS_EC)) {
 		ret = uclass_get_device(UCLASS_CROS_EC, 0, &vboot->cros_ec);
@@ -132,12 +128,12 @@ int vboot_ver_init(struct vboot_info *vboot)
 	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
 	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, ctx->secdata,
 				    sizeof(ctx->secdata));
-	printf("cros_nvdata_read_walk ret=%d\n", ret);
 	if (ret == -ENOENT)
-		printf("SKIP factory init\n");
+		printf("** SKIP factory init\n");
 // 		ret = cros_tpm_factory_initialise(vboot);
 	else if (ret)
 		return log_msg_ret("read secdata", ret);
+	vboot_secdata_dump(ctx->secdata, sizeof(ctx->secdata));
 #ifdef CONFIG_SANDBOX
 	ctx->secdata[0] = 2;
 	ctx->secdata[1] = 3;
@@ -150,24 +146,25 @@ int vboot_ver_init(struct vboot_info *vboot)
 	ctx->secdata[8] = 0;
 	ctx->secdata[9] = 0x7a;
 #endif
+#ifdef DEBUG
 	printf("secdata:\n");
 	print_buffer(0, ctx->secdata, 1, sizeof(ctx->secdata), 0);
+#endif
 
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
-
 	if (vboot_flag_read_walk(VBOOT_FLAG_DEVELOPER) == 1) {
 		ctx->flags |= VB2_CONTEXT_FORCE_DEVELOPER_MODE;
 		log_info("Enabled developer mode\n");
 	}
-
 	if (vboot_flag_read_walk(VBOOT_FLAG_RECOVERY) == 1) {
+		ctx->flags |= VB2_CONTEXT_FORCE_RECOVERY_MODE;
 		if (vboot->disable_dev_on_rec)
 			ctx->flags |= VB2_DISABLE_DEVELOPER_MODE;
+		log_info("Enabled recovery mode\n");
 	}
 
 	if (vboot_flag_read_walk(VBOOT_FLAG_WIPEOUT) == 1)
 		ctx->flags |= VB2_CONTEXT_FORCE_WIPEOUT_MODE;
-
 	if (vboot_flag_read_walk(VBOOT_FLAG_LID_OPEN) == 0)
 		ctx->flags |= VB2_CONTEXT_NOFAIL_BOOT;
 

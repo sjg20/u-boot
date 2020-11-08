@@ -26,7 +26,7 @@ u32 VbExIsShutdownRequested(void)
 	 * If power switch is pressed (but previously was known to be not
 	 * pressed), we power off.
 	 */
-	ret = vboot_flag_read_walk_prev(VBOOT_FLAG_POWER_OFF, &prev);
+	ret = vboot_flag_read_walk_prev(VBOOT_FLAG_POWER_OFF, &prev, NULL);
 	if (!ret && prev == 1) {
 		log_debug("Power-key-pressed is detected.\n");
 		return 1;

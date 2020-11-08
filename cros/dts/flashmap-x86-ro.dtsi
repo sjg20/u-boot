@@ -88,7 +88,7 @@
 		};
 		fmap {
 			offset = <(0xff200000 - RO_BASE)>;
-			size = <0x800>;
+			size = <0x1200>;
 		};
 		firmware-id {
 			u-boot,dm-pre-reloc;
@@ -109,8 +109,11 @@
 			type = "files";
 			pattern = "locales/*";
 			require-matches;
-			compress = "lz4";
+			files-compress = "lz4";
 			align = <0x40>;
+
+			/* Intel SPI flash driver requires word alignment */
+			files-align = <4>;
 		};
 		boot-rec {
 			align = <0x1000>;

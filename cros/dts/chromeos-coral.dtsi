@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Chromium OS-specific options for x86
+ *
+ * Copyright 2018 Google LLC
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/gpio/x86-gpio.h>
+#include <asm/arch-apollolake/gpio.h>
+#include <chromeos-x86.dtsi>
+
+/ {
+	chromeos_dev: chromeos {
+		ec-in-rw {
+			u-boot,dm-pre-reloc;
+			compatible = "google,gpio-flag";
+			gpio = <&gpio_n GPIO_41 GPIO_ACTIVE_HIGH>;
+		};
+
+		write-protect {
+			u-boot,dm-pre-reloc;
+			compatible = "google,gpio-flag";
+			gpio = <&gpio_nw GPIO_75 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};

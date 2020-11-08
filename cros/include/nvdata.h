@@ -11,6 +11,8 @@
 #ifndef __CROS_NVDATA_H
 #define __CROS_NVDATA_H
 
+/* These match with <dt-bindings/cros/nvdata.h> */
+
 enum cros_nvdata_type {
 	CROS_NV_DATA,		/* Standard data (can be lost) */
 	CROS_NV_SECDATA,	/* Secure data (e.g. stored in TPM) */
@@ -30,6 +32,16 @@ enum cros_nvdata_type {
 #define FWMP_NV_INDEX                   0x100a
 #define REC_HASH_NV_INDEX               0x100b
 #define REC_HASH_NV_SIZE                VB2_SHA256_DIGEST_SIZE
+
+/**
+ * struct nvdata_uc_priv - private uclass data for each device
+ *
+ * @supported: Bit mask of which enum cros_nvdata_type types are supported by
+ *	this device
+ */
+struct nvdata_uc_priv {
+	u32 supported;
+};
 
 /* Operations for the Platform Controller Hub */
 struct cros_nvdata_ops {
@@ -223,5 +235,7 @@ int cros_nvdata_setup_walk(enum cros_nvdata_type type, uint attr, uint size,
  *	value  on error
  */
 int cros_nvdata_lock_walk(enum cros_nvdata_type );
+
+int cros_nvdata_of_to_plat(struct udevice *dev);
 
 #endif /* __CROS_NVDATA_H */

@@ -11,6 +11,7 @@
 #include <common.h>
 #include <bloblist.h>
 #include <cros_ec.h>
+#include <dm.h>
 #include <log.h>
 #include <vboot_struct.h>
 #include <cros/vboot.h>
@@ -139,6 +140,7 @@ static int log_recovery_mode_switch(struct vboot_info *vboot)
 
 static int clear_recovery_mode_switch(struct vboot_info *vboot)
 {
+	log_info("Clearing recovery mode\n");
 	/* Clear all host event bits requesting recovery mode */
 	return cros_ec_clear_events_b(vboot->cros_ec,
 		EC_HOST_EVENT_MASK(EC_HOST_EVENT_KEYBOARD_RECOVERY) |
@@ -156,7 +158,7 @@ int vboot_fill_handoff(struct vboot_info *vboot)
 	sd->workbuf_hash_offset = 0;
 	sd->workbuf_hash_size = 0;
 
-	log_info("creating vboot_handoff structure\n");
+	log_info("Creating vboot_handoff structure\n");
 	vh = bloblist_add(BLOBLISTT_VBOOT_HANDOFF, sizeof(*vh), 0);
 	if (!vh)
 		return log_msg_ret("failed to alloc vboot_handoff struct\n",
@@ -166,10 +168,8 @@ int vboot_fill_handoff(struct vboot_info *vboot)
 	fill_handoff(vboot, vh, sd);
 	vboot->handoff = vh;
 
-	log_info("1\n");
 	/* Log the recovery mode switches if required, before clearing them */
 	log_recovery_mode_switch(vboot);
-	log_info("2\n");
 
 	/*
 	 * The recovery mode switch is cleared (typically backed by EC) here
@@ -180,8 +180,11 @@ int vboot_fill_handoff(struct vboot_info *vboot)
 	 * clear the state here since this function is called when memory
 	 * is known to be up.
 	 */
-	clear_recovery_mode_switch(vboot);
-	log_info("3\n");
+	log_warning("flags %x recovery=%d, EC=%s\n", ctx->flags,
+		    (ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0,
+		    vboot->cros_ec->name);
+	if (ctx->flags & VB2_CONTEXT_RECOVERY_MODE)
+		clear_recovery_mode_switch(vboot);
 
 	return 0;
 }

@@ -37,7 +37,7 @@ void ut_failf(struct unit_test_state *uts, const char *fname, int line,
 
 ulong ut_check_free(void)
 {
-	struct mallinfo info = mallinfo();
+ 	struct mallinfo info = mallinfo();
 
 	return info.uordblks;
 }

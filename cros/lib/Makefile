@@ -3,6 +3,7 @@
 # Copyright 2018 Google LLC
 #
 
+obj-$(CONFIG_$(SPL_)X86) += acpi.o
 obj-$(CONFIG_CHROMEOS) += aux-fw-uclass.o
 obj-$(CONFIG_CHROMEOS) += cros_ofnode.o
 obj-$(CONFIG_CHROMEOS) += cros_tpm.o

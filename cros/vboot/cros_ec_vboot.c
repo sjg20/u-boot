@@ -80,25 +80,30 @@ static int cros_ec_vboot_hash_image(struct udevice *dev,
 				    u8 *hash, int *hash_sizep)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
-	static struct ec_response_vboot_hash resp;
+	struct ec_response_vboot_hash resp;
 	u32 hash_offset;
 	int ret;
-	uint i;
 
 	hash_offset = get_vboot_hash_offset(select);
 
 	ret = cros_ec_read_hash(ec_dev, hash_offset, &resp);
-	if (ret)
+	if (ret) {
+		log_err("EC '%s': Cannot read hash\n", ec_dev->name);
 		return log_msg_ret("read", ret);
+	}
 	if (resp.digest_size > *hash_sizep)
 		return log_msg_ret("size", -E2BIG);
-	log_info("hash status=%x, hash_type=%x, digest_size=%x, offset=%x, size=%x\n",
-		 resp.status, resp.hash_type, resp.digest_size, resp.offset,
-		 resp.size);
+	log_debug("hash status=%x, select=%d, hash_offset=%x, hash_type=%x, digest_size=%x, offset=%x, size=%x\n",
+		  resp.status, select, hash_offset, resp.hash_type,
+		  resp.digest_size, resp.offset, resp.size);
 	memcpy(hash, resp.hash_digest, resp.digest_size);
+#ifdef LOG_DEBUG
+	uint i;
+
 	for (i = 0; i < resp.digest_size; i++)
 		printf("%02x", hash[i]);
 	printf("\n");
+#endif
 
 	*hash_sizep = resp.digest_size;
 
@@ -183,8 +188,8 @@ static int cros_ec_vboot_update_image(struct udevice *dev,
 				   &region_size);
 	if (ret)
 		return ret;
-	log_info("Updating region %d, offset=%x, size=%x\n", region,
-		 region_offset, region_size);
+	log_info("Updating region %d, offset=%x, size=%x, image_size=%x\n",
+		 region, region_offset, region_size, image_size);
 	if (image_size > region_size)
 		return log_msg_ret("size", -EINVAL);
 
