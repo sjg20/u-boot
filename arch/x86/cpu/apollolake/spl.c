@@ -39,7 +39,7 @@ static int rom_load_image(struct spl_image_info *spl_image,
 	spl_image->load_addr = spl_image->entry_point;
 	spl_image->os = IH_OS_U_BOOT;
 	spl_image->name = "U-Boot";
-	log_debug("Reading from mapped SPI %lx, size %lx", spl_pos, spl_size);
+	log_debug("Reading from mapped SPI %lx, size %lx\n", spl_pos, spl_size);
 
 	if (CONFIG_IS_ENABLED(SPI_FLASH_SUPPORT)) {
 		ret = uclass_find_first_device(UCLASS_SPI_FLASH, &dev);
