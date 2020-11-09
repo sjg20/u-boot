@@ -76,6 +76,16 @@
 			type = "text";
 			text-label = "frid";
 		};
+		private-files {
+			type = "files";
+			pattern = "*.dat";
+		};
+#ifdef CONFIG_HAVE_VBT
+		intel-vbt {
+			align = <4>;
+			filename = CONFIG_VBT_FILE;
+		};
+#endif
 	};
 
 	/* ---- Section: Rewritable slot B ---- */
@@ -135,6 +145,15 @@
 			type = "text";
 			text-label = "frid";
 		};
+		private-files {
+			type = "files";
+			pattern = "*.dat";
+		};
+#ifdef CONFIG_HAVE_VBT
+		intel-vbt {
+			filename = CONFIG_VBT_FILE;
+		};
+#endif
 	};
 
 	/* ---- Section: Rewritable VPD 32 KB ---- */

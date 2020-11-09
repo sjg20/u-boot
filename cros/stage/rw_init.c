@@ -8,7 +8,6 @@
 #define NEED_VB20_INTERNALS
 
 #include <common.h>
-#include <binman.h>
 #include <bloblist.h>
 #include <dm.h>
 #include <log.h>
@@ -272,12 +271,6 @@ int vboot_rw_init(struct vboot_info *vboot)
 	vboot->valid = true;
 	log_warning("flags %x %d\n", ctx->flags,
 		    ((ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0));
-
-	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
-		ret = binman_select_subnode("read-write-a");
-		if (ret)
-			return log_msg_ret("binman", ret);
-	}
 
 	ret = vboot_load_config(vboot);
 	if (ret)

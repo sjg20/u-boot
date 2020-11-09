@@ -186,6 +186,7 @@ int arch_fsp_init_r(void)
 	s3wake = IS_ENABLED(CONFIG_HAVE_ACPI_RESUME) &&
 		gd->arch.prev_sleep_state == ACPI_S3;
 
+	log_info("Selecting binman node\n");
 	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
 		ret = binman_select_subnode("read-only");
 		if (ret)

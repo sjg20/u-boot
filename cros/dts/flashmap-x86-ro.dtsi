@@ -88,7 +88,7 @@
 		};
 		fmap {
 			offset = <(0xff200000 - RO_BASE)>;
-			size = <0x800>;
+			size = <0xc00>;
 		};
 		firmware-id {
 			u-boot,dm-pre-reloc;

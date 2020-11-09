@@ -66,7 +66,7 @@ enum u_boot_phase {
 	PHASE_BOARD_R,	/* Running in U-Boot after relocation */
 };
 
-#define DO_VBOOT 0
+#define DO_VBOOT 1
 
 /**
  * spl_phase() - Find out the phase of U-Boot
