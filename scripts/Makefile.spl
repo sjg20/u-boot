@@ -115,7 +115,7 @@ libs-y += dts/
 libs-y += fs/
 libs-$(CONFIG_SPL_POST_MEM_SUPPORT) += post/drivers/
 libs-$(CONFIG_SPL_NET_SUPPORT) += net/
-libs-$(CONFIG_SPL_UNIT_TEST) += test/
+libs-$(CONFIG_$(SPL_TPL_)UNIT_TEST) += test/
 
 libs-$(CONFIG_$(SPL_TPL_)CHROMEOS) += cros/
 
@@ -303,7 +303,7 @@ endif
 
 ifneq ($(build_dtb),)
 $(obj)/$(SPL_BIN)-dtb.bin: $(obj)/$(SPL_BIN)-nodtb.bin \
-		$(if $(CONFIG_SPL_SEPARATE_BSS),,$(obj)/$(SPL_BIN)-pad.bin) \
+		$(if $(CONFIG_$(SPL_TPL_)SEPARATE_BSS),,$(obj)/$(SPL_BIN)-pad.bin) \
 		$(FINAL_DTB_CONTAINER)  FORCE
 	$(call if_changed,cat)
 
@@ -389,7 +389,7 @@ LDFLAGS_$(SPL_BIN) += -T u-boot-spl.lds $(LDFLAGS_FINAL)
 # Avoid 'Not enough room for program headers' error on binutils 2.28 onwards.
 LDFLAGS_$(SPL_BIN) += $(call ld-option, --no-dynamic-linker)
 
-# Pick the best-match (i.e. SPL_TEXT_BASE for SPL, TPL_TEXT_BASE for TPL)
+# Pick the best-match (e.g. SPL_TEXT_BASE for SPL, TPL_TEXT_BASE for TPL)
 ifneq ($(CONFIG_$(SPL_TPL_)TEXT_BASE),)
 LDFLAGS_$(SPL_BIN) += -Ttext $(CONFIG_$(SPL_TPL_)TEXT_BASE)
 endif

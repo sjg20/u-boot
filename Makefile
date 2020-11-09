@@ -6,6 +6,8 @@ SUBLEVEL =
 EXTRAVERSION = -rc5
 NAME =
 
+.PRECIOUS: tpl/u-boot-tpl
+
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
 # More info can be located in ./README
@@ -808,7 +810,7 @@ libs-$(CONFIG_API) += api/
 ifdef CONFIG_POST
 libs-y += post/
 endif
-libs-$(CONFIG_UNIT_TEST) += test/
+libs-$(CONFIG_$(SPL_TPL_)UNIT_TEST) += test/
 libs-$(CONFIG_UT_ENV) += test/env/
 libs-$(CONFIG_UT_OPTEE) += test/optee/
 libs-$(CONFIG_UT_OVERLAY) += test/overlay/
