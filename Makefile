@@ -6,6 +6,8 @@ SUBLEVEL =
 EXTRAVERSION = -rc5
 NAME =
 
+.PRECIOUS: tpl/u-boot-tpl
+
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
 # More info can be located in ./README
@@ -765,7 +767,7 @@ HAVE_VENDOR_COMMON_LIB = $(if $(wildcard $(srctree)/board/$(VENDOR)/common/Makef
 libs-y += lib/
 libs-$(HAVE_VENDOR_COMMON_LIB) += board/$(VENDOR)/common/
 libs-$(CONFIG_OF_EMBED) += dts/
-libs-$(CONFIG_CHROMEOS) += cros/
+libs-$(CONFIG_CHROMEOS_VBOOT) += cros/
 libs-y += fs/
 libs-y += net/
 libs-y += disk/
@@ -808,7 +810,7 @@ libs-$(CONFIG_API) += api/
 ifdef CONFIG_POST
 libs-y += post/
 endif
-libs-$(CONFIG_UNIT_TEST) += test/
+libs-$(CONFIG_$(SPL_TPL_)UNIT_TEST) += test/
 libs-$(CONFIG_UT_ENV) += test/env/
 libs-$(CONFIG_UT_OPTEE) += test/optee/
 libs-$(CONFIG_UT_OVERLAY) += test/overlay/
@@ -898,17 +900,19 @@ endif
 vboot:
 	$(Q)FIRMWARE_ARCH=$(VBOOT_SUBMAKE_FIRMWARE_ARCH) \
 		CC=$(CROSS_COMPILE)gcc \
-		CFLAGS="$(CFLAGS_VBOOT)" NO_STDINT=1 \
+		CFLAGS="$(CFLAGS_VBOOT)" NO_STDINT=1 TPM2_MODE=1 \
 		$(MAKE) -C $(VBOOT_SOURCE) DEBUG=1 \
 		BUILD=$(CURDIR)/include/generated/vboot \
 		fwlib
 
 PLATFORM_LIBS += $(CURDIR)/include/generated/vboot/vboot_fw.a
 VBOOT_TARGET := vboot
+
+$(VBOOT_TARGET): $(u-boot-init)
 endif
 
 # Add vboot_reference lib
-ifdef CONFIG_CHROMEOS
+ifdef CONFIG_CHROMEOS_VBOOT
 ifndef VBOOT_SOURCE
 PLATFORM_LIBS += $(VBOOT)/lib/vboot_fw.a
 endif
@@ -972,6 +976,7 @@ INPUTS-$(CONFIG_SPL_FRAMEWORK) += u-boot.img
 endif
 endif
 INPUTS-$(CONFIG_TPL) += tpl/u-boot-tpl.bin
+INPUTS-$(CONFIG_VPL) += vpl/u-boot-vpl.bin
 INPUTS-$(CONFIG_OF_SEPARATE) += u-boot.dtb
 ifeq ($(CONFIG_SPL_FRAMEWORK),y)
 INPUTS-$(CONFIG_OF_SEPARATE) += u-boot-dtb.img
@@ -987,10 +992,6 @@ INPUTS-$(CONFIG_EFI_STUB) += u-boot-payload.efi
 # Generate this input file for binman
 ifeq ($(CONFIG_SPL),)
 INPUTS-$(CONFIG_ARCH_MEDIATEK) += u-boot-mtk.bin
-endif
-
-ifneq ($(CONFIG_CHROMEOS),)
-ALL-y += image.bin
 endif
 
 # Add optional build target if defined in board/cpu/soc headers
@@ -1083,9 +1084,11 @@ cmd_cfgcheck = $(srctree)/scripts/check-config.sh $2 \
 PHONY += inputs
 inputs: $(INPUTS-y)
 
-all: .binman_stamp inputs
+all: .binman_stamp inputs $(if $(CONFIG_CHROMEOS_VBOOT),image.bin)
 ifeq ($(CONFIG_BINMAN),y)
+ifeq ($(CONFIG_CHROMEOS_VBOOT),)
 	$(call if_changed,binman)
+endif
 endif
 
 # Timestamp file to make sure that binman always runs
@@ -1702,18 +1705,18 @@ u-boot-x86-reset16.bin: u-boot FORCE
 
 endif # CONFIG_X86
 
-ifneq ($(CONFIG_CHROMEOS),)
+ifneq ($(CONFIG_CHROMEOS_VBOOT),)
 BINMAN_image.bin := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
 	-abmpblk=$(KBUILD_SRC)/cros/data/bmpblk.bin -I $(KBUILD_SRC)/cros/data \
 	"-ahardware-id=TEST 999" \
 	"-afrid=123412 123" -acros-ec-rw-path=$(KBUILD_SRC)/cros/data/ecrw.bin \
 	 -m -i image
-image.bin: $(filter-out image.bin,$(ALL-y)) tpl/u-boot-tpl spl/u-boot-spl \
+image.bin: $(INPUTS-y) \
+		$(if($(CONFIG_TPL),tpl/u-boot-tpl) \
+		$(if($(CONFIG_SPL),spl/u-boot-spl) \
 		u-boot.bin FORCE
 	$(call if_changed,binman)
 endif
-
-#$(filter-out image.bin,$(ALL-y))
 
 OBJCOPYFLAGS_u-boot-app.efi := $(OBJCOPYFLAGS_EFI)
 u-boot-app.efi: u-boot FORCE
@@ -1833,7 +1836,6 @@ cmd_smap = \
 
 u-boot:	$(u-boot-init) $(u-boot-main) $(VBOOT_TARGET) u-boot.lds FORCE
 	+$(call if_changed,u-boot__)
-
 ifeq ($(CONFIG_KALLSYMS),y)
 	$(call cmd,smap)
 	$(call cmd,u-boot__) common/system_map.o
@@ -2026,10 +2028,19 @@ spl/boot.bin: spl/u-boot-spl
 
 tpl/u-boot-tpl.bin: tpl/u-boot-tpl
 	@:
-tpl/u-boot-tpl: tools prepare \
-		$(if $(CONFIG_OF_SEPARATE)$(CONFIG_OF_EMBED)$(CONFIG_OF_HOSTFILE)$(CONFIG_SPL_OF_PLATDATA),dts/dt.dtb)
-	$(Q)$(MAKE) obj=tpl -f $(srctree)/scripts/Makefile.spl all
 	$(TPL_SIZE_CHECK)
+
+tpl/u-boot-tpl: tools prepare \
+		$(if $(CONFIG_OF_SEPARATE)$(CONFIG_OF_EMBED)$(CONFIG_OF_HOSTFILE)$(CONFIG_TPL_OF_PLATDATA),dts/dt.dtb)
+	$(Q)$(MAKE) obj=tpl -f $(srctree)/scripts/Makefile.spl all
+
+vpl/u-boot-vpl.bin: vpl/u-boot-vpl
+	@:
+	$(VPL_SIZE_CHECK)
+
+vpl/u-boot-vpl: tools prepare \
+		$(if $(CONFIG_OF_SEPARATE)$(CONFIG_OF_EMBED)$(CONFIG_OF_HOSTFILE)$(CONFIG_VPL_OF_PLATDATA),dts/dt.dtb)
+	$(Q)$(MAKE) obj=vpl -f $(srctree)/scripts/Makefile.spl all
 
 TAG_SUBDIRS := $(patsubst %,$(srctree)/%,$(u-boot-dirs) include)
 
