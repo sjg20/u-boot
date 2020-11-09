@@ -66,6 +66,8 @@ enum u_boot_phase {
 	PHASE_BOARD_R,	/* Running in U-Boot after relocation */
 };
 
+#define DO_VBOOT 0
+
 /**
  * spl_phase() - Find out the phase of U-Boot
  *
@@ -114,7 +116,7 @@ static inline enum u_boot_phase spl_phase(void)
 #ifdef CONFIG_TPL_BUILD
 	return PHASE_TPL;
 #elif defined(CONFIG_VPL_BUILD)
-	return PHASE_VPL;
+	return DO_VBOOT ? PHASE_VPL : PHASE_SPL;
 #elif defined(CONFIG_SPL_BUILD)
 	return PHASE_SPL;
 #else
@@ -131,9 +133,9 @@ static inline enum u_boot_phase spl_prev_phase(void)
 #ifdef CONFIG_TPL_BUILD
 	return PHASE_NONE;
 #elif defined(CONFIG_VPL_BUILD)
-	return PHASE_TPL;	/* VPL requires TPL */
+	return DO_VBOOT ? PHASE_TPL : PHASE_NONE;	/* VPL requires TPL */
 #elif defined(CONFIG_SPL_BUILD)
-	return IS_ENABLED(CONFIG_VPL) ? PHASE_VPL :
+	return DO_VBOOT && IS_ENABLED(CONFIG_VPL) ? PHASE_VPL :
 		IS_ENABLED(CONFIG_TPL) ? PHASE_TPL :
 		PHASE_NONE;
 #else
@@ -145,7 +147,7 @@ static inline enum u_boot_phase spl_prev_phase(void)
 static inline enum u_boot_phase spl_next_phase(void)
 {
 #ifdef CONFIG_TPL_BUILD
-	return IS_ENABLED(CONFIG_VPL) ? PHASE_VPL : PHASE_SPL;
+	return DO_VBOOT && IS_ENABLED(CONFIG_VPL) ? PHASE_VPL : PHASE_SPL;
 #elif defined(CONFIG_VPL_BUILD)
 	return PHASE_SPL;
 #else
@@ -258,6 +260,8 @@ ulong spl_get_image_size(void);
  * of spl_load_simple_fit().
  */
 bool spl_load_simple_fit_skip_processing(void);
+
+ulong spl_get_image_text_base(void);
 
 /**
  * spl_load_simple_fit() - Loads a fit image from a device.

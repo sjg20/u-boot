@@ -231,6 +231,7 @@ int vboot_run_auto(struct vboot_info *vboot, uint flags)
 	return vboot_run_stages(vboot, stage, flags);
 }
 
+#if DO_VBOOT
 void board_boot_order(u32 *spl_boot_list)
 {
 	spl_boot_list[0] = BOOT_DEVICE_CROS_VBOOT;
@@ -240,6 +241,7 @@ void board_boot_order(u32 *spl_boot_list)
 	spl_boot_list[1] = BOOT_DEVICE_BOARD;
 #endif
 }
+#endif
 
 int cros_do_stage(void)
 {
@@ -262,6 +264,8 @@ int cros_do_stage(void)
 
 	return 0;
 }
+
+#if DO_VBOOT
 
 #ifdef CONFIG_VPL_BUILD
 static int cros_load_image_vpl(struct spl_image_info *spl_image,
@@ -310,3 +314,4 @@ static int cros_load_image_spl(struct spl_image_info *spl_image,
 SPL_LOAD_IMAGE_METHOD("chromium_vboot_spl", 0, BOOT_DEVICE_CROS_VBOOT,
 		      cros_load_image_spl);
 #endif /* CONFIG_SPL_BUILD */
+#endif
