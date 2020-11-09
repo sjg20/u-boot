@@ -320,19 +320,21 @@ class Image(section.Entry_section):
             selected_entries.append(entry)
         return selected_entries, lines, widths
 
-    def _CollectEntries(self, entries, to_add):
+    def _CollectEntries(self, entries, entries_by_name, add_entry):
+        entries[add_entry.GetPath()] = add_entry
+        to_add = add_entry.GetEntries()
         if to_add:
             for entry in to_add.values():
                 entries[entry.GetPath()] = entry
             for entry in to_add.values():
-                self._CollectEntries(entries, entry.GetEntries())
+                self._CollectEntries(entries, entries_by_name, entry)
+        entries_by_name[add_entry.name] = add_entry
 
     def LookupImageSymbol(self, sym_name, optional, msg, base_addr):
         entries = OrderedDict()
-        self._CollectEntries(entries, self.GetEntries())
         entries_by_name = {}
-        for entry in entries.values():
-            entries_by_name[entry.name] = entry
+        self._CollectEntries(entries, entries_by_name, self)
+        #for entry in entries.values():
+            #entries_by_name[entry.name] = entry
         return self.LookupSymbol(sym_name, optional, msg, base_addr,
                                  entries_by_name)
-
