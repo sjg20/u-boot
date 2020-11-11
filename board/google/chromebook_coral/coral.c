@@ -14,6 +14,7 @@
 #include <asm/intel_gnvs.h>
 #include <asm/intel_pinctrl.h>
 #include <dm/acpi.h>
+#include <linux/delay.h>
 #include "variant_gpio.h"
 
 struct cros_gpio_info {
@@ -23,15 +24,55 @@ struct cros_gpio_info {
 	int flags;
 };
 
-int arch_misc_init(void)
-{
-	return 0;
-}
-
 /* This function is needed if CONFIG_CMDLINE is not enabled */
 __weak int board_run_command(const char *cmdline)
 {
 	printf("No command line\n");
+
+	return 0;
+}
+
+static int get_memconfig(struct udevice *dev)
+{
+	struct gpio_desc gpios[4];
+	int ret;
+
+	ret = gpio_request_list_by_name(dev, "memconfig-gpios", gpios,
+					ARRAY_SIZE(gpios),
+					GPIOD_IS_IN | GPIOD_PULL_UP);
+	if (ret) {
+		log_debug("Cannot get GPIO list '%s' (%d)\n", dev->name, ret);
+		return ret;
+	}
+
+	/* Give the lines time to settle */
+	udelay(10);
+
+	ret = dm_gpio_get_values_as_int(gpios, ARRAY_SIZE(gpios));
+	if (ret < 0)
+		return log_msg_ret("get", ret);
+
+	ret = gpio_free_list(dev, gpios, ARRAY_SIZE(gpios));
+	if (ret)
+		return log_msg_ret("free", ret);
+
+	return ret;
+}
+
+int arch_misc_init(void)
+{
+	struct udevice *dev;
+	int mem_config;
+	int ret;
+
+	ret = uclass_first_device_err(UCLASS_SYSINFO, &dev);
+	if (ret)
+		return log_msg_ret("board", ret);
+	ret = get_memconfig(dev);
+	if (ret < 0)
+		log_warning("Unable to read memconfig (err=%d)\n", ret);
+	mem_config = ret;
+	log_notice("Memconfig %d\n", mem_config);
 
 	return 0;
 }

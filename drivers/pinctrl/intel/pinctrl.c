@@ -32,11 +32,6 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <linux/err.h>
 
-#define GPIO_DW_SIZE(x)			(sizeof(u32) * (x))
-#define PAD_CFG_OFFSET(x, dw_num)	((x) + GPIO_DW_SIZE(dw_num))
-#define PAD_CFG0_OFFSET(x)		PAD_CFG_OFFSET(x, 0)
-#define PAD_CFG1_OFFSET(x)		PAD_CFG_OFFSET(x, 1)
-
 #define MISCCFG_GPE0_DW0_SHIFT 8
 #define MISCCFG_GPE0_DW0_MASK (0xf << MISCCFG_GPE0_DW0_SHIFT)
 #define MISCCFG_GPE0_DW1_SHIFT 12

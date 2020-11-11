@@ -130,6 +130,41 @@ static int intel_gpio_xlate(struct udevice *orig_dev, struct gpio_desc *desc,
 	return 0;
 }
 
+static int intel_gpio_set_dir_flags(struct udevice *dev, unsigned int offset,
+				    ulong flags)
+{
+	struct udevice *pinctrl = dev_get_parent(dev);
+	u32 bic0 = 0, bic1 = 0;
+	u32 or0, or1;
+	uint config_offset;
+
+	config_offset = intel_pinctrl_get_config_reg_offset(pinctrl, offset);
+
+	if (flags & GPIOD_IS_OUT) {
+		bic0 |= PAD_CFG0_MODE_MASK | PAD_CFG0_RX_STATE |
+			PAD_CFG0_TX_DISABLE;
+		or0 |= PAD_CFG0_MODE_GPIO | PAD_CFG0_RX_DISABLE;
+	} else if (flags & GPIOD_IS_IN) {
+		bic0 |= PAD_CFG0_MODE_MASK | PAD_CFG0_TX_STATE |
+			PAD_CFG0_RX_DISABLE;
+		or0 |= PAD_CFG0_MODE_GPIO | PAD_CFG0_TX_DISABLE;
+	}
+	if (flags & GPIOD_PULL_UP) {
+		bic1 |= PAD_CFG1_PULL_MASK;
+		or1 |= PAD_CFG1_PULL_UP_20K;
+	} else if (flags & GPIOD_PULL_DOWN) {
+		bic1 |= PAD_CFG1_PULL_MASK;
+		or1 |= PAD_CFG1_PULL_DN_20K;
+	}
+
+	pcr_clrsetbits32(pinctrl, PAD_CFG0_OFFSET(config_offset), bic0, or0);
+	pcr_clrsetbits32(pinctrl, PAD_CFG1_OFFSET(config_offset), bic1, or1);
+	log_info("%s: flags=%lx, offset=%x, config_offset=%x, %x/%x %x/%x\n",
+		 dev->name, flags, offset, config_offset, bic0, or0, bic1, or1);
+
+	return 0;
+}
+
 #if CONFIG_IS_ENABLED(ACPIGEN)
 static int intel_gpio_get_acpi(const struct gpio_desc *desc,
 			       struct acpi_gpio *gpio)
@@ -183,6 +218,7 @@ static const struct dm_gpio_ops gpio_intel_ops = {
 	.set_value		= intel_gpio_set_value,
 	.get_function		= intel_gpio_get_function,
 	.xlate			= intel_gpio_xlate,
+	.set_dir_flags		= intel_gpio_set_dir_flags,
 #if CONFIG_IS_ENABLED(ACPIGEN)
 	.get_acpi		= intel_gpio_get_acpi,
 #endif
