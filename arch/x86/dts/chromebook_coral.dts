@@ -1234,3 +1234,14 @@
 		reg = <0x26>;
 	};
 };
+
+#ifdef CONFIG_CHROMEOS_VBOOT
+&chromeos_dev {
+	write-protect {
+		u-boot,dm-pre-reloc;
+		compatible = "google,gpio-flag";
+		gpio = <&gpio_nw GPIO_75 GPIO_ACTIVE_HIGH>;
+		value = <0>;
+	};
+};
+#endif

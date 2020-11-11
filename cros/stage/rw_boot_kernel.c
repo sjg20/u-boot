@@ -259,7 +259,7 @@ static int boot_kernel(struct vboot_info *vboot,
 		device_remove(dev, DM_REMOVE_NORMAL);
 
 #ifdef CONFIG_X86
-// 	vboot_update_acpi(vboot);
+	vboot_update_acpi(vboot);
 
 	params = (struct boot_params *)(cmdline + CMDLINE_SIZE);
 	printf("kernel_buffer=%p, size=%x, bootloader_address=%llx, size=%x, cmdline=%p, params=%p\n",
@@ -272,7 +272,6 @@ static int boot_kernel(struct vboot_info *vboot,
 		print_buffer((ulong)kparams->kernel_buffer,
 			     kparams->kernel_buffer, 1, 0x100, 0);
 		printf("go %p, %p\n", params, kparams->kernel_buffer);
-		return 1;
 
 		boot_linux_kernel((ulong)params, (ulong)kparams->kernel_buffer,
 				  false);

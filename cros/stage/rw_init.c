@@ -208,7 +208,7 @@ static void wipe_unused_memory(struct vboot_info *vboot)
 
 static int vboot_do_init_out_flags(struct vboot_info *vboot, u32 out_flags)
 {
-	if (out_flags & VB_INIT_OUT_CLEAR_RAM) {
+	if (0 && (out_flags & VB_INIT_OUT_CLEAR_RAM)) {
 		if (vboot->disable_memwipe)
 			log_warning("Memory wipe requested but not supported\n");
 		else
@@ -250,11 +250,16 @@ static int vboot_init_handoff(struct vboot_info *vboot)
 		vdat->flags |= VBSD_NOFAIL_BOOT;
 	}
 
-	return vboot_do_init_out_flags(vboot, handoff->init_params.out_flags);
+	ret = vboot_do_init_out_flags(vboot, handoff->init_params.out_flags);
+	if (ret)
+		return log_msg_ret("flags", ret);
+
+	return 0;
 }
 
 int vboot_rw_init(struct vboot_info *vboot)
 {
+	struct fmap_firmware_entry *fw_entry;
 	struct vboot_blob *blob;
 	struct vb2_context *ctx;
 	int ret;
@@ -310,6 +315,24 @@ int vboot_rw_init(struct vboot_info *vboot)
 	ret = uclass_first_device_err(UCLASS_CROS_FWSTORE, &vboot->fwstore);
 	if (ret)
 		return log_msg_ret("Cannot set up fwstore", ret);
+
+	ret = cros_fwstore_read_entry(vboot->fwstore,
+				      &vboot->fmap.readonly.firmware_id,
+				      &vboot->readonly_firmware_id,
+				      sizeof(vboot->readonly_firmware_id));
+	if (ret)
+		return log_msg_ret("ro", ret);
+
+	if (vboot_is_slot_a(vboot))
+		fw_entry = &vboot->fmap.readwrite_a;
+	else
+		fw_entry = &vboot->fmap.readwrite_b;
+	ret = cros_fwstore_read_entry(vboot->fwstore,
+				      &fw_entry->firmware_id,
+				      &vboot->firmware_id,
+				      sizeof(vboot->firmware_id));
+	if (ret)
+		return log_msg_ret("rw", ret);
 
 #if CONFIG_IS_ENABLED(CROS_EC)
 	ret = uclass_get_device(UCLASS_CROS_EC, 0, &vboot->cros_ec);

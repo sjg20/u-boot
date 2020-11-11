@@ -33,6 +33,61 @@ struct smbios_write_method {
  * smbios_add_string() - add a string to the string area
  *
  * This adds a string to the string area which is appended directly after
+ * the formatted portion of an SMBIOS structure. If the string is already
+ * present in the table, it is not added again, but the string number of the
+ * existing string is returned
+ *
+ * @start:	string area start address
+ * @str:	string to add
+ * @pad:	length to pad string to (excluding terminator), 0 if none
+ * @strp:	If non-NULL, returns a pointer to the string in the table
+ * @return:	string number in the string area (1 or more)
+ */
+static int smbios_add_string_pad(char *start, const char *str, uint pad,
+				 char **strp)
+{
+	int i = 1;
+	char *p = start;
+
+	if (strp)
+		*strp = NULL;
+	if (!*str)
+		str = "Unknown";
+
+	for (;;) {
+		if (!*p) {
+			uint len;
+
+			if (strp)
+				*strp = p;
+			strcpy(p, str);
+			len = strlen(str);
+			p += len;
+			if (pad > len) {
+				memset(p, ' ', pad - len);
+				p += pad - len;
+			}
+			*p++ = '\0';
+			*p++ = '\0';
+
+			return i;
+		}
+
+		if (!strcmp(p, str)) {
+			if (strp)
+				*strp = p;
+			return i;
+		}
+
+		p += strlen(p) + 1;
+		i++;
+	}
+}
+
+/**
+ * smbios_add_string() - add a string to the string area
+ *
+ * This adds a string to the string area which is appended directly after
  * the formatted portion of an SMBIOS structure.
  *
  * @start:	string area start address
@@ -41,27 +96,7 @@ struct smbios_write_method {
  */
 static int smbios_add_string(char *start, const char *str)
 {
-	int i = 1;
-	char *p = start;
-	if (!*str)
-		str = "Unknown";
-
-	for (;;) {
-		if (!*p) {
-			strcpy(p, str);
-			p += strlen(str);
-			*p++ = '\0';
-			*p++ = '\0';
-
-			return i;
-		}
-
-		if (!strcmp(p, str))
-			return i;
-
-		p += strlen(p) + 1;
-		i++;
-	}
+	return smbios_add_string_pad(start, str, 0, NULL);
 }
 
 /**
@@ -112,12 +147,24 @@ static int smbios_write_type0(ulong *current, int handle, ofnode node)
 {
 	struct smbios_type0 *t;
 	int len = sizeof(struct smbios_type0);
+	char *ver_string;
+	uint pad = 0;
 
 	t = map_sysmem(*current, len);
 	memset(t, 0, sizeof(struct smbios_type0));
 	fill_smbios_header(t, SMBIOS_BIOS_INFORMATION, len, handle);
 	t->vendor = smbios_add_string(t->eos, "U-Boot");
-	t->bios_ver = smbios_add_string(t->eos, PLAIN_VERSION);
+
+	/*
+	 * Allow at least 66 bytes for version so Chrome OS can insert a new
+	 * string later, of at least 64 bytes plus terminator, which is the size
+	 * of chromeos_acpi_gnvs->fwid. See vboot_update_acpi().
+	 */
+	if (IS_ENABLED(CONFIG_CHROMEOS))
+		pad = 66;
+	t->bios_ver = smbios_add_string_pad(t->eos, PLAIN_VERSION, pad,
+					    &ver_string);
+	gd->arch.smbios_version = ver_string;
 	t->bios_release_date = smbios_add_string(t->eos, U_BOOT_DMI_DATE);
 #ifdef CONFIG_ROM_SIZE
 	t->bios_rom_size = (CONFIG_ROM_SIZE / 65536) - 1;
@@ -133,8 +180,8 @@ static int smbios_write_type0(ulong *current, int handle, ofnode node)
 #endif
 	t->bios_characteristics_ext2 = BIOS_CHARACTERISTICS_EXT2_TARGET;
 
-	t->bios_major_release = 0xff;
-	t->bios_minor_release = 0xff;
+	t->bios_major_release = U_BOOT_VERSION_NUM % 100;
+	t->bios_minor_release = U_BOOT_VERSION_NUM_PATCH;
 	t->ec_major_release = 0xff;
 	t->ec_minor_release = 0xff;
 

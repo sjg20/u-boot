@@ -24,6 +24,33 @@ int cros_fwstore_read(struct udevice *dev, int offset, int count, void *buf)
 	return ops->read(dev, offset, count, buf);
 }
 
+int cros_fwstore_read_entry(struct udevice *dev, struct fmap_entry *entry,
+			    void *buf, int maxlen)
+{
+	int ret;
+
+	if (entry->length > maxlen)
+		return log_msg_ret("spc", -ENOSPC);
+
+	ret = cros_fwstore_read(dev, entry->offset, entry->length, buf);
+	if (ret)
+		return log_msg_ret("read", ret);
+
+	return 0;
+}
+
+int cros_fwstore_mmap(struct udevice *dev, uint offset, uint size,
+		      ulong *addrp)
+{
+	struct cros_fwstore_ops *ops = cros_fwstore_get_ops(dev);
+
+	if (!ops->mmap)
+		return -ENOSYS;
+
+	return ops->mmap(dev, offset, size, addrp);
+}
+
+
 int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
 			void *buf, int buf_size)
 {
@@ -127,6 +154,12 @@ int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
 	}
 
 	return 0;
+}
+
+int fwstore_entry_mmap(struct udevice *dev, struct fmap_entry *entry,
+		       ulong *addrp)
+{
+	return cros_fwstore_mmap(dev, entry->offset, entry->length, addrp);
 }
 
 UCLASS_DRIVER(cros_fwstore) = {

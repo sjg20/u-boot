@@ -167,7 +167,6 @@ int vboot_ver_init(struct vboot_info *vboot)
 
 	if (vboot_flag_read_walk(VBOOT_FLAG_WIPEOUT) == 1)
 		ctx->flags |= VB2_CONTEXT_FORCE_WIPEOUT_MODE;
-
 	if (vboot_flag_read_walk(VBOOT_FLAG_LID_OPEN) == 0)
 		ctx->flags |= VB2_CONTEXT_NOFAIL_BOOT;
 

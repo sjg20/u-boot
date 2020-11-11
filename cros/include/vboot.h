@@ -12,7 +12,7 @@
 #include <vb2_api.h>
 #include <cros/cros_ofnode.h>
 
-#define ID_LEN		256
+#define ID_LEN		256U
 
 /* Required alignment for struct vb2_context */
 #define VBOOT_CONTEXT_ALIGN	16
