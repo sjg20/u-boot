@@ -210,6 +210,12 @@
 		_ll_result;						\
 	})
 
+#define ll_entry_decl(_type, _name, _list)				\
+	extern _type _u_boot_list_2_##_list##_2_##_name
+
+#define ll_entry_ref(_type, _name, _list)				\
+	(_type *)&_u_boot_list_2_##_list##_2_##_name
+
 /**
  * ll_start() - Point to first entry of first linker-generated array
  * @_type:	Data type of the entry

@@ -89,6 +89,8 @@ parser.add_option('-B', '--build-dir', type='string', default='b',
         help='Directory containing the build output')
 parser.add_option('-d', '--dtb-file', action='store',
                   help='Specify the .dtb input file')
+parser.add_option('-i', '--instantiate', action='store_true', default=False,
+                  help='Instantiate devices to avoid needing device_bind()')
 parser.add_option('--include-disabled', action='store_true',
                   help='Include disabled nodes')
 parser.add_option('-o', '--output', action='store', default='-',
@@ -111,4 +113,4 @@ elif options.test_coverage:
 
 else:
     dtb_platdata.run_steps(args, options.dtb_file, options.include_disabled,
-                           options.output)
+                           options.output, instantiate=options.instantiate)

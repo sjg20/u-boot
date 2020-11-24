@@ -187,9 +187,11 @@ class DtbPlatdata(object):
                key: Compatible string, e.g. 'rockchip,rk3288-grf'
                value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
         _compat_to_driver: Maps compatible strings to DriverInfo
+        _instantiate: Instantiate devices so they don't need to be bound at
+            run-time
     """
     def __init__(self, dtb_fname, include_disabled, warning_disabled,
-                 drivers_additional=None):
+                 drivers_additional=None, instantiate=False):
         self._fdt = None
         self._dtb_fname = dtb_fname
         self._valid_nodes = None
@@ -202,6 +204,7 @@ class DtbPlatdata(object):
         self._drivers_additional = drivers_additional or []
         self._of_match = {}
         self._compat_to_driver = {}
+        self._instantiate = instantiate
 
     def get_normalized_compat_name(self, node):
         """Get a node's normalized compat name
@@ -815,6 +818,30 @@ class DtbPlatdata(object):
         self.buf('};\n')
         self.buf('\n')
 
+    def _declare_device_inst(self, var_name, struct_name, node_parent):
+        """Add a device instance declaration to the output
+
+        This declares a U_BOOT_DEVICE_INST() for the device being processed
+
+        Args:
+            var_name: C name for the node
+            struct_name: Name for the dt struct associated with the node
+            node_parent: Parent of the node (or None if none)
+        """
+        self.buf('\n')
+        self.buf('__weak DM_DECL_DRIVER(%s);\n' % struct_name);
+        self.buf('\n')
+        self.buf('U_BOOT_DEVICE_INST(%s) = {\n' % var_name)
+        self.buf('\t.driver\t\t= DM_REF_DRIVER(%s),\n' % struct_name)
+        self.buf('\t.name\t\t= "%s",\n' % struct_name)
+        #self.buf('\t.platdata\t\t= &%s%s,\n' % (VAL_PREFIX, var_name))
+        #self.buf('\t.parent_platdata\t\t= %s,\n' % xx)
+        #self.buf('\t.driver_data\t\t= %s,\n' % xx)
+        #self.buf('\t.driver_data\t\t= %s,\n' % xx)
+        #self.buf('\t.driver_data\t\t= %s,\n' % xx)
+        self.buf('};\n')
+        self.buf('\n')
+
     def _output_prop(self, node, prop):
         """Output a line containing the value of a struct member
 
@@ -859,7 +886,10 @@ class DtbPlatdata(object):
         self.buf('/* Node %s index %d */\n' % (node.path, node.idx))
 
         self._output_values(var_name, struct_name, node)
-        self._declare_device(var_name, struct_name, node.parent)
+        if self._instantiate:
+            self._declare_device_inst(var_name, struct_name, node.parent)
+        else:
+            self._declare_device(var_name, struct_name, node.parent)
 
         self.out(''.join(self.get_buf()))
 
@@ -903,7 +933,7 @@ class DtbPlatdata(object):
         self.out(''.join(self.get_buf()))
 
 def run_steps(args, dtb_file, include_disabled, output, warning_disabled=False,
-              drivers_additional=None):
+              drivers_additional=None, instantiate=False):
     """Run all the steps of the dtoc tool
 
     Args:
@@ -915,6 +945,8 @@ def run_steps(args, dtb_file, include_disabled, output, warning_disabled=False,
             drivers
        _drivers_additional (list): List of additional drivers to use during
             scanning
+        instantiate: Instantiate devices so they don't need to be bound at
+            run-time
     Raises:
         ValueError: if args has no command, or an unknown command
     """
@@ -922,7 +954,7 @@ def run_steps(args, dtb_file, include_disabled, output, warning_disabled=False,
         raise ValueError('Please specify a command: struct, platdata')
 
     plat = DtbPlatdata(dtb_file, include_disabled, warning_disabled,
-                       drivers_additional)
+                       drivers_additional, instantiate)
     plat.scan_drivers()
     plat.scan_dtb()
     plat.scan_tree()

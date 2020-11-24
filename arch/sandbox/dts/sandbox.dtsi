@@ -278,7 +278,6 @@
 	};
 
 	tpm {
-		u-boot,dm-pre-reloc;
 		compatible = "google,sandbox-tpm";
 	};
 
