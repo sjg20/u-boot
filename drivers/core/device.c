@@ -44,6 +44,9 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 	bool auto_seq = true;
 	void *ptr;
 
+	if (CONFIG_IS_ENABLED(OF_PLATDATA_NO_BIND))
+		return -ENOSYS;
+
 	if (devp)
 		*devp = NULL;
 	if (!name)
@@ -382,26 +385,27 @@ int device_of_to_plat(struct udevice *dev)
 	if (dev_get_flags(dev) & DM_FLAG_PLATDATA_VALID)
 		return 0;
 
-	/* Ensure all parents have ofdata */
-	if (dev->parent) {
-		ret = device_of_to_plat(dev->parent);
+	if (!CONFIG_IS_ENABLED(OF_PLATDATA_NO_BIND)) {
+		/* Ensure all parents have ofdata */
+		if (dev->parent) {
+			ret = device_of_to_plat(dev->parent);
+			if (ret)
+				goto fail;
+
+			/*
+			 * The device might have already been probed during
+			 * the call to device_probe() on its parent device
+			 * (e.g. PCI bridge devices). Test the flags again
+			 * so that we don't mess up the device.
+			 */
+			if (dev_get_flags(dev) & DM_FLAG_PLATDATA_VALID)
+				return 0;
+		}
+
+		ret = device_alloc_priv(dev);
 		if (ret)
 			goto fail;
-
-		/*
-		 * The device might have already been probed during
-		 * the call to device_probe() on its parent device
-		 * (e.g. PCI bridge devices). Test the flags again
-		 * so that we don't mess up the device.
-		 */
-		if (dev_get_flags(dev) & DM_FLAG_PLATDATA_VALID)
-			return 0;
 	}
-
-	ret = device_alloc_priv(dev);
-	if (ret)
-		goto fail;
-
 	drv = dev->driver;
 	assert(drv);
 
@@ -529,7 +533,7 @@ void *dev_get_plat(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->plat_;
+	return dm_priv_to_rw(dev->plat_);
 }
 
 void *dev_get_parent_plat(const struct udevice *dev)
@@ -539,7 +543,7 @@ void *dev_get_parent_plat(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->parent_plat_;
+	return dm_priv_to_rw(dev->parent_plat_);
 }
 
 void *dev_get_uclass_plat(const struct udevice *dev)
@@ -549,7 +553,7 @@ void *dev_get_uclass_plat(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->uclass_plat_;
+	return dm_priv_to_rw(dev->uclass_plat_);
 }
 
 void *dev_get_priv(const struct udevice *dev)
@@ -559,7 +563,7 @@ void *dev_get_priv(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->priv_;
+	return dm_priv_to_rw(dev->priv_);
 }
 
 void *dev_get_uclass_priv(const struct udevice *dev)
@@ -569,7 +573,7 @@ void *dev_get_uclass_priv(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->uclass_priv_;
+	return dm_priv_to_rw(dev->uclass_priv_);
 }
 
 void *dev_get_parent_priv(const struct udevice *dev)
@@ -579,7 +583,7 @@ void *dev_get_parent_priv(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->parent_priv_;
+	return dm_priv_to_rw(dev->parent_priv_);
 }
 
 static int device_get_device_tail(struct udevice *dev, int ret,
@@ -1073,3 +1077,36 @@ int dev_enable_by_path(const char *path)
 	return lists_bind_fdt(parent, node, NULL, false);
 }
 #endif
+
+#if CONFIG_IS_ENABLED(OF_PLATDATA_INST)
+static struct udevice_rt *dev_get_rt(const struct udevice *dev)
+{
+	struct udevice *base = ll_entry_start(struct udevice, udevice);
+	int idx = dev - base;
+
+	struct udevice_rt *urt = gd_dm_udevice_rt() + idx;
+
+	return urt;
+}
+
+u32 dev_get_flags(const struct udevice *dev)
+{
+	const struct udevice_rt *urt = dev_get_rt(dev);
+
+	return urt->flags;
+}
+
+void dev_or_flags(const struct udevice *dev, u32 or)
+{
+	struct udevice_rt *urt = dev_get_rt(dev);
+
+	urt->flags |= or;
+}
+
+void dev_bic_flags(const struct udevice *dev, u32 bic)
+{
+	struct udevice_rt *urt = dev_get_rt(dev);
+
+	urt->flags &= ~bic;
+}
+#endif /* OF_PLATDATA_INST */

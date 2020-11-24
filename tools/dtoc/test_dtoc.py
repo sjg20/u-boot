@@ -17,6 +17,7 @@ import tempfile
 import unittest
 
 from dtb_platdata import conv_name_to_c
+from dtb_platdata import Driver
 from dtb_platdata import get_compat_name
 from dtb_platdata import get_value
 from dtb_platdata import tab_to
@@ -960,11 +961,11 @@ U_BOOT_DEVICE(spl_test2) = {
         i2c = 'I2C_UCLASS'
         compat = {'rockchip,rk3288-grf': 'ROCKCHIP_SYSCON_GRF',
                   'rockchip,rk3288-srf': None}
-        drv1 = dtb_platdata.DriverInfo('fred', i2c, compat)
-        drv2 = dtb_platdata.DriverInfo('mary', i2c, {})
-        drv3 = dtb_platdata.DriverInfo('fred', i2c, compat)
+        drv1 = dtb_platdata.Driver('fred', i2c, compat)
+        drv2 = dtb_platdata.Driver('mary', i2c, {})
+        drv3 = dtb_platdata.Driver('fred', i2c, compat)
         self.assertEqual(
-            "DriverInfo(name='fred', uclass_id='I2C_UCLASS', "
+            "Driver(name='fred', uclass_id='I2C_UCLASS', "
             "compat={'rockchip,rk3288-grf': 'ROCKCHIP_SYSCON_GRF', "
             "'rockchip,rk3288-srf': None}, priv_size=0)", str(drv1))
         self.assertEqual(drv1, drv3)
@@ -1093,3 +1094,14 @@ U_BOOT_DRIVER(i2c_tegra) = {
         self.assertEqual(
             {'dt-structs-gen.h', 'source.dts', 'dt-platdata.c', 'source.dtb'},
             leafs)
+
+    def testInstantiate(self):
+        """Test running dtoc with -i"""
+        dtb_file = get_dtb_file('dtoc_test_inst.dts')
+        output = tools.GetOutputFilename('output')
+        basedir = os.path.join(our_path, '../..')
+        dtb_platdata.run_steps(['platdata'], dtb_file, False, output, True,
+                               None, instantiate=True, basedir=basedir)
+        data = tools.ReadFile(output)
+        for line in data.splitlines():
+            print(line.decode('utf-8'))

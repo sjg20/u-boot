@@ -114,6 +114,59 @@ struct uclass_driver {
 #define UCLASS_DRIVER(__name)						\
 	ll_entry_declare(struct uclass_driver, __name, uclass_driver)
 
+/*
+ * Declare a uclass driver as an extern, so it can be referenced at build time
+ */
+#define DM_DECL_UCLASS_DRIVER(__name)					\
+	ll_entry_decl(struct uclass_driver, __name, uclass_driver)
+
+/*
+ * Get a pointer to a given uclass driver, for use in data structures. This
+ * requires that the symbol be declared with DM_DECL_UCLASS__DRIVER() first
+ */
+#define DM_REF_UCLASS_DRIVER(__name)					\
+	ll_entry_ref(struct uclass_driver, __name, uclass_driver)
+
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
+/* Declare a bound device ready for run-time use */
+#define UCLASS_INST(__name)						\
+	ll_entry_declare(struct uclass, __name, uclass)
+
+#define DM_DECL_UCLASS_INST(__name)						\
+	ll_entry_decl(struct uclass, __name, uclass)
+
+#define DM_REF_UCLASS_INST(__name)						\
+	ll_entry_ref(struct uclass, __name, uclass)
+#endif
+
+/**
+ * DM_PER_DEVICE_PRIV() - Specifies the per-device size of the private data
+ *
+ * This generate code but is also is parsed by dtoc. Put it inside
+ * UCLASS_DRIVER() on its own line to specify the amount of data to be allocated
+ * in the device for the use of the uclass
+ */
+#define DM_PER_DEVICE_PRIV(hdr,struc) \
+	.per_device_auto_alloc_size = sizeof(struc),
+
+/**
+ * DM_PER_DEVICE_PLATDATA() - Specifies the per-device size of the platform data
+ *
+ * This generate code but is also is parsed by dtoc. Put it inside
+ * UCLASS_DRIVER() on its own line to specify the amount of platform data to be
+ * allocated in the device for the use of the uclass
+ */
+#define DM_PER_DEVICE_PLATDATA(hdr,struc) \
+	.per_device_platdata_auto_alloc_size = sizeof(struc),
+
+/**
+ * uclass_get_priv() - Get the private data for a uclass
+ *
+ * @uc		Uclass to check
+ * @return private data, or NULL if none
+ */
+void *uclass_get_priv(const struct uclass *uc);
+
 /**
  * uclass_get_priv() - Get the private data for a uclass
  *
