@@ -78,11 +78,7 @@ struct driver_rt {
  * pointer to the struct driver_info created by that declaration.
  *
  * if OF_PLATDATA is enabled, from this it is possible to use the @dev member of
- * struct driver_info to find the device pointer itself.
- *
- * TODO(sjg@chromium.org): U_BOOT_DRVINFO() tells U-Boot to create a device, so
- * the naming seems sensible, but DM_DRVINFO_GET() is a bit of misnomer, since it
- * finds the driver_info record, not the device.
+ * struct driver_info to find the struct udevice itself.
  *
  * @__name: Driver name (C identifier, not a string. E.g. gpio7_at_ff7e0000)
  * @return struct driver_info * to the driver that created the device

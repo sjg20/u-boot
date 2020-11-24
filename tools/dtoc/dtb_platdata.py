@@ -85,22 +85,100 @@ class Driver:
         compat: Driver data for each compatible string:
             key: Compatible string, e.g. 'rockchip,rk3288-grf'
             value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
+        fname: Filename where the driver was found
+        compat: Driver data for each compatible string:
+            key: Compatible string, e.g. 'rockchip,rk3288-grf'
+            value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
+        phase: Which phase of U-Boot to use this driver
+        headers (list): List of header files needed for this driver (each a str)
+            e.g. ['<asm/cpu.h>']
+        dups (list): Driver objects with the same name as this one, that were
+            found after this one
+        warn_dups (bool): True if the duplicates are not distinguisble using
+            the phase
     """
-    def __init__(self, name, uclass_id, compat):
+    def __init__(self, name, fname):
         self.name = name
-        self.uclass_id = uclass_id
-        self.compat = compat
-        self.priv_size = 0
+        self.fname = fname
+        self.uclass_id = None
+        self.compat = None
+        self.priv = ''
+        self.platdata = ''
+        self.child_platdata = ''
+        self.child_priv = ''
+        self.used = False
+        self.need_macro = []
+        self.headers = []
+        self.phase = ''
+        self.dups = []
+        self.warn_dups = False
 
     def __eq__(self, other):
         return (self.name == other.name and
                 self.uclass_id == other.uclass_id and
                 self.compat == other.compat and
-                self.priv_size == other.priv_size)
+                self.priv == other.priv and
+                self.platdata == other.platdata)
 
     def __repr__(self):
-        return ("Driver(name='%s', uclass_id='%s', compat=%s, priv_size=%s)" %
-                (self.name, self.uclass_id, self.compat, self.priv_size))
+        return ("Driver(name='%s', used=%s, uclass_id='%s', compat=%s, priv=%s)" %
+                (self.name, self.used, self.uclass_id, self.compat, self.priv))
+
+
+class UclassDriver:
+    """Holds information about a uclass driver
+
+    Attributes:
+        name: Uclass name, e.g. 'i2c' if the driver is for UCLASS_I2C
+        uclass_id: Uclass ID, e.g. 'UCLASS_I2C'
+        priv: Information about private data, e.g.
+            '<i2c.h>, sizeof(struct i2c_priv)'
+        per_dev_priv (str): Information about per-device private data
+        per_dev_platdata (str): Information about per-device platdata
+        devs (list): List of devices in this uclass, each a Node
+        node_refs (dict): References in the linked list of devices:
+            key (int): Sequence number (0=first, n-1=last, -1=head, n=tail)
+            value (str): Reference to the device at that position
+        alias (dict): Aliases for this uclasses (for sequence numbers)
+            key (int): Alias number (e.g. 2 for "pci2")
+            value (str): Node the alias points to
+    """
+    def __init__(self, name):
+        self.name = name
+        self.uclass_id = None
+        self.priv = ''
+        self.per_dev_priv = ''
+        self.per_dev_platdata = ''
+        self.per_child_priv = ''
+        self.per_child_platdata = ''
+        self.devs = []
+        self.node_refs = {}
+        self.alias_num_to_node = {}
+        self.alias_path_to_num = {}
+
+    def __eq__(self, other):
+        return (self.name == other.name and
+                self.uclass_id == other.uclass_id and
+                self.priv == other.priv)
+
+    def __repr__(self):
+        return ("UclassDriver(name='%s', uclass_id='%s')" %
+                (self.name, self.uclass_id))
+
+
+class Struct:
+    """Holds information about a struct definition
+
+    Attributes:
+        name: Struct name, e.g. 'fred' if the struct is 'struct fred'
+        fname: Filename containing the struct
+    """
+    def __init__(self, name, fname):
+        self.name = name
+        self.fname =fname
+
+    def __repr__(self):
+        return ("Struct(name='%s', fname='%s')" % (self.name, self.fname))
 
 
 def conv_name_to_c(name):
@@ -118,6 +196,8 @@ def conv_name_to_c(name):
     new = new.replace('-', '_')
     new = new.replace(',', '_')
     new = new.replace('.', '_')
+    if new == '/':
+        return 'root'
     return new
 
 def tab_to(num_tabs, line):
@@ -189,8 +269,10 @@ class DtbPlatdata():
     Properties:
         _fdt: Fdt object, referencing the device tree
         _dtb_fname: Filename of the input device tree binary file
-        _valid_nodes: A list of Node object with compatible strings. The list
-            is ordered by conv_name_to_c(node.name)
+        _valid_nodes_unsorted: A list of Node object with compatible strings,
+            ordered by devicetree node order
+        _valid_nodes: A list of Node object with compatible strings, ordered by
+            conv_name_to_c(node.name)
         _include_disabled: true to include nodes marked status = "disabled"
         _outfile: The current output file (sys.stdout or a real file)
         _warning_disabled: true to disable warnings about driver names not found
@@ -217,9 +299,22 @@ class DtbPlatdata():
                         key (str): Field name
                         value: Prop object with field information
         _basedir (str): Base directory of source tree
+        _uclass: Dict of uclass information
+            key: uclass name (e.g. 'UCLASS_I2C')
+            value: UClassDriver
+        _instantiate: Instantiate devices so they don't need to be bound at
+            run-time
+        _phase: The phase of U-Boot that we are generating data for, e.g. 'spl'
+             or 'tpl'. None if not known
+        _structs: Dict of Struct obtains:
+            key: Name of struct
+            value: Struct object
+        _valid_uclasses (list of str): List of uclasses needed for the selected
+            devices (see _valid_node), each a uclass name (e.g. 'UCLASS_ID') in
+            alphabetical order
     """
     def __init__(self, dtb_fname, include_disabled, warning_disabled,
-                 drivers_additional=None):
+                 drivers_additional=None, instantiate=False, phase=None):
         self._fdt = None
         self._dtb_fname = dtb_fname
         self._valid_nodes = None
@@ -236,6 +331,11 @@ class DtbPlatdata():
         self._struct_data = collections.OrderedDict()
         self._basedir = None
         self._have_test_info = False
+        self._uclass = {}
+        self._instantiate = instantiate
+        self._phase = phase
+        self._structs = {}
+        self._valid_uclasses = None
 
     def save_info_for_test(self):
         return self._drivers, self._driver_aliases
@@ -261,7 +361,10 @@ class DtbPlatdata():
                 In case of no match found, the return will be the same as
                 get_compat_name()
         """
-        compat_list_c = get_compat_name(node)
+        if node == self._fdt.GetRoot():
+            compat_list_c = ['root_driver']
+        else:
+            compat_list_c = get_compat_name(node)
 
         for compat_c in compat_list_c:
             if not compat_c in self._drivers.keys():
@@ -434,6 +537,139 @@ class DtbPlatdata():
             return PhandleInfo(max_args, args)
         return None
 
+    @staticmethod
+    def uclass_id_to_name(uclass_id):
+        return uclass_id[len('UCLASS_'):].lower()
+
+    def _parse_structs(self, buff, fname):
+        """Parse a H file to extract struct defintions contained within
+
+        This parses 'struct xx {' definitions to figure out what structs this
+        header defines.
+
+        Args:
+            buff (str): Contents of file
+            fname (str): Filename (to use when printing errors)
+        """
+        structs = {}
+
+        re_struct = re.compile('^struct ([a-z0-9_]+) {$')
+        re_asm = re.compile('../arch/[a-z0-9]+/include/asm/(.*)')
+        prefix = ''
+        for line in buff.splitlines():
+            # Handle line continuation
+            if prefix:
+                line = prefix + line
+                prefix = ''
+            if line.endswith('\\'):
+                prefix = line[:-1]
+                continue
+
+            m_struct = re_struct.match(line)
+            if m_struct:
+                name = m_struct.group(1)
+                include_dir = os.path.join(self._basedir, 'include')
+                rel_fname = os.path.relpath(fname, include_dir)
+                m_asm = re_asm.match(rel_fname)
+                if m_asm:
+                    rel_fname = 'asm/' + m_asm.group(1)
+                structs[name] = Struct(name, rel_fname)
+        self._structs.update(structs)
+
+    def _get_re_for_member(self, member):
+        """_get_re_for_member: Get a compiled regular expresion
+
+        Args:
+            member (str): Struct member name (e.g. 'priv_auto')
+
+        returns:
+            Compiled regular expression that parses:
+
+               .member = sizeof(struct fred),
+
+            and returns "fred" as group 1
+        """
+        return re.compile('^\s*.%s\s*=\s*sizeof\(struct\s+(.*)\),$' % member)
+
+    def _parse_uclass_driver(self, fname, buff):
+        """Parse a C file to extract uclass driver information contained within
+
+        This parses UCLASS_DRIVER() structs to obtain various pieces of useful
+        information.
+
+        It updates the following members:
+            _uclass: Dict of uclass information
+                key: uclass name (e.g. 'UCLASS_I2C')
+                value: UClassDriver
+
+        Args:
+            fname (str): Filename being parsed (used for warnings)
+            buff (str): Contents of file
+        """
+        uc_drivers = {}
+
+        # Collect the driver name and associated Driver
+        driver = None
+        re_driver = re.compile(r'UCLASS_DRIVER\((.*)\)')
+
+        # Collect the uclass ID, e.g. 'UCLASS_SPI'
+        re_id = re.compile(r'\s*\.id\s*=\s*(UCLASS_[A-Z0-9_]+)')
+
+        # Matches the header/size information for uclass-private data
+        re_priv = self._get_re_for_member('priv_auto')
+
+        # Set up parsing for the auto members
+        re_per_device_priv = self._get_re_for_member('per_device_auto')
+        re_per_device_plat = self._get_re_for_member('per_device_plat_auto')
+        re_per_child_priv = self._get_re_for_member('per_child_auto')
+        re_per_child_plat = self._get_re_for_member('per_child_plat_auto')
+
+        prefix = ''
+        for line in buff.splitlines():
+            # Handle line continuation
+            if prefix:
+                line = prefix + line
+                prefix = ''
+            if line.endswith('\\'):
+                prefix = line[:-1]
+                continue
+
+            driver_match = re_driver.search(line)
+
+            # If we have seen UCLASS_DRIVER()...
+            if driver:
+                m_id = re_id.search(line)
+                m_priv = re_priv.match(line)
+                m_per_dev_priv = re_per_device_priv.match(line)
+                m_per_dev_plat = re_per_device_plat.match(line)
+                m_per_child_priv = re_per_child_priv.match(line)
+                m_per_child_plat = re_per_child_plat.match(line)
+                if m_id:
+                    driver.uclass_id = m_id.group(1)
+                elif m_priv:
+                    driver.priv = m_priv.group(1)
+                elif m_per_dev_priv:
+                    driver.per_dev_priv = m_per_dev_priv.group(1)
+                elif m_per_dev_plat:
+                    driver.per_dev_platdata = m_per_dev_plat.group(1)
+                elif m_per_child_priv:
+                    driver.per_child_priv = m_per_child_priv.group(1)
+                elif m_per_child_plat:
+                    driver.per_child_platdata = m_per_child_plat.group(1)
+                elif '};' in line:
+                    if not driver.uclass_id:
+                        raise ValueError(
+                            "%s: Cannot parse uclass ID in driver '%s'" %
+                            (fname, driver.name))
+                    uc_drivers[driver.uclass_id] = driver
+                    driver = None
+
+            elif driver_match:
+                driver_name = driver_match.group(1)
+                driver = UclassDriver(driver_name)
+
+        self._uclass.update(uc_drivers)
+
     def _parse_driver(self, fname, buff):
         """Parse a C file to extract driver information contained within
 
@@ -467,18 +703,17 @@ class DtbPlatdata():
         #    value: Driver
         drivers = {}
 
-        # Collect the driver name (None means not found yet)
-        driver_name = None
+        # Collect the driver info
+        driver = None
         re_driver = re.compile(r'U_BOOT_DRIVER\((.*)\)')
 
         # Collect the uclass ID, e.g. 'UCLASS_SPI'
-        uclass_id = None
         re_id = re.compile(r'\s*\.id\s*=\s*(UCLASS_[A-Z0-9_]+)')
 
         # Collect the compatible string, e.g. 'rockchip,rk3288-grf'
         compat = None
         re_compat = re.compile(r'{\s*.compatible\s*=\s*"(.*)"\s*'
-                               r'(,\s*.data\s*=\s*(.*))?\s*},')
+                               r'(,\s*.data\s*=\s*(\S*))?\s*},')
 
         # This is a dict of compatible strings that were found:
         #    key: Compatible string, e.g. 'rockchip,rk3288-grf'
@@ -495,8 +730,19 @@ class DtbPlatdata():
         re_of_match = re.compile(
             r'\.of_match\s*=\s*(of_match_ptr\()?([a-z0-9_]+)(\))?,')
 
-        # Matches the header/size information for priv
-        re_priv = re.compile(r'^\s*DM_PRIV\((.*)\)$')
+        re_hdr = re.compile('^\s*DM_HEADER\((.*)\).*$')
+        re_phase = re.compile('^\s*DM_PHASE\((.*)\).*$')
+
+        # Matches the header/size information for priv, platdata
+        re_priv = self._get_re_for_member('priv_auto')
+        re_platdata = self._get_re_for_member('plat_auto')
+        re_child_priv = self._get_re_for_member('per_child_auto')
+        re_child_platdata = self._get_re_for_member('per_child_plat_auto')
+
+        re_need_macro = re.compile('(priv_auto_alloc_size|'
+            'platdata_auto_alloc_size|per_child_auto_alloc_size|'
+            'per_child_platdata_auto_alloc_size)')
+
         prefix = ''
         for line in buff.splitlines():
             # Handle line continuation
@@ -509,39 +755,60 @@ class DtbPlatdata():
 
             driver_match = re_driver.search(line)
 
-            # If we have seen U_BOOT_DRIVER()...
-            if driver_name:
-                id_m = re_id.search(line)
-                id_of_match = re_of_match.search(line)
-                if id_m:
-                    uclass_id = id_m.group(1)
-                elif id_of_match:
-                    compat = id_of_match.group(2)
+            # If this line contains U_BOOT_DRIVER()...
+            if driver:
+                m_id = re_id.search(line)
+                m_of_match = re_of_match.search(line)
+                m_priv = re_priv.match(line)
+                m_platdata = re_platdata.match(line)
+                m_cplatdata = re_child_platdata.match(line)
+                m_cpriv = re_child_priv.match(line)
+                m_need_macro = re_need_macro.search(line)
+                m_hdr = re_hdr.match(line)
+                m_phase = re_phase.match(line)
+                if m_need_macro:
+                    driver.need_macro.append(line)
+                elif m_priv:
+                    driver.priv = m_priv.group(1)
+                elif m_platdata:
+                    driver.platdata = m_platdata.group(1)
+                elif m_cplatdata:
+                    driver.child_platdata = m_cplatdata.group(1)
+                elif m_cpriv:
+                    driver.child_priv = m_cpriv.group(1)
+                elif m_id:
+                    driver.uclass_id = m_id.group(1)
+                elif m_of_match:
+                    compat = m_of_match.group(2)
+                elif m_hdr:
+                    driver.headers.append(m_hdr.group(1))
+                elif m_phase:
+                    driver.phase = m_phase.group(1)
                 elif '};' in line:
-                    if uclass_id and compat:
-                        if compat not in of_match:
-                            raise ValueError(
-                                "%s: Unknown compatible var '%s' (found: %s)" %
-                                (fname, compat, ','.join(of_match.keys())))
-                        driver = Driver(driver_name, uclass_id,
-                                            of_match[compat])
-                        drivers[driver_name] = driver
+                    is_root = driver.name == 'root_driver'
+                    if driver.uclass_id and (compat or is_root):
+                        if not is_root:
+                            if compat not in of_match:
+                                raise ValueError(
+                                    "%s: Unknown compatible var '%s' (found %s)" %
+                                    (fname, compat, ','.join(of_match.keys())))
+                            driver.compat = of_match[compat]
 
-                        # This needs to be deterministic, since a driver may
-                        # have multiple compatible strings pointing to it.
-                        # We record the one earliest in the alphabet so it
-                        # will produce the same result on all machines.
-                        for compat_id in of_match[compat]:
-                            old = self._compat_to_driver.get(compat_id)
-                            if not old or driver.name < old.name:
-                                self._compat_to_driver[compat_id] = driver
+                            # This needs to be deterministic, since a driver may
+                            # have multiple compatible strings pointing to it.
+                            # We record the one earliest in the alphabet so it
+                            # will produce the same result on all machines.
+                            for id in of_match[compat]:
+                                old = self._compat_to_driver.get(id)
+                                if not old or driver.name < old.name:
+                                    self._compat_to_driver[id] = driver
+                        drivers[driver.name] = driver
                     else:
                         # The driver does not have a uclass or compat string.
                         # The first is required but the second is not, so just
                         # ignore this.
                         pass
-                    driver_name = None
-                    uclass_id = None
+                    driver = None
                     ids_name = None
                     compat = None
                     compat_dict = {}
@@ -555,13 +822,30 @@ class DtbPlatdata():
                     ids_name = None
             elif driver_match:
                 driver_name = driver_match.group(1)
+                driver = Driver(driver_name, fname)
             else:
                 ids_m = re_ids.search(line)
                 if ids_m:
                     ids_name = ids_m.group(1)
 
         # Make the updates based on what we found
-        self._drivers.update(drivers)
+        for driver in drivers.values():
+            if driver.name in self._drivers:
+                orig = self._drivers[driver.name]
+                #if orig.phase or driver.phase:
+                    #print('   - phases: orig=%s, new=%s (current phase=%s)' %
+                          #(orig.phase, driver.phase, self._phase))
+                if self._phase:
+                    if orig.phase == self._phase:
+                        orig.dups.append(driver)
+                        #print('   - Using %s' % orig.fname)
+                        continue
+                else:
+                    # We have no way of distinguishing them
+                    driver.warn_dups = True
+                    #print('   - Using %s' % driver.fname)
+                driver.dups.append(orig)
+            self._drivers[driver.name] = driver
         self._of_match.update(of_match)
 
     def scan_driver(self, fname):
@@ -589,6 +873,8 @@ class DtbPlatdata():
             # obtain driver information
             if 'U_BOOT_DRIVER' in buff:
                 self._parse_driver(fname, buff)
+            if 'UCLASS_DRIVER' in buff:
+                self._parse_uclass_driver(fname, buff)
 
             # The following re will search for driver aliases declared as
             # DM_DRIVER_ALIAS(alias, driver_name)
@@ -600,6 +886,29 @@ class DtbPlatdata():
                 if len(alias) != 2:
                     continue
                 self._driver_aliases[alias[1]] = alias[0]
+
+    def scan_header(self, fname):
+        """Scan a header file to build a list of struct definitions
+
+        It updates the following members:
+            _structs - updated with new Struct records for each struct found
+                in the file
+
+        Args
+            fname: header filename to scan
+        """
+        with open(fname, encoding='utf-8') as inf:
+            try:
+                buff = inf.read()
+            except UnicodeDecodeError:
+                # This seems to happen on older Python versions
+                print("Skipping file '%s' due to unicode error" % fname)
+                return
+
+            # If this file has any U_BOOT_DRIVER() declarations, process it to
+            # obtain driver information
+            if 'struct' in buff:
+                self._parse_structs(buff, fname)
 
     def scan_drivers(self, basedir=None):
         """Scan the driver folders to build a list of driver names and aliases
@@ -621,9 +930,11 @@ class DtbPlatdata():
             if rel_path.startswith('build') or rel_path.startswith('.git'):
                 continue
             for fname in filenames:
-                if not fname.endswith('.c'):
-                    continue
-                self.scan_driver(dirpath + '/' + fname)
+                pathname = dirpath + '/' + fname
+                if fname.endswith('.c'):
+                    self.scan_driver(pathname)
+                elif fname.endswith('.h'):
+                    self.scan_header(pathname)
 
         for fname in self._drivers_additional:
             if not isinstance(fname, str) or len(fname) == 0:
@@ -641,34 +952,44 @@ class DtbPlatdata():
         """
         self._fdt = fdt.FdtScan(self._dtb_fname)
 
-    def scan_node(self, root, valid_nodes):
+    def scan_node(self, node, valid_nodes):
         """Scan a node and subnodes to build a tree of node and phandle info
 
-        This adds each node to self._valid_nodes.
+        This adds each subnode to self._valid_nodes if it is enabled and has a
+        compatible string.
 
         Args:
-            root (Node): Root node for scan
+            node (Node): Node for scan for subnodes
             valid_nodes (list of Node): List of Node objects to add to
         """
-        for node in root.subnodes:
-            if 'compatible' in node.props:
-                status = node.props.get('status')
+        for subnode in node.subnodes:
+            if 'compatible' in subnode.props:
+                status = subnode.props.get('status')
                 if (not self._include_disabled and not status or
                         status.value != 'disabled'):
-                    valid_nodes.append(node)
+                    valid_nodes.append(subnode)
 
             # recurse to handle any subnodes
-            self.scan_node(node, valid_nodes)
+            self.scan_node(subnode, valid_nodes)
 
-    def scan_tree(self):
+    def scan_tree(self, add_root):
         """Scan the device tree for useful information
 
         This fills in the following properties:
-            _valid_nodes: A list of nodes we wish to consider include in the
-                platform data
+            _valid_nodes_unsorted: A list of nodes we wish to consider include
+                in the platform data (in devicetree node order)
+            _valid_nodes: Sorted version of _valid_nodes_unsorted
+
+        Args:
+            add_root: True to add the root node also (which wouldn't normally
+                be added as it may not have a compatible string)
         """
+        root = self._fdt.GetRoot()
         valid_nodes = []
-        self.scan_node(self._fdt.GetRoot(), valid_nodes)
+        if add_root:
+            valid_nodes.append(root)
+        self.scan_node(root, valid_nodes)
+        self._valid_nodes_unsorted = valid_nodes
         self._valid_nodes = sorted(valid_nodes,
                                    key=lambda x: conv_name_to_c(x.name))
         for idx, node in enumerate(self._valid_nodes):
@@ -815,17 +1136,11 @@ class DtbPlatdata():
         definitions for node in self._valid_nodes. See the documentation in
         doc/driver-model/of-plat.rst for more information.
 
-        Args:
-            structs (dict): dict containing structures:
-                key (str): Node name, as a C identifier
-                value: dict containing structure fields:
-                    key (str): Field name
-                    value: Prop object with field information
-
         """
         structs = self._struct_data
         self.out('#include <stdbool.h>\n')
         self.out('#include <linux/libfdt.h>\n')
+        self.out('\n')
 
         # Output the struct definition
         for name in sorted(structs):
@@ -908,7 +1223,132 @@ class DtbPlatdata():
         self.buf('};\n')
         self.buf('\n')
 
-    def _output_prop(self, node, prop):
+    def prep_priv(self, info, name, suffix, section='.priv_data'):
+        if not info:
+            return None
+        parts = info.split(',')
+        if len(parts) == 2:
+            hdr, struc = parts
+        else:
+            hdr = None
+            struc = parts[0]
+        var_name = '_%s%s' % (name, suffix)
+        hdr = self._structs.get(struc)
+        if hdr:
+            self.buf('#include <%s>\n' % hdr.fname)
+        else:
+            print('Warning: Cannot find header file for struct %s' % struc)
+        attr = '__attribute__ ((section ("%s")))' % section
+        return var_name, struc, attr
+
+    def alloc_priv(self, info, name, extra, suffix='_priv'):
+        result = self.prep_priv(info, name, suffix)
+        if not result:
+            return None
+        var_name, struc, section = result
+        self.buf('u8 %s_%s[sizeof(struct %s)]\n\t%s;\n' %
+                 (var_name, extra, struc.strip(), section))
+        return '%s_%s' % (var_name, extra)
+
+    def alloc_plat(self, info, name, extra, node):
+        result = self.prep_priv(info, name, '_plat')
+        if not result:
+            return None
+        var_name, struc, section = result
+        self.buf('struct %s %s\n\t%s_%s = {\n' %
+                 (struc.strip(), section, var_name, extra))
+        self.buf('\t.dtplat = {\n')
+        for pname in sorted(node.props):
+            self._output_prop(node, node.props[pname], 2)
+        self.buf('\t},\n')
+        self.buf('};\n')
+        return '&%s_%s' % (var_name, extra)
+
+    def _declare_device_inst(self, driver, var_name, struct_name, parent_driver,
+                             node, uclass):
+        """Add a device instance declaration to the output
+
+        This declares a DM_DEVICE_INST() for the device being processed
+
+        Args:
+            var_name: C name for the node
+            struct_name: Name for the dt struct associated with the node
+            parent_driver: Driver for the node's parent, or None if none
+        """
+        self.buf('\n')
+        num_lines = len(self._lines)
+        plat_name = self.alloc_plat(driver.platdata, driver.name, var_name,
+                                    node)
+        priv_name = self.alloc_priv(driver.priv, driver.name, var_name)
+        parent_plat_name = None
+        parent_priv_name = None
+        if parent_driver:
+            # TODO: deal with uclass providing these values
+            parent_plat_name = self.alloc_priv(
+                parent_driver.child_platdata, driver.name, var_name,
+                '_parent_plat')
+            parent_priv_name = self.alloc_priv(
+                parent_driver.child_priv, driver.name, var_name,
+                '_parent_priv')
+        uclass_plat_name = self.alloc_priv(uclass.per_dev_platdata, driver.name,
+                                           var_name)
+        uclass_priv_name = self.alloc_priv(uclass.per_dev_priv,
+                                           driver.name + '_uc', var_name)
+        for hdr in driver.headers:
+            self.buf('#include %s\n' % hdr)
+
+        # Add a blank line if we emitted any stuff above, for readability
+        if num_lines != len(self._lines):
+            self.buf('\n')
+
+        self.buf('DM_DEVICE_INST(%s) = {\n' % var_name)
+        self.buf('\t.driver\t\t= DM_DRIVER_REF(%s),\n' % struct_name)
+        self.buf('\t.name\t\t= "%s",\n' % struct_name)
+        if plat_name:
+            self.buf('\t.plat_\t= %s,\n' % plat_name)
+        else:
+            self.buf('\t.plat_\t= &%s%s,\n' % (VAL_PREFIX, var_name))
+        if parent_plat_name:
+            self.buf('\t.parent_plat_ = %s,\n' % parent_plat_name)
+        if uclass_plat_name:
+            self.buf('\t.uclass_plat_ = %s,\n' % uclass_plat_name)
+        driver_date = None
+
+        if node != self._fdt.GetRoot():
+            compat_list = node.props['compatible'].value
+            if not isinstance(compat_list, list):
+                compat_list = [compat_list]
+            for compat in compat_list:
+                driver_data = driver.compat.get(compat)
+                if driver_data:
+                    self.buf('\t.driver_data\t= %s,\n' % driver_data)
+                    break
+
+        if node.parent and node.parent.parent:
+            self.buf('\t.parent\t\t= DM_DEVICE_REF(%s),\n' %
+                     conv_name_to_c(node.parent.name))
+        if priv_name:
+            self.buf('\t.priv_\t\t= %s,\n' % priv_name)
+        self.buf('\t.uclass\t= DM_UCLASS_REF(%s),\n' % uclass.name)
+
+        if uclass_priv_name:
+            self.buf('\t.uclass_priv_ = %s,\n' % uclass_priv_name)
+        if parent_priv_name:
+            self.buf('\t.parent_priv_\t= %s,\n' % parent_priv_name)
+        self.list_node('uclass_node', uclass.node_refs, node.uclass_seq)
+        self.list_head('child_head', 'sibling_node', node.child_devs, var_name)
+        if node.parent in self._valid_nodes:
+            self.list_node('sibling_node', node.parent.child_refs,
+                           node.parent_seq)
+        # flags is left as 0
+
+        self.buf('\t.seq_ = %d,\n' % node.seq)
+
+        self.buf('};\n')
+        self.buf('\n')
+        return parent_plat_name
+
+    def _output_prop(self, node, prop, tabs=1):
         """Output a line containing the value of a struct member
 
         Args:
@@ -918,7 +1358,7 @@ class DtbPlatdata():
         if prop.name in PROP_IGNORE_LIST or prop.name[0] == '#':
             return
         member_name = conv_name_to_c(prop.name)
-        self.buf('\t%s= ' % tab_to(3, '.' + member_name))
+        self.buf('%s%s= ' % ('\t' * tabs, tab_to(3, '.' + member_name)))
 
         # Special handling for lists
         if isinstance(prop.value, list):
@@ -941,7 +1381,235 @@ class DtbPlatdata():
             self._output_prop(node, node.props[pname])
         self.buf('};\n')
 
-    def output_node(self, node):
+    def list_head(self, head_member, node_member, node_refs, var_name):
+        self.buf('\t.%s\t= {\n' % head_member)
+        if node_refs:
+            last = node_refs[-1].dev_ref
+            first = node_refs[0].dev_ref
+            member = node_member
+        else:
+            last = 'DM_DEVICE_REF(%s)' % var_name
+            first = last
+            member = head_member
+        self.buf('\t\t.prev = &%s->%s,\n' % (last, member))
+        self.buf('\t\t.next = &%s->%s,\n' % (first, member))
+        self.buf('\t},\n')
+
+    def list_node(self, member, node_refs, seq):
+        self.buf('\t.%s\t= {\n' % member)
+        self.buf('\t\t.prev = %s,\n' % node_refs[seq - 1])
+        self.buf('\t\t.next = %s,\n' % node_refs[seq + 1])
+        self.buf('\t},\n')
+
+    def generate_uclasses(self):
+        if not self.check_instantiate(True):
+            return
+        self.out('\n')
+        self.out('#include <common.h>\n')
+        self.out('#include <dm.h>\n')
+        self.out('#include <dt-structs.h>\n')
+        self.out('\n')
+        self.buf('/*\n')
+        self.buf(' * uclass declarations\n')
+        self.buf(' *\n')
+        self.buf(' * Sequence numbers:\n')
+        for uclass in self._uclass.values():
+            if uclass.alias_num_to_node:
+                self.buf(' * %s: %s\n' % (uclass.name, uclass.uclass_id))
+                for seq, node in uclass.alias_num_to_node.items():
+                    self.buf(' *    %d: %s\n' % (seq, node.path))
+        self.buf(' */\n')
+        uclass_list = self._valid_uclasses
+
+        uclass_node = {}
+        for seq, uclass_id in enumerate(uclass_list):
+            uc_name = self.uclass_id_to_name(uclass_id)
+            uclass_node[seq] = ('&DM_UCLASS_REF(%s)->sibling_node' %
+                                      uc_name)
+        uclass_node[-1] = '&uclass_head'
+        uclass_node[len(uclass_list)] = '&uclass_head'
+        self.buf('\n')
+        self.buf('struct list_head %s = {\n' % 'uclass_head')
+        self.buf('\t.prev = %s,\n' % uclass_node[len(uclass_list) -1])
+        self.buf('\t.next = %s,\n' % uclass_node[0])
+        self.buf('};\n')
+        self.buf('\n')
+
+        for seq, uclass_id in enumerate(uclass_list):
+            uc_drv = self._uclass.get(uclass_id)
+            uc_name = self.uclass_id_to_name(uclass_id)
+
+            priv_name = self.alloc_priv(uc_drv.priv, uc_drv.name, '')
+
+            self.buf('DM_UCLASS_INST(%s) = {\n' % uc_name)
+            if priv_name:
+                self.buf('\t.priv_\t\t= %s,\n' % priv_name)
+            self.buf('\t.uc_drv\t\t= DM_UCLASS_DRIVER_REF(%s),\n' % uc_name)
+            self.list_node('sibling_node', uclass_node, seq)
+            self.list_head('dev_head', 'uclass_node', uc_drv.devs, None)
+            self.buf('};\n')
+            self.buf('\n')
+        self.out(''.join(self.get_buf()))
+
+    def generate_decl(self):
+        nodes_to_output = list(self._valid_nodes)
+
+        self.buf('#include <dm/device-internal.h>\n')
+        self.buf('#include <dm/uclass-internal.h>\n')
+        self.buf('\n')
+        self.buf(
+            '/* driver declarations - these allow DM_DRIVER_GET() to be used */\n')
+        for node in nodes_to_output:
+            struct_name, _ = self.get_normalized_compat_name(node)
+            self.buf('DM_DRIVER_DECL(%s);\n' % struct_name);
+        self.buf('\n')
+
+        if self._instantiate:
+            self.buf(
+                '/* device declarations - these allow DM_DEVICE_REF() to be used */\n')
+            for node in nodes_to_output:
+                self.buf('DM_DEVICE_DECL(%s);\n' %
+                         conv_name_to_c(node.name))
+            self.buf('\n')
+
+        uclass_list = self._valid_uclasses
+
+        self.buf(
+            '/* uclass driver declarations - needed for DM_UCLASS_DRIVER_REF() */\n')
+        for uclass_id in uclass_list:
+            uc_name = self.uclass_id_to_name(uclass_id)
+            self.buf('DM_UCLASS_DRIVER_DECL(%s);\n' % uc_name)
+        self.buf('\n')
+
+        if self._instantiate:
+            self.buf('/* uclass declarations - needed for DM_UCLASS_REF() */\n')
+            for uclass_id in uclass_list:
+                uc_name = self.uclass_id_to_name(uclass_id)
+                self.buf('DM_UCLASS_DECL(%s);\n' % uc_name)
+            self.out(''.join(self.get_buf()))
+
+    def _read_aliases(self):
+        """Read the aliases and attach the information to self._alias
+        """
+        alias_node = self._fdt.GetNode('/aliases')
+        if not alias_node:
+            return
+        re_num = re.compile('([a-z0-9-]+[a-z]+)([0-9]+)')
+        for prop in alias_node.props.values():
+            m_alias = re_num.match(prop.name)
+            if not m_alias:
+                raise ValueError("Cannot decode alias '%s'" % prop.name)
+            name, num = m_alias.groups()
+            found = False
+            for uclass in self._uclass.values():
+                if uclass.name == name:
+                    node = self._fdt.GetNode(prop.value)
+                    if not node:
+                        raise ValueError("Alias '%s' path '%s' not found" %
+                                         (prop.name, prop.value))
+                    uclass.alias_num_to_node[int(num)] = node
+                    uclass.alias_path_to_num[node.path] = int(num)
+                    found = True
+                    break
+            if not found:
+                print("Could not find uclass for alias '%s'" % prop.name)
+
+    def _assign_seq(self):
+        """Assign a sequence number to each node"""
+        for node in self._valid_nodes_unsorted:
+            if node.seq == -1:
+                uclass = node.uclass
+                num = uclass.alias_path_to_num.get(node.path)
+                if num is not None:
+                    node.seq = num
+                else:
+                    for seq in range(1000):
+                        if seq not in uclass.alias_num_to_node:
+                            break
+                    node.seq = seq
+                    uclass.alias_path_to_num[node.path] = seq
+                    uclass.alias_num_to_node[seq] = node
+
+
+    def process_nodes(self):
+        nodes_to_output = list(self._valid_nodes)
+
+        # Figure out which drivers we actually use
+        for node in nodes_to_output:
+            struct_name, _ = self.get_normalized_compat_name(node)
+            driver = self._drivers.get(struct_name)
+            if driver:
+                driver.used = True
+                if driver.need_macro:
+                    print("Warning: Driver '%s' needs macros for: %s" %
+                          (driver.name, '\n'.join(driver.need_macro)))
+                if driver.dups and driver.warn_dups:
+                    print("Warning: Duplicate driver name '%s' (orig=%s, dups=%s)" %
+                          (driver.name, driver.fname,
+                           ', '.join([drv.fname for drv in driver.dups])))
+            node.child_devs = []
+            node.child_refs = {}
+            node.seq = -1
+
+        for node in nodes_to_output:
+            node.dev_ref = 'DM_DEVICE_REF(%s)' % conv_name_to_c(node.name)
+            struct_name, _ = self.get_normalized_compat_name(node)
+            driver = self._drivers.get(struct_name)
+            if not driver:
+                #print('all', self._drivers.keys())
+                raise ValueError("Cannot parse/find driver for '%s'" %
+                                 struct_name)
+            node.driver = driver
+            uclass = self._uclass.get(driver.uclass_id)
+            if not uclass:
+                raise ValueError("Cannot parse/find uclass '%s' for driver '%s'" %
+                                (driver.uclass_id, struct_name))
+            node.uclass = uclass
+            node.uclass_seq = len(node.uclass.devs)
+            node.uclass.devs.append(node)
+            uclass.node_refs[node.uclass_seq] = \
+                '&%s->uclass_node' % node.dev_ref
+
+            parent_driver = None
+            parent_struct_name = None
+            if node.parent in self._valid_nodes:
+                parent_struct_name, _ = self.get_normalized_compat_name(
+                    node.parent)
+                parent_driver = self._drivers.get(parent_struct_name)
+                if not parent_driver:
+                    raise ValueError("Cannot parse/find driver for '%s'" %
+                                    parent_struct_name)
+                node.parent_seq = len(node.parent.child_devs)
+                node.parent.child_devs.append(node)
+                node.parent.child_refs[node.parent_seq] = \
+                    '&%s->sibling_node' % node.dev_ref
+            node.parent_driver = parent_driver
+
+        for node in nodes_to_output:
+            ref = '&%s->child_head' % node.dev_ref
+            node.child_refs[-1] = ref
+            node.child_refs[len(node.child_devs)] = ref
+
+        self._read_aliases()
+        self._assign_seq()
+
+        uclass_list = set()
+        for driver in self._drivers.values():
+            if driver.used:
+                uclass_list.add(driver.uclass_id)
+        self._valid_uclasses = sorted(list(uclass_list))
+
+        for seq, uclass_id in enumerate(uclass_list):
+            uc_drv = self._uclass.get(uclass_id)
+            if not uc_drv:
+                raise ValueError('Cannot find uclass driver for %s (have %s)'
+                                 % (uc_drv, ', '.join(self._uclass.keys())))
+            uc_name = self.uclass_id_to_name(uclass_id)
+            ref = '&DM_UCLASS_REF(%s)->dev_head' % uc_name
+            uc_drv.node_refs[-1] = ref
+            uc_drv.node_refs[len(uc_drv.devs)] = ref
+
+    def output_node_plat(self, node):
         """Output the C code for a node
 
         Args:
@@ -949,12 +1617,61 @@ class DtbPlatdata():
         """
         struct_name, _ = self.get_normalized_compat_name(node)
         var_name = conv_name_to_c(node.name)
-        self.buf('/* Node %s index %d */\n' % (node.path, node.idx))
+
+        driver = node.driver
+        parent_driver = node.parent_driver
+
+        self.buf('/*\n')
+        self.buf(' * Node %s index %d\n' % (node.path, node.idx))
+        self.buf(' * driver %s parent %s\n' % (driver.name,
+                 parent_driver.name if parent_driver else 'None'))
+        self.buf('*/\n')
 
         self._output_values(var_name, struct_name, node)
         self._declare_device(var_name, struct_name, node.parent)
 
         self.out(''.join(self.get_buf()))
+
+    def output_node_instance(self, node):
+        """Output the C code for a node
+
+        Args:
+            node (fdt.Node): node to output
+        """
+        struct_name, _ = self.get_normalized_compat_name(node)
+        var_name = conv_name_to_c(node.name)
+
+        driver = node.driver
+        parent_driver = node.parent_driver
+
+        self.buf('/*\n')
+        self.buf(' * Node %s index %d\n' % (node.path, node.idx))
+        self.buf(' * driver %s parent %s\n' % (driver.name,
+                 parent_driver.name if parent_driver else 'None'))
+        self.buf('*/\n')
+
+        if not driver.platdata:
+            self._output_values(var_name, struct_name, node)
+        self._declare_device_inst(driver, var_name, struct_name,
+                                  parent_driver, node, node.uclass)
+
+        self.out(''.join(self.get_buf()))
+
+    def check_instantiate(self, require):
+        """Check if self._instantiate is set to the required value
+
+        If not, this outputs a message into the current file
+
+        Args:
+            require: True to require --instantiate, False to require that it not
+                be enabled
+        """
+        if require != self._instantiate:
+            self.out(
+                '/* This file is not used: --instantiate was %senabled */\n' %
+                ('not ' if require else ''))
+            return False
+        return True
 
     def generate_plat(self):
         """Generate device defintions for the platform data
@@ -966,6 +1683,8 @@ class DtbPlatdata():
         See the documentation in doc/driver-model/of-plat.rst for more
         information.
         """
+        if not self.check_instantiate(False):
+            return
         self.out('/* Allow use of U_BOOT_DRVINFO() in this file */\n')
         self.out('#define DT_PLATDATA_C\n')
         self.out('\n')
@@ -976,6 +1695,27 @@ class DtbPlatdata():
 
         for node in self._valid_nodes:
             self.output_node(node)
+
+        self.out(''.join(self.get_buf()))
+
+    def generate_inst(self):
+        """Generate device instances
+
+        This writes out DM_DEVICE_INST() records for each device in the
+        build.
+
+        See the documentation in doc/driver-model/of-plat.rst for more
+        information.
+        """
+        if not self.check_instantiate(True):
+            return
+        self.out('#include <common.h>\n')
+        self.out('#include <dm.h>\n')
+        self.out('#include <dt-structs.h>\n')
+        self.out('\n')
+
+        for node in self._valid_nodes:
+            self.output_node_instance(node)
 
         self.out(''.join(self.get_buf()))
 
@@ -991,12 +1731,21 @@ OUTPUT_FILES = {
     'platdata':
         OutputFile(Ftype.SOURCE, 'dt-plat.c', DtbPlatdata.generate_plat,
                    'Declares the U_BOOT_DRIVER() records and platform data'),
+    'instance':
+        OutputFile(Ftype.SOURCE, 'dt-inst.c', DtbPlatdata.generate_inst,
+                   'Declares the DM_DEVICE_INST() records'),
+    'uclass':
+        OutputFile(Ftype.SOURCE, 'dt-uclass.c', DtbPlatdata.generate_uclasses,
+                   'Declares the uclass instances (struct uclass)'),
+    'decl':
+        OutputFile(Ftype.HEADER, 'dt-decl.h', DtbPlatdata.generate_decl,
+                   'Declares externs for all device/uclass instances'),
     }
 
 
 def run_steps(args, dtb_file, include_disabled, output, output_dirs,
               warning_disabled=False, drivers_additional=None, basedir=None,
-              test_info=None):
+              test_info=None, instantiate=False, phase=None):
     """Run all the steps of the dtoc tool
 
     Args:
@@ -1015,7 +1764,8 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs,
         test_info (list): Useful information from a previous run, as returned
             from save_info_for_test(). This can help speed up tests. Use None
             for normal operation
-
+        instantiate: Instantiate devices so they don't need to be bound at
+            run-time
     Raises:
         ValueError: if args has no command, or an unknown command
     """
@@ -1025,16 +1775,17 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs,
         raise ValueError('Must specify either output or output_dirs, not both')
 
     plat = DtbPlatdata(dtb_file, include_disabled, warning_disabled,
-                       drivers_additional)
+                       drivers_additional, instantiate, phase)
     if test_info:
         plat.load_info_for_test(test_info)
     plat.scan_drivers(basedir)
     plat.scan_dtb()
-    plat.scan_tree()
+    plat.scan_tree(add_root=instantiate)
     plat.scan_reg_sizes()
     plat.setup_output_dirs(output_dirs)
     plat.scan_structs()
     plat.scan_phandles()
+    plat.process_nodes()
 
     cmds = args[0].split(',')
     if 'all' in cmds:

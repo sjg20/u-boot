@@ -164,14 +164,28 @@ struct udevice {
 	struct list_head uclass_node;
 	struct list_head child_head;
 	struct list_head sibling_node;
-	u32 flags_;
 	int seq_;
 #if !CONFIG_IS_ENABLED(OF_PLATDATA)
 	ofnode node_;
 #endif
+#if !CONFIG_IS_ENABLED(OF_PLATDATA_INST)
+	u32 flags_;
+#endif
 #ifdef CONFIG_DEVRES
 	struct list_head devres_head;
 #endif
+};
+
+/**
+ * udevice_rt - runtime information set up by U-Boot
+ *
+ * There is one of these for every udevice in the linker list, indexed by
+ * the udevice_info idx value.
+ *
+ * @flags: Flags for this device
+ */
+struct udevice_rt {
+	u32 flags;
 };
 
 /* Maximum sequence number supported */
@@ -180,6 +194,11 @@ struct udevice {
 /* Returns the operations for a device */
 #define device_get_ops(dev)	(dev->driver->ops)
 
+#if CONFIG_IS_ENABLED(OF_PLATDATA_INST)
+u32 dev_get_flags(const struct udevice *dev);
+void dev_or_flags(const struct udevice *dev, u32 or);
+void dev_bic_flags(const struct udevice *dev, u32 bic);
+#else
 static inline u32 dev_get_flags(const struct udevice *dev)
 {
 	return dev->flags_;
@@ -194,6 +213,10 @@ static inline void dev_bic_flags(struct udevice *dev, u32 bic)
 {
 	dev->flags_ &= ~bic;
 }
+#endif
+
+/* Returns non-zero if the device is active (probed and not removed) */
+#define device_active(dev)	(dev_get_flags(dev) & DM_FLAG_ACTIVATED)
 
 /**
  * dev_ofnode() - get the DT node reference associated with a udevice
@@ -338,12 +361,57 @@ struct driver {
 #define DM_DRIVER_GET(__name)						\
 	ll_entry_get(struct driver, __name, driver)
 
+/* Declare a driver as an extern, so it can be referenced at build time */
+#define DM_DRIVER_DECL(__name)					\
+	ll_entry_decl(struct driver, __name, driver)
+
+/*
+ * Get a pointer to a given driver, for use in data structures. This requires
+ * that the symbol be declared with DM_DRIVER_DECL() first
+ */
+#define DM_DRIVER_REF(__name)					\
+	ll_entry_ref(struct driver, __name, driver)
+
 /**
  * Declare a macro to state a alias for a driver name. This macro will
  * produce no code but its information will be parsed by tools like
  * dtoc
  */
 #define DM_DRIVER_ALIAS(__name, __alias)
+
+/**
+ * Declare a macro to declare a header needed for a driver. Often the correct
+ * header can be found automatically, but only for struct declarations. For
+ * enums and #defines used in the driver declaration and declared in a different
+ * header from the structs, this macro must be used.
+ *
+ * This macro produces no code but its information will be parsed by dtoc. The
+ * macro can be used multiple times with different headers, for the same driver.
+ * Put it within the U_BOOT_DRIVER() declaration, e.g.:
+ *
+ * U_BOOT_DRIVER(cpu) = {
+ *	.name = ...
+ *	...
+ *	DM_HEADER(<asm/cpu.h>)
+ * };
+ */
+#define DM_HEADER(_hdr)
+
+/**
+ * Declare a macro to indicate which phase of U-Boot this driver is fore.
+ *
+ *
+ * This macro produces no code but its information will be parsed by dtoc. The
+ * macro can be only be used once in a driver. Put it within the U_BOOT_DRIVER()
+ * declaration, e.g.:
+ *
+ * U_BOOT_DRIVER(cpu) = {
+ *	.name = ...
+ *	...
+ *	DM_PHASE(tpl)
+ * };
+ */
+#define DM_PHASE(_phase)
 
 /**
  * dev_get_plat() - Get the platform data for a device

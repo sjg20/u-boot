@@ -19,6 +19,7 @@ import unittest
 from unittest import mock
 
 from dtb_platdata import conv_name_to_c
+from dtb_platdata import Driver
 from dtb_platdata import get_compat_name
 from dtb_platdata import get_value
 from dtb_platdata import tab_to
@@ -594,6 +595,8 @@ U_BOOT_DRVINFO(phandle_target) = {
 \t.parent_idx\t= -1,
 };
 
+=======
+>>>>>>> 4acb2058889... wip
 ''', data)
 
     def test_phandle_bad(self):
@@ -1088,11 +1091,12 @@ U_BOOT_DRIVER(i2c_tegra) = {
 
         dtb_platdata.run_steps(['all'], dtb_file, False, None, [outdir], True)
         fnames = glob.glob(outdir + '/*')
-        self.assertEqual(4, len(fnames))
+        self.assertEqual(7, len(fnames))
 
         leafs = set([os.path.basename(fname) for fname in fnames])
         self.assertEqual(
-            {'dt-structs-gen.h', 'source.dts', 'dt-plat.c', 'source.dtb'},
+            {'dt-structs-gen.h', 'source.dts', 'dt-plat.c', 'source.dtb',
+             'dt-uclass.c', 'dt-decl.h', 'dt-inst.c'},
             leafs)
 
     def test_scan_dirs(self):
@@ -1129,3 +1133,15 @@ U_BOOT_DRIVER(i2c_tegra) = {
                              mocked.mock_calls[1])
         finally:
             shutil.rmtree(indir)
+
+    def testInstantiate(self):
+        """Test running dtoc with -i"""
+        dtb_file = get_dtb_file('dtoc_test_inst.dts')
+        basedir = os.path.join(OUR_PATH, '../..')
+        outdir = tools.GetOutputDir()
+        dtb_platdata.run_steps(['all'], dtb_file, False, None, [outdir],
+                               True, None, basedir=basedir, instantiate=True)
+        #data = tools.ReadFile(output)
+        #for line in data.splitlines():
+            #print(line.decode('utf-8'))
+>>>>>>> b52cc5ffffa... wip

@@ -205,6 +205,18 @@ struct global_data {
         /** Dynamic info about the driver */
 	struct driver_rt *dm_driver_rt;
 # endif
+
+#if CONFIG_IS_ENABLED(OF_PLATDATA_INST)
+	/** @dm_udevice_rt: Dynamic info about the udevice */
+	struct udevice_rt *dm_udevice_rt;
+
+	/**
+	 * @dm_priv_base: Base address of the priv/plat region used when
+	 * udevices and uclasses are in read-only memory. This is NULL if not
+	 * used
+	 */
+	void *dm_priv_base;
+# endif
 #endif
 #ifdef CONFIG_TIMER
 	/**
@@ -463,6 +475,18 @@ struct global_data {
 #else
 #define gd_set_dm_driver_rt(dyn)
 #define gd_dm_driver_rt()		NULL
+#endif
+
+#if CONFIG_IS_ENABLED(OF_PLATDATA_INST)
+#define gd_set_dm_udevice_rt(dyn)	gd->dm_udevice_rt = dyn
+#define gd_dm_udevice_rt()		gd->dm_udevice_rt
+#define gd_set_dm_priv_base(dyn)	gd->dm_priv_base = dyn
+#define gd_dm_priv_base()		gd->dm_priv_base
+#else
+#define gd_set_dm_udevice_rt(dyn)
+#define gd_dm_udevice_rt()		NULL
+#define gd_set_dm_priv_base(dyn)
+#define gd_dm_priv_base()		NULL
 #endif
 
 #ifdef CONFIG_GENERATE_ACPI_TABLE
