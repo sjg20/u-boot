@@ -335,12 +335,20 @@ struct mtd_info {
 static inline void mtd_set_of_node(struct mtd_info *mtd,
 				   const struct device_node *np)
 {
+	/* FIXME: Devices should not set this */
+#if !CONFIG_IS_ENABLED(OF_PLATDATA)
 	mtd->dev->node.np = np;
+#endif
 }
 
 static inline const struct device_node *mtd_get_of_node(struct mtd_info *mtd)
 {
+	/* FIXME: Devices should not use this, should use ofnode */
+#if !CONFIG_IS_ENABLED(OF_PLATDATA)
 	return mtd->dev->node.np;
+#else
+        return NULL;
+#endif
 }
 #else
 struct device_node;

@@ -81,13 +81,11 @@ static int testbus_child_post_remove(struct udevice *dev)
 }
 
 static const struct udevice_id testbus_ids[] = {
-	{
-		.compatible = "denx,u-boot-test-bus",
-		.data = DM_TEST_TYPE_FIRST },
+	{ .compatible = "denx,u-boot-test-bus", .data = DM_TEST_TYPE_FIRST },
 	{ }
 };
 
-U_BOOT_DRIVER(testbus_drv) = {
+U_BOOT_DRIVER(denx_u_boot_test_bus) = {
 	.name	= "testbus_drv",
 	.of_match	= testbus_ids,
 	.id	= UCLASS_TEST_BUS,
@@ -111,7 +109,7 @@ UCLASS_DRIVER(testbus) = {
 
 static int testfdt_drv_ping(struct udevice *dev, int pingval, int *pingret)
 {
-	const struct dm_test_pdata *pdata = dev->plat;
+	const struct dm_test_pdata *pdata = dev_get_plat(dev);
 	struct dm_test_priv *priv = dev_get_priv(dev);
 
 	*pingret = pingval + pdata->ping_add;
@@ -156,16 +154,14 @@ static int testfdt_drv_probe(struct udevice *dev)
 }
 
 static const struct udevice_id testfdt_ids[] = {
-	{
-		.compatible = "denx,u-boot-fdt-test",
-		.data = DM_TEST_TYPE_FIRST },
-	{
-		.compatible = "google,another-fdt-test",
-		.data = DM_TEST_TYPE_SECOND },
+	{ .compatible = "denx,u-boot-fdt-test", .data = DM_TEST_TYPE_FIRST },
+	{ .compatible = "google,another-fdt-test", .data = DM_TEST_TYPE_SECOND },
 	{ }
 };
 
-U_BOOT_DRIVER(testfdt_drv) = {
+U_BOOT_DRIVER_ALIAS(denx_u_boot_fdt_test, google_another_fdt_test)
+
+U_BOOT_DRIVER(denx_u_boot_fdt_test) = {
 	.name	= "testfdt_drv",
 	.of_match	= testfdt_ids,
 	.id	= UCLASS_TEST_FDT,
@@ -177,9 +173,7 @@ U_BOOT_DRIVER(testfdt_drv) = {
 };
 
 static const struct udevice_id testfdt1_ids[] = {
-	{
-		.compatible = "denx,u-boot-fdt-test1",
-		.data = DM_TEST_TYPE_FIRST },
+	{ .compatible = "denx,u-boot-fdt-test1", .data = DM_TEST_TYPE_FIRST },
 	{ }
 };
 
@@ -210,4 +204,6 @@ UCLASS_DRIVER(testfdt) = {
 	.name		= "testfdt",
 	.id		= UCLASS_TEST_FDT,
 	.flags		= DM_UC_FLAG_SEQ_ALIAS,
+	.per_device_auto	= sizeof(struct dm_test_uclass_perdev_priv),
+	.per_device_plat_auto	= sizeof(struct dm_test_perdev_uc_pdata),
 };

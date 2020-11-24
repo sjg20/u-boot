@@ -308,7 +308,11 @@ $(obj)/$(SPL_BIN).dtb: $(obj)/dts/dt-$(SPL_NAME).dtb FORCE
 pythonpath = PYTHONPATH=scripts/dtc/pylibfdt
 
 DTOC_ARGS := $(pythonpath) $(srctree)/tools/dtoc/dtoc \
-	-d $(obj)/$(SPL_BIN).dtb
+	-d $(obj)/$(SPL_BIN).dtb -p $(SPL_NAME)
+
+ifneq ($(CONFIG_$(SPL_TPL_)OF_PLATDATA_INST),)
+DTOC_ARGS += -i
+endif
 
 quiet_cmd_dtocc = DTOC C  $@
 cmd_dtocc = $(DTOC_ARGS) -o $@ platdata

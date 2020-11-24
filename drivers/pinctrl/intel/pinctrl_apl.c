@@ -17,18 +17,6 @@
 #include <asm-generic/gpio.h>
 #include <asm/intel_pinctrl_defs.h>
 
-/**
- * struct apl_gpio_plat - platform data for each device
- *
- * @dtplat: of-platdata data from C struct
- */
-struct apl_gpio_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
-	/* Put this first since driver model will copy the data here */
-	struct dtd_intel_apl_pinctrl dtplat;
-#endif
-};
-
 static const struct reset_mapping rst_map[] = {
 	{ .logical = PAD_CFG0_LOGICAL_RESET_PWROK, .chipset = 0U << 30 },
 	{ .logical = PAD_CFG0_LOGICAL_RESET_DEEP, .chipset = 1U << 30 },
@@ -152,8 +140,6 @@ static int apl_pinctrl_of_to_plat(struct udevice *dev)
 	 * linker list (i.e. alphabetical order by driver name). So the GPIO
 	 * device may well be bound before its parent (p2sb), and this call
 	 * will fail if p2sb is not bound yet.
-	 *
-	 * TODO(sjg@chromium.org): Add a parent pointer to child devices in dtoc
 	 */
 	ret = p2sb_set_port_id(dev, plat->dtplat.intel_p2sb_port_id);
 	if (ret)

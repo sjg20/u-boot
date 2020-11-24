@@ -297,14 +297,14 @@ static int gpio_sandbox_probe(struct udevice *dev)
 		/* Tell the uclass how many GPIOs we have */
 		uc_priv->gpio_count = CONFIG_SANDBOX_GPIO_COUNT;
 
-	dev->priv = calloc(sizeof(struct gpio_state), uc_priv->gpio_count);
+	dev->priv_ = calloc(sizeof(struct gpio_state), uc_priv->gpio_count);
 
 	return 0;
 }
 
 static int gpio_sandbox_remove(struct udevice *dev)
 {
-	free(dev->priv);
+	free(dev->priv_);
 
 	return 0;
 }

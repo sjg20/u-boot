@@ -89,10 +89,14 @@ parser.add_option('-B', '--build-dir', type='string', default='b',
         help='Directory containing the build output')
 parser.add_option('-d', '--dtb-file', action='store',
                   help='Specify the .dtb input file')
+parser.add_option('-i', '--instantiate', action='store_true', default=False,
+                  help='Instantiate devices to avoid needing device_bind()')
 parser.add_option('--include-disabled', action='store_true',
                   help='Include disabled nodes')
 parser.add_option('-o', '--output', action='store', default='-',
                   help='Select output filename')
+parser.add_option('-p', '--phase', type=str,
+                  help='set phase of U-Boot this invocation is for (spl/tpl)')
 parser.add_option('-P', '--processes', type=int,
                   help='set number of processes to use for running tests')
 parser.add_option('-t', '--test', action='store_true', dest='test',
@@ -111,4 +115,5 @@ elif options.test_coverage:
 
 else:
     dtb_platdata.run_steps(args, options.dtb_file, options.include_disabled,
-                           options.output)
+                           options.output, instantiate=options.instantiate,
+                           phase=options.phase)

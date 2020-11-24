@@ -19,25 +19,6 @@
 #include <spl.h>
 #include <asm/itss.h>
 
-struct itss_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
-	/* Put this first since driver model will copy the data here */
-	struct dtd_intel_itss dtplat;
-#endif
-};
-
-/* struct pmc_route - Routing for PMC to GPIO */
-struct pmc_route {
-	u32 pmc;
-	u32 gpio;
-};
-
-struct itss_priv {
-	struct pmc_route *route;
-	uint route_count;
-	u32 irq_snapshot[NUM_IPC_REGS];
-};
-
 static int set_polarity(struct udevice *dev, uint irq, bool active_low)
 {
 	u32 mask;
@@ -172,7 +153,8 @@ static int route_pmc_gpio_gpe(struct udevice *dev, uint pmc_gpe_num)
 static int itss_bind(struct udevice *dev)
 {
 	/* This is not set with of-platdata, so set it manually */
-	if (CONFIG_IS_ENABLED(OF_PLATDATA))
+	if (CONFIG_IS_ENABLED(OF_PLATDATA) &&
+	    !CONFIG_IS_ENABLED(OF_PLATDATA_INST))
 		dev->driver_data = X86_IRQT_ITSS;
 
 	return 0;
