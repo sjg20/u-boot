@@ -915,7 +915,41 @@ class DtbPlatdata(object):
         self.buf('};\n')
         self.buf('\n')
 
-    def _declare_device_inst(self, var_name, struct_name, node_parent):
+    def prep_priv(self, info, name):
+        if not info:
+            return None
+        parts = info.split(',')
+        if len(parts) == 2:
+            hdr, struc = parts
+        else:
+            hdr = None
+            struc = parts[0]
+        var_name = '_%s_priv' % name
+        if hdr:
+            self.buf('#include %s\n' % hdr)
+        section = '__attribute__ ((section (".data")))'
+        return var_name, struc, section
+
+    def alloc_priv(self, info, name):
+        result = self.prep_priv(info, name)
+        if not result:
+            return None
+        var_name, struc, section = result
+        self.buf('u8 %s[sizeof(%s)] %s;\n' % (var_name, struc.strip(), section))
+        return var_name
+
+    def alloc_plat(self, info, name, dt_platdata):
+        result = self.prep_priv(info, name)
+        if not result:
+            return None
+        var_name, struc, section = result
+        self.buf('%s %s = {\n' % (struc.strip(), var_name))
+        self.buf('\t.dtplat = {\n')
+        self.buf('\t};\n')
+        self.buf('} %s;\n' % section)
+        return '&' + var_name
+
+    def _declare_device_inst(self, driver, var_name, struct_name, node_parent):
         """Add a device instance declaration to the output
 
         This declares a U_BOOT_DEVICE_INST() for the device being processed
@@ -928,18 +962,13 @@ class DtbPlatdata(object):
         self.buf('\n')
         self.buf('DM_DECL_DRIVER(%s);\n' % struct_name);
         self.buf('\n')
-        driver = self._drivers.get(struct_name)
-        if not driver:
-            raise ValueError("Cannot parse/find driver for '%s'" % struct_name)
-        plat_name = self.alloc_priv(driver.platdata, driver.name)
+        plat_name = self.alloc_plat(driver.platdata, driver.name, var_name)
         priv_name = self.alloc_priv(driver.priv, driver.name)
         self.buf('U_BOOT_DEVICE_INST(%s) = {\n' % var_name)
         self.buf('\t.driver\t\t= DM_REF_DRIVER(%s),\n' % struct_name)
         self.buf('\t.name\t\t= "%s",\n' % struct_name)
         if plat_name:
             self.buf('\t.platdata\t\t= %s,\n' % plat_name)
-        else:
-            self.buf('\t.platdata\t\t= &%s%s,\n' % (VAL_PREFIX, var_name))
         if priv_name:
             self.buf('\t.priv\t\t= %s,\n' % priv_name)
         #self.buf('\t.parent_platdata\t\t= %s,\n' % xx)
@@ -993,30 +1022,19 @@ class DtbPlatdata(object):
 
         self.buf('/* Node %s index %d */\n' % (node.path, node.idx))
 
-        self._output_values(var_name, struct_name, node)
+        driver = self._drivers.get(struct_name)
+        if not driver:
+            raise ValueError("Cannot parse/find driver for '%s'" % struct_name)
+
+        if not driver.platdata:
+            self._output_values(var_name, struct_name, node)
         if self._instantiate:
-            self._declare_device_inst(var_name, struct_name, node.parent)
+            self._declare_device_inst(driver, var_name, struct_name,
+                                      node.parent)
         else:
             self._declare_device(var_name, struct_name, node.parent)
 
         self.out(''.join(self.get_buf()))
-
-    def alloc_priv(self, info, name):
-        if not info:
-            return None
-        parts = info.split(',')
-        if len(parts) == 2:
-            hdr, size = parts
-        else:
-            hdr = None
-            size = parts[0]
-        var_name = '_%s_priv' % name
-        if hdr:
-            self.buf('#include %s\n' % hdr)
-        section = '__attribute__ ((section (".data")))'
-
-        self.buf('u8 %s[%s] %s;\n' % (var_name, size.strip(), section))
-        return var_name
 
     def _output_uclasses(self):
         uclass_list = set()
