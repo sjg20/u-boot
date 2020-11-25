@@ -914,3 +914,6 @@ U_BOOT_DEVICE(spl_test2) = {
         basedir = os.path.join(our_path, '../..')
         dtb_platdata.run_steps(['platdata'], dtb_file, False, output, True,
                                None, instantiate=True, basedir=basedir)
+        data = tools.ReadFile(output)
+        for line in data.splitlines():
+            print(line.decode('utf-8'))

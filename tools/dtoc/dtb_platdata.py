@@ -919,7 +919,7 @@ class DtbPlatdata(object):
             node_parent: Parent of the node (or None if none)
         """
         self.buf('\n')
-        self.buf('__weak DM_DECL_DRIVER(%s);\n' % struct_name);
+        self.buf('DM_DECL_DRIVER(%s);\n' % struct_name);
         self.buf('\n')
         self.buf('U_BOOT_DEVICE_INST(%s) = {\n' % var_name)
         self.buf('\t.driver\t\t= DM_REF_DRIVER(%s),\n' % struct_name)
@@ -978,8 +978,7 @@ class DtbPlatdata(object):
 
         self._output_values(var_name, struct_name, node)
         if self._instantiate:
-            pass
-            #self._declare_device_inst(var_name, struct_name, node.parent)
+            self._declare_device_inst(var_name, struct_name, node.parent)
         else:
             self._declare_device(var_name, struct_name, node.parent)
 
@@ -992,7 +991,7 @@ class DtbPlatdata(object):
                 uclass_list.add(driver.uclass_id)
         self.buf('/* uclass declarations */\n')
         uclass_list = sorted(list(uclass_list))
-        prev_uc = 'NULL'
+        prev_uc = 'NULL /* Set up at runtime */'
 
         for uclass_id in uclass_list:
             uc_name = self.uclass_id_to_name(uclass_id)
@@ -1000,7 +999,6 @@ class DtbPlatdata(object):
             self.buf('DM_DECL_UCLASS_INST(%s);\n' % uc_name)
         self.buf('\n')
 
-        print('uclass_list', uclass_list)
         for seq, uclass_id in enumerate(uclass_list):
             uc_drv = self._uclass.get(uclass_id)
             if not uc_drv:
@@ -1033,7 +1031,7 @@ class DtbPlatdata(object):
             if priv_name:
                 self.buf('\t.priv\t\t= %s,\n' % priv_name)
             self.buf('\t.uc_drv\t\t= DM_REF_UCLASS_DRIVER(%s),\n' % uc_name)
-            self.buf('\t.sibling_node\t\t= {\n')
+            self.buf('\t.sibling_node\t= {\n')
             self.buf('\t\t.next = %s,\n' % next_uc)
             self.buf('\t\t.prev = %s,\n' % prev_uc)
             self.buf('\t},\n')
