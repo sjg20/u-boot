@@ -109,7 +109,32 @@ struct uclass_driver {
 
 /* Declare a new uclass_driver */
 #define UCLASS_DRIVER(__name)						\
-	ll_entry_declare(struct uclass_driver, __name, uclass)
+	ll_entry_declare(struct uclass_driver, __name, uclass_driver)
+
+/*
+ * Declare a uclass driver as an extern, so it can be referenced at build time
+ */
+#define DM_DECL_UCLASS_DRIVER(__name)					\
+	ll_entry_decl(struct uclass_driver, __name, uclass_driver)
+
+/*
+ * Get a pointer to a given uclass driver, for use in data structures. This
+ * requires that the symbol be declared with DM_DECL_UCLASS__DRIVER() first
+ */
+#define DM_REF_UCLASS_DRIVER(__name)					\
+	ll_entry_ref(struct uclass_driver, __name, uclass_driver)
+
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
+/* Declare a bound device ready for run-time use */
+#define UCLASS_INST(__name)						\
+	ll_entry_declare(struct uclass, __name, uclass)
+
+#define DM_DECL_UCLASS_INST(__name)						\
+	ll_entry_decl(struct uclass, __name, uclass)
+
+#define DM_REF_UCLASS_INST(__name)						\
+	ll_entry_ref(struct uclass, __name, uclass)
+#endif
 
 /**
  * uclass_get() - Get a uclass based on an ID, creating it if needed

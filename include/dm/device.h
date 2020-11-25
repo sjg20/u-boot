@@ -282,6 +282,7 @@ struct driver {
 #define DM_GET_DRIVER(__name)						\
 	ll_entry_get(struct driver, __name, driver)
 
+/* Declare a driver as an extern, so it can be referenced at build time */
 #define DM_DECL_DRIVER(__name)					\
 	ll_entry_decl(struct driver, __name, driver)
 

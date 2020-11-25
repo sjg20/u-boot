@@ -70,6 +70,7 @@ class DriverInfo:
         self.uclass_id = uclass_id
         self.compat = compat
         self.priv_size = 0
+        self.used = False
 
     def __eq__(self, other):
         return (self.name == other.name and
@@ -78,8 +79,24 @@ class DriverInfo:
                 self.priv_size == other.priv_size)
 
     def __repr__(self):
-        return ("DriverInfo(name='%s', uclass_id='%s', compat=%s, priv_size=%s)" %
-                (self.name, self.uclass_id, self.compat, self.priv_size))
+        return ("DriverInfo(name='%s', used=%s, uclass_id='%s', compat=%s, priv_size=%s)" %
+                (self.name, self.used, self.uclass_id, self.compat, self.priv_size))
+
+
+class UclassDriverInfo:
+    def __init__(self, name, uclass_id):
+        self.name = name
+        self.uclass_id = uclass_id
+        self.priv_size = 0
+
+    def __eq__(self, other):
+        return (self.name == other.name and
+                self.uclass_id == other.uclass_id and
+                self.priv_size == other.priv_size)
+
+    def __repr__(self):
+        return ("UclassDriver(name='%s', used=%s, uclass_id='%s', compat=%s, priv_size=%s)" %
+                (self.name, self.used, self.uclass_id, self.compat, self.priv_size))
 
 
 def conv_name_to_c(name):
@@ -343,6 +360,18 @@ class DtbPlatdata(object):
             return PhandleInfo(max_args, args)
         return None
 
+    def _parse_uclass_driver(self, buff):
+        """Parse a C file to extract uclass driver information contained within
+
+        This parses UCLASS_DRIVER() structs to obtain various pieces of useful
+        information.
+
+        It updates the following members:
+
+        Args:
+            buff (str): Contents of file
+        """
+
     def _parse_driver(self, buff):
         """Parse a C file to extract driver information contained within
 
@@ -501,6 +530,8 @@ class DtbPlatdata(object):
             # obtain driver information
             if 'U_BOOT_DRIVER' in buff:
                 self._parse_driver(buff)
+            if 'UCLASS_DRIVER' in buff:
+                self._parse_uclass_driver(buff)
 
             # The following re will search for driver aliases declared as
             # U_BOOT_DRIVER_ALIAS(alias, driver_name)
@@ -883,15 +914,69 @@ class DtbPlatdata(object):
         """
         struct_name, _ = self.get_normalized_compat_name(node)
         var_name = conv_name_to_c(node.name)
+
         self.buf('/* Node %s index %d */\n' % (node.path, node.idx))
 
         self._output_values(var_name, struct_name, node)
         if self._instantiate:
-            self._declare_device_inst(var_name, struct_name, node.parent)
+            pass
+            #self._declare_device_inst(var_name, struct_name, node.parent)
         else:
             self._declare_device(var_name, struct_name, node.parent)
 
         self.out(''.join(self.get_buf()))
+
+    def _output_uclasses(self):
+        def uclass_id_to_name(uclass_id):
+            return uclass_id[len('UCLASS_'):].lower()
+
+        uclass_list = set()
+        for driver in self._drivers.values():
+            if driver.used:
+                uclass_list.add(driver.uclass_id)
+        self.buf('/* uclass declarations */\n')
+        uclass_list = sorted(list(uclass_list))
+        prev_uc = 'NULL'
+
+        for uclass_id in uclass_list:
+            uc_name = uclass_id_to_name(uclass_id)
+            self.buf('DM_DECL_UCLASS_DRIVER(%s);\n' % uc_name)
+            self.buf('DM_DECL_UCLASS_INST(%s);\n' % uc_name)
+        self.buf('\n')
+
+        for seq, uclass_id in enumerate(uclass_list):
+            if seq == len(uclass_list) - 1:
+                next_uc = 'NULL /* Set up at runtime */'
+            else:
+                next_uc_name = uclass_id_to_name(uclass_list[seq + 1])
+                next_uc = '&DM_REF_UCLASS_INST(%s)->sibling_node' % next_uc_name
+
+            inline = True
+            if inline and driver.priv_size:
+                parts = driver.priv_size.split(',')
+                if len(parts) == 2:
+                    hdr, size = parts
+                else:
+                    hdr = None
+                    size = parts[0]
+                priv_name = '_%s_priv' % var_name
+                if hdr:
+                    self.buf('#include %s\n' % hdr)
+                section = '__attribute__ ((section (".data")))'
+
+                self.buf('u8 %s[%s] %s;\n' % (priv_name, size.strip(), section))
+
+            uc_name = uclass_id_to_name(uclass_id)
+            self.buf('UCLASS_INST(%s) = {\n' % uc_name)
+            #self.buf('\t.priv\t\t= %s,\n' % xx)
+            self.buf('\t.uc_drv\t\t= DM_REF_UCLASS_DRIVER(%s),\n' % uc_name)
+            self.buf('\t.sibling_node\t\t= {\n')
+            self.buf('\t\t.next = %s,\n' % next_uc)
+            self.buf('\t\t.prev = %s,\n' % prev_uc)
+            self.buf('\t},\n')
+            prev_uc = '&DM_REF_UCLASS_INST(%s)->sibling_node' % uc_name
+            self.buf('};\n')
+            self.buf('\n')
 
     def generate_tables(self):
         """Generate device defintions for the platform data
@@ -912,6 +997,16 @@ class DtbPlatdata(object):
         self.out('#include <dt-structs.h>\n')
         self.out('\n')
         nodes_to_output = list(self._valid_nodes)
+
+        # Figure out which drivers we actually use
+        for node in nodes_to_output:
+            struct_name, _ = self.get_normalized_compat_name(node)
+            driver = self._drivers.get(struct_name)
+            if driver:
+                driver.used = True
+
+        if self._instantiate:
+            self._output_uclasses()
 
         # Keep outputing nodes until there is none left
         while nodes_to_output:
