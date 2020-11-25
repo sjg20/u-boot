@@ -511,7 +511,11 @@ class DtbPlatdata(object):
             if driver:
                 id_m = re_id.search(line)
                 id_of_match = re_of_match.search(line)
-                if id_m:
+                priv_m = re_priv.match(line)
+                if priv_m:
+                    driver.priv = priv_m.group(1)
+                    print('priv', driver.priv)
+                elif id_m:
                     driver.uclass_id = id_m.group(1)
                 elif id_of_match:
                     compat = id_of_match.group(1)
@@ -923,13 +927,16 @@ class DtbPlatdata(object):
         self.buf('DM_DECL_DRIVER(%s);\n' % struct_name);
         self.buf('\n')
         driver = self._drivers.get(struct_name)
-        print('not found', struct_name)
-        print('driver', driver)
+        if not driver:
+            raise ValueError("Cannot parse/find driver for '%s'" % struct_name)
         plat_name = self.alloc_priv(driver.platdata, driver.name)
+        priv_name = self.alloc_priv(driver.priv, driver.name)
         self.buf('U_BOOT_DEVICE_INST(%s) = {\n' % var_name)
         self.buf('\t.driver\t\t= DM_REF_DRIVER(%s),\n' % struct_name)
         self.buf('\t.name\t\t= "%s",\n' % struct_name)
         self.buf('\t.platdata\t\t= &%s%s,\n' % (VAL_PREFIX, var_name))
+        if priv_name:
+            self.buf('\t.priv\t\t= %s,\n' % priv_name)
         #self.buf('\t.parent_platdata\t\t= %s,\n' % xx)
         #self.buf('\t.driver_data\t\t= %s,\n' % xx)
         #self.buf('\t.driver_data\t\t= %s,\n' % xx)
