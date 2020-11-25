@@ -123,6 +123,11 @@ struct dm_i2c_bus {
 	int max_transaction_bytes;
 };
 
+/* I2C information that is private to the uclass */
+struct i2c_priv {
+	int max_id;
+};
+
 /*
  * Not all of these flags are implemented in the U-Boot API
  */

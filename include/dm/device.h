@@ -294,6 +294,15 @@ struct driver {
 	ll_entry_ref(struct driver, __name, driver)
 
 /**
+ * DM_TINY_PRIV() - Specifies the size of the private data
+ *
+ * This does not generate any code, but is parsed by dtoc. Put it inside the
+ * U_BOOT_DRIVER() or UCLASS_DRIVER() on its own line to specify the amount of
+ * data to be allocated for the device/uclass
+ */
+#define DM_PRIV(hdr,size)		.priv_auto_alloc_size	= size,
+
+/**
  * Declare a macro to state a alias for a driver name. This macro will
  * produce no code but its information will be parsed by tools like
  * dtoc

@@ -686,10 +686,6 @@ static int i2c_child_post_bind(struct udevice *dev)
 #endif
 }
 
-struct i2c_priv {
-	int max_id;
-};
-
 static int i2c_post_bind(struct udevice *dev)
 {
 	struct uclass *class = dev->uclass;
@@ -739,7 +735,7 @@ UCLASS_DRIVER(i2c) = {
 	.flags		= DM_UC_FLAG_SEQ_ALIAS,
 	.post_bind	= i2c_post_bind,
 	.init		= i2c_uclass_init,
-	DM_TINY_PRIV(<i2c.h>, sizeof(struct i2c_priv))
+	DM_PRIV(<i2c.h>, sizeof(struct i2c_priv))
 	.pre_probe      = i2c_pre_probe,
 	.post_probe	= i2c_post_probe,
 	.per_device_auto_alloc_size = sizeof(struct dm_i2c_bus),

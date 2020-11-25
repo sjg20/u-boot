@@ -69,34 +69,42 @@ class Driver:
         self.name = name
         self.uclass_id = uclass_id
         self.compat = compat
-        self.priv_size = 0
+        self.priv = ''
         self.used = False
 
     def __eq__(self, other):
         return (self.name == other.name and
                 self.uclass_id == other.uclass_id and
                 self.compat == other.compat and
-                self.priv_size == other.priv_size)
+                self.priv == other.priv)
 
     def __repr__(self):
-        return ("Driver(name='%s', used=%s, uclass_id='%s', compat=%s, priv_size=%s)" %
-                (self.name, self.used, self.uclass_id, self.compat, self.priv_size))
+        return ("Driver(name='%s', used=%s, uclass_id='%s', compat=%s, priv=%s)" %
+                (self.name, self.used, self.uclass_id, self.compat, self.priv))
 
 
-class UclassDriverInfo:
-    def __init__(self, name, uclass_id):
+class UclassDriver:
+    """Holds information about a uclass driver
+
+    Attributes:
+        name: Uclass name, e.g. 'i2c' if the driver is for UCLASS_I2C
+        uclass_id: Uclass ID, e.g. 'UCLASS_I2C'
+        priv: Information about private data, e.g.
+            '<i2c.h>, sizeof(struct i2c_priv)'
+    """
+    def __init__(self, name):
         self.name = name
-        self.uclass_id = uclass_id
-        self.priv_size = 0
+        self.uclass_id = None
+        self.priv = ''
 
     def __eq__(self, other):
         return (self.name == other.name and
                 self.uclass_id == other.uclass_id and
-                self.priv_size == other.priv_size)
+                self.priv == other.priv)
 
     def __repr__(self):
-        return ("UclassDriver(name='%s', used=%s, uclass_id='%s', compat=%s, priv_size=%s)" %
-                (self.name, self.used, self.uclass_id, self.compat, self.priv_size))
+        return ("UclassDriver(name='%s', used=%s, uclass_id='%s', compat=%s, priv=%s)" %
+                (self.name, self.used, self.uclass_id, self.compat, self.priv))
 
 
 def conv_name_to_c(name):
@@ -204,6 +212,9 @@ class DtbPlatdata(object):
                key: Compatible string, e.g. 'rockchip,rk3288-grf'
                value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
         _compat_to_driver: Maps compatible strings to Driver
+        _uclass: Dict of uclass information
+            key: uclass name (e.g. 'UCLASS_I2C')
+            value: UClassDriver
         _instantiate: Instantiate devices so they don't need to be bound at
             run-time
     """
@@ -221,6 +232,7 @@ class DtbPlatdata(object):
         self._drivers_additional = drivers_additional or []
         self._of_match = {}
         self._compat_to_driver = {}
+        self._uclass = {}
         self._instantiate = instantiate
 
     def get_normalized_compat_name(self, node):
@@ -360,7 +372,11 @@ class DtbPlatdata(object):
             return PhandleInfo(max_args, args)
         return None
 
-    def _parse_uclass_driver(self, buff):
+    @staticmethod
+    def uclass_id_to_name(uclass_id):
+        return uclass_id[len('UCLASS_'):].lower()
+
+    def _parse_uclass_driver(self, buff, fname):
         """Parse a C file to extract uclass driver information contained within
 
         This parses UCLASS_DRIVER() structs to obtain various pieces of useful
@@ -370,16 +386,19 @@ class DtbPlatdata(object):
 
         Args:
             buff (str): Contents of file
+            fname (str): Filename (to use when printing errors)
         """
         uc_drivers = {}
 
-        # Collect the driver name (None means not found yet)
-        driver_name = None
+        # Collect the driver name and associated Driver
+        driver = None
         re_driver = re.compile(r'UCLASS_DRIVER\((.*)\)')
 
-        # Matches the header/size information for tinydev
-        re_tiny_priv = re.compile('^\s*DM_TINY_PRIV\((.*)\)$')
-        tiny_name = None
+        # Collect the uclass ID, e.g. 'UCLASS_SPI'
+        re_id = re.compile(r'\s*\.id\s*=\s*(UCLASS_[A-Z0-9_]+)')
+
+        # Matches the header/size information for uclass-private data
+        re_priv = re.compile('^\s*DM_PRIV\((.*)\)$')
 
         prefix = ''
         for line in buff.splitlines():
@@ -393,44 +412,29 @@ class DtbPlatdata(object):
 
             driver_match = re_driver.search(line)
 
-            # If we have seen U_BOOT_DRIVER()...
-            if driver_name:
-                    tiny_priv = re_tiny_priv.match(line)
-                    if tiny_priv:
-                        drivers[tiny_name].priv_size = tiny_priv.group(1)
+            # If we have seen UCLASS_DRIVER()...
+            if driver:
+                id_m = re_id.search(line)
+                priv_m = re_priv.match(line)
+                if id_m:
+                    driver.uclass_id = id_m.group(1)
+                elif priv_m:
+                    driver.priv = priv_m.group(1)
                 elif '};' in line:
-                    if uclass_id and compat:
-                        if compat not in of_match:
-                            raise ValueError(
-                                "%s: Unknown compatible var '%s' (found %s)" %
-                                (fn, compat, ','.join(of_match.keys())))
-                        driver = Driver(driver_name, uclass_id,
-                                            of_match[compat])
-                        drivers[driver_name] = driver
+                    if not driver.uclass_id:
+                        raise ValueError(
+                            "%s: Cannot parse uclass ID in driver '%s'" %
+                            (fname, driver.name))
+                    uc_drivers[driver.uclass_id] = driver
+                    driver = None
 
-                        # This needs to be deterministic, since a driver may
-                        # have multiple compatible strings pointing to it.
-                        # We record the one earliest in the alphabet so it
-                        # will produce the same result on all machines.
-                        for id in of_match[compat]:
-                            old = self._compat_to_driver.get(id)
-                            if not old or driver.name < old.name:
-                                self._compat_to_driver[id] = driver
-                    else:
-                        # The driver does not have a uclass or compat string.
-                        # The first is required but the second is not, so just
-                        # ignore this.
-                        pass
-                    driver_name = None
-                    uclass_id = None
-                    ids_name = None
-                    compat = None
-                    compat_dict = {}
             elif driver_match:
                 driver_name = driver_match.group(1)
+                driver = UclassDriver(driver_name)
 
+        self._uclass.update(uc_drivers)
 
-    def _parse_driver(self, buff):
+    def _parse_driver(self, buff, fname):
         """Parse a C file to extract driver information contained within
 
         This parses U_BOOT_DRIVER() structs to obtain various pieces of useful
@@ -444,6 +448,7 @@ class DtbPlatdata(object):
 
         Args:
             buff (str): Contents of file
+            fname (str): Filename (to use when printing errors)
         """
         # Dict holding information about compatible strings collected in this
         # function so far
@@ -513,7 +518,7 @@ class DtbPlatdata(object):
                         if compat not in of_match:
                             raise ValueError(
                                 "%s: Unknown compatible var '%s' (found %s)" %
-                                (fn, compat, ','.join(of_match.keys())))
+                                (fname, compat, ','.join(of_match.keys())))
                         driver = Driver(driver_name, uclass_id,
                                             of_match[compat])
                         drivers[driver_name] = driver
@@ -579,9 +584,9 @@ class DtbPlatdata(object):
             # If this file has any U_BOOT_DRIVER() declarations, process it to
             # obtain driver information
             if 'U_BOOT_DRIVER' in buff:
-                self._parse_driver(buff)
+                self._parse_driver(buff, fname)
             if 'UCLASS_DRIVER' in buff:
-                self._parse_uclass_driver(buff)
+                self._parse_uclass_driver(buff, fname)
 
             # The following re will search for driver aliases declared as
             # U_BOOT_DRIVER_ALIAS(alias, driver_name)
@@ -594,19 +599,23 @@ class DtbPlatdata(object):
                     continue
                 self._driver_aliases[alias[1]] = alias[0]
 
-    def scan_drivers(self):
+    def scan_drivers(self, basedir=None):
         """Scan the driver folders to build a list of driver names and aliases
 
         This procedure will populate self._drivers and self._driver_aliases
 
         """
-        basedir = sys.argv[0].replace('tools/dtoc/dtoc', '')
-        if basedir == '':
-            basedir = './'
+        if not basedir:
+            basedir = sys.argv[0].replace('tools/dtoc/dtoc', '')
+            if basedir == '':
+                basedir = './'
         for (dirpath, _, filenames) in os.walk(basedir):
             for fname in filenames:
                 if not fname.endswith('.c'):
                     continue
+                #if 'drivers/misc' in dirpath:
+                if fname == 'spltest_sandbox.c':
+                    print('fname', fname)
                 self.scan_driver(dirpath + '/' + fname)
 
         for fname in self._drivers_additional:
@@ -977,9 +986,6 @@ class DtbPlatdata(object):
         self.out(''.join(self.get_buf()))
 
     def _output_uclasses(self):
-        def uclass_id_to_name(uclass_id):
-            return uclass_id[len('UCLASS_'):].lower()
-
         uclass_list = set()
         for driver in self._drivers.values():
             if driver.used:
@@ -989,36 +995,43 @@ class DtbPlatdata(object):
         prev_uc = 'NULL'
 
         for uclass_id in uclass_list:
-            uc_name = uclass_id_to_name(uclass_id)
+            uc_name = self.uclass_id_to_name(uclass_id)
             self.buf('DM_DECL_UCLASS_DRIVER(%s);\n' % uc_name)
             self.buf('DM_DECL_UCLASS_INST(%s);\n' % uc_name)
         self.buf('\n')
 
+        print('uclass_list', uclass_list)
         for seq, uclass_id in enumerate(uclass_list):
+            uc_drv = self._uclass.get(uclass_id)
+            if not uc_drv:
+                raise ValueError('Cannot find uclass driver for %s (have %s)'
+                                 % (uc_drv, ', '.join(self._uclass.keys())))
             if seq == len(uclass_list) - 1:
                 next_uc = 'NULL /* Set up at runtime */'
             else:
-                next_uc_name = uclass_id_to_name(uclass_list[seq + 1])
+                next_uc_name = self.uclass_id_to_name(uclass_list[seq + 1])
                 next_uc = '&DM_REF_UCLASS_INST(%s)->sibling_node' % next_uc_name
 
             inline = True
-            if inline and driver.priv_size:
-                parts = driver.priv_size.split(',')
+            priv_name = None
+            if inline and uc_drv.priv:
+                parts = uc_drv.priv.split(',')
                 if len(parts) == 2:
                     hdr, size = parts
                 else:
                     hdr = None
                     size = parts[0]
-                priv_name = '_%s_priv' % var_name
+                priv_name = '_%s_priv' % uc_drv.name
                 if hdr:
                     self.buf('#include %s\n' % hdr)
                 section = '__attribute__ ((section (".data")))'
 
                 self.buf('u8 %s[%s] %s;\n' % (priv_name, size.strip(), section))
 
-            uc_name = uclass_id_to_name(uclass_id)
+            uc_name = self.uclass_id_to_name(uclass_id)
             self.buf('UCLASS_INST(%s) = {\n' % uc_name)
-            #self.buf('\t.priv\t\t= %s,\n' % xx)
+            if priv_name:
+                self.buf('\t.priv\t\t= %s,\n' % priv_name)
             self.buf('\t.uc_drv\t\t= DM_REF_UCLASS_DRIVER(%s),\n' % uc_name)
             self.buf('\t.sibling_node\t\t= {\n')
             self.buf('\t\t.next = %s,\n' % next_uc)
@@ -1078,7 +1091,7 @@ class DtbPlatdata(object):
         self.out(''.join(self.get_buf()))
 
 def run_steps(args, dtb_file, include_disabled, output, warning_disabled=False,
-              drivers_additional=None, instantiate=False):
+              drivers_additional=None, instantiate=False, basedir=None):
     """Run all the steps of the dtoc tool
 
     Args:
@@ -1100,7 +1113,7 @@ def run_steps(args, dtb_file, include_disabled, output, warning_disabled=False,
 
     plat = DtbPlatdata(dtb_file, include_disabled, warning_disabled,
                        drivers_additional, instantiate)
-    plat.scan_drivers()
+    plat.scan_drivers(basedir)
     plat.scan_dtb()
     plat.scan_tree()
     plat.scan_reg_sizes()

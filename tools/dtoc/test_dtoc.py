@@ -906,3 +906,11 @@ U_BOOT_DEVICE(spl_test2) = {
         with test_util.capture_sys_output() as (stdout, stderr):
             dtb_platdata.run_steps(['struct'], dtb_file, False, output, True,
                                [driver_fn])
+
+    def testInstantiate(self):
+        """Test running dtoc with -i"""
+        dtb_file = get_dtb_file('dtoc_test_inst.dts')
+        output = tools.GetOutputFilename('output')
+        basedir = os.path.join(our_path, '../..')
+        dtb_platdata.run_steps(['platdata'], dtb_file, False, output, True,
+                               None, instantiate=True, basedir=basedir)
