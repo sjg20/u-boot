@@ -64,7 +64,7 @@ PhandleInfo = collections.namedtuple('PhandleInfo', ['max_args', 'args'])
 PhandleLink = collections.namedtuple('PhandleLink', ['var_node', 'dev_name'])
 
 
-class DriverInfo:
+class Driver:
     def __init__(self, name, uclass_id, compat):
         self.name = name
         self.uclass_id = uclass_id
@@ -79,7 +79,7 @@ class DriverInfo:
                 self.priv_size == other.priv_size)
 
     def __repr__(self):
-        return ("DriverInfo(name='%s', used=%s, uclass_id='%s', compat=%s, priv_size=%s)" %
+        return ("Driver(name='%s', used=%s, uclass_id='%s', compat=%s, priv_size=%s)" %
                 (self.name, self.used, self.uclass_id, self.compat, self.priv_size))
 
 
@@ -192,7 +192,7 @@ class DtbPlatdata(object):
         _lines: Stashed list of output lines for outputting in the future
         _drivers: Dict of valid driver names found in drivers/
             key: Driver name
-            value: DriverInfo for that driver
+            value: Driver for that driver
         _driver_aliases: Dict that holds aliases for driver names
             key: Driver alias declared with
                 U_BOOT_DRIVER_ALIAS(driver_alias, driver_name)
@@ -203,7 +203,7 @@ class DtbPlatdata(object):
             value: Dict of compatible info in that variable:
                key: Compatible string, e.g. 'rockchip,rk3288-grf'
                value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
-        _compat_to_driver: Maps compatible strings to DriverInfo
+        _compat_to_driver: Maps compatible strings to Driver
         _instantiate: Instantiate devices so they don't need to be bound at
             run-time
     """
@@ -371,6 +371,7 @@ class DtbPlatdata(object):
         Args:
             buff (str): Contents of file
         """
+        pass
 
     def _parse_driver(self, buff):
         """Parse a C file to extract driver information contained within
@@ -379,10 +380,10 @@ class DtbPlatdata(object):
         information.
 
         It updates the following members:
-            _drivers - updated with new DriverInfo records for each driver found
+            _drivers - updated with new Driver records for each driver found
                 in the file
             _of_match - updated with each compatible string found in the file
-            _compat_to_driver - Maps compatible string to DriverInfo
+            _compat_to_driver - Maps compatible string to Driver
 
         Args:
             buff (str): Contents of file
@@ -397,7 +398,7 @@ class DtbPlatdata(object):
 
         # Dict holding driver information collected in this function so far
         #    key: Driver name (C name as in U_BOOT_DRIVER(xxx))
-        #    value: DriverInfo
+        #    value: Driver
         drivers = {}
 
         # Collect the driver name (None means not found yet)
@@ -457,7 +458,7 @@ class DtbPlatdata(object):
                             raise ValueError(
                                 "%s: Unknown compatible var '%s' (found %s)" %
                                 (fn, compat, ','.join(of_match.keys())))
-                        driver = DriverInfo(driver_name, uclass_id,
+                        driver = Driver(driver_name, uclass_id,
                                             of_match[compat])
                         drivers[driver_name] = driver
 
@@ -509,10 +510,10 @@ class DtbPlatdata(object):
         """Scan a driver file to build a list of driver names and aliases
 
         It updates the following members:
-            _drivers - updated with new DriverInfo records for each driver found
+            _drivers - updated with new Driver records for each driver found
                 in the file
             _of_match - updated with each compatible string found in the file
-            _compat_to_driver - Maps compatible string to DriverInfo
+            _compat_to_driver - Maps compatible string to Driver
             _driver_aliases - Maps alias names to driver name
 
         Args
