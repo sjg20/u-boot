@@ -65,18 +65,20 @@ PhandleLink = collections.namedtuple('PhandleLink', ['var_node', 'dev_name'])
 
 
 class Driver:
-    def __init__(self, name, uclass_id, compat):
+    def __init__(self, name):
         self.name = name
-        self.uclass_id = uclass_id
-        self.compat = compat
+        self.uclass_id = None
+        self.compat = None
         self.priv = ''
+        self.platdata = ''
         self.used = False
 
     def __eq__(self, other):
         return (self.name == other.name and
                 self.uclass_id == other.uclass_id and
                 self.compat == other.compat and
-                self.priv == other.priv)
+                self.priv == other.priv and
+                self.platdata == other.platdata)
 
     def __repr__(self):
         return ("Driver(name='%s', used=%s, uclass_id='%s', compat=%s, priv=%s)" %
@@ -463,12 +465,11 @@ class DtbPlatdata(object):
         #    value: Driver
         drivers = {}
 
-        # Collect the driver name (None means not found yet)
-        driver_name = None
+        # Collect the driver info
+        driver = None
         re_driver = re.compile(r'U_BOOT_DRIVER\((.*)\)')
 
         # Collect the uclass ID, e.g. 'UCLASS_SPI'
-        uclass_id = None
         re_id = re.compile(r'\s*\.id\s*=\s*(UCLASS_[A-Z0-9_]+)')
 
         # Collect the compatible string, e.g. 'rockchip,rk3288-grf'
@@ -490,8 +491,9 @@ class DtbPlatdata(object):
         # Matches the references to the udevice_id list
         re_of_match = re.compile('\.of_match\s*=\s*([a-z0-9_]+),')
 
-        # Matches the header/size information for priv
+        # Matches the header/size information for priv, platdata
         re_priv = re.compile('^\s*DM_PRIV\((.*)\)$')
+        re_platdata = re.compile('^\s*DM_PLATDATA\((.*)\)$')
 
         prefix = ''
         for line in buff.splitlines():
@@ -506,22 +508,21 @@ class DtbPlatdata(object):
             driver_match = re_driver.search(line)
 
             # If this line contains U_BOOT_DRIVER()...
-            if driver_name:
+            if driver:
                 id_m = re_id.search(line)
                 id_of_match = re_of_match.search(line)
                 if id_m:
-                    uclass_id = id_m.group(1)
+                    driver.uclass_id = id_m.group(1)
                 elif id_of_match:
                     compat = id_of_match.group(1)
                 elif '};' in line:
-                    if uclass_id and compat:
+                    if driver.uclass_id and compat:
                         if compat not in of_match:
                             raise ValueError(
                                 "%s: Unknown compatible var '%s' (found %s)" %
                                 (fname, compat, ','.join(of_match.keys())))
-                        driver = Driver(driver_name, uclass_id,
-                                            of_match[compat])
-                        drivers[driver_name] = driver
+                        driver.compat = of_match[compat]
+                        drivers[driver.name] = driver
 
                         # This needs to be deterministic, since a driver may
                         # have multiple compatible strings pointing to it.
@@ -536,8 +537,7 @@ class DtbPlatdata(object):
                         # The first is required but the second is not, so just
                         # ignore this.
                         pass
-                    driver_name = None
-                    uclass_id = None
+                    driver = None
                     ids_name = None
                     compat = None
                     compat_dict = {}
@@ -551,6 +551,7 @@ class DtbPlatdata(object):
                     ids_name = None
             elif driver_match:
                 driver_name = driver_match.group(1)
+                driver = Driver(driver_name)
             else:
                 ids_m = re_ids.search(line)
                 if ids_m:
@@ -921,10 +922,14 @@ class DtbPlatdata(object):
         self.buf('\n')
         self.buf('DM_DECL_DRIVER(%s);\n' % struct_name);
         self.buf('\n')
+        driver = self._drivers.get(struct_name)
+        print('not found', struct_name)
+        print('driver', driver)
+        plat_name = self.alloc_priv(driver.platdata, driver.name)
         self.buf('U_BOOT_DEVICE_INST(%s) = {\n' % var_name)
         self.buf('\t.driver\t\t= DM_REF_DRIVER(%s),\n' % struct_name)
         self.buf('\t.name\t\t= "%s",\n' % struct_name)
-        #self.buf('\t.platdata\t\t= &%s%s,\n' % (VAL_PREFIX, var_name))
+        self.buf('\t.platdata\t\t= &%s%s,\n' % (VAL_PREFIX, var_name))
         #self.buf('\t.parent_platdata\t\t= %s,\n' % xx)
         #self.buf('\t.driver_data\t\t= %s,\n' % xx)
         #self.buf('\t.driver_data\t\t= %s,\n' % xx)
@@ -984,6 +989,23 @@ class DtbPlatdata(object):
 
         self.out(''.join(self.get_buf()))
 
+    def alloc_priv(self, info, name):
+        if not info:
+            return None
+        parts = info.split(',')
+        if len(parts) == 2:
+            hdr, size = parts
+        else:
+            hdr = None
+            size = parts[0]
+        var_name = '_%s_priv' % name
+        if hdr:
+            self.buf('#include %s\n' % hdr)
+        section = '__attribute__ ((section (".data")))'
+
+        self.buf('u8 %s[%s] %s;\n' % (var_name, size.strip(), section))
+        return var_name
+
     def _output_uclasses(self):
         uclass_list = set()
         for driver in self._drivers.values():
@@ -1010,21 +1032,7 @@ class DtbPlatdata(object):
                 next_uc_name = self.uclass_id_to_name(uclass_list[seq + 1])
                 next_uc = '&DM_REF_UCLASS_INST(%s)->sibling_node' % next_uc_name
 
-            inline = True
-            priv_name = None
-            if inline and uc_drv.priv:
-                parts = uc_drv.priv.split(',')
-                if len(parts) == 2:
-                    hdr, size = parts
-                else:
-                    hdr = None
-                    size = parts[0]
-                priv_name = '_%s_priv' % uc_drv.name
-                if hdr:
-                    self.buf('#include %s\n' % hdr)
-                section = '__attribute__ ((section (".data")))'
-
-                self.buf('u8 %s[%s] %s;\n' % (priv_name, size.strip(), section))
+            priv_name = self.alloc_priv(uc_drv.priv, uc_drv.name)
 
             uc_name = self.uclass_id_to_name(uclass_id)
             self.buf('UCLASS_INST(%s) = {\n' % uc_name)

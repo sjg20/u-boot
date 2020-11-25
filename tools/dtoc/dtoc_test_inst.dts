@@ -30,16 +30,18 @@
 		longbytearray = [09 0a 0b 0c 0d 0e 0f 10];
 	};
 
-	i2c@0 {
-		compatible = "sandbox,i2c-test";
-		u-boot,dm-pre-reloc;
+	some-bus {
 		#address-cells = <1>;
 		#size-cells = <0>;
-		pmic@9 {
-			compatible = "sandbox,pmic-test";
-			u-boot,dm-pre-reloc;
-			reg = <9>;
-			low-power;
+		compatible = "denx,u-boot-test-bus";
+		reg = <3 1>;
+		ping-expect = <4>;
+		ping-add = <4>;
+		test {
+			compatible = "denx,u-boot-fdt-test";
+			reg = <5>;
+			ping-expect = <5>;
+			ping-add = <5>;
 		};
 	};
 };
