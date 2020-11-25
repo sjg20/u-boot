@@ -69,15 +69,26 @@ class DriverInfo:
 
     Attributes:
         name: Name of driver. For U_BOOT_DRIVER(x) this is 'x'
+        uclass_id: Name of uclass (e.g. 'UCLASS_I2C')
+        compat: Driver data for each compatible string:
+            key: Compatible string, e.g. 'rockchip,rk3288-grf'
+            value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
     """
-    def __init__(self, name):
+    def __init__(self, name, uclass_id, compat):
         self.name = name
+        self.uclass_id = uclass_id
+        self.compat = compat
+        self.priv_size = 0
 
     def __eq__(self, other):
-        return self.name == other.name
+        return (self.name == other.name and
+                self.uclass_id == other.uclass_id and
+                self.compat == other.compat and
+                self.priv_size == other.priv_size)
 
     def __repr__(self):
-        return "DriverInfo(name='%s')" % self.name
+        return ("DriverInfo(name='%s', uclass_id='%s', compat=%s, priv_size=%s)" %
+                (self.name, self.uclass_id, self.compat, self.priv_size))
 
 
 def conv_name_to_c(name):
@@ -180,6 +191,12 @@ class DtbPlatdata():
                 U_BOOT_DRIVER_ALIAS(driver_alias, driver_name)
             value: Driver name declared with U_BOOT_DRIVER(driver_name)
         _drivers_additional: List of additional drivers to use during scanning
+        _of_match: Dict holding information about compatible strings
+            key: Name of struct udevice_id variable
+            value: Dict of compatible info in that variable:
+               key: Compatible string, e.g. 'rockchip,rk3288-grf'
+               value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
+        _compat_to_driver: Maps compatible strings to DriverInfo
     """
     def __init__(self, dtb_fname, include_disabled, warning_disabled,
                  drivers_additional=None):
@@ -193,6 +210,8 @@ class DtbPlatdata():
         self._drivers = {}
         self._driver_aliases = {}
         self._drivers_additional = drivers_additional or []
+        self._of_match = {}
+        self._compat_to_driver = {}
 
     def get_normalized_compat_name(self, node):
         """Get a node's normalized compat name
@@ -331,10 +350,144 @@ class DtbPlatdata():
             return PhandleInfo(max_args, args)
         return None
 
+    def _parse_driver(self, fname, buff):
+        """Parse a C file to extract driver information contained within
+
+        This parses U_BOOT_DRIVER() structs to obtain various pieces of useful
+        information.
+
+        It updates the following members:
+            _drivers - updated with new DriverInfo records for each driver found
+                in the file
+            _of_match - updated with each compatible string found in the file
+            _compat_to_driver - Maps compatible string to DriverInfo
+
+        Args:
+            fname (str): Filename being parsed (used for warnings)
+            buff (str): Contents of file
+
+        Raises:
+            ValueError: Compatible variable is mentioned in .of_match in
+                U_BOOT_DRIVER() but not found in the file
+        """
+        # Dict holding information about compatible strings collected in this
+        # function so far
+        #    key: Name of struct udevice_id variable
+        #    value: Dict of compatible info in that variable:
+        #       key: Compatible string, e.g. 'rockchip,rk3288-grf'
+        #       value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
+        of_match = {}
+
+        # Dict holding driver information collected in this function so far
+        #    key: Driver name (C name as in U_BOOT_DRIVER(xxx))
+        #    value: DriverInfo
+        drivers = {}
+
+        # Collect the driver name (None means not found yet)
+        driver_name = None
+        re_driver = re.compile(r'U_BOOT_DRIVER\((.*)\)')
+
+        # Collect the uclass ID, e.g. 'UCLASS_SPI'
+        uclass_id = None
+        re_id = re.compile(r'\s*\.id\s*=\s*(UCLASS_[A-Z0-9_]+)')
+
+        # Collect the compatible string, e.g. 'rockchip,rk3288-grf'
+        compat = None
+        re_compat = re.compile(r'{\s*.compatible\s*=\s*"(.*)"\s*'
+                               r'(,\s*.data\s*=\s*(.*))?\s*},')
+
+        # This is a dict of compatible strings that were found:
+        #    key: Compatible string, e.g. 'rockchip,rk3288-grf'
+        #    value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
+        compat_dict = {}
+
+        # Holds the var nane of the udevice_id list, e.g.
+        # 'rk3288_syscon_ids_noc' in
+        # static const struct udevice_id rk3288_syscon_ids_noc[] = {
+        ids_name = None
+        re_ids = re.compile(r'struct udevice_id (.*)\[\]\s*=')
+
+        # Matches the references to the udevice_id list
+        re_of_match = re.compile(r'\.of_match\s*=\s*([a-z0-9_]+),')
+
+        # Matches the header/size information for priv
+        re_priv = re.compile(r'^\s*DM_PRIV\((.*)\)$')
+        prefix = ''
+        for line in buff.splitlines():
+            # Handle line continuation
+            if prefix:
+                line = prefix + line
+                prefix = ''
+            if line.endswith('\\'):
+                prefix = line[:-1]
+                continue
+
+            driver_match = re_driver.search(line)
+
+            # If we have seen U_BOOT_DRIVER()...
+            if driver_name:
+                id_m = re_id.search(line)
+                id_of_match = re_of_match.search(line)
+                if id_m:
+                    uclass_id = id_m.group(1)
+                elif id_of_match:
+                    compat = id_of_match.group(1)
+                elif '};' in line:
+                    if uclass_id and compat:
+                        if compat not in of_match:
+                            raise ValueError(
+                                "%s: Unknown compatible var '%s' (found: %s)" %
+                                (fname, compat, ','.join(of_match.keys())))
+                        driver = DriverInfo(driver_name, uclass_id,
+                                            of_match[compat])
+                        drivers[driver_name] = driver
+
+                        # This needs to be deterministic, since a driver may
+                        # have multiple compatible strings pointing to it.
+                        # We record the one earliest in the alphabet so it
+                        # will produce the same result on all machines.
+                        for compat_id in of_match[compat]:
+                            old = self._compat_to_driver.get(compat_id)
+                            if not old or driver.name < old.name:
+                                self._compat_to_driver[compat_id] = driver
+                    else:
+                        # The driver does not have a uclass or compat string.
+                        # The first is required but the second is not, so just
+                        # ignore this.
+                        pass
+                    driver_name = None
+                    uclass_id = None
+                    ids_name = None
+                    compat = None
+                    compat_dict = {}
+
+            elif ids_name:
+                compat_m = re_compat.search(line)
+                if compat_m:
+                    compat_dict[compat_m.group(1)] = compat_m.group(3)
+                elif '};' in line:
+                    of_match[ids_name] = compat_dict
+                    ids_name = None
+            elif driver_match:
+                driver_name = driver_match.group(1)
+            else:
+                ids_m = re_ids.search(line)
+                if ids_m:
+                    ids_name = ids_m.group(1)
+
+        # Make the updates based on what we found
+        self._drivers.update(drivers)
+        self._of_match.update(of_match)
+
     def scan_driver(self, fname):
         """Scan a driver file to build a list of driver names and aliases
 
-        This procedure will populate self._drivers and self._driver_aliases
+        It updates the following members:
+            _drivers - updated with new DriverInfo records for each driver found
+                in the file
+            _of_match - updated with each compatible string found in the file
+            _compat_to_driver - Maps compatible string to DriverInfo
+            _driver_aliases - Maps alias names to driver name
 
         Args
             fname: Driver filename to scan
@@ -347,12 +500,10 @@ class DtbPlatdata():
                 print("Skipping file '%s' due to unicode error" % fname)
                 return
 
-            # The following re will search for driver names declared as
-            # U_BOOT_DRIVER(driver_name)
-            drivers = re.findall(r'U_BOOT_DRIVER\((.*)\)', buff)
-
-            for driver in drivers:
-                self._drivers[driver] = DriverInfo(driver)
+            # If this file has any U_BOOT_DRIVER() declarations, process it to
+            # obtain driver information
+            if 'U_BOOT_DRIVER' in buff:
+                self._parse_driver(fname, buff)
 
             # The following re will search for driver aliases declared as
             # U_BOOT_DRIVER_ALIAS(alias, driver_name)
