@@ -371,7 +371,64 @@ class DtbPlatdata(object):
         Args:
             buff (str): Contents of file
         """
-        pass
+        uc_drivers = {}
+
+        # Collect the driver name (None means not found yet)
+        driver_name = None
+        re_driver = re.compile(r'UCLASS_DRIVER\((.*)\)')
+
+        # Matches the header/size information for tinydev
+        re_tiny_priv = re.compile('^\s*DM_TINY_PRIV\((.*)\)$')
+        tiny_name = None
+
+        prefix = ''
+        for line in buff.splitlines():
+            # Handle line continuation
+            if prefix:
+                line = prefix + line
+                prefix = ''
+            if line.endswith('\\'):
+                prefix = line[:-1]
+                continue
+
+            driver_match = re_driver.search(line)
+
+            # If we have seen U_BOOT_DRIVER()...
+            if driver_name:
+                    tiny_priv = re_tiny_priv.match(line)
+                    if tiny_priv:
+                        drivers[tiny_name].priv_size = tiny_priv.group(1)
+                elif '};' in line:
+                    if uclass_id and compat:
+                        if compat not in of_match:
+                            raise ValueError(
+                                "%s: Unknown compatible var '%s' (found %s)" %
+                                (fn, compat, ','.join(of_match.keys())))
+                        driver = Driver(driver_name, uclass_id,
+                                            of_match[compat])
+                        drivers[driver_name] = driver
+
+                        # This needs to be deterministic, since a driver may
+                        # have multiple compatible strings pointing to it.
+                        # We record the one earliest in the alphabet so it
+                        # will produce the same result on all machines.
+                        for id in of_match[compat]:
+                            old = self._compat_to_driver.get(id)
+                            if not old or driver.name < old.name:
+                                self._compat_to_driver[id] = driver
+                    else:
+                        # The driver does not have a uclass or compat string.
+                        # The first is required but the second is not, so just
+                        # ignore this.
+                        pass
+                    driver_name = None
+                    uclass_id = None
+                    ids_name = None
+                    compat = None
+                    compat_dict = {}
+            elif driver_match:
+                driver_name = driver_match.group(1)
+
 
     def _parse_driver(self, buff):
         """Parse a C file to extract driver information contained within
@@ -430,7 +487,6 @@ class DtbPlatdata(object):
 
         # Matches the header/size information for priv
         re_priv = re.compile('^\s*DM_PRIV\((.*)\)$')
-        drv_name = None
 
         prefix = ''
         for line in buff.splitlines():
@@ -444,7 +500,7 @@ class DtbPlatdata(object):
 
             driver_match = re_driver.search(line)
 
-            # If we have seen U_BOOT_DRIVER()...
+            # If this line contains U_BOOT_DRIVER()...
             if driver_name:
                 id_m = re_id.search(line)
                 id_of_match = re_of_match.search(line)
@@ -481,13 +537,6 @@ class DtbPlatdata(object):
                     compat = None
                     compat_dict = {}
 
-            # If we have seen U_BOOT_DRIVER()...
-            elif drv_name:
-                priv = re_priv.match(line)
-                if priv:
-                    drivers[drv_name].priv_size = priv.group(1)
-                elif '};' in line:
-                    drv_name = None
             elif ids_name:
                 compat_m = re_compat.search(line)
                 if compat_m:
