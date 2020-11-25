@@ -92,7 +92,7 @@ U_BOOT_DRIVER(denx_u_boot_test_bus) = {
 	.probe	= testbus_drv_probe,
 	.child_post_bind = testbus_child_post_bind,
 	DM_PRIV(<dm/test.h>,sizeof(struct dm_test_priv))
-	.platdata_auto_alloc_size = sizeof(struct dm_test_pdata),
+	DM_PLATDATA(<dm/test.h>,.sizeof(struct dm_test_pdata))
 	.per_child_auto_alloc_size = sizeof(struct dm_test_parent_data),
 	.per_child_platdata_auto_alloc_size =
 			sizeof(struct dm_test_parent_platdata),
@@ -167,8 +167,8 @@ U_BOOT_DRIVER(denx_u_boot_fdt_test) = {
 	.ofdata_to_platdata = testfdt_ofdata_to_platdata,
 	.probe	= testfdt_drv_probe,
 	.ops	= &test_ops,
-	.priv_auto_alloc_size = sizeof(struct dm_test_priv),
-	.platdata_auto_alloc_size = sizeof(struct dm_test_pdata),
+	DM_PRIV(<dm/test.h>,sizeof(struct dm_test_priv))
+	DM_PLATDATA(<dm/test.h>,sizeof(struct dm_test_pdata))
 };
 
 static const struct udevice_id testfdt1_ids[] = {

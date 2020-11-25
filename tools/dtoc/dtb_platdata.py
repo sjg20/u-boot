@@ -512,9 +512,11 @@ class DtbPlatdata(object):
                 id_m = re_id.search(line)
                 id_of_match = re_of_match.search(line)
                 priv_m = re_priv.match(line)
+                platdata_m = re_platdata.match(line)
                 if priv_m:
                     driver.priv = priv_m.group(1)
-                    print('priv', driver.priv)
+                elif platdata_m:
+                    driver.platdata = platdata_m.group(1)
                 elif id_m:
                     driver.uclass_id = id_m.group(1)
                 elif id_of_match:
@@ -934,7 +936,10 @@ class DtbPlatdata(object):
         self.buf('U_BOOT_DEVICE_INST(%s) = {\n' % var_name)
         self.buf('\t.driver\t\t= DM_REF_DRIVER(%s),\n' % struct_name)
         self.buf('\t.name\t\t= "%s",\n' % struct_name)
-        self.buf('\t.platdata\t\t= &%s%s,\n' % (VAL_PREFIX, var_name))
+        if plat_name:
+            self.buf('\t.platdata\t\t= %s,\n' % plat_name)
+        else:
+            self.buf('\t.platdata\t\t= &%s%s,\n' % (VAL_PREFIX, var_name))
         if priv_name:
             self.buf('\t.priv\t\t= %s,\n' % priv_name)
         #self.buf('\t.parent_platdata\t\t= %s,\n' % xx)
