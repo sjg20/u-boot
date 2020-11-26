@@ -92,10 +92,9 @@ U_BOOT_DRIVER(denx_u_boot_test_bus) = {
 	.probe	= testbus_drv_probe,
 	.child_post_bind = testbus_child_post_bind,
 	DM_PRIV(<dm/test.h>,struct dm_test_priv)
-	DM_PLATDATA(<dm/test.h>,.struct dm_test_pdata)
-	.per_child_auto_alloc_size = sizeof(struct dm_test_parent_data),
-	.per_child_platdata_auto_alloc_size =
-			sizeof(struct dm_test_parent_platdata),
+	DM_PLATDATA(<dm/test.h>,struct dm_test_pdata)
+	DM_CHILD_PRIV(<dm/test.h>,struct dm_test_parent_data)
+	DM_CHILD_PLATDATA(<dm/test.h>,struct dm_test_parent_platdata)
 	.child_pre_probe = testbus_child_pre_probe,
 	.child_post_remove = testbus_child_post_remove,
 };

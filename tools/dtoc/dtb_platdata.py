@@ -71,6 +71,8 @@ class Driver:
         self.compat = None
         self.priv = ''
         self.platdata = ''
+        self.child_platdata = ''
+        self.child_priv = ''
         self.used = False
 
     def __eq__(self, other):
@@ -494,6 +496,8 @@ class DtbPlatdata(object):
         # Matches the header/size information for priv, platdata
         re_priv = re.compile('^\s*DM_PRIV\((.*)\)$')
         re_platdata = re.compile('^\s*DM_PLATDATA\((.*)\)$')
+        re_child_platdata = re.compile('^\s*DM_CHILD_PLATDATA\((.*)\)$')
+        re_child_priv = re.compile('^\s*DM_CHILD_PRIV\((.*)\)$')
 
         prefix = ''
         for line in buff.splitlines():
@@ -513,10 +517,16 @@ class DtbPlatdata(object):
                 id_of_match = re_of_match.search(line)
                 priv_m = re_priv.match(line)
                 platdata_m = re_platdata.match(line)
+                cplatdata_m = re_child_platdata.match(line)
+                cpriv_m = re_child_priv.match(line)
                 if priv_m:
                     driver.priv = priv_m.group(1)
                 elif platdata_m:
                     driver.platdata = platdata_m.group(1)
+                elif cplatdata_m:
+                    driver.child_platdata = cplatdata_m.group(1)
+                elif cpriv_m:
+                    driver.child_priv = cpriv_m.group(1)
                 elif id_m:
                     driver.uclass_id = id_m.group(1)
                 elif id_of_match:
@@ -915,7 +925,7 @@ class DtbPlatdata(object):
         self.buf('};\n')
         self.buf('\n')
 
-    def prep_priv(self, info, name):
+    def prep_priv(self, info, name, suffix):
         if not info:
             return None
         parts = info.split(',')
@@ -924,14 +934,14 @@ class DtbPlatdata(object):
         else:
             hdr = None
             struc = parts[0]
-        var_name = '_%s_priv' % name
+        var_name = '_%s%s' % (name, suffix)
         if hdr:
             self.buf('#include %s\n' % hdr)
         section = '__attribute__ ((section (".data")))'
         return var_name, struc, section
 
-    def alloc_priv(self, info, name):
-        result = self.prep_priv(info, name)
+    def alloc_priv(self, info, name, suffix='_priv'):
+        result = self.prep_priv(info, name, suffix)
         if not result:
             return None
         var_name, struc, section = result
@@ -939,7 +949,7 @@ class DtbPlatdata(object):
         return var_name
 
     def alloc_plat(self, info, name, dt_platdata):
-        result = self.prep_priv(info, name)
+        result = self.prep_priv(info, name, '_plat')
         if not result:
             return None
         var_name, struc, section = result
@@ -949,7 +959,8 @@ class DtbPlatdata(object):
         self.buf('} %s;\n' % section)
         return '&' + var_name
 
-    def _declare_device_inst(self, driver, var_name, struct_name, node_parent):
+    def _declare_device_inst(self, driver, var_name, struct_name,
+			     parent_driver):
         """Add a device instance declaration to the output
 
         This declares a U_BOOT_DEVICE_INST() for the device being processed
@@ -957,26 +968,35 @@ class DtbPlatdata(object):
         Args:
             var_name: C name for the node
             struct_name: Name for the dt struct associated with the node
-            node_parent: Parent of the node (or None if none)
+            parent_driver: Driver for the node's parent, or None if none
         """
-        self.buf('\n')
         self.buf('DM_DECL_DRIVER(%s);\n' % struct_name);
         self.buf('\n')
         plat_name = self.alloc_plat(driver.platdata, driver.name, var_name)
         priv_name = self.alloc_priv(driver.priv, driver.name)
+        parent_plat_name = None
+        parent_priv_name = None
+        if parent_driver:
+            parent_plat_name = self.alloc_priv(parent_driver.child_platdata,
+                                               driver.name, '_parent_plat')
+            parent_priv_name = self.alloc_priv(parent_driver.child_priv,
+                                               driver.name, '_parent_priv')
         self.buf('U_BOOT_DEVICE_INST(%s) = {\n' % var_name)
         self.buf('\t.driver\t\t= DM_REF_DRIVER(%s),\n' % struct_name)
         self.buf('\t.name\t\t= "%s",\n' % struct_name)
         if plat_name:
             self.buf('\t.platdata\t\t= %s,\n' % plat_name)
+        else:
+            self.buf('\t.platdata\t\t= &%s%s,\n' % (VAL_PREFIX, var_name))
         if priv_name:
             self.buf('\t.priv\t\t= %s,\n' % priv_name)
-        #self.buf('\t.parent_platdata\t\t= %s,\n' % xx)
-        #self.buf('\t.driver_data\t\t= %s,\n' % xx)
-        #self.buf('\t.driver_data\t\t= %s,\n' % xx)
-        #self.buf('\t.driver_data\t\t= %s,\n' % xx)
+        if parent_plat_name:
+            self.buf('\t.parent_platdata\t\t= %s,\n' % parent_plat_name)
+        if parent_priv_name:
+            self.buf('\t.parent_priv\t\t= %s,\n' % parent_priv_name)
         self.buf('};\n')
         self.buf('\n')
+        return parent_plat_name
 
     def _output_prop(self, node, prop):
         """Output a line containing the value of a struct member
@@ -1020,17 +1040,29 @@ class DtbPlatdata(object):
         struct_name, _ = self.get_normalized_compat_name(node)
         var_name = conv_name_to_c(node.name)
 
-        self.buf('/* Node %s index %d */\n' % (node.path, node.idx))
-
         driver = self._drivers.get(struct_name)
         if not driver:
             raise ValueError("Cannot parse/find driver for '%s'" % struct_name)
 
-        if not driver.platdata:
+        parent_driver = None
+        if node.parent in self._valid_nodes:
+            parent_struct_name, _ = self.get_normalized_compat_name(node.parent)
+            parent_driver = self._drivers.get(parent_struct_name)
+            if not parent_driver:
+                raise ValueError("Cannot parse/find driver for '%s'" %
+                                parent_struct_name)
+
+        self.buf('/*\n')
+        self.buf(' * Node %s index %d\n' % (node.path, node.idx))
+        self.buf(' * driver %s parent %s\n' % (driver.name,
+                 parent_driver.name if parent_driver else 'None'))
+        self.buf('*/\n')
+
+        if not self._instantiate or not driver.platdata:
             self._output_values(var_name, struct_name, node)
         if self._instantiate:
             self._declare_device_inst(driver, var_name, struct_name,
-                                      node.parent)
+                                      parent_driver)
         else:
             self._declare_device(var_name, struct_name, node.parent)
 
