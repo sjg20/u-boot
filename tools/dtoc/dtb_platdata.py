@@ -102,6 +102,12 @@ class UclassDriver:
         uclass_id: Uclass ID, e.g. 'UCLASS_I2C'
         priv: Information about private data, e.g.
             '<i2c.h>, sizeof(struct i2c_priv)'
+        per_dev_priv (str): Information about per-device private data
+        per_dev_platdata (str): Information about per-device platdata
+        devs (list): List of devices in this uclass, each a Node
+        node_refs (dict): References in the linked list of devices:
+            key (it): Sequence number (0=first, n-1=last, -1=head, n=tail)
+            value (str): Reference to the device at that position
     """
     def __init__(self, name):
         self.name = name
@@ -109,6 +115,8 @@ class UclassDriver:
         self.priv = ''
         self.per_dev_priv = ''
         self.per_dev_platdata = ''
+        self.devs = []
+        self.node_refs = {}
 
     def __eq__(self, other):
         return (self.name == other.name and
@@ -116,8 +124,8 @@ class UclassDriver:
                 self.priv == other.priv)
 
     def __repr__(self):
-        return ("UclassDriver(name='%s', used=%s, uclass_id='%s', compat=%s, priv=%s)" %
-                (self.name, self.used, self.uclass_id, self.compat, self.priv))
+        return ("UclassDriver(name='%s', uclass_id='%s')" %
+                (self.name, self.uclass_id))
 
 
 def conv_name_to_c(name):
@@ -1038,6 +1046,7 @@ class DtbPlatdata(object):
             self.buf('\t.uclass_priv = %s,\n' % uclass_priv_name)
         if parent_priv_name:
             self.buf('\t.parent_priv\t= %s,\n' % parent_priv_name)
+        self.list_node('uclass_node', uclass.node_refs, node.uclass_seq)
         self.buf('};\n')
         self.buf('\n')
         return parent_plat_name
@@ -1134,6 +1143,9 @@ class DtbPlatdata(object):
             if not uc_drv:
                 raise ValueError('Cannot find uclass driver for %s (have %s)'
                                  % (uc_drv, ', '.join(self._uclass.keys())))
+            ref = '&DM_REF_UCLASS_INST(%s)->dev_head' % uc_name
+            uc_drv.node_refs[-1] = ref
+            uc_drv.node_refs[len(uc_drv.devs)] = ref
 
             priv_name = self.alloc_priv(uc_drv.priv, uc_drv.name)
 
@@ -1143,6 +1155,13 @@ class DtbPlatdata(object):
                 self.buf('\t.priv\t\t= %s,\n' % priv_name)
             self.buf('\t.uc_drv\t\t= DM_REF_UCLASS_DRIVER(%s),\n' % uc_name)
             self.list_node('sibling_node', uclass_node, seq)
+            if uc_drv.devs:
+                self.buf('\t.dev_head\t= {\n')
+                last = uc_drv.devs[-1]
+                first = uc_drv.devs[0]
+                self.buf('\t\t.prev = &%s->uclass_node,\n' % last.dev_ref)
+                self.buf('\t\t.next = &%s->uclass_node,\n' % first.dev_ref)
+                self.buf('\t},\n')
             self.buf('};\n')
             self.buf('\n')
 
@@ -1173,11 +1192,9 @@ class DtbPlatdata(object):
             if driver:
                 driver.used = True
 
-        if self._instantiate:
-            self._output_uclasses()
-
         for node in nodes_to_output:
             self.buf('U_BOOT_DEVICE_DECL(%s);\n' % conv_name_to_c(node.name))
+            node.dev_ref = 'U_BOOT_DEVICE_REF(%s)' % conv_name_to_c(node.name)
             struct_name, _ = self.get_normalized_compat_name(node)
             driver = self._drivers.get(struct_name)
             if not driver:
@@ -1189,6 +1206,9 @@ class DtbPlatdata(object):
                 raise ValueError("Cannot parse/find uclass '%s' for driver '%s'" %
                                 (driver.uclass_id, struct_name))
             node.uclass = uclass
+            node.uclass_seq = len(node.uclass.devs)
+            node.uclass.devs.append(node)
+            uclass.node_refs[node.uclass_seq] = '&%s->uclass_node' % node.dev_ref
             parent_driver = None
             parent_struct_name = None
             if node.parent in self._valid_nodes:
@@ -1199,8 +1219,10 @@ class DtbPlatdata(object):
                     raise ValueError("Cannot parse/find driver for '%s'" %
                                     parent_struct_name)
             node.parent_driver = parent_driver
-
         self.buf('\n')
+
+        if self._instantiate:
+            self._output_uclasses()
 
         # Keep outputing nodes until there is none left
         while nodes_to_output:
