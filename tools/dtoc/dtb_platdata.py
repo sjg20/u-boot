@@ -65,6 +65,13 @@ PhandleLink = collections.namedtuple('PhandleLink', ['var_node', 'dev_name'])
 
 
 class Driver:
+    """Information about a driver in U-Boot
+
+    Attributes:
+        compat: Driver data for each compatible string:
+            key: Compatible string, e.g. 'rockchip,rk3288-grf'
+            value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
+    """
     def __init__(self, name):
         self.name = name
         self.uclass_id = None
@@ -100,6 +107,8 @@ class UclassDriver:
         self.name = name
         self.uclass_id = None
         self.priv = ''
+        self.per_dev_priv = ''
+        self.per_dev_platdata = ''
 
     def __eq__(self, other):
         return (self.name == other.name and
@@ -424,12 +433,18 @@ class DtbPlatdata(object):
 
             # If we have seen UCLASS_DRIVER()...
             if driver:
-                id_m = re_id.search(line)
-                priv_m = re_priv.match(line)
-                if id_m:
-                    driver.uclass_id = id_m.group(1)
-                elif priv_m:
-                    driver.priv = priv_m.group(1)
+                m_id = re_id.search(line)
+                m_priv = re_priv.match(line)
+                m_per_dev_priv = re_per_device_priv.match(line)
+                m_per_dev_plat = re_per_device_plat.match(line)
+                if m_id:
+                    driver.uclass_id = m_id.group(1)
+                elif m_priv:
+                    driver.priv = m_priv.group(1)
+                elif m_per_dev_priv:
+                    driver.per_dev_priv = m_per_dev_priv.group(1)
+                elif m_per_dev_plat:
+                    driver.per_dev_platdata = m_per_dev_plat.group(1)
                 elif '};' in line:
                     if not driver.uclass_id:
                         raise ValueError(
@@ -483,7 +498,7 @@ class DtbPlatdata(object):
         # Collect the compatible string, e.g. 'rockchip,rk3288-grf'
         compat = None
         re_compat = re.compile('{\s*.compatible\s*=\s*"(.*)"\s*'
-                                    '(,\s*.data\s*=\s*(.*))?\s*},')
+                                    '(,\s*.data\s*=\s*(\S*))?\s*},')
 
         # This is a dict of compatible strings that were found:
         #    key: Compatible string, e.g. 'rockchip,rk3288-grf'
@@ -519,24 +534,24 @@ class DtbPlatdata(object):
 
             # If this line contains U_BOOT_DRIVER()...
             if driver:
-                id_m = re_id.search(line)
-                id_of_match = re_of_match.search(line)
-                priv_m = re_priv.match(line)
-                platdata_m = re_platdata.match(line)
-                cplatdata_m = re_child_platdata.match(line)
-                cpriv_m = re_child_priv.match(line)
-                if priv_m:
-                    driver.priv = priv_m.group(1)
-                elif platdata_m:
-                    driver.platdata = platdata_m.group(1)
-                elif cplatdata_m:
-                    driver.child_platdata = cplatdata_m.group(1)
-                elif cpriv_m:
-                    driver.child_priv = cpriv_m.group(1)
-                elif id_m:
-                    driver.uclass_id = id_m.group(1)
-                elif id_of_match:
-                    compat = id_of_match.group(1)
+                m_id = re_id.search(line)
+                m_of_match = re_of_match.search(line)
+                m_priv = re_priv.match(line)
+                m_platdata = re_platdata.match(line)
+                m_cplatdata = re_child_platdata.match(line)
+                m_cpriv = re_child_priv.match(line)
+                if m_priv:
+                    driver.priv = m_priv.group(1)
+                elif m_platdata:
+                    driver.platdata = m_platdata.group(1)
+                elif m_cplatdata:
+                    driver.child_platdata = m_cplatdata.group(1)
+                elif m_cpriv:
+                    driver.child_priv = m_cpriv.group(1)
+                elif m_id:
+                    driver.uclass_id = m_id.group(1)
+                elif m_of_match:
+                    compat = m_of_match.group(1)
                 elif '};' in line:
                     if driver.uclass_id and compat:
                         if compat not in of_match:
@@ -966,7 +981,7 @@ class DtbPlatdata(object):
         return '&' + var_name
 
     def _declare_device_inst(self, driver, var_name, struct_name,
-			     parent_driver, node):
+			     parent_driver, parent_struct_name, node, uclass):
         """Add a device instance declaration to the output
 
         This declares a U_BOOT_DEVICE_INST() for the device being processed
@@ -988,6 +1003,9 @@ class DtbPlatdata(object):
                                                driver.name, '_parent_plat')
             parent_priv_name = self.alloc_priv(parent_driver.child_priv,
                                                driver.name, '_parent_priv')
+        uclass_plat_name = self.alloc_priv(uclass.per_dev_platdata, driver.name)
+        uclass_priv_name = self.alloc_priv(uclass.per_dev_priv, driver.name)
+
         self.buf('U_BOOT_DEVICE_INST(%s) = {\n' % var_name)
         self.buf('\t.driver\t\t= DM_REF_DRIVER(%s),\n' % struct_name)
         self.buf('\t.name\t\t= "%s",\n' % struct_name)
@@ -997,8 +1015,25 @@ class DtbPlatdata(object):
             self.buf('\t.platdata\t= &%s%s,\n' % (VAL_PREFIX, var_name))
         if parent_plat_name:
             self.buf('\t.parent_platdata = %s,\n' % parent_plat_name)
+        if uclass_plat_name:
+            self.buf('\t.uclass_platdata = %s,\n' % uclass_plat_name)
+        driver_date = None
+
+        compat_list = node.props['compatible'].value
+        if not isinstance(compat_list, list):
+            compat_list = [compat_list]
+        for compat in compat_list:
+            driver_data = driver.compat.get(compat)
+            if driver_data:
+                self.buf('\t.driver_data\t= %s,\n' % driver_data)
+                break
         if parent_priv_name:
             self.buf('\t.parent_priv\t= %s,\n' % parent_priv_name)
+        if uclass_priv_name:
+            self.buf('\t.uclass_priv = %s,\n' % uclass_priv_name)
+        if parent_struct_name:
+            self.buf('\t.parent\t\t= DM_REF_DEVICE_INST(%s);\n' %
+                     parent_struct_name)
         if priv_name:
             self.buf('\t.priv\t\t= %s,\n' % priv_name)
         self.buf('};\n')
@@ -1052,12 +1087,18 @@ class DtbPlatdata(object):
             raise ValueError("Cannot parse/find driver for '%s'" % struct_name)
 
         parent_driver = None
+        parent_struct_name = None
         if node.parent in self._valid_nodes:
             parent_struct_name, _ = self.get_normalized_compat_name(node.parent)
             parent_driver = self._drivers.get(parent_struct_name)
             if not parent_driver:
                 raise ValueError("Cannot parse/find driver for '%s'" %
                                 parent_struct_name)
+
+        uclass = self._uclass.get(driver.uclass_id)
+        if not uclass:
+            raise ValueError("Cannot parse/find uclass '%s' for driver '%s'" %
+                             (driver.uclass_id, struct_name))
 
         self.buf('/*\n')
         self.buf(' * Node %s index %d\n' % (node.path, node.idx))
@@ -1069,7 +1110,8 @@ class DtbPlatdata(object):
             self._output_values(var_name, struct_name, node)
         if self._instantiate:
             self._declare_device_inst(driver, var_name, struct_name,
-                                      parent_driver, node)
+                                      parent_driver, parent_struct_name, node,
+                                      uclass)
         else:
             self._declare_device(var_name, struct_name, node.parent)
 

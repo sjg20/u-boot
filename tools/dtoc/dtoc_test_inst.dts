@@ -38,7 +38,7 @@
 		ping-expect = <4>;
 		ping-add = <4>;
 		test {
-			compatible = "denx,u-boot-fdt-test";
+			compatible = "denx,u-boot-fdt-test", "google,another-fdt-test";
 			reg = <5>;
 			ping-expect = <5>;
 			ping-add = <5>;
