@@ -130,7 +130,9 @@ enum {
  * @uclass_node: Used by uclass to link its devices
  * @child_head: List of children of this device
  * @sibling_node: Next device in parent's child_haed list
- * @flags: Flags for this device DM_FLAG_...
+ * @flags: Flags for this device DM_FLAG_... These start at 0 initially and are
+ *	used to track the device's state. They are unrelated to the driver
+ *	flags.
  * @req_seq: Requested sequence number for this device (-1 = any)
  * @seq: Allocated sequence number for this device (-1 = none). This is set up
  * when the device is probed and will be unique within the device's uclass.
