@@ -630,9 +630,6 @@ class DtbPlatdata(object):
             for fname in filenames:
                 if not fname.endswith('.c'):
                     continue
-                #if 'drivers/misc' in dirpath:
-                if fname == 'spltest_sandbox.c':
-                    print('fname', fname)
                 self.scan_driver(dirpath + '/' + fname)
 
         for fname in self._drivers_additional:
@@ -945,22 +942,25 @@ class DtbPlatdata(object):
         if not result:
             return None
         var_name, struc, section = result
-        self.buf('u8 %s[sizeof(%s)] %s;\n' % (var_name, struc.strip(), section))
+        self.buf('u8 %s[sizeof(%s)]\n\t%s;\n' % (var_name, struc.strip(),
+                                                 section))
         return var_name
 
-    def alloc_plat(self, info, name, dt_platdata):
+    def alloc_plat(self, info, name, dt_platdata, node):
         result = self.prep_priv(info, name, '_plat')
         if not result:
             return None
         var_name, struc, section = result
         self.buf('%s %s = {\n' % (struc.strip(), var_name))
         self.buf('\t.dtplat = {\n')
-        self.buf('\t};\n')
+        for pname in sorted(node.props):
+            self._output_prop(node, node.props[pname], 2)
+        self.buf('\t},\n')
         self.buf('} %s;\n' % section)
         return '&' + var_name
 
     def _declare_device_inst(self, driver, var_name, struct_name,
-			     parent_driver):
+			     parent_driver, node):
         """Add a device instance declaration to the output
 
         This declares a U_BOOT_DEVICE_INST() for the device being processed
@@ -972,7 +972,8 @@ class DtbPlatdata(object):
         """
         self.buf('DM_DECL_DRIVER(%s);\n' % struct_name);
         self.buf('\n')
-        plat_name = self.alloc_plat(driver.platdata, driver.name, var_name)
+        plat_name = self.alloc_plat(driver.platdata, driver.name, var_name,
+                                    node)
         priv_name = self.alloc_priv(driver.priv, driver.name)
         parent_plat_name = None
         parent_priv_name = None
@@ -985,20 +986,20 @@ class DtbPlatdata(object):
         self.buf('\t.driver\t\t= DM_REF_DRIVER(%s),\n' % struct_name)
         self.buf('\t.name\t\t= "%s",\n' % struct_name)
         if plat_name:
-            self.buf('\t.platdata\t\t= %s,\n' % plat_name)
+            self.buf('\t.platdata\t= %s,\n' % plat_name)
         else:
-            self.buf('\t.platdata\t\t= &%s%s,\n' % (VAL_PREFIX, var_name))
+            self.buf('\t.platdata\t= &%s%s,\n' % (VAL_PREFIX, var_name))
         if priv_name:
             self.buf('\t.priv\t\t= %s,\n' % priv_name)
         if parent_plat_name:
-            self.buf('\t.parent_platdata\t\t= %s,\n' % parent_plat_name)
+            self.buf('\t.parent_platdata = %s,\n' % parent_plat_name)
         if parent_priv_name:
-            self.buf('\t.parent_priv\t\t= %s,\n' % parent_priv_name)
+            self.buf('\t.parent_priv\t= %s,\n' % parent_priv_name)
         self.buf('};\n')
         self.buf('\n')
         return parent_plat_name
 
-    def _output_prop(self, node, prop):
+    def _output_prop(self, node, prop, tabs=1):
         """Output a line containing the value of a struct member
 
         Args:
@@ -1008,7 +1009,7 @@ class DtbPlatdata(object):
         if prop.name in PROP_IGNORE_LIST or prop.name[0] == '#':
             return
         member_name = conv_name_to_c(prop.name)
-        self.buf('\t%s= ' % tab_to(3, '.' + member_name))
+        self.buf('%s%s= ' % ('\t' * tabs, tab_to(3, '.' + member_name)))
 
         # Special handling for lists
         if isinstance(prop.value, list):
@@ -1062,7 +1063,7 @@ class DtbPlatdata(object):
             self._output_values(var_name, struct_name, node)
         if self._instantiate:
             self._declare_device_inst(driver, var_name, struct_name,
-                                      parent_driver)
+                                      parent_driver, node)
         else:
             self._declare_device(var_name, struct_name, node.parent)
 
