@@ -1047,6 +1047,11 @@ class DtbPlatdata(object):
         if parent_priv_name:
             self.buf('\t.parent_priv\t= %s,\n' % parent_priv_name)
         self.list_node('uclass_node', uclass.node_refs, node.uclass_seq)
+        if node.parent in self._valid_nodes:
+            self.list_node('sibling_node', node.parent.child_refs,
+                           node.parent_seq)
+        #if node.child_devs:
+
         self.buf('};\n')
         self.buf('\n')
         return parent_plat_name
@@ -1140,6 +1145,7 @@ class DtbPlatdata(object):
 
         for seq, uclass_id in enumerate(uclass_list):
             uc_drv = self._uclass.get(uclass_id)
+            uc_name = self.uclass_id_to_name(uclass_id)
             if not uc_drv:
                 raise ValueError('Cannot find uclass driver for %s (have %s)'
                                  % (uc_drv, ', '.join(self._uclass.keys())))
@@ -1149,12 +1155,12 @@ class DtbPlatdata(object):
 
             priv_name = self.alloc_priv(uc_drv.priv, uc_drv.name)
 
-            uc_name = self.uclass_id_to_name(uclass_id)
             self.buf('UCLASS_INST(%s) = {\n' % uc_name)
             if priv_name:
                 self.buf('\t.priv\t\t= %s,\n' % priv_name)
             self.buf('\t.uc_drv\t\t= DM_REF_UCLASS_DRIVER(%s),\n' % uc_name)
             self.list_node('sibling_node', uclass_node, seq)
+            #self.list_head('dev_head', 'uclass_node', uc_drv.devs)
             if uc_drv.devs:
                 self.buf('\t.dev_head\t= {\n')
                 last = uc_drv.devs[-1]
@@ -1191,6 +1197,8 @@ class DtbPlatdata(object):
             driver = self._drivers.get(struct_name)
             if driver:
                 driver.used = True
+            node.child_devs = []
+            node.child_refs = {}
 
         for node in nodes_to_output:
             self.buf('U_BOOT_DEVICE_DECL(%s);\n' % conv_name_to_c(node.name))
@@ -1208,7 +1216,9 @@ class DtbPlatdata(object):
             node.uclass = uclass
             node.uclass_seq = len(node.uclass.devs)
             node.uclass.devs.append(node)
-            uclass.node_refs[node.uclass_seq] = '&%s->uclass_node' % node.dev_ref
+            uclass.node_refs[node.uclass_seq] = \
+                '&%s->uclass_node' % node.dev_ref
+
             parent_driver = None
             parent_struct_name = None
             if node.parent in self._valid_nodes:
@@ -1218,8 +1228,17 @@ class DtbPlatdata(object):
                 if not parent_driver:
                     raise ValueError("Cannot parse/find driver for '%s'" %
                                     parent_struct_name)
+                node.parent_seq = len(node.parent.child_devs)
+                node.parent.child_devs.append(node)
+                node.parent.child_refs[node.parent_seq] = \
+                    '&%s->sibling_node' % node.dev_ref
             node.parent_driver = parent_driver
         self.buf('\n')
+
+        for node in nodes_to_output:
+            ref = '&%s->child_head' % node.dev_ref
+            node.child_refs[-1] = ref
+            node.child_refs[len(node.child_devs)] = ref
 
         if self._instantiate:
             self._output_uclasses()
