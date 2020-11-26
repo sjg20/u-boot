@@ -103,6 +103,8 @@ UCLASS_DRIVER(testbus) = {
 	.name		= "testbus",
 	.id		= UCLASS_TEST_BUS,
 	.flags		= DM_UC_FLAG_SEQ_ALIAS,
+	DM_PER_DEVICE_PRIV(<dm/tets.h>,struct dm_test_uclass_perdev_priv)
+	DM_PER_DEVICE_PLATDATA(<dm/tets.h>,struct dm_test_perdev_uc_pdata)
 	.child_pre_probe = testbus_child_pre_probe_uclass,
 	.child_post_probe = testbus_child_post_probe_uclass,
 };

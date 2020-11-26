@@ -404,6 +404,12 @@ class DtbPlatdata(object):
         # Matches the header/size information for uclass-private data
         re_priv = re.compile('^\s*DM_PRIV\((.*)\)$')
 
+        # Matches the header/size information for per-device uclass data
+        re_per_device_priv = re.compile('^\s*DM_PER_DEVICE_PRIV\((.*)\)$')
+
+        # Matches the header/size information for per-device uclass platdata
+        re_per_device_plat = re.compile('^\s*DM_PER_DEVICE_PLATDATA\((.*)\)$')
+
         prefix = ''
         for line in buff.splitlines():
             # Handle line continuation
@@ -989,12 +995,12 @@ class DtbPlatdata(object):
             self.buf('\t.platdata\t= %s,\n' % plat_name)
         else:
             self.buf('\t.platdata\t= &%s%s,\n' % (VAL_PREFIX, var_name))
-        if priv_name:
-            self.buf('\t.priv\t\t= %s,\n' % priv_name)
         if parent_plat_name:
             self.buf('\t.parent_platdata = %s,\n' % parent_plat_name)
         if parent_priv_name:
             self.buf('\t.parent_priv\t= %s,\n' % parent_priv_name)
+        if priv_name:
+            self.buf('\t.priv\t\t= %s,\n' % priv_name)
         self.buf('};\n')
         self.buf('\n')
         return parent_plat_name

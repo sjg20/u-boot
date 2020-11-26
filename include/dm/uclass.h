@@ -137,6 +137,26 @@ struct uclass_driver {
 #endif
 
 /**
+ * DM_PER_DEVICE_PRIV() - Specifies the per-device size of the private data
+ *
+ * This generate code but is also is parsed by dtoc. Put it inside
+ * UCLASS_DRIVER() on its own line to specify the amount of data to be allocated
+ * in the device for the use of the uclass
+ */
+#define DM_PER_DEVICE_PRIV(hdr,struc) \
+	.per_device_auto_alloc_size = sizeof(struc),
+
+/**
+ * DM_PER_DEVICE_PLATDATA() - Specifies the per-device size of the platform data
+ *
+ * This generate code but is also is parsed by dtoc. Put it inside
+ * UCLASS_DRIVER() on its own line to specify the amount of platform data to be
+ * allocated in the device for the use of the uclass
+ */
+#define DM_PER_DEVICE_PLATDATA(hdr,struc) \
+	.per_device_platdata_auto_alloc_size = sizeof(struc),
+
+/**
  * uclass_get() - Get a uclass based on an ID, creating it if needed
  *
  * Every uclass is identified by an ID, a number from 0 to n-1 where n is
