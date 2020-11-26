@@ -1050,7 +1050,7 @@ class DtbPlatdata(object):
         if node.parent in self._valid_nodes:
             self.list_node('sibling_node', node.parent.child_refs,
                            node.parent_seq)
-        #if node.child_devs:
+        self.list_head('child_head', 'sibling_node', node.child_devs)
 
         self.buf('};\n')
         self.buf('\n')
@@ -1117,6 +1117,15 @@ class DtbPlatdata(object):
 
         self.out(''.join(self.get_buf()))
 
+    def list_head(self, member, node_member, node_refs):
+        if node_refs:
+            self.buf('\t.%s\t= {\n' % member)
+            last = node_refs[-1]
+            first = node_refs[0]
+            self.buf('\t\t.prev = &%s->%s,\n' % (last.dev_ref, node_member))
+            self.buf('\t\t.next = &%s->%s,\n' % (first.dev_ref, node_member))
+            self.buf('\t},\n')
+
     def list_node(self, member, node_refs, seq):
         self.buf('\t.%s\t= {\n' % member)
         self.buf('\t\t.prev = %s,\n' % node_refs[seq - 1])
@@ -1160,14 +1169,7 @@ class DtbPlatdata(object):
                 self.buf('\t.priv\t\t= %s,\n' % priv_name)
             self.buf('\t.uc_drv\t\t= DM_REF_UCLASS_DRIVER(%s),\n' % uc_name)
             self.list_node('sibling_node', uclass_node, seq)
-            #self.list_head('dev_head', 'uclass_node', uc_drv.devs)
-            if uc_drv.devs:
-                self.buf('\t.dev_head\t= {\n')
-                last = uc_drv.devs[-1]
-                first = uc_drv.devs[0]
-                self.buf('\t\t.prev = &%s->uclass_node,\n' % last.dev_ref)
-                self.buf('\t\t.next = &%s->uclass_node,\n' % first.dev_ref)
-                self.buf('\t},\n')
+            self.list_head('dev_head', 'uclass_node', uc_drv.devs)
             self.buf('};\n')
             self.buf('\n')
 
