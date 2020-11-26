@@ -981,7 +981,7 @@ class DtbPlatdata(object):
         return '&' + var_name
 
     def _declare_device_inst(self, driver, var_name, struct_name,
-			     parent_driver, parent_struct_name, node, uclass):
+			     parent_driver, node, uclass):
         """Add a device instance declaration to the output
 
         This declares a U_BOOT_DEVICE_INST() for the device being processed
@@ -1027,15 +1027,17 @@ class DtbPlatdata(object):
             if driver_data:
                 self.buf('\t.driver_data\t= %s,\n' % driver_data)
                 break
-        if parent_priv_name:
-            self.buf('\t.parent_priv\t= %s,\n' % parent_priv_name)
-        if uclass_priv_name:
-            self.buf('\t.uclass_priv = %s,\n' % uclass_priv_name)
-        if parent_struct_name:
-            self.buf('\t.parent\t\t= DM_REF_DEVICE_INST(%s);\n' %
-                     parent_struct_name)
+        if node.parent and node.parent.parent:
+            self.buf('\t.parent\t\t= U_BOOT_DEVICE_REF(%s),\n' %
+                     conv_name_to_c(node.parent.name))
         if priv_name:
             self.buf('\t.priv\t\t= %s,\n' % priv_name)
+        self.buf('\t.uclass\t= DM_REF_UCLASS_INST(%s),\n' % uclass.name)
+
+        if uclass_priv_name:
+            self.buf('\t.uclass_priv = %s,\n' % uclass_priv_name)
+        if parent_priv_name:
+            self.buf('\t.parent_priv\t= %s,\n' % parent_priv_name)
         self.buf('};\n')
         self.buf('\n')
         return parent_plat_name
@@ -1110,8 +1112,7 @@ class DtbPlatdata(object):
             self._output_values(var_name, struct_name, node)
         if self._instantiate:
             self._declare_device_inst(driver, var_name, struct_name,
-                                      parent_driver, parent_struct_name, node,
-                                      uclass)
+                                      parent_driver, node, uclass)
         else:
             self._declare_device(var_name, struct_name, node.parent)
 
@@ -1187,6 +1188,10 @@ class DtbPlatdata(object):
 
         if self._instantiate:
             self._output_uclasses()
+
+        for node in nodes_to_output:
+            self.buf('U_BOOT_DEVICE_DECL(%s);\n' % conv_name_to_c(node.name))
+        self.buf('\n')
 
         # Keep outputing nodes until there is none left
         while nodes_to_output:
