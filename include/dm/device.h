@@ -129,7 +129,7 @@ enum {
  * @parent_priv: The parent's private data for this device
  * @uclass_node: Used by uclass to link its devices
  * @child_head: List of children of this device
- * @sibling_node: Next device in list of all devices
+ * @sibling_node: Next device in parent's child_haed list
  * @flags: Flags for this device DM_FLAG_...
  * @req_seq: Requested sequence number for this device (-1 = any)
  * @seq: Allocated sequence number for this device (-1 = none). This is set up

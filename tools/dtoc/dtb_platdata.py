@@ -1084,23 +1084,8 @@ class DtbPlatdata(object):
         struct_name, _ = self.get_normalized_compat_name(node)
         var_name = conv_name_to_c(node.name)
 
-        driver = self._drivers.get(struct_name)
-        if not driver:
-            raise ValueError("Cannot parse/find driver for '%s'" % struct_name)
-
-        parent_driver = None
-        parent_struct_name = None
-        if node.parent in self._valid_nodes:
-            parent_struct_name, _ = self.get_normalized_compat_name(node.parent)
-            parent_driver = self._drivers.get(parent_struct_name)
-            if not parent_driver:
-                raise ValueError("Cannot parse/find driver for '%s'" %
-                                parent_struct_name)
-
-        uclass = self._uclass.get(driver.uclass_id)
-        if not uclass:
-            raise ValueError("Cannot parse/find uclass '%s' for driver '%s'" %
-                             (driver.uclass_id, struct_name))
+        driver = node.driver
+        parent_driver = node.parent_driver
 
         self.buf('/*\n')
         self.buf(' * Node %s index %d\n' % (node.path, node.idx))
@@ -1112,11 +1097,17 @@ class DtbPlatdata(object):
             self._output_values(var_name, struct_name, node)
         if self._instantiate:
             self._declare_device_inst(driver, var_name, struct_name,
-                                      parent_driver, node, uclass)
+                                      parent_driver, node, node.uclass)
         else:
             self._declare_device(var_name, struct_name, node.parent)
 
         self.out(''.join(self.get_buf()))
+
+    def list_node(self, member, node_refs, seq):
+        self.buf('\t.%s\t= {\n' % member)
+        self.buf('\t\t.prev = %s,\n' % node_refs[seq - 1])
+        self.buf('\t\t.next = %s,\n' % node_refs[seq + 1])
+        self.buf('\t},\n')
 
     def _output_uclasses(self):
         uclass_list = set()
@@ -1127,10 +1118,15 @@ class DtbPlatdata(object):
         uclass_list = sorted(list(uclass_list))
         prev_uc = 'NULL /* Set up at runtime */'
 
-        for uclass_id in uclass_list:
+        uclass_node = {}
+        for seq, uclass_id in enumerate(uclass_list):
             uc_name = self.uclass_id_to_name(uclass_id)
             self.buf('DM_DECL_UCLASS_DRIVER(%s);\n' % uc_name)
             self.buf('DM_DECL_UCLASS_INST(%s);\n' % uc_name)
+            uclass_node[seq] = ('&DM_REF_UCLASS_INST(%s)->sibling_node' %
+                                      uc_name)
+        uclass_node[-1] = 'NULL /* Set up at runtime */'
+        uclass_node[len(uclass_list)] = 'NULL /* Set up at runtime */'
         self.buf('\n')
 
         for seq, uclass_id in enumerate(uclass_list):
@@ -1138,11 +1134,6 @@ class DtbPlatdata(object):
             if not uc_drv:
                 raise ValueError('Cannot find uclass driver for %s (have %s)'
                                  % (uc_drv, ', '.join(self._uclass.keys())))
-            if seq == len(uclass_list) - 1:
-                next_uc = 'NULL /* Set up at runtime */'
-            else:
-                next_uc_name = self.uclass_id_to_name(uclass_list[seq + 1])
-                next_uc = '&DM_REF_UCLASS_INST(%s)->sibling_node' % next_uc_name
 
             priv_name = self.alloc_priv(uc_drv.priv, uc_drv.name)
 
@@ -1151,11 +1142,7 @@ class DtbPlatdata(object):
             if priv_name:
                 self.buf('\t.priv\t\t= %s,\n' % priv_name)
             self.buf('\t.uc_drv\t\t= DM_REF_UCLASS_DRIVER(%s),\n' % uc_name)
-            self.buf('\t.sibling_node\t= {\n')
-            self.buf('\t\t.next = %s,\n' % next_uc)
-            self.buf('\t\t.prev = %s,\n' % prev_uc)
-            self.buf('\t},\n')
-            prev_uc = '&DM_REF_UCLASS_INST(%s)->sibling_node' % uc_name
+            self.list_node('sibling_node', uclass_node, seq)
             self.buf('};\n')
             self.buf('\n')
 
@@ -1191,6 +1178,28 @@ class DtbPlatdata(object):
 
         for node in nodes_to_output:
             self.buf('U_BOOT_DEVICE_DECL(%s);\n' % conv_name_to_c(node.name))
+            struct_name, _ = self.get_normalized_compat_name(node)
+            driver = self._drivers.get(struct_name)
+            if not driver:
+                raise ValueError("Cannot parse/find driver for '%s'" %
+                                 struct_name)
+            node.driver = driver
+            uclass = self._uclass.get(driver.uclass_id)
+            if not uclass:
+                raise ValueError("Cannot parse/find uclass '%s' for driver '%s'" %
+                                (driver.uclass_id, struct_name))
+            node.uclass = uclass
+            parent_driver = None
+            parent_struct_name = None
+            if node.parent in self._valid_nodes:
+                parent_struct_name, _ = self.get_normalized_compat_name(
+                    node.parent)
+                parent_driver = self._drivers.get(parent_struct_name)
+                if not parent_driver:
+                    raise ValueError("Cannot parse/find driver for '%s'" %
+                                    parent_struct_name)
+            node.parent_driver = parent_driver
+
         self.buf('\n')
 
         # Keep outputing nodes until there is none left
