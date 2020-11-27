@@ -222,7 +222,7 @@ static int vf_usb_ofdata_to_platdata(struct udevice *dev)
 	int node = dev_of_offset(dev);
 	const char *mode;
 
-	priv->portnr = dev->seq;
+	priv->portnr = dev_seq(dev);
 
 	priv->ehci = dev_read_addr_ptr(dev);
 	mode = fdt_getprop(dt_blob, node, "dr_mode", NULL);
