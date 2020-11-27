@@ -88,6 +88,7 @@ static int dm_do_test(struct unit_test_state *uts, struct unit_test *test,
 	ut_assertok(dm_test_init(uts, of_live));
 
 	uts->start = mallinfo();
+	gd->flags |= GD_FLG_DM_NO_SEQ;
 	if (test->flags & UT_TESTF_SCAN_PDATA)
 		ut_assertok(dm_scan_platdata(false));
 	if (test->flags & UT_TESTF_PROBE_TEST)
@@ -95,6 +96,8 @@ static int dm_do_test(struct unit_test_state *uts, struct unit_test *test,
 	if (!CONFIG_IS_ENABLED(OF_PLATDATA) &&
 	    (test->flags & UT_TESTF_SCAN_FDT))
 		ut_assertok(dm_extended_scan(false));
+	uclass_alloc_all_seqs();
+	gd->flags &= ~GD_FLG_DM_NO_SEQ;
 
 	/*
 	 * Silence the console and rely on console recording to get
@@ -208,12 +211,15 @@ int dm_test_main(const char *test_name)
 		printf("Failures: %d\n", uts->fail_count);
 
 	/* Put everything back to normal so that sandbox works as expected */
+	gd->flags |= GD_FLG_DM_NO_SEQ;
 	gd_set_of_root(uts->of_root);
 	gd->dm_root = NULL;
 	ut_assertok(dm_init(CONFIG_IS_ENABLED(OF_LIVE)));
 	dm_scan_platdata(false);
 	if (!CONFIG_IS_ENABLED(OF_PLATDATA))
 		dm_scan_fdt(false);
+	uclass_alloc_all_seqs();
+	gd->flags &= ~GD_FLG_DM_NO_SEQ;
 
 	return uts->fail_count ? CMD_RET_FAILURE : 0;
 }
