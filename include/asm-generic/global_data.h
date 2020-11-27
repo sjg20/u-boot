@@ -547,6 +547,8 @@ enum gd_flags {
 	 * @GD_FLG_SMP_READY: SMP initialization is complete
 	 */
 	GD_FLG_SMP_READY = 0x40000,
+	/** @GD_FLG_DM_NO_SEQ: Don't assign devices a sequence number on bind */
+	GD_FLG_DM_NO_SEQ = 0x80000,
 };
 
 #endif /* __ASSEMBLY__ */

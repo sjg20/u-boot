@@ -308,25 +308,40 @@ int dm_init_and_scan(bool pre_reloc_only)
 		debug("dm_init() failed: %d\n", ret);
 		return ret;
 	}
+	gd->flags |= GD_FLG_DM_NO_SEQ;
 	ret = dm_scan_platdata(pre_reloc_only);
 	if (ret) {
 		debug("dm_scan_platdata() failed: %d\n", ret);
-		return ret;
+		goto fail;
 	}
 
 	if (CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)) {
 		ret = dm_extended_scan(pre_reloc_only);
 		if (ret) {
 			debug("dm_extended_scan() failed: %d\n", ret);
-			return ret;
+			goto fail;
 		}
 	}
 
 	ret = dm_scan_other(pre_reloc_only);
 	if (ret)
-		return ret;
+		goto fail;
+
+	/*
+	 * Now that all the alisas have been used to claim sequence numbers, we
+	 * can allocate every non-aliased device a sequence number
+	 */
+	uclass_alloc_all_seqs();
+
+	/*
+	 * From now on, assign sequence numbers when binding, to ensure that
+	 * every new device has a sequence number too
+	 */
+	gd->flags &= ~GD_FLG_DM_NO_SEQ;
 
 	return 0;
+fail:
+	return ret;
 }
 
 #ifdef CONFIG_ACPIGEN

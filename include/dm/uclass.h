@@ -381,6 +381,14 @@ int uclass_first_device_drvdata(enum uclass_id id, ulong driver_data,
 int uclass_resolve_seq(struct udevice *dev);
 
 /**
+ * uclass_alloc_all_seqs() - Make sure that all devices have sequence numbers
+ *
+ * This updates any sequence numbers that are unallocated (set to -1) to the
+ * next available number in the uclass, above all existing numbers
+ */
+void uclass_alloc_all_seqs(void);
+
+/**
  * uclass_id_foreach_dev() - Helper function to iteration through devices
  *
  * This creates a for() loop which works through the available devices in

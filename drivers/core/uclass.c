@@ -288,6 +288,46 @@ int uclass_find_next_free_req_seq(struct uclass *uc)
 	return max + 1;
 }
 
+static int uclass_find_first_free_seq(struct uclass *uc)
+{
+	struct udevice *dev;
+	bool in_use = true;
+	int cur;
+
+	/* Increment cur until we get to a value not used in the devices */
+	for (cur = 0; in_use;) {
+		in_use = false;
+		list_for_each_entry(dev, &uc->dev_head, uclass_node) {
+			if (dev->sqq == cur) {
+				in_use = true;
+				cur++;
+				break;
+			}
+		}
+	}
+
+	return cur;
+}
+
+static void uclass_alloc_seqs(struct uclass *uc)
+{
+	struct udevice *dev;
+
+	list_for_each_entry(dev, &uc->dev_head, uclass_node) {
+		if (dev->sqq == -1)
+			dev->sqq = uclass_find_first_free_seq(uc);
+	}
+}
+
+void uclass_alloc_all_seqs(void)
+{
+	struct uclass *uc;
+
+	list_for_each_entry(uc, &gd->uclass_root, sibling_node) {
+		uclass_alloc_seqs(uc);
+	}
+}
+
 int uclass_find_device_by_seq(enum uclass_id id, int seq_or_req_seq,
 			      bool find_req_seq, struct udevice **devp)
 {
