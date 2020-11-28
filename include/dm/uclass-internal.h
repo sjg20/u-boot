@@ -12,17 +12,17 @@
 #include <dm/ofnode.h>
 
 /**
- * uclass_find_next_free_req_seq() - Get the next free req_seq number
+ * uclass_find_next_free_seq() - Get the next free sequence number
  *
- * This returns the next free req_seq number. This is useful only if
- * OF_CONTROL is not used. The next free req_seq number is simply the
- * maximum req_seq of the uclass + 1.
- * This allows assiging req_seq number in the binding order.
+ * This returns the next free sequence number. This is useful only if
+ * OF_CONTROL is not used. The next free sequence number is simply the
+ * maximum sequence number used by al devices in the uclass + 1.
+ * This allows assiging the sequence number in the binding order.
  *
  * @uc:		uclass to check
- * @return	The next free req_seq number
+ * @return	The next free sequence number
  */
-int uclass_find_next_free_req_seq(struct uclass *uc);
+int uclass_find_next_free_seq(struct uclass *uc);
 
 /**
  * uclass_get_device_tail() - handle the end of a get_device call

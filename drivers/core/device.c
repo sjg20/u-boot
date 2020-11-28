@@ -94,16 +94,15 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 				if (dev->req_seq == -1) {
 					auto_seq = true;
 					dev->req_seq =
-						uclass_find_next_free_req_seq(
-							uc);
+						uclass_find_next_free_seq(uc);
 				}
 			}
 		} else {
 			auto_seq = true;
-			dev->req_seq = uclass_find_next_free_req_seq(uc);
+			dev->req_seq = uclass_find_next_free_seq(uc);
 		}
 		if (auto_seq && !(gd->flags & GD_FLG_DM_NO_SEQ))
-			dev->sqq = uclass_find_next_free_req_seq(uc);
+			dev->sqq = uclass_find_next_free_seq(uc);
 	}
 
 	if (drv->platdata_auto_alloc_size) {
