@@ -72,34 +72,23 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 	dev->driver = drv;
 	dev->uclass = uc;
 
-	dev->seq = -1;
-	dev->req_seq = -1;
 	dev->sqq = -1;
 	if (CONFIG_IS_ENABLED(DM_SEQ_ALIAS) &&
 	    (uc->uc_drv->flags & DM_UC_FLAG_SEQ_ALIAS)) {
 		/*
 		 * Some devices, such as a SPI bus, I2C bus and serial ports
 		 * are numbered using aliases.
-		 *
-		 * This is just a 'requested' sequence, and will be
-		 * resolved (and ->seq updated) when the device is probed.
 		 */
 		if (CONFIG_IS_ENABLED(OF_CONTROL) &&
 		    !CONFIG_IS_ENABLED(OF_PLATDATA)) {
 			if (uc->uc_drv->name && ofnode_valid(node)) {
-				dev_read_alias_seq(dev, &dev->sqq);
-				dev_read_alias_seq(dev, &dev->req_seq);
-			}
-			if (CONFIG_IS_ENABLED(OF_PRIOR_STAGE)) {
-				if (dev->req_seq == -1) {
+				if (dev_read_alias_seq(dev, &dev->sqq))
 					auto_seq = true;
-					dev->req_seq =
-						uclass_find_next_free_seq(uc);
-				}
+			} else {
+				auto_seq = true;
 			}
 		} else {
 			auto_seq = true;
-			dev->req_seq = uclass_find_next_free_seq(uc);
 		}
 		if (auto_seq && !(gd->flags & GD_FLG_DM_NO_SEQ))
 			dev->sqq = uclass_find_next_free_seq(uc);
@@ -518,7 +507,6 @@ fail_uclass:
 fail:
 	dev->flags &= ~DM_FLAG_ACTIVATED;
 
-	dev->seq = -1;
 	device_free(dev);
 
 	return ret;

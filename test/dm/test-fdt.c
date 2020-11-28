@@ -386,6 +386,34 @@ static int dm_test_fdt_uclass_seq(struct unit_test_state *uts)
 }
 DM_TEST(dm_test_fdt_uclass_seq, UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
 
+/* More tests for sequence numbers */
+static int dm_test_fdt_uclass_seq_more(struct unit_test_state *uts)
+{
+	struct udevice *dev;
+	ofnode node;
+
+	/* Check creating a device with an alias */
+	node = ofnode_path("/some-bus/c-test@1");
+	ut_assertok(device_bind(dm_root(), DM_GET_DRIVER(testfdt_drv),
+				"c-test@1", NULL, node, &dev));
+	ut_asserteq(0, uclass_get_device_by_seq(UCLASS_TEST_FDT, 12, &dev));
+
+	/*
+	 * Now bind a device without an alias. It should not get the next
+	 * sequence number after all aliases, skipping 10 and 11
+	 */
+	ut_assertok(device_bind(dm_root(), DM_GET_DRIVER(testfdt_drv),
+				"fred", NULL, ofnode_null(), &dev));
+	ut_asserteq(13, dev_seq(dev));
+
+	ut_assertok(device_bind(dm_root(), DM_GET_DRIVER(testfdt_drv),
+				"fred2", NULL, ofnode_null(), &dev));
+	ut_asserteq(14, dev_seq(dev));
+
+	return 0;
+}
+DM_TEST(dm_test_fdt_uclass_seq_more, UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
+
 /* Test that we can find a device by device tree offset */
 static int dm_test_fdt_offset(struct unit_test_state *uts)
 {
