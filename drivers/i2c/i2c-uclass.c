@@ -700,13 +700,7 @@ static int i2c_post_bind(struct udevice *dev)
 	if (!priv)
 		return -ENOMEM;
 
-	debug("%s: %s, req_seq=%d\n", __func__, dev->name, dev->req_seq);
-
-	/* if there is no alias ID, use the first free */
-	if (dev->req_seq == -1)
-		dev->req_seq = ++priv->max_id;
-
-	debug("%s: %s, new req_seq=%d\n", __func__, dev->name, dev->req_seq);
+	debug("%s: %s, seq=%d\n", __func__, dev->name, dev_seq(dev));
 
 #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 	ret = dm_scan_fdt_dev(dev);
