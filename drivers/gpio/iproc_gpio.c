@@ -252,7 +252,7 @@ static int iproc_gpio_ofdata_to_platdata(struct udevice *dev)
 		return ret;
 	}
 
-	snprintf(name, sizeof(name), "GPIO%d", dev->req_seq);
+	snprintf(name, sizeof(name), "GPIO%d", dev_seq(dev));
 	plat->name = strdup(name);
 	if (!plat->name)
 		return -ENOMEM;

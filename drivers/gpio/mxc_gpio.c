@@ -318,7 +318,7 @@ static int mxc_gpio_ofdata_to_platdata(struct udevice *dev)
 
 		plat->regs = (struct gpio_regs *)addr;
 	}
-	plat->bank_index = dev->req_seq;
+	plat->bank_index = dev_seq(dev);
 
 	return 0;
 }
