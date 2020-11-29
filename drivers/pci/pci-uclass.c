@@ -632,7 +632,7 @@ int dm_pci_hose_probe_bus(struct udevice *bus)
 				    &reg);
 		sub_bus = reg;
 	} else {
-		sub_bus = pci_get_bus_max() + 1;
+		sub_bus = dev_seq(bus);
 	}
 	debug("%s: bus = %d/%s\n", __func__, sub_bus, bus->name);
 	dm_pciauto_prescan_setup_bridge(bus, sub_bus);
@@ -644,14 +644,6 @@ int dm_pci_hose_probe_bus(struct udevice *bus)
 		return ret;
 	}
 
-	if (!ea_pos) {
-		if (sub_bus != dev_seq(bus)) {
-			debug("%s: Internal error, bus '%s' got seq %d, expected %d\n",
-			      __func__, bus->name, dev_seq(bus), sub_bus);
-			return -EPIPE;
-		}
-		sub_bus = pci_get_bus_max();
-	}
 	dm_pciauto_postscan_setup_bridge(bus, sub_bus);
 
 	return sub_bus;
