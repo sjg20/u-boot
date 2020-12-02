@@ -324,7 +324,7 @@ static void *alloc_priv(int size, uint flags)
 	return priv;
 }
 
-int device_ofdata_to_platdata(struct udevice *dev)
+int device_of_to_plat(struct udevice *dev)
 {
 	const struct driver *drv;
 	int size = 0;
@@ -338,7 +338,7 @@ int device_ofdata_to_platdata(struct udevice *dev)
 
 	/* Ensure all parents have ofdata */
 	if (dev->parent) {
-		ret = device_ofdata_to_platdata(dev->parent);
+		ret = device_of_to_plat(dev->parent);
 		if (ret)
 			goto fail;
 
@@ -389,9 +389,9 @@ int device_ofdata_to_platdata(struct udevice *dev)
 		}
 	}
 
-	if (drv->ofdata_to_platdata &&
+	if (drv->of_to_plat &&
 	    (CONFIG_IS_ENABLED(OF_PLATDATA) || dev_has_of_node(dev))) {
-		ret = drv->ofdata_to_platdata(dev);
+		ret = drv->of_to_plat(dev);
 		if (ret)
 			goto fail;
 	}
@@ -419,7 +419,7 @@ int device_probe(struct udevice *dev)
 	drv = dev->driver;
 	assert(drv);
 
-	ret = device_ofdata_to_platdata(dev);
+	ret = device_of_to_plat(dev);
 	if (ret)
 		goto fail;
 
@@ -861,7 +861,7 @@ int device_first_child_ofdata_err(struct udevice *parent, struct udevice **devp)
 	if (!dev)
 		return -ENODEV;
 
-	ret = device_ofdata_to_platdata(dev);
+	ret = device_of_to_plat(dev);
 	if (ret)
 		return ret;
 
@@ -879,7 +879,7 @@ int device_next_child_ofdata_err(struct udevice **devp)
 	if (!dev)
 		return -ENODEV;
 
-	ret = device_ofdata_to_platdata(dev);
+	ret = device_of_to_plat(dev);
 	if (ret)
 		return ret;
 
