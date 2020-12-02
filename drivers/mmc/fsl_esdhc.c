@@ -933,7 +933,7 @@ int fsl_esdhc_mmc_init(struct bd_info *bis)
 static int fsl_esdhc_probe(struct udevice *dev)
 {
 	struct mmc_uclass_priv *upriv = dev_get_uclass_priv(dev);
-	struct fsl_esdhc_plat *plat = dev_get_platdata(dev);
+	struct fsl_esdhc_plat *plat = dev_get_plat(dev);
 	struct fsl_esdhc_priv *priv = dev_get_priv(dev);
 	u32 caps, hostver;
 	fdt_addr_t addr;
@@ -1000,7 +1000,7 @@ static int fsl_esdhc_probe(struct udevice *dev)
 
 static int fsl_esdhc_get_cd(struct udevice *dev)
 {
-	struct fsl_esdhc_plat *plat = dev_get_platdata(dev);
+	struct fsl_esdhc_plat *plat = dev_get_plat(dev);
 	struct fsl_esdhc_priv *priv = dev_get_priv(dev);
 
 	if (plat->cfg.host_caps & MMC_CAP_NONREMOVABLE)
@@ -1012,7 +1012,7 @@ static int fsl_esdhc_get_cd(struct udevice *dev)
 static int fsl_esdhc_send_cmd(struct udevice *dev, struct mmc_cmd *cmd,
 			      struct mmc_data *data)
 {
-	struct fsl_esdhc_plat *plat = dev_get_platdata(dev);
+	struct fsl_esdhc_plat *plat = dev_get_plat(dev);
 	struct fsl_esdhc_priv *priv = dev_get_priv(dev);
 
 	return esdhc_send_cmd_common(priv, &plat->mmc, cmd, data);
@@ -1020,7 +1020,7 @@ static int fsl_esdhc_send_cmd(struct udevice *dev, struct mmc_cmd *cmd,
 
 static int fsl_esdhc_set_ios(struct udevice *dev)
 {
-	struct fsl_esdhc_plat *plat = dev_get_platdata(dev);
+	struct fsl_esdhc_plat *plat = dev_get_plat(dev);
 	struct fsl_esdhc_priv *priv = dev_get_priv(dev);
 
 	return esdhc_set_ios_common(priv, &plat->mmc);
@@ -1028,7 +1028,7 @@ static int fsl_esdhc_set_ios(struct udevice *dev)
 
 static int fsl_esdhc_reinit(struct udevice *dev)
 {
-	struct fsl_esdhc_plat *plat = dev_get_platdata(dev);
+	struct fsl_esdhc_plat *plat = dev_get_plat(dev);
 	struct fsl_esdhc_priv *priv = dev_get_priv(dev);
 
 	return esdhc_init_common(priv, &plat->mmc);
@@ -1037,7 +1037,7 @@ static int fsl_esdhc_reinit(struct udevice *dev)
 #ifdef MMC_SUPPORTS_TUNING
 static int fsl_esdhc_execute_tuning(struct udevice *dev, uint32_t opcode)
 {
-	struct fsl_esdhc_plat *plat = dev_get_platdata(dev);
+	struct fsl_esdhc_plat *plat = dev_get_plat(dev);
 	struct fsl_esdhc_priv *priv = dev_get_priv(dev);
 	struct fsl_esdhc *regs = priv->esdhc_regs;
 	u32 val, irqstaten;
@@ -1102,7 +1102,7 @@ static const struct udevice_id fsl_esdhc_ids[] = {
 
 static int fsl_esdhc_bind(struct udevice *dev)
 {
-	struct fsl_esdhc_plat *plat = dev_get_platdata(dev);
+	struct fsl_esdhc_plat *plat = dev_get_plat(dev);
 
 	return mmc_bind(dev, &plat->mmc, &plat->cfg);
 }
