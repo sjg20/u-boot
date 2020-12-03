@@ -1738,7 +1738,7 @@ U_BOOT_DRIVER(fsl_esdhc) = {
 	.bind	= fsl_esdhc_bind,
 #endif
 	.probe	= fsl_esdhc_probe,
-	.platdata_auto	= sizeof(struct fsl_esdhc_plat),
+	.plat_auto	= sizeof(struct fsl_esdhc_plat),
 	.priv_auto	= sizeof(struct fsl_esdhc_priv),
 };
 

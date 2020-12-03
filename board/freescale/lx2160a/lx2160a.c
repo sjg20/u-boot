@@ -65,7 +65,7 @@ static struct pl01x_serial_platdata serial0 = {
 
 U_BOOT_DEVICE(nxp_serial0) = {
 	.name = "serial_pl01x",
-	.platdata = &serial0,
+	.plat = &serial0,
 };
 
 static struct pl01x_serial_platdata serial1 = {
@@ -75,7 +75,7 @@ static struct pl01x_serial_platdata serial1 = {
 
 U_BOOT_DEVICE(nxp_serial1) = {
 	.name = "serial_pl01x",
-	.platdata = &serial1,
+	.plat = &serial1,
 };
 
 int select_i2c_ch_pca9547(u8 ch)
