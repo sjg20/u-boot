@@ -72,8 +72,8 @@ static int uclass_add(enum uclass_id id, struct uclass **ucp)
 	if (!uc)
 		return -ENOMEM;
 	if (uc_drv->priv_auto) {
-		uc->priv = calloc(1, uc_drv->priv_auto);
-		if (!uc->priv) {
+		uc->priv_ = calloc(1, uc_drv->priv_auto);
+		if (!uc->priv_) {
 			ret = -ENOMEM;
 			goto fail_mem;
 		}
@@ -94,8 +94,8 @@ static int uclass_add(enum uclass_id id, struct uclass **ucp)
 	return 0;
 fail:
 	if (uc_drv->priv_auto) {
-		free(uc->priv);
-		uc->priv = NULL;
+		free(uc->priv_);
+		uc->priv_ = NULL;
 	}
 	list_del(&uc->sibling_node);
 fail_mem:
@@ -132,7 +132,7 @@ int uclass_destroy(struct uclass *uc)
 		uc_drv->destroy(uc);
 	list_del(&uc->sibling_node);
 	if (uc_drv->priv_auto)
-		free(uc->priv);
+		free(uc->priv_);
 	free(uc);
 
 	return 0;
@@ -158,6 +158,11 @@ const char *uclass_get_name(enum uclass_id id)
 	if (uclass_get(id, &uc))
 		return NULL;
 	return uc->uc_drv->name;
+}
+
+void *uclass_get_priv(const struct uclass *uc)
+{
+	return uc->priv_;
 }
 
 enum uclass_id uclass_get_by_name(const char *name)

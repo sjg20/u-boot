@@ -190,6 +190,34 @@ static inline int device_chld_remove(struct udevice *dev, struct driver *drv,
 #endif
 
 /**
+ * dev_set_priv() - Set the private data for a device
+ *
+ * This is normally handled by driver model, which automatically allocates
+ * private data when an 'auto' size if provided by the driver.
+ *
+ * Use this function to override normal operation for special situations, such
+ * as needing to allocate a variable amount of data.
+ *
+ * @dev		Device to check
+ * @priv	New private-data pointer
+ */
+void dev_set_priv(struct udevice *dev, void *priv);
+
+/**
+ * dev_set_plat() - Set the platform data for a device
+ *
+ * This is normally handled by driver model, which automatically allocates
+ * platform data when an 'auto' size if provided by the driver.
+ *
+ * Use this function to override normal operation for special situations, such
+ * as needing to allocate a variable amount of data.
+ *
+ * @dev		Device to check
+ * @plat	New platform-data pointer
+ */
+void dev_set_plat(struct udevice *dev, void *priv);
+
+/**
  * simple_bus_translate() - translate a bus address to a system address
  *
  * This handles the 'ranges' property in a simple bus. It translates the
