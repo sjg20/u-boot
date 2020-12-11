@@ -335,7 +335,7 @@ class BuilderThread(threading.Thread):
                 for var in sorted(env.keys()):
                     print('%s="%s"' % (var, env[var]), file=fd)
             lines = []
-            for fname in ['u-boot', 'spl/u-boot-spl']:
+            for fname in ['u-boot', 'spl/u-boot-spl', 'tpl/u-boot-tpl']:
                 cmd = ['%snm' % self.toolchain.cross, '--size-sort', fname]
                 nm_result = command.RunPipe([cmd], capture=True,
                         capture_stderr=True, cwd=result.out_dir,
