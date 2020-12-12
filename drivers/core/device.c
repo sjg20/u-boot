@@ -961,12 +961,12 @@ int device_set_name(struct udevice *dev, const char *name)
 
 void dev_set_priv(struct udevice *dev, void *priv)
 {
-	dev->priv_ = priv;
+	dev->priv = priv;
 }
 
 void dev_set_plat(struct udevice *dev, void *plat)
 {
-	dev->plat_ = plat;
+	dev->plat = plat;
 }
 
 #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)

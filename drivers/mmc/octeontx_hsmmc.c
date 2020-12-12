@@ -30,6 +30,7 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/csrs/csrs-mio_emm.h>
 #include <asm/io.h>
+#include <dm/device-internal.h>
 
 #include <power/regulator.h>
 
@@ -3841,7 +3842,7 @@ static int octeontx_mmc_host_child_pre_probe(struct udevice *dev)
 	}
 
 	slot = &host->slots[bus_id];
-	dev->priv = slot;
+	dev_set_priv(dev, slot);
 	slot->host = host;
 	slot->bus_id = bus_id;
 	slot->dev = dev;
@@ -3852,7 +3853,7 @@ static int octeontx_mmc_host_child_pre_probe(struct udevice *dev)
 	snprintf(name, sizeof(name), "octeontx-mmc%d", bus_id);
 	err = device_set_name(dev, name);
 
-	if (!dev->uclass_priv) {
+	if (!dev_get_uclass_priv(dev)) {
 		debug("%s(%s): Allocating uclass priv\n", __func__,
 		      dev->name);
 		upriv = calloc(1, sizeof(struct mmc_uclass_priv));
@@ -3861,7 +3862,7 @@ static int octeontx_mmc_host_child_pre_probe(struct udevice *dev)
 		dev->uclass_priv = upriv;
 		dev->uclass->priv = upriv;
 	} else {
-		upriv = dev->uclass_priv;
+		upriv = dev_get_uclass_priv(dev);
 	}
 
 	upriv->mmc = &slot->mmc;

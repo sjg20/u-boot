@@ -339,7 +339,7 @@ static int tsec_recv(struct eth_device *dev)
 #else
 static int tsec_recv(struct udevice *dev, int flags, uchar **packetp)
 {
-	struct tsec_private *priv = (struct tsec_private *)dev->priv;
+	struct tsec_private *priv = (struct tsec_private *) dev_get_priv(dev);
 	struct tsec __iomem *regs = priv->regs;
 	int ret = -1;
 
@@ -368,7 +368,7 @@ static int tsec_recv(struct udevice *dev, int flags, uchar **packetp)
 
 static int tsec_free_pkt(struct udevice *dev, uchar *packet, int length)
 {
-	struct tsec_private *priv = (struct tsec_private *)dev->priv;
+	struct tsec_private *priv = (struct tsec_private *) dev_get_priv(dev);
 	u16 status;
 
 	out_be16(&priv->rxbd[priv->rx_idx].length, 0);
@@ -865,7 +865,7 @@ int tsec_probe(struct udevice *dev)
 
 int tsec_remove(struct udevice *dev)
 {
-	struct tsec_private *priv = dev->priv;
+	struct tsec_private *priv = dev_get_priv(dev);
 
 	free(priv->phydev);
 	mdio_unregister(priv->bus);

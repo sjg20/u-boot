@@ -104,7 +104,7 @@ static int apl_flash_bind(struct udevice *dev)
 		plat = calloc(sizeof(*plat), 1);
 		if (!plat)
 			return -ENOMEM;
-		dev->parent_plat = plat;
+		dev_get_parent_plat(dev) = plat;
 	}
 
 	return 0;

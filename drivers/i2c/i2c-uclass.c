@@ -693,7 +693,7 @@ struct i2c_priv {
 static int i2c_post_bind(struct udevice *dev)
 {
 	struct uclass *class = dev->uclass;
-	struct i2c_priv *priv = class->priv;
+	struct i2c_priv *priv = uclass_get_priv(class);
 	int ret = 0;
 
 	/* Just for sure */
@@ -710,7 +710,7 @@ static int i2c_post_bind(struct udevice *dev)
 
 int i2c_uclass_init(struct uclass *class)
 {
-	struct i2c_priv *priv = class->priv;
+	struct i2c_priv *priv = uclass_get_priv(class);
 
 	/* Just for sure */
 	if (!priv)

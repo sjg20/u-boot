@@ -704,7 +704,7 @@ static int fm_eth_recv(struct udevice *dev, int flags, uchar **packetp)
 #ifdef CONFIG_DM_ETH
 static int fm_eth_free_pkt(struct udevice *dev, uchar *packet, int length)
 {
-	struct fm_eth *fm_eth = (struct fm_eth *)dev->priv;
+	struct fm_eth *fm_eth = (struct fm_eth *) dev_get_priv(dev);
 
 	fm_eth->cur_rxbd = fm_eth_free_one(fm_eth, fm_eth->cur_rxbd);
 
@@ -1004,7 +1004,7 @@ static struct udevice *fm_get_internal_mdio(struct udevice *dev)
 
 static int fm_eth_probe(struct udevice *dev)
 {
-	struct fm_eth *fm_eth = (struct fm_eth *)dev->priv;
+	struct fm_eth *fm_eth = (struct fm_eth *) dev_get_priv(dev);
 	struct ofnode_phandle_args args;
 	void *reg;
 	int ret, index;

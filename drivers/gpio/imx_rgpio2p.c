@@ -151,7 +151,7 @@ static int imx_rgpio2p_probe(struct udevice *dev)
 
 static int imx_rgpio2p_bind(struct udevice *dev)
 {
-	struct imx_rgpio2p_plat *plat = dev->plat;
+	struct imx_rgpio2p_plat *plat = dev_get_plat(dev);
 	fdt_addr_t addr;
 
 	/*
@@ -184,7 +184,7 @@ static int imx_rgpio2p_bind(struct udevice *dev)
 
 	plat->regs = (struct gpio_regs *)addr;
 	plat->bank_index = dev_seq(dev);
-	dev->plat = plat;
+	dev_set_plat(dev, plat);
 
 	return 0;
 }

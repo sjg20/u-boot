@@ -185,7 +185,7 @@ int p2sb_set_port_id(struct udevice *dev, int portid)
 		 * not have a parent.
 		 */
 		dev->parent_plat = malloc(sizeof(*pplat));
-		if (!dev->parent_plat)
+		if (!dev_get_parent_plat(dev))
 			return -ENOMEM;
 	}
 	pplat = dev_get_parent_plat(dev);

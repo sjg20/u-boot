@@ -184,7 +184,7 @@ int usb_stop(void)
 	if (ret)
 		return ret;
 
-	uc_priv = uc->priv;
+	uc_priv = uclass_get_priv(uc);
 
 	uclass_foreach_dev(bus, uc) {
 		ret = device_remove(bus, DM_REMOVE_NORMAL);
@@ -263,7 +263,7 @@ int usb_init(void)
 	if (ret)
 		return ret;
 
-	uc_priv = uc->priv;
+	uc_priv = uclass_get_priv(uc);
 
 	uclass_foreach_dev(bus, uc) {
 		/* init low_level USB */
