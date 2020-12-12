@@ -393,7 +393,8 @@ class DtbPlatdata(object):
         re_ids = re.compile('struct udevice_id (.*)\[\]\s*=')
 
         # Matches the references to the udevice_id list
-        re_of_match = re.compile('\.of_match\s*=\s*([a-z0-9_]+),')
+        re_of_match = re.compile(
+            '\.of_match\s*=\s*(of_match_ptr\()?([a-z0-9_]+)(\))?,')
 
         # Matches the header/size information for priv
         re_priv = re.compile('^\s*DM_PRIV\((.*)\)$')
@@ -418,7 +419,7 @@ class DtbPlatdata(object):
                 if id_m:
                     uclass_id = id_m.group(1)
                 elif id_of_match:
-                    compat = id_of_match.group(1)
+                    compat = id_of_match.group(2)
                 elif '};' in line:
                     if uclass_id and compat:
                         if compat not in of_match:
