@@ -74,7 +74,7 @@ void board_init_f(ulong dummy)
 	get_clocks();
 
 	preloader_console_init();
-	spl_set_bd();
+	spl_alloc_bd();
 
 #ifdef CONFIG_SYS_I2C
 #ifdef CONFIG_SPL_I2C_SUPPORT
