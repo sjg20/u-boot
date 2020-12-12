@@ -271,7 +271,7 @@ static int dm_test_fdt(struct unit_test_state *uts)
 		ret = uclass_find_device(UCLASS_TEST_FDT, i, &dev);
 		ut_assert(!ret);
 		ut_assert(!dev_get_priv(dev));
-		ut_assert(dev->plat);
+		ut_assert(dev_get_plat(dev));
 	}
 
 	ut_assertok(dm_check_devices(uts, num_devices));
