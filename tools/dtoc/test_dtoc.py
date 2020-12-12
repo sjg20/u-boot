@@ -1009,3 +1009,23 @@ U_BOOT_DRIVER(i2c_tegra) = {
         self.assertIn(
             "file.c: Unknown compatible var 'tegra_i2c_ids' (found: tegra_i2c_ids2)",
             str(e.exception))
+
+    def testOfmatch(self):
+        """Test detection of of_match_ptr() member"""
+        buff = '''
+static const struct udevice_id tegra_i2c_ids[] = {
+	{ .compatible = "nvidia,tegra114-i2c", .data = TYPE_114 },
+	{ }
+};
+
+U_BOOT_DRIVER(i2c_tegra) = {
+	.name	= "i2c_tegra",
+	.id	= UCLASS_I2C,
+	.of_match = of_match_ptr(tegra_i2c_ids),
+};
+'''
+        dpd = dtb_platdata.DtbPlatdata(None, False, False)
+        dpd._parse_driver('file.c', buff)
+        self.assertIn('i2c_tegra', dpd._drivers)
+        drv = dpd._drivers['i2c_tegra']
+        self.assertEqual('i2c_tegra', drv.name)
