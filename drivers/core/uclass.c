@@ -160,6 +160,11 @@ const char *uclass_get_name(enum uclass_id id)
 	return uc->uc_drv->name;
 }
 
+void *uclass_get_priv(const struct uclass *uc)
+{
+	return uc->priv;
+}
+
 enum uclass_id uclass_get_by_name(const char *name)
 {
 	int i;
