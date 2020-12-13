@@ -959,6 +959,16 @@ int device_set_name(struct udevice *dev, const char *name)
 	return 0;
 }
 
+void dev_set_priv(struct udevice *dev, void *priv)
+{
+	dev->priv_ = priv;
+}
+
+void dev_set_plat(struct udevice *dev, void *plat)
+{
+	dev->plat_ = plat;
+}
+
 #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 bool device_is_compatible(const struct udevice *dev, const char *compat)
 {
