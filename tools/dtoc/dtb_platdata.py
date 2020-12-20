@@ -1513,8 +1513,26 @@ class DtbPlatdata():
                     uclass.alias_path_to_num[node.path] = seq
                     uclass.alias_num_to_node[seq] = node
 
+
     def process_nodes(self):
         nodes_to_output = list(self._valid_nodes)
+
+        # Figure out which drivers we actually use
+        for node in nodes_to_output:
+            struct_name, _ = self.get_normalized_compat_name(node)
+            driver = self._drivers.get(struct_name)
+            if driver:
+                driver.used = True
+                if driver.need_macro:
+                    print("Warning: Driver '%s' needs macros for: %s" %
+                          (driver.name, '\n'.join(driver.need_macro)))
+                if driver.dups and driver.warn_dups:
+                    print("Warning: Duplicate driver name '%s' (orig=%s, dups=%s)" %
+                          (driver.name, driver.fname,
+                           ', '.join([drv.fname for drv in driver.dups])))
+            node.child_devs = []
+            node.child_refs = {}
+            node.seq = -1
 
     def generate_tables(self):
         """Generate device defintions for the platform data
@@ -1535,23 +1553,6 @@ class DtbPlatdata():
         self.out('#include <dt-structs.h>\n')
         self.out('\n')
         nodes_to_output = list(self._valid_nodes)
-
-        # Figure out which drivers we actually use
-        for node in nodes_to_output:
-            struct_name, _ = self.get_normalized_compat_name(node)
-            driver = self._drivers.get(struct_name)
-            if driver:
-                driver.used = True
-                if driver.need_macro:
-                    print("Warning: Driver '%s' needs macros for: %s" %
-                          (driver.name, '\n'.join(driver.need_macro)))
-                if driver.dups and driver.warn_dups:
-                    print("Warning: Duplicate driver name '%s' (orig=%s, dups=%s)" %
-                          (driver.name, driver.fname,
-                           ', '.join([drv.fname for drv in driver.dups])))
-            node.child_devs = []
-            node.child_refs = {}
-            node.seq = -1
 
         for node in nodes_to_output:
             self.buf('U_BOOT_DEVICE_DECL(%s);\n' % conv_name_to_c(node.name))
