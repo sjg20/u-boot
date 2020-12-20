@@ -1013,7 +1013,10 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs,
     structs = plat.scan_structs()
     plat.scan_phandles()
 
-    for cmd in args[0].split(','):
+    cmds = args[0].split(',')
+    if 'all' in cmds:
+        cmds = OUTPUT_FILES.keys()
+    for cmd in cmds:
         outfile = OUTPUT_FILES.get(cmd)
         if not outfile:
             raise ValueError("Unknown command '%s': (use: %s)" %

@@ -10,6 +10,7 @@ tool.
 """
 
 import collections
+import glob
 import os
 import struct
 import tempfile
@@ -314,6 +315,11 @@ U_BOOT_DEVICE(spl_test3) = {
             data = infile.read()
 
         self._check_strings(self.platdata_text, data)
+
+        # Try the 'all' command
+        self.run_test(['all'], dtb_file, output)
+        data = tools.ReadFile(output, binary=False)
+        self._check_strings(self.struct_text + self.platdata_text, data)
 
     def test_driver_alias(self):
         """Test output from a device tree file with a driver alias"""
@@ -901,7 +907,7 @@ U_BOOT_DEVICE(spl_test2) = {
         """Test output of multiple pieces to a single file"""
         dtb_file = get_dtb_file('dtoc_test_simple.dts')
         output = tools.GetOutputFilename('output')
-        self.run_test(['struct,platdata'], dtb_file, output)
+        self.run_test(['all'], dtb_file, output)
         data = tools.ReadFile(output, binary=False)
         self._check_strings(self.struct_text + self.platdata_text, data)
 
@@ -1059,3 +1065,31 @@ U_BOOT_DRIVER(i2c_tegra) = {
         self.assertIn('i2c_tegra', dpd._drivers)
         drv = dpd._drivers['i2c_tegra']
         self.assertEqual('i2c_tegra', drv.name)
+
+    def test_output_conflict(self):
+        """Test a conflict between and output dirs and output file"""
+        with self.assertRaises(ValueError) as e:
+            dtb_platdata.run_steps(['all'], None, False, 'out', ['cdir'], True)
+        self.assertIn("Must specify either output or output_dirs, not both",
+                      str(e.exception))
+
+    def test_output_dirs(self):
+        """Test outputting files to a directory"""
+        # Remove the directory so that files from other tests are not there
+        tools._RemoveOutputDir()
+        tools.PrepareOutputDir(None)
+
+        # This should create the .dts and .dtb in the output directory
+        dtb_file = get_dtb_file('dtoc_test_simple.dts')
+        outdir = tools.GetOutputDir()
+        fnames = glob.glob(outdir + '/*')
+        self.assertEqual(2, len(fnames))
+
+        dtb_platdata.run_steps(['all'], dtb_file, False, None, [outdir], True)
+        fnames = glob.glob(outdir + '/*')
+        self.assertEqual(4, len(fnames))
+
+        leafs = set([os.path.basename(fname) for fname in fnames])
+        self.assertEqual(
+            {'dt-structs-gen.h', 'source.dts', 'dt-platdata.c', 'source.dtb'},
+            leafs)
