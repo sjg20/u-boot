@@ -1534,28 +1534,7 @@ class DtbPlatdata():
             node.child_refs = {}
             node.seq = -1
 
-    def generate_tables(self):
-        """Generate device defintions for the platform data
-
-        This writes out C platform data initialisation data and
-        U_BOOT_DEVICE() declarations for each valid node. Where a node has
-        multiple compatible strings, a #define is used to make them equivalent.
-
-        See the documentation in doc/driver-model/of-plat.rst for more
-        information.
-        """
-        self.out_header()
-        self.out('/* Allow use of U_BOOT_DEVICE() in this file */\n')
-        self.out('#define DT_PLATDATA_C\n')
-        self.out('\n')
-        self.out('#include <common.h>\n')
-        self.out('#include <dm.h>\n')
-        self.out('#include <dt-structs.h>\n')
-        self.out('\n')
-        nodes_to_output = list(self._valid_nodes)
-
         for node in nodes_to_output:
-            self.buf('U_BOOT_DEVICE_DECL(%s);\n' % conv_name_to_c(node.name))
             node.dev_ref = 'U_BOOT_DEVICE_REF(%s)' % conv_name_to_c(node.name)
             struct_name, _ = self.get_normalized_compat_name(node)
             driver = self._drivers.get(struct_name)
@@ -1588,6 +1567,29 @@ class DtbPlatdata():
                 node.parent.child_refs[node.parent_seq] = \
                     '&%s->sibling_node' % node.dev_ref
             node.parent_driver = parent_driver
+
+    def generate_tables(self):
+        """Generate device defintions for the platform data
+
+        This writes out C platform data initialisation data and
+        U_BOOT_DEVICE() declarations for each valid node. Where a node has
+        multiple compatible strings, a #define is used to make them equivalent.
+
+        See the documentation in doc/driver-model/of-plat.rst for more
+        information.
+        """
+        self.out_header()
+        self.out('/* Allow use of U_BOOT_DEVICE() in this file */\n')
+        self.out('#define DT_PLATDATA_C\n')
+        self.out('\n')
+        self.out('#include <common.h>\n')
+        self.out('#include <dm.h>\n')
+        self.out('#include <dt-structs.h>\n')
+        self.out('\n')
+        nodes_to_output = list(self._valid_nodes)
+
+        for node in nodes_to_output:
+            self.buf('U_BOOT_DEVICE_DECL(%s);\n' % conv_name_to_c(node.name))
         self.buf('\n')
 
         for node in nodes_to_output:
