@@ -1658,12 +1658,6 @@ class DtbPlatdata():
             self.output_node(node)
             nodes_to_output.remove(node)
 
-        # Define dm_populate_phandle_data() which will add the linking between
-        # nodes using DM_GET_DEVICE
-        # dtv_dmc_at_xxx.clocks[0].node = DM_GET_DEVICE(clock_controller_at_xxx)
-        self.buf('void dm_populate_phandle_data(void) {\n')
-        self.buf('}\n')
-
         self.out(''.join(self.get_buf()))
 
 # Types of output file we understand
