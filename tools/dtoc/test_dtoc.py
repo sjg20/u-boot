@@ -135,7 +135,7 @@ class TestDtoc(unittest.TestCase):
             dtb_file (str): Filename of .dtb file
             output (str): Filename of output file
         """
-        dtb_platdata.run_steps(args, dtb_file, False, output, True)
+        dtb_platdata.run_steps(args, dtb_file, False, output, [], True)
 
     def test_name(self):
         """Test conversion of device tree names to C identifiers"""
@@ -356,7 +356,7 @@ void dm_populate_phandle_data(void) {
         dtb_file = get_dtb_file('dtoc_test_invalid_driver.dts')
         output = tools.GetOutputFilename('output')
         with test_util.capture_sys_output() as _:
-            dtb_platdata.run_steps(['struct'], dtb_file, False, output)
+            dtb_platdata.run_steps(['struct'], dtb_file, False, output, [])
         with open(output) as infile:
             data = infile.read()
         self._check_strings(HEADER + '''
@@ -365,7 +365,7 @@ struct dtd_invalid {
 ''', data)
 
         with test_util.capture_sys_output() as _:
-            dtb_platdata.run_steps(['platdata'], dtb_file, False, output)
+            dtb_platdata.run_steps(['platdata'], dtb_file, False, output, [])
         with open(output) as infile:
             data = infile.read()
         self._check_strings(C_HEADER + '''
@@ -521,7 +521,7 @@ void dm_populate_phandle_data(void) {
         """Test that phandle targets are generated when unsing cd-gpios"""
         dtb_file = get_dtb_file('dtoc_test_phandle_cd_gpios.dts')
         output = tools.GetOutputFilename('output')
-        dtb_platdata.run_steps(['platdata'], dtb_file, False, output, True)
+        dtb_platdata.run_steps(['platdata'], dtb_file, False, output, [], True)
         with open(output) as infile:
             data = infile.read()
         self._check_strings(C_HEADER + '''
@@ -920,7 +920,7 @@ U_BOOT_DEVICE(spl_test2) = {
         output = tools.GetOutputFilename('output')
         with test_util.capture_sys_output() as _:
             dtb_platdata.run_steps(
-                ['struct'], dtb_file, False, output, True,
+                ['struct'], dtb_file, False, output, [], True,
                 [None, '', 'tools/dtoc/dtoc_test_scan_drivers.cxx'])
 
     @staticmethod
@@ -938,8 +938,8 @@ U_BOOT_DEVICE(spl_test2) = {
             fout.write(b'\x81')
 
         with test_util.capture_sys_output() as _:
-            dtb_platdata.run_steps(['struct'], dtb_file, False, output, True,
-                                   [driver_fn])
+            dtb_platdata.run_steps(['struct'], dtb_file, False, output, [],
+                                   True, [driver_fn])
 
     def test_driver(self):
         """Test the Driver class"""
