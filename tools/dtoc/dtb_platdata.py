@@ -323,6 +323,7 @@ class DtbPlatdata():
         self._phase = phase
         self._structs = {}
         self._basedir = None
+        self._valid_uclasses = None
 
     def get_normalized_compat_name(self, node):
         """Get a node's normalized compat name
@@ -1420,10 +1421,12 @@ class DtbPlatdata():
     def generate_uclasses(self):
         if not self._instantiate:
             return
-        uclass_list = set()
-        for driver in self._drivers.values():
-            if driver.used:
-                uclass_list.add(driver.uclass_id)
+        self.out_header()
+        self.out('\n')
+        self.out('#include <common.h>\n')
+        self.out('#include <dm.h>\n')
+        self.out('#include <dt-structs.h>\n')
+        self.out('\n')
         self.buf('/*\n')
         self.buf(' * uclass declarations\n')
         self.buf(' *\n')
@@ -1434,13 +1437,11 @@ class DtbPlatdata():
                 for seq, node in uclass.alias_num_to_node.items():
                     self.buf(' *    %d: %s\n' % (seq, node.path))
         self.buf(' */\n')
-        uclass_list = sorted(list(uclass_list))
+        uclass_list = self._valid_uclasses
 
         uclass_node = {}
         for seq, uclass_id in enumerate(uclass_list):
             uc_name = self.uclass_id_to_name(uclass_id)
-            self.buf('DM_DECL_UCLASS_DRIVER(%s);\n' % uc_name)
-            self.buf('DM_DECL_UCLASS_INST(%s);\n' % uc_name)
             uclass_node[seq] = ('&DM_REF_UCLASS_INST(%s)->sibling_node' %
                                       uc_name)
         uclass_node[-1] = '&uclass_head'
@@ -1455,12 +1456,6 @@ class DtbPlatdata():
         for seq, uclass_id in enumerate(uclass_list):
             uc_drv = self._uclass.get(uclass_id)
             uc_name = self.uclass_id_to_name(uclass_id)
-            if not uc_drv:
-                raise ValueError('Cannot find uclass driver for %s (have %s)'
-                                 % (uc_drv, ', '.join(self._uclass.keys())))
-            ref = '&DM_REF_UCLASS_INST(%s)->dev_head' % uc_name
-            uc_drv.node_refs[-1] = ref
-            uc_drv.node_refs[len(uc_drv.devs)] = ref
 
             priv_name = self.alloc_priv(uc_drv.priv, uc_drv.name, '')
 
@@ -1472,13 +1467,35 @@ class DtbPlatdata():
             self.list_head('dev_head', 'uclass_node', uc_drv.devs, None)
             self.buf('};\n')
             self.buf('\n')
+        self.out(''.join(self.get_buf()))
+
+    def generate_decl(self):
+        if not self._instantiate:
+            return
+        self.out_header()
+        self.out('\n')
+        self.buf('/* driver declarations */\n')
+
+        nodes_to_output = list(self._valid_nodes)
+        for node in nodes_to_output:
+            self.buf('U_BOOT_DEVICE_DECL(%s);\n' % conv_name_to_c(node.name))
+        self.buf('\n')
+
+        uclass_list = self._valid_uclasses
+        for uclass_id in uclass_list:
+            uc_name = self.uclass_id_to_name(uclass_id)
+            self.buf('DM_DECL_UCLASS_DRIVER(%s);\n' % uc_name)
+            self.buf('DM_DECL_UCLASS_INST(%s);\n' % uc_name)
+        self.out(''.join(self.get_buf()))
 
     def _read_aliases(self):
         """Read the aliases and attach the information to self._alias
         """
         alias_node = self._fdt.GetNode('/aliases')
+        if not alias_node:
+            return
         re_num = re.compile('([a-z0-9-]+[a-z]+)([0-9]+)')
-        for prop in alias_node .props.values():
+        for prop in alias_node.props.values():
             m_alias = re_num.match(prop.name)
             if not m_alias:
                 raise ValueError("Cannot decode alias '%s'" % prop.name)
@@ -1576,6 +1593,22 @@ class DtbPlatdata():
         self._read_aliases()
         self._assign_seq()
 
+        uclass_list = set()
+        for driver in self._drivers.values():
+            if driver.used:
+                uclass_list.add(driver.uclass_id)
+        self._valid_uclasses = sorted(list(uclass_list))
+
+        for seq, uclass_id in enumerate(uclass_list):
+            uc_drv = self._uclass.get(uclass_id)
+            if not uc_drv:
+                raise ValueError('Cannot find uclass driver for %s (have %s)'
+                                 % (uc_drv, ', '.join(self._uclass.keys())))
+            uc_name = self.uclass_id_to_name(uclass_id)
+            ref = '&DM_REF_UCLASS_INST(%s)->dev_head' % uc_name
+            uc_drv.node_refs[-1] = ref
+            uc_drv.node_refs[len(uc_drv.devs)] = ref
+
     def generate_tables(self):
         """Generate device defintions for the platform data
 
@@ -1595,13 +1628,6 @@ class DtbPlatdata():
         self.out('#include <dt-structs.h>\n')
         self.out('\n')
         nodes_to_output = list(self._valid_nodes)
-
-        for node in nodes_to_output:
-            self.buf('U_BOOT_DEVICE_DECL(%s);\n' % conv_name_to_c(node.name))
-        self.buf('\n')
-
-        if self._instantiate:
-            self.generate_uclasses()
 
         # Keep outputing nodes until there is none left
         while nodes_to_output:
@@ -1650,6 +1676,7 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs, warning_dis
         'struct': OutputFile(Ftype.HEADER, 'dt-structs-gen.h'),
         'platdata': OutputFile(Ftype.SOURCE, 'dt-platdata.c'),
         'uclass': OutputFile(Ftype.SOURCE, 'dt-uclass.c'),
+        'decl': OutputFile(Ftype.HEADER, 'dt-decl.h'),
         }
 
     if not args:
@@ -1684,4 +1711,6 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs, warning_dis
             plat.generate_tables()
         elif cmd == 'uclass':
             plat.generate_uclasses()
+        elif cmd == 'decl':
+            plat.generate_decl()
     plat.finish_output()

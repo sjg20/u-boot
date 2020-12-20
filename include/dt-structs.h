@@ -25,6 +25,7 @@ struct phandle_2_arg {
 	int arg[2];
 };
 #include <generated/dt-structs-gen.h>
+#include <generated/dt-decl.h>
 #endif
 
 #endif
