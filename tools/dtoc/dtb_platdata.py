@@ -57,7 +57,9 @@ class Ftype(IntEnum):
 # This holds information about each type of output file dtoc can create
 # type: Type of file (Ftype)
 # fname: Filename excluding directory, e.g. 'dt-platdata.c'
-OutputFile = collections.namedtuple('OutputFile', ['ftype', 'fname'])
+# hdr_comment: Comment explaining the purpose of the file
+OutputFile = collections.namedtuple('OutputFile',
+                                    ['ftype', 'fname', 'hdr_comment'])
 
 # This holds information about a property which includes phandles.
 #
@@ -72,6 +74,24 @@ PhandleInfo = collections.namedtuple('PhandleInfo', ['max_args', 'args'])
 # var_node: C variable to assign (e.g. 'dtv_mmc.clocks[0].node')
 # dev_name: Name of device to assign to (e.g. 'clock')
 PhandleLink = collections.namedtuple('PhandleLink', ['var_node', 'dev_name'])
+
+# Types of output file we understand
+# key: Command used to generate this file
+# value: OutputFile for this command
+OUTPUT_FILES = {
+    'struct':
+        OutputFile(Ftype.HEADER, 'dt-structs-gen.h',
+                   'Defines the structs used to hold devicetree data'),
+    'platdata':
+        OutputFile(Ftype.SOURCE, 'dt-platdata.c',
+                   'Declares the U_BOOT_DRIVER() records and platform data'),
+    'uclass':
+        OutputFile(Ftype.SOURCE, 'dt-uclass.c',
+                   'Declares the uclass instances (struct uclass)'),
+    'decl':
+        OutputFile(Ftype.HEADER, 'dt-decl.h',
+                   'Declares externs for all device/uclass instances'),
+    }
 
 
 class Driver:
@@ -1669,15 +1689,6 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs, warning_dis
     Raises:
         ValueError: if args has no command, or an unknown command
     """
-    # Types of output file we understand
-    # key: Command used to generate this file
-    # value: OutputFile for this command
-    output_files = {
-        'struct': OutputFile(Ftype.HEADER, 'dt-structs-gen.h'),
-        'platdata': OutputFile(Ftype.SOURCE, 'dt-platdata.c'),
-        'uclass': OutputFile(Ftype.SOURCE, 'dt-uclass.c'),
-        'decl': OutputFile(Ftype.HEADER, 'dt-decl.h'),
-        }
 
     if not args:
         raise ValueError('Please specify a command: struct, platdata, all')
@@ -1697,12 +1708,12 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs, warning_dis
 
     cmds = args[0].split(',')
     if 'all' in cmds:
-        cmds = output_files.keys()
+        cmds = OUTPUT_FILES.keys()
     for cmd in cmds:
-        outfile = output_files.get(cmd)
+        outfile = OUTPUT_FILES.get(cmd)
         if not outfile:
             raise ValueError("Unknown command '%s': (use: %s)" %
-                             (cmd, ', '.join(output_files.keys())))
+                             (cmd, ', '.join(OUTPUT_FILES.keys())))
         plat.setup_output(outfile.ftype,
                           outfile.fname if output_dirs else output)
         if cmd == 'struct':
