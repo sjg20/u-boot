@@ -1098,10 +1098,10 @@ U_BOOT_DRIVER(i2c_tegra) = {
     def testInstantiate(self):
         """Test running dtoc with -i"""
         dtb_file = get_dtb_file('dtoc_test_inst.dts')
-        output = tools.GetOutputFilename('output')
-        basedir = os.path.join(our_path, '../..')
-        dtb_platdata.run_steps(['platdata'], dtb_file, False, output, True,
-                               None, instantiate=True, basedir=basedir)
-        data = tools.ReadFile(output)
-        for line in data.splitlines():
-            print(line.decode('utf-8'))
+        basedir = os.path.join(OUR_PATH, '../..')
+        outdir = tools.GetOutputDir()
+        dtb_platdata.run_steps(['all'], dtb_file, False, None, [outdir],
+                               True, None, instantiate=True, basedir=basedir)
+        #data = tools.ReadFile(output)
+        #for line in data.splitlines():
+            #print(line.decode('utf-8'))

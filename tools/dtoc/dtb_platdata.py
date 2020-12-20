@@ -1417,7 +1417,9 @@ class DtbPlatdata():
         self.buf('\t\t.next = %s,\n' % node_refs[seq + 1])
         self.buf('\t},\n')
 
-    def _output_uclasses(self):
+    def generate_uclasses(self):
+        if not self._instantiate:
+            return
         uclass_list = set()
         for driver in self._drivers.values():
             if driver.used:
@@ -1511,6 +1513,8 @@ class DtbPlatdata():
                     uclass.alias_path_to_num[node.path] = seq
                     uclass.alias_num_to_node[seq] = node
 
+    def process_nodes(self):
+        nodes_to_output = list(self._valid_nodes)
 
     def generate_tables(self):
         """Generate device defintions for the platform data
@@ -1593,7 +1597,7 @@ class DtbPlatdata():
         if self._instantiate:
             self._read_aliases()
             self._assign_seq()
-            self._output_uclasses()
+            self.generate_uclasses()
 
         # Keep outputing nodes until there is none left
         while nodes_to_output:
@@ -1641,6 +1645,7 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs, warning_dis
     output_files = {
         'struct': OutputFile(Ftype.HEADER, 'dt-structs-gen.h'),
         'platdata': OutputFile(Ftype.SOURCE, 'dt-platdata.c'),
+        'uclass': OutputFile(Ftype.SOURCE, 'dt-uclass.c'),
         }
 
     if not args:
@@ -1657,6 +1662,7 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs, warning_dis
     plat.setup_output_dirs(output_dirs)
     structs = plat.scan_structs()
     plat.scan_phandles()
+    plat.process_nodes()
 
     cmds = args[0].split(',')
     if 'all' in cmds:
@@ -1672,4 +1678,6 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs, warning_dis
             plat.generate_structs(structs)
         elif cmd == 'platdata':
             plat.generate_tables()
+        elif cmd == 'uclass':
+            plat.generate_uclasses()
     plat.finish_output()
