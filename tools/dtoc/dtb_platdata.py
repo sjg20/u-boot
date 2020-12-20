@@ -15,6 +15,7 @@ See doc/driver-model/of-plat.rst for more informaiton
 
 import collections
 import copy
+from enum import IntEnum
 import os
 import re
 import sys
@@ -48,6 +49,15 @@ TYPE_NAMES = {
 
 STRUCT_PREFIX = 'dtd_'
 VAL_PREFIX = 'dtv_'
+
+class Ftype(IntEnum):
+    SOURCE, HEADER = range(2)
+
+
+# This holds information about each type of output file dtoc can create
+# type: Type of file (Ftype)
+# fname: Filename excluding directory, e.g. 'dt-platdata.c'
+OutputFile = collections.namedtuple('OutputFile', ['ftype', 'fname'])
 
 # This holds information about a property which includes phandles.
 #
@@ -197,6 +207,8 @@ class DtbPlatdata():
                key: Compatible string, e.g. 'rockchip,rk3288-grf'
                value: Driver data, e,g, 'ROCKCHIP_SYSCON_GRF', or None
         _compat_to_driver: Maps compatible strings to DriverInfo
+        _dirname: Directory to hold output files, or None for none (all files
+            go to stdout)
     """
     def __init__(self, dtb_fname, include_disabled, warning_disabled,
                  drivers_additional=None):
@@ -212,6 +224,7 @@ class DtbPlatdata():
         self._drivers_additional = drivers_additional or []
         self._of_match = {}
         self._compat_to_driver = {}
+        self._dirnames = [None] * len(Ftype)
 
     def get_normalized_compat_name(self, node):
         """Get a node's normalized compat name
@@ -249,19 +262,67 @@ class DtbPlatdata():
 
         return compat_list_c[0], compat_list_c[1:]
 
-    def setup_output(self, fname):
+    def setup_output_dirs(self, output_dirs):
+        """Set up the output directories
+
+        This should be done before setup_output() is called
+
+        Args:
+            output_dirs (tuple of str):
+                Directory to use for C output files.
+                    Use None to write files relative current directory
+                Directory to use for H output files.
+                    Defaults to the C output dir
+        """
+        def process_dir(ftype, dirname):
+            if dirname:
+                os.makedirs(dirname, exist_ok=True)
+                self._dirnames[ftype] = dirname
+
+        if output_dirs:
+            c_dirname = output_dirs[0]
+            h_dirname = output_dirs[1] if len(output_dirs) > 1 else c_dirname
+            process_dir(Ftype.SOURCE, c_dirname)
+            process_dir(Ftype.HEADER, h_dirname)
+
+    def setup_output(self, ftype, fname):
         """Set up the output destination
 
         Once this is done, future calls to self.out() will output to this
-        file.
+        file. The file used is as follows:
+
+        self._dirnames[ftype] is None: output to fname, or stdout if None
+        self._dirnames[ftype] is not None: output to fname in that directory
+
+        Calling this function multiple times will close the old file and open
+        the new one. If they are the same file, nothing happens and output will
+        continue to the same file.
 
         Args:
-            fname (str): Filename to send output to, or None for stdout
+            ftype (str): Type of file to create ('c' or 'h')
+            fname (str): Filename to send output to. If there is a directory in
+                self._dirnames for this file type, it will be put in that
+                directory
         """
-        if fname:
-            self._outfile = open(fname, 'w')
+        dirname = self._dirnames[ftype]
+        if dirname:
+            pathname = os.path.join(dirname, fname)
+            if self._outfile:
+                self._outfile.close()
+            self._outfile = open(pathname, 'w')
+        elif fname:
+            if not self._outfile:
+                self._outfile = open(fname, 'w')
         else:
             self._outfile = sys.stdout
+
+    def finish_output(self):
+        """Finish outputing to a file
+
+        This closes the output file, if one is in use
+        """
+        if self._outfile != sys.stdout:
+            self._outfile.close()
 
     def out(self, line):
         """Output a string to the output file
@@ -928,8 +989,18 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs,
     Raises:
         ValueError: if args has no command, or an unknown command
     """
+    # Types of output file we understand
+    # key: Command used to generate this file
+    # value: OutputFile for this command
+    output_files = {
+        'struct': OutputFile(Ftype.HEADER, 'dt-structs-gen.h'),
+        'platdata': OutputFile(Ftype.SOURCE, 'dt-platdata.c'),
+        }
+
     if not args:
-        raise ValueError('Please specify a command: struct, platdata')
+        raise ValueError('Please specify a command: struct, platdata, all')
+    if output and output_dirs and any(output_dirs):
+        raise ValueError('Must specify either output or output_dirs, not both')
 
     plat = DtbPlatdata(dtb_file, include_disabled, warning_disabled,
                        drivers_additional)
@@ -937,15 +1008,19 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs,
     plat.scan_dtb()
     plat.scan_tree()
     plat.scan_reg_sizes()
-    plat.setup_output(output)
+    plat.setup_output_dirs(output_dirs)
     structs = plat.scan_structs()
     plat.scan_phandles()
 
     for cmd in args[0].split(','):
+        outfile = output_files.get(cmd)
+        if not outfile:
+            raise ValueError("Unknown command '%s': (use: %s)" %
+                             (cmd, ', '.join(output_files.keys())))
+        plat.setup_output(outfile.ftype,
+                          outfile.fname if output_dirs else output)
         if cmd == 'struct':
             plat.generate_structs(structs)
         elif cmd == 'platdata':
             plat.generate_tables()
-        else:
-            raise ValueError("Unknown command '%s': (use: struct, platdata)" %
-                             cmd)
+    plat.finish_output()
