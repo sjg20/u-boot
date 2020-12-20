@@ -322,6 +322,14 @@ class DtbPlatdata():
             key: Name of struct
             value: Struct object
         _basedir (str): Base directory of source tree
+        _valid_uclasses (list of str): List of uclasses needed for the selected
+            devices (see _valid_node), each a uclass name (e.g. 'UCLASS_ID') in
+            alphabetical order
+        _structs (dict): OrderedDict of dtplat structures to output
+            key (str): Node name, as a C identifier
+                    value: dict containing structure fields:
+                        key (str): Field name
+                        value: Prop object with field information
     """
     def __init__(self, dtb_fname, include_disabled, warning_disabled,
                  drivers_additional=None, instantiate=False, phase=None):
@@ -344,6 +352,7 @@ class DtbPlatdata():
         self._structs = {}
         self._basedir = None
         self._valid_uclasses = None
+        self._struct_data = collections.OrderedDict()
 
     def get_normalized_compat_name(self, node):
         """Get a node's normalized compat name
@@ -1069,7 +1078,7 @@ class DtbPlatdata():
                     key (str): Field name
                     value: Prop object with field information
         """
-        structs = collections.OrderedDict()
+        structs = self._struct_data
         for node in self._valid_nodes:
             node_name, _ = self.get_normalized_compat_name(node)
             fields = {}
@@ -1100,8 +1109,6 @@ class DtbPlatdata():
                 if name not in PROP_IGNORE_LIST and name[0] != '#':
                     prop.Widen(struct[name])
 
-        return structs
-
     def scan_phandles(self):
         """Figure out what phandles each node uses
 
@@ -1130,21 +1137,15 @@ class DtbPlatdata():
                         pos += 1 + args
 
 
-    def generate_structs(self, structs):
+    def generate_structs(self):
         """Generate struct defintions for the platform data
 
         This writes out the body of a header file consisting of structure
         definitions for node in self._valid_nodes. See the documentation in
         doc/driver-model/of-plat.rst for more information.
 
-        Args:
-            structs (dict): dict containing structures:
-                key (str): Node name, as a C identifier
-                value: dict containing structure fields:
-                    key (str): Field name
-                    value: Prop object with field information
-
         """
+        structs = self._struct_data
         self.out_header()
         self.out('#include <stdbool.h>\n')
         self.out('#include <linux/libfdt.h>\n')
@@ -1702,7 +1703,7 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs, warning_dis
     plat.scan_tree(add_root=instantiate)
     plat.scan_reg_sizes()
     plat.setup_output_dirs(output_dirs)
-    structs = plat.scan_structs()
+    plat.scan_structs()
     plat.scan_phandles()
     plat.process_nodes()
 
@@ -1717,7 +1718,7 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs, warning_dis
         plat.setup_output(outfile.ftype,
                           outfile.fname if output_dirs else output)
         if cmd == 'struct':
-            plat.generate_structs(structs)
+            plat.generate_structs()
         elif cmd == 'platdata':
             plat.generate_tables()
         elif cmd == 'uclass':
