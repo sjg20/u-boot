@@ -1568,6 +1568,14 @@ class DtbPlatdata():
                     '&%s->sibling_node' % node.dev_ref
             node.parent_driver = parent_driver
 
+        for node in nodes_to_output:
+            ref = '&%s->child_head' % node.dev_ref
+            node.child_refs[-1] = ref
+            node.child_refs[len(node.child_devs)] = ref
+
+        self._read_aliases()
+        self._assign_seq()
+
     def generate_tables(self):
         """Generate device defintions for the platform data
 
@@ -1592,14 +1600,7 @@ class DtbPlatdata():
             self.buf('U_BOOT_DEVICE_DECL(%s);\n' % conv_name_to_c(node.name))
         self.buf('\n')
 
-        for node in nodes_to_output:
-            ref = '&%s->child_head' % node.dev_ref
-            node.child_refs[-1] = ref
-            node.child_refs[len(node.child_devs)] = ref
-
         if self._instantiate:
-            self._read_aliases()
-            self._assign_seq()
             self.generate_uclasses()
 
         # Keep outputing nodes until there is none left
