@@ -56,6 +56,9 @@ C_HEADER = '''/*
 #include <dt-structs.h>
 '''
 
+# Info saved from a previous run of the tests (to speed things up)
+test_info = None
+
 # This is a test so is allowed to access private things in the module it is
 # testing
 # pylint: disable=W0212
@@ -72,6 +75,14 @@ def get_dtb_file(dts_fname, capture_stderr=False):
     """
     return fdt_util.EnsureCompiled(os.path.join(OUR_PATH, dts_fname),
                                    capture_stderr=capture_stderr)
+
+
+def setup():
+    global test_info
+
+    dpd = dtb_platdata.DtbPlatdata(None, False, False)
+    dpd.scan_drivers(None)
+    test_info = dpd.save_info_for_test()
 
 
 class FakeNode:
@@ -136,7 +147,8 @@ class TestDtoc(unittest.TestCase):
             dtb_file (str): Filename of .dtb file
             output (str): Filename of output file
         """
-        dtb_platdata.run_steps(args, dtb_file, False, output, [], True)
+        dtb_platdata.run_steps(args, dtb_file, False, output, [], True,
+                               test_info=test_info)
 
     def test_name(self):
         """Test conversion of device tree names to C identifiers"""

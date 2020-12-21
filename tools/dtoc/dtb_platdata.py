@@ -235,6 +235,14 @@ class DtbPlatdata():
         self._dirnames = [None] * len(Ftype)
         self._struct_data = collections.OrderedDict()
         self._basedir = None
+        self._have_test_info = False
+
+    def save_info_for_test(self):
+        return self._drivers, self._driver_aliases
+
+    def load_info_for_test(self, info):
+        self._drivers, self._driver_aliases = info
+        self._have_test_info = True
 
     def get_normalized_compat_name(self, node):
         """Get a node's normalized compat name
@@ -599,6 +607,8 @@ class DtbPlatdata():
         This procedure will populate self._drivers and self._driver_aliases
 
         """
+        if not basedir and self._have_test_info:
+            return
         if not basedir:
             basedir = sys.argv[0].replace('tools/dtoc/dtoc', '')
             if basedir == '':
@@ -985,7 +995,8 @@ OUTPUT_FILES = {
 
 
 def run_steps(args, dtb_file, include_disabled, output, output_dirs,
-              warning_disabled=False, drivers_additional=None, basedir=None):
+              warning_disabled=False, drivers_additional=None, basedir=None,
+              test_info=None):
     """Run all the steps of the dtoc tool
 
     Args:
@@ -1001,6 +1012,10 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs,
             scanning
         basedir (str): Base directory of U-Boot source code. Defaults to the
             grandparent of this file's directory
+        test_info (list): Useful information from a previous run, as returned
+            from save_info_for_test(). This can help speed up tests. Use None
+            for normal operation
+
     Raises:
         ValueError: if args has no command, or an unknown command
     """
@@ -1011,6 +1026,8 @@ def run_steps(args, dtb_file, include_disabled, output, output_dirs,
 
     plat = DtbPlatdata(dtb_file, include_disabled, warning_disabled,
                        drivers_additional)
+    if test_info:
+        plat.load_info_for_test(test_info)
     plat.scan_drivers(basedir)
     plat.scan_dtb()
     plat.scan_tree()

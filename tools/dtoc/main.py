@@ -54,6 +54,9 @@ def run_tests(args):
     result = unittest.TestResult()
     sys.argv = [sys.argv[0]]
     test_name = args and args[0] or None
+
+    test_dtoc.setup()
+
     for module in (test_dtoc.TestDtoc,):
         if test_name:
             try:
