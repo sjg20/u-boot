@@ -962,11 +962,11 @@ U_BOOT_DRVINFO(spl_test2) = {
         i2c = 'I2C_UCLASS'
         compat = {'rockchip,rk3288-grf': 'ROCKCHIP_SYSCON_GRF',
                   'rockchip,rk3288-srf': None}
-        drv1 = dtb_platdata.DriverInfo('fred', i2c, compat)
-        drv2 = dtb_platdata.DriverInfo('mary', i2c, {})
-        drv3 = dtb_platdata.DriverInfo('fred', i2c, compat)
+        drv1 = dtb_platdata.Driver('fred', i2c, compat)
+        drv2 = dtb_platdata.Driver('mary', i2c, {})
+        drv3 = dtb_platdata.Driver('fred', i2c, compat)
         self.assertEqual(
-            "DriverInfo(name='fred', uclass_id='I2C_UCLASS', "
+            "Driver(name='fred', uclass_id='I2C_UCLASS', "
             "compat={'rockchip,rk3288-grf': 'ROCKCHIP_SYSCON_GRF', "
             "'rockchip,rk3288-srf': None}, priv_size=0)", str(drv1))
         self.assertEqual(drv1, drv3)
@@ -1009,7 +1009,7 @@ U_BOOT_DRVINFO(spl_test2) = {
         i2c = 'I2C_UCLASS'
         compat = {'rockchip,rk3288-grf': 'ROCKCHIP_SYSCON_GRF',
                   'rockchip,rk3288-srf': None}
-        drv = dtb_platdata.DriverInfo('fred', i2c, compat)
+        drv = dtb_platdata.Driver('fred', i2c, compat)
         dpd._drivers['rockchip_rk3288_grf'] = drv
 
         dpd._driver_aliases['rockchip_rk3288_srf'] = 'rockchip_rk3288_grf'
