@@ -57,25 +57,12 @@ def run_tests(args):
 
     test_dtoc.setup()
 
-    for module in (test_dtoc.TestDtoc,):
-        if test_name:
-            try:
-                suite = unittest.TestLoader().loadTestsFromName(test_name, module)
-            except AttributeError:
-                continue
-        else:
-            suite = unittest.TestLoader().loadTestsFromTestCase(module)
-        suite.run(result)
+    test_util.RunTestSuites(
+        result, debug=True, verbosity=1, test_preserve_dirs=False,
+        processes=None, test_name=test_name, toolpath=[],
+        test_class_list=[test_dtoc.TestDtoc,])
 
-    print(result)
-    for _, err in result.errors:
-        print(err)
-    for _, err in result.failures:
-        print(err)
-    if result.errors or result.failures:
-        print('dtoc tests FAILED')
-        return 1
-    return 0
+    return test_util.ReportResult('binman', test_name, result)
 
 def RunTestCoverage():
     """Run the tests and check that we get 100% coverage"""
