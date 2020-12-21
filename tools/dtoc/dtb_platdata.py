@@ -605,6 +605,11 @@ class DtbPlatdata():
                 basedir = './'
         self._basedir = basedir
         for (dirpath, _, filenames) in os.walk(basedir):
+            rel_path = dirpath[len(basedir):]
+            if rel_path.startswith('/'):
+                rel_path = rel_path[1:]
+            if rel_path.startswith('build') or rel_path.startswith('.git'):
+                continue
             for fname in filenames:
                 if not fname.endswith('.c'):
                     continue
