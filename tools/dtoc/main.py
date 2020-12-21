@@ -16,7 +16,7 @@ compiled program.
 Dtoc produces two output files:
 
    dt-structs.h  - contains struct definitions
-   dt-platdata.c - contains data from the device tree using the struct
+   dt-plat.c - contains data from the device tree using the struct
                       definitions, as well as U-Boot driver definitions.
 
 This tool is used in U-Boot to provide device tree data to SPL without

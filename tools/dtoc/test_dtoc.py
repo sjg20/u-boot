@@ -1093,5 +1093,5 @@ U_BOOT_DRIVER(i2c_tegra) = {
 
         leafs = set([os.path.basename(fname) for fname in fnames])
         self.assertEqual(
-            {'dt-structs-gen.h', 'source.dts', 'dt-platdata.c', 'source.dtb'},
+            {'dt-structs-gen.h', 'source.dts', 'dt-plat.c', 'source.dtb'},
             leafs)

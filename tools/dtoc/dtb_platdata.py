@@ -984,7 +984,7 @@ OUTPUT_FILES = {
         OutputFile(Ftype.HEADER, 'dt-structs-gen.h',
                    'Defines the structs used to hold devicetree data'),
     'platdata':
-        OutputFile(Ftype.SOURCE, 'dt-platdata.c',
+        OutputFile(Ftype.SOURCE, 'dt-plat.c',
                    'Declares the U_BOOT_DRIVER() records and platform data'),
     }
 
