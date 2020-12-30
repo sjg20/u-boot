@@ -11,6 +11,7 @@
 #include <fdtdec.h>
 #include <log.h>
 #include <malloc.h>
+#include <asm-generic/sections.h>
 #include <linux/libfdt.h>
 #include <dm/acpi.h>
 #include <dm/device.h>
@@ -134,7 +135,9 @@ static int dm_setup_inst(void)
 
 	if (CONFIG_IS_ENABLED(OF_PLATDATA_RT)) {
 		struct udevice_rt *urt;
+		void *base;
 		int n_ents;
+		uint size;
 
 		/* Allocate the udevice_rt table */
 		n_ents = ll_entry_count(struct udevice, udevice);
@@ -142,6 +145,15 @@ static int dm_setup_inst(void)
 		if (!urt)
 			return log_msg_ret("urt", -ENOMEM);
 		gd_set_dm_udevice_rt(urt);
+
+		/* Now allocate space for the priv/plat data, and copy it in */
+		size = __priv_data_end - __priv_data_start;
+
+		base = calloc(1, size);
+		if (!base)
+			return log_msg_ret("priv", -ENOMEM);
+		memcpy(base, __priv_data_start, size);
+		gd_set_dm_priv_base(base);
 	}
 
 	return 0;
