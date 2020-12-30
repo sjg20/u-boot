@@ -338,6 +338,17 @@ struct driver {
 #define DM_DRIVER_GET(__name)						\
 	ll_entry_get(struct driver, __name, driver)
 
+/* Declare a driver as an extern, so it can be referenced at build time */
+#define DM_DRIVER_DECL(__name)					\
+	ll_entry_decl(struct driver, __name, driver)
+
+/*
+ * Get a pointer to a given driver, for use in data structures. This requires
+ * that the symbol be declared with DM_DRIVER_DECL() first
+ */
+#define DM_DRIVER_REF(__name)					\
+	ll_entry_ref(struct driver, __name, driver)
+
 /**
  * Declare a macro to state a alias for a driver name. This macro will
  * produce no code but its information will be parsed by tools like
