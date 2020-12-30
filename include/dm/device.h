@@ -166,12 +166,27 @@ struct udevice {
 	struct list_head sibling_node;
 	u32 flags_;
 	int seq_;
-#if !CONFIG_IS_ENABLED(OF_PLATDATA)
+#if !CONFIG_IS_ENABLED(OF_PLATDATA_RT)
 	ofnode node_;
 #endif
 #ifdef CONFIG_DEVRES
 	struct list_head devres_head;
 #endif
+};
+
+/**
+ * udevice_rt - runtime information set up by U-Boot
+ *
+ * This is only used with OF_PLATDATA_RT
+ *
+ * There is one of these for every udevice in the linker list, indexed by
+ * the udevice_info idx value.
+ *
+ * @flags_: Flags for this device DM_FLAG_... (do not access outside driver
+ *	model)
+ */
+struct udevice_rt {
+	u32 flags_;
 };
 
 /* Maximum sequence number supported */
