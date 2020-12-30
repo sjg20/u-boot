@@ -542,7 +542,7 @@ void *dev_get_plat(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->plat_;
+	return dm_priv_to_rw(dev->plat_);
 }
 
 void *dev_get_parent_plat(const struct udevice *dev)
@@ -552,7 +552,7 @@ void *dev_get_parent_plat(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->parent_plat_;
+	return dm_priv_to_rw(dev->parent_plat_);
 }
 
 void *dev_get_uclass_plat(const struct udevice *dev)
@@ -562,7 +562,7 @@ void *dev_get_uclass_plat(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->uclass_plat_;
+	return dm_priv_to_rw(dev->uclass_plat_);
 }
 
 void *dev_get_priv(const struct udevice *dev)
@@ -572,7 +572,7 @@ void *dev_get_priv(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->priv_;
+	return dm_priv_to_rw(dev->priv_);
 }
 
 void *dev_get_uclass_priv(const struct udevice *dev)
@@ -582,7 +582,7 @@ void *dev_get_uclass_priv(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->uclass_priv_;
+	return dm_priv_to_rw(dev->uclass_priv_);
 }
 
 void *dev_get_parent_priv(const struct udevice *dev)
@@ -592,7 +592,7 @@ void *dev_get_parent_priv(const struct udevice *dev)
 		return NULL;
 	}
 
-	return dev->parent_priv_;
+	return dm_priv_to_rw(dev->parent_priv_);
 }
 
 static int device_get_device_tail(struct udevice *dev, int ret,
