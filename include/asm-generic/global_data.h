@@ -219,6 +219,10 @@ struct global_data {
 	/** @dm_driver_rt: Dynamic info about the driver */
 	struct driver_rt *dm_driver_rt;
 # endif
+#if CONFIG_IS_ENABLED(OF_PLATDATA_RT)
+	/** @dm_udevice_rt: Dynamic info about the udevice */
+	struct udevice_rt *dm_udevice_rt;
+# endif
 #endif
 #ifdef CONFIG_TIMER
 	/**
@@ -477,6 +481,14 @@ struct global_data {
 #else
 #define gd_set_dm_driver_rt(dyn)
 #define gd_dm_driver_rt()		NULL
+#endif
+
+#if CONFIG_IS_ENABLED(OF_PLATDATA_RT)
+#define gd_set_dm_udevice_rt(dyn)	gd->dm_udevice_rt = dyn
+#define gd_dm_udevice_rt()		gd->dm_udevice_rt
+#else
+#define gd_set_dm_udevice_rt(dyn)
+#define gd_dm_udevice_rt()		NULL
 #endif
 
 #ifdef CONFIG_GENERATE_ACPI_TABLE
