@@ -18,6 +18,27 @@
 #endif
 
 /**
+ * struct smbios_ctx - context for writing SMBIOS tables
+ *
+ * @node:	node containing the information to write (ofnode_null() if none)
+ * @dev:	sysinfo device to use (NULL if none)
+ */
+struct smbios_ctx {
+	ofnode node;
+	struct udevice *dev;
+};
+
+/**
+ * Function prototype to write a specific type of SMBIOS structure
+ *
+ * @addr:	start address to write the structure
+ * @handle:	the structure's handle, a unique 16-bit number
+ * @return:	size of the structure
+ */
+typedef int (*smbios_write_type)(ulong *addr, int handle,
+				 struct smbios_ctx *ctx);
+
+/**
  * struct smbios_write_method - Information about a table-writing function
  *
  * @write: Function to call
@@ -107,13 +128,13 @@ static int smbios_add_string(char *start, const char *str)
  * @prop:	property to write
  * @return 0 if not found, else SMBIOS string number (1 or more)
  */
-static int smbios_add_prop(char *start, ofnode node, const char *prop)
+static int smbios_add_prop(char *start, struct smbios_ctx *ctx,
+			   const char *prop)
 {
-
 	if (IS_ENABLED(CONFIG_OF_CONTROL)) {
 		const char *str;
 
-		str = ofnode_read_string(node, prop);
+		str = ofnode_read_string(ctx->node, prop);
 		if (str)
 			return smbios_add_string(start, str);
 	}
@@ -143,7 +164,8 @@ static int smbios_string_table_len(char *start)
 	return len + 1;
 }
 
-static int smbios_write_type0(ulong *current, int handle, ofnode node)
+static int smbios_write_type0(ulong *current, int handle,
+			      struct smbios_ctx *ctx)
 {
 	struct smbios_type0 *t;
 	int len = sizeof(struct smbios_type0);
@@ -192,7 +214,8 @@ static int smbios_write_type0(ulong *current, int handle, ofnode node)
 	return len;
 }
 
-static int smbios_write_type1(ulong *current, int handle, ofnode node)
+static int smbios_write_type1(ulong *current, int handle,
+			      struct smbios_ctx *ctx)
 {
 	struct smbios_type1 *t;
 	int len = sizeof(struct smbios_type1);
@@ -201,17 +224,18 @@ static int smbios_write_type1(ulong *current, int handle, ofnode node)
 	t = map_sysmem(*current, len);
 	memset(t, 0, sizeof(struct smbios_type1));
 	fill_smbios_header(t, SMBIOS_SYSTEM_INFORMATION, len, handle);
-	t->manufacturer = smbios_add_prop(t->eos, node, "manufacturer");
-	t->product_name = smbios_add_prop(t->eos, node, "product");
-	t->version = smbios_add_prop(t->eos, node, "version");
+	t->manufacturer = smbios_add_prop(t->eos, ctx, "manufacturer");
+	t->product_name = smbios_add_prop(t->eos, ctx, "product");
+// 	SYSINFO_ID_SMBIOS_SYSTEM_VERSION
+	t->version = smbios_add_prop(t->eos, ctx, "version");
 	if (serial_str) {
 		t->serial_number = smbios_add_string(t->eos, serial_str);
 		strncpy((char *)t->uuid, serial_str, sizeof(t->uuid));
 	} else {
-		t->serial_number = smbios_add_prop(t->eos, node, "serial");
+		t->serial_number = smbios_add_prop(t->eos, ctx, "serial");
 	}
-	t->sku_number = smbios_add_prop(t->eos, node, "sku");
-	t->family = smbios_add_prop(t->eos, node, "family");
+	t->sku_number = smbios_add_prop(t->eos, ctx, "sku");
+	t->family = smbios_add_prop(t->eos, ctx, "family");
 
 	len = t->length + smbios_string_table_len(t->eos);
 	*current += len;
@@ -220,7 +244,8 @@ static int smbios_write_type1(ulong *current, int handle, ofnode node)
 	return len;
 }
 
-static int smbios_write_type2(ulong *current, int handle, ofnode node)
+static int smbios_write_type2(ulong *current, int handle,
+			      struct smbios_ctx *ctx)
 {
 	struct smbios_type2 *t;
 	int len = sizeof(struct smbios_type2);
@@ -228,9 +253,9 @@ static int smbios_write_type2(ulong *current, int handle, ofnode node)
 	t = map_sysmem(*current, len);
 	memset(t, 0, sizeof(struct smbios_type2));
 	fill_smbios_header(t, SMBIOS_BOARD_INFORMATION, len, handle);
-	t->manufacturer = smbios_add_prop(t->eos, node, "manufacturer");
-	t->product_name = smbios_add_prop(t->eos, node, "product");
-	t->asset_tag_number = smbios_add_prop(t->eos, node, "asset-tag");
+	t->manufacturer = smbios_add_prop(t->eos, ctx, "manufacturer");
+	t->product_name = smbios_add_prop(t->eos, ctx, "product");
+	t->asset_tag_number = smbios_add_prop(t->eos, ctx, "asset-tag");
 	t->feature_flags = SMBIOS_BOARD_FEATURE_HOSTING;
 	t->board_type = SMBIOS_BOARD_MOTHERBOARD;
 
@@ -241,7 +266,8 @@ static int smbios_write_type2(ulong *current, int handle, ofnode node)
 	return len;
 }
 
-static int smbios_write_type3(ulong *current, int handle, ofnode node)
+static int smbios_write_type3(ulong *current, int handle,
+			      struct smbios_ctx *ctx)
 {
 	struct smbios_type3 *t;
 	int len = sizeof(struct smbios_type3);
@@ -249,7 +275,7 @@ static int smbios_write_type3(ulong *current, int handle, ofnode node)
 	t = map_sysmem(*current, len);
 	memset(t, 0, sizeof(struct smbios_type3));
 	fill_smbios_header(t, SMBIOS_SYSTEM_ENCLOSURE, len, handle);
-	t->manufacturer = smbios_add_prop(t->eos, node, "manufacturer");
+	t->manufacturer = smbios_add_prop(t->eos, ctx, "manufacturer");
 	t->chassis_type = SMBIOS_ENCLOSURE_DESKTOP;
 	t->bootup_state = SMBIOS_STATE_SAFE;
 	t->power_supply_state = SMBIOS_STATE_SAFE;
@@ -263,7 +289,8 @@ static int smbios_write_type3(ulong *current, int handle, ofnode node)
 	return len;
 }
 
-static void smbios_write_type4_dm(struct smbios_type4 *t, ofnode node)
+static void smbios_write_type4_dm(struct smbios_type4 *t,
+				  struct smbios_ctx *ctx)
 {
 	u16 processor_family = SMBIOS_PROCESSOR_FAMILY_UNKNOWN;
 	const char *vendor = "Unknown";
@@ -295,7 +322,8 @@ static void smbios_write_type4_dm(struct smbios_type4 *t, ofnode node)
 	t->processor_version = smbios_add_string(t->eos, name);
 }
 
-static int smbios_write_type4(ulong *current, int handle, ofnode node)
+static int smbios_write_type4(ulong *current, int handle,
+			      struct smbios_ctx *ctx)
 {
 	struct smbios_type4 *t;
 	int len = sizeof(struct smbios_type4);
@@ -304,7 +332,7 @@ static int smbios_write_type4(ulong *current, int handle, ofnode node)
 	memset(t, 0, sizeof(struct smbios_type4));
 	fill_smbios_header(t, SMBIOS_PROCESSOR_INFORMATION, len, handle);
 	t->processor_type = SMBIOS_PROCESSOR_TYPE_CENTRAL;
-	smbios_write_type4_dm(t, node);
+	smbios_write_type4_dm(t, ctx);
 	t->status = SMBIOS_PROCESSOR_STATUS_ENABLED;
 	t->processor_upgrade = SMBIOS_PROCESSOR_UPGRADE_NONE;
 	t->l1_cache_handle = 0xffff;
@@ -319,7 +347,8 @@ static int smbios_write_type4(ulong *current, int handle, ofnode node)
 	return len;
 }
 
-static int smbios_write_type32(ulong *current, int handle, ofnode node)
+static int smbios_write_type32(ulong *current, int handle,
+			       struct smbios_ctx *ctx)
 {
 	struct smbios_type32 *t;
 	int len = sizeof(struct smbios_type32);
@@ -334,7 +363,8 @@ static int smbios_write_type32(ulong *current, int handle, ofnode node)
 	return len;
 }
 
-static int smbios_write_type127(ulong *current, int handle, ofnode node)
+static int smbios_write_type127(ulong *current, int handle,
+				struct smbios_ctx *ctx)
 {
 	struct smbios_type127 *t;
 	int len = sizeof(struct smbios_type127);
@@ -363,7 +393,7 @@ ulong write_smbios_table(ulong addr)
 {
 	ofnode parent_node = ofnode_null();
 	struct smbios_entry *se;
-	struct udevice *dev;
+	struct smbios_ctx ctx;
 	ulong table_addr;
 	ulong tables;
 	int len = 0;
@@ -373,10 +403,12 @@ ulong write_smbios_table(ulong addr)
 	int isize;
 	int i;
 
+	ctx.node = ofnode_null();
 	if (IS_ENABLED(CONFIG_OF_CONTROL)) {
-		uclass_first_device(UCLASS_SYSINFO, &dev);
-		if (dev)
-			parent_node = dev_read_subnode(dev, "smbios");
+		uclass_first_device(UCLASS_SYSINFO, &ctx.dev);
+		if (ctx.dev) {
+			parent_node = dev_read_subnode(ctx.dev, "smbios");
+		}
 	}
 
 	/* 16 byte align the table address */
@@ -392,14 +424,13 @@ ulong write_smbios_table(ulong addr)
 	/* populate minimum required tables */
 	for (i = 0; i < ARRAY_SIZE(smbios_write_funcs); i++) {
 		const struct smbios_write_method *method;
-		ofnode node = ofnode_null();
 		int tmp;
 
 		method = &smbios_write_funcs[i];
 		if (IS_ENABLED(CONFIG_OF_CONTROL) && method->subnode_name)
-			node = ofnode_find_subnode(parent_node,
-						   method->subnode_name);
-		tmp = method->write((ulong *)&addr, handle++, node);
+			ctx.node = ofnode_find_subnode(parent_node,
+						       method->subnode_name);
+		tmp = method->write((ulong *)&addr, handle++, &ctx);
 
 		max_struct_size = max(max_struct_size, tmp);
 		len += tmp;
