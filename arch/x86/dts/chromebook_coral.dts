@@ -60,6 +60,8 @@
 			&gpio_nw GPIO_102 GPIO_ACTIVE_HIGH
 			&gpio_n GPIO_38 GPIO_ACTIVE_HIGH
 			&gpio_n GPIO_45 GPIO_ACTIVE_HIGH>;
+		skuconfig-gpios = <&gpio_nw GPIO_16 GPIO_ACTIVE_HIGH
+			&gpio_nw GPIO_17 GPIO_ACTIVE_HIGH>;
 		smbios {
 			/* Type 1 table */
 			system {

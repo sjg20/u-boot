@@ -3,6 +3,8 @@
  * Copyright (c) 2013 Google, Inc
  */
 
+#define LOG_CATEGORY	UCLASS_GPIO
+
 #include <common.h>
 #include <dm.h>
 #include <log.h>
@@ -20,6 +22,7 @@
 #include <dm/device_compat.h>
 #include <linux/bug.h>
 #include <linux/ctype.h>
+#include <linux/delay.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -671,6 +674,21 @@ int dm_gpio_set_dir_flags(struct gpio_desc *desc, ulong flags)
 	return ret;
 }
 
+int dm_gpios_set_dir_flags(struct gpio_desc *desc, int count, ulong flags)
+{
+	int ret;
+	int i;
+
+	for (i = 0; i < count; i++) {
+		desc[i].flags = 0;
+		ret = dm_gpio_set_dir_flags(&desc[i], flags);
+		if (ret)
+			return log_ret(ret);
+	}
+
+	return 0;
+}
+
 int dm_gpio_set_dir(struct gpio_desc *desc)
 {
 	int ret;
@@ -944,6 +962,65 @@ int dm_gpio_get_values_as_int(const struct gpio_desc *desc_list, int count)
 			vector |= bitmask;
 		bitmask <<= 1;
 	}
+
+	return vector;
+}
+
+int dm_gpio_get_values_as_int_base3(struct gpio_desc *desc_list,
+				    int count)
+{
+	const char tristate[] = "01z";
+	enum {
+		PULLUP,
+		PULLDOWN,
+
+		NUM_OPTIONS,
+	};
+	int vals[NUM_OPTIONS];
+	unsigned mask;
+	unsigned vector = 0;
+	int ret, i;
+
+	for (i = 0; i < NUM_OPTIONS; i++) {
+		uint flags = GPIOD_IS_IN;
+
+		flags |= (i == PULLDOWN) ? GPIOD_PULL_DOWN : GPIOD_PULL_UP;
+		ret = dm_gpios_set_dir_flags(desc_list, count, flags);
+		if (ret)
+			return log_msg_ret("pu", ret);
+
+		/* Give the lines time to settle */
+		udelay(10);
+
+		ret = dm_gpio_get_values_as_int(desc_list, count);
+		if (ret < 0)
+			return log_msg_ret("get1", ret);
+		vals[i] = ret;
+	}
+
+	log_debug("values: %x %x, count = %d\n", vals[0], vals[1], count);
+	for (i = count - 1, mask = 1 << i; i >= 0; i--, mask >>= 1) {
+		uint pd = vals[PULLDOWN] & mask ? 1 : 0;
+		uint pu = vals[PULLUP] & mask ? 1 : 0;
+		uint digit;
+
+		/*
+		 * Get value with internal pulldown active. If this is 1 then
+		 * there is a stronger external pullup, which we call 1. If not
+		 * then call it 0.
+		 */
+		digit = pd;
+
+		/*
+		 * If the values differ then the pin is floating so we call
+		 * this a 2.
+		 * */
+		if (pu != pd)
+			digit |= 2;
+		log_debug("%c ", tristate[digit]);
+		vector = 3 * vector + digit;
+	}
+	log_debug("vector=%d\n", vector);
 
 	return vector;
 }

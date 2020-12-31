@@ -3,6 +3,8 @@
  * Copyright 2019 Google LLC
  */
 
+#define LOG_CATEGORY	UCLASS_GPIO
+
 #include <common.h>
 #include <dm.h>
 #include <errno.h>
@@ -159,8 +161,8 @@ static int intel_gpio_set_dir_flags(struct udevice *dev, unsigned int offset,
 
 	pcr_clrsetbits32(pinctrl, PAD_CFG0_OFFSET(config_offset), bic0, or0);
 	pcr_clrsetbits32(pinctrl, PAD_CFG1_OFFSET(config_offset), bic1, or1);
-	log_info("%s: flags=%lx, offset=%x, config_offset=%x, %x/%x %x/%x\n",
-		 dev->name, flags, offset, config_offset, bic0, or0, bic1, or1);
+	log_debug("%s: flags=%lx, offset=%x, config_offset=%x, %x/%x %x/%x\n",
+		  dev->name, flags, offset, config_offset, bic0, or0, bic1, or1);
 
 	return 0;
 }

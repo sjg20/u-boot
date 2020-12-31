@@ -35,12 +35,13 @@ __weak int board_run_command(const char *cmdline)
 static int get_memconfig(struct udevice *dev)
 {
 	struct gpio_desc gpios[4];
+	int cfg;
 	int ret;
 
 	ret = gpio_request_list_by_name(dev, "memconfig-gpios", gpios,
 					ARRAY_SIZE(gpios),
 					GPIOD_IS_IN | GPIOD_PULL_UP);
-	if (ret) {
+	if (ret < 0) {
 		log_debug("Cannot get GPIO list '%s' (%d)\n", dev->name, ret);
 		return ret;
 	}
@@ -51,18 +52,45 @@ static int get_memconfig(struct udevice *dev)
 	ret = dm_gpio_get_values_as_int(gpios, ARRAY_SIZE(gpios));
 	if (ret < 0)
 		return log_msg_ret("get", ret);
+	cfg = ret;
 
 	ret = gpio_free_list(dev, gpios, ARRAY_SIZE(gpios));
 	if (ret)
 		return log_msg_ret("free", ret);
 
-	return ret;
+	return cfg;
+}
+
+static int get_skuconfig(struct udevice *dev)
+{
+	struct gpio_desc gpios[2];
+	int cfg;
+	int ret;
+
+	ret = gpio_request_list_by_name(dev, "skuconfig-gpios", gpios,
+					ARRAY_SIZE(gpios),
+					GPIOD_IS_IN);
+	if (ret < 0) {
+		log_debug("Cannot get GPIO list '%s' (%d)\n", dev->name, ret);
+		return ret;
+	}
+
+	ret = dm_gpio_get_values_as_int_base3(gpios, ARRAY_SIZE(gpios));
+	if (ret < 0)
+		return log_msg_ret("get", ret);
+	cfg = ret;
+
+	ret = gpio_free_list(dev, gpios, ARRAY_SIZE(gpios));
+	if (ret)
+		return log_msg_ret("free", ret);
+
+	return cfg;
 }
 
 int arch_misc_init(void)
 {
+	int mem_config, sku_config;
 	struct udevice *dev;
-	int mem_config;
 	int ret;
 
 	ret = uclass_first_device_err(UCLASS_SYSINFO, &dev);
@@ -72,7 +100,11 @@ int arch_misc_init(void)
 	if (ret < 0)
 		log_warning("Unable to read memconfig (err=%d)\n", ret);
 	mem_config = ret;
-	log_notice("Memconfig %d\n", mem_config);
+	ret = get_skuconfig(dev);
+	if (ret < 0)
+		log_warning("Unable to read memconfig (err=%d)\n", ret);
+	sku_config = ret;
+	log_notice("Memconfig %d, SKU %d\n", mem_config, sku_config);
 
 	return 0;
 }
