@@ -10,6 +10,7 @@
 #include <env.h>
 #include <mapmem.h>
 #include <smbios.h>
+#include <sysinfo.h>
 #include <tables_csum.h>
 #include <version.h>
 #ifdef CONFIG_CPU
@@ -121,16 +122,26 @@ static int smbios_add_string(char *start, const char *str)
 }
 
 /**
- * smbios_add_prop() - Add a property from the device tree
+ * smbios_add_prop_si() - Add a property from the devicetree or sysinfo
+ *
+ * Sysinfo is used if available, with a fallback to devicetree
  *
  * @start:	string area start address
  * @node:	node containing the information to write (ofnode_null() if none)
  * @prop:	property to write
  * @return 0 if not found, else SMBIOS string number (1 or more)
  */
-static int smbios_add_prop(char *start, struct smbios_ctx *ctx,
-			   const char *prop)
+static int smbios_add_prop_si(char *start, struct smbios_ctx *ctx,
+			      const char *prop, int sysinfo_id)
 {
+	if (sysinfo_id && ctx->dev) {
+		char val[80];
+		int ret;
+
+		ret = sysinfo_get_str(ctx->dev, sysinfo_id, sizeof(val), val);
+		if (!ret)
+			return smbios_add_string(start, val);
+	}
 	if (IS_ENABLED(CONFIG_OF_CONTROL)) {
 		const char *str;
 
@@ -140,6 +151,20 @@ static int smbios_add_prop(char *start, struct smbios_ctx *ctx,
 	}
 
 	return 0;
+}
+
+/**
+ * smbios_add_prop() - Add a property from the devicetree
+ *
+ * @start:	string area start address
+ * @node:	node containing the information to write (ofnode_null() if none)
+ * @prop:	property to write
+ * @return 0 if not found, else SMBIOS string number (1 or more)
+ */
+static int smbios_add_prop(char *start, struct smbios_ctx *ctx,
+			   const char *prop)
+{
+	return smbios_add_prop_si(start, ctx, prop, SYSINFO_ID_NONE);
 }
 
 /**
@@ -226,8 +251,8 @@ static int smbios_write_type1(ulong *current, int handle,
 	fill_smbios_header(t, SMBIOS_SYSTEM_INFORMATION, len, handle);
 	t->manufacturer = smbios_add_prop(t->eos, ctx, "manufacturer");
 	t->product_name = smbios_add_prop(t->eos, ctx, "product");
-// 	SYSINFO_ID_SMBIOS_SYSTEM_VERSION
-	t->version = smbios_add_prop(t->eos, ctx, "version");
+	t->version = smbios_add_prop_si(t->eos, ctx, "version",
+					SYSINFO_ID_SMBIOS_SYSTEM_VERSION);
 	if (serial_str) {
 		t->serial_number = smbios_add_string(t->eos, serial_str);
 		strncpy((char *)t->uuid, serial_str, sizeof(t->uuid));
@@ -255,6 +280,8 @@ static int smbios_write_type2(ulong *current, int handle,
 	fill_smbios_header(t, SMBIOS_BOARD_INFORMATION, len, handle);
 	t->manufacturer = smbios_add_prop(t->eos, ctx, "manufacturer");
 	t->product_name = smbios_add_prop(t->eos, ctx, "product");
+	t->version = smbios_add_prop_si(t->eos, ctx, "version",
+					SYSINFO_ID_SMBIOS_BASEBOARD_VERSION);
 	t->asset_tag_number = smbios_add_prop(t->eos, ctx, "asset-tag");
 	t->feature_flags = SMBIOS_BOARD_FEATURE_HOSTING;
 	t->board_type = SMBIOS_BOARD_MOTHERBOARD;

@@ -8,6 +8,7 @@
 #include <command.h>
 #include <dm.h>
 #include <log.h>
+#include <sysinfo.h>
 #include <acpi/acpigen.h>
 #include <asm-generic/gpio.h>
 #include <asm/acpi_nhlt.h>
@@ -85,6 +86,30 @@ static int get_skuconfig(struct udevice *dev)
 		return log_msg_ret("free", ret);
 
 	return cfg;
+}
+
+static int coral_get_str(struct udevice *dev, int id, size_t size, char *val)
+{
+	if (IS_ENABLED(CONFIG_SPL_BUILD))
+		return -ENOSYS;
+
+	switch (id) {
+	case SYSINFO_ID_SMBIOS_SYSTEM_VERSION:
+	case SYSINFO_ID_SMBIOS_BASEBOARD_VERSION: {
+		int ret = get_skuconfig(dev);
+
+		if (ret < 0)
+			return ret;
+		if (size < 15)
+			return -ENOSPC;
+		sprintf(val, "rev%d", ret);
+		break;
+	}
+	default:
+		return -ENOENT;
+	}
+
+	return 0;
 }
 
 int arch_misc_init(void)
@@ -218,6 +243,10 @@ struct acpi_ops coral_acpi_ops = {
 	.inject_dsdt	= chromeos_acpi_gpio_generate,
 };
 
+struct sysinfo_ops coral_sysinfo_ops = {
+	.get_str	= coral_get_str,
+};
+
 static const struct udevice_id coral_ids[] = {
 	{ .compatible = "google,coral" },
 	{ }
@@ -227,5 +256,6 @@ U_BOOT_DRIVER(coral_drv) = {
 	.name		= "coral",
 	.id		= UCLASS_SYSINFO,
 	.of_match	= coral_ids,
+	.ops		= &coral_sysinfo_ops,
 	ACPI_OPS_PTR(&coral_acpi_ops)
 };
