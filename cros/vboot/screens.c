@@ -107,11 +107,15 @@ static int load_archive(const char *locale_name, struct directory **dest)
 	log_info("Load locale file '%s'\n", locale_name);
 	ret = cros_ofnode_find_locale(locale_name, &fentry);
 	if (ret) {
-		log_err("Cannot read file '%s'\n", locale_name);
+		log_err("Cannot find locale '%s'\n", locale_name);
 		return VBERROR_INVALID_BMPFV;
 	}
 
 	ret = fwstore_load_image(vboot->fwstore, &fentry, &data, &size);
+	if (ret) {
+		log_err("Cannot read file '%s'\n", locale_name);
+		return VBERROR_INVALID_BMPFV;
+	}
 
 	/* convert endianness of archive header */
 	dir = (struct directory *)data;
@@ -1178,7 +1182,7 @@ static int vboot_init_locale(struct vboot_info *vboot)
 
 	ret = cros_ofnode_find_locale("locales", &fentry);
 	if (ret)
-		return log_msg_ret("find locales\n", ret);
+		return log_msg_ret("find locales", ret);
 
 	locale_data.count = 0;
 
@@ -1253,10 +1257,18 @@ static VbError_t vboot_init_screen(struct vboot_info *vboot)
 	 * Load generic (location-free) graphics data, ignoring errors.
 	 * Fallback screens will be drawn for missing data
 	 */
-	load_archive("vbgfx.bin", &base_graphics);
+	ret = load_archive("vbgfx.bin", &base_graphics);
+	if (ret) {
+		log_err("Failed to read graphics data (err=%d)\n", ret);
+		return VBERROR_INVALID_BMPFV;
+	}
 
 	/* load font graphics */
-	load_archive("font.bin", &font_graphics);
+	ret = load_archive("font.bin", &font_graphics);
+	if (ret) {
+		log_err("Failed to read fonts (err=%d)\n", ret);
+		return VBERROR_INVALID_BMPFV;
+	}
 
 	/* reset localised graphics. we defer loading it */
 	locale_data.archive = NULL;
