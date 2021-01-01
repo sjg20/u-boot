@@ -109,7 +109,7 @@
 			type = "files";
 			pattern = "locales/*";
 			require-matches;
-			compress = "lz4";
+			files-compress = "lz4";
 			align = <0x40>;
 		};
 		boot-rec {
