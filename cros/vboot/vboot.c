@@ -139,3 +139,8 @@ int vboot_platform_is_resuming(void)
 
 	return 0;
 }
+
+int vboot_dump(const void *nvdata, int size)
+{
+	return 0;
+}

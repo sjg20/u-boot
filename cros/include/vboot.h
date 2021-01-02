@@ -334,4 +334,15 @@ int cros_tpm_factory_initialise(struct vboot_info *vboot);
  */
 int cros_tpm_setup(struct vboot_info *vboot);
 
+/**
+ * vboot_dump() - Dump the vboot context
+ *
+ * This shows the context in human-readable form
+ *
+ * @nvdata: Pointer to context
+ * @size: Size of context (typically EC_VBNV_BLOCK_SIZE)
+ * @return 0 if it is valid, -ve error otherwise
+ */
+int vboot_dump(const void *nvdata, int size);
+
 #endif /* __CROS_VBOOT_H */

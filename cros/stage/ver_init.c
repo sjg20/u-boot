@@ -93,6 +93,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 	if (ret)
 		return log_msg_ret("read nvdata", ret);
 
+	vboot_dump(ctx->nvdata, EC_VBNV_BLOCK_SIZE);
 #if 0
 	/* Force legacy mode */
 	ctx->nvdata[VB2_NV_OFFS_HEADER] = VB2_NV_HEADER_SIGNATURE_V1;
