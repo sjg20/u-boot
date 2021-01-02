@@ -2,7 +2,6 @@
 /*
  * Copyright (c) 2018 Google, Inc
  */
-#define DEBUG
 
 #include <common.h>
 #include <debug_uart.h>
@@ -114,8 +113,10 @@ void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 {
 	debug("Jumping to %s at %lx\n", spl_phase_name(spl_next_phase()),
 	      (ulong)spl_image->entry_point);
+#ifdef DEBUG
 	print_buffer(spl_image->entry_point, (void *)spl_image->entry_point, 1,
 		     0x20, 0);
+#endif
 	jump_to_spl(spl_image->entry_point);
 	hang();
 }

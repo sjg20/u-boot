@@ -74,13 +74,15 @@ int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
 		return log_ret(ret);
 
 	/* Decompress if needed */
-	printf("entry->compress_algo %d\n", entry->compress_algo);
+	log_debug("entry->compress_algo %d\n", entry->compress_algo);
 	if (entry->compress_algo == FMAP_COMPRESS_LZ4) {
 		size_t out_size = buf_size;
 
-		log_info("Decompress lz4 length=%x, unc=%x, buf_size=%x, start=%p\n",
-			 entry->length, entry->unc_length, buf_size, start);
+		log_debug("Decompress lz4 length=%x, unc=%x, buf_size=%x, start=%p\n",
+			  entry->length, entry->unc_length, buf_size, start);
+#ifdef DEBUG
 		print_buffer(0, start, 1, 0x80, 0);
+#endif
 		start += sizeof(u32);	/* skip compressed size */
 		ret = ulz4fn(start, entry->length, buf, &out_size);
 		if (ret)

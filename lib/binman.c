@@ -118,8 +118,8 @@ int binman_select_subnode(const char *name)
 	if (!ofnode_valid(node))
 		return log_msg_ret("node", -ENOENT);
 	binman->image = node;
-	log_info("binman: Selected image subnode '%s'\n",
-		 ofnode_get_name(binman->image));
+	log_debug("binman: Selected image subnode '%s'\n",
+		  ofnode_get_name(binman->image));
 
 	return 0;
 }
@@ -135,8 +135,8 @@ int binman_init(void)
 	if (ret)
 		return log_msg_ret("node", -ENOENT);
 	binman_set_rom_offset(ROM_OFFSET_NONE);
-	log_info("binman: Selected image node '%s'\n",
-		 ofnode_get_name(binman->image));
+	log_debug("binman: Selected image node '%s'\n",
+		  ofnode_get_name(binman->image));
 
 	return 0;
 }

@@ -27,7 +27,6 @@
 	"setexpr cmdline_ptr $loader - 2000; " \
 	"setexpr.s cmdline *$cmdline_ptr; " \
 	"setexpr cmdline gsub %U \\\\${uuid}; " \
-	"echo fred; " \
 	"if part uuid mmc 2:2 uuid; then " \
 	"zboot start 100000 0 0 0 $setup cmdline; " \
 	"zboot load; zboot setup; zboot dump; zboot go;" \

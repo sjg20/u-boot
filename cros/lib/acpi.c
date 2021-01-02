@@ -143,8 +143,8 @@ int vboot_update_acpi(struct vboot_info *vboot)
 		/* This string is supposed to have at least enough bytes */
 		len = strlen(gd->arch.smbios_version);
 		if (len + 1 >= size) {
-			log_info("Replacing SMBIOS type 0 version string '%s'\n",
-				 gd->arch.smbios_version);
+			log_debug("Replacing SMBIOS type 0 version string '%s'\n",
+				  gd->arch.smbios_version);
 			strncpy(gd->arch.smbios_version, vboot->firmware_id,
 				size);
 			gd->arch.smbios_version[size] = '\0';
@@ -157,7 +157,7 @@ int vboot_update_acpi(struct vboot_info *vboot)
 		return -ENOSPC;
 	}
 
-	// Synchronize VbSharedDataHeader from vboot_handoff to acpi vdat.
+	/* Synchronize VbSharedDataHeader from vboot_handoff to acpi vdat */
 	memcpy(vdat, vb_sd, vb_sd_size);
 
 	return 0;

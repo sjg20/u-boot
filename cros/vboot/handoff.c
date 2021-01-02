@@ -156,7 +156,7 @@ int vboot_fill_handoff(struct vboot_info *vboot)
 	sd->workbuf_hash_offset = 0;
 	sd->workbuf_hash_size = 0;
 
-	log_info("creating vboot_handoff structure\n");
+	log_debug("Creating vboot_handoff structure\n");
 	vh = bloblist_add(BLOBLISTT_VBOOT_HANDOFF, sizeof(*vh), 0);
 	if (!vh)
 		return log_msg_ret("failed to alloc vboot_handoff struct\n",
@@ -166,10 +166,8 @@ int vboot_fill_handoff(struct vboot_info *vboot)
 	fill_handoff(vboot, vh, sd);
 	vboot->handoff = vh;
 
-	log_info("1\n");
 	/* Log the recovery mode switches if required, before clearing them */
 	log_recovery_mode_switch(vboot);
-	log_info("2\n");
 
 	/*
 	 * The recovery mode switch is cleared (typically backed by EC) here
@@ -181,7 +179,6 @@ int vboot_fill_handoff(struct vboot_info *vboot)
 	 * is known to be up.
 	 */
 	clear_recovery_mode_switch(vboot);
-	log_info("3\n");
 
 	return 0;
 }

@@ -46,8 +46,6 @@ static int pci_mmc_probe(struct udevice *dev)
 	ret = mmc_of_parse(dev, &plat->cfg);
 	if (ret)
 		return ret;
-	printf("\n\n* mmc %s: rem=%ld\n", dev->name,
-	       plat->cfg.host_caps & MMC_CAP_NONREMOVABLE);
 	desc = mmc_get_blk_desc(&plat->mmc);
 	desc->removable = !(plat->cfg.host_caps & MMC_CAP_NONREMOVABLE);
 

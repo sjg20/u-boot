@@ -51,8 +51,8 @@ int vboot_ver_init(struct vboot_info *vboot)
 	struct vb2_context *ctx;
 	int ret;
 
-	printf("vboot is at %p, size %lx, bloblist %p\n", vboot,
-	       (ulong)sizeof(*vboot), gd->bloblist);
+	log_debug("vboot is at %p, size %lx, bloblist %p\n", vboot,
+		  (ulong)sizeof(*vboot), gd->bloblist);
 	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, sizeof(struct vboot_blob),
 			    VBOOT_CONTEXT_ALIGN);
 	if (!blob)
@@ -72,7 +72,6 @@ int vboot_ver_init(struct vboot_info *vboot)
 	vboot->ctx = ctx;
 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
-	printf("ctx=%p\n", ctx);
 
 	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
 	if (ret)
@@ -133,9 +132,8 @@ int vboot_ver_init(struct vboot_info *vboot)
 	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
 	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, ctx->secdata,
 				    sizeof(ctx->secdata));
-	printf("cros_nvdata_read_walk ret=%d\n", ret);
 	if (ret == -ENOENT)
-		printf("SKIP factory init\n");
+		printf("** SKIP factory init\n");
 // 		ret = cros_tpm_factory_initialise(vboot);
 	else if (ret)
 		return log_msg_ret("read secdata", ret);
@@ -151,8 +149,10 @@ int vboot_ver_init(struct vboot_info *vboot)
 	ctx->secdata[8] = 0;
 	ctx->secdata[9] = 0x7a;
 #endif
+#ifdef DEBUG
 	printf("secdata:\n");
 	print_buffer(0, ctx->secdata, 1, sizeof(ctx->secdata), 0);
+#endif
 
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
 

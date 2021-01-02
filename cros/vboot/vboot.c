@@ -150,6 +150,7 @@ int vboot_dump(const void *nvdata, int size)
 	crc = 0;
 	for (i = 0; i < VB2_NVDATA_SIZE; i++)
 		crc += data[i];
+	printf("Vboot context:\n");
 	printf("CRC %x : %svalid\n", data[VB2_NV_OFFS_CRC_V1], crc ? "in" : "");
 
 	ch = data[VB2_NV_OFFS_HEADER];

@@ -109,10 +109,11 @@ static void build_command_line(char *command_line, int auto_boot)
 
 	if (env_command_line)
 		strcat(command_line, env_command_line);
-
+#ifdef DEBUG
 	printf("Kernel command line:");
 	puts(command_line);
 	printf("\n");
+#endif
 }
 
 static int kernel_magic_ok(struct setup_header *hdr)
@@ -494,7 +495,6 @@ static int do_zboot_go(struct cmd_tbl *cmdtp, int flag, int argc,
 	disable_interrupts();
 
 	/* we assume that the kernel is in place */
-	printf("go %p, %lx\n", state.base_ptr, state.load_address);
 	ret = boot_linux_kernel((ulong)state.base_ptr, state.load_address,
 				false);
 	printf("Kernel returned! (err=%d)\n", ret);

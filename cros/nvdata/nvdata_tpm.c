@@ -33,7 +33,7 @@ static int get_index(enum cros_nvdata_type type)
 		/* We cannot handle these */
 		break;
 	}
-	log_info("Unsupported type %d\n", type);
+	log_debug("Unsupported type %d\n", type);
 
 	return -1;
 }

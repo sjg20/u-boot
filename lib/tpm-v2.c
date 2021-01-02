@@ -166,7 +166,6 @@ u32 tpm2_pcr_extend(struct udevice *dev, u32 index, const uint8_t *digest)
 	};
 	int ret;
 
-	printf("size %d\n", sizeof(command_v2));
 	/*
 	 * Fill the command structure starting from the first buffer:
 	 *     - the digest

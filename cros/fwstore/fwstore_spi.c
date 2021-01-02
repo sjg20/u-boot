@@ -5,7 +5,6 @@
  * Copyright 2018 Google LLC
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_CROS_FWSTORE
 
 #include <common.h>
@@ -194,7 +193,10 @@ static int fwstore_spi_mmap(struct udevice *dev, uint offset, uint size,
 		return log_msg_ret("Could not get flash mmap", ret);
 	rom_offset = (map_base & mask) - CONFIG_ROM_SIZE;
 	*addrp = offset + rom_offset;
+#ifdef LOG_DEBUG
+	log_debug("content:\n");
 	print_buffer(*addrp, (void *)*addrp, 1, 0x20, 0);
+#endif
 
 	return 0;
 }

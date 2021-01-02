@@ -4,7 +4,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_VBOOT
 
 #define NEED_VB20_INTERNALS
@@ -185,25 +184,23 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 	struct vb2_digest_context *dc = (struct vb2_digest_context *)
 		(ctx->workbuf + sd->workbuf_hash_offset);
 
-	printf("extend, ctx=%p, sd=%p, dc=%p, sd->workbuf_hash_size=%x\n",
-	       ctx, sd, dc, sd->workbuf_hash_size);
+	log_debug("extend, ctx=%p, sd=%p, dc=%p, sd->workbuf_hash_size=%x\n",
+		  ctx, sd, dc, sd->workbuf_hash_size);
 	/* Extend over the body */
 	for (blk = 0; ; blk++) {
 		int nbytes;
 
 		bootstage_start(BOOTSTAGE_ACCUM_VBOOT_FIRMWARE_READ, NULL);
 		nbytes = misc_read(fw_main, -1, block, TODO_BLOCK_SIZE);
-// 		log_debug("blk %x: read %x:\n", blk, nbytes);
-#if 0
+#ifdef DEBUG
 		print_buffer(blk * TODO_BLOCK_SIZE, block, 1,
-			     nbytes /* > 0x20 ? 0x20 : nbytes*/, 0);
+			     nbytes > 0x20 ? 0x20 : nbytes, 0);
 #endif
 		bootstage_accum(BOOTSTAGE_ACCUM_VBOOT_FIRMWARE_READ);
 		if (nbytes < 0)
 			return log_msg_ret("Read fwstore", nbytes);
 		else if (!nbytes)
 			break;
-// 		printf("   - got %x\n", nbytes);
 
 		ret = vb2api_extend_hash(ctx, block, nbytes);
 		if (ret)

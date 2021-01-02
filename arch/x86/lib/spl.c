@@ -2,7 +2,6 @@
 /*
  * Copyright (c) 2016 Google, Inc
  */
-#define DEBUG
 
 #include <common.h>
 #include <cpu_func.h>
@@ -163,7 +162,6 @@ void board_init_f(ulong flags)
 {
 	int ret;
 
-	printf("\nboard_init_f - spl\n");
 	ret = x86_spl_init();
 	if (ret) {
 		printf("x86_spl_init: error %d\n", ret);

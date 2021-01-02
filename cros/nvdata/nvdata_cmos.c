@@ -24,7 +24,7 @@ static int cmos_nvdata_read(struct udevice *dev, enum cros_nvdata_type type,
 	int i, val;
 
 	if (type != CROS_NV_DATA) {
-		log_err("Only CROS_NV_DATA supported (not %d)\n", type);
+		log_debug("Only CROS_NV_DATA supported (not %d)\n", type);
 		return -ENOSYS;
 	}
 
@@ -46,7 +46,7 @@ static int cmos_nvdata_write(struct udevice *dev, enum cros_nvdata_type type, co
 	int i, ret;
 
 	if (type != CROS_NV_DATA) {
-		log_err("Only CROS_NV_DATA supported (not %d)\n", type);
+		log_debug("Only CROS_NV_DATA supported (not %d)\n", type);
 		return -ENOSYS;
 	}
 

@@ -116,14 +116,14 @@ static int save_if_needed(struct vboot_info *vboot)
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
 
-	log_warning("Skipping save\n");
-	return 0;
-
 	if (!ctx)
 		return -ENOENT;
 	if (ctx->flags & VB2_CONTEXT_NVDATA_CHANGED) {
-		log(LOGC_VBOOT, LOGL_INFO, "Saving nvdata\n");
+		log_info("Saving nvdata\n");
+
+#ifdef DEBUG
 		print_buffer(0, ctx->nvdata, 1, sizeof(ctx->nvdata), 0);
+#endif
 		ret = cros_nvdata_write_walk(CROS_NV_DATA, ctx->nvdata,
 					     sizeof(ctx->nvdata));
 		if (ret)
@@ -131,7 +131,7 @@ static int save_if_needed(struct vboot_info *vboot)
 		ctx->flags &= ~VB2_CONTEXT_NVDATA_CHANGED;
 	}
 	if (ctx->flags & VB2_CONTEXT_SECDATA_CHANGED) {
-		log(LOGC_VBOOT, LOGL_INFO, "Saving secdata\n");
+		log_info("Saving secdata\n");
 		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->nvdata,
 					     sizeof(ctx->nvdata));
 		if (ret)
@@ -252,7 +252,6 @@ int cros_do_stage(void)
 	if (!CONFIG_IS_ENABLED(CHROMEOS_VBOOT_A))
 		return 0;
 
-	printf("vpl: load image\n");
 	ret = vboot_alloc(&vboot);
 	if (ret)
 		return ret;
@@ -260,7 +259,7 @@ int cros_do_stage(void)
 
 	ret = vboot_run_auto(vboot, 0);
 	if (ret)
-		printf("VPL error %d\n", ret);
+		log_err("VPL error %d\n", ret);
 
 	return 0;
 }
@@ -274,7 +273,6 @@ static int cros_load_image_vpl(struct spl_image_info *spl_image,
 	struct vboot_info *vboot;
 	int ret;
 
-	printf("vpl: load image\n");
 	ret = vboot_alloc(&vboot);
 	if (ret)
 		return ret;
@@ -282,7 +280,7 @@ static int cros_load_image_vpl(struct spl_image_info *spl_image,
 
 	ret = vboot_run_auto(vboot, 0);
 	if (ret)
-		printf("VPL error %d\n", ret);
+		log_err("VPL error %d\n", ret);
 	log_info("Completed loading image\n");
 
 	return 0;

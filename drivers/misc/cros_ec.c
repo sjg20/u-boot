@@ -1416,7 +1416,7 @@ bool cros_ec_is_uhepi_supported(struct udevice *dev)
 #define UHEPI_NOT_SUPPORTED 2
 	static int uhepi_support;
 
-	printf("uhepi_support=%d\n", uhepi_support);
+	log_debug("uhepi_support=%d\n", uhepi_support);
 	if (!uhepi_support) {
 		uhepi_support = cros_ec_check_feature(dev,
 			EC_FEATURE_UNIFIED_WAKE_MASKS) > 0 ? UHEPI_SUPPORTED :
@@ -1444,8 +1444,8 @@ static int cros_ec_get_mask(struct udevice *dev, uint type)
 
 static int cros_ec_clear_mask(struct udevice *dev, uint type, u64 mask)
 {
-	log_info("dev=%p %s\n", dev, dev->name);
-	log_info("UHEPI %d\n", cros_ec_is_uhepi_supported(dev));
+	log_debug("dev=%p %s\n", dev, dev->name);
+	log_debug("UHEPI %d\n", cros_ec_is_uhepi_supported(dev));
 	if (cros_ec_is_uhepi_supported(dev))
 		return cros_ec_uhepi_cmd(dev, type, EC_HOST_EVENT_CLEAR, &mask);
 

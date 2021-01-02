@@ -72,10 +72,10 @@ static int gbb_init(struct vboot_info *vboot)
 	ret = gbb_copy_in(vboot, offset, 0, sizeof(GoogleBinaryBlockHeader));
 	if (ret)
 		return ret;
-	log_info("The GBB signature is at %p and is: ", hdr->signature);
+	log_debug("The GBB signature is at %p and is:", hdr->signature);
 	for (int i = 0; i < GBB_SIGNATURE_SIZE; i++)
-		log_info(" %02x", hdr->signature[i]);
-	log_info("\n");
+		log_debug(" %02x", hdr->signature[i]);
+	log_debug("\n");
 
 	ret = gbb_copy_in(vboot, offset, hdr->hwid_offset, hdr->hwid_size);
 	if (ret)
@@ -271,8 +271,6 @@ int vboot_rw_init(struct vboot_info *vboot)
 	ctx = &blob->ctx;
 	vboot->ctx = ctx;
 	ctx->non_vboot_context = vboot;
-// 	printf("ctx = %p\n", ctx);
-// 	print_buffer(0, ctx->nvdata, 1, sizeof(ctx->nvdata), 0);
 	vboot->valid = true;
 	log_warning("flags %x %d\n", ctx->flags,
 		    ((ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0));
@@ -284,24 +282,6 @@ int vboot_rw_init(struct vboot_info *vboot)
 	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
 	if (ret)
 		return log_msg_ret("Cannot locate TPM", ret);
-
-	{
-		u8 sendbuf[] = {
-			0x80, 0x02, 0x00, 0x00, 0x00, 0x23, 0x00, 0x00,
-			0x01, 0x4e, 0x40, 0x00, 0x00, 0x0c, 0x01, 0x00,
-			0x10, 0x08, 0x00, 0x00, 0x00, 0x09, 0x40, 0x00,
-			0x00, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x0d, 0x00, 0x00
-		};
-		u8 recvbuf[100];
-		size_t recv_size;
-		int ret;
-
-		recv_size = 100;
-		ret = tpm_xfer(vboot->tpm, sendbuf, 0x23, recvbuf, &recv_size);
-		printf("\ntry ret %s=%d\n\n", vboot->tpm->name, ret);
-		while (ret);
-	}
 
 	ret = cros_ofnode_flashmap(&vboot->fmap);
 	if (ret)
@@ -338,7 +318,6 @@ int vboot_rw_init(struct vboot_info *vboot)
 	ret = uclass_get_device(UCLASS_CROS_EC, 0, &vboot->cros_ec);
 	if (ret)
 		return log_msg_ret("Cannot locate Chromium OS EC", ret);
-	printf("EC=%p\n", vboot->cros_ec);
 #endif
 	ret = vboot_init_handoff(vboot);
 	if (ret)

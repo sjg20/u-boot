@@ -133,7 +133,9 @@ VbError_t VbExNvStorageRead(u8 *buf)
 	ret = cros_nvdata_read_walk(CROS_NV_DATA, buf, EC_VBNV_BLOCK_SIZE);
 	if (ret)
 		return VBERROR_UNKNOWN;
+#ifdef DEBUG
 	print_buffer(0, buf, 1, EC_VBNV_BLOCK_SIZE, 0);
+#endif
 
 	return 0;
 }

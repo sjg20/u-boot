@@ -4,7 +4,6 @@
  */
 
 #define LOG_CATEGORY LOGC_VBOOT
-#define LOG_DEBUG
 
 #include <common.h>
 #include <errno.h>
@@ -218,7 +217,6 @@ int cros_ofnode_flashmap(struct cros_fmap *config)
 				return log_msg_ret("Failed to process Flashmap",
 						   -EINVAL);
 		}
-		printf("no more subnodes\n");
 	}
 
 	return 0;

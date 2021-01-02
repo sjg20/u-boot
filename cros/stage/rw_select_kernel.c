@@ -25,7 +25,6 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 	ret = vboot_load_config(vboot);
 	if (ret)
 		return log_msg_ret("Cannot load config", ret);
-	printf("config %s\n", ofnode_get_name(vboot->config));
 	kaddr = ofnode_get_addr_size(vboot->config, "kernel-addr", &ksize);
 	if (kaddr == FDT_ADDR_T_NONE)
 		return log_msg_ret("Cannot read kernel address", -EINVAL);
@@ -46,7 +45,7 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 		}
 	}
 
-	printf("Calling VbSelectAndLoadKernel().\n");
+	log_debug("Calling VbSelectAndLoadKernel().\n");
 	VbError_t res = VbSelectAndLoadKernel(&vboot->cparams, kparams);
 
 	if (res) {

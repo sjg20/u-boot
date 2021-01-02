@@ -24,13 +24,8 @@ _start:
 	mov	%eax, %esp
 	call	board_init_f_init_reserve
 
-	mov	$67, %eax
-	call	printch
-
 	xorl	%eax, %eax
 	call	board_init_f
-	mov	$67, %eax
-	call	printch
 	call	board_init_f_r
 
 	/* Should not return here */

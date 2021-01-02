@@ -359,7 +359,7 @@ static u32 do_setup(struct vboot_info *vboot, bool s3flag)
 {
 	u32 ret;
 
-	printf("Setting up TPM (s3=%d):\n", s3flag);
+	log(UCLASS_TPM, LOGL_DEBUG, "Setting up TPM (s3=%d):\n", s3flag);
 	ret = tpm_open(vboot->tpm);
 	if (ret != TPM_SUCCESS) {
 		log_err("TPM: Can't initialise\n");
@@ -375,14 +375,14 @@ static u32 do_setup(struct vboot_info *vboot, bool s3flag)
 		return TPM_SUCCESS;
 	}
 
-	printf("TPM startup:\n");
+	log(UCLASS_TPM, LOGL_DEBUG, "TPM startup:\n");
 	ret = tpm_startup(vboot->tpm, TPM_ST_CLEAR);
 	if (ret != TPM_SUCCESS) {
 		log_err("TPM: Can't run startup command\n");
 		goto out;
 	}
 
-	printf("TPM presence:\n");
+	log(UCLASS_TPM, LOGL_DEBUG, "TPM presence:\n");
 	ret = tpm_tsc_physical_presence(vboot->tpm,
 					TPM_PHYSICAL_PRESENCE_PRESENT);
 	if (ret != TPM_SUCCESS) {
@@ -418,7 +418,7 @@ out:
 	if (ret != TPM_SUCCESS)
 		log_err("TPM: setup failed\n");
 	else
-		log_info("TPM: setup succeeded\n");
+		log_debug("TPM: setup succeeded\n");
 
 	return ret;
 }

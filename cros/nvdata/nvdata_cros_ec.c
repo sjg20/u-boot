@@ -18,7 +18,7 @@ static int cros_ec_nvdata_read(struct udevice *dev, enum cros_nvdata_type type, 
 	struct udevice *cros_ec = dev_get_parent(dev);
 
 	if (index != CROS_NV_DATA) {
-		log_err("Only CROS_NV_DATA supported (not %x)\n", index);
+		log_debug("Only CROS_NV_DATA supported (not %x)\n", index);
 		return -ENOSYS;
 	}
 
@@ -31,7 +31,7 @@ static int cros_ec_nvdata_write(struct udevice *dev, enum cros_nvdata_type type,
 	struct udevice *cros_ec = dev_get_parent(dev);
 
 	if (index != CROS_NV_DATA) {
-		log_err("Only CROS_NV_DATA supported (not %x)\n", index);
+		log_debug("Only CROS_NV_DATA supported (not %x)\n", index);
 		return -ENOSYS;
 	}
 
