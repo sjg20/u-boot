@@ -6,6 +6,7 @@
  */
 
 #define LOG_CATEGORY LOGC_VBOOT
+#define NEED_VB20_INTERNALS
 
 #include <common.h>
 #include <dm.h>
@@ -142,5 +143,100 @@ int vboot_platform_is_resuming(void)
 
 int vboot_dump(const void *nvdata, int size)
 {
+	const u8 *data = nvdata;
+	uint sig, val, crc, i, ch;
+	uint expect_size;
+
+	crc = 0;
+	for (i = 0; i < VB2_NVDATA_SIZE; i++)
+		crc += data[i];
+	printf("CRC %x : %svalid\n", data[VB2_NV_OFFS_CRC_V1], crc ? "in" : "");
+
+	ch = data[VB2_NV_OFFS_HEADER];
+	sig = ch & VB2_NV_HEADER_SIGNATURE_MASK;
+	printf("Signature %s\n", sig == VB2_NV_HEADER_SIGNATURE_V1 ? "v1" :
+	       sig == VB2_NV_HEADER_SIGNATURE_V2 ? "v2" : "invalid");
+	expect_size = sig == VB2_NV_HEADER_SIGNATURE_V1 ? VB2_NVDATA_SIZE :
+		sig == VB2_NV_HEADER_SIGNATURE_V2 ? VB2_NVDATA_SIZE_V2 : -1;
+	printf("Size %d : %svalid\n", size, size == expect_size ? "" : "in");
+	if (ch & VB2_NV_HEADER_WIPEOUT)
+		printf("   - wipeout\n");
+	if (ch & VB2_NV_HEADER_KERNEL_SETTINGS_RESET)
+		printf("   - kernel settings reset\n");
+	if (ch & VB2_NV_HEADER_FW_SETTINGS_RESET)
+		printf("   - firmware settings reset\n");
+
+	ch = data[VB2_NV_OFFS_BOOT];
+	printf("Try count %d\n", ch & VB2_NV_BOOT_TRY_COUNT_MASK);
+	if (ch & VB2_NV_BOOT_BACKUP_NVRAM)
+		printf("Backup nvram\n");
+	if (ch & VB2_NV_BOOT_OPROM_NEEDED)
+		printf("Oprom needed\n");
+	if (ch & VB2_NV_BOOT_DISABLE_DEV)
+		printf("Disable dev\n");
+	if (ch & VB2_NV_BOOT_DEBUG_RESET)
+		printf("Debug reset\n");
+
+	ch = data[VB2_NV_OFFS_BOOT2];
+	printf("Result %d\n", ch & VB2_NV_BOOT2_RESULT_MASK);
+	if (ch & VB2_NV_BOOT2_TRIED)
+		printf("Tried\n");
+	if (ch & VB2_NV_BOOT2_TRY_NEXT)
+		printf("Try next\n");
+	printf("Prev result %d\n", (ch & VB2_NV_BOOT2_PREV_RESULT_MASK) >>
+	       VB2_NV_BOOT2_PREV_RESULT_SHIFT);
+	if (ch & VB2_NV_BOOT2_PREV_TRIED)
+		printf("Prev tried\n");
+	printf("Recovery %d\n", data[VB2_NV_OFFS_RECOVERY]);
+	printf("Recovery subcode %d\n", data[VB2_NV_OFFS_RECOVERY_SUBCODE]);
+	printf("Localization %d\n", data[VB2_NV_OFFS_LOCALIZATION]);
+
+	ch = data[VB2_NV_OFFS_DEV];
+	if (ch & VB2_NV_DEV_FLAG_USB)
+		printf("Dev usb\n");
+	if (ch & VB2_NV_DEV_FLAG_SIGNED_ONLY)
+		printf("Dev signed only\n");
+	if (ch & VB2_NV_DEV_FLAG_LEGACY)
+		printf("Dev legacy\n");
+	if (ch & VB2_NV_DEV_FLAG_FASTBOOT_FULL_CAP)
+		printf("Dev fastboot full cap\n");
+	printf("Default boot %d\n", (ch & VB2_NV_DEV_FLAG_DEFAULT_BOOT) >>
+	       VB2_NV_DEV_DEFAULT_BOOT_SHIFT);
+	if (ch & VB2_NV_DEV_FLAG_UDC)
+		printf("Dev udc\n");
+
+	ch = data[VB2_NV_OFFS_TPM];
+	if (ch & VB2_NV_TPM_CLEAR_OWNER_REQUEST)
+		printf("TPM clear owner request needed\n");
+	if (ch & VB2_NV_TPM_CLEAR_OWNER_DONE)
+		printf("TPM clear owner done\n");
+	if (ch & VB2_NV_TPM_REBOOTED)
+		printf("TPM rebooted\n");
+
+	ch = data[VB2_NV_OFFS_MISC];
+	if (ch & VB2_NV_MISC_UNLOCK_FASTBOOT)
+		printf("Unlock fastboot\n");
+	if (ch & VB2_NV_MISC_BOOT_ON_AC_DETECT)
+		printf("Boot-on-AC detect\n");
+	if (ch & VB2_NV_MISC_TRY_RO_SYNC)
+		printf("Try RO sync\n");
+	if (ch & VB2_NV_MISC_BATTERY_CUTOFF)
+		printf("Battery cutoff\n");
+	if (ch & VB2_NV_MISC_ENABLE_ALT_OS)
+		printf("Enable Alt OS\n");
+	if (ch & VB2_NV_MISC_DISABLE_ALT_OS)
+		printf("Disable Alt OS\n");
+	if (ch & VB2_NV_MISC_POST_EC_SYNC_DELAY)
+		printf("Post EC-sync delay\n");
+
+	val = data[VB2_NV_OFFS_KERNEL1] | data[VB2_NV_OFFS_KERNEL2] << 8;
+	printf("Kernel %d\n", val);
+
+	val = data[VB2_NV_OFFS_KERNEL_MAX_ROLLFORWARD1] |
+		data[VB2_NV_OFFS_KERNEL_MAX_ROLLFORWARD2] << 8 |
+		data[VB2_NV_OFFS_KERNEL_MAX_ROLLFORWARD3] << 16 |
+		data[VB2_NV_OFFS_KERNEL_MAX_ROLLFORWARD4] << 24;
+	printf("Kernel max roll-forward %d\n", val);
+
 	return 0;
 }
