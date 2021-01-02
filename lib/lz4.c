@@ -270,7 +270,6 @@ FORCE_INLINE int LZ4_decompress_generic(
     }
 
     /* end of decoding */
-    printf("end\n");
     if (endOnInput)
        return (int) (((char*)op)-dest);     /* Nb of output bytes decoded */
     else

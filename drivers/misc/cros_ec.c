@@ -514,7 +514,6 @@ static int cros_ec_wait_on_hash_done(struct udevice *dev,
 		if (ec_command(dev, EC_CMD_VBOOT_HASH, 0, p, sizeof(*p), hash,
 			       sizeof(*hash)) < 0)
 			return -1;
-		printf("2: size=%x\n", hash->size);
 
 		if (get_timer(start) > CROS_EC_CMD_HASH_TIMEOUT_MS) {
 			debug("%s: EC_VBOOT_HASH_GET timeout\n", __func__);
@@ -530,17 +529,11 @@ int cros_ec_read_hash(struct udevice *dev, uint hash_offset,
 	struct ec_params_vboot_hash p;
 	int rv;
 
-	printf("\n\n\n\nabout to hash EC\n\n\n\n");
-	printf("hash=%p, hash_offset=%x\n", hash, hash_offset);
-
-	mdelay(1000);
-
 	p.cmd = EC_VBOOT_HASH_GET;
 	p.offset = hash_offset;
 	if (ec_command(dev, EC_CMD_VBOOT_HASH, 0, &p, sizeof(p),
 		       hash, sizeof(*hash)) < 0)
 		return -1;
-	printf("1: size=%x\n", hash->size);
 
 	/* If the EC is busy calculating the hash, fidget until it's done. */
 	rv = cros_ec_wait_on_hash_done(dev, &p, hash);
@@ -565,7 +558,6 @@ int cros_ec_read_hash(struct udevice *dev, uint hash_offset,
 	if (ec_command(dev, EC_CMD_VBOOT_HASH, 0, &p, sizeof(p),
 		       hash, sizeof(*hash)) < 0)
 		return -1;
-	printf("3: size=%x\n", hash->size);
 
 	rv = cros_ec_wait_on_hash_done(dev, &p, hash);
 	if (rv)
@@ -576,7 +568,6 @@ int cros_ec_read_hash(struct udevice *dev, uint hash_offset,
 	}
 
 	debug("%s: hash done\n", __func__);
-	printf("4: size=%x\n", hash->size);
 
 	return 0;
 }

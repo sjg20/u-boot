@@ -1202,7 +1202,7 @@ static int vboot_init_locale(struct vboot_info *vboot)
 	loc_start[size] = '\0';
 
 	/* Parse the list */
-	log_info("Supported locales:\n");
+	log_info("Supported locales: ");
 	loc = loc_start;
 	while (loc - loc_start < size &&
 	       locale_data.count < ARRAY_SIZE(locale_data.codes)) {
@@ -1295,7 +1295,7 @@ int vboot_draw_screen(u32 screen, u32 locale)
 {
 	struct vboot_info *vboot = vboot_get();
 
-	printf("%s: screen=0x%x locale=%d\n", __func__, screen, locale);
+	log_debug("%s: screen=0x%x locale=%d\n", __func__, screen, locale);
 
 	if (!initialised) {
 		if (vboot_init_screen(vboot))
@@ -1347,6 +1347,5 @@ int vboot_get_locale_count(void)
 		if (vboot_init_screen(vboot))
 			return VBERROR_UNKNOWN;
 	}
-	printf("Locale count %d\n", locale_data.count);
 	return locale_data.count;
 }
