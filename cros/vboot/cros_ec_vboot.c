@@ -80,7 +80,7 @@ static int cros_ec_vboot_hash_image(struct udevice *dev,
 				    u8 *hash, int *hash_sizep)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
-	static struct ec_response_vboot_hash resp;
+	struct ec_response_vboot_hash resp;
 	u32 hash_offset;
 	int ret;
 	uint i;
