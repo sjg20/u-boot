@@ -135,19 +135,17 @@ int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
 		*image_sizep = entry->length;
 		break;
 	case FMAP_COMPRESS_LZ4:
-		buf_size = entry->unc_length + 100;
+		buf_size = entry->unc_length;
 		buf = malloc(buf_size);
 		if (!buf)
 			return log_msg_ret("allocate decomp buf", -ENOMEM);
-		log_info("Decompress lz4 length=%x, buf_size=%zx, uncomp=%x\n",
-			 entry->length, buf_size, entry->unc_length);
-		print_buffer(0, data, 1, 0x40, 0);
+		log_info("Decompress lz4 length=%x, buf_size=%zx\n",
+			 entry->length, buf_size);
 		comp_len = *(u32 *)data;
 		in = data + sizeof(u32);	/* skip uncompressed size */
 		ret = ulz4fn(in, comp_len, buf, &buf_size);
 		if (ret)
 			return log_msg_ret("decompress lz4", ret);
-		print_buffer((ulong)buf, buf, 1, 0x40, 0);
 		*imagep = buf;
 		*image_sizep = buf_size;
 		free(data);
