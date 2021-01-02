@@ -92,9 +92,9 @@ static int cros_ec_vboot_hash_image(struct udevice *dev,
 		return log_msg_ret("read", ret);
 	if (resp.digest_size > *hash_sizep)
 		return log_msg_ret("size", -E2BIG);
-	log_info("hash status=%x, hash_type=%x, digest_size=%x, offset=%x, size=%x\n",
-		 resp.status, resp.hash_type, resp.digest_size, resp.offset,
-		 resp.size);
+	log_info("hash status=%x, select=%d, hash_offset=%x, hash_type=%x, digest_size=%x, offset=%x, size=%x\n",
+		 resp.status, select, hash_offset, resp.hash_type, resp.digest_size,
+		 resp.offset, resp.size);
 	memcpy(hash, resp.hash_digest, resp.digest_size);
 	for (i = 0; i < resp.digest_size; i++)
 		printf("%02x", hash[i]);
