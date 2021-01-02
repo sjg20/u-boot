@@ -1163,6 +1163,7 @@ static VbError_t draw_ui(struct vboot_info *vboot, u32 screen_type,
 		rv = desc->draw(vboot, p);
 		if (rv)
 			printf("Drawing failed (0x%x)\n", rv);
+		video_sync_copy_all(vboot->video);
 	}
 	if (rv) {
 		print_fallback_message(vboot, desc);
