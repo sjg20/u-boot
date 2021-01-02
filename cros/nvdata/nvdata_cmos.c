@@ -68,6 +68,9 @@ static int cmos_nvdata_probe(struct udevice *dev)
 	if (ret)
 		return log_msg_ret("Missing 'reg' property", ret);
 
+	/* Add 14 to skip past the RTC registers */
+	priv->base_reg += 14;
+
 	return 0;
 }
 
