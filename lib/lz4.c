@@ -99,8 +99,14 @@ FORCE_INLINE int LZ4_decompress_generic(
 
     /* Special cases */
     if ((partialDecoding) && (oexit> oend-MFLIMIT)) oexit = oend-MFLIMIT;                         /* targetOutputSize too high => decode everything */
-    if ((endOnInput) && (unlikely(outputSize==0))) return ((inputSize==1) && (*ip==0)) ? 0 : -1;  /* Empty output buffer */
-    if ((!endOnInput) && (unlikely(outputSize==0))) return (*ip==0?1:-1);
+    if ((endOnInput) && (unlikely(outputSize==0)))  {
+	    printf("empty output\n");
+	    return ((inputSize==1) && (*ip==0)) ? 0 : -1;  /* Empty output buffer */
+    }
+    if ((!endOnInput) && (unlikely(outputSize==0)))  {
+	    printf("empty output\n");
+	    return (*ip==0?1:-1);
+    }
 
 
     /* Main Loop */
@@ -264,6 +270,7 @@ FORCE_INLINE int LZ4_decompress_generic(
     }
 
     /* end of decoding */
+    printf("end\n");
     if (endOnInput)
        return (int) (((char*)op)-dest);     /* Nb of output bytes decoded */
     else

@@ -111,6 +111,9 @@
 			require-matches;
 			files-compress = "lz4";
 			align = <0x40>;
+
+			/* Intel SPI flash driver requires word alignment */
+			files-align = <4>;
 		};
 		boot-rec {
 			align = <0x1000>;

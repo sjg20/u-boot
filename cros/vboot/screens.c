@@ -1347,5 +1347,6 @@ int vboot_get_locale_count(void)
 		if (vboot_init_screen(vboot))
 			return VBERROR_UNKNOWN;
 	}
+	printf("Locale count %d\n", locale_data.count);
 	return locale_data.count;
 }

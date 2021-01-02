@@ -38,6 +38,7 @@ class Entry_files(Entry_section):
             self.Raise("Missing 'pattern' property")
         self._files_compress = fdt_util.GetString(self._node, 'files-compress',
                                                   'none')
+        self._files_align = fdt_util.GetInt(self._node, 'files-align');
         self._require_matches = fdt_util.GetBool(self._node,
                                                 'require-matches')
 
@@ -55,6 +56,8 @@ class Entry_files(Entry_section):
             state.AddString(subnode, 'type', 'blob')
             state.AddString(subnode, 'filename', fname)
             state.AddString(subnode, 'compress', self._files_compress)
+            if self._files_align:
+                state.AddInt(subnode, 'align', self._files_align)
 
         # Read entries again, now that we have some
         self._ReadEntries()

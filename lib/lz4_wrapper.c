@@ -44,7 +44,7 @@ int ulz4fn(const void *src, size_t srcn, void *dst, size_t *dstn)
 		u8 block_desc;
 
 		if (srcn < sizeof(u32) + 3*sizeof(u8))
-			return -EINVAL;	/* input overrun */
+			return log_msg_ret("underrun", -EINVAL);	/* input overrun */
 
 		magic = get_unaligned_le32(in);
 		in += sizeof(u32);
@@ -70,7 +70,7 @@ int ulz4fn(const void *src, size_t srcn, void *dst, size_t *dstn)
 
 		if (has_content_size) {
 			if (srcn < sizeof(u32) + 3*sizeof(u8) + sizeof(u64))
-				return -EINVAL;	/* input overrun */
+				return log_msg_ret("underrun2", -EINVAL);	/* input overrun */
 			in += sizeof(u64);
 		}
 		/* Header checksum byte */
@@ -85,7 +85,9 @@ int ulz4fn(const void *src, size_t srcn, void *dst, size_t *dstn)
 		block_size = block_header & ~LZ4F_BLOCKUNCOMPRESSED_FLAG;
 
 		if (in - src + block_size > srcn) {
-			ret = -EINVAL;		/* input overrun */
+			printf("in=%p, src=%p, in-src=%x, block_size=%x, srcn=%x\n",
+			       in, src, in - src, block_size, srcn);
+			ret = log_msg_ret("underrun3", -EINVAL);/* input overrun */
 			break;
 		}
 
