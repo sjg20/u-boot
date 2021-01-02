@@ -44,6 +44,10 @@ enum {
 	CROS_EC_CMD_TIMEOUT_MS	= 5000,
 	/* Timeout waiting for a synchronous hash to be recomputed */
 	CROS_EC_CMD_HASH_TIMEOUT_MS = 2000,
+
+	/* Wait 10 ms between attempts to check if EC's hash is ready */
+	CROS_EC_HASH_CHECK_DELAY_MS = 10,
+
 };
 
 #define INVALID_HCMD 0xFF
@@ -399,7 +403,8 @@ static int ec_command(struct udevice *dev, uint cmd, int cmd_version,
 		 * disregard the result.
 		 */
 		if (din && in_buffer) {
-			assert(len <= din_len);
+			if (len > din_len)
+				return -ENOSPC;
 			memmove(din, in_buffer, len);
 		}
 	}
@@ -502,7 +507,9 @@ static int cros_ec_wait_on_hash_done(struct udevice *dev,
 
 	start = get_timer(0);
 	while (hash->status == EC_VBOOT_HASH_STATUS_BUSY) {
-		mdelay(50);	/* Insert some reasonable delay */
+		mdelay(CROS_EC_HASH_CHECK_DELAY_MS);
+
+		p->cmd = EC_VBOOT_HASH_GET;
 
 		if (ec_command(dev, EC_CMD_VBOOT_HASH, 0, p, sizeof(*p), hash,
 			       sizeof(*hash)) < 0)
@@ -522,6 +529,11 @@ int cros_ec_read_hash(struct udevice *dev, uint hash_offset,
 {
 	struct ec_params_vboot_hash p;
 	int rv;
+
+	printf("\n\n\n\nabout to hash EC\n\n\n\n");
+	printf("hash=%p, hash_offset=%x\n", hash, hash_offset);
+
+	mdelay(1000);
 
 	p.cmd = EC_VBOOT_HASH_GET;
 	p.offset = hash_offset;

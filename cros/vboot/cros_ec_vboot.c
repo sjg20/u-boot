@@ -183,8 +183,8 @@ static int cros_ec_vboot_update_image(struct udevice *dev,
 				   &region_size);
 	if (ret)
 		return ret;
-	log_info("Updating region %d, offset=%x, size=%x\n", region,
-		 region_offset, region_size);
+	log_info("Updating region %d, offset=%x, size=%x, image_size=%x\n",
+		 region, region_offset, region_size, image_size);
 	if (image_size > region_size)
 		return log_msg_ret("size", -EINVAL);
 

@@ -63,6 +63,7 @@
 		ecrw {
 			type = "cros-ec-rw";
 			u-boot,dm-pre-reloc;
+			align = <4>;
 			align-size = <0x1000>;
 			hash {
 				u-boot,dm-pre-reloc;
@@ -72,6 +73,7 @@
 		firmware-id {
 			/* Alignment: no requirement */
 			u-boot,dm-pre-reloc;
+			align = <4>;
 			size = <0x100>;
 			type = "text";
 			text-label = "frid";
