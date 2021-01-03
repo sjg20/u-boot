@@ -63,6 +63,18 @@
 		skuconfig-gpios = <&gpio_nw GPIO_16 GPIO_ACTIVE_HIGH
 			&gpio_nw GPIO_17 GPIO_ACTIVE_HIGH>;
 		smbios {
+			/* Type 0 table */
+			bios {
+				/*
+				 * Allow at least 66 bytes for version so
+				 * Chrome OS can insert a new string later, of
+				 * at least 64 bytes plus terminator, which is
+				 * the size of chromeos_acpi_gnvs->fwid. See
+				 * vboot_update_acpi().
+				 */
+				version = "                                                                ";
+			};
+
 			/* Type 1 table */
 			system {
 				manufacturer = "Google";
