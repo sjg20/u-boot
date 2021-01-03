@@ -584,10 +584,14 @@ int fdtdec_check_fdt(void)
  */
 int fdtdec_prepare_fdt(void)
 {
+	printf(" dtb %p %lx\n", gd->fdt_blob, (ulong)gd->fdt_blob - 0xfef40000);
+	print_buffer((ulong)gd->fdt_blob, gd->fdt_blob, 4, 32, 0);
 	if (!gd->fdt_blob || ((uintptr_t)gd->fdt_blob & 3) ||
 	    fdt_check_header(gd->fdt_blob)) {
 #ifdef CONFIG_SPL_BUILD
+		printf("%p\n", gd->fdt_blob);
 		puts("Missing DTB\n");
+		print_buffer((ulong)gd->fdt_blob, gd->fdt_blob, 4, 32, 0);
 #else
 		printf("No valid device tree binary found at %p\n",
 		       gd->fdt_blob);
