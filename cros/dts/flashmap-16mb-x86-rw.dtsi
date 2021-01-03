@@ -42,6 +42,7 @@
 		};
 		rw_a_spl: u-boot-spl {
 			u-boot,dm-pre-reloc;
+			align = <4>;
 			type = "u-boot-spl";
 		};
 		u-boot {
@@ -116,6 +117,7 @@
 		};
 		rw_b_spl: u-boot-spl {
 			u-boot,dm-pre-reloc;
+			align = <4>;
 			type = "u-boot-spl";
 		};
 		u-boot {

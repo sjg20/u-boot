@@ -208,9 +208,12 @@ static int tpm_secdata_lock(struct udevice *dev, enum cros_nvdata_type type)
 		if (type == CROS_NV_SECDATA)
 			return tpm_set_global_lock(tpm);
 	} else if (IS_ENABLED(CONFIG_TPM_V2) && version == TPM_V2) {
-		if (type != CROS_NV_SECDATA)
-			return log_msg_ret("not secdata", -ENOTSUPP);
-		return log_retz(tpm2_write_lock(tpm, index));
+		if (type == CROS_NV_SECDATA)
+			return log_retz(tpm2_write_lock(tpm, index));
+		else if (type == CROS_NV_SECDATAK)
+			return log_retz(tpm2_disable_platform_hierarchy(dev));
+		else
+			return log_msg_ret("type", -ENOTSUPP);
 	} else {
 		return log_msg_ret("no tpm", -ENOENT);
 	}

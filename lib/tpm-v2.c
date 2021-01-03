@@ -222,7 +222,11 @@ u32 tpm2_nv_read_value(struct udevice *dev, u32 index, void *data, u32 count)
 u32 tpm2_nv_write_value(struct udevice *dev, u32 index, const void *data,
 			u32 count)
 {
+	struct tpm_chip_priv *priv = dev_get_uclass_priv(dev);
 	uint offset = 10 + 8 + 9;
+	/* Use empty password auth if platform hierarchy is disabled */
+	u32 auth = priv->plat_hier_disabled ? HR_NV_INDEX + index :
+		TPM2_RH_PLATFORM;
 	u8 command_v2[COMMAND_BUFFER_SIZE] = {
 		/* header 10 bytes */
 		tpm_u16(TPM2_ST_SESSIONS),	/* TAG */
@@ -230,7 +234,7 @@ u32 tpm2_nv_write_value(struct udevice *dev, u32 index, const void *data,
 		tpm_u32(TPM2_CC_NV_READ),	/* Command code */
 
 		/* handles 8 bytes */
-		tpm_u32(TPM2_RH_PLATFORM),	/* Primary platform seed */
+		tpm_u32(auth),			/* Primary platform seed */
 		tpm_u32(HR_NV_INDEX + index),	/* Password authorisation */
 
 		/* AUTH_SESSION */
@@ -251,6 +255,7 @@ u32 tpm2_nv_write_value(struct udevice *dev, u32 index, const void *data,
 			       offset + count, 0);
 	if (ret)
 		return TPM_LIB_ERROR;
+	print_buffer(0, command_v2, 1, 50, 0);
 
 	return tpm_sendrecv_command(dev, command_v2, response, &response_len);
 }
@@ -625,4 +630,38 @@ u32 tpm2_write_lock(struct udevice *dev, u32 index)
 	};
 
 	return tpm_sendrecv_command(dev, command_v2, NULL, NULL);
+}
+
+u32 tpm2_disable_platform_hierarchy(struct udevice *dev)
+{
+	struct tpm_chip_priv *priv = dev_get_uclass_priv(dev);
+	u8 command_v2[COMMAND_BUFFER_SIZE] = {
+		/* header 10 bytes */
+		tpm_u16(TPM2_ST_SESSIONS),	/* TAG */
+		tpm_u32(10 + 4 + 9 + 5),	/* Length */
+		tpm_u32(TPM2_CC_HIER_CONTROL),	/* Command code */
+
+		/* 4 bytes */
+		tpm_u32(TPM2_RH_PLATFORM),	/* Primary platform seed */
+
+		/* session header 9 bytes */
+		tpm_u32(9),			/* Header size */
+		tpm_u32(TPM2_RS_PW),		/* Password authorisation */
+		tpm_u16(0),			/* nonce_size */
+		0,				/* session_attrs */
+		tpm_u16(0),			/* auth_size */
+
+		/* payload 5 bytes */
+		tpm_u32(TPM2_RH_PLATFORM),	/* Hierarchy to disable */
+		0,				/* 0=disable */
+	};
+	int ret;
+
+	ret = tpm_sendrecv_command(dev, command_v2, NULL, NULL);
+	if (ret)
+		return ret;
+
+	priv->plat_hier_disabled = true;
+
+	return 0;
 }

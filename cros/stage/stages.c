@@ -130,17 +130,23 @@ static int save_if_needed(struct vboot_info *vboot)
 			return log_msg_ret("save nvdata", ret);
 		ctx->flags &= ~VB2_CONTEXT_NVDATA_CHANGED;
 	}
+
 	if (ctx->flags & VB2_CONTEXT_SECDATA_CHANGED) {
 		log_info("Saving secdata\n");
 		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->nvdata,
 					     sizeof(ctx->nvdata));
 		if (ret)
-			return log_msg_ret("save secdata", ret);
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->nvdata,
+			return log_msg_ret("secdata", ret);
+		ctx->flags &= ~VB2_CONTEXT_SECDATA_CHANGED;
+	}
+
+	if (ctx->flags & VB2_CONTEXT_SECDATAK_CHANGED) {
+		log_info("Saving secdatak\n");
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK, ctx->nvdata,
 					     sizeof(ctx->nvdata));
 		if (ret)
-			return log_msg_ret("save nvdata", ret);
-		ctx->flags &= ~VB2_CONTEXT_SECDATA_CHANGED;
+			return log_msg_ret("secdata", ret);
+		ctx->flags &= ~VB2_CONTEXT_SECDATAK_CHANGED;
 	}
 
 	return 0;
