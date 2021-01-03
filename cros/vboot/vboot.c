@@ -16,6 +16,7 @@
 #include <asm/io.h>
 #include <cros_ec.h>
 #include <cros/vboot.h>
+#include <u-boot/crc.h>
 
 int vboot_alloc(struct vboot_info **vbootp)
 {
@@ -141,25 +142,28 @@ int vboot_platform_is_resuming(void)
 	return 0;
 }
 
-int vboot_dump(const void *nvdata, int size)
+int vboot_dump_nvdata(const void *nvdata, int size)
 {
 	const u8 *data = nvdata;
-	uint sig, val, crc, i, ch;
+	uint sig, val, crc, crc_ofs, ch;
 	uint expect_size;
-
-	crc = 0;
-	for (i = 0; i < VB2_NVDATA_SIZE; i++)
-		crc += data[i];
-	printf("Vboot context:\n");
-	printf("CRC %x : %svalid\n", data[VB2_NV_OFFS_CRC_V1], crc ? "in" : "");
+	bool is_v2;
 
 	ch = data[VB2_NV_OFFS_HEADER];
 	sig = ch & VB2_NV_HEADER_SIGNATURE_MASK;
+	is_v2 = sig == VB2_NV_HEADER_SIGNATURE_V2;
+
+	crc_ofs = is_v2 ? VB2_NV_OFFS_CRC_V2 : VB2_NV_OFFS_CRC_V1;
+	crc = crc8(0, data, crc_ofs);
+	printf("Vboot nvdata:\n");
 	printf("Signature %s\n", sig == VB2_NV_HEADER_SIGNATURE_V1 ? "v1" :
 	       sig == VB2_NV_HEADER_SIGNATURE_V2 ? "v2" : "invalid");
 	expect_size = sig == VB2_NV_HEADER_SIGNATURE_V1 ? VB2_NVDATA_SIZE :
 		sig == VB2_NV_HEADER_SIGNATURE_V2 ? VB2_NVDATA_SIZE_V2 : -1;
 	printf("Size %d : %svalid\n", size, size == expect_size ? "" : "in");
+	printf("CRC %x (calc %x): %svalid\n", data[crc_ofs], crc,
+	       crc == data[crc_ofs] ? "" : "in");
+
 	if (ch & VB2_NV_HEADER_WIPEOUT)
 		printf("   - wipeout\n");
 	if (ch & VB2_NV_HEADER_KERNEL_SETTINGS_RESET)
@@ -238,6 +242,30 @@ int vboot_dump(const void *nvdata, int size)
 		data[VB2_NV_OFFS_KERNEL_MAX_ROLLFORWARD3] << 16 |
 		data[VB2_NV_OFFS_KERNEL_MAX_ROLLFORWARD4] << 24;
 	printf("Kernel max roll-forward %d\n", val);
+
+	return crc ? -EINVAL : 0;
+}
+
+int vboot_dump_secdata(const void *secdata, int size)
+{
+	const struct vb2_secdata *sec = secdata;
+	uint crc;
+
+	crc = crc8(0, secdata, offsetof(struct vb2_secdata, crc8));
+	printf("Vboot secdata:\n");
+
+	print_buffer(0, secdata, 1, size, 0);
+	printf("Size %d : %svalid\n", size, size == VB2_SECDATA_SIZE ?
+	       "" : "in");
+	printf("CRC %x (calc %x): %svalid\n", sec->crc8, crc,
+	       crc == sec->crc8 ? "" : "in");
+	printf("Version %d\n", sec->struct_version);
+	if (sec->flags & VB2_SECDATA_FLAG_LAST_BOOT_DEVELOPER)
+		printf("Last boot was dev mode\n");
+	if (sec->flags & VB2_SECDATA_FLAG_DEV_MODE)
+		printf("Dev mode\n");
+	printf("Firmware versions %x\n", sec->fw_versions);
+
 
 	return 0;
 }

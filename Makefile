@@ -1707,7 +1707,7 @@ endif # CONFIG_X86
 ifneq ($(CONFIG_CHROMEOS_VBOOT),)
 BINMAN_image.bin := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
 	-abmpblk=$(KBUILD_SRC)/cros/data/bmpblk.bin -I $(KBUILD_SRC)/cros/data \
-	"-ahardware-id=TEST 999" \
+	"-ahardware-id=CORAL TEST 8594" \
 	"-afrid=123412 123" -acros-ec-rw-path=$(KBUILD_SRC)/cros/data/ecrw.bin \
 	 -m -i image
 image.bin: $(INPUTS-y) \

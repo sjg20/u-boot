@@ -231,7 +231,7 @@ u32 tpm2_nv_write_value(struct udevice *dev, u32 index, const void *data,
 
 		/* handles 8 bytes */
 		tpm_u32(TPM2_RH_PLATFORM),	/* Primary platform seed */
-		tpm_u32(index),			/* Password authorisation */
+		tpm_u32(HR_NV_INDEX + index),	/* Password authorisation */
 
 		/* AUTH_SESSION */
 		tpm_u32(9),			/* Authorization size */

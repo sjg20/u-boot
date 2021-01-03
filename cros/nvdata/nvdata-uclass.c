@@ -146,7 +146,7 @@ VbError_t VbExNvStorageWrite(const u8 *buf)
 
 #ifdef DEBUG
 	print_buffer(0, buf, 1, EC_VBNV_BLOCK_SIZE, 0);
-	vboot_dump(buf, EC_VBNV_BLOCK_SIZE);
+	vboot_dump_nvdata(buf, EC_VBNV_BLOCK_SIZE);
 #endif
 	ret = cros_nvdata_write_walk(CROS_NV_DATA, buf, EC_VBNV_BLOCK_SIZE);
 	if (ret)

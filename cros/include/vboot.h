@@ -335,14 +335,25 @@ int cros_tpm_factory_initialise(struct vboot_info *vboot);
 int cros_tpm_setup(struct vboot_info *vboot);
 
 /**
- * vboot_dump() - Dump the vboot context
+ * vboot_dump_nvdata() - Dump the vboot non-volatile data
+ *
+ * This shows the NV data in human-readable form
+ *
+ * @nvdata: Pointer to context
+ * @size: Size of NV data (typically EC_VBNV_BLOCK_SIZE)
+ * @return 0 if it is valid, -ve error otherwise
+ */
+int vboot_dump_nvdata(const void *nvdata, int size);
+
+/**
+ * vboot_dump_nvdata() - Dump the vboot secure data
  *
  * This shows the context in human-readable form
  *
  * @nvdata: Pointer to context
- * @size: Size of context (typically EC_VBNV_BLOCK_SIZE)
+ * @size: Size of NV context (typically sizeof(struct vb2_secdata))
  * @return 0 if it is valid, -ve error otherwise
  */
-int vboot_dump(const void *nvdata, int size);
+int vboot_dump_secdata(const void *secdata, int size);
 
 #endif /* __CROS_VBOOT_H */
