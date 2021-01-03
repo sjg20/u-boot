@@ -10,6 +10,8 @@ from binman.entry import Entry
 from binman.etype.blob import Entry_blob
 from dtoc import fdt_util
 from patman import tools
+from patman import tout
+from patman.tools import ToHex, ToHexSize
 
 class Entry_u_boot_vpl_nodtb(Entry_blob):
     """VPL binary without device tree appended
@@ -35,7 +37,11 @@ class Entry_u_boot_vpl_nodtb(Entry_blob):
         bss_size = elf.GetSymbolAddress(fname, '__bss_size')
         if not bss_size:
             self.Raise('Expected __bss_size symbol in vpl/u-boot-vpl')
-        self.SetContents(self.data + tools.GetBytes(0, bss_size))
+        new_data = self.data + tools.GetBytes(0, bss_size)
+        tout.Detail("Entry '%s' size %s padded with _bss_size %s to %s" %
+                   (self._node.path, ToHexSize(self.data), ToHex(bss_size),
+                    ToHexSize(new_data)))
+        self.SetContents(new_data)
         return True
 
     def GetDefaultFilename(self):
