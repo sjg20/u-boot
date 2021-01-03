@@ -44,6 +44,7 @@ enum vboot_stage_t {
 	VBOOT_STAGE_FIRST_RW,
 	VBOOT_STAGE_RW_INIT = VBOOT_STAGE_FIRST_RW,
 	VBOOT_STAGE_RW_SELECTKERNEL,
+	VBOOT_STAGE_RW_LOCK,
 	VBOOT_STAGE_RW_BOOTKERNEL,
 
 	/* VB2 stages, not yet implemented */
@@ -133,6 +134,7 @@ int vboot_spl_jump_u_boot(struct vboot_info *vboot);
 /* U-Boot-proper stages */
 int vboot_rw_init(struct vboot_info *vboot);
 int vboot_rw_select_kernel(struct vboot_info *vboot);
+int vboot_rw_lock(struct vboot_info *vboot);
 int vboot_rw_boot_kernel(struct vboot_info *vboot);
 
 /* VB2 stages, not yet implemented */

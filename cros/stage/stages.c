@@ -50,6 +50,7 @@ struct vboot_stage stages[VBOOT_STAGE_COUNT] = {
 	[VBOOT_STAGE_RW_INIT] = {"rw_init", vboot_rw_init,},
 	[VBOOT_STAGE_RW_SELECTKERNEL] =
 		{"rw_selectkernel", vboot_rw_select_kernel,},
+	[VBOOT_STAGE_RW_LOCK] = {"rw_lock", vboot_rw_lock,},
 	[VBOOT_STAGE_RW_BOOTKERNEL] = {"rw_bootkernel", vboot_rw_boot_kernel,},
 #endif
 
