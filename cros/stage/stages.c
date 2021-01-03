@@ -104,7 +104,7 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
 	bootstage_mark_name(BOOTSTAGE_VBOOT_FIRST + stagenum, stage->name);
 	ret = (*stage->run)(vboot);
 	if (ret)
-		log_err("Error: stage '%s' returned %d\n", stage->name, ret);
+		log_err("Error: stage '%s' returned %x\n", stage->name, ret);
 
 	return ret;
 }
@@ -164,6 +164,18 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 			break;
 		ret = vboot_run_stage(vboot, stagenum);
 		save_if_needed(vboot);
+
+		if (stagenum == VBOOT_STAGE_VER1_VBINIT &&
+		    ret == VB2_ERROR_API_PHASE1_RECOVERY) {
+			struct fmap_firmware_entry *fw = &vboot->fmap.readonly;
+			struct vb2_context *ctx = vboot_get_ctx(vboot);
+
+			vboot_set_selected_region(vboot, &fw->spl_rec, &fw->boot_rec);
+			log_warning("flags %x recovery=%d\n", ctx->flags,
+				    (ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0);
+			ret = 0;
+		}
+
 		if (ret)
 			break;
 	}
@@ -179,23 +191,6 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 	/* Allow dropping to the command line here for debugging */
 	if (flags & VBOOT_FLAG_CMDLINE)
 		return -EPERM;
-
-	if (ret == VB2_ERROR_API_PHASE1_RECOVERY) {
-		struct fmap_firmware_entry *fw = &vboot->fmap.readonly;
-		struct vb2_context *ctx = vboot_get_ctx(vboot);
-
-		vboot_set_selected_region(vboot, &fw->spl_rec, &fw->boot_rec);
-		ret = vboot_fill_handoff(vboot);
-		if (ret)
-			return log_msg_ret("Cannot setup vboot handoff", ret);
-		log_warning("flags %x %d\n", ctx->flags,
-			    (ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0);
-		ctx->flags |= VB2_CONTEXT_RECOVERY_MODE;
-		sysreset_walk_halt(SYSRESET_COLD);
-		return -ENOENT;  /* Try next boot method (which is recovery) */
-	}
-
-	return 0;
 
 	if (ret == VBERROR_REBOOT_REQUIRED) {
 		log_warning("Cold reboot\n");
