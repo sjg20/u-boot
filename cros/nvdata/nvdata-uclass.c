@@ -79,7 +79,8 @@ int cros_nvdata_write_walk(enum cros_nvdata_type type, const u8 *data, int size)
 	int ret = -ENOSYS;
 
 	uclass_foreach_dev_probe(UCLASS_CROS_NVDATA, dev) {
-		log(UCLASS_CROS_NVDATA, LOGL_INFO, "write %s\n", dev->name);
+		log(UCLASS_CROS_NVDATA, LOGL_INFO, "write type %s\n",
+		    dev->name);
 		ret = cros_nvdata_write(dev, type, data, size);
 		if (!ret)
 			break;
@@ -146,8 +147,8 @@ VbError_t VbExNvStorageWrite(const u8 *buf)
 
 #ifdef DEBUG
 	print_buffer(0, buf, 1, EC_VBNV_BLOCK_SIZE, 0);
-	vboot_dump_nvdata(buf, EC_VBNV_BLOCK_SIZE);
 #endif
+	vboot_dump_nvdata(buf, EC_VBNV_BLOCK_SIZE);
 	ret = cros_nvdata_write_walk(CROS_NV_DATA, buf, EC_VBNV_BLOCK_SIZE);
 	if (ret)
 		return VBERROR_UNKNOWN;

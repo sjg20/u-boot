@@ -22,6 +22,10 @@ struct vboot_stage {
 	int (*run)(struct vboot_info *vboot);
 };
 
+#if CONFIG_IS_ENABLED(CHROMEOS_VBOOT_A) || \
+	CONFIG_IS_ENABLED(CHROMEOS_VBOOT_B) || \
+	CONFIG_IS_ENABLED(CHROMEOS_VBOOT_C)
+
 /* There are three groups here. TPL runs the early firmware-selection process,
  * then SPL sets up SDRAM and jumps to U-Boot proper, which does the kernel-
  * selection process. We only build in the code that is actually needed by each
@@ -125,6 +129,8 @@ static int save_if_needed(struct vboot_info *vboot)
 #ifdef DEBUG
 		print_buffer(0, ctx->nvdata, 1, sizeof(ctx->nvdata), 0);
 #endif
+		if (spl_phase() != PHASE_SPL)
+			vboot_dump_nvdata(ctx->nvdata, sizeof(ctx->nvdata));
 		ret = cros_nvdata_write_walk(CROS_NV_DATA, ctx->nvdata,
 					     sizeof(ctx->nvdata));
 		if (ret)
@@ -265,6 +271,8 @@ int cros_do_stage(void)
 
 	return 0;
 }
+
+#endif /* CHROMEOS_VBOOT_A B or C */
 
 #if DO_VBOOT
 
