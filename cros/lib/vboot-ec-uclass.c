@@ -50,7 +50,7 @@ int vboot_ec_disable_jump(struct udevice *dev)
 int vboot_ec_hash_image(struct udevice *dev, enum VbSelectFirmware_t select,
 			const u8 **hashp, int *hash_sizep)
 {
-	struct vboot_ec_priv *priv = dev_get_uclass_priv(dev);
+	struct vboot_ec_uc_priv *priv = dev_get_uclass_priv(dev);
 	struct vboot_ec_ops *ops = vboot_ec_get_ops(dev);
 	int hash_size;
 	int ret;
@@ -65,6 +65,7 @@ int vboot_ec_hash_image(struct udevice *dev, enum VbSelectFirmware_t select,
 	if (ret)
 		return log_msg_ret("hash", ret);
 	*hashp = priv->hash_digest;
+	printf("returning hash %p %p\n", priv, priv->hash_digest);
 	*hash_sizep = hash_size;
 
 	return 0;
@@ -123,5 +124,5 @@ UCLASS_DRIVER(cros_vboot_ec) = {
 	.id		= UCLASS_CROS_VBOOT_EC,
 	.name		= "cros-vboot-ec",
 	.flags		= DM_UC_FLAG_SEQ_ALIAS,
-	.priv_auto_alloc_size	= sizeof(struct vboot_ec_priv),
+	.per_device_auto_alloc_size	= sizeof(struct vboot_ec_uc_priv),
 };

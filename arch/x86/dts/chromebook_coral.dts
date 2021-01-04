@@ -629,6 +629,13 @@
 					cros_ec_vboot: vboot {
 						compatible = "google,cros-ec-vboot";
 					};
+
+					nvdata-vstore {
+						u-boot,dm-pre-reloc;
+						compatible = "google,cros-ec-nvdata";
+						/* CROS_NV_VSTORE */
+						nvdata,types = <(1 << 4)>;
+					};
 				};
 			};
 		};

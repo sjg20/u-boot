@@ -1,15 +1,23 @@
 config NVDATA_CROS_EC
 	bool "Non-volatile data driver that uses the Chromium OS EC"
 	help
-	  This stored non-volatile data in the EC. This data may be lost when
+	  This stores non-volatile data in the EC. This data may be lost when
 	  the EC is reset but that does not happen often (Esc-Power-Refresh,
-	  running out of battery, etc.). This driver supports only the
-	  CROS_NV_DATA type.
+	  running out of battery, etc.). This driver supports CROS_NV_DATA and
+	  CROS_NV_VSTORE.
+
+config VPL_NVDATA_CROS_EC
+	bool "Non-volatile data driver that uses the Chromium OS EC in VPL"
+	help
+	  This stores non-volatile data in the EC. This data may be lost when
+	  the EC is reset but that does not happen often (Esc-Power-Refresh,
+	  running out of battery, etc.). This driver supports CROS_NV_DATA and
+	  CROS_NV_VSTORE.
 
 config NVDATA_TPM
 	bool "Non-volatile data driver that uses the TPM"
 	help
-	  This stored non-volatile data in the EC. This data is retained until
+	  This stores non-volatile data in the EC. This data is retained until
 	  the TPM is reset and cleared, typically after a 'power wash' cycle
 	  causes the device to enter the initial OOBE (Out-of-Box-Experience)
 	  screen. This driver supports CROS_NV_SECDATA, CROS_NV_SECDATAK and

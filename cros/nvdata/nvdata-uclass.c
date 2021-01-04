@@ -4,7 +4,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_CATEGORY LOGC_VBOOT
+#define LOG_CATEGORY UCLASS_CROS_NVDATA
 
 #include <common.h>
 #include <dm.h>
@@ -78,10 +78,11 @@ int cros_nvdata_write_walk(enum cros_nvdata_type type, const u8 *data, int size)
 	struct udevice *dev;
 	int ret = -ENOSYS;
 
+	log_info("write type %d size %x\n", type, size);
 	uclass_foreach_dev_probe(UCLASS_CROS_NVDATA, dev) {
-		log(UCLASS_CROS_NVDATA, LOGL_INFO, "write type %s\n",
-		    dev->name);
+		log_info("   - try %s\n", dev->name);
 		ret = cros_nvdata_write(dev, type, data, size);
+		log_info("   - %s ret=%d\n", dev->name, ret);
 		if (!ret)
 			break;
 	}

@@ -2,7 +2,7 @@
 /*
  * Copyright 2018 Google LLC
  */
-
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
@@ -287,6 +287,14 @@ int cros_ofnode_memory(const char *name, struct fdt_memory *config)
 static void dump_fmap_entry(const char *path, struct fmap_entry *entry)
 {
 	log_debug("%-20s %08x:%08x\n", path, entry->offset, entry->length);
+	if (entry->hash) {
+		int i;
+
+		log_debug("   hash: ");
+		for (i = 0; i < entry->hash_size; i++)
+			log_debug("%02x", entry->hash[i]);
+		log_debug("\n");
+	}
 }
 
 static void dump_fmap_firmware_entry(const char *name,

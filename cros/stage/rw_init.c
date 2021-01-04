@@ -283,7 +283,9 @@ int vboot_rw_init(struct vboot_info *vboot)
 	if (ret)
 		return log_msg_ret("Cannot locate TPM", ret);
 
+	printf("fmap\n");
 	ret = cros_ofnode_flashmap(&vboot->fmap);
+	printf("fmap %d\n", ret);
 	if (ret)
 		return log_msg_ret("failed to decode fmap\n", ret);
 	cros_ofnode_dump_fmap(&vboot->fmap);

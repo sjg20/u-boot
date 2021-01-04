@@ -238,7 +238,6 @@ int vboot_dump_secdata(const void *secdata, int size)
 	crc = crc8(0, secdata, offsetof(struct vb2_secdata, crc8));
 	printf("Vboot secdata:\n");
 
-	print_buffer(0, secdata, 1, size, 0);
 	printf("   Size %d : %svalid\n", size, size == VB2_SECDATA_SIZE ?
 	       "" : "in");
 	printf("   CRC %x (calc %x): %svalid\n", sec->crc8, crc,
@@ -249,7 +248,6 @@ int vboot_dump_secdata(const void *secdata, int size)
 	if (sec->flags & VB2_SECDATA_FLAG_DEV_MODE)
 		printf("   - dev mode\n");
 	printf("   Firmware versions %x\n", sec->fw_versions);
-
 
 	return 0;
 }

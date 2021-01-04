@@ -5,6 +5,7 @@
  * Copyright 2018 Google LLC
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>

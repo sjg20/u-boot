@@ -21,19 +21,16 @@ static int cmos_nvdata_read(struct udevice *dev, enum cros_nvdata_type type,
 {
 	struct cmos_priv *priv = dev_get_priv(dev);
 	struct udevice *rtc = dev_get_parent(dev);
-	int i, val;
+	int ret;
 
 	if (type != CROS_NV_DATA) {
 		log_debug("Only CROS_NV_DATA supported (not %d)\n", type);
 		return -ENOSYS;
 	}
 
-	for (i = 0; i < size; i++) {
-		val = rtc_read8(rtc, priv->base_reg + i);
-		if (val < 0)
-			return log_msg_ret("Read CMOS RAM", val);
-		data[i] = val;
-	}
+	ret = dm_rtc_read(rtc, priv->base_reg, data, size);
+	if (ret)
+		return log_msg_ret("Read CMOS RAM", ret);
 
 	return 0;
 }
@@ -43,18 +40,16 @@ static int cmos_nvdata_write(struct udevice *dev, enum cros_nvdata_type type, co
 {
 	struct cmos_priv *priv = dev_get_priv(dev);
 	struct udevice *rtc = dev_get_parent(dev);
-	int i, ret;
+	int ret;
 
 	if (type != CROS_NV_DATA) {
 		log_debug("Only CROS_NV_DATA supported (not %d)\n", type);
 		return -ENOSYS;
 	}
 
-	for (i = 0; i < size; i++) {
-		ret = rtc_write8(rtc, priv->base_reg + i, data[i]);
-		if (ret)
-			return log_msg_ret("Write CMOS RAM", ret);
-	}
+	ret = dm_rtc_write(rtc, priv->base_reg, data, size);
+	if (ret)
+		return log_msg_ret("Write CMOS RAM", ret);
 
 	return 0;
 }

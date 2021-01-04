@@ -5,6 +5,7 @@
  * Copyright 2018 Google LLC
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_CROS_EC
 
 #include <common.h>
@@ -196,12 +197,17 @@ VbError_t VbExEcGetExpectedImageHash(int devidx, enum VbSelectFirmware_t select,
 	struct vboot_info *vboot = vboot_get();
 	struct fmap_entry *entry;
 
-	log_debug("devidx=%d\n", devidx);
+	log_info("devidx=%d\n", devidx);
 	entry = get_firmware_entry(vboot, devidx, select);
-	if (!entry)
+	if (!entry) {
+		log_err("Cannot get firmware entry: devid=%x, select=%d\b",
+			devidx, select);
 		return VBERROR_UNKNOWN;
+	}
 	*hash = entry->hash;
 	*hash_size = entry->hash_size;
+	log_info("hash size=%x\n", entry->hash_size);
+
 #ifdef LOG_DEBUG
 	uint i;
 

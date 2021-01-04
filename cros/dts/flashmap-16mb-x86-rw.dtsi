@@ -139,8 +139,12 @@
 		ecrw {
 			type = "cros-ec-rw";
 			u-boot,dm-pre-reloc;
+			align = <4>;
 			align-size = <0x1000>;
-			add-hash;
+			hash {
+				u-boot,dm-pre-reloc;
+				algo = "sha256";
+			};
 		};
 		firmware-id {
 			/* Alignment: no requirement */

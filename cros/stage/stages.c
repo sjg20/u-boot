@@ -140,8 +140,8 @@ static int save_if_needed(struct vboot_info *vboot)
 
 	if (ctx->flags & VB2_CONTEXT_SECDATA_CHANGED) {
 		log_info("Saving secdata\n");
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->nvdata,
-					     sizeof(ctx->nvdata));
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->secdata,
+					     sizeof(ctx->secdata));
 		if (ret)
 			return log_msg_ret("secdata", ret);
 		ctx->flags &= ~VB2_CONTEXT_SECDATA_CHANGED;
@@ -149,10 +149,10 @@ static int save_if_needed(struct vboot_info *vboot)
 
 	if (ctx->flags & VB2_CONTEXT_SECDATAK_CHANGED) {
 		log_info("Saving secdatak\n");
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK, ctx->nvdata,
-					     sizeof(ctx->nvdata));
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK, ctx->secdatak,
+					     sizeof(ctx->secdatak));
 		if (ret)
-			return log_msg_ret("secdata", ret);
+			return log_msg_ret("secdatak", ret);
 		ctx->flags &= ~VB2_CONTEXT_SECDATAK_CHANGED;
 	}
 

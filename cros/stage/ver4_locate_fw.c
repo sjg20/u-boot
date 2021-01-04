@@ -42,6 +42,12 @@ static int vboot_save_hash(void *digest, size_t digest_size)
 	assert(digest_size == EC_VSTORE_SLOT_SIZE);
 
 	ret = cros_nvdata_write_walk(CROS_NV_VSTORE, digest, digest_size);
+
+	if (ret == -ENOSYS) {
+		/* Coral EC does not support this */
+		log_err("Could not write to vstore: continuing\n");
+		return 0;
+	}
 	if (ret)
 		return ret;
 
