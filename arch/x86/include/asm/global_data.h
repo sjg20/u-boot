@@ -124,6 +124,7 @@ struct arch_global_data {
 	void *itss_priv;		/* Private ITSS data pointer */
 	ulong acpi_start;		/* Start address of ACPI tables */
 	ulong coreboot_table;		/* Address of coreboot table */
+	char *smbios_version;		/* Points to SMBIOS type 0 version */
 };
 
 #endif
