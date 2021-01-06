@@ -31,6 +31,14 @@
  * to read the serial number.
  */
 
+/** enum sysinfo_id - Standard IDs defined by U-Boot */
+enum sysinfo_id {
+	SYSINFO_ID_NONE,
+
+	SYSINFO_ID_SMBIOS_SYSTEM_VERSION,
+	SYSINFO_ID_SMBIOS_BASEBOARD_VERSION,
+};
+
 #if CONFIG_IS_ENABLED(SYSINFO)
 struct sysinfo_ops {
 	/**
