@@ -171,7 +171,7 @@ VbError_t VbExNvStorageWrite(const u8 *buf)
 	return 0;
 }
 
-int cros_nvdata_ofdata_to_platdata(struct udevice *dev)
+int cros_nvdata_of_to_plat(struct udevice *dev)
 {
 	struct nvdata_uc_priv *uc_priv = dev_get_uclass_priv(dev);
 	uint i;
@@ -198,5 +198,5 @@ int cros_nvdata_ofdata_to_platdata(struct udevice *dev)
 UCLASS_DRIVER(cros_nvdata) = {
 	.id		= UCLASS_CROS_NVDATA,
 	.name		= "cros_nvdata",
-	.per_device_auto_alloc_size	= sizeof(struct nvdata_uc_priv),
+	.per_device_auto	= sizeof(struct nvdata_uc_priv),
 };

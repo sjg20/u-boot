@@ -236,6 +236,6 @@ int cros_nvdata_setup_walk(enum cros_nvdata_type type, uint attr, uint size,
  */
 int cros_nvdata_lock_walk(enum cros_nvdata_type );
 
-int cros_nvdata_ofdata_to_platdata(struct udevice *dev);
+int cros_nvdata_of_to_plat(struct udevice *dev);
 
 #endif /* __CROS_NVDATA_H */

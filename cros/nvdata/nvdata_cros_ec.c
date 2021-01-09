@@ -125,5 +125,5 @@ U_BOOT_DRIVER(cros_ec_nvdata_drv) = {
 	.id		= UCLASS_CROS_NVDATA,
 	.of_match	= cros_ec_nvdata_ids,
 	.ops		= &cros_ec_nvdata_ops,
-	.ofdata_to_platdata	= cros_nvdata_ofdata_to_platdata,
+	.of_to_plat	= cros_nvdata_of_to_plat,
 };

@@ -4,6 +4,7 @@
  */
 
 #ifndef USE_HOSTCC
+
 #include <common.h>
 #include <boot_fit.h>
 #include <dm.h>
@@ -759,9 +760,9 @@ int fdtdec_parse_phandle_with_args(const void *blob, int src_node,
 				node = fdt_node_offset_by_phandle(blob,
 								  phandle);
 				if (node < 0) {
-					debug("%s: could not find phandle\n",
+					debug("%s: could not find phandle %d\n",
 					      fdt_get_name(blob, src_node,
-							   NULL));
+							   NULL), phandle);
 					goto err;
 				}
 			}

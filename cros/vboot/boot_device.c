@@ -35,7 +35,7 @@ enum {
 static int add_matching_device(struct udevice *dev, u32 req_flags,
 			       VbDiskInfo *info)
 {
-	struct blk_desc *bdev = dev_get_uclass_platdata(dev);
+	struct blk_desc *bdev = dev_get_uclass_plat(dev);
 	u32 flags;
 
 	/* Ignore zero-length devices */
@@ -151,7 +151,7 @@ VbError_t VbExDiskRead(VbExDiskHandle_t handle, u64 lba_start, u64 lba_count,
 		       void *buffer)
 {
 	struct udevice *dev = (struct udevice *)handle;
-	struct blk_desc *bdev = dev_get_uclass_platdata(dev);
+	struct blk_desc *bdev = dev_get_uclass_plat(dev);
 	u64 blks_read;
 
 	log_debug("lba_start=%x, lba_count=%x, buffer=%p\n", (uint)lba_start,
@@ -174,7 +174,7 @@ VbError_t VbExDiskWrite(VbExDiskHandle_t handle, u64 lba_start,
 			u64 lba_count, const void *buffer)
 {
 	struct udevice *dev = (struct udevice *)handle;
-	struct blk_desc *bdev = dev_get_uclass_platdata(dev);
+	struct blk_desc *bdev = dev_get_uclass_plat(dev);
 
 	if (lba_start >= bdev->lba || lba_start + lba_count > bdev->lba)
 		return VBERROR_UNKNOWN;

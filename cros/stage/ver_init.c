@@ -103,7 +103,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 	cros_ofnode_dump_fmap(&vboot->fmap);
 	ret = uclass_first_device_err(UCLASS_CROS_FWSTORE, &vboot->fwstore);
 	if (ret)
-		return log_msg_ret("set up fwstore", ret);
+		return log_msg_ret("fwstore", ret);
 
 	if (CONFIG_IS_ENABLED(CROS_EC)) {
 		ret = uclass_get_device(UCLASS_CROS_EC, 0, &vboot->cros_ec);

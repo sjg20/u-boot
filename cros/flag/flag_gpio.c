@@ -67,5 +67,5 @@ U_BOOT_DRIVER(flag_gpio_drv) = {
 	.of_match	= flag_gpio_ids,
 	.probe		= flag_gpio_probe,
 	.ops		= &flag_gpio_ops,
-	.priv_auto_alloc_size	= sizeof(struct flag_gpio_priv),
+	.priv_auto	= sizeof(struct flag_gpio_priv),
 };

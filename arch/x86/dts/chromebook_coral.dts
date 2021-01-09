@@ -352,6 +352,7 @@
 		spi: fast-spi@d,2 {
 			u-boot,dm-pre-proper;
 			u-boot,dm-spl;
+			u-boot,dm-vpl;
 			reg = <0x02006a10 0 0 0 0>;
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -364,6 +365,7 @@
 				#address-cells = <1>;
 				u-boot,dm-pre-proper;
 				u-boot,dm-spl;
+				u-boot,dm-vpl;
 				reg = <0>;
 				compatible = "winbond,w25q128fw",
 					 "jedec,spi-nor";
@@ -623,6 +625,7 @@
 				u-boot,dm-pre-reloc;
 				cros_ec: cros-ec {
 					u-boot,dm-pre-proper;
+					u-boot,dm-vpl;
 					compatible = "google,cros-ec-lpc";
 					reg = <0x204 1 0x200 1 0x880 0x80>;
 
@@ -1281,6 +1284,7 @@
 &rtc {
 	#address-cells = <1>;
 	#size-cells = <0>;
+	u-boot,dm-pre-reloc;
 	nvdata {
 		u-boot,dm-pre-reloc;
 		compatible = "google,cmos-nvdata";

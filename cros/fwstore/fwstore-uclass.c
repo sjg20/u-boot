@@ -99,10 +99,8 @@ int fwstore_get_reader_dev(struct udevice *fwstore, int offset, int size,
 	int ret;
 
 	if (device_find_first_inactive_child(fwstore, UCLASS_MISC, &dev)) {
-		ret = device_bind_ofnode(fwstore,
-					 DM_GET_DRIVER(fwstore_reader),
-					 "fwstore_reader", 0, ofnode_null(),
-					 &dev);
+		ret = device_bind(fwstore, DM_DRIVER_GET(fwstore_reader),
+				  "fwstore_reader", 0, ofnode_null(), &dev);
 		if (ret)
 			return log_msg_ret("bind failed", ret);
 	}

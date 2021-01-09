@@ -61,5 +61,5 @@ U_BOOT_DRIVER(flag_key_drv) = {
 	.of_match	= flag_key_ids,
 	.probe		= flag_key_probe,
 	.ops		= &flag_key_ops,
-	.priv_auto_alloc_size	= sizeof(struct flag_key_priv),
+	.priv_auto	= sizeof(struct flag_key_priv),
 };

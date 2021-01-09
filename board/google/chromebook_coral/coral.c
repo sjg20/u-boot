@@ -244,11 +244,11 @@ struct acpi_ops coral_acpi_ops = {
 	.inject_dsdt	= chromeos_acpi_gpio_generate,
 };
 
-#if !CONFIG_IS_ENABLED(OF_PLATDATA)
 struct sysinfo_ops coral_sysinfo_ops = {
 	.get_str	= coral_get_str,
 };
 
+#if !CONFIG_IS_ENABLED(OF_PLATDATA)
 static const struct udevice_id coral_ids[] = {
 	{ .compatible = "google,coral" },
 	{ }

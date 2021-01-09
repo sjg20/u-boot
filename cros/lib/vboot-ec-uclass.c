@@ -124,5 +124,5 @@ UCLASS_DRIVER(cros_vboot_ec) = {
 	.id		= UCLASS_CROS_VBOOT_EC,
 	.name		= "cros-vboot-ec",
 	.flags		= DM_UC_FLAG_SEQ_ALIAS,
-	.per_device_auto_alloc_size	= sizeof(struct vboot_ec_uc_priv),
+	.per_device_auto	= sizeof(struct vboot_ec_uc_priv),
 };

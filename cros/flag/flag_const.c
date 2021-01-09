@@ -31,7 +31,7 @@ static int flag_const_read(struct udevice *dev)
 	return priv->value;
 }
 
-static int flag_const_ofdata_to_platdata(struct udevice *dev)
+static int flag_const_of_to_plat(struct udevice *dev)
 {
 	struct flag_const_priv *priv = dev_get_priv(dev);
 	u32 value;
@@ -66,7 +66,7 @@ U_BOOT_DRIVER(google_const_flag) = {
 	.name		= "google_const_flag",
 	.id		= UCLASS_CROS_VBOOT_FLAG,
 	.of_match	= flag_const_ids,
-	.ofdata_to_platdata	= flag_const_ofdata_to_platdata,
+	.of_to_plat	= flag_const_of_to_plat,
 	.ops		= &flag_const_ops,
-	.priv_auto_alloc_size	= sizeof(struct flag_const_priv),
+	.priv_auto	= sizeof(struct flag_const_priv),
 };

@@ -547,7 +547,7 @@ int cbgfx_get_bitmap_dimension(const void *bitmap, size_t sz,
 
 int cbgfx_init(struct udevice *dev)
 {
-	struct video_uc_platdata *plat = dev_get_uclass_platdata(dev);
+	struct video_uc_plat *plat = dev_get_uclass_plat(dev);
 	struct video_priv *priv = dev_get_uclass_priv(dev);
 
 	fbinfo->physical_address = plat->base;

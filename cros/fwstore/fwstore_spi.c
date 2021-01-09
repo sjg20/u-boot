@@ -121,11 +121,11 @@ static int fwstore_spi_write(struct udevice *dev, ulong offset, ulong count,
 	log_debug("adjusted offset: %08x\n", pos);
 	if (pos > offset) {
 		log_debug("align incorrect: %08x > %08lx\n", pos, offset);
-		return -EINVAL;
+		return log_msg_ret("aligh", -EINVAL);
 	}
 
 	if (border_check(priv->sf, pos, len))
-		return -ERANGE;
+		return log_msg_ret("border", -ERANGE);
 
 	backup_buf = len > sizeof(static_buf) ? malloc(len) : static_buf;
 	if (!backup_buf)
@@ -215,7 +215,7 @@ int fwstore_spi_probe(struct udevice *dev)
 					 &args);
 	if (ret < 0) {
 		log_debug("fail to look up phandle for device %s\n", dev->name);
-		return ret;
+		return log_msg_ret("phandle", ret);
 	}
 
 	ret = uclass_get_device_by_ofnode(UCLASS_SPI_FLASH, args.node,
@@ -223,7 +223,7 @@ int fwstore_spi_probe(struct udevice *dev)
 	if (ret) {
 		log_debug("fail to init SPI flash at %s: %s: ret=%d\n",
 			  dev->name, ofnode_get_name(args.node), ret);
-		return ret;
+		return log_msg_ret("init", ret);
 	}
 #endif
 
@@ -248,5 +248,5 @@ U_BOOT_DRIVER(cros_fwstore_spi) = {
 	.of_match = fwstore_spi_ids,
 	.ops	= &fwstore_spi_ops,
 	.probe	= fwstore_spi_probe,
-	.priv_auto_alloc_size = sizeof(struct fwstore_spi_priv),
+	.priv_auto = sizeof(struct fwstore_spi_priv),
 };

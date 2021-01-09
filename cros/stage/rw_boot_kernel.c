@@ -70,7 +70,7 @@ static char *get_kernel_config(void *kernel_buffer, size_t bootloader_offset)
 
 static u32 get_dev_num(const struct udevice *dev)
 {
-	const struct blk_desc *desc = dev_get_uclass_platdata(dev);
+	const struct blk_desc *desc = dev_get_uclass_plat(dev);
 
 	return desc->devnum;
 }

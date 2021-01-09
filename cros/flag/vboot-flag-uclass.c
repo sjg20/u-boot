@@ -81,7 +81,7 @@ int vboot_flag_read_walk_prev(enum vboot_flag_t flag, int *prevp,
 
 	ret = vboot_flag_read(dev);
 	if (ret >= 0 && !uclass_get(UCLASS_CROS_VBOOT_FLAG, &uc)) {
-		struct vboot_flag_state *uc_priv = uc->priv;
+		struct vboot_flag_state *uc_priv = uclass_get_priv(uc);
 
 		if (prevp)
 			*prevp = uc_priv->value[flag];
@@ -118,7 +118,7 @@ static int vboot_flag_pre_probe(struct udevice *dev)
 
 static int vboot_flag_init(struct uclass *uc)
 {
-	struct vboot_flag_state *uc_priv = uc->priv;
+	struct vboot_flag_state *uc_priv = uclass_get_priv(uc);
 	int i;
 
 	for (i = 0; i < VBOOT_FLAG_COUNT; i++)
@@ -132,6 +132,6 @@ UCLASS_DRIVER(vboot_flag) = {
 	.name		= "vboot_flag",
 	.init		= vboot_flag_init,
 	.pre_probe	= vboot_flag_pre_probe,
-	.priv_auto_alloc_size	= sizeof(struct vboot_flag_state),
-	.per_device_auto_alloc_size = sizeof(struct vboot_flag_uc_priv),
+	.priv_auto	= sizeof(struct vboot_flag_state),
+	.per_device_auto = sizeof(struct vboot_flag_uc_priv),
 };

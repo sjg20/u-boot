@@ -133,7 +133,8 @@ u32 tpm_pcr_extend(struct udevice *dev, u32 index, const void *in_digest,
 	if (is_tpm1(dev))
 		return tpm1_pcr_extend(dev, index, in_digest, out_digest);
 	else
-		return tpm2_pcr_extend(dev, index, in_digest);
+		return tpm2_pcr_extend(dev, index, TPM2_ALG_SHA256, in_digest,
+				       TPM2_DIGEST_LEN);
 }
 
 u32 tpm_pcr_read(struct udevice *dev, u32 index, void *data, size_t count)

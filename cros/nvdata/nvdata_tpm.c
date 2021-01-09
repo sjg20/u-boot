@@ -238,5 +238,5 @@ U_BOOT_DRIVER(google_tpm_secdata) = {
 	.id		= UCLASS_CROS_NVDATA,
 	.of_match	= tpm_secdata_ids,
 	.ops		= &tpm_secdata_ops,
-	.ofdata_to_platdata	= cros_nvdata_ofdata_to_platdata,
+	.of_to_plat	= cros_nvdata_of_to_plat,
 };
