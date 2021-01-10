@@ -685,7 +685,7 @@ int dm_gpio_set_dir(struct gpio_desc *desc);
 int dm_gpio_set_dir_flags(struct gpio_desc *desc, ulong flags);
 
 /**
- * dm_gpio_get_dir_flags() - Get direction flags
+ * dm_gpio_get_flags() - Get direction flags
  *
  * read the current direction flags
  *
@@ -694,7 +694,7 @@ int dm_gpio_set_dir_flags(struct gpio_desc *desc, ulong flags);
  * @flags:	place to put the used flags
  * @return 0 if OK, -ve on error, in which case desc->flags is not updated
  */
-int dm_gpio_get_dir_flags(struct gpio_desc *desc, ulong *flags);
+int dm_gpio_get_flags(struct gpio_desc *desc, ulong *flags);
 
 /**
  * gpio_get_number() - Get the global GPIO number of a GPIO
