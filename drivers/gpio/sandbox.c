@@ -231,7 +231,7 @@ static int sb_gpio_update_flags(struct udevice *dev, uint offset, ulong flags)
 static int sb_gpio_get_flags(struct udevice *dev, uint offset, ulong *flagsp)
 {
 	debug("%s: offset:%u\n", __func__, offset);
-	*flagsp = *get_gpio_flags(dev, offset);
+	*flagsp = *get_gpio_flags(dev, offset) & ~GPIOD_SANDBOX_MASK;
 
 	return 0;
 }
