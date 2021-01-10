@@ -23,6 +23,7 @@
 struct gpio_state {
 	const char *label;	/* label given by requester */
 	ulong flags;		/* flags (GPIOD_...) */
+	bool out_active;	/* GPIOD_IS_OUT_ACTIVE was set */
 };
 
 /* Access routines for GPIO info */
@@ -60,12 +61,14 @@ static int get_gpio_flag(struct udevice *dev, unsigned int offset, ulong flag)
 static int set_gpio_flag(struct udevice *dev, unsigned int offset, ulong flag,
 			 int value)
 {
-	ulong *gpio = get_gpio_flags(dev, offset);
+	struct gpio_state *state = get_gpio_state(dev, offset);
 
 	if (value)
-		*gpio |= flag;
+		state->flags |= flag;
 	else
-		*gpio &= ~flag;
+		state->flags &= ~flag;
+	if (state->flags & GPIOD_IS_OUT)
+		state->out_active = state->flags & GPIOD_IS_OUT_ACTIVE;
 
 	return 0;
 }
@@ -76,13 +79,20 @@ static int set_gpio_flag(struct udevice *dev, unsigned int offset, ulong flag,
 
 int sandbox_gpio_get_value(struct udevice *dev, unsigned offset)
 {
+	struct gpio_state *state = get_gpio_state(dev, offset);
+
 	if (get_gpio_flag(dev, offset, GPIOD_IS_OUT))
 		debug("sandbox_gpio: get_value on output gpio %u\n", offset);
-	return get_gpio_flag(dev, offset, GPIOD_IS_OUT_ACTIVE);
+
+	return state->out_active;
 }
 
 int sandbox_gpio_set_value(struct udevice *dev, unsigned offset, int value)
 {
+	struct gpio_state *state = get_gpio_state(dev, offset);
+
+	state->out_active = value;
+
 	return set_gpio_flag(dev, offset, GPIOD_IS_OUT_ACTIVE, value);
 }
 
@@ -106,7 +116,10 @@ ulong sandbox_gpio_get_flags(struct udevice *dev, uint offset)
 
 int sandbox_gpio_set_flags(struct udevice *dev, uint offset, ulong flags)
 {
-	*get_gpio_flags(dev, offset) = flags;
+	struct gpio_state *state = get_gpio_state(dev, offset);
+
+	state->flags = flags;
+	state->out_active = flags & GPIOD_IS_OUT_ACTIVE;
 
 	return 0;
 }
@@ -189,21 +202,20 @@ static int sb_gpio_xlate(struct udevice *dev, struct gpio_desc *desc,
 
 static int sb_gpio_update_flags(struct udevice *dev, uint offset, ulong newf)
 {
-	ulong *flags;
+	struct gpio_state *state = get_gpio_state(dev, offset);
 
 	debug("%s: offset:%u, flags = %lx\n", __func__, offset, newf);
-
-	flags = get_gpio_flags(dev, offset);
 
 	/*
 	 * For testing purposes keep the output value when switching to input.
 	 * This allows us to manipulate the input value via the gpio command.
 	 */
 	if (newf & GPIOD_IS_IN)
-		*flags = (newf & ~GPIOD_IS_OUT_ACTIVE) |
-			(*flags & GPIOD_IS_OUT_ACTIVE);
+		state->out_active = state->flags & GPIOD_IS_OUT_ACTIVE;
 	else
-		*flags = newf;
+		state->out_active = newf & GPIOD_IS_OUT_ACTIVE;
+
+	state->flags = newf;
 
 	return 0;
 }
