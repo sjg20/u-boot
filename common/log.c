@@ -227,6 +227,7 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 	char buf[CONFIG_SYS_CBSIZE];
 	struct log_rec rec;
 	va_list args;
+	int len;
 
 	/* Check for message continuation */
 	if (cat == LOGC_CONT)
@@ -239,12 +240,15 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 	rec.flags = 0;
 	if (level & LOGL_FORCE_DEBUG)
 		rec.flags |= LOGRECF_FORCE_DEBUG;
+	if (gd->log_cont)
+		rec.flags |= LOGRECF_CONT;
 	rec.file = file;
 	rec.line = line;
 	rec.func = func;
 	va_start(args, fmt);
-	vsnprintf(buf, sizeof(buf), fmt, args);
+	len = vsnprintf(buf, sizeof(buf), fmt, args);
 	va_end(args);
+	gd->log_cont = len && buf[len - 1] != '\n';
 	rec.msg = buf;
 	if (!gd || !(gd->flags & GD_FLG_LOG_READY)) {
 		if (gd)
