@@ -23,6 +23,11 @@
  */
 #include <asm-generic/gpio.h>
 
+/* Our own private GPIO flags, which musn't conflict with GPIOD_... */
+#define GPIOD_EXT_HIGH		BIT(20)	/* external source is high (else low) */
+
+#define GPIOD_SANDBOX_MASK	BIT(20)
+
 /**
  * Return the simulated value of a GPIO (used only in sandbox test code)
  *
