@@ -219,7 +219,7 @@ int gpio_xlate_offs_flags(struct udevice *dev, struct gpio_desc *desc,
 static int gpio_find_and_xlate(struct gpio_desc *desc,
 			       struct ofnode_phandle_args *args)
 {
-	struct dm_gpio_ops *ops = gpio_get_ops(desc->dev);
+	const struct dm_gpio_ops *ops = gpio_get_ops(desc->dev);
 
 	if (ops->xlate)
 		return ops->xlate(desc->dev, desc, args);
@@ -352,6 +352,7 @@ int gpio_hog_lookup_name(const char *name, struct gpio_desc **desc)
 
 int dm_gpio_request(struct gpio_desc *desc, const char *label)
 {
+	const struct dm_gpio_ops *ops = gpio_get_ops(desc->dev);
 	struct udevice *dev = desc->dev;
 	struct gpio_dev_priv *uc_priv;
 	char *str;
@@ -363,8 +364,8 @@ int dm_gpio_request(struct gpio_desc *desc, const char *label)
 	str = strdup(label);
 	if (!str)
 		return -ENOMEM;
-	if (gpio_get_ops(dev)->request) {
-		ret = gpio_get_ops(dev)->request(dev, desc->offset, label);
+	if (ops->request) {
+		ret = ops->request(dev, desc->offset, label);
 		if (ret) {
 			free(str);
 			return ret;
@@ -441,14 +442,15 @@ int gpio_requestf(unsigned gpio, const char *fmt, ...)
 
 int _dm_gpio_free(struct udevice *dev, uint offset)
 {
+	const struct dm_gpio_ops *ops = gpio_get_ops(dev);
 	struct gpio_dev_priv *uc_priv;
 	int ret;
 
 	uc_priv = dev_get_uclass_priv(dev);
 	if (!uc_priv->name[offset])
 		return -ENXIO;
-	if (gpio_get_ops(dev)->rfree) {
-		ret = gpio_get_ops(dev)->rfree(dev, offset);
+	if (ops->rfree) {
+		ret = ops->rfree(dev, offset);
 		if (ret)
 			return ret;
 	}
@@ -545,9 +547,10 @@ int gpio_direction_output(unsigned gpio, int value)
 
 static int _gpio_get_value(const struct gpio_desc *desc)
 {
+	const struct dm_gpio_ops *ops = gpio_get_ops(desc->dev);
 	int value;
 
-	value = gpio_get_ops(desc->dev)->get_value(desc->dev, desc->offset);
+	value = ops->get_value(desc->dev, desc->offset);
 
 	return desc->flags & GPIOD_ACTIVE_LOW ? !value : value;
 }
@@ -643,7 +646,7 @@ static int check_dir_flags(ulong flags)
 static int _dm_gpio_update_flags(struct gpio_desc *desc, ulong flags)
 {
 	struct udevice *dev = desc->dev;
-	struct dm_gpio_ops *ops = gpio_get_ops(dev);
+	const struct dm_gpio_ops *ops = gpio_get_ops(dev);
 	struct gpio_dev_priv *uc_priv = dev_get_uclass_priv(dev);
 	int ret = 0;
 
@@ -709,7 +712,7 @@ int dm_gpio_get_flags(struct gpio_desc *desc, ulong *flagsp)
 {
 	struct udevice *dev = desc->dev;
 	int ret, value;
-	struct dm_gpio_ops *ops = gpio_get_ops(dev);
+	const struct dm_gpio_ops *ops = gpio_get_ops(dev);
 	ulong flags;
 
 	ret = check_reserved(desc, "get_flags");
@@ -807,7 +810,7 @@ static int get_function(struct udevice *dev, int offset, bool skip_unused,
 			const char **namep)
 {
 	struct gpio_dev_priv *uc_priv = dev_get_uclass_priv(dev);
-	struct dm_gpio_ops *ops = gpio_get_ops(dev);
+	const struct dm_gpio_ops *ops = gpio_get_ops(dev);
 
 	BUILD_BUG_ON(GPIOF_COUNT != ARRAY_SIZE(gpio_function));
 	if (!device_active(dev))
@@ -844,7 +847,7 @@ int gpio_get_raw_function(struct udevice *dev, int offset, const char **namep)
 
 int gpio_get_status(struct udevice *dev, int offset, char *buf, int buffsize)
 {
-	struct dm_gpio_ops *ops = gpio_get_ops(dev);
+	const struct dm_gpio_ops *ops = gpio_get_ops(dev);
 	struct gpio_dev_priv *priv;
 	char *str = buf;
 	int func;
@@ -884,7 +887,7 @@ int gpio_get_status(struct udevice *dev, int offset, char *buf, int buffsize)
 #if CONFIG_IS_ENABLED(ACPIGEN)
 int gpio_get_acpi(const struct gpio_desc *desc, struct acpi_gpio *gpio)
 {
-	struct dm_gpio_ops *ops;
+	const struct dm_gpio_ops *ops;
 
 	memset(gpio, '\0', sizeof(*gpio));
 	if (!dm_gpio_is_valid(desc)) {
