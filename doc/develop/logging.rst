@@ -54,6 +54,9 @@ If CONFIG_LOG is not set, then no logging will be available.
 The above have SPL and TPL versions also, e.g. CONFIG_SPL_LOG_MAX_LEVEL and
 CONFIG_TPL_LOG_MAX_LEVEL.
 
+If logging is disabled, the default behaviour is to output any message at
+level LOGL_INFO and below.
+
 Temporary logging within a single file
 --------------------------------------
 
@@ -292,8 +295,6 @@ More logging destinations:
 * buffer - recorded in a memory buffer
 
 Convert debug() statements in the code to log() statements
-
-Support making printf() emit log statements at L_INFO level
 
 Convert error() statements in the code to log() statements
 

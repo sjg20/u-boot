@@ -175,25 +175,29 @@ static inline int _log_nop(enum log_category_t cat, enum log_level_t level,
 #define log_io(_fmt...)		log_nop(LOG_CATEGORY, LOGL_DEBUG_IO, ##_fmt)
 #endif
 
-#if CONFIG_IS_ENABLED(LOG)
 #ifdef LOG_DEBUG
 #define _LOG_DEBUG	LOGL_FORCE_DEBUG
 #else
 #define _LOG_DEBUG	0
 #endif
 
+#if CONFIG_IS_ENABLED(LOG)
+
 /* Emit a log record if the level is less that the maximum */
 #define log(_cat, _level, _fmt, _args...) ({ \
 	int _l = _level; \
-	if (CONFIG_IS_ENABLED(LOG) && \
-	    (_LOG_DEBUG != 0 || _l <= _LOG_MAX_LEVEL)) \
+	if ((_LOG_DEBUG != 0 || _l <= _LOG_MAX_LEVEL)) \
 		_log((enum log_category_t)(_cat), \
 		     (enum log_level_t)(_l | _LOG_DEBUG), __FILE__, \
 		     __LINE__, __func__, \
 		      pr_fmt(_fmt), ##_args); \
 	})
 #else
-#define log(_cat, _level, _fmt, _args...)
+#define log(_cat, _level, _fmt, _args...) ({ \
+	int _l = _level; \
+	if ((_LOG_DEBUG != 0 || _l <= LOGL_INFO)) \
+		printf(_fmt, ##_args); \
+	})
 #endif
 
 #define log_nop(_cat, _level, _fmt, _args...) ({ \
