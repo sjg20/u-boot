@@ -309,7 +309,7 @@ struct dm_gpio_ops {
 	 * If any flags cannot be set (e.g. the driver or hardware does not
 	 * support them or this particular GPIO does not have the requested
 	 * feature), the driver should perform what changes it can. The uclass
-	 * can read the current flags back with a call to get_dir_flags() if
+	 * can read the current flags back with a call to get_flags() if
 	 * desired.
 	 *
 	 * The uclass checks that flags do not obviously conflict (e.g. input
@@ -335,19 +335,20 @@ struct dm_gpio_ops {
 			    ulong flags);
 
 	/**
-	 * get_dir_flags() - Get GPIO dir flags
+	 * get_flags() - Get GPIO flags
 	 *
-	 * This function return the GPIO direction flags used.
+	 * This function return the GPIO flags used. It should read this from
+	 * the hardware directly.
 	 *
 	 * This method is optional.
 	 *
 	 * @dev:	GPIO device
 	 * @offset:	GPIO offset within that device
-	 * @flags:	place to put the used direction flags by GPIO
+	 * @flagsp:	place to put the current flags value
 	 * @return 0 if OK, -ve on error
 	 */
-	int (*get_dir_flags)(struct udevice *dev, unsigned int offset,
-			     ulong *flags);
+	int (*get_flags)(struct udevice *dev, unsigned int offset,
+			 ulong *flagsp);
 
 #if CONFIG_IS_ENABLED(ACPIGEN)
 	/**
