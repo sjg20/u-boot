@@ -69,7 +69,7 @@ int sandbox_gpio_set_direction(struct udevice *dev, unsigned int offset,
  * @param offset	GPIO offset within bank
  * @return dir_flags: bitfield accesses by GPIOD_ defines
  */
-ulong sandbox_gpio_get_dir_flags(struct udevice *dev, unsigned int offset);
+ulong sandbox_gpio_get_flags(struct udevice *dev, unsigned int offset);
 
 /**
  * Set the simulated flags of a GPIO (used only in sandbox test code)
