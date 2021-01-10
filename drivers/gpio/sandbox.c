@@ -210,9 +210,7 @@ static int sb_gpio_update_flags(struct udevice *dev, uint offset, ulong newf)
 	 * For testing purposes keep the output value when switching to input.
 	 * This allows us to manipulate the input value via the gpio command.
 	 */
-	if (newf & GPIOD_IS_IN)
-		state->out_active = state->flags & GPIOD_IS_OUT_ACTIVE;
-	else
+	if (!(newf & GPIOD_IS_IN))
 		state->out_active = newf & GPIOD_IS_OUT_ACTIVE;
 
 	state->flags = newf;
