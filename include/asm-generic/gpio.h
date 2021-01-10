@@ -658,17 +658,6 @@ int dm_gpio_get_value(const struct gpio_desc *desc);
 int dm_gpio_set_value(const struct gpio_desc *desc, int value);
 
 /**
- * dm_gpio_set_dir() - Set the direction for a GPIO
- *
- * This sets up the direction according to the GPIO flags: desc->flags.
- *
- * @desc:	GPIO description containing device, offset and flags,
- *		previously returned by gpio_request_by_name()
- * @return 0 if OK, -ve on error
- */
-int dm_gpio_set_dir(struct gpio_desc *desc);
-
-/**
  * dm_gpio_set_dir_flags() - Set direction using description and added flags
  *
  * This sets up the direction according to the provided flags and the GPIO
