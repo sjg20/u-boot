@@ -128,6 +128,12 @@ struct gpio_desc {
 #define GPIOD_PULL_UP		BIT(7)	/* GPIO has pull-up enabled */
 #define GPIOD_PULL_DOWN		BIT(8)	/* GPIO has pull-down enabled */
 
+/* Flags for updating the above */
+#define GPIOD_MASK_DIR		(GPIOD_IS_OUT | GPIOD_IS_IN | \
+					GPIOD_IS_OUT_ACTIVE)
+#define GPIOD_MASK_DSTYPE	(GPIOD_OPEN_DRAIN | GPIOD_OPEN_SOURCE)
+#define GPIOD_MASK_PULL		(GPIOD_PULL_UP | GPIOD_PULL_DOWN)
+
 	uint offset;		/* GPIO offset within the device */
 	/*
 	 * We could consider adding the GPIO label in here. Possibly we could
@@ -658,6 +664,25 @@ int gpio_free_list_nodev(struct gpio_desc *desc, int count);
 int dm_gpio_get_value(const struct gpio_desc *desc);
 
 int dm_gpio_set_value(const struct gpio_desc *desc, int value);
+
+/**
+ * dm_gpio_clrset_flags() - Update flags
+ *
+ * This updates the flags as directled. Note that desc->flags is updated by this
+ * function on success. If any changes cannot be made, best efforts are made.
+ *
+ * By use of @clr and @set any of flags can be individually updated, or left
+ * alone
+ *
+ * @desc:	GPIO description containing device, offset and flags,
+ *		previously returned by gpio_request_by_name()
+ * @clr:	Flags to clear (GPIOD_...)
+ * @set:	Flags to set (GPIOD_...)
+ * @return 0 if OK, -EINVAL if the flags had obvious conflicts,
+ * -ERECALLCONFLICT if there was a non-obvious hardware conflict when attempting
+ * to set the flags
+ */
+int dm_gpio_clrset_flags(struct gpio_desc *desc, ulong clr, ulong set);
 
 /**
  * dm_gpio_set_dir_flags() - Set direction using description and added flags
