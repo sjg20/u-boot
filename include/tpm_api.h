@@ -4,8 +4,8 @@
  * Coypright (c) 2013 Guntermann & Drunck GmbH
  */
 
-#ifndef __TPM_APL_H
-#define __TPM_APL_H
+#ifndef __TPM_API_H
+#define __TPM_API_H
 
 #include <tpm-common.h>
 #include <tpm-v1.h>
@@ -319,5 +319,4 @@ u32 tpm_write_lock(struct udevice *dev, u32 index);
  */
 u32 tpm_resume(struct udevice *dev);
 
-#endif /* __TPM_APL_H */
-
+#endif /* __TPM_API_H */

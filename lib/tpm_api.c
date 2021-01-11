@@ -9,6 +9,7 @@
 #include <tpm_api.h>
 #include <tpm-v1.h>
 #include <tpm-v2.h>
+#include <tpm_api.h>
 
 static bool is_tpm1(struct udevice *dev)
 {
