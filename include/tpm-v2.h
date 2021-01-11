@@ -530,4 +530,6 @@ u32 tpm2_get_random(struct udevice *dev, void *data, u32 count);
 
 u32 tpm2_write_lock(struct udevice *dev, u32 index);
 
+u32 tpm2_disable_platform_hierarchy(struct udevice *dev);
+
 #endif /* __TPM_V2_H */
