@@ -125,7 +125,7 @@ u32 tpm_write_lock(struct udevice *dev, u32 index)
 	if (is_tpm1(dev))
 		return -ENOSYS;
 	else
-		return -ENOSYS;
+		return tpm2_write_lock(dev, index);
 }
 
 u32 tpm_pcr_extend(struct udevice *dev, u32 index, const void *in_digest,
