@@ -238,6 +238,7 @@ enum tpm2_command_codes {
 	TPM2_CC_CLEAR		= 0x0126,
 	TPM2_CC_CLEARCONTROL	= 0x0127,
 	TPM2_CC_HIERCHANGEAUTH	= 0x0129,
+	TPM2_CC_NV_DEFINE_SPACE	= 0x012a,
 	TPM2_CC_PCR_SETAUTHPOL	= 0x012C,
 	TPM2_CC_DAM_RESET	= 0x0139,
 	TPM2_CC_DAM_PARAMETERS	= 0x013A,
@@ -385,6 +386,13 @@ u32 tpm2_self_test(struct udevice *dev, enum tpm2_yes_no full_test);
  */
 u32 tpm2_clear(struct udevice *dev, u32 handle, const char *pw,
 	       const ssize_t pw_sz);
+
+/**
+ * enum tpm_index_attrs
+ */
+u32 tpm2_nv_define_space(struct udevice *dev, u32 space_index,
+			 size_t space_size, u32 nv_attributes,
+			 const uint8_t *nv_policy, size_t nv_policy_size);
 
 /**
  * Issue a TPM2_PCR_Extend command.
