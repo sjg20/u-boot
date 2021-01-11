@@ -240,6 +240,7 @@ enum tpm2_command_codes {
 	TPM2_CC_HIERCHANGEAUTH	= 0x0129,
 	TPM2_CC_NV_DEFINE_SPACE	= 0x012a,
 	TPM2_CC_PCR_SETAUTHPOL	= 0x012C,
+	TPM2_CC_NV_WRITE	= 0x0137,
 	TPM2_CC_DAM_RESET	= 0x0139,
 	TPM2_CC_DAM_PARAMETERS	= 0x013A,
 	TPM2_CC_NV_READ         = 0x014E,
@@ -407,6 +408,10 @@ u32 tpm2_nv_define_space(struct udevice *dev, u32 space_index,
  */
 u32 tpm2_pcr_extend(struct udevice *dev, u32 index, u32 algorithm,
 		    const u8 *digest, u32 digest_len);
+
+u32 tpm2_nv_read_value(struct udevice *dev, u32 index, void *data, u32 count);
+u32 tpm2_nv_write_value(struct udevice *dev, u32 index, const void *data,
+			u32 count);
 
 /**
  * Issue a TPM2_PCR_Read command.
