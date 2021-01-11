@@ -192,12 +192,12 @@ struct global_data {
 	 */
 	struct udevice *dm_root_f;
 	/**
-	 * @uclass_root: head of core tree
+	 * @uclass_root_s: head of core tree
 	 */
 	struct list_head uclass_root_s;
 	/**
 	 * @uclass_root: pointer to head of core tree, if uclasses are in
-	 * read-only memory and cannot be adjusted to use @uclass_root as a
+	 * read-only memory and cannot be adjusted to use @uclass_root_s as a
 	 * list head.
 	 */
 	struct list_head *uclass_root;
