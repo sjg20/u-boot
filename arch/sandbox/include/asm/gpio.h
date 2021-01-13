@@ -25,8 +25,12 @@
 
 /* Our own private GPIO flags, which musn't conflict with GPIOD_... */
 #define GPIOD_EXT_HIGH		BIT(20)	/* external source is high (else low) */
+#define GPIOD_EXT_DRIVEN	BIT(21)	/* external source is driven */
+#define GPIOD_EXT_PULL_UP	BIT(22)	/* GPIO has external pull-up */
+#define GPIOD_EXT_PULL_DOWN	BIT(23)	/* GPIO has external pull-down */
 
-#define GPIOD_SANDBOX_MASK	BIT(20)
+#define GPIOD_EXT_PULL		(BIT(21) | BIT(22))
+#define GPIOD_SANDBOX_MASK	GENMASK(23, 20)
 
 /**
  * Return the simulated value of a GPIO (used only in sandbox test code)
@@ -81,10 +85,10 @@ ulong sandbox_gpio_get_flags(struct udevice *dev, unsigned int offset);
  *
  * @param dev		device to use
  * @param offset	GPIO offset within bank
- * @param flags		dir_flags: bitfield accesses by GPIOD_ defines
+ * @param flags		bitfield accesses by GPIOD_ defines
  * @return -1 on error, 0 if ok
  */
-int sandbox_gpio_set_dir_flags(struct udevice *dev, unsigned int offset,
-			       ulong flags);
+int sandbox_gpio_set_flags(struct udevice *dev, unsigned int offset,
+			   ulong flags);
 
 #endif

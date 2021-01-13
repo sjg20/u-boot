@@ -19,7 +19,6 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/gpio/sandbox-gpio.h>
 
-
 struct gpio_state {
 	const char *label;	/* label given by requester */
 	ulong flags;		/* flags (GPIOD_...) */
@@ -77,16 +76,28 @@ static int set_gpio_flag(struct udevice *dev, unsigned int offset, ulong flag,
 int sandbox_gpio_get_value(struct udevice *dev, unsigned offset)
 {
 	struct gpio_state *state = get_gpio_state(dev, offset);
+	bool val;
 
 	if (get_gpio_flag(dev, offset, GPIOD_IS_OUT))
 		debug("sandbox_gpio: get_value on output gpio %u\n", offset);
 
-	return state->flags & GPIOD_EXT_HIGH ? true : false;
+	if (state->flags & GPIOD_EXT_DRIVEN) {
+		val = state->flags & GPIOD_EXT_HIGH;
+	} else {
+		if (state->flags & GPIOD_EXT_PULL_UP)
+			val = true;
+		else if (state->flags & GPIOD_EXT_PULL_DOWN)
+			val = false;
+		else
+			val = state->flags & GPIOD_PULL_UP;
+	}
+
+	return val;
 }
 
 int sandbox_gpio_set_value(struct udevice *dev, unsigned offset, int value)
 {
-	set_gpio_flag(dev, offset, GPIOD_EXT_HIGH, value);
+	set_gpio_flag(dev, offset, GPIOD_EXT_DRIVEN | GPIOD_EXT_HIGH, value);
 
 	return 0;
 }
@@ -120,6 +131,7 @@ int sandbox_gpio_set_flags(struct udevice *dev, uint offset, ulong flags)
 	return 0;
 }
 
+
 /*
  * These functions implement the public interface within U-Boot
  */
@@ -143,8 +155,8 @@ static int sb_gpio_direction_output(struct udevice *dev, unsigned offset,
 	ret = sandbox_gpio_set_direction(dev, offset, 1);
 	if (ret)
 		return ret;
-	ret = set_gpio_flag(dev, offset, GPIOD_IS_OUT_ACTIVE | GPIOD_EXT_HIGH,
-			    value);
+	ret = set_gpio_flag(dev, offset, GPIOD_IS_OUT_ACTIVE |
+			    GPIOD_EXT_DRIVEN | GPIOD_EXT_HIGH, value);
 	if (ret)
 		return ret;
 
@@ -172,8 +184,8 @@ static int sb_gpio_set_value(struct udevice *dev, unsigned offset, int value)
 		return -1;
 	}
 
-	ret = set_gpio_flag(dev, offset, GPIOD_IS_OUT_ACTIVE | GPIOD_EXT_HIGH,
-			    value);
+	ret = set_gpio_flag(dev, offset, GPIOD_IS_OUT_ACTIVE |
+			    GPIOD_EXT_DRIVEN |GPIOD_EXT_HIGH, value);
 	if (ret)
 		return ret;
 
@@ -218,10 +230,13 @@ static int sb_gpio_update_flags(struct udevice *dev, uint offset, ulong flags)
 	struct gpio_state *state = get_gpio_state(dev, offset);
 
 	if (flags & GPIOD_IS_OUT) {
+		flags |= GPIOD_EXT_DRIVEN;
 		if (flags & GPIOD_IS_OUT_ACTIVE)
 			flags |= GPIOD_EXT_HIGH;
 		else
 			flags &= ~GPIOD_EXT_HIGH;
+	} else {
+		flags |= state->flags & GPIOD_SANDBOX_MASK;
 	}
 	state->flags = flags;
 
