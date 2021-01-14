@@ -85,7 +85,7 @@ int sandbox_gpio_get_value(struct udevice *dev, unsigned offset)
 
 int sandbox_gpio_set_value(struct udevice *dev, unsigned offset, int value)
 {
-	set_gpio_flag(dev, offset, GPIOD_IS_OUT_ACTIVE | GPIOD_EXT_HIGH, value);
+	set_gpio_flag(dev, offset, GPIOD_EXT_HIGH, value);
 
 	return 0;
 }
@@ -137,10 +137,19 @@ static int sb_gpio_direction_input(struct udevice *dev, unsigned offset)
 static int sb_gpio_direction_output(struct udevice *dev, unsigned offset,
 				    int value)
 {
+	int ret;
+
 	debug("%s: offset:%u, value = %d\n", __func__, offset, value);
 
-	return sandbox_gpio_set_direction(dev, offset, 1) |
-		sandbox_gpio_set_value(dev, offset, value);
+	ret = sandbox_gpio_set_direction(dev, offset, 1);
+	if (ret)
+		return ret;
+	ret = set_gpio_flag(dev, offset, GPIOD_IS_OUT_ACTIVE | GPIOD_EXT_HIGH,
+			    value);
+	if (ret)
+		return ret;
+
+	return 0;
 }
 
 /* read GPIO IN value of port 'offset' */
@@ -154,6 +163,8 @@ static int sb_gpio_get_value(struct udevice *dev, unsigned offset)
 /* write GPIO OUT value to port 'offset' */
 static int sb_gpio_set_value(struct udevice *dev, unsigned offset, int value)
 {
+	int ret;
+
 	debug("%s: offset:%u, value = %d\n", __func__, offset, value);
 
 	if (!sandbox_gpio_get_direction(dev, offset)) {
@@ -162,7 +173,12 @@ static int sb_gpio_set_value(struct udevice *dev, unsigned offset, int value)
 		return -1;
 	}
 
-	return sandbox_gpio_set_value(dev, offset, value);
+	ret = set_gpio_flag(dev, offset, GPIOD_IS_OUT_ACTIVE | GPIOD_EXT_HIGH,
+			    value);
+	if (ret)
+		return ret;
+
+	return 0;
 }
 
 static int sb_gpio_get_function(struct udevice *dev, unsigned offset)
