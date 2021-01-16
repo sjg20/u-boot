@@ -5,11 +5,13 @@
  */
 
 #include <common.h>
+#include <bootstage.h>
 #include <bootm.h>
 #include <command.h>
-#include <environment.h>
+#include <env.h>
 #include <errno.h>
 #include <image.h>
+#include <log.h>
 #include <fdt_support.h>
 
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_CLI_FRAMEWORK)
@@ -18,7 +20,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 static bootm_headers_t linux_images;
 
-static void boot_go_set_os(cmd_tbl_t *cmdtp, int flag, int argc,
+static void boot_go_set_os(struct cmd_tbl *cmdtp, int flag, int argc,
 			   char * const argv[],
 			   bootm_headers_t *images)
 {
@@ -66,8 +68,8 @@ static void boot_start_lmb(bootm_headers_t *images)
 
 	lmb_init(&images->lmb);
 
-	mem_start = getenv_bootm_low();
-	mem_size = getenv_bootm_size();
+	mem_start = env_get_bootm_low();
+	mem_size = env_get_bootm_size();
 
 	lmb_add(&images->lmb, (phys_addr_t)mem_start, mem_size);
 
@@ -79,7 +81,7 @@ static void boot_start_lmb(bootm_headers_t *images)
 static inline void boot_start_lmb(bootm_headers_t *images) { }
 #endif
 
-int do_boot_linux(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+int do_boot_linux(struct cmd_tbl *cmdtp, int flag, int argc, char * const argv[])
 {
 	boot_os_fn *boot_fn;
 	bootm_headers_t *images = &linux_images;
@@ -126,7 +128,7 @@ U_BOOT_CMD(bootl, CONFIG_SYS_MAXARGS, 1, do_boot_linux,
 #endif
 
 #if defined(CONFIG_CMD_BOOTD) && !defined(CONFIG_CMD_BOOTM)
-int do_bootd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+int do_bootd(struct cmd_tbl *cmdtp, int flag, int argc, char * const argv[])
 {
 	return run_command(env_get("bootcmd"), flag);
 }
