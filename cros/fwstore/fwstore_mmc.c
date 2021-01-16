@@ -236,5 +236,5 @@ U_BOOT_DRIVER(fwstore_mmc) = {
 	.of_match = fwstore_mmc_ids,
 	.ops	= &fwstore_mmc_ops,
 	.probe	= fwstore_mmc_probe,
-	.priv_auto_alloc_size = sizeof(struct priv),
+	.priv_auto = sizeof(struct priv),
 };

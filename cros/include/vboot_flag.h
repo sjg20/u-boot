@@ -24,6 +24,17 @@ enum vboot_flag_t {
 	VBOOT_FLAG_COUNT,
 };
 
+/**
+ * struct vboot_flag_uc_priv - uclass information for each device
+ *
+ * Each device in this uclass has its own version of this struct.
+ *
+ * @flag: Flag that this device handles
+ */
+struct vboot_flag_uc_priv {
+	enum vboot_flag_t flag;
+};
+
 struct vboot_flag_details {
 	/* previous value of the flag (1 or 0), or -1 if not known */
 	int prev_value;
@@ -71,10 +82,20 @@ int vboot_flag_read_walk(enum vboot_flag_t flag);
  *
  * @flag: Flag to find
  * @prevp: Returns previous value of flag on success
+ * @devp: Returns device that provided the flag value
  * @return flag value (0 or 1) if OK, -ENOENT if no driver supports the flag,
  *	-E2BIG if more than one driver supports the flag, other -ve
  *	value on other error
  */
-int vboot_flag_read_walk_prev(enum vboot_flag_t flag, int *prevp);
+int vboot_flag_read_walk_prev(enum vboot_flag_t flag, int *prevp,
+			      struct udevice **devp);
+
+/**
+ * vboot_flag_name() - Get the name of a flag
+ *
+ * @flag: Flag to check
+ * @return name of flag
+ */
+const char *vboot_flag_name(enum vboot_flag_t flag);
 
 #endif /* __CROS_VBOOT_FLAG_H */

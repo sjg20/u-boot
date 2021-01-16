@@ -13,7 +13,7 @@ enum {
 	VBOOT_EC_MAX_HASH_SIZE	= 64,
 };
 
-struct vboot_ec_priv {
+struct vboot_ec_uc_priv {
 	u8 hash_digest[VBOOT_EC_MAX_HASH_SIZE];
 };
 

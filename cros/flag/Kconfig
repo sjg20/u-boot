@@ -41,6 +41,15 @@ config CROS_FLAG_CONST
 	  all over the life of the verified boot session. This can be useful
 	  for flags which are not supported on a particular platform.
 
+config CROS_FLAG_CROS_EC
+	bool "Flags controlled by Chromium OS EC"
+	depends on CROS_FLAG
+	help
+	  Enable support for a Chromium OS flag which is provided by the EC.
+	  This typically involves sending a meessage to the EC to read the
+	  flag. An example might be reading recovery mode, since the EC is
+	  able to check the keyboard on start-up for that key combination.
+
 config CROS_FLAG_KEY
 	bool "Flags controlled by a keypress"
 	depends on CROS_FLAG && SANDBOX

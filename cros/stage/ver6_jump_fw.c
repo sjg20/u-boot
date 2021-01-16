@@ -8,6 +8,8 @@
 #include <log.h>
 #include <cros/vboot.h>
 
+#include <tpm-common.h>
+
 int vboot_ver6_jump_fw(struct vboot_info *vboot)
 {
 	struct fmap_entry *entry;

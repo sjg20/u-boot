@@ -47,6 +47,9 @@ struct cros_fwstore_ops {
 	 * @return	1 if sw wp is enabled, 0 if disabled, -ve on error
 	 */
 	int (*sw_wp_enabled)(struct udevice *dev);
+
+	int (*mmap)(struct udevice *dev, uint offset, uint size, ulong *addrp);
+
 };
 
 #define cros_fwstore_get_ops(dev) \
@@ -81,6 +84,9 @@ int cros_fwstore_write(struct udevice *dev, int offset, int count, void *buf);
  * @return	1 if sw wp is enabled, 0 if disabled, -ve on error
  */
 int cros_fwstore_get_sw_write_prot(struct udevice *dev);
+
+int cros_fwstore_mmap(struct udevice *dev, uint offset, uint size,
+		      ulong *addrp);
 
 /**
  * fwstore_reader_setup() - Set up an existing reader for SPI flash
@@ -155,5 +161,21 @@ int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
  */
 int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
 			void *buf, int buf_size);
+
+/**
+ * cros_fwstore_read() - read data
+ *
+ * @dev:	Device to read from
+ * @entry:	Flash entry to load (provides offset, size, compression,
+ *		uncompressed size)
+ * @buf:	Buffer to place data
+ * @maxlen:	Length of buffer
+ * @return 0 if OK, -ve on error
+ */
+int cros_fwstore_read_entry(struct udevice *dev, struct fmap_entry *entry,
+			    void *buf, int maxlen);
+
+int fwstore_entry_mmap(struct udevice *dev, struct fmap_entry *entry,
+		       ulong *addrp);
 
 #endif /* __CROS_FWSTORE_H_ */

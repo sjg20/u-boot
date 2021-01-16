@@ -4,7 +4,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_VBOOT
 
 #define NEED_VB20_INTERNALS
@@ -39,17 +38,17 @@ static int vboot_save_hash(void *digest, size_t digest_size)
 {
 	int ret;
 
-	/* Ensure the digests being saved match the EC's slot size. */
+	/* Ensure the digests being saved match the EC's slot size */
 	assert(digest_size == EC_VSTORE_SLOT_SIZE);
 
 	ret = cros_nvdata_write_walk(CROS_NV_VSTORE, digest, digest_size);
 	if (ret)
-		return ret;
+		return log_msg_ret("write", ret);
 
-	/* Assert the slot is locked on successful write. */
+	/* Assert the slot is locked on successful write */
 	ret = cros_nvdata_lock_walk(CROS_NV_VSTORE);
 	if (ret)
-		return ret;
+		return log_msg_ret("lock", ret);
 
 	return 0;
 }
@@ -63,7 +62,7 @@ static int vboot_save_hash(void *digest, size_t digest_size)
  */
 static int vboot_retrieve_hash(void *digest, size_t digest_size)
 {
-	/* Ensure the digests being saved match the EC's slot size. */
+	/* Ensure the digests being saved match the EC's slot size */
 	assert(digest_size == EC_VSTORE_SLOT_SIZE);
 
 	return cros_nvdata_read_walk(CROS_NV_VSTORE, digest, digest_size);
@@ -73,6 +72,7 @@ static int handle_digest_result(struct vboot_info *vboot, void *slot_hash,
 				size_t slot_hash_sz)
 {
 	int is_resume;
+	int ret;
 
 	/*
 	 * Chrome EC is the only support for vboot_save_hash() &
@@ -130,8 +130,9 @@ static int handle_digest_result(struct vboot_info *vboot, void *slot_hash,
 	log_debug("Saving vboot hash\n");
 
 	/* Always save the hash for the current boot */
-	if (vboot_save_hash(slot_hash, slot_hash_sz)) {
-		log_err("Error saving vboot hash\n");
+	ret = vboot_save_hash(slot_hash, slot_hash_sz);
+	if (ret) {
+		log_err("Error %d saving vboot hash\n", ret);
 		/*
 		 * Though this is an error, don't report it up since it could
 		 * lead to a reboot loop. The consequence of this is that
@@ -185,25 +186,23 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 	struct vb2_digest_context *dc = (struct vb2_digest_context *)
 		(ctx->workbuf + sd->workbuf_hash_offset);
 
-	printf("extend, ctx=%p, sd=%p, dc=%p, sd->workbuf_hash_size=%x\n",
-	       ctx, sd, dc, sd->workbuf_hash_size);
+	log_debug("extend, ctx=%p, sd=%p, dc=%p, sd->workbuf_hash_size=%x\n",
+		  ctx, sd, dc, sd->workbuf_hash_size);
 	/* Extend over the body */
 	for (blk = 0; ; blk++) {
 		int nbytes;
 
 		bootstage_start(BOOTSTAGE_ACCUM_VBOOT_FIRMWARE_READ, NULL);
 		nbytes = misc_read(fw_main, -1, block, TODO_BLOCK_SIZE);
-// 		log_debug("blk %x: read %x:\n", blk, nbytes);
-#if 0
+#ifdef DEBUG
 		print_buffer(blk * TODO_BLOCK_SIZE, block, 1,
-			     nbytes /* > 0x20 ? 0x20 : nbytes*/, 0);
+			     nbytes > 0x20 ? 0x20 : nbytes, 0);
 #endif
 		bootstage_accum(BOOTSTAGE_ACCUM_VBOOT_FIRMWARE_READ);
 		if (nbytes < 0)
 			return log_msg_ret("Read fwstore", nbytes);
 		else if (!nbytes)
 			break;
-// 		printf("   - got %x\n", nbytes);
 
 		ret = vb2api_extend_hash(ctx, block, nbytes);
 		if (ret)

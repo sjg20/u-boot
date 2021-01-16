@@ -547,7 +547,7 @@ int cbgfx_get_bitmap_dimension(const void *bitmap, size_t sz,
 
 int cbgfx_init(struct udevice *dev)
 {
-	struct video_uc_platdata *plat = dev_get_uclass_platdata(dev);
+	struct video_uc_plat *plat = dev_get_uclass_plat(dev);
 	struct video_priv *priv = dev_get_uclass_priv(dev);
 
 	fbinfo->physical_address = plat->base;
@@ -559,11 +559,11 @@ int cbgfx_init(struct udevice *dev)
 	fbinfo->reserved_mask_size = 0;
 	switch (priv->bpix) {
 	case VIDEO_BPP32:
-		fbinfo->red_mask_pos = 0;
+		fbinfo->red_mask_pos = 16;
 		fbinfo->red_mask_size = 8;
 		fbinfo->green_mask_pos = 8;
 		fbinfo->green_mask_size = 8;
-		fbinfo->blue_mask_pos = 16;
+		fbinfo->blue_mask_pos = 0;
 		fbinfo->blue_mask_size = 8;
 		break;
 	case VIDEO_BPP16:
