@@ -37,6 +37,8 @@
 
 #if defined(CONFIG_TPL_BUILD)
 #define _CONFIG_PREFIX TPL_
+#elif defined(CONFIG_VPL_BUILD)
+#define _CONFIG_PREFIX VPL_
 #elif defined(CONFIG_SPL_BUILD)
 #define _CONFIG_PREFIX SPL_
 #else
@@ -52,6 +54,7 @@
  *  CONFIG_FOO if CONFIG_SPL_BUILD is undefined,
  *  CONFIG_SPL_FOO if CONFIG_SPL_BUILD is defined.
  *  CONFIG_TPL_FOO if CONFIG_TPL_BUILD is defined.
+ *  CONFIG_VPL_FOO if CONFIG_VPL_BUILD is defined.
  */
 #define CONFIG_VAL(option)  config_val(option)
 
