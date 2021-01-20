@@ -137,27 +137,33 @@ void spl_fixup_fdt(void *fdt_blob)
 
 ulong spl_get_image_pos(void)
 {
-	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT) && spl_phase() == PHASE_TPL)
+#ifdef CONFIG_VPL
+	if (spl_next_phase() == PHASE_VPL)
 		return binman_sym(ulong, vpl, image_pos);
-	return spl_phase() == PHASE_TPL ?
+#endif
+	return spl_next_phase() == PHASE_SPL ?
 		binman_sym(ulong, spl, image_pos) :
 		binman_sym(ulong, u_boot_any, image_pos);
 }
 
 ulong spl_get_image_size(void)
 {
-	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT) && spl_phase() == PHASE_TPL)
+#ifdef CONFIG_VPL
+	if (spl_next_phase() == PHASE_VPL)
 		return binman_sym(ulong, vpl, size);
-	return spl_phase() == PHASE_TPL ?
+#endif
+	return spl_next_phase() == PHASE_SPL ?
 		binman_sym(ulong, spl, size) :
 		binman_sym(ulong, u_boot_any, size);
 }
 
 ulong spl_get_image_text_base(void)
 {
-	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT))
+#ifdef CONFIG_VPL
+	if (spl_next_phase() == PHASE_VPL)
 		return CONFIG_VPL_TEXT_BASE;
-	return spl_phase() == PHASE_TPL ? CONFIG_SPL_TEXT_BASE :
+#endif
+	return spl_next_phase() == PHASE_SPL ? CONFIG_SPL_TEXT_BASE :
 		CONFIG_SYS_TEXT_BASE;
 }
 

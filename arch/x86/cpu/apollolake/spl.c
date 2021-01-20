@@ -140,9 +140,7 @@ void board_boot_order(u32 *spl_boot_list)
 {
 	bool use_spi_flash = IS_ENABLED(CONFIG_APL_BOOT_FROM_FAST_SPI_FLASH);
 
-	if (DO_VBOOT && IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
-		spl_boot_list[0] = BOOT_DEVICE_CROS_VBOOT;
-	} else if (use_spi_flash) {
+	if (use_spi_flash) {
 		spl_boot_list[0] = BOOT_DEVICE_FAST_SPI;
 		spl_boot_list[1] = BOOT_DEVICE_SPI_MMAP;
 	} else {
