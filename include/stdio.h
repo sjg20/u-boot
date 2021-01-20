@@ -10,6 +10,7 @@ int tstc(void);
 
 /* stdout */
 #if !defined(CONFIG_SPL_BUILD) || \
+	(defined(CONFIG_VPL_BUILD) && defined(CONFIG_VPL_SERIAL)) || \
 	(defined(CONFIG_TPL_BUILD) && defined(CONFIG_TPL_SERIAL)) || \
 	(defined(CONFIG_SPL_BUILD) && !defined(CONFIG_TPL_BUILD) && \
 		defined(CONFIG_SPL_SERIAL))
