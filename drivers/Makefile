@@ -34,6 +34,7 @@ obj-$(CONFIG_XEN) += xen/
 obj-$(CONFIG_$(SPL_)FPGA) += fpga/
 
 ifndef CONFIG_TPL_BUILD
+ifndef CONFIG_VPL_BUILD
 ifdef CONFIG_SPL_BUILD
 
 obj-$(CONFIG_SPL_BOOTCOUNT_LIMIT) += bootcount/
@@ -64,6 +65,7 @@ obj-$(CONFIG_SPL_SATA_SUPPORT) += ata/ scsi/
 obj-$(CONFIG_HAVE_BLOCK_DEVICE) += block/
 obj-$(CONFIG_SPL_THERMAL) += thermal/
 
+endif
 endif
 endif
 
