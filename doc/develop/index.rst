@@ -31,6 +31,7 @@ Testing
 
    testing
    py_testing
+   tests_writing
    tests_sandbox
 
 Refactoring
