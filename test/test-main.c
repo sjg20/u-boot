@@ -16,6 +16,13 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+static struct unit_test_state *cur_test_state;
+
+struct unit_test_state *test_get_state(void)
+{
+	return cur_test_state;
+}
+
 /**
  * dm_test_pre_run() - Get ready to run a driver model test
  *
@@ -147,6 +154,9 @@ int ut_run_test(struct unit_test_state *uts, struct unit_test *test,
 		note = " (flat tree)";
 	printf("Test: %s: %s%s\n", test_name, fname, note);
 
+	/* Allow access to test state from drivers */
+	cur_test_state = uts;
+
 	ret = test_pre_run(uts, test);
 	if (ret == -EAGAIN)
 		return -EAGAIN;
@@ -158,6 +168,8 @@ int ut_run_test(struct unit_test_state *uts, struct unit_test *test,
 	ret = test_post_run(uts, test);
 	if (ret)
 		return ret;
+
+	cur_test_state = NULL;
 
 	return 0;
 }
