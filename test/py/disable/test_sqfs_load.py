@@ -12,8 +12,9 @@ from sqfs_common import *
 @pytest.mark.buildconfigspec('fs_squashfs')
 @pytest.mark.requiredtool('mksquashfs')
 def test_sqfs_load(u_boot_console):
+    """THIS NEEDS A COMMENT"""
     build_dir = u_boot_console.config.build_dir
-    command = "sqfsload host 0 $kernel_addr_r "
+    command = 'sqfsload host 0 $kernel_addr_r '
 
     for opt in comp_opts:
         # generate and load the squashfs image
@@ -24,11 +25,11 @@ def test_sqfs_load(u_boot_console):
             # skip unsupported compression types
             continue
 
-        path = os.path.join(build_dir, "sqfs-" + opt.name)
-        output = u_boot_console.run_command("host bind 0 " + path)
+        path = os.path.join(build_dir, 'sqfs-' + opt.name)
+        output = u_boot_console.run_command('host bind 0 ' + path)
 
-        output = u_boot_console.run_command(command + "xxx")
-        assert "File not found." in output
+        output = u_boot_console.run_command(command + 'xxx')
+        assert 'File not found.' in output
 
         for (f, s) in zip(opt.files, opt.sizes):
             try:
@@ -39,7 +40,7 @@ def test_sqfs_load(u_boot_console):
                 opt.cleanup(build_dir)
 
         # test symbolic link
-        output = u_boot_console.run_command(command + "sym")
+        output = u_boot_console.run_command(command + 'sym')
         assert str(opt.sizes[0]) in output
 
         # remove generated files
