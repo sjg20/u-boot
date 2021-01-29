@@ -12,7 +12,7 @@
 #include <spl.h>
 #include <asm/spl.h>
 #include <asm/state.h>
-#include <test/test.h>
+#include <test/ut.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -58,9 +58,12 @@ void spl_board_init(void)
 	preloader_console_init();
 
 	if (state->run_unittests) {
+		struct unit_test *tests = UNIT_TEST_ALL_START();
+		const int count = UNIT_TEST_ALL_COUNT();
 		int ret;
 
-		ret = dm_test_run(state->select_unittests);
+		ret = ut_run_list("spl", NULL, tests, count,
+				  state->select_unittests);
 		/* continue execution into U-Boot */
 	}
 }
