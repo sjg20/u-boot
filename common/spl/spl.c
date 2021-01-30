@@ -16,6 +16,7 @@
 #include <init.h>
 #include <irq_func.h>
 #include <log.h>
+#include <mapmem.h>
 #include <serial.h>
 #include <spl.h>
 #include <asm/u-boot.h>
@@ -167,7 +168,7 @@ __weak void spl_board_prepare_for_boot(void)
 
 __weak struct image_header *spl_get_load_buffer(ssize_t offset, size_t size)
 {
-	return (struct image_header *)(CONFIG_SYS_TEXT_BASE + offset);
+	return map_sysmem(CONFIG_SYS_TEXT_BASE + offset, 0);
 }
 
 void spl_set_header_raw_uboot(struct spl_image_info *spl_image)
