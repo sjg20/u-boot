@@ -705,8 +705,8 @@ class DtbPlatdata():
             parent_priv_name = self.alloc_priv(
                 parent_driver.child_priv, driver.name, node.var_name,
                 '_parent_priv')
-        uclass_plat_name = self.alloc_priv(uclass.per_dev_plat, driver.name,
-                                           node.var_name)
+        uclass_plat_name = self.alloc_priv(
+            uclass.per_dev_plat, driver.name + '_uc', node.var_name, 'plat')
         uclass_priv_name = self.alloc_priv(uclass.per_dev_priv,
                                            driver.name + '_uc', node.var_name)
         for hdr in driver.headers:
