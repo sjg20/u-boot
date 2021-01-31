@@ -64,6 +64,7 @@ int i2c_emul_find(struct udevice *dev, struct udevice **emulp)
 	return device_probe(emul);
 }
 
+
 UCLASS_DRIVER(i2c_emul) = {
 	.id		= UCLASS_I2C_EMUL,
 	.name		= "i2c_emul",

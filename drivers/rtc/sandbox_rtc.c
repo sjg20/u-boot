@@ -8,6 +8,7 @@
 #include <dm.h>
 #include <i2c.h>
 #include <rtc.h>
+#include <asm/i2c.h>
 #include <asm/rtc.h>
 #include <dm/acpi.h>
 

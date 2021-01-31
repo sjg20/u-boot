@@ -165,7 +165,7 @@ struct udevice {
 	struct list_head child_head;
 	struct list_head sibling_node;
 	int seq_;
-#if !CONFIG_IS_ENABLED(OF_PLATDATA_RT)
+#if !CONFIG_IS_ENABLED(OF_PLATDATA)
 	ofnode node_;
 #endif
 #if !CONFIG_IS_ENABLED(OF_PLATDATA_RT)

@@ -635,7 +635,7 @@ class DtbPlatdata():
         """
         self.buf('U_BOOT_DRVINFO(%s) = {\n' % node.var_name)
         self.buf('\t.name\t\t= "%s",\n' % node.struct_name)
-        self.buf('\t.plat\t= &%s%s,\n' % (VAL_PREFIX, node.var_name))
+        self.buf('\t.plat\t\t= &%s%s,\n' % (VAL_PREFIX, node.var_name))
         self.buf('\t.plat_size\t= sizeof(%s%s),\n' %
                  (VAL_PREFIX, node.var_name))
         idx = -1
@@ -720,13 +720,13 @@ class DtbPlatdata():
         self.buf('\t.driver\t\t= DM_DRIVER_REF(%s),\n' % node.struct_name)
         self.buf('\t.name\t\t= "%s",\n' % node.struct_name)
         if plat_name:
-            self.buf('\t.plat_\t= %s,\n' % plat_name)
+            self.buf('\t.plat_\t\t= %s,\n' % plat_name)
         else:
-            self.buf('\t.plat_\t= &%s%s,\n' % (VAL_PREFIX, node.var_name))
+            self.buf('\t.plat_\t\t= &%s%s,\n' % (VAL_PREFIX, node.var_name))
         if parent_plat_name:
-            self.buf('\t.parent_plat_ = %s,\n' % parent_plat_name)
+            self.buf('\t.parent_plat_\t= %s,\n' % parent_plat_name)
         if uclass_plat_name:
-            self.buf('\t.uclass_plat_ = %s,\n' % uclass_plat_name)
+            self.buf('\t.uclass_plat_\t= %s,\n' % uclass_plat_name)
         driver_date = None
 
         if node != self._fdt.GetRoot():
@@ -744,7 +744,7 @@ class DtbPlatdata():
                      node.parent.var_name)
         if priv_name:
             self.buf('\t.priv_\t\t= %s,\n' % priv_name)
-        self.buf('\t.uclass\t= DM_UCLASS_REF(%s),\n' % uclass.name)
+        self.buf('\t.uclass\t\t= DM_UCLASS_REF(%s),\n' % uclass.name)
 
         if uclass_priv_name:
             self.buf('\t.uclass_priv_ = %s,\n' % uclass_priv_name)
@@ -823,10 +823,13 @@ class DtbPlatdata():
         self.out('#include <dt-structs.h>\n')
         self.out('\n')
         self.buf('/*\n')
-        self.buf(' * uclass declarations\n')
-        self.buf(' *\n')
-        self.buf(' * Sequence numbers:\n')
+        self.buf(
+            " * uclass declarations, ordered by 'struct uclass' linker_list idx:\n")
         uclass_list = self._valid_uclasses
+        for seq, uclass in enumerate(uclass_list):
+            self.buf(' * %3d: %s\n' % (seq, uclass.name))
+        self.buf(' *\n')
+        self.buf(' * Sequence numbers allocated in each uclass:\n')
         for uclass in uclass_list:
             if uclass.alias_num_to_node:
                 self.buf(' * %s: %s\n' % (uclass.name, uclass.uclass_id))
@@ -1062,6 +1065,19 @@ class DtbPlatdata():
         self.out('#include <dt-structs.h>\n')
         self.out('\n')
 
+        self.out('/*\n')
+        self.out(
+            " * driver_info declarations, ordered by 'struct driver_info' linker_list idx:\n")
+        self.out(' *\n')
+        self.out(' * idx  %-20s %-20s\n' % ('driver_info', 'driver'))
+        self.out(' * ---  %-20s %-20s\n' % ('-' * 20, '-' * 20))
+        for node in self._valid_nodes:
+            self.out(' * %3d: %-20s %-20s\n' %
+                     (node.idx, node.var_name, node.struct_name))
+        self.out(' * ---  %-20s %-20s\n' % ('-' * 20, '-' * 20))
+        self.out(' */\n')
+        self.out('\n')
+
         for node in self._valid_nodes:
             self.output_node_plat(node)
 
@@ -1081,6 +1097,19 @@ class DtbPlatdata():
         self.out('#include <common.h>\n')
         self.out('#include <dm.h>\n')
         self.out('#include <dt-structs.h>\n')
+        self.out('\n')
+
+        self.out('/*\n')
+        self.out(
+            " * udevice declarations, ordered by 'struct udevice' linker_list position:\n")
+        self.out(' *\n')
+        self.out(' * idx  %-20s %-20s\n' % ('udevice', 'driver'))
+        self.out(' * ---  %-20s %-20s\n' % ('-' * 20, '-' * 20))
+        for node in self._valid_nodes:
+            self.out(' * %3d: %-20s %-20s\n' %
+                     (node.idx, node.var_name, node.struct_name))
+        self.out(' * ---  %-20s %-20s\n' % ('-' * 20, '-' * 20))
+        self.out(' */\n')
         self.out('\n')
 
         for node in self._valid_nodes:
