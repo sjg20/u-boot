@@ -111,6 +111,8 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 				ret = -ENOMEM;
 				goto fail_alloc1;
 			}
+			printf("%s: &gd=%p, alloc %d, plat=%p\n", dev->name, &gd,
+			       drv->plat_auto, plat);
 			if (CONFIG_IS_ENABLED(OF_PLATDATA) && plat)
 				memcpy(ptr, plat, of_plat_size);
 			dev_set_plat(dev, ptr);

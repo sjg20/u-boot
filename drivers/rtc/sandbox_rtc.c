@@ -81,11 +81,12 @@ struct acpi_ops sandbox_rtc_acpi_ops = {
 
 static int sandbox_rtc_bind(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(PLATDATA)
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
 	struct sandbox_i2c_rtc_plat_data *plat = dev_get_plat(dev);
 
+	printf("dev %s, plat=%p\n", dev->name, plat);
 	/* Set up the emul_idx for i2c_emul_find() */
-	i2c_emul_set_idx(dev, plat->dtplat.sandbox_emul->idx);
+// 	i2c_emul_set_idx(dev, plat->dtplat.sandbox_emul->idx);
 #endif
 
 	return 0;

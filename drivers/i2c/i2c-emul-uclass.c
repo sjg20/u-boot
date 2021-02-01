@@ -35,6 +35,7 @@ void i2c_emul_set_idx(struct udevice *dev, int emul_idx)
 {
 	struct dm_i2c_chip *plat = dev_get_parent_plat(dev);
 
+	printf("%s: %p: set index %d\n", dev->name, plat, emul_idx);
 	plat->emul_idx = emul_idx;
 }
 

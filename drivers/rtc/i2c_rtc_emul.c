@@ -60,6 +60,7 @@ static void reset_time(struct udevice *dev)
 	struct sandbox_i2c_rtc_plat_data *plat = dev_get_plat(dev);
 	struct rtc_time now;
 
+	printf("dev %s plat=%p\n", dev->name, plat);
 	os_localtime(&now);
 	plat->base_time = rtc_mktime(&now);
 	plat->offset = os_get_time_offset();
