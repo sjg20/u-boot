@@ -427,6 +427,7 @@ config BOOTSTAGE_REPORT
 
 config BOOTSTAGE_RECORD_COUNT
 	int "Number of boot stage records to store"
+	depends on BOOTSTAGE
 	default 30
 	help
 	  This is the size of the bootstage record list and is the maximum
@@ -434,6 +435,7 @@ config BOOTSTAGE_RECORD_COUNT
 
 config SPL_BOOTSTAGE_RECORD_COUNT
 	int "Number of boot stage records to store for SPL"
+	depends on SPL_BOOTSTAGE
 	default 5
 	help
 	  This is the size of the bootstage record list and is the maximum
@@ -441,6 +443,7 @@ config SPL_BOOTSTAGE_RECORD_COUNT
 
 config TPL_BOOTSTAGE_RECORD_COUNT
 	int "Number of boot stage records to store for TPL"
+	depends on TPL_BOOTSTAGE
 	default 5
 	help
 	  This is the size of the bootstage record list and is the maximum
