@@ -33,11 +33,11 @@ void sandbox_exit(void)
 {
 	/* Do this here while it still has an effect */
 	os_fd_restore();
-	if (state_uninit())
-		os_exit(2);
-
 	if (dm_uninit())
 		os_exit(2);
+
+// 	if (state_uninit())
+// 		os_exit(2);
 
 	/* This is considered normal termination for now */
 	os_exit(0);
