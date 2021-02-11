@@ -283,6 +283,15 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 	return 0;
 }
 
+int _log_buffer(enum log_category_t cat, enum log_level_t level, ulong addr,
+		const void *data, uint width, uint count, uint linelen)
+{
+	/* TOOD: run this through the log system */
+	print_buffer(addr, data, width, count, linelen);
+
+	return 0;
+}
+
 int log_add_filter_flags(const char *drv_name, enum log_category_t cat_list[],
 			 enum log_level_t level, const char *file_list,
 			 int flags)

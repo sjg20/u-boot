@@ -128,17 +128,17 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 	 int line, const char *func, const char *fmt, ...)
 		__attribute__ ((format (__printf__, 6, 7)));
 
-static inline int _log_nop(enum log_category_t cat, enum log_level_t level,
-			   const char *file, int line, const char *func,
-			   const char *fmt, ...)
-		__attribute__ ((format (__printf__, 6, 7)));
-
-static inline int _log_nop(enum log_category_t cat, enum log_level_t level,
-			   const char *file, int line, const char *func,
-			   const char *fmt, ...)
-{
-	return 0;
-}
+/**
+ * _log_buffer - Internal function to print data buffer in hex and ascii form
+ *
+ * @addr:	Starting address to display at start of line
+ * @data:	pointer to data buffer
+ * @width:	data value width.  May be 1, 2, or 4.
+ * @count:	number of values to display
+ * @linelen:	Number of values to print per line; specify 0 for default length
+ */
+int _log_buffer(enum log_category_t cat, enum log_level_t level, ulong addr,
+		const void *data, uint width, uint count, uint linelen);
 
 /* Define this at the top of a file to add a prefix to debug messages */
 #ifndef pr_fmt
@@ -189,6 +189,15 @@ static inline int _log_nop(enum log_category_t cat, enum log_level_t level,
 		     __LINE__, __func__, \
 		      pr_fmt(_fmt), ##_args); \
 	})
+
+/* Emit a dump if the level is less that the maximum */
+#define log_buffer(_cat, _level, _addr, _data, _width, _count, _linelen)  ({ \
+	int _l = _level; \
+	if (_LOG_DEBUG != 0 || _l <= _LOG_MAX_LEVEL) \
+		_log_buffer((enum log_category_t)(_cat), \
+			    (enum log_level_t)(_l | _LOG_DEBUG), _addr, _data, \
+			    _width, _count, _linelen); \
+	})
 #else
 /* Note: _LOG_DEBUG != 0 avoids a warning with clang */
 #define log(_cat, _level, _fmt, _args...) ({ \
@@ -197,13 +206,13 @@ static inline int _log_nop(enum log_category_t cat, enum log_level_t level,
 	    (_DEBUG && _l == LOGL_DEBUG)) \
 		printf(_fmt, ##_args); \
 	})
-#endif
-
-#define log_nop(_cat, _level, _fmt, _args...) ({ \
+#define log_buffer(_cat, _level, _addr, _data, _width, _count, _linelen)  ({ \
 	int _l = _level; \
-	_log_nop((enum log_category_t)(_cat), _l, __FILE__, __LINE__, \
-		      __func__, pr_fmt(_fmt), ##_args); \
-})
+	if (_LOG_DEBUG != 0 || _l <= LOGL_INFO || \
+	    (_DEBUG && _l == LOGL_DEBUG)) \
+		print_buffer(_addr, _data, _width, _count, _linelen); \
+	})
+#endif
 
 #ifdef DEBUG
 #define _DEBUG	1
