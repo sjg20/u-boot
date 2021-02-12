@@ -226,11 +226,14 @@ int _log_buffer(enum log_category_t cat, enum log_level_t level, ulong addr,
 #define _SPL_BUILD	0
 #endif
 
-#if !_DEBUG && CONFIG_IS_ENABLED(LOG)
+#if CONFIG_IS_ENABLED(LOG)
 
-#define debug_cond(cond, fmt, args...)			\
-({							\
-	log(LOG_CATEGORY, LOGL_DEBUG, fmt, ##args);	\
+#define debug_cond(cond, fmt, args...)					\
+({									\
+	if (cond)							\
+		log(LOG_CATEGORY,					\
+		    (enum log_level_t)(LOGL_FORCE_DEBUG | _LOG_DEBUG), 	\
+		    fmt, ##args);					\
 })
 
 #else /* _DEBUG */
