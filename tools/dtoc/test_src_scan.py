@@ -33,7 +33,7 @@ class TestSrcScan(unittest.TestCase):
 
     def test_simple(self):
         """Simple test of scanning drivers"""
-        scan = src_scan.Scanner(None, True, None)
+        scan = src_scan.Scanner(None, None)
         scan.scan_drivers()
         self.assertIn('sandbox_gpio', scan._drivers)
         self.assertIn('sandbox_gpio_alias', scan._driver_aliases)
@@ -44,7 +44,7 @@ class TestSrcScan(unittest.TestCase):
     def test_additional(self):
         """Test with additional drivers to scan"""
         scan = src_scan.Scanner(
-            None, True, [None, '', 'tools/dtoc/dtoc_test_scan_drivers.cxx'])
+            None, [None, '', 'tools/dtoc/dtoc_test_scan_drivers.cxx'])
         scan.scan_drivers()
         self.assertIn('sandbox_gpio_alias2', scan._driver_aliases)
         self.assertEqual('sandbox_gpio',
@@ -61,7 +61,7 @@ class TestSrcScan(unittest.TestCase):
         with open(driver_fn, 'wb+') as fout:
             fout.write(b'\x81')
 
-        scan = src_scan.Scanner(None, True, [driver_fn])
+        scan = src_scan.Scanner(None, [driver_fn])
         with test_util.capture_sys_output() as (stdout, _):
             scan.scan_drivers()
         self.assertRegex(stdout.getvalue(),
@@ -96,7 +96,7 @@ class TestSrcScan(unittest.TestCase):
             # Mock out scan_driver and check that it is called with the
             # expected files
             with mock.patch.object(src_scan.Scanner, "scan_driver")  as mocked:
-                scan = src_scan.Scanner(indir, True, None)
+                scan = src_scan.Scanner(indir, None)
                 scan.scan_drivers()
             self.assertEqual(2, len(mocked.mock_calls))
             self.assertEqual(mock.call(fname_list[0]),
