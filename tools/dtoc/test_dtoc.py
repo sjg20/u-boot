@@ -824,7 +824,7 @@ U_BOOT_DRVINFO(test3) = {
         with self.assertRaises(ValueError) as exc:
             self.run_test(['struct'], dtb_file, output)
         self.assertIn(
-            "Node 'spl-test' reg property has 3 cells which is not a multiple of na + ns = 1 + 1)",
+            "Node 'spl-test' (parent '/') reg property has 3 cells which is not a multiple of na + ns = 1 + 1)",
             str(exc.exception))
 
     def test_add_prop(self):

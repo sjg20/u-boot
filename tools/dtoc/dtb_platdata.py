@@ -370,6 +370,9 @@ class DtbPlatdata():
                 Number of size cells for this node
         """
         parent = node.parent
+        if parent and not parent.props:
+            raise ValueError("Parent node '%s' has no properties - do you need u-boot,dm-spl or similar?" %
+                             parent.path)
         num_addr, num_size = 2, 2
         if parent:
             addr_prop = parent.props.get('#address-cells')
@@ -397,18 +400,21 @@ class DtbPlatdata():
             if reg.type != fdt.Type.INT:
                 raise ValueError("Node '%s' reg property is not an int" %
                                  node.name)
-            if len(reg.value) % total:
+            reg_val = reg.value
+            if not isinstance(reg_val, list):
+                reg_val = [reg_val]
+            if len(reg_val) % total:
                 raise ValueError(
-                    "Node '%s' reg property has %d cells "
+                    "Node '%s' (parent '%s') reg property has %d cells "
                     'which is not a multiple of na + ns = %d + %d)' %
-                    (node.name, len(reg.value), num_addr, num_size))
+                    (node.name, node.parent.name, len(reg_val), num_addr, num_size))
             reg.num_addr = num_addr
             reg.num_size = num_size
             if num_addr != 1 or num_size != 1:
                 reg.type = fdt.Type.INT64
                 i = 0
                 new_value = []
-                val = reg.value
+                val = reg_val
                 if not isinstance(val, list):
                     val = [val]
                 while i < len(val):
