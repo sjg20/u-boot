@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Flag devices for booting from coreboot
+ *
+ * Copyright 2021 Google LLC
+ */
+
+/ {
+	chromeos {
+		cb-write-protect {
+			compatible = "google,sysinfo-flag";
+			google,name = "write-protect";
+		};
+		cb-ec-in-rw {
+			compatible = "google,sysinfo-flag";
+			google,name = "ec-in-rw";
+		};
+		cb-lid-open {
+			compatible = "google,sysinfo-flag";
+			google,name = "lid-open";
+		};
+		cb-power-button {
+			compatible = "google,sysinfo-flag";
+			google,name = "power-button";
+		};
+		cb-oprom-loaded {
+			compatible = "google,sysinfo-flag";
+			google,name = "oprom-loaded";
+		};
+		cb-recovery {
+			compatible = "google,sysinfo-flag";
+			google,name = "recovery";
+		};
+	};
+};
