@@ -19,3 +19,4 @@ purposes.
    cros_dts
    cros_sandbox
    cros_coral
+   cros_coreboot
