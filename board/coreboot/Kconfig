@@ -18,6 +18,14 @@ config TARGET_COREBOOT
 	  coreboot terminology. This method was used for the Chromebook
 	  Pixel when launched.
 
+config TARGET_CHROMEOS_COREBOOT
+	bool "Chrome OS coreboot"
+	help
+	  This target is used for running U-Boot on top of coreboot, with
+	  the Chromium OS verified boot UI implementation included. This allows
+	  booting from Coreboot into U-Boot, showing the vboot UI and then
+	  booting into the kernel.
+
 endchoice
 
 source "board/coreboot/coreboot/Kconfig"

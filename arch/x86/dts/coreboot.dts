@@ -15,6 +15,13 @@
 
 #include "tsc_timer.dtsi"
 
+#include <pci_ids.h>
+#include <dt-bindings/pci/pci.h>
+
+#if defined(CONFIG_CHROMEOS_VBOOT)
+#include "chromeos-coreboot.dtsi"
+#endif
+
 / {
 	model = "coreboot x86 payload";
 	compatible = "coreboot,x86-payload";
@@ -34,6 +41,9 @@
 	pci {
 		compatible = "pci-x86";
 		u-boot,dm-pre-reloc;
+		u-boot,pci-pre-reloc = <
+			PCI_VENDEV(PCI_VENDOR_ID_INTEL,
+				   PCI_DEVICE_ID_INTEL_APL_UART2)>;
 	};
 
 	serial: serial {

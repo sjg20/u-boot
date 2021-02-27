@@ -36,3 +36,10 @@ config SYS_CONFIG_NAME
 	default "coreboot"
 
 endif
+
+if TARGET_CHROMEOS_COREBOOT
+
+config SYS_CONFIG_NAME
+	default "chromeos_coreboot"
+
+endif

@@ -11,3 +11,10 @@ S:	Maintained
 F:	board/coreboot/coreboot/
 F:	include/configs/coreboot.h
 F:	configs/coreboot64_defconfig
+
+CHROMEOS_COREBOOT BOARD
+M:	Simon Glass <sjg@chromium.org>
+S:	Maintained
+F:	board/coreboot/coreboot/
+F:	include/configs/chromeos_coreboot.h
+F:	configs/chromeos_coreboot_defconfig

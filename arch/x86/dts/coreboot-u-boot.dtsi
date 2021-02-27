@@ -6,6 +6,7 @@
 
 #include <config.h>
 
+#ifdef CONFIG_BINMAN
 / {
 	binman {
 		filename = "u-boot-x86-with-spl.bin";
@@ -16,3 +17,4 @@
 		};
 	};
 };
+#endif /* BINMAN */
