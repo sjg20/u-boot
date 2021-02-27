@@ -23,7 +23,7 @@ devkeys_dir=cros/data/devkeys
 new=cb.bin
 
 # Input directory
-ub=/tmp/b/chromeos_coreboot
+ub=/tmp/b/chromeos_coral
 
 # Name of file to replace
 name=fallback/payload
