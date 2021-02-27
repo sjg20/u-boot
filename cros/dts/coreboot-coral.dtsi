@@ -1,0 +1,183 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Chromium OS-specific options for coral
+ *
+ * Copyright 2021 Google LLC
+ */
+
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/gpio/x86-gpio.h>
+
+#include <dt-bindings/cros/nvdata.h>
+
+#include <asm/arch-apollolake/gpio.h>
+#include <asm/arch-apollolake/iomap.h>
+
+/ {
+	acpi_gpe: general-purpose-events {
+		u-boot,dm-pre-proper;
+		reg = <IOMAP_ACPI_BASE IOMAP_ACPI_SIZE>;
+		compatible = "intel,acpi-gpe";
+		interrupt-controller;
+		#interrupt-cells = <2>;
+	};
+
+	pci {
+		compatible = "pci-x86";
+		#address-cells = <3>;
+		#size-cells = <2>;
+		ranges = <0x02000000 0x0 0xc0000000 0xc0000000 0 0x10000000
+			0x42000000 0x0 0xb0000000 0xb0000000 0 0x10000000
+			0x01000000 0x0 0x1000 0x1000 0 0xefff>;
+
+		i2c_2: i2c2@16,2 {
+			compatible = "intel,apl-i2c", "snps,designware-i2c-pci";
+			reg = <0x0200b210 0 0 0 0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			clock-frequency = <400000>;
+			i2c,speeds = <100000 400000 1000000>;
+			i2c-scl-rising-time-ns = <57>;
+			i2c-scl-falling-time-ns = <28>;
+			tpm: tpm@50 {
+				reg = <0x50>;
+				compatible = "google,cr50";
+				u-boot,i2c-offset-len = <0>;
+				ready-gpios = <&gpio_n 28 GPIO_ACTIVE_LOW>;
+				interrupts-extended = <&acpi_gpe GPIO_28_IRQ
+					 IRQ_TYPE_EDGE_FALLING>;
+				acpi,hid = "GOOG0005";
+				acpi,ddn = "I2C TPM";
+				acpi,name = "TPMI";
+
+				secdata {
+					u-boot,dm-vpl;
+					compatible = "google,tpm-secdata";
+					nvdata,types = <CROS_NV_SECDATAF
+						CROS_NV_SECDATAK
+						CROS_NV_MRC_REC_HASH>;
+				};
+			};
+		};
+
+		p2sb: p2sb@d,0 {
+			u-boot,dm-pre-reloc;
+			reg = <0x02006810 0 0 0 0>;
+			compatible = "intel,p2sb";
+			early-regs = <IOMAP_P2SB_BAR 0x100000>;
+			pci,no-autoconfig;
+
+			n {
+				compatible = "intel,apl-pinctrl";
+				u-boot,dm-pre-reloc;
+				intel,p2sb-port-id = <PID_GPIO_N>;
+				acpi,path = "\\_SB.GPO0";
+				gpio_n: gpio-n {
+					compatible = "intel,gpio";
+					u-boot,dm-pre-reloc;
+					gpio-controller;
+					#gpio-cells = <2>;
+					linux-name = "INT3452:00";
+				};
+			};
+		};
+
+		spi: fast-spi@d,2 {
+			u-boot,dm-pre-proper;
+			u-boot,dm-spl;
+			u-boot,dm-vpl;
+			reg = <0x02006a10 0 0 0 0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			compatible = "intel,fast-spi";
+			early-regs = <IOMAP_SPI_BASE 0x1000>;
+			intel,hardware-seq = <1>;
+
+			fwstore_spi: spi-flash@0 {
+				#size-cells = <1>;
+				#address-cells = <1>;
+				u-boot,dm-pre-proper;
+				u-boot,dm-spl;
+				u-boot,dm-vpl;
+				reg = <0>;
+				compatible = "winbond,w25q128fw",
+					 "jedec,spi-nor";
+			};
+		};
+
+		emmc: emmc@1c,0 {
+			reg = <0x0000e000 0 0 0 0>;
+			compatible = "intel,apl-emmc";
+			non-removable;
+		};
+
+		pch: pch@1f,0 {
+			reg = <0x0000f800 0 0 0 0>;
+			compatible = "simple-bus";
+			u-boot,dm-pre-reloc;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			lpc: lpc {
+				compatible = "simple-bus";
+				#address-cells = <1>;
+				#size-cells = <0>;
+				cros_ec: cros-ec {
+					compatible = "google,cros-ec-lpc";
+					reg = <0x204 1 0x200 1 0x880 0x80>;
+
+					/*
+					 * Describes the flash memory within
+					 * the EC
+					 */
+					#address-cells = <1>;
+					#size-cells = <1>;
+
+					flash@8000000 {
+						reg = <0x08000000 0x20000>;
+						erase-value = <0xff>;
+					};
+
+					cros_ec_vboot: vboot {
+						compatible = "google,cros-ec-vboot";
+					};
+
+					nvdata-vstore {
+						u-boot,dm-vpl;
+						compatible = "google,cros-ec-nvdata";
+						nvdata,types = <CROS_NV_VSTORE>;
+					};
+
+					lid-open {
+						u-boot,dm-vpl;
+						/*
+						 * Ignore lid transitions after
+						 * boot
+						 */
+						primary-only;
+						compatible = "google,cros-ec-flag";
+					};
+
+					recovery {
+						u-boot,dm-vpl;
+						compatible = "google,cros-ec-flag";
+						primary-only;
+					};
+				};
+			};
+		};
+	};
+};
+
+
+&rtc {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	nvdata {
+		u-boot,dm-vpl;
+		compatible = "google,cmos-nvdata";
+		reg = <0x26>;
+		nvdata,types = <CROS_NV_DATA>;
+	};
+};
