@@ -20,3 +20,4 @@ purposes.
    cros_sandbox
    cros_coral
    cros_coreboot
+   cros_efi_payload
