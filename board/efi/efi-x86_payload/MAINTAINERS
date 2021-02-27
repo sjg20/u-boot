@@ -5,3 +5,11 @@ F:	board/efi/efi-x86_payload/
 F:	include/configs/efi-x86_payload.h
 F:	configs/efi-x86_payload32_defconfig
 F:	configs/efi-x86_payload64_defconfig
+
+# This is always 64-bit (32-bit not supported)
+CHROMIUM OS EFI-X86_PAYLOAD BOARD
+M:	Simon Glass <sjg@chromium.org>
+S:	Maintained
+F:	board/efi/efi-x86_payload/
+F:	include/configs/chromeos_efi-x86_payload.h
+F:	configs/chromeos_efi-x86_payload_defconfig
