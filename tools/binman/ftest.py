@@ -4248,15 +4248,23 @@ class TestFunctional(unittest.TestCase):
     def testFdtInclude(self):
         data = self._DoReadFileDtb(
             '192_fdt_incl.dts', use_real_dtb=True, update_dtb=True)[0]
-        fdt_data = data[len(U_BOOT_DATA):]
-        print('data', data)
+        fdt_data = data[len(U_BOOT_NODTB_DATA):]
         dtb = fdt.Fdt.FromData(fdt_data)
         dtb.Scan()
         props = self._GetPropTree(dtb, BASE_DTB_PROPS + REPACK_DTB_PROPS)
         self.assertEqual({
             'image-pos': 0,
             'offset': 0,
-            'size': 40
+            'size': len(data),
+            'u-boot/u-boot-dtb:image-pos': 46,
+            'u-boot/u-boot-dtb:offset': 46,
+            'u-boot/u-boot-dtb:size': 421,
+            'u-boot/u-boot-nodtb:image-pos': 0,
+            'u-boot/u-boot-nodtb:offset': 0,
+            'u-boot/u-boot-nodtb:size': 46,
+            'u-boot:image-pos': 0,
+            'u-boot:offset': 0,
+            'u-boot:size': 467
         }, props)
 
 

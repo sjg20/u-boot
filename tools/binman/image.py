@@ -47,9 +47,22 @@ class Image(section.Entry_section):
             exception). This should be used if the Image is being loaded from
             a file rather than generated. In that case we obviously don't need
             the entry arguments since the contents already exists.
+        update_fdt: True if we are updating the FDT wth entry offsets, etc.
+            Any entry type that includes a devicetree must put it in a
+            separate entry so that it will be updated. For example. 'u-boot'
+            normally just picks up 'u-boot.bin' which includes the
+            devicetree, but this is not updateable, since it comes into
+            binman as one piece and binman doesn't know that it is actually
+            an executable followed by a devicetree. Of course it could be
+            taught this, but then when reading an image (e.g. 'binman ls')
+            it may need to be able to split the devicetree out of the image
+            in order to determine the location of things. Instead we choose
+            to ignore 'u-boot-bin' in this case, and build it ourselves in
+            binman with 'u-boot-dtb.bin' and 'u-boot.dtb'. See
+            Entry_u_boot and Entry_blob_phase for details.
     """
     def __init__(self, name, node, copy_to_orig=True, test=False,
-                 ignore_missing=False):
+                 ignore_missing=False, update_fdt=False):
         super().__init__(None, 'section', node, test=test)
         self.copy_to_orig = copy_to_orig
         self.name = 'main-section'
@@ -59,6 +72,7 @@ class Image(section.Entry_section):
         self.fdtmap_data = None
         self.allow_repack = False
         self._ignore_missing = ignore_missing
+        self.update_fdt = update_fdt
         if not test:
             self.ReadNode()
 

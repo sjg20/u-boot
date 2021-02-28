@@ -210,7 +210,7 @@ class Entry(object):
         """
         return {}
 
-    def ExpandEntries(self):
+    def ExpandEntries(self, update_fdt):
         """Expand out entries which produce other entries
 
         Some entries generate subnodes automatically, from which sub-entries

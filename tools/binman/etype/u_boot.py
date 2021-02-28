@@ -24,6 +24,5 @@ class Entry_u_boot(Entry_blob_phase):
     in the binman README for more information.
     """
     def __init__(self, section, etype, node):
-        super().__init__(section, etype, node, 'u-boot', 'u-boot-dtb', False)
-
-    def ExpandEntries(self):
+        super().__init__(section, 'section', node, 'u-boot', 'u-boot-dtb',
+                         False)

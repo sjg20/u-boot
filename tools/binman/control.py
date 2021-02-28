@@ -28,7 +28,7 @@ images = OrderedDict()
 #    value: Text for the help
 missing_blob_help = {}
 
-def _ReadImageDesc(binman_node):
+def _ReadImageDesc(binman_node, update_fdt):
     """Read the image descriptions from the /binman node
 
     This normally produces a single Image object called 'image'. But if
@@ -36,15 +36,16 @@ def _ReadImageDesc(binman_node):
 
     Args:
         binman_node: Node object of the /binman node
+        update_fdt: True if the FDT will be updated with the entry information
     Returns:
         OrderedDict of Image objects, each of which describes an image
     """
     images = OrderedDict()
     if 'multiple-images' in binman_node.props:
         for node in binman_node.subnodes:
-            images[node.name] = Image(node.name, node)
+            images[node.name] = Image(node.name, node, update_fdt=update_fdt)
     else:
-        images['image'] = Image('image', binman_node)
+        images['image'] = Image('image', binman_node, update_fdt=update_fdt)
     return images
 
 def _FindBinmanNode(dtb):
@@ -438,7 +439,7 @@ def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt):
         raise ValueError("Device tree '%s' does not have a 'binman' "
                             "node" % dtb_fname)
 
-    images = _ReadImageDesc(node)
+    images = _ReadImageDesc(node, update_fdt)
 
     if select_images:
         skip = []
