@@ -5,10 +5,9 @@
 # Entry-type module for U-Boot binary
 #
 
-from binman.entry import Entry
-from binman.etype.blob import Entry_blob
+from binman.etype.blob_phase import Entry_blob_phase
 
-class Entry_u_boot(Entry_blob):
+class Entry_u_boot(Entry_blob_phase):
     """U-Boot flat binary
 
     Properties / Entry arguments:
@@ -16,8 +15,7 @@ class Entry_u_boot(Entry_blob):
 
     This is the U-Boot binary, containing relocation information to allow it
     to relocate itself at runtime. The binary typically includes a device tree
-    blob at the end of it. Use u_boot_nodtb if you want to package the device
-    tree separately.
+    blob at the end of it.
 
     U-Boot can access binman symbols at runtime. See:
 
@@ -26,7 +24,6 @@ class Entry_u_boot(Entry_blob):
     in the binman README for more information.
     """
     def __init__(self, section, etype, node):
-        super().__init__(section, etype, node)
+        super().__init__(section, etype, node, 'u-boot', 'u-boot-dtb', False)
 
-    def GetDefaultFilename(self):
-        return 'u-boot.bin'
+    def ExpandEntries(self):

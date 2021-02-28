@@ -211,6 +211,14 @@ class Entry(object):
         return {}
 
     def ExpandEntries(self):
+        """Expand out entries which produce other entries
+
+        Some entries generate subnodes automatically, from which sub-entries
+        are then created. This method allows those to be added to the binman
+        defintion for the current image. An entry whic implements this method
+        should call state.AddSubnode() to add a subnode and can add properties
+        with state.AddString(), etc.
+        """
         pass
 
     def AddMissingProperties(self, have_image_pos):
