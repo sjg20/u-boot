@@ -5,10 +5,9 @@
 # Entry-type module for U-Boot binary
 #
 
-from binman.entry import Entry
-from binman.etype.blob import Entry_blob
+from binman.etype.blob_phase import Entry_blob_phase
 
-class Entry_u_boot(Entry_blob):
+class Entry_u_boot_expanded(Entry_blob_phase):
     """U-Boot flat binary
 
     Properties / Entry arguments:
@@ -25,7 +24,5 @@ class Entry_u_boot(Entry_blob):
     in the binman README for more information.
     """
     def __init__(self, section, etype, node):
-        super().__init__(section, etype, node)
-
-    def GetDefaultFilename(self):
-        return 'u-boot.bin'
+        super().__init__(section, 'section', node, 'u-boot', 'u-boot-dtb',
+                         False)

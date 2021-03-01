@@ -102,23 +102,32 @@ class Entry(object):
         self.allow_missing = False
 
     @staticmethod
-    def Lookup(node_path, etype):
+    def Lookup(node_path, etype, expanded):
         """Look up the entry class for a node.
 
         Args:
             node_node: Path name of Node object containing information about
                        the entry to create (used for errors)
             etype:   Entry type to use
+            expanded: Try to use the expanded version of etype, if available
 
         Returns:
             The entry class object if found, else None
         """
         # Convert something like 'u-boot@0' to 'u_boot' since we are only
         # interested in the type.
-        module_name = etype.replace('-', '_')
+        orig_name = etype.replace('-', '_')
+        module_name = orig_name
+
         if '@' in module_name:
             module_name = module_name.split('@')[0]
+        if expanded:
+            module_name = orig_name + '_expanded'
         module = modules.get(module_name)
+        if not module:
+            module = modules.get(orig_name)
+            if module:
+                module_name = orig_name
 
         # Also allow entry-type modules to be brought in from the etype directory.
 
@@ -127,29 +136,35 @@ class Entry(object):
             try:
                 module = importlib.import_module('binman.etype.' + module_name)
             except ImportError as e:
-                raise ValueError("Unknown entry type '%s' in node '%s' (expected etype/%s.py, error '%s'" %
-                                 (etype, node_path, module_name, e))
+                try:
+                    module_name = orig_name
+                    module = importlib.import_module('binman.etype.' +
+                                                     module_name)
+                except ImportError as e:
+                    raise ValueError("Unknown entry type '%s' in node '%s' (expected etype/%s.py, error '%s'" %
+                                     (etype, node_path, module_name, e))
             modules[module_name] = module
 
         # Look up the expected class name
         return getattr(module, 'Entry_%s' % module_name)
 
     @staticmethod
-    def Create(section, node, etype=None):
+    def Create(section, node, etype=None, expanded=False):
         """Create a new entry for a node.
 
         Args:
-            section: Section object containing this node
-            node:    Node object containing information about the entry to
-                     create
-            etype:   Entry type to use, or None to work it out (used for tests)
+            section:  Section object containing this node
+            node:     Node object containing information about the entry to
+                      create
+            expanded: True to use expanded versions of entries, where available
+            etype:    Entry type to use, or None to work it out (used for tests)
 
         Returns:
             A new Entry object of the correct type (a subclass of Entry)
         """
         if not etype:
             etype = fdt_util.GetString(node, 'type', node.name)
-        obj = Entry.Lookup(node.path, etype)
+        obj = Entry.Lookup(node.path, etype, expanded)
 
         # Call its constructor to get the object we want.
         return obj(section, etype, node)
@@ -210,7 +225,7 @@ class Entry(object):
         """
         return {}
 
-    def ExpandEntries(self, update_fdt):
+    def ExpandEntries(self):
         """Expand out entries which produce other entries
 
         Some entries generate subnodes automatically, from which sub-entries
@@ -645,7 +660,7 @@ features to produce new behaviours.
             modules.remove('_testing')
         missing = []
         for name in modules:
-            module = Entry.Lookup('WriteDocs', name)
+            module = Entry.Lookup('WriteDocs', name, False)
             docs = getattr(module, '__doc__')
             if test_missing == name:
                 docs = None
