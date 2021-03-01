@@ -8,6 +8,12 @@
 from binman.etype.section import Entry_section
 
 class Entry_blob_phase(Entry_section):
+    """Section that holds a phase binary
+
+    This is a base class that should not normally be used directly. It is used
+    when converting a 'u-boot' entry automatically into a 'u-boot-expanded'
+    entry; similarly for SPL.
+    """
     def __init__(self, section, etype, node, root_fname, dtb_file, bss_pad):
         """Set up a new blob for a phase
 

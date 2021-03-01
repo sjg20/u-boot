@@ -28,7 +28,7 @@ images = OrderedDict()
 #    value: Text for the help
 missing_blob_help = {}
 
-def _ReadImageDesc(binman_node, update_fdt):
+def _ReadImageDesc(binman_node, use_expanded):
     """Read the image descriptions from the /binman node
 
     This normally produces a single Image object called 'image'. But if
@@ -36,16 +36,17 @@ def _ReadImageDesc(binman_node, update_fdt):
 
     Args:
         binman_node: Node object of the /binman node
-        update_fdt: True if the FDT will be updated with the entry information
+        use_expanded: True if the FDT will be updated with the entry information
     Returns:
         OrderedDict of Image objects, each of which describes an image
     """
     images = OrderedDict()
     if 'multiple-images' in binman_node.props:
         for node in binman_node.subnodes:
-            images[node.name] = Image(node.name, node, update_fdt=update_fdt)
+            images[node.name] = Image(node.name, node,
+                                      use_expanded=use_expanded)
     else:
-        images['image'] = Image('image', binman_node, update_fdt=update_fdt)
+        images['image'] = Image('image', binman_node, use_expanded=use_expanded)
     return images
 
 def _FindBinmanNode(dtb):
@@ -400,7 +401,7 @@ def ReplaceEntries(image_fname, input_fname, indir, entry_paths,
     return image
 
 
-def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt):
+def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt, use_expanded):
     """Prepare the images to be processed and select the device tree
 
     This function:
@@ -414,6 +415,9 @@ def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt):
         dtb_fname: Filename of the device tree file to use (.dts or .dtb)
         selected_images: List of images to output, or None for all
         update_fdt: True to update the FDT wth entry offsets, etc.
+        use_expanded: True to use expanded versions of entries, if available.
+            So if 'u-boot' is called for, we use 'u-boot-expanded' instead. This
+            is needed if update_fdt is True (although tests may disable it)
 
     Returns:
         OrderedDict of images:
@@ -439,7 +443,7 @@ def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt):
         raise ValueError("Device tree '%s' does not have a 'binman' "
                             "node" % dtb_fname)
 
-    images = _ReadImageDesc(node, update_fdt)
+    images = _ReadImageDesc(node, use_expanded)
 
     if select_images:
         skip = []
@@ -612,6 +616,7 @@ def Binman(args):
         elf.debug = args.debug
         cbfs_util.VERBOSE = args.verbosity > 2
         state.use_fake_dtb = args.fake_dtb
+        use_expanded = args.update_fdt and not args.fake_u_boot
         try:
             tools.SetInputDirs(args.indir)
             tools.PrepareOutputDir(args.outdir, args.preserve)
@@ -619,7 +624,7 @@ def Binman(args):
             state.SetEntryArgs(args.entry_arg)
 
             images = PrepareImagesAndDtbs(dtb_fname, args.image,
-                                          args.update_fdt)
+                                          args.update_fdt, use_expanded)
             missing = False
             for image in images.values():
                 missing |= ProcessImage(image, args.update_fdt, args.map,

@@ -116,15 +116,16 @@ class Entry(object):
         """
         # Convert something like 'u-boot@0' to 'u_boot' since we are only
         # interested in the type.
-        orig_name = etype.replace('-', '_')
-        module_name = orig_name
+        orig_name = None
+        module_name = etype.replace('-', '_')
 
         if '@' in module_name:
             module_name = module_name.split('@')[0]
         if expanded:
-            module_name = orig_name + '_expanded'
+            orig_name = module_name
+            module_name += '_expanded'
         module = modules.get(module_name)
-        if not module:
+        if not module and orig_name:
             module = modules.get(orig_name)
             if module:
                 module_name = orig_name
@@ -137,7 +138,8 @@ class Entry(object):
                 module = importlib.import_module('binman.etype.' + module_name)
             except ImportError as e:
                 try:
-                    module_name = orig_name
+                    if orig_name:
+                        module_name = orig_name
                     module = importlib.import_module('binman.etype.' +
                                                      module_name)
                 except ImportError as e:

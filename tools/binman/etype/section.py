@@ -85,7 +85,7 @@ class Entry_section(Entry):
             if node.name.startswith('hash') or node.name.startswith('signature'):
                 continue
             entry = Entry.Create(self, node,
-                                 expanded=self.GetImage().update_fdt)
+                                 expanded=self.GetImage().use_expanded)
             entry.ReadNode()
             entry.SetPrefix(self._name_prefix)
             self._entries[node.name] = entry
