@@ -4259,28 +4259,55 @@ class TestFunctional(unittest.TestCase):
         self.assertEquals(U_BOOT_DATA, u_boot.ReadData())
 
     def testFdtInclude(self):
+        self._SetupSplElf()
+        self._SetupTplElf()
+        self.maxDiff = None
         data = self._DoReadFileDtb(
             '192_fdt_incl.dts', use_real_dtb=True, use_real_u_boot=True,
             update_dtb=True)[0]
+
+        # Check the U-Boot dtb
         fdt_data = data[len(U_BOOT_NODTB_DATA):]
         dtb = fdt.Fdt.FromData(fdt_data)
+        fdt_size = dtb.GetFdtObj().totalsize()
         dtb.Scan()
-        props = self._GetPropTree(dtb, BASE_DTB_PROPS + REPACK_DTB_PROPS)
+        props = self._GetPropTree(dtb, 'size')
+        pad_len = 10
         self.assertEqual({
-            'image-pos': 0,
-            'offset': 0,
             'size': len(data),
-            'u-boot/u-boot-dtb:image-pos': 46,
-            'u-boot/u-boot-dtb:offset': 46,
-            'u-boot/u-boot-dtb:size': 421,
-            'u-boot/u-boot-nodtb:image-pos': 0,
-            'u-boot/u-boot-nodtb:offset': 0,
-            'u-boot/u-boot-nodtb:size': 46,
-            'u-boot:image-pos': 0,
-            'u-boot:offset': 0,
-            'u-boot:size': 467
+            'u-boot-spl/u-boot-spl-bss-pad:size': pad_len,
+            'u-boot-spl/u-boot-spl-dtb:size': 1005,
+            'u-boot-spl/u-boot-spl-nodtb:size': len(U_BOOT_SPL_NODTB_DATA),
+            'u-boot-spl:size': 1064,
+            'u-boot-tpl/u-boot-tpl-bss-pad:size': pad_len,
+            'u-boot-tpl/u-boot-tpl-dtb:size': 1005,
+            'u-boot-tpl/u-boot-tpl-nodtb:size': len(U_BOOT_TPL_NODTB_DATA),
+            'u-boot-tpl:size': 1064,
+            'u-boot/u-boot-dtb:size': 1005,
+            'u-boot/u-boot-nodtb:size': len(U_BOOT_NODTB_DATA),
+            'u-boot:size': 1051,
         }, props)
 
+        # Now check SPL
+        fdt_data = data[len(U_BOOT_NODTB_DATA) + fdt_size +
+                        len(U_BOOT_SPL_NODTB_DATA) + pad_len:]
+        dtb = fdt.Fdt.FromData(fdt_data)
+        dtb.Scan()
+        props = self._GetPropTree(dtb, 'size')
+        self.assertEqual({
+            'size': len(data),
+            'u-boot-spl/u-boot-spl-bss-pad:size': pad_len,
+            'u-boot-spl/u-boot-spl-dtb:size': 1005,
+            'u-boot-spl/u-boot-spl-nodtb:size': len(U_BOOT_SPL_NODTB_DATA),
+            'u-boot-spl:size': 1064,
+            'u-boot-tpl/u-boot-tpl-bss-pad:size': pad_len,
+            'u-boot-tpl/u-boot-tpl-dtb:size': 1005,
+            'u-boot-tpl/u-boot-tpl-nodtb:size': len(U_BOOT_TPL_NODTB_DATA),
+            'u-boot-tpl:size': 1064,
+            'u-boot/u-boot-dtb:size': 1005,
+            'u-boot/u-boot-nodtb:size': len(U_BOOT_NODTB_DATA),
+            'u-boot:size': 1051,
+        }, props)
 
 if __name__ == "__main__":
     unittest.main()

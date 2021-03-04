@@ -8,5 +8,9 @@
 	binman {
 		u-boot {
 		};
+		u-boot-spl {
+		};
+		u-boot-tpl {
+		};
 	};
 };

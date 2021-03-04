@@ -43,7 +43,7 @@ class Entry_blob_phase(Entry_section):
         """Create the subnodes"""
         names = [self.root_fname + '-nodtb', self.root_fname + '-dtb']
         if self.bss_pad:
-            entries.insert(1, self.root_fname + '-bss-pad')
+            names.insert(1, self.root_fname + '-bss-pad')
         for name in names:
             subnode = state.AddSubnode(self._node, name)
 

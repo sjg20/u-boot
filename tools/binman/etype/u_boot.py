@@ -2,7 +2,7 @@
 # Copyright (c) 2016 Google, Inc
 # Written by Simon Glass <sjg@chromium.org>
 #
-# Entry-type module for U-Boot binary
+# Entry-type module for the expanded U-Boot binary
 #
 
 from binman.entry import Entry
