@@ -8,6 +8,7 @@
 #include <compiler.h>
 #include <console.h>
 #include <div64.h>
+#include <hexdump.h>
 #include <version.h>
 #include <linux/ctype.h>
 #include <asm/io.h>
@@ -207,6 +208,14 @@ int print_buffer(ulong addr, const void *data, uint width, uint count,
 	if (linelen < 1)
 		linelen = DEFAULT_LINE_LENGTH_BYTES / width;
 
+	/* Use hexdump if available */
+	if (CONFIG_IS_ENABLED(HEXDUMP)) {
+		return print_hex_dump("", addr ? DUMP_PREFIX_ADDRESS :
+				      DUMP_PREFIX_OFFSET, linelen * width,
+				      width, data, width * count, true);
+	}
+
+	/* Fall back to a smaller implementation */
 	while (count) {
 		uint thislinelen;
 		char buf[HEXDUMP_MAX_BUF_LENGTH(width * linelen)];

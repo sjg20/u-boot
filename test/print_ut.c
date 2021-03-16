@@ -185,9 +185,9 @@ static int print_display_buffer(struct unit_test_state *uts)
 
 	/* address */
 	console_record_reset();
-	print_buffer(0x12345678, buf, 1, 0x12, 0);
-	ut_assert_nextline("12345678: 00 11 22 33 44 55 66 77 88 99 aa bb cc dd ee ff  ..\"3DUfw........");
-	ut_assert_nextline("12345688: 10 00                                            ..");
+	print_buffer(4, buf + 4, 1, 0x12, 0);
+	ut_assert_nextline("00000004: 44 55 66 77 88 99 aa bb cc dd ee ff 10 00 00 00  DUfw............");
+	ut_assert_nextline("00000014: 00 00                                            ..");
 	ut_assert_console_end();
 
 	/* 16-bit */
