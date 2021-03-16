@@ -227,7 +227,33 @@ static int print_display_buffer(struct unit_test_state *uts)
 }
 PRINT_TEST(print_display_buffer, UT_TESTF_CONSOLE_REC);
 
-static int print_hex_dump(struct unit_test_state *uts)
+static int print_hexdump_line(struct unit_test_state *uts)
+{
+	char *linebuf;
+	u8 *buf;
+	int i;
+
+	buf = map_sysmem(0, BUF_SIZE);
+	memset(buf, '\0', BUF_SIZE);
+	for (i = 0; i < 0x11; i++)
+		buf[i] = i * 0x11;
+
+	/* Check buffer size calculations */
+	linebuf = map_sysmem(0x400, BUF_SIZE);
+	memset(linebuf, '\xff', BUF_SIZE);
+	ut_asserteq(-ENOSPC, hexdump_line(0, buf, 1, 0x10, 0, linebuf, 75));
+	ut_asserteq(-1, linebuf[0]);
+	ut_asserteq(0x10, hexdump_line(0, buf, 1, 0x10, 0, linebuf, 76));
+	ut_asserteq(0, linebuf[75]);
+	ut_asserteq(-1, linebuf[76]);
+
+	unmap_sysmem(buf);
+
+	return 0;
+}
+PRINT_TEST(print_hexdump_line, UT_TESTF_CONSOLE_REC);
+
+static int print_hexdump(struct unit_test_state *uts)
 {
 	u8 *buf;
 	int i;
@@ -300,7 +326,7 @@ static int print_hex_dump(struct unit_test_state *uts)
 
 	return 0;
 }
-PRINT_TEST(print_hex_dump, UT_TESTF_CONSOLE_REC);
+PRINT_TEST(print_hexdump, UT_TESTF_CONSOLE_REC);
 
 int do_ut_print(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
