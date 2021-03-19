@@ -73,7 +73,8 @@ def EnsureCompiled(fname, tmpdir=None, capture_stderr=False):
     for path in search_paths:
         args.extend(['-I', path])
     args += ['-o', dts_input, fname]
-    command.Run('cc', *args)
+    cc = os.environ.get('CC') or 'cc'
+    command.Run(cc, *args)
 
     # If we don't have a directory, put it in the tools tempdir
     search_list = []
