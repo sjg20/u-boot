@@ -23,12 +23,16 @@ quiet_cmd_pymod = PYMOD   $@
 		SWIG_OPTS="-I$(LIBFDT_srcdir) -I$(LIBFDT_srcdir)/.." \
 		$(PYTHON3) $< --quiet build_ext --inplace
 
-$(obj)/_libfdt.so: $(src)/setup.py $(PYLIBFDT_srcs) FORCE
+$(obj)/_libfdt.so $(obj)/libfdt.py &: $(src)/setup.py $(PYLIBFDT_srcs)
 	@# Remove the library since otherwise Python doesn't seem to regenerate
 	@# the libfdt.py file if it is missing.
-	rm -f $(obj)/_libfdt*.so
+	@rm -f $(obj)/_libfdt*.so
 	$(call if_changed,pymod)
+	@# Rename the file to _libfdt.so so this Makefile doesn't run every time
+	@if [ ! -e $(obj)/_libfdt.so ]; then \
+		mv $(obj)/_libfdt*.so $(obj)/_libfdt.so || true; \
+	fi
 
-always += _libfdt.so
+always += _libfdt.so libfdt.py
 
 clean-files += libfdt.i _libfdt.so libfdt.py libfdt_wrap.c
