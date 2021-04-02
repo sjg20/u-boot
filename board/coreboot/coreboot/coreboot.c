@@ -39,6 +39,7 @@ int show_board_info(void)
 	const char *bios_ver = smbios_string(bios, t0->bios_ver);
 	const char *model = smbios_string(system, t1->product_name);
 	const char *manufacturer = smbios_string(system, t1->manufacturer);
+	const char *date = smbios_string(bios, t0->bios_release_date);
 
 	if (!model || !manufacturer || !bios_ver)
 		goto fallback;
@@ -46,6 +47,8 @@ int show_board_info(void)
 	printf("Vendor: %s\n", manufacturer);
 	printf("Model: %s\n", model);
 	printf("BIOS Version: %s\n", bios_ver);
+	if (date)
+		printf("BIOS date: %s\n", date);
 
 	return 0;
 
