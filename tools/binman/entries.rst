@@ -461,8 +461,12 @@ see www.flashrom.org/Flashrom for more information.
 
 When used, this entry will be populated with an FMAP which reflects the
 entries in the current image. Note that any hierarchy is squashed, since
-FMAP does not support this. Also, CBFS entries appear as a single entry -
-the sub-entries are ignored.
+FMAP does not support this. Sections are represented as an area appearing
+before its contents, so that it is possible to reconstruct the hierarchy
+from the FMAP by using the offset information. This convention does not
+seem to be documented, but is used in Chromium OS.
+
+CBFS entries appear as a single entry, i.e. the sub-entries are ignored.
 
 
 
