@@ -444,7 +444,7 @@ int image_decomp(int comp, ulong load, ulong image_start, int type,
 		 void *load_buf, void *image_buf, ulong image_len,
 		 uint unc_len, ulong *load_end)
 {
-	int ret = 0;
+	int ret = -ENOSYS;
 
 	*load_end = load;
 	print_decomp_msg(comp, type, load == image_start);
@@ -539,7 +539,6 @@ int image_decomp(int comp, ulong load, ulong image_start, int type,
 		}
 
 		image_len = ret;
-
 		break;
 	}
 #endif /* CONFIG_ZSTD */
