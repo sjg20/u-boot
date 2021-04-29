@@ -1144,4 +1144,8 @@ size_t ZSTD_decompressBlock(ZSTD_DCtx *dctx, void *dst, size_t dstCapacity,
 size_t ZSTD_insertBlock(ZSTD_DCtx *dctx, const void *blockStart,
 	size_t blockSize);
 
+struct abuf;
+
+int zstd_decompress(struct abuf *in, struct abuf *out);
+
 #endif  /* ZSTD_H */
