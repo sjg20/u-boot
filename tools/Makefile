@@ -91,7 +91,7 @@ RSA_OBJS-$(CONFIG_TOOLS_LIBCRYPTO) := $(addprefix lib/rsa/, \
 
 ECDSA_OBJS-$(CONFIG_TOOLS_LIBCRYPTO) := $(addprefix lib/ecdsa/, ecdsa-libcrypto.o)
 
-AES_OBJS-$(CONFIG_TOOLS_LIBCRYPTO) := $(addprefix lib/aes/, \
+AES_OBJS-$(CONFIG_TOOLS_FIT_CIPHER_ENCRYPT) := $(addprefix lib/aes/, \
 					aes-encrypt.o aes-decrypt.o)
 
 # Cryptographic helpers that depend on openssl/libcrypto

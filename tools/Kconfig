@@ -30,6 +30,18 @@ config TOOLS_FIT
 	help
 	  Enable FIT support in the tools builds.
 
+config TOOLS_FIT_CIPHER
+	bool
+	default y if FIT_CIPHER
+	help
+	 Enable ciphering data in a FIT in the tools builds
+
+config TOOLS_FIT_CIPHER_ENCRYPT
+	bool
+	default y if FIT_CIPHER
+	help
+	  Enables encryption in a FIT in the tools builds
+
 config TOOLS_FIT_FULL_CHECK
 	def_bool y
 	help
