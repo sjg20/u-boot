@@ -1316,7 +1316,7 @@ int fit_image_verify_with_data(const void *fit, int image_noffset,
 	int ret;
 
 	/* Verify all required signatures */
-	if (FIT_IMAGE_ENABLE_VERIFY &&
+	if (CONFIG_IS_ENABLED(RSA_VERIFY) &&
 	    fit_image_verify_required_sigs(fit, image_noffset, data, size,
 					   gd_fdt_blob(), &verify_all)) {
 		err_msg = "Unable to verify required signature";
@@ -1338,7 +1338,7 @@ int fit_image_verify_with_data(const void *fit, int image_noffset,
 						 &err_msg))
 				goto error;
 			puts("+ ");
-		} else if (FIT_IMAGE_ENABLE_VERIFY && verify_all &&
+		} else if (CONFIG_IS_ENABLED(RSA_VERIFY) && verify_all &&
 				!strncmp(name, FIT_SIG_NODENAME,
 					strlen(FIT_SIG_NODENAME))) {
 			ret = fit_image_check_sig(fit, noffset, data,
@@ -2061,7 +2061,7 @@ int fit_image_load(bootm_headers_t *images, ulong addr,
 		if (image_type == IH_TYPE_KERNEL)
 			images->fit_uname_cfg = fit_base_uname_config;
 
-		if (FIT_IMAGE_ENABLE_VERIFY && images->verify) {
+		if (CONFIG_IS_ENABLED(RSA_VERIFY) && images->verify) {
 			puts("   Verifying Hash Integrity ... ");
 			if (fit_config_verify(fit, cfg_noffset)) {
 				puts("Bad Data Hash\n");
