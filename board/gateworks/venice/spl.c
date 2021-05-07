@@ -16,6 +16,7 @@
 #include <asm/mach-imx/iomux-v3.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/imx8mm_pins.h>
+#include <asm/arch/imx8mn_pins.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/mach-imx/boot_mode.h>
 #include <asm/arch/ddr.h>
@@ -36,11 +37,54 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+static int fdt_pack_reg(const void *fdt, void *buf, u64 address, u64 size)
+{
+	int address_cells = fdt_address_cells(fdt, 0);
+	int size_cells = fdt_size_cells(fdt, 0);
+	char *p = buf;
+
+	if (address_cells == 2)
+		*(fdt64_t *)p = cpu_to_fdt64(address);
+	else
+		*(fdt32_t *)p = cpu_to_fdt32(address);
+	p += 4 * address_cells;
+
+	if (size_cells == 2)
+		*(fdt64_t *)p = cpu_to_fdt64(size);
+	else
+		*(fdt32_t *)p = cpu_to_fdt32(size);
+	p += 4 * size_cells;
+
+	return p - (char *)buf;
+}
+
+static void venice_fixup_memory(void *fdt, int size_gb) {
+	const void *prop;
+	int memory;
+	int len;
+	u8 buf[16];
+
+	memory = fdt_path_offset(fdt, "/memory");
+	prop = fdt_getprop(fdt, memory, "reg", &len);
+
+	if (prop && len >= 16) {
+		len = fdt_pack_reg(fdt, buf, CONFIG_SYS_SDRAM_BASE,
+				(u64)size_gb * 0x40000000);
+		fdt_setprop(fdt, memory, "reg", buf, len);
+	}
+}
+
+void spl_perform_fixups(struct spl_image_info *spl_image)
+{
+	venice_fixup_memory(spl_image->fdt_addr, gd->ram_size);
+}
+
 static void spl_dram_init(int size)
 {
 	struct dram_timing_info *dram_timing;
 
 	switch (size) {
+#ifdef CONFIG_IMX8MM
 	case 1:
 		dram_timing = &dram_timing_1gb;
 		break;
@@ -54,16 +98,32 @@ static void spl_dram_init(int size)
 		printf("Unknown DDR configuration: %d GiB\n", size);
 		dram_timing = &dram_timing_1gb;
 		size = 1;
+#endif
+#ifdef CONFIG_IMX8MN
+	case 2:
+		if (!strcmp(gsc_get_model(), "GW7902-SP466-A") ||
+		    !strcmp(gsc_get_model(), "GW7902-SP466-B")) {
+			dram_timing = &dram_timing_2gb_dual_die;
+		} else {
+			dram_timing = &dram_timing_2gb_single_die;
+		}
+		break;
+	default:
+		printf("Unknown DDR configuration: %d GiB\n", size);
+		dram_timing = &dram_timing_2gb_dual_die;
+		size = 2;
+#endif
 	}
 
 	printf("DRAM    : LPDDR4 %d GiB\n", size);
 	ddr_init(dram_timing);
-	writel(size, M4_BOOTROM_BASE_ADDR);
+	gd->ram_size = size;
 }
 
 #define UART_PAD_CTRL	(PAD_CTL_DSE6 | PAD_CTL_FSEL1)
 #define WDOG_PAD_CTRL	(PAD_CTL_DSE6 | PAD_CTL_ODE | PAD_CTL_PUE | PAD_CTL_PE)
 
+#ifdef CONFIG_IMX8MM
 static iomux_v3_cfg_t const uart_pads[] = {
 	IMX8MM_PAD_UART2_RXD_UART2_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
 	IMX8MM_PAD_UART2_TXD_UART2_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
@@ -72,6 +132,17 @@ static iomux_v3_cfg_t const uart_pads[] = {
 static iomux_v3_cfg_t const wdog_pads[] = {
 	IMX8MM_PAD_GPIO1_IO02_WDOG1_WDOG_B  | MUX_PAD_CTRL(WDOG_PAD_CTRL),
 };
+#endif
+#ifdef CONFIG_IMX8MN
+static iomux_v3_cfg_t const uart_pads[] = {
+	IMX8MN_PAD_UART2_RXD__UART2_DCE_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
+	IMX8MN_PAD_UART2_TXD__UART2_DCE_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
+};
+
+static iomux_v3_cfg_t const wdog_pads[] = {
+	IMX8MN_PAD_GPIO1_IO02__WDOG1_WDOG_B  | MUX_PAD_CTRL(WDOG_PAD_CTRL),
+};
+#endif
 
 int board_early_init_f(void)
 {

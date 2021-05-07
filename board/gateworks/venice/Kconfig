@@ -10,3 +10,15 @@ config SYS_CONFIG_NAME
 	default "imx8mm_venice"
 
 endif
+
+if TARGET_IMX8MN_VENICE
+
+config SYS_BOARD
+	default "venice"
+
+config SYS_VENDOR
+	default "gateworks"
+
+config SYS_CONFIG_NAME
+	default "imx8mn_venice"
+endif
