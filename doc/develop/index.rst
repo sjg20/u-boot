@@ -15,6 +15,7 @@ Implementation
    logging
    makefiles
    menus
+   spl
    uefi/index
    version
 
