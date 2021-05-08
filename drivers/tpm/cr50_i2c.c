@@ -656,6 +656,44 @@ enum {
 	LONG_TIMEOUT_MS		= 2000,
 };
 
+
+/* Maximum size of the text describing internal TPM state. */
+#define STATE_TEXT_SIZE 120
+
+char *tpm_internal_state(struct TpmOps *me)
+{
+	struct tpm_vendor_header *h;
+	struct tpm_vendor_state *s;
+	size_t buffer_size = sizeof(struct tpm_vendor_header) +
+		sizeof(struct tpm_vendor_state);
+	char *state_str;
+
+	/* Command to send to the TPM. */
+	h = xzalloc(buffer_size);
+
+	/* Response from the TPM. */
+	s = (struct tpm_vendor_state *)(h + 1);
+
+	state_str = xzalloc(STATE_TEXT_SIZE);
+
+	cr50_fill_vendor_cmd_header(h, VENDOR_CC_REPORT_TPM_STATE, 0);
+
+	if (me->xmit(me, (void *)h, sizeof(*h), (void *)h, &buffer_size) ||
+	    (buffer_size < sizeof(struct tpm_vendor_header))) {
+		snprintf(state_str, STATE_TEXT_SIZE, "communications error");
+	} else if(unmarshal_u32(&h->code)) {
+		snprintf(state_str, STATE_TEXT_SIZE, "TPM error %d",
+			 unmarshal_u32(&h->code));
+	} else {
+		/* TPM responded as expected. */
+		stringify_state(s, state_str, STATE_TEXT_SIZE);
+	}
+
+	free(h);
+
+	return state_str;
+}
+
 static int cr50_i2c_of_to_plat(struct udevice *dev)
 {
 	struct tpm_chip_priv *upriv = dev_get_uclass_priv(dev);

@@ -120,7 +120,7 @@ int dev_get_uclass_index(struct udevice *dev, struct uclass **ucp);
  * uclass_find_device() - Return n-th child of uclass
  * @id:		Id number of the uclass
  * @index:	Position of the child in uclass's list
- * #devp:	Returns pointer to device, or NULL on error
+ * @devp:	Returns pointer to device, or NULL on error
  *
  * The device is not prepared for use - this is an internal function.
  * The function uclass_get_device_tail() can be used to probe the device.
@@ -133,7 +133,7 @@ int uclass_find_device(enum uclass_id id, int index, struct udevice **devp);
 /**
  * uclass_find_first_device() - Return the first device in a uclass
  * @id:		Id number of the uclass
- * #devp:	Returns pointer to device, or NULL on error
+ * @devp:	Returns pointer to device, or NULL on error
  *
  * The device is not prepared for use - this is an internal function.
  * The function uclass_get_device_tail() can be used to probe the device.
