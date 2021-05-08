@@ -13,15 +13,20 @@ bool vboot_wants_oprom(struct vboot_info *vboot)
 {
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 
-	return ctx->nvdata[VB2_NV_OFFS_BOOT] & VB2_NV_BOOT_OPROM_NEEDED;
+	return ctx->nvdata[VB2_NV_OFFS_BOOT] & VB2_NV_BOOT_DISPLAY_REQUEST;
 }
 
 #ifndef CONFIG_SPL_BUILD
 u32 vboot_get_gbb_flags(struct vboot_info *vboot)
 {
+	// TODO
+#if 0
 	VbCommonParams *cparams = &vboot->cparams;
-	GoogleBinaryBlockHeader *hdr = cparams->gbb_data;
+	struct vb2_gbb_header *hdr = cparams->gbb_data;
 
 	return hdr->flags;
+#endif
+
+	return 0;
 }
 #endif

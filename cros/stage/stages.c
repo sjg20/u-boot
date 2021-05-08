@@ -143,23 +143,24 @@ static int save_if_needed(struct vboot_info *vboot)
 		ctx->flags &= ~VB2_CONTEXT_NVDATA_CHANGED;
 	}
 
-	if (ctx->flags & VB2_CONTEXT_SECDATA_CHANGED) {
+	if (ctx->flags & VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED) {
 		log_info("Saving secdata\n");
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->secdata,
-					     sizeof(ctx->secdata));
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->secdata_firmware,
+					     sizeof(ctx->secdata_firmware));
 		if (ret) {
 			return log_msg_ret("secdata", ret);
 		}
-		ctx->flags &= ~VB2_CONTEXT_SECDATA_CHANGED;
+		ctx->flags &= ~VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED;
 	}
 
-	if (ctx->flags & VB2_CONTEXT_SECDATAK_CHANGED) {
+	if (ctx->flags & VB2_CONTEXT_SECDATA_KERNEL_CHANGED) {
 		log_info("Saving secdatak\n");
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK, ctx->secdatak,
-					     sizeof(ctx->secdatak));
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK,
+					     ctx->secdata_kernel,
+					     sizeof(ctx->secdata_kernel));
 		if (ret)
 			return log_msg_ret("secdatak", ret);
-		ctx->flags &= ~VB2_CONTEXT_SECDATAK_CHANGED;
+		ctx->flags &= ~VB2_CONTEXT_SECDATA_KERNEL_CHANGED;
 	}
 
 	return 0;
@@ -185,7 +186,7 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 
 			vboot_set_selected_region(vboot, &fw->spl_rec,
 						  &fw->boot_rec);
-			log_warning("flags %x recovery=%d\n", ctx->flags,
+			log_warning("flags %llx recovery=%d\n", ctx->flags,
 				    vboot_is_recovery(vboot));
 			ret = 0;
 		}
@@ -202,18 +203,11 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 	if (flags & VBOOT_FLAG_CMDLINE)
 		return -EPERM;
 
-	if (ret == VBERROR_REBOOT_REQUIRED) {
+	if (ret == VB2_REQUEST_REBOOT) {
 		log_warning("Cold reboot\n");
 		sysreset_walk_halt(SYSRESET_COLD);
 	} else {
 		switch (vboot->vb_error) {
-		case VBERROR_BIOS_SHELL_REQUESTED:
-			return -EPERM;
-		case VBERROR_EC_REBOOT_TO_RO_REQUIRED:
-		case VBERROR_SHUTDOWN_REQUESTED:
-			log_warning("Power off\n");
-			sysreset_walk_halt(SYSRESET_POWER_OFF);
-			break;
 		default:
 			log_warning("Cold reboot\n");
 			sysreset_walk_halt(SYSRESET_COLD);

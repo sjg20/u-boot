@@ -72,7 +72,7 @@ struct vboot_ec_ops {
 	 *
 	 * @return 0 if OK, non-zero on error
 	 */
-	int (*hash_image)(struct udevice *dev, enum VbSelectFirmware_t select,
+	int (*hash_image)(struct udevice *dev, enum vb2_firmware_selection select,
 			  u8 *hash, int *hash_sizep);
 
 	/**
@@ -84,7 +84,7 @@ struct vboot_ec_ops {
 	 * @image_size:	Size of the image in bytes
 	 * @return 0 if OK, non-zero on error
 	 */
-	int (*update_image)(struct udevice *dev, enum VbSelectFirmware_t select,
+	int (*update_image)(struct udevice *dev, enum vb2_firmware_selection select,
 			    const u8 *image, int image_size);
 
 	/**
@@ -98,17 +98,7 @@ struct vboot_ec_ops {
 	 * @return 0 if OK, -EPERM if protection could not be set and a reboot
 	 *	is required, other non-zero on error
 	 */
-	int (*protect)(struct udevice *dev, enum VbSelectFirmware_t select);
-
-	/**
-	 * entering_mode() - Inform the EC of the boot mode selected by the AP
-	 * mode: Normal, Developer, or Recovery
-	 *
-	 * @dev: UCLASS_CROS_VBOOT_EC device
-	 * @mode: Boot mode selected
-	 * @return 0 if OK, non-zero on error
-	 */
-	int (*entering_mode)(struct udevice *dev, enum VbEcBootMode_t mode);
+	int (*protect)(struct udevice *dev, enum vb2_firmware_selection select);
 
 	/**
 	 * reboot_to_ro() Tells the EC to reboot to RO on next AP shutdown
@@ -125,12 +115,11 @@ struct vboot_ec_ops {
 int vboot_ec_running_rw(struct udevice *dev, int *in_rwp);
 int vboot_ec_jump_to_rw(struct udevice *dev);
 int vboot_ec_disable_jump(struct udevice *dev);
-int vboot_ec_hash_image(struct udevice *dev, enum VbSelectFirmware_t select,
+int vboot_ec_hash_image(struct udevice *dev, enum vb2_firmware_selection select,
 			const u8 **hashp, int *hash_sizep);
-int vboot_ec_update_image(struct udevice *dev, enum VbSelectFirmware_t select,
+int vboot_ec_update_image(struct udevice *dev, enum vb2_firmware_selection select,
 			  const u8 *image, int image_size);
-int vboot_ec_protect(struct udevice *dev, enum VbSelectFirmware_t select);
-int vboot_ec_entering_mode(struct udevice *dev, enum VbEcBootMode_t mode);
+int vboot_ec_protect(struct udevice *dev, enum vb2_firmware_selection select);
 int vboot_ec_reboot_to_ro(struct udevice *dev);
 
 #endif /* __CROS_VBOOT_EC_H */

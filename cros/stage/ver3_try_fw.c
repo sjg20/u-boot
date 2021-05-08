@@ -20,7 +20,7 @@ int vboot_ver3_try_fw(struct vboot_info *vboot)
 	bootstage_mark(BOOTSTAGE_VBOOT_END_VERIFY_SLOT);
 	if (ret) {
 		log_info("Reboot reqested (%x)\n", ret);
-		return VBERROR_REBOOT_REQUIRED;
+		return VB2_REQUEST_REBOOT;
 	}
 
 	return 0;

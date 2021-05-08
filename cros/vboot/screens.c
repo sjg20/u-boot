@@ -23,8 +23,6 @@
 #include <cros/vbfile.h>
 #include <cros/vboot.h>
 
-#include <gbb_header.h>
-
 /*
  * This is the base used to specify the size and the coordinate of the image.
  * For example, height = 40 means 4.0% of the canvas (=drawing area) height.
@@ -173,7 +171,7 @@ static vb2_error_t load_localised_graphics(uint locale)
 	/* check whether we've already loaded the archive for this locale */
 	if (locale_data.archive) {
 		if (locale_data.archive_locale == locale)
-			return VBERROR_SUCCESS;
+			return VB2_SUCCESS;
 		/* No need to keep more than one locale graphics at a time */
 		free(locale_data.archive);
 	}
@@ -183,13 +181,13 @@ static vb2_error_t load_localised_graphics(uint locale)
 	ret = load_archive(str, &locale_data.archive);
 	if (ret) {
 		log_err("Cannot read locale '%s'\n", str);
-		return VBERROR_INVALID_BMPFV;
+		return VB2_ERROR_UI_INVALID_ARCHIVE;
 	}
 
 	/* Remember what's cached */
 	locale_data.archive_locale = locale;
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static struct dentry *find_file_in_archive(const struct directory *dir,
@@ -238,7 +236,7 @@ static vb2_error_t draw(struct directory *dir, const char *image_name,
 
 	file = find_file_in_archive(dir, image_name);
 	if (!file)
-		return VBERROR_NO_IMAGE_PRESENT;
+		return VB2_ERROR_UI_MISSING_IMAGE;
 	bitmap = (u8 *)dir + file->offset;
 
 	struct scale pos = {
@@ -251,7 +249,7 @@ static vb2_error_t draw(struct directory *dir, const char *image_name,
 	};
 
 	if (cbgfx_get_bitmap_dimension(bitmap, file->size, &dim))
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
 	if ((int64_t)dim.x.n * VB_SCALE <= (int64_t)dim.x.d * VB_DIVIDER_WIDTH)
 		return cbgfx_draw_bitmap((u8 *)dir + file->offset, file->size,
@@ -296,7 +294,7 @@ static vb2_error_t get_image_size(struct directory *dir, const char *image_name,
 
 	file = find_file_in_archive(dir, image_name);
 	if (!file)
-		return VBERROR_NO_IMAGE_PRESENT;
+		return VB2_ERROR_UI_MISSING_IMAGE;
 
 	struct scale dim = {
 		.x = { .n = *width, .d = VB_SCALE, },
@@ -306,12 +304,12 @@ static vb2_error_t get_image_size(struct directory *dir, const char *image_name,
 	rv = cbgfx_get_bitmap_dimension((u8 *)dir + file->offset, file->size,
 					&dim);
 	if (rv)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
 	*width = dim.x.n * VB_SCALE / dim.x.d;
 	*height = dim.y.n * VB_SCALE / dim.y.d;
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t get_image_size_locale(const char *image_name, u32 locale,
@@ -345,7 +343,7 @@ static int draw_text(const char *text, s32 x, s32 y,
 		x += w;
 		text++;
 	}
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static int get_text_width(const char *text, s32 *width, s32 *height)
@@ -363,12 +361,12 @@ static int get_text_width(const char *text, s32 *width, s32 *height)
 		*width += w;
 		text++;
 	}
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_footer(struct vboot_info *vboot, u32 locale)
 {
-	GoogleBinaryBlockHeader *gbb;
+	struct vb2_gbb_header *gbb;
 	char *hwid = NULL;
 	s32 x, y, w1, h1, w2, h2, w3, h3;
 	s32 total;
@@ -441,10 +439,14 @@ static vb2_error_t vboot_draw_footer(struct vboot_info *vboot, u32 locale)
 	 * which is locale dependent, and 'XYZ', a model name. Model name
 	 * consists of individual font images: 'X' 'Y' 'Z'.
 	 */
-	gbb = vboot->cparams.gbb_data;
+// 	gbb = vboot->cparams.gbb_data;
+// TODO
+	gbb = NULL;
+	/*
 	if (gbb)
 		hwid = (char *)((ulong)gbb + gbb->hwid_offset);
 	else
+	*/
 		hwid = "NOT FOUND";
 
 	w1 = VB_SIZE_AUTO;
@@ -479,7 +481,7 @@ static vb2_error_t vboot_draw_footer(struct vboot_info *vboot, u32 locale)
 			  x, y, VB_SIZE_AUTO, VB_TEXT_HEIGHT,
 			  PIVOT_H_LEFT | PIVOT_V_TOP);
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 /*
@@ -527,7 +529,7 @@ static vb2_error_t vboot_draw_language(struct vboot_info *vboot, u32 locale)
 				      w, h, PIVOT_H_RIGHT | PIVOT_V_BOTTOM));
 	}
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t draw_base_screen(struct vboot_info *vboot, u32 locale,
@@ -536,7 +538,7 @@ static vb2_error_t draw_base_screen(struct vboot_info *vboot, u32 locale,
 	const struct rgb_colour white = { 0xff, 0xff, 0xff };
 
 	if (cbgfx_clear_screen(&white))
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	RET_ON_ERR(draw_image("chrome_logo.bmp",
 			      (VB_SCALE - VB_DIVIDER_WIDTH) / 2,
 			      VB_DIVIDER_V_OFFSET - VB_LOGO_LIFTUP,
@@ -556,7 +558,7 @@ static vb2_error_t draw_base_screen(struct vboot_info *vboot, u32 locale,
 
 	RET_ON_ERR(vboot_draw_footer(vboot, locale));
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_base_screen(struct vboot_info *vboot,
@@ -575,7 +577,7 @@ static vb2_error_t vboot_draw_blank(struct vboot_info *vboot, struct params *p)
 {
 	video_clear(vboot->video);
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_menu(struct params *p, const struct menu *m)
@@ -618,7 +620,7 @@ static vb2_error_t vboot_draw_menu(struct params *p, const struct menu *m)
 				     VB_SIZE_AUTO, VB_TEXT_HEIGHT * 2,
 				     PIVOT_H_CENTER | PIVOT_V_BOTTOM));
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 /* String arrays with bmp file names for detachable Menus */
@@ -678,7 +680,7 @@ static vb2_error_t vboot_draw_developer_warning(struct vboot_info *vboot,
 				     VB_TEXT_HEIGHT,
 				     PIVOT_H_CENTER | PIVOT_V_TOP));
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_developer_warning_menu(struct vboot_info *vboot,
@@ -720,7 +722,7 @@ static vb2_error_t vboot_draw_recovery_no_good(struct vboot_info *vboot,
 	RET_ON_ERR(draw_image("BadDevices.bmp", VB_SCALE_HALF, VB_SCALE_HALF,
 			      VB_SIZE_AUTO, VB_ICON_HEIGHT,
 			      PIVOT_H_CENTER | PIVOT_V_CENTER));
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_recovery_insert(struct vboot_info *vboot,
@@ -738,7 +740,7 @@ static vb2_error_t vboot_draw_recovery_insert(struct vboot_info *vboot,
 	RET_ON_ERR(draw_image("InsertDevices.bmp", VB_SCALE_HALF, VB_SCALE_HALF,
 			      VB_SIZE_AUTO, h,
 			      PIVOT_H_CENTER | PIVOT_V_CENTER));
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_recovery_to_dev(struct vboot_info *vboot,
@@ -751,7 +753,7 @@ static vb2_error_t vboot_draw_recovery_to_dev(struct vboot_info *vboot,
 				     VB_SCALE_HALF, VB_SIZE_AUTO,
 				     VB_TEXT_HEIGHT * 4,
 				     PIVOT_H_CENTER | PIVOT_V_CENTER));
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_recovery_to_dev_menu(struct vboot_info *vboot,
@@ -784,7 +786,7 @@ static vb2_error_t vboot_draw_developer_to_norm(struct vboot_info *vboot,
 				     VB_SCALE_HALF + VB_TEXT_HEIGHT * 2,
 				     VB_SIZE_AUTO, VB_TEXT_HEIGHT * 4,
 				     PIVOT_H_CENTER | PIVOT_V_TOP));
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_developer_to_norm_menu(struct vboot_info *vboot,
@@ -813,7 +815,7 @@ static vb2_error_t vboot_draw_wait(struct vboot_info *vboot, struct params *p)
 				     VB_SCALE_HALF, VB_SIZE_AUTO,
 				     VB_TEXT_HEIGHT * 2,
 				     PIVOT_H_CENTER | PIVOT_V_CENTER));
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_to_norm_confirmed(struct vboot_info *vboot,
@@ -831,7 +833,7 @@ static vb2_error_t vboot_draw_to_norm_confirmed(struct vboot_info *vboot,
 				     VB_SCALE_HALF + VB_TEXT_HEIGHT * 2,
 				     VB_SIZE_AUTO, VB_TEXT_HEIGHT,
 				     PIVOT_H_CENTER | PIVOT_V_TOP));
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_os_broken(struct vboot_info *vboot,
@@ -845,7 +847,7 @@ static vb2_error_t vboot_draw_os_broken(struct vboot_info *vboot,
 				     VB_SCALE_HALF, VB_SIZE_AUTO,
 				     VB_TEXT_HEIGHT * 2,
 				     PIVOT_H_CENTER | PIVOT_V_TOP));
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_languages_menu(struct vboot_info *vboot,
@@ -932,7 +934,7 @@ static vb2_error_t vboot_draw_languages_menu(struct vboot_info *vboot,
 				     VB_TEXT_HEIGHT * 2,
 				     PIVOT_H_CENTER | PIVOT_V_BOTTOM));
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static void cons_string(struct udevice *cons, const char *str)
@@ -971,7 +973,7 @@ static vb2_error_t vboot_draw_altfw_pick(struct vboot_info *vboot,
 	sprintf(msg, "Press key 1-%c to select alternative boot loader:", '2');
 	cons_text(vboot, 0, -1, msg, "");
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static vb2_error_t vboot_draw_options_menu(struct vboot_info *vboot,
@@ -1155,7 +1157,7 @@ static void print_fallback_message(struct vboot_info *vboot,
 static vb2_error_t draw_ui(struct vboot_info *vboot, u32 screen_type,
 			 struct params *p)
 {
-	vb2_error_t rv = VBERROR_UNKNOWN;
+	vb2_error_t rv = VB2_ERROR_UNKNOWN;
 	const struct vboot_ui_descriptor *desc;
 
 	desc = get_ui_descriptor(screen_type);
@@ -1167,7 +1169,7 @@ static vb2_error_t draw_ui(struct vboot_info *vboot, u32 screen_type,
 	if (p->locale >= locale_data.count) {
 		printf("Unsupported locale (%d)\n", p->locale);
 		print_fallback_message(vboot, desc);
-		return VBERROR_INVALID_PARAMETER;
+		return VB2_ERROR_INVALID_PARAMETER;
 	}
 
 	/* if no drawing function is registered, fallback msg will be printed */
@@ -1182,7 +1184,7 @@ static vb2_error_t draw_ui(struct vboot_info *vboot, u32 screen_type,
 		return VBERROR_SCREEN_DRAW;
 	}
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static int vboot_init_locale(struct vboot_info *vboot)
@@ -1242,13 +1244,13 @@ static vb2_error_t vboot_init_screen(struct vboot_info *vboot)
 	ret = uclass_first_device_err(UCLASS_VIDEO, &vboot->video);
 	if (ret) {
 		log_err("Cannot find video device (err=%d)\n", ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 
 	ret = uclass_first_device_err(UCLASS_VIDEO_CONSOLE, &vboot->console);
 	if (ret) {
 		log_err("Cannot find console device (err=%d)\n", ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 
 	ret = uclass_first_device_err(UCLASS_PANEL, &vboot->panel);
@@ -1258,7 +1260,7 @@ static vb2_error_t vboot_init_screen(struct vboot_info *vboot)
 	ret = cbgfx_init(vboot->video);
 	if (ret) {
 		log_err("cbgfx_init() failed (err=%d)\n", ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 
 	/* create a list of supported locales */
@@ -1290,7 +1292,7 @@ static vb2_error_t vboot_init_screen(struct vboot_info *vboot)
 
 	initialised = true;
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 static void update_backlight(struct vboot_info *vboot, bool enable)
@@ -1313,7 +1315,7 @@ int vboot_draw_screen(u32 screen, u32 locale)
 
 	if (!initialised) {
 		if (vboot_init_screen(vboot))
-			return VBERROR_UNKNOWN;
+			return VB2_ERROR_UNKNOWN;
 	}
 	update_backlight(vboot, screen != VB_SCREEN_BLANK);
 
@@ -1328,7 +1330,7 @@ int vboot_draw_screen(u32 screen, u32 locale)
 
 	locale_data.current = locale;
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 int vboot_draw_ui(u32 screen, u32 locale,
@@ -1342,7 +1344,7 @@ int vboot_draw_ui(u32 screen, u32 locale,
 
 	if (!initialised) {
 		if (vboot_init_screen(vboot))
-			return VBERROR_UNKNOWN;
+			return VB2_ERROR_UNKNOWN;
 	}
 
 	/* If the screen is blank, turn off the backlight; else turn it on */
@@ -1359,7 +1361,7 @@ int vboot_get_locale_count(void)
 
 	if (!initialised) {
 		if (vboot_init_screen(vboot))
-			return VBERROR_UNKNOWN;
+			return VB2_ERROR_UNKNOWN;
 	}
 	return locale_data.count;
 }

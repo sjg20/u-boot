@@ -62,7 +62,7 @@ static int ec_get(int devidx, struct udevice **devp)
 	ret = uclass_get_device_by_seq(UCLASS_CROS_VBOOT_EC, devidx, &dev);
 	if (ret) {
 		log_err("Get EC %d: err=%d\n", devidx, ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 	log_debug("EC devidx=%d,name=%s\n", devidx, dev->name);
 	*devp = dev;
@@ -83,10 +83,10 @@ vb2_error_t VbExEcRunningRW(int devidx, int *in_rw)
 	ret = vboot_ec_running_rw(dev, in_rw);
 	if (ret) {
 		log_err("Failed, err=%d\n", ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 vb2_error_t VbExEcJumpToRW(int devidx)
@@ -102,10 +102,10 @@ vb2_error_t VbExEcJumpToRW(int devidx)
 	ret = vboot_ec_jump_to_rw(dev);
 	if (ret) {
 		log_err("Failed, err=%d\n", ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 vb2_error_t VbExEcDisableJump(int devidx)
@@ -122,13 +122,13 @@ vb2_error_t VbExEcDisableJump(int devidx)
 	ret = vboot_ec_disable_jump(dev);
 	if (ret) {
 		log_err("Failed, err=%d\n", ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
-vb2_error_t VbExEcHashImage(int devidx, enum VbSelectFirmware_t select,
+vb2_error_t VbExEcHashImage(int devidx, enum vb2_firmware_selection select,
 			  const u8 **hashp, int *hash_sizep)
 {
 	struct udevice *dev;
@@ -143,10 +143,10 @@ vb2_error_t VbExEcHashImage(int devidx, enum VbSelectFirmware_t select,
 		  *hash_sizep);
 	if (ret) {
 		log_err("Failed, err=%d\n", ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 /**
@@ -159,7 +159,7 @@ vb2_error_t VbExEcHashImage(int devidx, enum VbSelectFirmware_t select,
  */
 static struct fmap_entry *get_firmware_entry(struct vboot_info *vboot,
 					     int devidx,
-					     enum VbSelectFirmware_t select)
+					     enum vb2_firmware_selection select)
 {
 	struct fmap_section *fw;
 	struct fmap_ec *ec;
@@ -182,7 +182,7 @@ static struct fmap_entry *get_firmware_entry(struct vboot_info *vboot,
 	return entry;
 }
 
-vb2_error_t VbExEcGetExpectedImage(int devidx, enum VbSelectFirmware_t select,
+vb2_error_t VbExEcGetExpectedImage(int devidx, enum vb2_firmware_selection select,
 				 const u8 **imagep, int *image_sizep)
 {
 	struct vboot_info *vboot = vboot_get();
@@ -193,21 +193,21 @@ vb2_error_t VbExEcGetExpectedImage(int devidx, enum VbSelectFirmware_t select,
 	log_debug("%s: %d\n", __func__, devidx);
 	entry = get_firmware_entry(vboot, devidx, select);
 	if (!entry)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
 	/* Reuse the same image to avoid leaking memory */
 	buf = &vboot->expected_ec_image;
 	ret = fwstore_load_image(vboot->fwstore, entry, buf);
 	if (ret) {
 		log_err("Cannot locate image: err=%d\n", ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 	*imagep = abuf_data(buf);
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
-vb2_error_t VbExEcGetExpectedImageHash(int devidx, enum VbSelectFirmware_t select,
+vb2_error_t VbExEcGetExpectedImageHash(int devidx, enum vb2_firmware_selection select,
 				     const u8 **hash, int *hash_size)
 {
 	struct vboot_info *vboot = vboot_get();
@@ -219,7 +219,7 @@ vb2_error_t VbExEcGetExpectedImageHash(int devidx, enum VbSelectFirmware_t selec
 	if (!entry) {
 		log_err("Cannot get firmware entry: devid=%x, select=%d\b",
 			devidx, select);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 	*hash = entry->hash;
 	*hash_size = entry->hash_size;
@@ -228,10 +228,10 @@ vb2_error_t VbExEcGetExpectedImageHash(int devidx, enum VbSelectFirmware_t selec
 		log_debug("%02x", entry->hash[i]);
 	log_debug("\n");
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
-vb2_error_t VbExEcUpdateImage(int devidx, enum VbSelectFirmware_t select,
+vb2_error_t VbExEcUpdateImage(int devidx, enum vb2_firmware_selection select,
 			    const u8 *image, int image_size)
 {
 	struct udevice *dev;
@@ -247,19 +247,20 @@ vb2_error_t VbExEcUpdateImage(int devidx, enum VbSelectFirmware_t select,
 		log_err("Failed, err=%d\n", ret);
 		switch (ret) {
 		case -EINVAL:
-			return VBERROR_INVALID_PARAMETER;
-		case -EPERM:
-			return VBERROR_EC_REBOOT_TO_RO_REQUIRED;
+			return VB2_ERROR_INVALID_PARAMETER;
+		// TODO
+// 		case -EPERM:
+// 			return VBERROR_EC_REBOOT_TO_RO_REQUIRED;
 		case -EIO:
 		default:
-			return VBERROR_UNKNOWN;
+			return VB2_ERROR_UNKNOWN;
 		}
 	}
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
-vb2_error_t VbExEcProtect(int devidx, enum VbSelectFirmware_t select)
+vb2_error_t VbExEcProtect(int devidx, enum vb2_firmware_selection select)
 {
 	struct udevice *dev;
 	int ret;
@@ -272,29 +273,10 @@ vb2_error_t VbExEcProtect(int devidx, enum VbSelectFirmware_t select)
 	ret = vboot_ec_protect(dev, select);
 	if (ret) {
 		log_err("Failed, err=%d\n", ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 
-	return VBERROR_SUCCESS;
-}
-
-vb2_error_t VbExEcEnteringMode(int devidx, enum VbEcBootMode_t mode)
-{
-	struct udevice *dev;
-	int ret;
-
-	log_debug("%s: %d\n", __func__, devidx);
-	ret = ec_get(devidx, &dev);
-	if (ret)
-		return log_msg_ret("Cannot get EC", ret);
-
-	ret = vboot_ec_entering_mode(dev, mode);
-	if (ret) {
-		log_err("Failed, err=%d\n", ret);
-		return VBERROR_UNKNOWN;
-	}
-
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 /* Wait 3 seconds after software sync for EC to clear the limit power flag */
@@ -319,7 +301,7 @@ vb2_error_t VbExEcVbootDone(int in_recovery)
 			limit_power = 0;
 		} else if (ret) {
 			log_warning("Failed to check EC limit power flag\n");
-			return VBERROR_UNKNOWN;
+			return VB2_ERROR_UNKNOWN;
 		}
 
 		/*
@@ -341,12 +323,12 @@ vb2_error_t VbExEcVbootDone(int in_recovery)
 
 	if (limit_power) {
 		log_info("EC requests limited power usage. Request shutdown\n");
-		return VBERROR_SHUTDOWN_REQUESTED;
+		return VB2_REQUEST_SHUTDOWN;
 	}
 
 	bootstage_mark(BOOTSTAMP_VBOOT_EC_DONE);
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 vb2_error_t VbExEcBatteryCutOff(void)
@@ -358,8 +340,8 @@ vb2_error_t VbExEcBatteryCutOff(void)
 	ret = cros_ec_battery_cutoff(dev, EC_BATTERY_CUTOFF_FLAG_AT_SHUTDOWN);
 	if (ret) {
 		log_err("Failed, err=%d\n", ret);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }

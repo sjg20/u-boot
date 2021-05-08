@@ -36,14 +36,14 @@ static int locate_aux_fw(struct udevice *dev, struct fmap_entry *entry)
 	return 0;
 }
 
-vb2_error_t VbExCheckAuxFw(VbAuxFwUpdateSeverity_t *severityp)
+vb2_error_t VbExCheckAuxFw(enum vb2_auxfw_update_severity *severityp)
 {
 	enum aux_fw_severity max, current;
 	struct udevice *dev;
 	struct fmap_entry entry;
 	int ret;
 
-	max = VB_AUX_FW_NO_UPDATE;
+	max = VB2_AUXFW_NO_UPDATE;
 	uclass_foreach_dev_probe(UCLASS_CROS_AUX_FW, dev) {
 		ret = locate_aux_fw(dev, &entry);
 		if (ret)
@@ -58,7 +58,7 @@ vb2_error_t VbExCheckAuxFw(VbAuxFwUpdateSeverity_t *severityp)
 	}
 	switch (max) {
 	case AUX_FW_NO_UPDATE:
-		*severityp = VB_AUX_FW_NO_UPDATE;
+		*severityp = VB2_AUXFW_NO_UPDATE;
 		break;
 	case AUX_FW_FAST_UPDATE:
 		*severityp = AUX_FW_FAST_UPDATE;
@@ -68,7 +68,7 @@ vb2_error_t VbExCheckAuxFw(VbAuxFwUpdateSeverity_t *severityp)
 		break;
 	default:
 		log_err("Invalid severity %d", max);
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	}
 
 	return 0;
@@ -180,7 +180,7 @@ vb2_error_t VbExUpdateAuxFw(void)
 
 	/* Request EC reboot, if required */
 	if (state.reboot_required && !ret)
-		return VBERROR_EC_REBOOT_TO_RO_REQUIRED;
+		return VB2_REQUEST_REBOOT_EC_TO_RO;
 
 	return 0;
 }

@@ -47,7 +47,7 @@ int vboot_ec_disable_jump(struct udevice *dev)
 	return ops->disable_jump(dev);
 }
 
-int vboot_ec_hash_image(struct udevice *dev, enum VbSelectFirmware_t select,
+int vboot_ec_hash_image(struct udevice *dev, enum vb2_firmware_selection select,
 			const u8 **hashp, int *hash_sizep)
 {
 	struct vboot_ec_uc_priv *priv = dev_get_uclass_priv(dev);
@@ -71,7 +71,7 @@ int vboot_ec_hash_image(struct udevice *dev, enum VbSelectFirmware_t select,
 	return 0;
 }
 
-int vboot_ec_update_image(struct udevice *dev, enum VbSelectFirmware_t select,
+int vboot_ec_update_image(struct udevice *dev, enum vb2_firmware_selection select,
 			  const u8 *image, int image_size)
 {
 	struct vboot_ec_ops *ops = vboot_ec_get_ops(dev);
@@ -84,7 +84,7 @@ int vboot_ec_update_image(struct udevice *dev, enum VbSelectFirmware_t select,
 	return ops->update_image(dev, select, image, image_size);
 }
 
-int vboot_ec_protect(struct udevice *dev, enum VbSelectFirmware_t select)
+int vboot_ec_protect(struct udevice *dev, enum vb2_firmware_selection select)
 {
 	struct vboot_ec_ops *ops = vboot_ec_get_ops(dev);
 
@@ -94,18 +94,6 @@ int vboot_ec_protect(struct udevice *dev, enum VbSelectFirmware_t select)
 		return -ENOSYS;
 
 	return ops->protect(dev, select);
-}
-
-int vboot_ec_entering_mode(struct udevice *dev, enum VbEcBootMode_t mode)
-{
-	struct vboot_ec_ops *ops = vboot_ec_get_ops(dev);
-
-	if (device_get_uclass_id(dev) != UCLASS_CROS_VBOOT_EC)
-		return -EDOM;
-	if (!ops->entering_mode)
-		return -ENOSYS;
-
-	return ops->entering_mode(dev, mode);
 }
 
 int vboot_ec_reboot_to_ro(struct udevice *dev)

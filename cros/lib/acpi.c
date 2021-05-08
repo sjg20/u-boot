@@ -62,7 +62,7 @@ int vboot_update_acpi(struct vboot_info *vboot)
 {
 	struct chromeos_acpi_gnvs *tab;
 	struct acpi_global_nvs *gnvs;
-	GoogleBinaryBlockHeader *gbb;
+	struct vb2_gbb_header *gbb;
 	VbSharedDataHeader *vb_sd;
 	VbSharedDataHeader *vdat;
 	uint size, vb_sd_size;

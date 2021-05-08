@@ -269,7 +269,7 @@ int vboot_ver4_locate_fw(struct vboot_info *vboot)
 	ret = hash_body(vboot, dev);
 	if (ret) {
 		log_info("Reboot requested (%x)\n", ret);
-		return VBERROR_REBOOT_REQUIRED;
+		return VB2_REQUEST_REBOOT;
 	}
 
 	return 0;

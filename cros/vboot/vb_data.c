@@ -24,29 +24,24 @@ static struct nvdata_info {
 	{ VB2_NV_OFFS_HEADER, VB2_NV_HEADER_FW_SETTINGS_RESET,
 		"firmware settings reset" },
 	{ VB2_NV_OFFS_BOOT, VB2_NV_BOOT_BACKUP_NVRAM, "backup nvram" },
-	{ VB2_NV_OFFS_BOOT, VB2_NV_BOOT_OPROM_NEEDED, "oprom needed" },
+	{ VB2_NV_OFFS_BOOT, VB2_NV_BOOT_DISPLAY_REQUEST, "oprom needed" },
 	{ VB2_NV_OFFS_BOOT, VB2_NV_BOOT_DISABLE_DEV, "disable dev" },
 	{ VB2_NV_OFFS_BOOT, VB2_NV_BOOT_DEBUG_RESET, "debug reset" },
 	{ VB2_NV_OFFS_BOOT2, VB2_NV_BOOT2_TRIED, "tried" },
 	{ VB2_NV_OFFS_BOOT2, VB2_NV_BOOT2_TRY_NEXT, "try next" },
 	{ VB2_NV_OFFS_BOOT2, VB2_NV_BOOT2_PREV_TRIED, "prev tried" },
-	{ VB2_NV_OFFS_DEV, VB2_NV_DEV_FLAG_USB, "dev usb" },
+	{ VB2_NV_OFFS_DEV, VB2_NV_DEV_FLAG_EXTERNAL, "dev external" },
 	{ VB2_NV_OFFS_DEV, VB2_NV_DEV_FLAG_SIGNED_ONLY, "dev signed only" },
 	{ VB2_NV_OFFS_DEV, VB2_NV_DEV_FLAG_LEGACY, "dev legacy" },
-	{ VB2_NV_OFFS_DEV, VB2_NV_DEV_FLAG_FASTBOOT_FULL_CAP,
-		"dev fastboot full cap" },
 	{ VB2_NV_OFFS_DEV, VB2_NV_DEV_FLAG_UDC, "dev udc" },
 	{ VB2_NV_OFFS_TPM, VB2_NV_TPM_CLEAR_OWNER_REQUEST,
 		"TPM clear owner request needed" },
 	{ VB2_NV_OFFS_TPM, VB2_NV_TPM_CLEAR_OWNER_DONE, "TPM clear owner done" },
 	{ VB2_NV_OFFS_TPM, VB2_NV_TPM_REBOOTED, "TPM rebooted" },
-	{ VB2_NV_OFFS_MISC, VB2_NV_MISC_UNLOCK_FASTBOOT, "unlock fastboot" },
 	{ VB2_NV_OFFS_MISC, VB2_NV_MISC_BOOT_ON_AC_DETECT,
 		"boot-on-AC detect" },
 	{ VB2_NV_OFFS_MISC, VB2_NV_MISC_TRY_RO_SYNC, "try RO sync" },
 	{ VB2_NV_OFFS_MISC, VB2_NV_MISC_BATTERY_CUTOFF, "battery cutoff" },
-	{ VB2_NV_OFFS_MISC, VB2_NV_MISC_ENABLE_ALT_OS, "enable Alt OS" },
-	{ VB2_NV_OFFS_MISC, VB2_NV_MISC_DISABLE_ALT_OS, "disable Alt OS" },
 	{ VB2_NV_OFFS_MISC, VB2_NV_MISC_POST_EC_SYNC_DELAY,
 		"post EC-sync delay" },
 	{}
@@ -113,14 +108,14 @@ int vboot_secdata_dump(const void *secdata, int size)
 	printf("Vboot secdata:\n");
 	print_buffer(0, secdata, 1, size, 0);
 
-	printf("   Size %d : %svalid\n", size, size == VB2_SECDATA_SIZE ?
-	       "" : "in");
+	printf("   Size %d : %svalid\n", size,
+	       size == VB2_SECDATA_FIRMWARE_SIZE ? "" : "in");
 	printf("   CRC %x (calc %x): %svalid\n", sec->crc8, crc,
 	       crc_ok ? "" : "in");
 	printf("   Version %d\n", sec->struct_version);
-	if (sec->flags & VB2_SECDATA_FLAG_LAST_BOOT_DEVELOPER)
+	if (sec->flags & VB2_SECDATA_FIRMWARE_FLAG_LAST_BOOT_DEVELOPER)
 		printf("   - last boot was dev mode\n");
-	if (sec->flags & VB2_SECDATA_FLAG_DEV_MODE)
+	if (sec->flags & VB2_SECDATA_FIRMWARE_FLAG_DEV_MODE)
 		printf("   - dev mode\n");
 	printf("   Firmware versions %x\n", sec->fw_versions);
 
@@ -141,11 +136,12 @@ int vboot_secdata_set(void *secdata, int size, enum secdata_t field, int val)
 
 	switch (field) {
 	case SECDATA_LAST_BOOT_DEV:
-		update_flag(&sec->flags, VB2_SECDATA_FLAG_LAST_BOOT_DEVELOPER,
-			    val);
+		update_flag(&sec->flags,
+			    VB2_SECDATA_FIRMWARE_FLAG_LAST_BOOT_DEVELOPER, val);
 		break;
 	case SECDATA_DEV_MODE:
-		update_flag(&sec->flags, VB2_SECDATA_FLAG_DEV_MODE, val);
+		update_flag(&sec->flags, VB2_SECDATA_FIRMWARE_FLAG_DEV_MODE,
+			    val);
 		break;
 	default:
 		return -ENOENT;
@@ -163,10 +159,11 @@ int vboot_secdata_get(const void *secdata, int size, enum secdata_t field)
 
 	switch (field) {
 	case SECDATA_LAST_BOOT_DEV:
-		return sec->flags & VB2_SECDATA_FLAG_LAST_BOOT_DEVELOPER ?
+		return sec->flags & VB2_SECDATA_FIRMWARE_FLAG_LAST_BOOT_DEVELOPER ?
 			true : false;
 	case SECDATA_DEV_MODE:
-		return sec->flags & VB2_SECDATA_FLAG_DEV_MODE ? true : false;
+		return sec->flags & VB2_SECDATA_FIRMWARE_FLAG_DEV_MODE ? true :
+			 false;
 	default:
 		return -ENOENT;
 	}

@@ -33,7 +33,8 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 	kparams->kernel_buffer_size = ksize;
 
 	if (vboot->detachable_ui) {
-		kparams->inflags = VB_SALK_INFLAGS_ENABLE_DETACHABLE_UI;
+		// TODO
+// 		kparams->inflags = VB2_CONTEXT_DETACHABLE_UI;
 		if (IS_ENABLED(CONFIG_X86) && CONFIG_IS_ENABLED(CROS_EC)) {
 			/*
 			 * TODO(sjg@chromium.org): On x86 systems, inhibit power
@@ -46,9 +47,11 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 	}
 
 	log_debug("Calling VbSelectAndLoadKernel().\n");
-	res = VbSelectAndLoadKernel(&vboot->cparams, kparams);
+	res = VbSelectAndLoadKernel(vboot->ctx, kparams);
 
 	ret = 0;
+#if 0
+	//TODO
 	if (res == VBERROR_EC_REBOOT_TO_RO_REQUIRED) {
 		log_info("EC Reboot requested. Doing cold reboot.\n");
 
@@ -56,6 +59,7 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 		if (CONFIG_IS_ENABLED(CROS_EC))
 			cros_ec_reboot(vboot->cros_ec, EC_REBOOT_COLD, 0);
 		sysreset_walk_halt(SYSRESET_COLD);
+	// TODO
 	} else if (res == VBERROR_EC_REBOOT_TO_SWITCH_RW) {
 		log_info("Switch EC slot requested. Doing cold reboot\n");
 		if (CONFIG_IS_ENABLED(CROS_EC))
@@ -65,11 +69,12 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 	} else if (res == VBERROR_SHUTDOWN_REQUESTED) {
 		log_info("Powering off\n");
 		sysreset_walk_halt(SYSRESET_POWER_OFF);
-	} else if (res == VBERROR_REBOOT_REQUIRED) {
+	} else if (res == VB2_REQUEST_REBOOT) {
 		log_info("Reboot requested. Doing warm reboot\n");
 		sysreset_walk_halt(SYSRESET_WARM);
 	}
-	if (res != VBERROR_SUCCESS) {
+#endif
+	if (res != VB2_SUCCESS) {
 		log_info("VbSelectAndLoadKernel() returned %d, doing a cold reboot\n",
 			 res);
 		sysreset_walk_halt(SYSRESET_COLD);

@@ -148,7 +148,7 @@ vb2_error_t VbExNvStorageRead(u8 *buf)
 
 	ret = cros_nvdata_read_walk(CROS_NV_DATA, buf, EC_VBNV_BLOCK_SIZE);
 	if (ret)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 #ifdef DEBUG
 	print_buffer(0, buf, 1, EC_VBNV_BLOCK_SIZE, 0);
 #endif
@@ -166,7 +166,7 @@ vb2_error_t VbExNvStorageWrite(const u8 *buf)
 	vboot_dump_nvdata(buf, EC_VBNV_BLOCK_SIZE);
 	ret = cros_nvdata_write_walk(CROS_NV_DATA, buf, EC_VBNV_BLOCK_SIZE);
 	if (ret)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
 	return 0;
 }

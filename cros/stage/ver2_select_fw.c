@@ -17,7 +17,7 @@ int vboot_ver2_select_fw(struct vboot_info *vboot)
 	ret = vb2api_fw_phase2(vboot_get_ctx(vboot));
 	if (ret) {
 		log_info("Reboot requested (%x)\n", ret);
-		return VBERROR_REBOOT_REQUIRED;
+		return VB2_REQUEST_REBOOT;
 	}
 
 	return 0;

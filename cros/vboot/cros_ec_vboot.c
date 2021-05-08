@@ -62,7 +62,7 @@ static int cros_ec_vboot_disable_jump(struct udevice *dev)
 	return 0;
 }
 
-static u32 get_vboot_hash_offset(enum VbSelectFirmware_t select)
+static u32 get_vboot_hash_offset(enum vb2_firmware_selection select)
 {
 	switch (select) {
 	case VB_SELECT_FIRMWARE_READONLY:
@@ -75,7 +75,7 @@ static u32 get_vboot_hash_offset(enum VbSelectFirmware_t select)
 }
 
 static int cros_ec_vboot_hash_image(struct udevice *dev,
-				    enum VbSelectFirmware_t select,
+				    enum vb2_firmware_selection select,
 				    u8 *hash, int *hash_sizep)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
@@ -108,7 +108,7 @@ static int cros_ec_vboot_hash_image(struct udevice *dev,
 }
 
 static int vboot_set_region_protection(struct udevice *ec_dev,
-				       enum VbSelectFirmware_t select,
+				       enum vb2_firmware_selection select,
 				       int enable)
 {
 	struct ec_response_flash_protect resp;
@@ -155,7 +155,7 @@ static int vboot_set_region_protection(struct udevice *ec_dev,
 	return -EIO;
 }
 
-static enum ec_flash_region vboot_to_ec_region(enum VbSelectFirmware_t select)
+static enum ec_flash_region vboot_to_ec_region(enum vb2_firmware_selection select)
 {
 	switch (select) {
 	case VB_SELECT_FIRMWARE_READONLY:
@@ -168,7 +168,7 @@ static enum ec_flash_region vboot_to_ec_region(enum VbSelectFirmware_t select)
 }
 
 static int cros_ec_vboot_update_image(struct udevice *dev,
-				      enum VbSelectFirmware_t select,
+				      enum vb2_firmware_selection select,
 				      const u8 *image, int image_size)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
@@ -217,24 +217,11 @@ static int cros_ec_vboot_update_image(struct udevice *dev,
 }
 
 static int cros_ec_vboot_protect(struct udevice *dev,
-				 enum VbSelectFirmware_t select)
+				 enum vb2_firmware_selection select)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
 
 	return vboot_set_region_protection(ec_dev, select, 1);
-}
-
-static int cros_ec_vboot_entering_mode(struct udevice *dev,
-				       enum VbEcBootMode_t mode)
-{
-	struct udevice *ec_dev = dev_get_parent(dev);
-	int ret;
-
-	ret = cros_ec_entering_mode(ec_dev, mode);
-	if (ret)
-		return ret;
-
-	return 0;
 }
 
 int cros_ec_vboot_reboot_to_ro(struct udevice *dev)
@@ -250,7 +237,6 @@ static const struct vboot_ec_ops cros_ec_vboot_ops = {
 	.hash_image	= cros_ec_vboot_hash_image,
 	.update_image	= cros_ec_vboot_update_image,
 	.protect	= cros_ec_vboot_protect,
-	.entering_mode	= cros_ec_vboot_entering_mode,
 	.reboot_to_ro	= cros_ec_vboot_reboot_to_ro,
 };
 

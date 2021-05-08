@@ -24,7 +24,7 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 	if (ret) {
 		log_warning("Failed to extend TPM PCRs (%#x)\n", ret);
 		vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_U_ERROR, ret);
-		return VBERROR_REBOOT_REQUIRED;
+		return VB2_REQUEST_REBOOT;
 	}
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMPCR);
 
@@ -34,7 +34,7 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 	if (ret) {
 		log_info("Failed to lock TPM (%x)\n", ret);
 		vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_L_ERROR, 0);
-		return VBERROR_REBOOT_REQUIRED;
+		return VB2_REQUEST_REBOOT;
 	}
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMLOCK);
 
@@ -45,7 +45,7 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 			log_info("Failed to lock rec hash space(%x)\n", ret);
 			vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_REC_HASH_L_ERROR,
 				    0);
-			return VBERROR_REBOOT_REQUIRED;
+			return VB2_REQUEST_REBOOT;
 		}
 	}
 

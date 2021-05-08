@@ -157,10 +157,11 @@ static int setup_spaces(struct vboot_info *vboot)
 		if (ret)
 			return ret;
 	}
-	vb2api_secdata_create(ctx);
+	vb2api_secdata_firmware_create(ctx);
 	ret = setup_space(vboot->tpm, CROS_NV_SECDATA, version == TPM_V1 ?
 			  v1_rw_space_attributes : v2_rw_space_attributes,
-			  NULL, 0, ctx->secdata, VB2_SECDATA_SIZE);
+			  NULL, 0, ctx->secdata_firmware,
+			  VB2_SECDATA_FIRMWARE_SIZE);
 	if (ret)
 		return ret;
 
@@ -238,7 +239,7 @@ int cros_tpm_factory_initialise(struct vboot_info *vboot)
 	int ret;
 
 	/* Defines and sets vb2 secdata space */
-	vb2api_secdata_create(ctx);
+	vb2api_secdata_firmware_create(ctx);
 
 	log_debug("TPM: factory initialisation\n");
 
@@ -434,7 +435,7 @@ int cros_tpm_setup(struct vboot_info *vboot)
 	return ret;
 }
 
-int vb2ex_tpm_clear_owner(struct vb2_context *ctx)
+vb2_error_t vb2ex_tpm_clear_owner(struct vb2_context *ctx)
 {
 	struct vboot_info *vboot = vboot_get();
 	u32 rv;

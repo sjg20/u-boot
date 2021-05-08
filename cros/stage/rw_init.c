@@ -25,6 +25,7 @@
 
 #include <vb2_internals_please_do_not_use.h>
 
+#if 0
 /**
  * gbb_copy_in() - Copy a portion of the GBB into vboot->cparams
  *
@@ -38,6 +39,8 @@
 static int gbb_copy_in(struct vboot_info *vboot, uint gbb_offset, uint offset,
 		       uint size)
 {
+//TODO
+#if 0
 	VbCommonParams *cparams = &vboot->cparams;
 	u8 *gbb_copy = cparams->gbb_data;
 	int ret;
@@ -48,6 +51,7 @@ static int gbb_copy_in(struct vboot_info *vboot, uint gbb_offset, uint offset,
 				gbb_copy + offset);
 	if (ret)
 		return log_msg_ret("read", ret);
+#endif
 
 	return 0;
 }
@@ -62,8 +66,10 @@ static int gbb_copy_in(struct vboot_info *vboot, uint gbb_offset, uint offset,
  */
 static int gbb_init(struct vboot_info *vboot)
 {
+//TODO
+#if 0
 	struct fmap_entry *entry = &vboot->fmap.readonly.gbb;
-	VbCommonParams *cparams = &vboot->cparams;
+// 	VbCommonParams *cparams = &vboot->cparams;
 	u32 offset;
 	int ret, i;
 
@@ -76,9 +82,9 @@ static int gbb_init(struct vboot_info *vboot)
 
 	offset = entry->offset;
 
-	GoogleBinaryBlockHeader *hdr = cparams->gbb_data;
+	struct vb2_gbb_header *hdr = cparams->gbb_data;
 
-	ret = gbb_copy_in(vboot, offset, 0, sizeof(GoogleBinaryBlockHeader));
+	ret = gbb_copy_in(vboot, offset, 0, sizeof(struct vb2_gbb_header));
 	if (ret)
 		return ret;
 	log_debug("The GBB signature is at %p and is:", hdr->signature);
@@ -100,9 +106,14 @@ static int gbb_init(struct vboot_info *vboot)
 	if (ret)
 		return ret;
 
+#endif
+
 	return 0;
 }
+#endif
 
+	// TODO
+#if 0
 /**
  * common_params_init() - read in GBB and find vboot's shared data
  *
@@ -112,7 +123,7 @@ static int gbb_init(struct vboot_info *vboot)
  */
 static int common_params_init(struct vboot_info *vboot, bool clear_shared_data)
 {
-	VbCommonParams *cparams = &vboot->cparams;
+// 	VbCommonParams *cparams = &vboot->cparams;
 	int ret;
 
 	memset(cparams, '\0', sizeof(*cparams));
@@ -132,6 +143,9 @@ static int common_params_init(struct vboot_info *vboot, bool clear_shared_data)
 
 	return 0;
 }
+#endif
+
+#if 0
 
 /**
  * setup_unused_memory() - find memory to clear
@@ -217,7 +231,8 @@ static int wipe_unused_memory(struct vboot_info *vboot)
 
 static int vboot_do_init_out_flags(struct vboot_info *vboot, u32 out_flags)
 {
-	if (0 && (out_flags & VB_INIT_OUT_CLEAR_RAM)) {
+	// TODO
+	if (0) { /* && (out_flags & VB_INIT_OUT_CLEAR_RAM)) { */
 		if (vboot->disable_memwipe)
 			log_warning("Memory wipe requested but not supported\n");
 		else
@@ -226,6 +241,7 @@ static int vboot_do_init_out_flags(struct vboot_info *vboot, u32 out_flags)
 
 	return 0;
 }
+#endif
 
 /**
  * vboot_init_handoff() - Read in the hand-off information from previous phase
@@ -238,6 +254,8 @@ static int vboot_do_init_out_flags(struct vboot_info *vboot, u32 out_flags)
  */
 static int vboot_init_handoff(struct vboot_info *vboot)
 {
+	// TOO
+#if 0
 	struct vboot_handoff *handoff;
 	VbSharedDataHeader *vdat;
 	int ret;
@@ -273,6 +291,7 @@ static int vboot_init_handoff(struct vboot_info *vboot)
 	ret = vboot_do_init_out_flags(vboot, handoff->init_params.out_flags);
 	if (ret)
 		return log_msg_ret("flags", ret);
+#endif
 
 	return 0;
 }
@@ -297,8 +316,9 @@ int vboot_rw_init(struct vboot_info *vboot)
 		 */
 		ctx = &blob->ctx;
 		vboot->ctx = ctx;
-		ctx->non_vboot_context = vboot;
-		log_warning("flags %x %d\n", ctx->flags,
+		// TODO
+// 		ctx->non_vboot_context = vboot;
+		log_warning("flags %llx %d\n", ctx->flags,
 			    ((ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0));
 	} else {
 		ret = cb_vboot_rw_init(vboot);
@@ -309,7 +329,7 @@ int vboot_rw_init(struct vboot_info *vboot)
 	if (vboot_is_recovery(vboot))
 		log_info("Recovery mode\n");
 	else
-		log_info("Booting from slot %s: vboot->ctx=%p, flags %x\n",
+		log_info("Booting from slot %s: vboot->ctx=%p, flags %llx\n",
 			 vboot_slot_name(vboot), vboot->ctx, vboot->ctx->flags);
 	vboot->valid = true;
 

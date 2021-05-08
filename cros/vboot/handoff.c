@@ -12,7 +12,6 @@
 #include <cros_ec.h>
 #include <dm.h>
 #include <log.h>
-#include <vboot_struct.h>
 #include <cros/vboot.h>
 #include <cros/vboot_flag.h>
 
@@ -29,10 +28,12 @@ static void fill_handoff(struct vboot_info *vboot,
 			 struct vboot_handoff *vboot_handoff,
 			 struct vb2_shared_data *vb2_sd)
 {
-	VbSharedDataHeader *vb_sd =
-		(VbSharedDataHeader *)vboot_handoff->shared_data;
-	u32 *oflags = &vboot_handoff->init_params.out_flags;
+	// TODO
+// 	VbSharedDataHeader *vb_sd = NULL;
+// 		(VbSharedDataHeader *)vboot_handoff->shared_data;
+// 	u32 *oflags = NULL; //&vboot_handoff->init_params.out_flags;
 
+#if 0
 	vb_sd->flags |= VBSD_BOOT_FIRMWARE_VBOOT2;
 
 	vboot_handoff->selected_firmware = vb2_sd->fw_slot;
@@ -125,6 +126,7 @@ static void fill_handoff(struct vboot_info *vboot,
 	}
 
 	vb_sd->recovery_reason = vb2_sd->recovery_reason;
+#endif
 }
 
 /**
@@ -169,9 +171,10 @@ int vboot_fill_handoff(struct vboot_info *vboot)
 	struct vboot_handoff *vh;
 	struct vb2_shared_data *sd;
 
-	sd = (struct vb2_shared_data *)ctx->workbuf;
-	sd->workbuf_hash_offset = 0;
-	sd->workbuf_hash_size = 0;
+	// TODO
+	sd = NULL; //(struct vb2_shared_data *)ctx->workbuf;
+// 	sd->workbuf_hash_offset = 0;
+// 	sd->workbuf_hash_size = 0;
 
 	log_info("Creating vboot_handoff structure\n");
 	vh = bloblist_add(BLOBLISTT_VBOOT_HANDOFF, sizeof(*vh), 0);
@@ -186,7 +189,7 @@ int vboot_fill_handoff(struct vboot_info *vboot)
 	/* Log the recovery mode switches if required, before clearing them */
 	log_recovery_mode_switch(vboot);
 
-	log_warning("flags %x recovery=%d, EC=%s\n", ctx->flags,
+	log_warning("flags %llx recovery=%d, EC=%s\n", ctx->flags,
 		    (ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0,
 		    vboot->cros_ec->name);
 	if (ctx->flags & VB2_CONTEXT_RECOVERY_MODE)

@@ -120,16 +120,16 @@ int vboot_ver_init(struct vboot_info *vboot)
 	 * invalid secdata and tell us what to do (=reboot).
 	 */
 	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
-	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, ctx->secdata,
-				    sizeof(ctx->secdata));
+	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, ctx->secdata_firmware,
+				    sizeof(ctx->secdata_firmware));
 	if (ret == -ENOENT)
 		ret = cros_tpm_factory_initialise(vboot);
 	else if (ret)
 		return log_msg_ret("Cannot read secdata", ret);
-	vboot_secdata_dump(ctx->secdata, sizeof(ctx->secdata));
+	vboot_secdata_dump(ctx->secdata_firmware, sizeof(ctx->secdata_firmware));
 	log_debug("secdata:\n");
-	log_buffer(LOGC_VBOOT, LOGL_DEBUG, 0, ctx->secdata, 1,
-		   sizeof(ctx->secdata), 0);
+	log_buffer(LOGC_VBOOT, LOGL_DEBUG, 0, ctx->secdata_firmware, 1,
+		   sizeof(ctx->secdata_firmware), 0);
 
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
 	if (vboot_flag_read_walk(VBOOT_FLAG_DEVELOPER) == 1) {

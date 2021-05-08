@@ -74,7 +74,7 @@ vb2_error_t VbExDisplayScreen(u32 screen_type, u32 locale)
 
 	if (!vboot_draw_screen(screen_type, locale)) {
 		video_sync(vboot->video, true);
-		return VBERROR_SUCCESS;
+		return VB2_SUCCESS;
 	}
 
 	/*
@@ -142,7 +142,7 @@ vb2_error_t VbExDisplayScreen(u32 screen_type, u32 locale)
 	if (msg)
 		print_on_center(vboot->console, msg);
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 /**
@@ -177,14 +177,14 @@ vb2_error_t VbExDisplayDebugInfo(const char *info_str)
 			  vboot->readonly_firmware_id);
 	show_cdata_string(console, "active firmware id: ", vboot->firmware_id);
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 vb2_error_t VbExGetLocalizationCount(u32 *count)
 {
 	*count = vboot_get_locale_count();
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 vb2_error_t VbExDisplayMenu(u32 screen_type, u32 locale,

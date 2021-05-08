@@ -84,7 +84,7 @@ enum vboot_stage_t vboot_find_stage(const char *name);
  *
  * @vboot: vboot struct to use
  * @stage: stage to run
- * @return 0 if OK, VBERROR_REBOOT_REQUIRED if a reboot is needed,
+ * @return 0 if OK, VB2_REQUEST_REBOOT if a reboot is needed,
  *	VB2_ERROR_API_PHASE1_RECOVERY if we should reboot into recovery, other
  *	non-zero value for any other error (meaning a reboot is needed)
  */

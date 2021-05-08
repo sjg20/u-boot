@@ -33,7 +33,7 @@ int vboot_ver1_vbinit(struct vboot_info *vboot)
 		}
 
 		log_warning("Reboot reqested (%x)\n", ret);
-		return VBERROR_REBOOT_REQUIRED;
+		return VB2_REQUEST_REBOOT;
 	}
 
 	return 0;
