@@ -699,3 +699,23 @@ u32 tpm2_cr50_report_state(struct udevice *dev, u8 *recvbuf, size_t *recv_size)
 
 	return 0;
 }
+
+u32 tpm2_cr50_enable_nvcommits(struct udevice *dev)
+{
+	u8 command_v2[COMMAND_BUFFER_SIZE] = {
+		/* header 10 bytes */
+		tpm_u16(TPM2_ST_NO_SESSIONS),		/* TAG */
+		tpm_u32(10 + 2),			/* Length */
+		tpm_u32(TPM2_CR50_VENDOR_COMMAND),	/* Command code */
+
+		tpm_u16(TPM2_CR50_SUB_CMD_NVMEM_ENABLE_COMMITS),
+	};
+	int ret;
+
+	ret = tpm_sendrecv_command(dev, command_v2, NULL, NULL);
+	log_debug("ret=%s, %x\n", dev->name, ret);
+	if (ret)
+		return ret;
+
+	return 0;
+}
