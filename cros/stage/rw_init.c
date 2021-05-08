@@ -5,8 +5,6 @@
  * Copyright 2018 Google LLC
  */
 
-#define NEED_VB20_INTERNALS
-
 #include <common.h>
 #include <bloblist.h>
 #include <cbfs.h>
@@ -14,6 +12,7 @@
 #include <init.h>
 #include <log.h>
 #include <mapmem.h>
+#include <tpm-common.h>
 #include <cros/cb_helper.h>
 #include <cros/cros_ofnode.h>
 #include <cros/fmap.h>
@@ -24,10 +23,7 @@
 #include <cros/vboot_flag.h>
 #include <cros/memwipe.h>
 
-#include <gbb_header.h>
-#include <vboot_struct.h>
-
-#include <tpm-common.h>
+#include <vb2_internals_please_do_not_use.h>
 
 /**
  * gbb_copy_in() - Copy a portion of the GBB into vboot->cparams

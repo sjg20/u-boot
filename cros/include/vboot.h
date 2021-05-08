@@ -77,9 +77,9 @@ struct vboot_blob {
  * @shared_data: Shared data used by vboot
  */
 struct vboot_handoff {
-	VbInitParams init_params;
+// 	VbInitParams init_params;
 	u32 selected_firmware;
-	char shared_data[VB_SHARED_DATA_MIN_SIZE];
+// 	char shared_data[VB_SHARED_DATA_MIN_SIZE];
 } __packed;
 
 /**
@@ -129,7 +129,7 @@ struct vboot_handoff {
  * @fwstore: Firmware storage device
  * @kparams: Kernel params passed to Vboot library
  * @cparams: Common params passed to Vboot library
- * @vb2_return_code: Vboot library error, if any
+ * @vb_error: Vboot library error, if any
  * @fw_size: Size of firmware image in bytes - this starts off as the number
  *	of bytes in the section containing the firmware, but may be smaller if
  *	the vblock indicates that not all of that data was signed.
@@ -181,11 +181,9 @@ struct vboot_info {
 	struct udevice *fwstore;
 #ifndef CONFIG_SPL_BUILD
 	VbSelectAndLoadKernelParams kparams;
-	VbCommonParams cparams;
+// 	VbCommonParams cparams;
 #endif
-	enum vb2_return_code vb2_return_code;
-
-	enum VbErrorPredefined_t vb_error;
+	enum vb2_return_code vb_error;
 	u32 fw_size;
 
 	char readonly_firmware_id[ID_LEN];
@@ -211,7 +209,8 @@ enum secdata_t {
  */
 static inline struct vboot_info *ctx_to_vboot(struct vb2_context *ctx)
 {
-	return ctx->non_vboot_context;
+// 	return ctx->non_vboot_context;
+	return NULL;
 }
 
 /**
@@ -426,7 +425,7 @@ int vboot_dump_nvdata(const void *nvdata, int size);
  * This shows the context in human-readable form
  *
  * @nvdata: Pointer to context
- * @size: Size of NV context (typically sizeof(struct vb2_secdata))
+ * @size: Size of NV context (typically sizeof(struct vb2_secdata_firmware))
  * @return 0 if it is valid, -ve error otherwise
  */
 int vboot_secdata_dump(const void *secdata, int size);

@@ -45,10 +45,11 @@ static int resource_read(struct vboot_info *vboot,
 	return log_msg_ret("resource", ret);
 }
 
-int vb2ex_read_resource(struct vb2_context *ctx, enum vb2_resource_index index,
-			u32 offset, void *buf, u32 size)
+vb2_error_t vb2ex_read_resource(struct vb2_context *ctx,
+				enum vb2_resource_index index,
+				u32 offset, void *buf, u32 size)
 {
-	struct vboot_info *vboot = ctx->non_vboot_context;
+	struct vboot_info *vboot = ctx_to_vboot(ctx);
 	int ret;
 
 	ret = resource_read(vboot, index, offset, buf, size);

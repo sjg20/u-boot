@@ -96,7 +96,7 @@ static int boot_device_usb_start(struct vboot_info *vboot)
 	return 0;
 }
 
-VbError_t VbExDiskGetInfo(VbDiskInfo **infos_ptr, u32 *count_ptr,
+vb2_error_t VbExDiskGetInfo(VbDiskInfo **infos_ptr, u32 *count_ptr,
 			  u32 disk_flags)
 {
 	struct vboot_info *vboot = vboot_get();
@@ -147,7 +147,7 @@ VbError_t VbExDiskGetInfo(VbDiskInfo **infos_ptr, u32 *count_ptr,
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExDiskFreeInfo(VbDiskInfo *infos, VbExDiskHandle_t preserve_handle)
+vb2_error_t VbExDiskFreeInfo(VbDiskInfo *infos, VbExDiskHandle_t preserve_handle)
 {
 	/* We do nothing for preserve_handle as we keep all the devices on */
 	free(infos);
@@ -155,7 +155,7 @@ VbError_t VbExDiskFreeInfo(VbDiskInfo *infos, VbExDiskHandle_t preserve_handle)
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExDiskRead(VbExDiskHandle_t handle, u64 lba_start, u64 lba_count,
+vb2_error_t VbExDiskRead(VbExDiskHandle_t handle, u64 lba_start, u64 lba_count,
 		       void *buffer)
 {
 	struct udevice *dev = (struct udevice *)handle;
@@ -179,7 +179,7 @@ VbError_t VbExDiskRead(VbExDiskHandle_t handle, u64 lba_start, u64 lba_count,
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExDiskWrite(VbExDiskHandle_t handle, u64 lba_start,
+vb2_error_t VbExDiskWrite(VbExDiskHandle_t handle, u64 lba_start,
 			u64 lba_count, const void *buffer)
 {
 	struct udevice *dev = (struct udevice *)handle;
@@ -218,7 +218,7 @@ struct disk_stream {
 	u64 sectors_left;
 };
 
-VbError_t VbExStreamOpen(VbExDiskHandle_t handle, u64 lba_start,
+vb2_error_t VbExStreamOpen(VbExDiskHandle_t handle, u64 lba_start,
 			 u64 lba_count, VbExStream_t *stream)
 {
 	struct disk_stream *s;
@@ -239,11 +239,11 @@ VbError_t VbExStreamOpen(VbExDiskHandle_t handle, u64 lba_start,
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExStreamRead(VbExStream_t stream, u32 bytes, void *buffer)
+vb2_error_t VbExStreamRead(VbExStream_t stream, u32 bytes, void *buffer)
 {
 	struct disk_stream *s = (struct disk_stream *)stream;
 	u64 sectors;
-	VbError_t rv;
+	vb2_error_t rv;
 
 	if (!s)
 		return VBERROR_UNKNOWN;

@@ -4,7 +4,6 @@
  */
 
 #define LOG_CATEGORY LOGC_VBOOT
-#define NEED_VB20_INTERNALS
 
 #include <common.h>
 #include <bloblist.h>
@@ -15,6 +14,8 @@
 #include <cros/nvdata.h>
 #include <cros/vboot.h>
 #include <cros/vboot_flag.h>
+
+#include <vb2_internals_please_do_not_use.h>
 
 /**
  * vb2_init_blob() - Set up the vboot persistent blob

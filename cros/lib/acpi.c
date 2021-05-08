@@ -5,7 +5,6 @@
  * Copyright 2020 Google LLC
  */
 
-#define NEED_VB20_INTERNALS
 #define LOG_CATEGORY	LOGC_VBOOT
 
 #include <common.h>
@@ -17,8 +16,9 @@
 #include <cros/fwstore.h>
 #include <cros/vboot.h>
 
-#include <gbb_header.h>
 #include <vboot_struct.h>
+
+#include <vb2_internals_please_do_not_use.h>
 
 /* vboot firmware indexes */
 enum {

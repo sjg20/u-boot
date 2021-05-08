@@ -5,12 +5,9 @@
  * Copyright 2018 Google LLC
  */
 
-#define NEED_VB20_INTERNALS
-
 #include <common.h>
 #include <cros/vboot.h>
-
-#include <gbb_header.h>
+#include <vb2_internals_please_do_not_use.h>
 
 bool vboot_wants_oprom(struct vboot_info *vboot)
 {

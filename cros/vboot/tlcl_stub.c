@@ -12,13 +12,13 @@
 #include <tpm-v1.h>
 #include <cros/vboot.h>
 
-VbError_t VbExTpmInit(void)
+vb2_error_t VbExTpmInit(void)
 {
 	/* tpm_lite lib doesn't call VbExTpmOpen after VbExTpmInit */
 	return VbExTpmOpen();
 }
 
-VbError_t VbExTpmClose(void)
+vb2_error_t VbExTpmClose(void)
 {
 	struct vboot_info *vboot = vboot_get();
 
@@ -28,7 +28,7 @@ VbError_t VbExTpmClose(void)
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExTpmOpen(void)
+vb2_error_t VbExTpmOpen(void)
 {
 	struct vboot_info *vboot = vboot_get();
 
@@ -38,7 +38,7 @@ VbError_t VbExTpmOpen(void)
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExTpmSendReceive(const u8 *request, u32 request_length,
+vb2_error_t VbExTpmSendReceive(const u8 *request, u32 request_length,
 			     u8 *response, u32 *response_length)
 {
 	struct vboot_info *vboot = vboot_get();

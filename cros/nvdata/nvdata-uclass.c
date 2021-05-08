@@ -142,7 +142,7 @@ int cros_nvdata_lock_walk(enum cros_nvdata_type type)
 	return 0;
 }
 
-VbError_t VbExNvStorageRead(u8 *buf)
+vb2_error_t VbExNvStorageRead(u8 *buf)
 {
 	int ret;
 
@@ -156,7 +156,7 @@ VbError_t VbExNvStorageRead(u8 *buf)
 	return 0;
 }
 
-VbError_t VbExNvStorageWrite(const u8 *buf)
+vb2_error_t VbExNvStorageWrite(const u8 *buf)
 {
 	int ret;
 

@@ -6,7 +6,6 @@
  */
 
 #define LOG_CATEGORY LOGC_VBOOT
-#define NEED_VB20_INTERNALS
 
 #include <common.h>
 #include <bloblist.h>
@@ -16,6 +15,8 @@
 #include <vboot_struct.h>
 #include <cros/vboot.h>
 #include <cros/vboot_flag.h>
+
+#include <vb2_internals_please_do_not_use.h>
 
 /**
  * Sets vboot_handoff based on the information in vb2_shared_data

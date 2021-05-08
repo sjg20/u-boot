@@ -57,7 +57,7 @@ void VbExSleepMs(u32 msec)
 		udelay(100);
 }
 
-VbError_t VbExBeep(u32 msec, u32 frequency)
+vb2_error_t VbExBeep(u32 msec, u32 frequency)
 {
 	struct udevice *dev;
 	int ret;

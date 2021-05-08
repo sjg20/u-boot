@@ -6,8 +6,6 @@
 
 #define LOG_CATEGORY LOGC_VBOOT
 
-#define NEED_VB20_INTERNALS
-
 #include <common.h>
 #include <ec_commands.h>
 #include <misc.h>
@@ -18,6 +16,8 @@
 #include <cros/nvdata.h>
 #include <cros/vboot.h>
 #include <vb2_api.h>
+
+#include <vb2_internals_please_do_not_use.h>
 
 /* The max hash size to expect is for SHA512 */
 #define VBOOT_MAX_HASH_SIZE	VB2_SHA512_DIGEST_SIZE

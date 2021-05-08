@@ -8,8 +8,6 @@
  * Copyright 2018 Google LLC
  */
 
-#define NEED_VB20_INTERNALS
-
 #include <common.h>
 #include <command.h>
 #include <dm.h>
@@ -19,6 +17,8 @@
 #include <cros/vboot.h>
 #include <cros/vboot_flag.h>
 #include <dm/device-internal.h>
+
+#include <vb2_internals_please_do_not_use.h>
 
 /* The next stage of vboot to run (used for repeatable commands) */
 static enum vboot_stage_t vboot_next_stage;
@@ -190,7 +190,7 @@ U_BOOT_CMD_WITH_SUBCMDS(nvdata, "Non-volatile data", nvdata_help_text,
 
 static int dump_secdata(void)
 {
-	u8 secdata[sizeof(struct vb2_secdata)];
+	u8 secdata[sizeof(struct vb2_secdata_firmware)];
 	int ret;
 
 	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, secdata, sizeof(secdata));
@@ -225,7 +225,7 @@ const char *const secdata_name[] = {
 static int do_secdata_set(struct cmd_tbl *cmdtp, int flag, int argc,
 			  char *const argv[])
 {
-	u8 secdata[sizeof(struct vb2_secdata)];
+	u8 secdata[sizeof(struct vb2_secdata_firmware)];
 	int ret, i;
 
 	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, secdata, sizeof(secdata));

@@ -6,11 +6,12 @@
  */
 
 #define LOG_CATEGORY LOGC_VBOOT
-#define NEED_VB20_INTERNALS
 
 #include <common.h>
 #include <cros/vboot.h>
 #include <u-boot/crc.h>
+
+#include <vb2_internals_please_do_not_use.h>
 
 static struct nvdata_info {
 	u8 ofs;
@@ -103,11 +104,11 @@ int vboot_dump_nvdata(const void *nvdata, int size)
 
 int vboot_secdata_dump(const void *secdata, int size)
 {
-	const struct vb2_secdata *sec = secdata;
+	const struct vb2_secdata_firmware *sec = secdata;
 	bool crc_ok;
 	uint crc;
 
-	crc = crc8(0, secdata, offsetof(struct vb2_secdata, crc8));
+	crc = crc8(0, secdata, offsetof(struct vb2_secdata_firmware, crc8));
 	crc_ok = crc == sec->crc8;
 	printf("Vboot secdata:\n");
 	print_buffer(0, secdata, 1, size, 0);
@@ -136,7 +137,7 @@ static void update_flag(u8 *flagp, uint mask, uint val)
 
 int vboot_secdata_set(void *secdata, int size, enum secdata_t field, int val)
 {
-	struct vb2_secdata *sec = secdata;
+	struct vb2_secdata_firmware *sec = secdata;
 
 	switch (field) {
 	case SECDATA_LAST_BOOT_DEV:
@@ -151,14 +152,14 @@ int vboot_secdata_set(void *secdata, int size, enum secdata_t field, int val)
 	}
 
 	/* Update the CRC */
-	sec->crc8 = crc8(0, secdata, offsetof(struct vb2_secdata, crc8));
+	sec->crc8 = crc8(0, secdata, offsetof(struct vb2_secdata_firmware, crc8));
 
 	return 0;
 }
 
 int vboot_secdata_get(const void *secdata, int size, enum secdata_t field)
 {
-	const struct vb2_secdata *sec = secdata;
+	const struct vb2_secdata_firmware *sec = secdata;
 
 	switch (field) {
 	case SECDATA_LAST_BOOT_DEV:

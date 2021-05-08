@@ -70,7 +70,7 @@ static int ec_get(int devidx, struct udevice **devp)
 	return 0;
 }
 
-VbError_t VbExEcRunningRW(int devidx, int *in_rw)
+vb2_error_t VbExEcRunningRW(int devidx, int *in_rw)
 {
 	struct udevice *dev;
 	int ret;
@@ -89,7 +89,7 @@ VbError_t VbExEcRunningRW(int devidx, int *in_rw)
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExEcJumpToRW(int devidx)
+vb2_error_t VbExEcJumpToRW(int devidx)
 {
 	struct udevice *dev;
 	int ret;
@@ -108,7 +108,7 @@ VbError_t VbExEcJumpToRW(int devidx)
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExEcDisableJump(int devidx)
+vb2_error_t VbExEcDisableJump(int devidx)
 {
 	struct udevice *dev;
 	int ret;
@@ -128,7 +128,7 @@ VbError_t VbExEcDisableJump(int devidx)
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExEcHashImage(int devidx, enum VbSelectFirmware_t select,
+vb2_error_t VbExEcHashImage(int devidx, enum VbSelectFirmware_t select,
 			  const u8 **hashp, int *hash_sizep)
 {
 	struct udevice *dev;
@@ -182,7 +182,7 @@ static struct fmap_entry *get_firmware_entry(struct vboot_info *vboot,
 	return entry;
 }
 
-VbError_t VbExEcGetExpectedImage(int devidx, enum VbSelectFirmware_t select,
+vb2_error_t VbExEcGetExpectedImage(int devidx, enum VbSelectFirmware_t select,
 				 const u8 **imagep, int *image_sizep)
 {
 	struct vboot_info *vboot = vboot_get();
@@ -207,7 +207,7 @@ VbError_t VbExEcGetExpectedImage(int devidx, enum VbSelectFirmware_t select,
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExEcGetExpectedImageHash(int devidx, enum VbSelectFirmware_t select,
+vb2_error_t VbExEcGetExpectedImageHash(int devidx, enum VbSelectFirmware_t select,
 				     const u8 **hash, int *hash_size)
 {
 	struct vboot_info *vboot = vboot_get();
@@ -231,7 +231,7 @@ VbError_t VbExEcGetExpectedImageHash(int devidx, enum VbSelectFirmware_t select,
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExEcUpdateImage(int devidx, enum VbSelectFirmware_t select,
+vb2_error_t VbExEcUpdateImage(int devidx, enum VbSelectFirmware_t select,
 			    const u8 *image, int image_size)
 {
 	struct udevice *dev;
@@ -259,7 +259,7 @@ VbError_t VbExEcUpdateImage(int devidx, enum VbSelectFirmware_t select,
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExEcProtect(int devidx, enum VbSelectFirmware_t select)
+vb2_error_t VbExEcProtect(int devidx, enum VbSelectFirmware_t select)
 {
 	struct udevice *dev;
 	int ret;
@@ -278,7 +278,7 @@ VbError_t VbExEcProtect(int devidx, enum VbSelectFirmware_t select)
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExEcEnteringMode(int devidx, enum VbEcBootMode_t mode)
+vb2_error_t VbExEcEnteringMode(int devidx, enum VbEcBootMode_t mode)
 {
 	struct udevice *dev;
 	int ret;
@@ -302,7 +302,7 @@ VbError_t VbExEcEnteringMode(int devidx, enum VbEcBootMode_t mode)
 /* Check the limit power flag every 50 ms while waiting */
 #define LIMIT_POWER_POLL_SLEEP 50
 
-VbError_t VbExEcVbootDone(int in_recovery)
+vb2_error_t VbExEcVbootDone(int in_recovery)
 {
 	struct udevice *dev = board_get_cros_ec_dev();
 	int limit_power;
@@ -349,7 +349,7 @@ VbError_t VbExEcVbootDone(int in_recovery)
 	return VBERROR_SUCCESS;
 }
 
-VbError_t VbExEcBatteryCutOff(void)
+vb2_error_t VbExEcBatteryCutOff(void)
 {
 	struct udevice *dev = board_get_cros_ec_dev();
 	int ret;

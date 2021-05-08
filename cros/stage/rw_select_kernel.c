@@ -19,7 +19,7 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 	VbSelectAndLoadKernelParams *kparams = &vboot->kparams;
 	fdt_addr_t kaddr;
 	fdt_size_t ksize;
-	VbError_t res;
+	vb2_error_t res;
 	int ret;
 
 	ret = vboot_load_config(vboot);
