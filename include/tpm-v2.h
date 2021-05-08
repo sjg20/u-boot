@@ -712,4 +712,18 @@ u32 tpm2_submit_command(struct udevice *dev, const u8 *sendbuf,
  */
 u32 tpm2_cr50_report_state(struct udevice *dev, u8 *recvbuf, size_t *recv_size);
 
+/*
+ * tpm2_cr50_enable_nvcommits() - Tell Cr50 to commit NV data immediately
+ *
+ * For Chromium OS verified boot, we may reboot or reset at different times,
+ * possibly leaving non-volatile data unwritten by the TPM.
+ *
+ * This vendor command is used to indicate that non-volatile data should be
+ * written to its store immediately.
+ *
+ * @dev		TPM device
+ * Return: result of the operation
+ */
+u32 tpm2_cr50_enable_nvcommits(struct udevice *dev);
+
 #endif /* __TPM_V2_H */
