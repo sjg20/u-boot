@@ -628,6 +628,7 @@ def Binman(args):
             tools.PrepareOutputDir(args.outdir, args.preserve)
             tools.SetToolPaths(args.toolpath)
             state.SetEntryArgs(args.entry_arg)
+            state.SetThreads(args.threads)
 
             images = PrepareImagesAndDtbs(dtb_fname, args.image,
                                           args.update_fdt, use_expanded)
@@ -642,6 +643,8 @@ def Binman(args):
 
             if missing:
                 tout.Warning("\nSome images are invalid")
+
+            #state.TimingShow()
         finally:
             tools.FinaliseOutputDir()
     finally:

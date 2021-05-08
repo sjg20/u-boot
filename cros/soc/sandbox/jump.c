@@ -16,7 +16,8 @@
 
 int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry)
 {
-	u8 *buf;
+	struct abuf buf;
+	u8 *data;
 	int size;
 	int ret;
 
@@ -25,15 +26,16 @@ int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry)
 	 * decompression does not overwrite the compressed data.
 	 */
 	size = entry->unc_length ? entry->unc_length * 2 : entry->length;
-	buf = os_malloc(size);
-	if (!buf)
+	data = os_malloc(size);
+	if (!data)
 		return log_msg_ret("alloc", -ENOMEM);
 	log_info("Reading firmware offset %x, length %x\n", entry->offset,
 		 entry->length);
-	ret = fwstore_read_decomp(vboot->fwstore, entry, buf, size);
+	abuf_init_set(&buf, data, size);
+	ret = fwstore_read_decomp(vboot->fwstore, entry, &buf);
 	if (ret)
 		return log_msg_ret("read", ret);
-	ret = os_jump_to_image(buf, size);
+	ret = os_jump_to_image(data, size);
 	if (ret)
 		return log_msg_ret("jump", ret);
 

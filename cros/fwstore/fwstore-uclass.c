@@ -76,48 +76,59 @@ int cros_fwstore_mmap(struct udevice *dev, uint offset, uint size,
 	return ops->mmap(dev, offset, size, addrp);
 }
 
-int fwstore_decomp_with_algo(enum fmap_compress_t algo, void *data, size_t size,
-			     void *out, size_t out_size, bool is_cbfs)
+int fwstore_decomp_with_algo(enum fmap_compress_t algo, struct abuf *in,
+			     struct abuf *out, bool is_cbfs)
 {
+	const size_t size = abuf_size(in);
+	const void *indata;
 	size_t comp_len;
-	void *in;
 	int ret;
 
+	indata = abuf_data(in);
 	if (!is_cbfs) {
 		if (size < sizeof(u32))
-			return -ETOOSMALL;
-		comp_len = *(u32 *)data;
+			return log_msg_ret("sz", -ETOOSMALL);
+		comp_len = *(u32 *)indata;
 		if (comp_len > size - sizeof(u32)) {
 			log_warning("comp_len=%zx, size=%zx\n", comp_len, size);
-			return -EOVERFLOW;
+			return log_msg_ret("norm", -EOVERFLOW);
 		}
-		in = data + sizeof(u32);	/* skip uncompressed size */
+		/* skip uncompressed size */
+		indata += sizeof(u32);
 	} else {
 		comp_len = size;
-		in = data;
 	}
 
 	log_debug("Decompress algo %d length=%zx, unc=%zx, size=%zx, data=%p\n",
-		  algo, size, out_size, size, data);
-	log_buffer(UCLASS_CROS_FWSTORE, LOGL_DEBUG, 0, data, 1, 0x80, 0);
+		  algo, size, abuf_size(out), size, abuf_data(in));
+	log_buffer(UCLASS_CROS_FWSTORE, LOGL_DEBUG, 0, abuf_data(in), 1, 0x80,
+		   0);
 	switch (algo) {
 	case FMAP_COMPRESS_LZMA: {
 		if (!CONFIG_IS_ENABLED(LZMA))
 			return log_msg_ret("lzma", -ENOTSUPP);
-		SizeT inout_size = out_size;
+		SizeT inout_size = abuf_size(out);
 
-		ret = lzmaBuffToBuffDecompress(out, &inout_size, in, comp_len);
+		ret = lzmaBuffToBuffDecompress(abuf_data(out), &inout_size,
+					       indata, comp_len);
 		if (ret)
-			return log_msg_ret("lzma", ret);
+			return log_msg_ret("lzmad", ret);
+		if (!abuf_realloc(out, inout_size))
+			return log_msg_ret("lz4m", -ENOMEM);
 		break;
 	}
-	case FMAP_COMPRESS_LZ4:
+	case FMAP_COMPRESS_LZ4: {
+		size_t out_size;
+
 		if (!CONFIG_IS_ENABLED(LZ4))
 			return log_msg_ret("lz4", -ENOTSUPP);
-		ret = ulz4fn(in, comp_len, out, &out_size);
+		ret = ulz4fn(indata, comp_len, abuf_data(out), &out_size);
 		if (ret)
-			return log_msg_ret("lz4", ret);
+			return log_msg_ret("lz4d", ret);
+		if (!abuf_realloc(out, out_size))
+			return log_msg_ret("lz4m", -ENOMEM);
 		break;
+	}
 	default:
 		return log_msg_ret("unknown", -EPROTONOSUPPORT);
 	}
@@ -126,10 +137,10 @@ int fwstore_decomp_with_algo(enum fmap_compress_t algo, void *data, size_t size,
 }
 
 int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
-			void *buf, int buf_size)
+			struct abuf *buf)
 {
 	struct cros_fwstore_ops *ops = cros_fwstore_get_ops(dev);
-	u8 *start;
+	struct abuf readbuf;
 	int ret;
 
 	if (!ops->read)
@@ -137,22 +148,29 @@ int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
 
 	/* Read the data into the buffer */
 	if (entry->compress_algo == FMAP_COMPRESS_NONE) {
-		start = buf;
+		abuf_init_set(&readbuf, abuf_data(buf), abuf_size(buf));
 	} else {
-		if (buf_size < entry->unc_length)
+		if (abuf_size(buf) < entry->unc_length)
 			return log_ret(-ENOSPC);
-		start = buf + ALIGN(buf_size - entry->unc_length, 4);
+		abuf_init_set(&readbuf, abuf_data(buf) +
+			ALIGN(abuf_size(buf) - entry->unc_length, 4),
+			entry->unc_length);
+
 	}
-	ret = ops->read(dev, entry->offset, entry->length, start);
-	if (ret)
+	ret = ops->read(dev, entry->offset, entry->length, abuf_data(&readbuf));
+	if (ret) {
+		abuf_uninit(&readbuf);
 		return log_msg_ret("read", ret);
+	}
 
 	if (entry->compress_algo != FMAP_COMPRESS_NONE) {
-		ret = fwstore_decomp_with_algo(entry->compress_algo, start,
-					       entry->length, buf, buf_size,
-					       false);
+		ret = fwstore_decomp_with_algo(entry->compress_algo, &readbuf,
+					       buf, false);
+		abuf_uninit(&readbuf);
 		if (ret)
 			return log_msg_ret("decomp", ret);
+	} else {
+		abuf_uninit(&readbuf);
 	}
 
 	return 0;
@@ -179,20 +197,19 @@ int fwstore_get_reader_dev(struct udevice *fwstore, int offset, int size,
 	return 0;
 }
 
-int fwstore_decomp_data(struct fmap_entry *entry, u8 *data, bool is_cbfs,
-			struct abuf *abuf)
+static int fwstore_decomp_data(struct fmap_entry *entry, struct abuf *in,
+			       bool is_cbfs, struct abuf *out)
 {
 	int ret;
 
-	if (!abuf_realloc(abuf, entry->unc_length + 100))
+	if (!abuf_realloc(out, entry->unc_length + 100))
 		return log_msg_ret("allocate decomp buf", -ENOMEM);
 	log_debug("Decompress algo %d length=%x, buf_size=%zx\n",
-		  entry->compress_algo, entry->length, abuf_size(abuf));
-	log_buffer(UCLASS_CROS_FWSTORE, LOGL_DEBUG, 0, data, 1, 0x80, 0);
+		  entry->compress_algo, entry->length, abuf_size(out));
+	log_buffer(UCLASS_CROS_FWSTORE, LOGL_DEBUG, 0, abuf_data(in), 1, 0x80,
+		   0);
 
-	ret = fwstore_decomp_with_algo(entry->compress_algo, data,
-				       entry->length, abuf_data(abuf),
-				       abuf_size(abuf), is_cbfs);
+	ret = fwstore_decomp_with_algo(entry->compress_algo, in, out, is_cbfs);
 	if (ret)
 		return log_msg_ret("decomp", ret);
 
@@ -200,11 +217,10 @@ int fwstore_decomp_data(struct fmap_entry *entry, u8 *data, bool is_cbfs,
 }
 
 int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
-		       struct abuf *abuf)
+		       struct abuf *buf)
 {
 	struct abuf tmp;
 	bool is_cbfs;
-	void *data;
 	ulong addr;
 	int ret;
 
@@ -248,26 +264,14 @@ int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
 		}
 	}
 
-	data = abuf_data(&tmp);
 	if (entry->compress_algo != FMAP_COMPRESS_NONE) {
-		ret = fwstore_decomp_data(entry, data, is_cbfs, abuf);
+		ret = fwstore_decomp_data(entry, &tmp, is_cbfs, buf);
 		if (ret) {
 			ret = log_msg_ret("decomp", ret);
 			goto err;
 		}
 	} else {
-		abuf_set(abuf, data, entry->length);
-	}
-	abuf_uninit(&tmp);
-
-	if (entry->compress_algo != FMAP_COMPRESS_NONE) {
-		ret = fwstore_decomp_data(entry, data, is_cbfs, abuf);
-		if (ret) {
-			ret = log_msg_ret("decomp", ret);
-			goto err;
-		}
-	} else {
-		abuf_set(abuf, data, entry->length);
+		abuf_set(buf, abuf_data(&tmp), entry->length);
 	}
 	abuf_uninit(&tmp);
 

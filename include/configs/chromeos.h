@@ -73,9 +73,9 @@
 #ifndef DIRECT_BOOTARGS
 #define DIRECT_BOOTARGS
 #endif
-#ifndef CONFIG_EXTRA_BOOTARGS
-#define CONFIG_EXTRA_BOOTARGS
-#endif
+
+/* Not currently used */
+#define EXTRA_BOOTARGS
 
 /*******************************************************************************
  * Non-verified boot script                                                    *
@@ -100,8 +100,7 @@
 	"common_bootargs=cros_legacy " DIRECT_BOOTARGS "\0" \
 	\
 	"dev_extras=\0" \
-	"extra_bootargs=" \
-		CONFIG_EXTRA_BOOTARGS "\0" \
+	"extra_bootargs=" EXTRA_BOOTARGS "\0" \
 	"bootdev_bootargs=\0" \
 	\
 	"regen_all=" \

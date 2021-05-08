@@ -6,6 +6,7 @@
 #include <common.h>
 #include <dm.h>
 #include <hang.h>
+#include <handoff.h>
 #include <init.h>
 #include <log.h>
 #include <os.h>
@@ -42,7 +43,7 @@ void board_init_f(ulong flag)
 
 u32 spl_boot_device(void)
 {
-	return IS_ENABLED(CONFIG_CHROMEOS) ? BOOT_DEVICE_CROS_VBOOT :
+	return CONFIG_IS_ENABLED(CONFIG_CHROMEOS) ? BOOT_DEVICE_CROS_VBOOT :
 		BOOT_DEVICE_BOARD;
 }
 
@@ -87,7 +88,11 @@ void spl_board_init(void)
 		/* continue execution into U-Boot */
 	}
 
-	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
+	/*
+	 * Go straight into Chromium Os, which will handle loading the next
+	 * phase
+	 */
+	if (CONFIG_IS_ENABLED(CHROMEOS_VBOOT)) {
 		void cros_do_stage(void);
 
 		cros_do_stage();

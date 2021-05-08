@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2018 Google LLC
- * Written by Simon Glass <sjg@chromium.org>
+ * Copyright 2021 Google LLC
  */
 
 #define LOG_CATEGORY LOGC_VBOOT
@@ -9,6 +8,7 @@
 #include <common.h>
 #include <log.h>
 #include <cros/cros_common.h>
+#include <cros/tpm_common.h>
 #include <cros/vboot.h>
 
 int vboot_ver1_vbinit(struct vboot_info *vboot)
@@ -27,13 +27,13 @@ int vboot_ver1_vbinit(struct vboot_info *vboot)
 		 */
 		if (ret == VB2_ERROR_API_PHASE1_RECOVERY) {
 			log_warning("Recovery requested (%x)\n", ret);
-			cros_tpm_extend_pcrs(vboot);	/* ignore failures */
+			vboot_extend_pcrs(vboot);	/* ignore failures */
 			bootstage_mark(BOOTSTAGE_VBOOT_END);
 			return ret;
 		}
 
 		log_warning("Reboot reqested (%x)\n", ret);
-		return VBERROR_REBOOT_REQUIRED;
+		return VB2_REQUEST_REBOOT;
 	}
 
 	return 0;

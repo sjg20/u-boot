@@ -109,4 +109,4 @@ else:
     dtb_platdata.run_steps(args, options.dtb_file, options.include_disabled,
                            options.output,
                            [options.c_output_dir, options.h_output_dir],
-                           options.phase, instantiate=options.instantiate)
+                           options.phase, options.instantiate)

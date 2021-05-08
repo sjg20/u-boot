@@ -12,18 +12,18 @@
  * No-op stubs that can be overridden by SoCs with hardware-crypto support.
  * This could be plumbed through U-Boot's hash subsystem if needed.
  */
-int vb2ex_hwcrypto_digest_init(enum vb2_hash_algorithm hash_alg,
-			       u32 data_size)
+vb2_error_t vb2ex_hwcrypto_digest_init(enum vb2_hash_algorithm hash_alg,
+				       u32 data_size)
 {
 	return VB2_ERROR_EX_HWCRYPTO_UNSUPPORTED;
 }
 
-int vb2ex_hwcrypto_digest_extend(const u8 *buf, u32 size)
+vb2_error_t vb2ex_hwcrypto_digest_extend(const u8 *buf, u32 size)
 {
 	return VB2_ERROR_EX_HWCRYPTO_UNSUPPORTED;
 }
 
-int vb2ex_hwcrypto_digest_finalize(u8 *digest, u32 digest_size)
+vb2_error_t vb2ex_hwcrypto_digest_finalize(u8 *digest, u32 digest_size)
 {
 	return VB2_ERROR_EX_HWCRYPTO_UNSUPPORTED;
 }

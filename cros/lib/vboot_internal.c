@@ -5,26 +5,22 @@
  * Copyright 2018 Google LLC
  */
 
-#define NEED_VB20_INTERNALS
-
 #include <common.h>
 #include <cros/vboot.h>
-
-#include <gbb_header.h>
+#include <vb2_internals_please_do_not_use.h>
 
 bool vboot_wants_oprom(struct vboot_info *vboot)
 {
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 
-	return ctx->nvdata[VB2_NV_OFFS_BOOT] & VB2_NV_BOOT_OPROM_NEEDED;
+	return ctx->nvdata[VB2_NV_OFFS_BOOT] & VB2_NV_BOOT_DISPLAY_REQUEST;
 }
 
 #ifndef CONFIG_SPL_BUILD
 u32 vboot_get_gbb_flags(struct vboot_info *vboot)
 {
-	VbCommonParams *cparams = &vboot->cparams;
-	GoogleBinaryBlockHeader *hdr = cparams->gbb_data;
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
 
-	return hdr->flags;
+	return vb2api_gbb_get_flags(ctx);
 }
 #endif

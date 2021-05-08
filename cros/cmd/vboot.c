@@ -8,8 +8,6 @@
  * Copyright 2018 Google LLC
  */
 
-#define NEED_VB20_INTERNALS
-
 #include <common.h>
 #include <command.h>
 #include <dm.h>
@@ -19,6 +17,8 @@
 #include <cros/vboot.h>
 #include <cros/vboot_flag.h>
 #include <dm/device-internal.h>
+
+#include <vb2_internals_please_do_not_use.h>
 
 /* The next stage of vboot to run (used for repeatable commands) */
 static enum vboot_stage_t vboot_next_stage;
@@ -158,7 +158,7 @@ static int dump_nvdata(void)
 	ret = cros_nvdata_read_walk(CROS_NV_DATA, nvdata, sizeof(nvdata));
 	if (ret)
 		return log_msg_ret("read", ret);
-	ret = vboot_dump_nvdata(nvdata, sizeof(nvdata));
+	ret = vboot_nvdata_dump(nvdata, sizeof(nvdata));
 	if (ret)
 		return log_msg_ret("dump", ret);
 
@@ -190,13 +190,13 @@ U_BOOT_CMD_WITH_SUBCMDS(nvdata, "Non-volatile data", nvdata_help_text,
 
 static int dump_secdata(void)
 {
-	u8 secdata[sizeof(struct vb2_secdata)];
+	u8 secdata[sizeof(struct vb2_secdata_firmware)];
 	int ret;
 
-	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, secdata, sizeof(secdata));
+	ret = cros_nvdata_read_walk(CROS_NV_SECDATAF, secdata, sizeof(secdata));
 	if (ret)
 		return log_msg_ret("read", ret);
-	ret = vboot_secdata_dump(secdata, sizeof(secdata));
+	ret = vboot_secdataf_dump(secdata, sizeof(secdata));
 	if (ret)
 		return log_msg_ret("dump", ret);
 
@@ -225,17 +225,17 @@ const char *const secdata_name[] = {
 static int do_secdata_set(struct cmd_tbl *cmdtp, int flag, int argc,
 			  char *const argv[])
 {
-	u8 secdata[sizeof(struct vb2_secdata)];
+	u8 secdata[sizeof(struct vb2_secdata_firmware)];
 	int ret, i;
 
-	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, secdata, sizeof(secdata));
+	ret = cros_nvdata_read_walk(CROS_NV_SECDATAF, secdata, sizeof(secdata));
 	if (ret) {
 		printf("Cannot read (err=%d)\n", ret);
 		return CMD_RET_FAILURE;
 	}
 	if (argc <= 1) {
 		for (i = 0; i < SECDATA_COUNT; i++) {
-			int val = vboot_secdata_get(secdata, sizeof(secdata),
+			int val = vboot_secdataf_get(secdata, sizeof(secdata),
 						    i);
 
 			printf("%s: %d (%#x)\n", secdata_name[i], val, val);
@@ -258,12 +258,12 @@ static int do_secdata_set(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		val = simple_strtol(argv[2], NULL, 16);
 		printf("Set '%s' to %x\n", secdata_name[field], val);
-		ret = vboot_secdata_set(secdata, sizeof(secdata), field, val);
+		ret = vboot_secdataf_set(secdata, sizeof(secdata), field, val);
 		if (ret) {
 			printf("Cannot set (err=%d)\n", ret);
 			return CMD_RET_FAILURE;
 		}
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, secdata,
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAF, secdata,
 					     sizeof(secdata));
 		if (ret) {
 			printf("Cannot write (err=%d)\n", ret);
@@ -378,7 +378,6 @@ U_BOOT_CMD_WITH_SUBCMDS(flags, "Cros vboot flags", flags_help_text,
 	U_BOOT_CMD_MKENT(dump, 4, 0, do_flags_dump, "", ""),
 	U_BOOT_CMD_MKENT(list, 4, 0, do_flags_list, "", ""),
 );
-
 
 static int do_vboot_go_auto(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])

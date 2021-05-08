@@ -7,7 +7,6 @@
  */
 
 #include <common.h>
-#include <gbb_header.h>
 #include <cros/keyboard.h>
 #include <cros/cros_ofnode.h>
 #include <cros/vboot.h>
@@ -86,7 +85,7 @@ static int faft_key_remap(int *keyp, enum key_type_t keytype)
 	u32 gbb_flags = vboot_get_gbb_flags(vboot);
 	int i;
 
-	if ((gbb_flags & GBB_FLAG_FAFT_KEY_OVERIDE) == 0)
+	if ((gbb_flags & VB2_GBB_FLAG_RUNNING_FAFT) == 0)
 		return -1;
 
 	if (remap_keys[keytype].array_ptr) {

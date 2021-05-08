@@ -70,15 +70,19 @@ int cros_nvdata_read_walk(enum cros_nvdata_type type, u8 *data, int size)
 	struct udevice *dev;
 	int ret = -ENOSYS;
 
+	log_debug("read type %d size %x\n", type, size);
 	uclass_foreach_dev_probe(UCLASS_CROS_NVDATA, dev) {
+		log_debug("trying dev %s\n", dev->name);
 		if (supports_type(dev, type)) {
 			ret = cros_nvdata_read(dev, type, data, size);
 			if (!ret)
 				break;
 		}
 	}
-	if (ret)
-		return ret;
+	if (ret) {
+		log_warning("Failed to read type %d\n", type);
+		return log_msg_ret("walk", ret);
+	}
 
 	return 0;
 }
@@ -88,8 +92,9 @@ int cros_nvdata_write_walk(enum cros_nvdata_type type, const u8 *data, int size)
 	struct udevice *dev;
 	int ret = -ENOSYS;
 
-	log_info("write type %d size %x\n", type, size);
+	log_debug("write type %d size %x\n", type, size);
 	uclass_foreach_dev_probe(UCLASS_CROS_NVDATA, dev) {
+		log_debug("trying dev %s\n", dev->name);
 		if (supports_type(dev, type)) {
 			ret = cros_nvdata_write(dev, type, data, size);
 			if (!ret)
@@ -138,35 +143,6 @@ int cros_nvdata_lock_walk(enum cros_nvdata_type type)
 	}
 	if (ret)
 		return ret;
-
-	return 0;
-}
-
-VbError_t VbExNvStorageRead(u8 *buf)
-{
-	int ret;
-
-	ret = cros_nvdata_read_walk(CROS_NV_DATA, buf, EC_VBNV_BLOCK_SIZE);
-	if (ret)
-		return VBERROR_UNKNOWN;
-#ifdef DEBUG
-	print_buffer(0, buf, 1, EC_VBNV_BLOCK_SIZE, 0);
-#endif
-
-	return 0;
-}
-
-VbError_t VbExNvStorageWrite(const u8 *buf)
-{
-	int ret;
-
-#ifdef DEBUG
-	print_buffer(0, buf, 1, EC_VBNV_BLOCK_SIZE, 0);
-#endif
-	vboot_dump_nvdata(buf, EC_VBNV_BLOCK_SIZE);
-	ret = cros_nvdata_write_walk(CROS_NV_DATA, buf, EC_VBNV_BLOCK_SIZE);
-	if (ret)
-		return VBERROR_UNKNOWN;
 
 	return 0;
 }

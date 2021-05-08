@@ -115,6 +115,16 @@ int cb_fmap_read(struct vboot_info *vboot)
 	return 0;
 }
 
+
+/**
+ * cb_vboot_make_context() - Make a vboot 2 context from sysinfo
+ *
+ * This parses the handoff information to produce a VB2 context, with the
+ * flags field set correctly.
+ *
+ * @sysinfo: Coreboot sysinfo information
+ * @ctxp: Returns a new VB2 context
+ */
 int cb_vboot_make_context(const struct sysinfo_t *sysinfo,
 			  struct vb2_context **ctxp)
 {
@@ -258,7 +268,7 @@ const char *cb_read_model(const struct sysinfo_t *sysinfo)
 	return (char *)mb->strings + mb->part_number_idx;
 }
 
-int cb_vboot_rw_init(struct vboot_info *vboot)
+int cb_vboot_rw_init(struct vboot_info *vboot, struct vb2_context **ctxp)
 {
 	const struct sysinfo_t *sysinfo = cb_get_sysinfo();
 	const char *model;
@@ -276,7 +286,7 @@ int cb_vboot_rw_init(struct vboot_info *vboot)
 		log_notice("Starting vboot on %.30s...\n", model);
 	}
 
-	ret = cb_vboot_make_context(sysinfo, &vboot->ctx);
+	ret = cb_vboot_make_context(sysinfo, ctxp);
 	if (ret)
 		return log_msg_ret("ctx", ret);
 	vboot->from_coreboot = true;

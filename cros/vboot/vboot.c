@@ -8,23 +8,22 @@
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
+#include <cros_ec.h>
 #include <dm.h>
 #include <errno.h>
 #include <log.h>
 #include <mapmem.h>
 #include <asm/io.h>
-#include <cros_ec.h>
 #include <cros/vboot.h>
 
 int vboot_alloc(struct vboot_info **vbootp)
 {
-	gd->vboot = malloc(sizeof(struct vboot_info));
+	gd->vboot = calloc(1, sizeof(struct vboot_info));
 	if (!gd->vboot) {
 		log_err("Cannot allocate vboot %x\n",
                         (uint)sizeof(struct vboot_info));
 		return -ENOMEM;
 	}
-	memset(gd->vboot, '\0', sizeof(struct vboot_info));
 	*vbootp = gd->vboot;
 
 	return 0;
@@ -79,8 +78,6 @@ int vboot_load_config(struct vboot_info *vboot)
 	vboot->disable_power_button_during_update = ofnode_read_bool(node,
 					"disable-power-button-during-update");
 #endif
-	vboot->work_buffer_size = ofnode_read_u32_default(node,
-					"vboot2-work-buffer-size", 0x3000);
 
 	vboot->config = node;
 

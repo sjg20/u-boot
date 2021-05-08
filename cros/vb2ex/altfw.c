@@ -9,7 +9,7 @@
 #include <os.h>
 #include <cros/vboot.h>
 
-int VbExLegacy(int altfw_num)
+vb2_error_t vb2ex_run_altfw(u32 altfw_num)
 {
 	/* TODO(sjg@chromium.org): Implement this */
 	printf("Legacy boot %d\n", altfw_num);
@@ -17,8 +17,8 @@ int VbExLegacy(int altfw_num)
 	return 1;
 }
 
-u32 VbExGetAltFwIdxMask(void)
+u32 vb2ex_get_altfw_count(void)
 {
 	/* TODO(sjg@chromium.org): Implement this */
-	return 3 << 1;
+	return 2;
 }

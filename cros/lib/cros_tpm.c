@@ -88,7 +88,7 @@ static int extend_pcr(struct vboot_info *vboot, int pcr,
 	if (size < TPM_PCR_MINIMUM_DIGEST_SIZE)
 		return log_msg_retz("size", VB2_ERROR_UNKNOWN);
 
-	ret = tpm_pcr_extend(vboot->tpm, pcr, buffer, out);
+	ret = tpm_pcr_extend(vboot->tpm, pcr, size, buffer, out);
 	if (ret)
 		return log_msg_retz("extend", VB2_ERROR_UNKNOWN);
 
@@ -145,7 +145,7 @@ static int setup_spaces(struct vboot_info *vboot)
 		return ret;
 
 	if (vboot->has_rec_mode_mrc) {
-		ret = setup_space(vboot->tpm, CROS_NV_REC_HASH,
+		ret = setup_space(vboot->tpm, CROS_NV_MRC_REC_HASH,
 				  version == TPM_V1 ? v1_ro_space_attributes :
 				  v2_ro_space_attributes,
 				  version == TPM_V1 ? v1_pcr0_unchanged_policy :
@@ -157,10 +157,11 @@ static int setup_spaces(struct vboot_info *vboot)
 		if (ret)
 			return ret;
 	}
-	vb2api_secdata_create(ctx);
-	ret = setup_space(vboot->tpm, CROS_NV_SECDATA, version == TPM_V1 ?
+	vb2api_secdata_firmware_create(ctx);
+	ret = setup_space(vboot->tpm, CROS_NV_SECDATAF, version == TPM_V1 ?
 			  v1_rw_space_attributes : v2_rw_space_attributes,
-			  NULL, 0, ctx->secdata, VB2_SECDATA_SIZE);
+			  NULL, 0, ctx->secdata_firmware,
+			  VB2_SECDATA_FIRMWARE_SIZE);
 	if (ret)
 		return ret;
 
@@ -238,7 +239,7 @@ int cros_tpm_factory_initialise(struct vboot_info *vboot)
 	int ret;
 
 	/* Defines and sets vb2 secdata space */
-	vb2api_secdata_create(ctx);
+	vb2api_secdata_firmware_create(ctx);
 
 	log_debug("TPM: factory initialisation\n");
 
@@ -432,17 +433,4 @@ int cros_tpm_setup(struct vboot_info *vboot)
 		ctx->flags |= VB2_CONTEXT_SECDATA_WANTS_REBOOT;
 
 	return ret;
-}
-
-int vb2ex_tpm_clear_owner(struct vb2_context *ctx)
-{
-	struct vboot_info *vboot = vboot_get();
-	u32 rv;
-
-	log_info("Clearing TPM owner\n");
-	rv = tpm_clear_and_reenable(vboot->tpm);
-	if (rv)
-		return VB2_ERROR_EX_TPM_CLEAR_OWNER;
-
-	return VB2_SUCCESS;
 }

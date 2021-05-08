@@ -30,6 +30,7 @@ config TARGET_SANDBOX_FLATTREE
 config TARGET_CHROMEOS_SANDBOX
 	bool "Support Chrome OS sandbox"
 	select SUPPORT_TPL
+	select SUPPORT_VPL
 	select SUPPORT_SPL
 
 endchoice

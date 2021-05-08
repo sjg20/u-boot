@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <log.h>
 #include <tpm_api.h>
+#include <cros/antirollback.h>
 #include <cros/nvdata.h>
 
 /**
@@ -23,17 +24,19 @@
 static int get_index(enum cros_nvdata_type type)
 {
 	switch (type) {
-	case CROS_NV_SECDATA:
+	case CROS_NV_SECDATAF:
 		return FIRMWARE_NV_INDEX;
 	case CROS_NV_SECDATAK:
 		return KERNEL_NV_INDEX;
-	case CROS_NV_REC_HASH:
-		return REC_HASH_NV_INDEX;
+	case CROS_NV_MRC_REC_HASH:
+		return MRC_REC_HASH_NV_INDEX;
+	case CROS_NV_FWMP:
+		return FWMP_NV_INDEX;
 	default:
 		/* We cannot handle these */
 		break;
 	}
-	log_debug("Unsupported type %d\n", type);
+	log_err("Unsupported type %d\n", type);
 
 	return -1;
 }
@@ -66,7 +69,7 @@ static u32 safe_write(struct udevice *tpm, u32 index, const void *data,
 	}
 	if (ret) {
 		log_err("Failed to write secdata (err=%x)\n", ret);
-		return -EIO;
+		return log_msg_ret("fail", -EIO);
 	}
 
 	return 0;
@@ -85,10 +88,12 @@ int tpm_secdata_read(struct udevice *dev, enum cros_nvdata_type type, u8 *data,
 
 	ret = tpm_nv_read_value(tpm, index, data, size);
 	if (ret == TPM_BADINDEX) {
-		return log_msg_ret("TPM has no secdata for index", -ENOENT);
+		return log_msg_ret("type", -ENOENT);
+	} else if (ret == TPM2_RC_COMMAND_CODE) {
+		return log_msg_ret("cmd", -ENOSYS);
 	} else if (ret != TPM_SUCCESS) {
 		log_err("Failed to read secdata (err=%x)\n", ret);
-		return -EIO;
+		return log_msg_ret("fail", -EIO);
 	}
 
 	return 0;
@@ -108,7 +113,7 @@ static int tpm_secdata_write(struct udevice *dev, enum cros_nvdata_type type,
 	ret = safe_write(tpm, index, data, size);
 	if (ret != TPM_SUCCESS) {
 		log_err("Failed to write secdata (err=%x)\n", ret);
-		return -EIO;
+		return log_msg_ret("fail", -EIO);
 	}
 
 	return 0;
@@ -166,24 +171,24 @@ static int tpm_secdata_setup(struct udevice *dev, enum cros_nvdata_type type,
 			     int nv_policy_size)
 {
 	struct udevice *tpm = dev_get_parent(dev);
-	enum tpm_version version = tpm_get_version(tpm);
 	int ret;
 	int index;
 
 	index = get_index(type);
 	if (index == -1)
 		return -EINVAL;
+	log_info("index=%x\n", index);
 
-	if (IS_ENABLED(CONFIG_TPM_V1) && version == TPM_V1)
+	if (tpm_is_v1(tpm))
 		ret = safe_define_space(tpm, index, attr, size);
-	else if (IS_ENABLED(CONFIG_TPM_V2) && version == TPM_V2)
-		ret = set_space(dev, index, attr, size, nv_policy,
+	else if (tpm_is_v2(tpm))
+		ret = set_space(tpm, index, attr, size, nv_policy,
 				nv_policy_size);
 	else
-		return log_msg_ret("no tpm", -ENOENT);
+		return log_msg_ret("version", -ENOENT);
 	if (ret != TPM_SUCCESS) {
 		log_err("Failed to setup secdata (err=%x)\n", ret);
-		return -EIO;
+		return log_msg_ret("fail", -EIO);
 	}
 
 	return 0;
@@ -205,10 +210,10 @@ static int tpm_secdata_lock(struct udevice *dev, enum cros_nvdata_type type)
 		 * is requested, and do nothing otherwise. This ensures that the
 		 * lock is always set.
 		 */
-		if (type == CROS_NV_SECDATA)
+		if (type == CROS_NV_SECDATAF)
 			return tpm_set_global_lock(tpm);
 	} else if (IS_ENABLED(CONFIG_TPM_V2) && version == TPM_V2) {
-		if (type == CROS_NV_SECDATA || type == CROS_NV_REC_HASH)
+		if (type == CROS_NV_SECDATAF || type == CROS_NV_MRC_REC_HASH)
 			return log_retz(tpm2_write_lock(tpm, index));
 		else if (type == CROS_NV_SECDATAK)
 			return log_retz(tpm2_disable_platform_hierarchy(tpm));

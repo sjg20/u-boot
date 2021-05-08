@@ -17,18 +17,6 @@ struct vb2_context;
 struct vboot_handoff;
 
 /**
- * cb_vboot_make_context() - Make a vboot 2 context from sysinfo
- *
- * This parses the handoff information to produce a VB2 context, with the
- * flags field set correctly.
- *
- * @sysinfo: Coreboot sysinfo information
- * @ctxp: Returns a new VB2 context
- */
-int cb_vboot_make_context(const struct sysinfo_t *sysinfo,
-			  struct vb2_context **ctxp);
-
-/**
  * cb_conv_compress_type() - Convert a CBFS compression algorithm tag to FMAP
  *
  * @cbfs_comp_algo: CBFS compression tag, e.g. CBFS_COMPRESS_LZMA
@@ -104,7 +92,7 @@ const char *cb_read_model(const struct sysinfo_t *sysinfo);
  * @vboot: vboot context
  * @return 0 if OK, -ENOENT if no handoff info, other -ve on other error
  */
-int cb_vboot_rw_init(struct vboot_info *vboot);
+int cb_vboot_rw_init(struct vboot_info *vboot, struct vb2_context **ctxp);
 
 /**
  * cb_get_vboot_handoff() - Obtain the vboot handout pointer from coreboot

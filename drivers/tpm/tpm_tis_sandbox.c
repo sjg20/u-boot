@@ -11,6 +11,8 @@
 #include <u-boot/crc.h>
 #include "sandbox_common.h"
 
+#define REC_HASH_NV_SIZE		VB2_SHA256_DIGEST_SIZE
+
 #define NV_DATA_PUBLIC_PERMISSIONS_OFFSET	60
 
 /*

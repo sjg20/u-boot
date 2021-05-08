@@ -4,17 +4,23 @@
  */
 
 #define LOG_CATEGORY LOGC_VBOOT
-#define NEED_VB20_INTERNALS
 
 #include <common.h>
 #include <bloblist.h>
+#include <cros_ec.h>
 #include <ec_commands.h>
 #include <dm.h>
 #include <log.h>
+#include <spl.h>
+#include <tpm-common.h>
+#include <cros/antirollback.h>
 #include <cros/cros_common.h>
 #include <cros/nvdata.h>
+#include <cros/tpm_common.h>
 #include <cros/vboot.h>
 #include <cros/vboot_flag.h>
+
+#include <vb2_internals_please_do_not_use.h>
 
 /**
  * vb2_init_blob() - Set up the vboot persistent blob
@@ -26,21 +32,19 @@
  * the boot.
  *
  * @blob: Pointer to the persistent blob for vboot
- * @work_buffer_size: Size to use for work buffer
+ * @workbuf_size: Size to use for work buffer
  */
-static int vb2_init_blob(struct vboot_blob *blob, int work_buffer_size)
+static int vb2_init_blob(struct vboot_blob *blob, int workbuf_size,
+			 struct vb2_context **ctxp)
 {
-	struct vb2_context *ctx = &blob->ctx;
+	struct vb2_context *ctx;
 	int ret;
 
-	/* initialise the vb2_context */
-	ctx->workbuf_size = work_buffer_size;
-	ctx->workbuf = memalign(VBOOT_CONTEXT_ALIGN, ctx->workbuf_size);
-	if (!ctx->workbuf)
-		return -ENOMEM;
-	ret = vb2_init_context(ctx);
+	/* Initialize vb2_shared_data and friends. */
+	ret = vb2api_init((void *)blob, workbuf_size, &ctx);
 	if (ret)
 		return log_msg_ret("init_context", ret);
+	*ctxp = ctx;
 
 	return 0;
 }
@@ -51,12 +55,13 @@ int vboot_ver_init(struct vboot_info *vboot)
 	struct vb2_context *ctx;
 	int ret;
 
+	printf("vboot starting in %s\n", spl_phase_name(spl_phase()));
 	log_debug("vboot is at %p, size %lx, bloblist %p\n", vboot,
 		  (ulong)sizeof(*vboot), gd->bloblist);
 	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, sizeof(struct vboot_blob),
 			    VBOOT_CONTEXT_ALIGN);
 	if (!blob)
-		return log_msg_ret("set up vboot context", -ENOSPC);
+		return log_msg_ret("blob", -ENOSPC);
 
 	bootstage_mark(BOOTSTAGE_VBOOT_START);
 
@@ -64,31 +69,54 @@ int vboot_ver_init(struct vboot_info *vboot)
 	if (ret)
 		return log_msg_ret("load config", ret);
 	/* Set up context and work buffer */
-	ret = vb2_init_blob(blob, vboot->work_buffer_size);
+	ret = vb2_init_blob(blob, VB2_FIRMWARE_WORKBUF_RECOMMENDED_SIZE, &ctx);
 	if (ret)
 		return log_msg_ret("set up work context", ret);
 	vboot->blob = blob;
-	ctx = &blob->ctx;
 	vboot->ctx = ctx;
 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
 
-	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
+	ret = uclass_get_device_by_seq(UCLASS_TPM, 0, &vboot->tpm);
+	if (ret)
+		ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
 	if (ret)
 		return log_msg_ret("find TPM", ret);
-	ret = cros_tpm_setup(vboot);
+	log_info("TPM: %s, version %s\n", vboot->tpm->name,
+		tpm_get_version(vboot->tpm) == TPM_V1 ? "v1.2" : "v2");
+
+	/*
+	 * Read secdata from TPM. Initialise TPM if secdata not found. We don't
+	 * check the return value here because vb2api_fw_phase1 will catch
+	 * invalid secdata and tell us what to do (=reboot).
+	 */
+	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
+	ret = vboot_setup_tpm(vboot);
 	if (ret) {
 		log_err("TPM setup failed (err=%x)\n", ret);
-		return log_msg_ret("tpm_setup", -EIO);
+	} else {
+		ret = antirollback_read_space_firmware(vboot);
+		/*
+		 * This indicates a coding error (e.g. not supported in TPM
+		 * emulator, so fail immediately.
+		 */
+		if (ret == -ENOSYS)
+			return log_msg_ret("inval", ret);
+		antirollback_read_space_kernel(vboot);
 	}
+	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
 
 	/* initialise and read nvdata from non-volatile storage */
-	/* TODO(sjg@chromium.org): Support full-size context */
-	ret = cros_nvdata_read_walk(CROS_NV_DATA, ctx->nvdata, VBNV_BLOCK_SIZE);
+	ret = cros_nvdata_read_walk(CROS_NV_DATA, ctx->nvdata,
+				    VB2_NVDATA_SIZE_V2);
 	if (ret)
 		return log_msg_ret("read nvdata", ret);
 
-	vboot_dump_nvdata(ctx->nvdata, EC_VBNV_BLOCK_SIZE);
+	/* Dump all the context */
+	vboot_nvdata_dump(ctx->nvdata, VB2_NVDATA_SIZE_V2);
+	vboot_secdataf_dump(ctx->secdata_firmware,
+			    sizeof(ctx->secdata_firmware));
+	vboot_secdatak_dump(ctx->secdata_kernel, sizeof(ctx->secdata_kernel));
 
 	ret = cros_ofnode_flashmap(&vboot->fmap);
 	if (ret)
@@ -102,6 +130,13 @@ int vboot_ver_init(struct vboot_info *vboot)
 		ret = uclass_get_device(UCLASS_CROS_EC, 0, &vboot->cros_ec);
 		if (ret)
 			return log_msg_ret("locate Chromium OS EC", ret);
+
+		/*
+		 * Allow for special key combinations on sandbox, e.g. to enter
+		 * recovery mode
+		 */
+		if (IS_ENABLED(CONFIG_SANDBOX))
+			cros_ec_check_keyboard(vboot->cros_ec);
 	}
 	/*
 	 * Set S3 resume flag if vboot should behave differently when selecting
@@ -113,32 +148,10 @@ int vboot_ver_init(struct vboot_info *vboot)
 	    vboot_platform_is_resuming())
 		ctx->flags |= VB2_CONTEXT_S3_RESUME;
 
-	/*
-	 * Read secdata from TPM. initialise TPM if secdata not found. We don't
-	 * check the return value here because vb2api_fw_phase1 will catch
-	 * invalid secdata and tell us what to do (=reboot).
-	 */
-	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
-	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, ctx->secdata,
-				    sizeof(ctx->secdata));
-	if (ret == -ENOENT)
-		ret = cros_tpm_factory_initialise(vboot);
-	else if (ret)
-		return log_msg_ret("Cannot read secdata", ret);
-	vboot_secdata_dump(ctx->secdata, sizeof(ctx->secdata));
-	log_debug("secdata:\n");
-	log_buffer(LOGC_VBOOT, LOGL_DEBUG, 0, ctx->secdata, 1,
-		   sizeof(ctx->secdata), 0);
-
-	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
-	if (vboot_flag_read_walk(VBOOT_FLAG_DEVELOPER) == 1) {
-		ctx->flags |= VB2_CONTEXT_FORCE_DEVELOPER_MODE;
-		log_info("Enabled developer mode\n");
-	}
 	if (vboot_flag_read_walk(VBOOT_FLAG_RECOVERY) == 1) {
 		ctx->flags |= VB2_CONTEXT_FORCE_RECOVERY_MODE;
 		if (vboot->disable_dev_on_rec)
-			ctx->flags |= VB2_DISABLE_DEVELOPER_MODE;
+			ctx->flags |= VB2_CONTEXT_DISABLE_DEVELOPER_MODE;
 		log_info("Enabled recovery mode\n");
 	}
 
@@ -146,6 +159,8 @@ int vboot_ver_init(struct vboot_info *vboot)
 		ctx->flags |= VB2_CONTEXT_FORCE_WIPEOUT_MODE;
 	if (vboot_flag_read_walk(VBOOT_FLAG_LID_OPEN) == 0)
 		ctx->flags |= VB2_CONTEXT_NOFAIL_BOOT;
+	ctx->flags |= VB2_CONTEXT_NVDATA_V2;
+	ctx->flags |= VB2_CONTEXT_DEVELOPER_MODE;
 
 	return 0;
 }

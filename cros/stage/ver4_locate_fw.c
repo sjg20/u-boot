@@ -6,8 +6,6 @@
 
 #define LOG_CATEGORY LOGC_VBOOT
 
-#define NEED_VB20_INTERNALS
-
 #include <common.h>
 #include <ec_commands.h>
 #include <misc.h>
@@ -18,6 +16,8 @@
 #include <cros/nvdata.h>
 #include <cros/vboot.h>
 #include <vb2_api.h>
+
+#include <vb2_internals_please_do_not_use.h>
 
 /* The max hash size to expect is for SHA512 */
 #define VBOOT_MAX_HASH_SIZE	VB2_SHA512_DIGEST_SIZE
@@ -190,7 +190,7 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 	log_info("Hashing firmware body, expected size %x\n", expected_size);
 
 	/* Start the body hash */
-	ret = vb2api_init_hash(ctx, VB2_HASH_TAG_FW_BODY, &expected_size);
+	ret = vb2api_init_hash(ctx, VB2_HASH_TAG_FW_BODY);
 	if (ret)
 		return log_msg_retz("init hash", ret);
 
@@ -206,12 +206,6 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 		return log_msg_ret("restrict", ret);
 	}
 
-	struct vb2_shared_data *sd = vb2_get_sd(ctx);
-	struct vb2_digest_context *dc = (struct vb2_digest_context *)
-		(ctx->workbuf + sd->workbuf_hash_offset);
-
-	log_debug("extend, ctx=%p, sd=%p, dc=%p, sd->workbuf_hash_size=%x\n",
-		  ctx, sd, dc, sd->workbuf_hash_size);
 	/* Extend over the body */
 	for (blk = 0; ; blk++) {
 		int nbytes;
@@ -269,7 +263,7 @@ int vboot_ver4_locate_fw(struct vboot_info *vboot)
 	ret = hash_body(vboot, dev);
 	if (ret) {
 		log_info("Reboot requested (%x)\n", ret);
-		return VBERROR_REBOOT_REQUIRED;
+		return VB2_REQUEST_REBOOT;
 	}
 
 	return 0;

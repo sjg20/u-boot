@@ -175,22 +175,19 @@ int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
  *
  * @dev: Device to read from (UCLASS_FWSTORE)
  * @entry: Flashmap entry to read from (indicates position, compression, etc.)
- * @buf: Buffer to read into (make sure it is large enough for the uncompressed
- *	data plus a good margin, to allow for uncompression
+ * @buf: Buffer to read into (must be inited by caller)
  * @buf_size: Size of buffer
  * @return 0 if OK, -ve on error
  */
 int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
-			void *buf, int buf_size);
+			struct abuf *buf);
 
 /**
  * fwstore_decomp_with_algo() - Decompress some data
  *
  * @algo: Compression algorithm to use
- * @data: Compressed data to decompress
- * @size: Size of compressed data
- * @out: Output buffer for decompressed data
- * @out_size: Size of output buffer
+ * @in: Compressed data to decompress
+ * @out: Output buffer for decompressed data (must be inited by caller)
  * @is_cbfs: true if this is a CBFS region, rather than binman. Binman adds the
  * u32 size of the compressed data to the start of @data, with @is_cbfs this is
  * not expected
@@ -201,8 +198,8 @@ int fwstore_read_decomp(struct udevice *dev, struct fmap_entry *entry,
  * other -ve value if the decompression fails due to corruption or unsupported
  * compression options within the compressed stream.
  */
-int fwstore_decomp_with_algo(enum fmap_compress_t algo, void *data, size_t size,
-			     void *out, size_t out_size, bool is_cbfs);
+int fwstore_decomp_with_algo(enum fmap_compress_t algo, struct abuf *in,
+			     struct abuf *out, bool is_cbfs);
 
 /**
  * cros_fwstore_read_entry() - read data

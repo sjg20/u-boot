@@ -99,6 +99,7 @@ config VPL_CHROMEOS
 	imply VPL_GPIO_SUPPORT
 	imply VPL_BOARD_INIT
 	imply VPL_DRIVERS_MISC_SUPPORT
+	imply VPL_ENV_SUPPORT
 	imply VPL_SERIAL_SUPPORT
 	imply VPL_SPI_FLASH_SUPPORT
 	imply VPL_SPI_SUPPORT
@@ -117,6 +118,8 @@ config VPL_CHROMEOS
 	imply VPL_PINCTRL
 	imply VPL_NVDATA_CMOS if X86
 	imply VPL_FWSTORE_SPI_FLASH
+	imply VPL_HANDOFF
+	imply VPL_TPM
 
 config TPL_CHROMEOS_VBOOT_A
 	bool "Run vboot stage A (SPL selection) in TPL"

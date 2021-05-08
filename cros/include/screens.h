@@ -15,7 +15,7 @@
  *
  * @screen: Screen number to draw (VB_SCREEN_...)
  * @locale: Locale to use (numbered from 0 to n-1, listed in 'locales' file)
- * @return VBERROR_SUCCESS (0) if OK, other VBERROR_... value on error
+ * @return VB2_SUCCESS (0) if OK, other VBERROR_... value on error
  */
 int vboot_draw_screen(u32 screen, u32 locale);
 
@@ -30,7 +30,7 @@ int vboot_draw_screen(u32 screen, u32 locale);
  * @disabled_idx_mask: Mask for menu items that are not shown (bit n = index n)
  * @redraw_base: 1 to do a full screen redraw, 0 to draw on top of the existing
  *	screen
- * @return VBERROR_SUCCESS (0) if OK, other VBERROR_... value on error
+ * @return VB2_SUCCESS (0) if OK, other VBERROR_... value on error
  */
 int vboot_draw_ui(u32 screen, u32 locale, u32 selected_index,
 		  u32 disabled_idx_mask, u32 redraw_base);

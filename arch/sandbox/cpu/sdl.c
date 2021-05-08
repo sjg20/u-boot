@@ -142,8 +142,7 @@ int sandbox_sdl_init_display(int width, int height, int log2_bpp,
 		return -EINVAL;
 	}
 	sdl.renderer = SDL_CreateRenderer(screen, -1,
-					  SDL_RENDERER_ACCELERATED |
-					  SDL_RENDERER_PRESENTVSYNC);
+					  SDL_RENDERER_ACCELERATED);
 	if (!sdl.renderer) {
 		printf("Unable to initialise SDL renderer: %s\n",
 		       SDL_GetError());

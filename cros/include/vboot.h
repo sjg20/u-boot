@@ -59,28 +59,11 @@ struct vboot_fw_info {
  *	U-Boot slot
  */
 struct vboot_blob {
-	struct vb2_context ctx __aligned(VBOOT_CONTEXT_ALIGN);
+	u8 share_data[VB2_FIRMWARE_WORKBUF_RECOMMENDED_SIZE]
+		 __aligned(VBOOT_CONTEXT_ALIGN);
 	struct fmap_entry spl_entry;
 	struct fmap_entry u_boot_entry;
 };
-
-/**
- * struct vboot_handoff - vboot information passed through the phases
- *
- * The vboot_handoff structure contains the data to be consumed by downstream
- * firmware after firmware selection has been completed. Namely it provides
- * vboot shared data as well as the flags from VbInit.
- *
- * @init_params: vboot parameters
- * @selected_firmware: This is the firmware selected to run (fw_slot). This is 0
- *	for A, 1 for B
- * @shared_data: Shared data used by vboot
- */
-struct vboot_handoff {
-	VbInitParams init_params;
-	u32 selected_firmware;
-	char shared_data[VB_SHARED_DATA_MIN_SIZE];
-} __packed;
 
 /**
  * Main verified boot data structure
@@ -115,6 +98,8 @@ struct vboot_handoff {
  * @physical_dev_switch: Developer mode has a physical switch (i.e. not in TPM)
  * @physical_rec_switch: Recovery mode has a physical switch (i.e. not in TPM)
  * @resume_path_same_as_boot: Resume path boots through the reset vector
+ * @cr50_commit_secdata: Tell Cr50 to commit changes immediately when they are
+ *	written
  *
  * @detachable_ui: Use the keyboard-less UI
  * @disable_memwipe: Disable memory wiping on this platform
@@ -122,14 +107,12 @@ struct vboot_handoff {
  * @disable_power_button_during_update: Disable the power button during an aux
  *	firmware update
  * @usb_is_enumerated: true if USB ports have been enumerated already
- * @work_buffer_size: Size of vboot2 work buffer
  *
- * @handoff: Vboot handoff info
  * @fmap: Firmare map, parsed from the binman information
  * @fwstore: Firmware storage device
  * @kparams: Kernel params passed to Vboot library
  * @cparams: Common params passed to Vboot library
- * @vb2_return_code: Vboot library error, if any
+ * @vb_error: Vboot library error, if any
  * @fw_size: Size of firmware image in bytes - this starts off as the number
  *	of bytes in the section containing the firmware, but may be smaller if
  *	the vblock indicates that not all of that data was signed.
@@ -167,6 +150,7 @@ struct vboot_info {
 	bool physical_dev_switch;
 	bool physical_rec_switch;
 	bool resume_path_same_as_boot;
+	bool cr50_commit_secdata;
 #ifndef CONFIG_SPL_BUILD
 	bool detachable_ui;
 	bool disable_memwipe;
@@ -174,18 +158,14 @@ struct vboot_info {
 	bool disable_power_button_during_update;
 	bool usb_is_enumerated;
 #endif
-	int work_buffer_size;
 
-	struct vboot_handoff *handoff;
 	struct cros_fmap fmap;
 	struct udevice *fwstore;
 #ifndef CONFIG_SPL_BUILD
 	VbSelectAndLoadKernelParams kparams;
-	VbCommonParams cparams;
+// 	VbCommonParams cparams;
 #endif
-	enum vb2_return_code vb2_return_code;
-
-	enum VbErrorPredefined_t vb_error;
+	enum vb2_return_code vb_error;
 	u32 fw_size;
 
 	char readonly_firmware_id[ID_LEN];
@@ -229,25 +209,6 @@ static inline bool vboot_from_cb(struct vboot_info *vboot)
 {
 	return CONFIG_IS_ENABLED(CHROMEOS_COREBOOT) && vboot->from_coreboot;
 }
-
-/**
- * vboot_update_acpi() - Update ACPI data
- *
- * For x86 systems, this writes a basic level of information in binary to
- * the ACPI tables for use by the kernel.
- *
- * It also updates the SMBIOS type 0 version string with the firmware ID of the
- * firmware being booted.
- *
- * This uses the BLOBLISTT_ACPI_GNVS blob in the bloblist.
- *
- * When booting frem coreboot, bloblist is not available. In that case it uses
- * the sysinfo acpi_gnvs pointer to find the correct place to update.
- *
- * @vboot: Pointer to vboot structure
- * @return 0 if OK, -ve on error
- */
-int vboot_update_acpi(struct vboot_info *vboot);
 
 /**
  * vboot_get() - Get a pointer to the vboot structure
@@ -360,16 +321,6 @@ int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry);
 bool vboot_wants_oprom(struct vboot_info *vboot);
 
 /**
- * vboot_fill_handoff() - Add the handoff information to vboot
- *
- * This writes out the handoff information so that the following phases know
- * what to do
- *
- * @vboot: Pointer to vboot structure
- */
-int vboot_fill_handoff(struct vboot_info *vboot);
-
-/**
  * vboot_get_gbb_flags() - Get the Google Binary Block (GBB) flags
  *
  * This can only be called after vboot_rw_init() is finished
@@ -380,37 +331,7 @@ int vboot_fill_handoff(struct vboot_info *vboot);
 u32 vboot_get_gbb_flags(struct vboot_info *vboot);
 
 /**
- * cros_tpm_extend_pcrs() - Extend TPM PCRs with the vboot digests
- *
- * Vboot generates digests for the boot mode and the hardware ID. This extends
- * TPM PCRs with these values
- *
- * @vboot: Pointer to vboot structure
- * @return 0 if OK, non-zero on error
- */
-int cros_tpm_extend_pcrs(struct vboot_info *vboot);
-
-/**
- * cros_tpm_factory_initialise() - Set up the TPM for the first time
- *
- * This sets up the TPM ready for use. It should be called if the TPM is found
- * to not be inited.
- *
- * @vboot: Pointer to vboot structure
- * @return 0 if OK, non-zero on error
- */
-int cros_tpm_factory_initialise(struct vboot_info *vboot);
-
-/**
- * cros_tpm_setup() - Set up the TPM ready for use
- *
- * @vboot: Pointer to vboot structure
- * @return 0 if OK, non-zero on error
- */
-int cros_tpm_setup(struct vboot_info *vboot);
-
-/**
- * vboot_dump_nvdata() - Dump the vboot non-volatile data
+ * vboot_nvdata_dump() - Dump the vboot non-volatile data
  *
  * This shows the NV data in human-readable form
  *
@@ -418,21 +339,43 @@ int cros_tpm_setup(struct vboot_info *vboot);
  * @size: Size of NV data (typically EC_VBNV_BLOCK_SIZE)
  * @return 0 if it is valid, -ve error otherwise
  */
-int vboot_dump_nvdata(const void *nvdata, int size);
+int vboot_nvdata_dump(const void *nvdata, int size);
 
 /**
- * vboot_dump_nvdata() - Dump the vboot secure data
+ * vboot_secdataf_dump() - Dump the vboot secure data
  *
  * This shows the context in human-readable form
  *
  * @nvdata: Pointer to context
- * @size: Size of NV context (typically sizeof(struct vb2_secdata))
+ * @size: Size of NV context (typically sizeof(struct vb2_secdata_firmware))
  * @return 0 if it is valid, -ve error otherwise
  */
-int vboot_secdata_dump(const void *secdata, int size);
+int vboot_secdataf_dump(const void *secdata, int size);
 
 /**
- * vboot_secdata_set() - Set a field in the secure data
+ * vboot_secdatak_dump() - Dump the vboot secure kernel data
+ *
+ * This shows the context in human-readable form
+ *
+ * @nvdata: Pointer to context
+ * @size: Size of NV context (typically sizeof(struct vb2_secdata_firmware))
+ * @return 0 if it is valid, -ve error otherwise
+ */
+int vboot_secdatak_dump(const void *secdata, int size);
+
+/**
+ * vboot_fwmp_dump() - Dump the vboot secure firmware manager parameters
+ *
+ * This shows the context in human-readable form
+ *
+ * @nvdata: Pointer to context
+ * @size: Size of NV context (typically sizeof(struct vb2_secdata_firmware))
+ * @return 0 if it is valid, -ve error otherwise
+ */
+int vboot_fwmp_dump(const void *secdata, int size);
+
+/**
+ * vboot_secdataf_set() - Set a field in the secure data
  *
  * This is used to update a single field in the secure data, for testing and
  * development purpsoes
@@ -443,10 +386,10 @@ int vboot_secdata_dump(const void *secdata, int size);
  * @val: Value to set
  * @return 0 if OK, -ve on error
  */
-int vboot_secdata_set(void *secdata, int size, enum secdata_t field, int val);
+int vboot_secdataf_set(void *secdata, int size, enum secdata_t field, int val);
 
 /**
- * vboot_secdata_get() - Get a field from secure data
+ * vboot_secdataf_get() - Get a field from secure data
  *
  * This is read used read a single field in the secure data, for testing and
  * development purposes
@@ -456,6 +399,29 @@ int vboot_secdata_set(void *secdata, int size, enum secdata_t field, int val);
  * @field: Field to read
  * @return value read, or -ve on error
  */
-int vboot_secdata_get(const void *secdata, int size, enum secdata_t field);
+int vboot_secdataf_get(const void *secdata, int size, enum secdata_t field);
+
+/**
+ * vboot_save_if_needed() - Save non-volatile and/or secure data if changed
+ *
+ * @vboot: vboot context
+ * @vberrp: Returns which part failed (VB2_ERROR_SECDATA_KERNEL_WRITE,
+ *	VB2_ERROR_SECDATA_FIRMWARE_WRITE or VB2_ERROR_NV_WRITE)
+ * @return 0 if OK, -ve if save failed
+ */
+int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp);
+
+/* Some compatibility things for code pulled from coreboot, etc. */
+#include <linux/sizes.h>
+char *cbmem_console_snapshot(void);
+
+#define KiB		SZ_1K
+#define MiB		SZ_1M
+#define GiB		SZ_1G
+#define USECS_PER_SEC	1000000
+
+void *xzalloc(size_t size);
+void *xmalloc(size_t size);
+char *cbmem_console_snapshot(void);;
 
 #endif /* __CROS_VBOOT_H */

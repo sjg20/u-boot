@@ -5,8 +5,6 @@
  * Copyright 2018 Google LLC
  */
 
-#define NEED_VB20_INTERNALS
-
 #include <common.h>
 #include <bloblist.h>
 #include <cbfs.h>
@@ -14,6 +12,7 @@
 #include <init.h>
 #include <log.h>
 #include <mapmem.h>
+#include <tpm-common.h>
 #include <cros/cb_helper.h>
 #include <cros/cros_ofnode.h>
 #include <cros/fmap.h>
@@ -24,118 +23,7 @@
 #include <cros/vboot_flag.h>
 #include <cros/memwipe.h>
 
-#include <gbb_header.h>
-#include <vboot_struct.h>
-
-#include <tpm-common.h>
-
-/**
- * gbb_copy_in() - Copy a portion of the GBB into vboot->cparams
- *
- * @vboot:	Vboot info
- * @gbb_offset:	Offset of GBB in vboot->fwstore
- * @offset:	Offset within GBB to read
- * @size:	Number of bytes to read
- * @return 0 if OK, -EINVAL if offset/size invalid, other error if fwstore
- *	fails to read
- */
-static int gbb_copy_in(struct vboot_info *vboot, uint gbb_offset, uint offset,
-		       uint size)
-{
-	VbCommonParams *cparams = &vboot->cparams;
-	u8 *gbb_copy = cparams->gbb_data;
-	int ret;
-
-	if (offset > cparams->gbb_size || offset + size > cparams->gbb_size)
-		return log_msg_ret("range", -EINVAL);
-	ret = cros_fwstore_read(vboot->fwstore, gbb_offset + offset, size,
-				gbb_copy + offset);
-	if (ret)
-		return log_msg_ret("read", ret);
-
-	return 0;
-}
-
-/**
- * gbb_init() - Read in the Google Binary Block (GBB)
- *
- * Allocates space for the GBB and reads in the various pieces
- *
- * @vboot: vboot context
- * @return 0 if OK, -ve on error
- */
-static int gbb_init(struct vboot_info *vboot)
-{
-	struct fmap_entry *entry = &vboot->fmap.readonly.gbb;
-	VbCommonParams *cparams = &vboot->cparams;
-	u32 offset;
-	int ret, i;
-
-	cparams->gbb_size = entry->length;
-	cparams->gbb_data = malloc(entry->length);
-	if (!cparams->gbb_data)
-		return log_msg_ret("buffer", -ENOMEM);
-
-	memset(cparams->gbb_data, 0, cparams->gbb_size);
-
-	offset = entry->offset;
-
-	GoogleBinaryBlockHeader *hdr = cparams->gbb_data;
-
-	ret = gbb_copy_in(vboot, offset, 0, sizeof(GoogleBinaryBlockHeader));
-	if (ret)
-		return ret;
-	log_debug("The GBB signature is at %p and is:", hdr->signature);
-	for (i = 0; i < GBB_SIGNATURE_SIZE; i++)
-		log_debug(" %02x", hdr->signature[i]);
-	log_debug("\n");
-
-	ret = gbb_copy_in(vboot, offset, hdr->hwid_offset, hdr->hwid_size);
-	if (ret)
-		return ret;
-
-	ret = gbb_copy_in(vboot, offset, hdr->rootkey_offset,
-			  hdr->rootkey_size);
-	if (ret)
-		return ret;
-
-	ret = gbb_copy_in(vboot, offset, hdr->recovery_key_offset,
-			  hdr->recovery_key_size);
-	if (ret)
-		return ret;
-
-	return 0;
-}
-
-/**
- * common_params_init() - read in GBB and find vboot's shared data
- *
- * @vboot: vboot context
- * @clear_shared_data: true to clear the shared data region to zeroes
- * @return 0 if OK, -ve on error
- */
-static int common_params_init(struct vboot_info *vboot, bool clear_shared_data)
-{
-	VbCommonParams *cparams = &vboot->cparams;
-	int ret;
-
-	memset(cparams, '\0', sizeof(*cparams));
-
-	ret = gbb_init(vboot);
-	if (ret)
-		return log_msg_ret("gbb", ret);
-
-	cparams->shared_data_blob = vboot->handoff->shared_data;
-	cparams->shared_data_size = ARRAY_SIZE(vboot->handoff->shared_data);
-	if (clear_shared_data)
-		memset(cparams->shared_data_blob, '\0',
-		       cparams->shared_data_size);
-	log_info("Found shared_data_blob at %lx, size %d\n",
-		 (ulong)map_to_sysmem(cparams->shared_data_blob),
-		 cparams->shared_data_size);
-
-	return 0;
-}
+#include <vb2_internals_please_do_not_use.h>
 
 /**
  * setup_unused_memory() - find memory to clear
@@ -182,7 +70,7 @@ static ulong get_current_sp(void)
 }
 
 /**
- * wipe_unused_memory() - Wipe memory not needed to boot
+ * memory_wipe_unused() - Wipe memory not needed to boot
  *
  * This provides additional security by clearing out memory that might contain
  * things from a previous boot
@@ -191,7 +79,7 @@ static ulong get_current_sp(void)
  * @return 0 if OK, -EPERM if coreboot tables are needed but missing on x86
  *	(fatal error)
  */
-static int wipe_unused_memory(struct vboot_info *vboot)
+static int memory_wipe_unused(struct vboot_info *vboot)
 {
 	struct memwipe wipe;
 
@@ -210,76 +98,25 @@ static int wipe_unused_memory(struct vboot_info *vboot)
 	memwipe_sub(&wipe, get_current_sp() - MEMWIPE_STACK_MARGIN,
 		    gd->ram_top);
 
-	/* Exclude the shared data between bootstub and main firmware */
-	memwipe_sub(&wipe, (ulong)vboot->handoff,
-		    (ulong)vboot->handoff + sizeof(struct vboot_handoff));
-
 	memwipe_execute(&wipe);
 
 	return 0;
 }
 
-static int vboot_do_init_out_flags(struct vboot_info *vboot, u32 out_flags)
+static int vboot_check_wipe_memory(struct vboot_info *vboot)
 {
-	if (0 && (out_flags & VB_INIT_OUT_CLEAR_RAM)) {
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
+
+	if (ctx->flags & VB2_CONTEXT_CLEAR_RAM) {
 		if (vboot->disable_memwipe)
 			log_warning("Memory wipe requested but not supported\n");
 		else
-			return wipe_unused_memory(vboot);
+			return memory_wipe_unused(vboot);
 	}
 
 	return 0;
 }
 
-/**
- * vboot_init_handoff() - Read in the hand-off information from previous phase
- *
- * This handles both booting bare-metal and from coreboot. It collects the
- * provided handoff information and sets things up ready for the read/write
- * phase of vboot, containing the UI.
- *
- * @vboot: vboot context
- */
-static int vboot_init_handoff(struct vboot_info *vboot)
-{
-	struct vboot_handoff *handoff;
-	VbSharedDataHeader *vdat;
-	int ret;
-
-	if (!vboot_from_cb(vboot)) {
-		handoff = bloblist_find(BLOBLISTT_VBOOT_HANDOFF,
-					sizeof(*handoff));
-		if (!handoff)
-			return log_msg_ret("handoff\n", -ENOENT);
-	} else {
-		handoff = cb_get_vboot_handoff();
-	}
-	vboot->handoff = handoff;
-
-	/* Set up the common param structure, not clearing shared data */
-	ret = common_params_init(vboot, 0);
-	if (ret)
-		return ret;
-
-	vdat = vboot->cparams.shared_data_blob;
-	/*
-	 * If the lid is closed, don't count down the boot tries for updates,
-	 * since the OS will shut down before it can register success.
-	 *
-	 * VbInit() was already called in stage A, so we need to update the
-	 * vboot internal flags ourself.
-	 */
-	if (vboot_flag_read_walk(VBOOT_FLAG_LID_OPEN) == 0) {
-		/* Tell kernel selection to not count down */
-		vdat->flags |= VBSD_NOFAIL_BOOT;
-	}
-
-	ret = vboot_do_init_out_flags(vboot, handoff->init_params.out_flags);
-	if (ret)
-		return log_msg_ret("flags", ret);
-
-	return 0;
-}
 
 int vboot_rw_init(struct vboot_info *vboot)
 {
@@ -290,30 +127,38 @@ int vboot_rw_init(struct vboot_info *vboot)
 	int ret;
 
 	if (!IS_ENABLED(CONFIG_SYS_COREBOOT) || ll_boot_init()) {
+		int new_size = VB2_KERNEL_WORKBUF_RECOMMENDED_SIZE;
+		int ret;
+
 		blob = bloblist_find(BLOBLISTT_VBOOT_CTX, sizeof(*blob));
 		if (!blob)
 			return log_msg_ret("blob", -ENOENT);
-		vboot->blob = blob;
+		ret = bloblist_resize(BLOBLISTT_VBOOT_CTX, new_size);
+		if (ret)
+			return log_msg_ret("resize", ret);
 
-		/*
-		 * This is not actually used since this part of vboot uses the
-		 * old v1 API
-		 */
-		ctx = &blob->ctx;
-		vboot->ctx = ctx;
-		ctx->non_vboot_context = vboot;
-		log_warning("flags %x %d\n", ctx->flags,
+		ret = vb2api_relocate(blob, blob, new_size, &ctx);
+		if (ret)
+			return log_msg_ret("reloc", ret);
+
+		log_warning("flags %llx %d\n", ctx->flags,
 			    ((ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0));
 	} else {
-		ret = cb_vboot_rw_init(vboot);
+		ret = cb_vboot_rw_init(vboot, &ctx);
 		if (ret)
 			return log_msg_ret("cb", ret);
 	}
+	vboot->ctx = ctx;
+	ctx->non_vboot_context = vboot;
+
+	ret = vboot_check_wipe_memory(vboot);
+	if (ret)
+		log_warning("Failed to wipe memory (err=%d)\n", ret);
 
 	if (vboot_is_recovery(vboot))
 		log_info("Recovery mode\n");
 	else
-		log_info("Booting from slot %s: vboot->ctx=%p, flags %x\n",
+		log_info("Booting from slot %s: vboot->ctx=%p, flags %llx\n",
 			 vboot_slot_name(vboot), vboot->ctx, vboot->ctx->flags);
 	vboot->valid = true;
 
@@ -365,9 +210,13 @@ int vboot_rw_init(struct vboot_info *vboot)
 		if (ret)
 			return log_msg_ret("ec", ret);
 	}
-	ret = vboot_init_handoff(vboot);
+
+	/* initialise and read fwmp from TPM */
+	ret = cros_nvdata_read_walk(CROS_NV_FWMP, ctx->secdata_fwmp,
+				    VB2_SECDATA_FWMP_MIN_SIZE);
 	if (ret)
-		return log_msg_ret("handoff", ret);
+		return log_msg_ret("read nvdata", ret);
+	vboot_fwmp_dump(ctx->secdata_fwmp, VB2_SECDATA_FWMP_MIN_SIZE);
 
 	return 0;
 }

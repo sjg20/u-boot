@@ -96,7 +96,7 @@ static int boot_device_usb_start(struct vboot_info *vboot)
 	return 0;
 }
 
-VbError_t VbExDiskGetInfo(VbDiskInfo **infos_ptr, u32 *count_ptr,
+vb2_error_t VbExDiskGetInfo(VbDiskInfo **infos_ptr, u32 *count_ptr,
 			  u32 disk_flags)
 {
 	struct vboot_info *vboot = vboot_get();
@@ -141,21 +141,21 @@ VbError_t VbExDiskGetInfo(VbDiskInfo **infos_ptr, u32 *count_ptr,
 		free(infos);
 	}
 	bootstage_accum(BOOTSTAGE_ACCUM_VBOOT_BOOT_DEVICE_INFO);
-	log_info("Found %u disks\n", count);
+	log_debug("Found %u disks\n", count);
 
 	/* The operation itself succeeds, despite scan failure all about */
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
-VbError_t VbExDiskFreeInfo(VbDiskInfo *infos, VbExDiskHandle_t preserve_handle)
+vb2_error_t VbExDiskFreeInfo(VbDiskInfo *infos, VbExDiskHandle_t preserve_handle)
 {
 	/* We do nothing for preserve_handle as we keep all the devices on */
 	free(infos);
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
-VbError_t VbExDiskRead(VbExDiskHandle_t handle, u64 lba_start, u64 lba_count,
+vb2_error_t VbExDiskRead(VbExDiskHandle_t handle, u64 lba_start, u64 lba_count,
 		       void *buffer)
 {
 	struct udevice *dev = (struct udevice *)handle;
@@ -166,7 +166,7 @@ VbError_t VbExDiskRead(VbExDiskHandle_t handle, u64 lba_start, u64 lba_count,
 		  (uint)lba_count, buffer);
 
 	if (lba_start >= bdev->lba || lba_start + lba_count > bdev->lba)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
 	/* Keep track of the total time spent reading */
 	bootstage_start(BOOTSTAGE_ACCUM_VBOOT_BOOT_DEVICE_READ,
@@ -174,24 +174,24 @@ VbError_t VbExDiskRead(VbExDiskHandle_t handle, u64 lba_start, u64 lba_count,
 	blks_read = blk_dread(bdev, lba_start, lba_count, buffer);
 	bootstage_accum(BOOTSTAGE_ACCUM_VBOOT_BOOT_DEVICE_READ);
 	if (blks_read != lba_count)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
-VbError_t VbExDiskWrite(VbExDiskHandle_t handle, u64 lba_start,
+vb2_error_t VbExDiskWrite(VbExDiskHandle_t handle, u64 lba_start,
 			u64 lba_count, const void *buffer)
 {
 	struct udevice *dev = (struct udevice *)handle;
 	struct blk_desc *bdev = dev_get_uclass_plat(dev);
 
 	if (lba_start >= bdev->lba || lba_start + lba_count > bdev->lba)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
 	if (blk_dwrite(bdev, lba_start, lba_count, buffer) != lba_count)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 /*
@@ -218,53 +218,53 @@ struct disk_stream {
 	u64 sectors_left;
 };
 
-VbError_t VbExStreamOpen(VbExDiskHandle_t handle, u64 lba_start,
+vb2_error_t VbExStreamOpen(VbExDiskHandle_t handle, u64 lba_start,
 			 u64 lba_count, VbExStream_t *stream)
 {
 	struct disk_stream *s;
 
 	*stream = NULL;
 	if (!handle)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
 	s = malloc(sizeof(*s));
 	if (!s)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 	s->handle = handle;
 	s->sector = lba_start;
 	s->sectors_left = lba_count;
 
 	*stream = (void *)s;
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
-VbError_t VbExStreamRead(VbExStream_t stream, u32 bytes, void *buffer)
+vb2_error_t VbExStreamRead(VbExStream_t stream, u32 bytes, void *buffer)
 {
 	struct disk_stream *s = (struct disk_stream *)stream;
 	u64 sectors;
-	VbError_t rv;
+	vb2_error_t rv;
 
 	if (!s)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
 	/* For now, require reads to be a multiple of the LBA size */
 	if (bytes % LBA_BYTES)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
 	/* Fail on overflow */
 	sectors = bytes / LBA_BYTES;
 	if (sectors > s->sectors_left)
-		return VBERROR_UNKNOWN;
+		return VB2_ERROR_UNKNOWN;
 
 	rv = VbExDiskRead(s->handle, s->sector, sectors, buffer);
-	if (rv != VBERROR_SUCCESS)
+	if (rv != VB2_SUCCESS)
 		return rv;
 
 	s->sector += sectors;
 	s->sectors_left -= sectors;
 
-	return VBERROR_SUCCESS;
+	return VB2_SUCCESS;
 }
 
 void VbExStreamClose(VbExStream_t stream)

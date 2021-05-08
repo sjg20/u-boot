@@ -223,7 +223,7 @@
 			reg = <0>;
 			compatible = "spansion,w25q128", "jedec,spi-nor";
 			spi-max-frequency = <40000000>;
-			sandbox,filename = "spi.bin";
+			sandbox,filename = "spi-cros.bin";
 		};
 	};
 
@@ -287,21 +287,23 @@
 		clock-frequency = <1000000>;
 	};
 
-	tpm {
+	tpm_v1: tpm {
 		compatible = "google,sandbox-tpm";
-
-		nvdata {
-			u-boot,dm-pre-reloc;
-			compatible = "google,tpm-secdata";
-			nvdata,types = <CROS_NV_SECDATA
-				CROS_NV_SECDATAK
-				CROS_NV_REC_HASH>;
-		};
-
 	};
 
-	tpm2 {
+	tpm_v2: tpm2 {
 		compatible = "sandbox,tpm2";
+		u-boot,dm-vpl;
+
+		nvdata {
+			u-boot,dm-vpl;
+			compatible = "google,tpm-secdata";
+			nvdata,types = <CROS_NV_SECDATAF
+				CROS_NV_SECDATAK
+				CROS_NV_MRC_REC_HASH
+				CROS_NV_FWMP>;
+		};
+
 	};
 
 	triangle {
@@ -315,6 +317,8 @@
 	/* Needs to be available prior to relocation */
 	uart0: serial {
 		u-boot,dm-spl;
+		u-boot,dm-tpl;
+		u-boot,dm-vpl;
 		compatible = "sandbox,serial";
 		sandbox,text-colour = "cyan";
 		pinctrl-names = "default";
@@ -434,12 +438,12 @@
 	};
 
 	nvdata {
-		u-boot,dm-pre-reloc;
+		u-boot,dm-vpl;
 		compatible = "google,cros-ec-nvdata";
-		nvdata,types = <CROS_NV_DATA>;
+		nvdata,types = <CROS_NV_DATA CROS_NV_VSTORE>;
 	};
 
-	cros_ec_vboot: vboot {
+	cros_vboot_ec: vboot {
 		compatible = "google,cros-ec-vboot";
 	};
 

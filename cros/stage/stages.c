@@ -102,7 +102,8 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
 	struct vboot_stage *stage = &stages[stagenum];
 	int ret;
 
-	log_info("Running stage '%s'\n", stage->name);
+	log_info("--\n");
+	log_info("* Running stage '%s'\n", stage->name);
 	if (!stage->run) {
 		log_debug("   - Stage '%s' not available\n", stage->name);
 		return -EPERM;
@@ -111,7 +112,8 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
 	bootstage_mark_name(BOOTSTAGE_VBOOT_FIRST + stagenum, stage->name);
 	ret = (*stage->run)(vboot);
 	if (ret)
-		log_err("Error: stage '%s' returned %x\n", stage->name, ret);
+		log_err("Error: stage '%s' returned %x (%d)\n", stage->name,
+			ret, ret);
 
 	return ret;
 }
@@ -122,44 +124,58 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
  * @vboot: vboot context
  * @return 0 if OK, -ve if save failed
  */
-static int save_if_needed(struct vboot_info *vboot)
+int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp)
 {
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
 
+	*vberrp = VB2_SUCCESS;
 	if (!ctx)
 		return -ENOENT;
+
+	if (ctx->flags & VB2_CONTEXT_SECDATA_KERNEL_CHANGED) {
+		log_info("Saving secdatak\n");
+		if (spl_phase() != PHASE_SPL)
+			vboot_secdatak_dump(ctx->secdata_kernel,
+					    sizeof(ctx->secdata_kernel));
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK,
+					     ctx->secdata_kernel,
+					     sizeof(ctx->secdata_kernel));
+		if (ret) {
+			*vberrp = VB2_ERROR_SECDATA_KERNEL_WRITE;
+			return log_msg_ret("secdatak", ret);
+		}
+		ctx->flags &= ~VB2_CONTEXT_SECDATA_KERNEL_CHANGED;
+	}
+
+	if (ctx->flags & VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED) {
+		log_info("Saving secdataf\n");
+		if (spl_phase() != PHASE_SPL)
+			vboot_secdataf_dump(ctx->secdata_firmware,
+					    sizeof(ctx->secdata_firmware));
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAF, ctx->secdata_firmware,
+					     sizeof(ctx->secdata_firmware));
+		if (ret) {
+			*vberrp = VB2_ERROR_SECDATA_FIRMWARE_WRITE;
+			return log_msg_ret("secdata", ret);
+		}
+		ctx->flags &= ~VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED;
+	}
+
 	if (ctx->flags & VB2_CONTEXT_NVDATA_CHANGED) {
 		log_info("Saving nvdata\n");
 
 		log_buffer(LOGC_VBOOT, LOGL_DEBUG, 0, ctx->nvdata, 1,
 			   sizeof(ctx->nvdata), 0);
 		if (spl_phase() != PHASE_SPL)
-			vboot_dump_nvdata(ctx->nvdata, sizeof(ctx->nvdata));
+			vboot_nvdata_dump(ctx->nvdata, sizeof(ctx->nvdata));
 		ret = cros_nvdata_write_walk(CROS_NV_DATA, ctx->nvdata,
 					     sizeof(ctx->nvdata));
-		if (ret)
-			return log_msg_ret("save nvdata", ret);
-		ctx->flags &= ~VB2_CONTEXT_NVDATA_CHANGED;
-	}
-
-	if (ctx->flags & VB2_CONTEXT_SECDATA_CHANGED) {
-		log_info("Saving secdata\n");
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->secdata,
-					     sizeof(ctx->secdata));
 		if (ret) {
-			return log_msg_ret("secdata", ret);
+			*vberrp = VB2_ERROR_NV_WRITE;
+			return log_msg_ret("save nvdata", ret);
 		}
-		ctx->flags &= ~VB2_CONTEXT_SECDATA_CHANGED;
-	}
-
-	if (ctx->flags & VB2_CONTEXT_SECDATAK_CHANGED) {
-		log_info("Saving secdatak\n");
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK, ctx->secdatak,
-					     sizeof(ctx->secdatak));
-		if (ret)
-			return log_msg_ret("secdatak", ret);
-		ctx->flags &= ~VB2_CONTEXT_SECDATAK_CHANGED;
+		ctx->flags &= ~VB2_CONTEXT_NVDATA_CHANGED;
 	}
 
 	return 0;
@@ -173,10 +189,12 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 
 	for (stagenum = start; !ret && stagenum < VBOOT_STAGE_COUNT;
 	     stagenum++) {
+		enum vb2_return_code vberr;
+
 		if (!stages[stagenum].name)
 			break;
 		ret = vboot_run_stage(vboot, stagenum);
-		save_if_needed(vboot);
+		vboot_save_if_needed(vboot, &vberr);
 
 		if (stagenum == VBOOT_STAGE_VER1_VBINIT &&
 		    ret == VB2_ERROR_API_PHASE1_RECOVERY) {
@@ -185,7 +203,7 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 
 			vboot_set_selected_region(vboot, &fw->spl_rec,
 						  &fw->boot_rec);
-			log_warning("flags %x recovery=%d\n", ctx->flags,
+			log_warning("flags %llx recovery=%d\n", ctx->flags,
 				    vboot_is_recovery(vboot));
 			ret = 0;
 		}
@@ -202,18 +220,11 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 	if (flags & VBOOT_FLAG_CMDLINE)
 		return -EPERM;
 
-	if (ret == VBERROR_REBOOT_REQUIRED) {
+	if (ret == VB2_REQUEST_REBOOT) {
 		log_warning("Cold reboot\n");
 		sysreset_walk_halt(SYSRESET_COLD);
 	} else {
 		switch (vboot->vb_error) {
-		case VBERROR_BIOS_SHELL_REQUESTED:
-			return -EPERM;
-		case VBERROR_EC_REBOOT_TO_RO_REQUIRED:
-		case VBERROR_SHUTDOWN_REQUESTED:
-			log_warning("Power off\n");
-			sysreset_walk_halt(SYSRESET_POWER_OFF);
-			break;
 		default:
 			log_warning("Cold reboot\n");
 			sysreset_walk_halt(SYSRESET_COLD);
@@ -331,3 +342,4 @@ static int cros_load_image_spl(struct spl_image_info *spl_image,
 SPL_LOAD_IMAGE_METHOD("chromium_vboot_spl", 0, BOOT_DEVICE_CROS_VBOOT,
 		      cros_load_image_spl);
 #endif /* CONFIG_SPL_BUILD */
+
