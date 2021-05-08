@@ -31,7 +31,6 @@ bool abuf_realloc(struct abuf *abuf, size_t new_size)
 	if (!new_size) {
 		/* easy case, just need to uninit, freeing any allocation */
 		abuf_uninit(abuf);
-		return true;
 	} else if (abuf->alloced) {
 		/* currently allocated, so need to reallocate */
 		ptr = realloc(abuf->data, new_size);
@@ -39,26 +38,26 @@ bool abuf_realloc(struct abuf *abuf, size_t new_size)
 			return false;
 		abuf->data = ptr;
 		abuf->size = new_size;
-		return true;
 	} else if (new_size <= abuf->size) {
 		/*
 		 * not currently alloced and new size is no larger. Just update
 		 * it. Data is lost off the end if new_size < abuf->size
 		 */
 		abuf->size = new_size;
-		return true;
 	} else {
 		/* not currently allocated and new size is larger. Alloc and
 		 * copy in data. The new space is not inited.
 		 */
-		ptr = memdup(abuf->data, new_size);
+		ptr = malloc(new_size);
 		if (!ptr)
 			return false;
+		memcpy(ptr, abuf->data, min(new_size, abuf->size));
 		abuf->data = ptr;
 		abuf->size = new_size;
 		abuf->alloced = true;
-		return true;
 	}
+
+	return true;
 }
 
 void *abuf_uninit_move(struct abuf *abuf, size_t *sizep)
@@ -72,9 +71,10 @@ void *abuf_uninit_move(struct abuf *abuf, size_t *sizep)
 	if (abuf->alloced) {
 		ptr = abuf->data;
 	} else {
-		ptr = memdup(abuf->data, abuf->size);
+		ptr = malloc(abuf->size);
 		if (!ptr)
 			return NULL;
+		memcpy(ptr, abuf->data, abuf->size);
 	}
 	/* Clear everything out so there is no record of the data */
 	abuf_init(abuf);
