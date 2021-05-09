@@ -111,7 +111,8 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
 	bootstage_mark_name(BOOTSTAGE_VBOOT_FIRST + stagenum, stage->name);
 	ret = (*stage->run)(vboot);
 	if (ret)
-		log_err("Error: stage '%s' returned %x\n", stage->name, ret);
+		log_err("Error: stage '%s' returned %x (%d)\n", stage->name,
+			ret, ret);
 
 	return ret;
 }
@@ -144,8 +145,8 @@ int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp)
 	}
 
 	if (ctx->flags & VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED) {
-		log_info("Saving secdata\n");
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->secdata_firmware,
+		log_info("Saving secdataf\n");
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAF, ctx->secdata_firmware,
 					     sizeof(ctx->secdata_firmware));
 		if (ret) {
 			*vberrp = VB2_ERROR_SECDATA_FIRMWARE_WRITE;

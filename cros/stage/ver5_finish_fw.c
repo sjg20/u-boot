@@ -30,7 +30,7 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 
 	/* Lock TPM */
 	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMLOCK);
-	ret = cros_nvdata_lock_walk(CROS_NV_SECDATA);
+	ret = cros_nvdata_lock_walk(CROS_NV_SECDATAF);
 	if (ret) {
 		log_info("Failed to lock TPM (%x)\n", ret);
 		vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_L_ERROR, 0);

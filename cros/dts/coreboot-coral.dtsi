@@ -54,7 +54,7 @@
 				secdata {
 					u-boot,dm-vpl;
 					compatible = "google,tpm-secdata";
-					nvdata,types = <CROS_NV_SECDATA
+					nvdata,types = <CROS_NV_SECDATAF
 						CROS_NV_SECDATAK
 						CROS_NV_REC_HASH>;
 				};

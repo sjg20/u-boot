@@ -293,7 +293,7 @@
 		nvdata {
 			u-boot,dm-pre-reloc;
 			compatible = "google,tpm-secdata";
-			nvdata,types = <CROS_NV_SECDATA
+			nvdata,types = <CROS_NV_SECDATAF
 				CROS_NV_SECDATAK
 				CROS_NV_REC_HASH>;
 		};
@@ -315,6 +315,7 @@
 	/* Needs to be available prior to relocation */
 	uart0: serial {
 		u-boot,dm-spl;
+		u-boot,dm-tpl;
 		compatible = "sandbox,serial";
 		sandbox,text-colour = "cyan";
 		pinctrl-names = "default";

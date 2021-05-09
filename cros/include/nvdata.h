@@ -19,14 +19,14 @@ struct udevice;
  * enum cros_nvdata_type - types of non-volatile data
  *
  * @CROS_NV_DATA: Standard data (can be lost)
- * @CROS_NV_SECDATA: Secure data (e.g. stored in TPM)
+ * @CROS_NV_SECDATAF: Secure data (e.g. stored in TPM)
  * @CROS_NV_SECDATAK: Secure data for kernel
  * @CROS_NV_REC_HASH: Recovery-mode hash
  * @CROS_NV_VSTORE: Verified boot storage slot 0
  */
 enum cros_nvdata_type {
 	CROS_NV_DATA	= 0,
-	CROS_NV_SECDATA,
+	CROS_NV_SECDATAF,
 	CROS_NV_SECDATAK,
 	CROS_NV_REC_HASH,
 	CROS_NV_VSTORE,

@@ -28,7 +28,7 @@ config NVDATA_TPM
 	  This stores non-volatile data in the EC. This data is retained until
 	  the TPM is reset and cleared, typically after a 'power wash' cycle
 	  causes the device to enter the initial OOBE (Out-of-Box-Experience)
-	  screen. This driver supports CROS_NV_SECDATA, CROS_NV_SECDATAK and
+	  screen. This driver supports CROS_NV_SECDATAF, CROS_NV_SECDATAK and
 	  CROS_NV_REC_HASH types.
 
 config SPL_NVDATA_TPM

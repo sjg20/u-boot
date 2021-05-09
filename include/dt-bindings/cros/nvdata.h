@@ -12,7 +12,7 @@
 /* enum cros_nvdata_type */
 
 #define CROS_NV_DATA		0	/* Standard data (can be lost) */
-#define CROS_NV_SECDATA		1	/* Secure data (e.g. stored in TPM) */
+#define CROS_NV_SECDATAF		1	/* Secure data (e.g. stored in TPM) */
 #define CROS_NV_SECDATAK	2	/* Secure data for kernel */
 #define CROS_NV_REC_HASH	3	/* Recovery-mode hash */
 #define CROS_NV_VSTORE		4	/* Verified boot storage slot 0 */

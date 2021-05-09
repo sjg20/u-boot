@@ -193,7 +193,7 @@ static int dump_secdata(void)
 	u8 secdata[sizeof(struct vb2_secdata_firmware)];
 	int ret;
 
-	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, secdata, sizeof(secdata));
+	ret = cros_nvdata_read_walk(CROS_NV_SECDATAF, secdata, sizeof(secdata));
 	if (ret)
 		return log_msg_ret("read", ret);
 	ret = vboot_secdata_dump(secdata, sizeof(secdata));
@@ -228,7 +228,7 @@ static int do_secdata_set(struct cmd_tbl *cmdtp, int flag, int argc,
 	u8 secdata[sizeof(struct vb2_secdata_firmware)];
 	int ret, i;
 
-	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, secdata, sizeof(secdata));
+	ret = cros_nvdata_read_walk(CROS_NV_SECDATAF, secdata, sizeof(secdata));
 	if (ret) {
 		printf("Cannot read (err=%d)\n", ret);
 		return CMD_RET_FAILURE;
@@ -263,7 +263,7 @@ static int do_secdata_set(struct cmd_tbl *cmdtp, int flag, int argc,
 			printf("Cannot set (err=%d)\n", ret);
 			return CMD_RET_FAILURE;
 		}
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, secdata,
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAF, secdata,
 					     sizeof(secdata));
 		if (ret) {
 			printf("Cannot write (err=%d)\n", ret);

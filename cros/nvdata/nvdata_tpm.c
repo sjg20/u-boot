@@ -23,7 +23,7 @@
 static int get_index(enum cros_nvdata_type type)
 {
 	switch (type) {
-	case CROS_NV_SECDATA:
+	case CROS_NV_SECDATAF:
 		return FIRMWARE_NV_INDEX;
 	case CROS_NV_SECDATAK:
 		return KERNEL_NV_INDEX;
@@ -205,10 +205,10 @@ static int tpm_secdata_lock(struct udevice *dev, enum cros_nvdata_type type)
 		 * is requested, and do nothing otherwise. This ensures that the
 		 * lock is always set.
 		 */
-		if (type == CROS_NV_SECDATA)
+		if (type == CROS_NV_SECDATAF)
 			return tpm_set_global_lock(tpm);
 	} else if (IS_ENABLED(CONFIG_TPM_V2) && version == TPM_V2) {
-		if (type == CROS_NV_SECDATA || type == CROS_NV_REC_HASH)
+		if (type == CROS_NV_SECDATAF || type == CROS_NV_REC_HASH)
 			return log_retz(tpm2_write_lock(tpm, index));
 		else if (type == CROS_NV_SECDATAK)
 			return log_retz(tpm2_disable_platform_hierarchy(tpm));

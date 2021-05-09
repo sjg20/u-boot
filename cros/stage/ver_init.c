@@ -123,7 +123,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 	 * invalid secdata and tell us what to do (=reboot).
 	 */
 	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
-	ret = cros_nvdata_read_walk(CROS_NV_SECDATA, ctx->secdata_firmware,
+	ret = cros_nvdata_read_walk(CROS_NV_SECDATAF, ctx->secdata_firmware,
 				    sizeof(ctx->secdata_firmware));
 	if (ret == -ENOENT)
 		ret = cros_tpm_factory_initialise(vboot);

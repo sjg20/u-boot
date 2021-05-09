@@ -158,7 +158,7 @@ static int setup_spaces(struct vboot_info *vboot)
 			return ret;
 	}
 	vb2api_secdata_firmware_create(ctx);
-	ret = setup_space(vboot->tpm, CROS_NV_SECDATA, version == TPM_V1 ?
+	ret = setup_space(vboot->tpm, CROS_NV_SECDATAF, version == TPM_V1 ?
 			  v1_rw_space_attributes : v2_rw_space_attributes,
 			  NULL, 0, ctx->secdata_firmware,
 			  VB2_SECDATA_FIRMWARE_SIZE);
