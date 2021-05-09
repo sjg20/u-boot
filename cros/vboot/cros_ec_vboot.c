@@ -169,7 +169,7 @@ static enum ec_flash_region vboot_to_ec_region(enum vb2_firmware_selection selec
 
 static int cros_ec_vboot_update_image(struct udevice *dev,
 				      enum vb2_firmware_selection select,
-				      const u8 *image, int image_size)
+				      const struct abuf *buf)
 {
 	struct udevice *ec_dev = dev_get_parent(dev);
 	u32 region_offset, region_size;
@@ -185,9 +185,9 @@ static int cros_ec_vboot_update_image(struct udevice *dev,
 				   &region_size);
 	if (ret)
 		return ret;
-	log_info("Updating region %d, offset=%x, size=%x, image_size=%x\n",
-		 region, region_offset, region_size, image_size);
-	if (image_size > region_size)
+	log_info("Updating region %d, offset=%x, size=%x, image_size=%zx\n",
+		 region, region_offset, region_size, abuf_size(buf));
+	if (abuf_size(buf) > region_size)
 		return log_msg_ret("size", -EINVAL);
 
 	/*
@@ -203,7 +203,8 @@ static int cros_ec_vboot_update_image(struct udevice *dev,
 		return log_msg_ret("erase", ret);
 
 	/* Write the image */
-	ret = cros_ec_flash_write(ec_dev, image, region_offset, image_size);
+	ret = cros_ec_flash_write(ec_dev, abuf_data(buf), region_offset,
+				  abuf_size(buf));
 	if (ret)
 		return log_msg_ret("write", ret);
 

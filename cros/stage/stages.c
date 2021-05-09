@@ -122,13 +122,38 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
  * @vboot: vboot context
  * @return 0 if OK, -ve if save failed
  */
-static int save_if_needed(struct vboot_info *vboot)
+int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp)
 {
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
 
+	*vberrp = VB2_SUCCESS;
 	if (!ctx)
 		return -ENOENT;
+
+	if (ctx->flags & VB2_CONTEXT_SECDATA_KERNEL_CHANGED) {
+		log_info("Saving secdatak\n");
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK,
+					     ctx->secdata_kernel,
+					     sizeof(ctx->secdata_kernel));
+		if (ret) {
+			*vberrp = VB2_ERROR_SECDATA_KERNEL_WRITE;
+			return log_msg_ret("secdatak", ret);
+		}
+		ctx->flags &= ~VB2_CONTEXT_SECDATA_KERNEL_CHANGED;
+	}
+
+	if (ctx->flags & VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED) {
+		log_info("Saving secdata\n");
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->secdata_firmware,
+					     sizeof(ctx->secdata_firmware));
+		if (ret) {
+			*vberrp = VB2_ERROR_SECDATA_FIRMWARE_WRITE;
+			return log_msg_ret("secdata", ret);
+		}
+		ctx->flags &= ~VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED;
+	}
+
 	if (ctx->flags & VB2_CONTEXT_NVDATA_CHANGED) {
 		log_info("Saving nvdata\n");
 
@@ -138,29 +163,11 @@ static int save_if_needed(struct vboot_info *vboot)
 			vboot_dump_nvdata(ctx->nvdata, sizeof(ctx->nvdata));
 		ret = cros_nvdata_write_walk(CROS_NV_DATA, ctx->nvdata,
 					     sizeof(ctx->nvdata));
-		if (ret)
-			return log_msg_ret("save nvdata", ret);
-		ctx->flags &= ~VB2_CONTEXT_NVDATA_CHANGED;
-	}
-
-	if (ctx->flags & VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED) {
-		log_info("Saving secdata\n");
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATA, ctx->secdata_firmware,
-					     sizeof(ctx->secdata_firmware));
 		if (ret) {
-			return log_msg_ret("secdata", ret);
+			*vberrp = VB2_ERROR_NV_WRITE;
+			return log_msg_ret("save nvdata", ret);
 		}
-		ctx->flags &= ~VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED;
-	}
-
-	if (ctx->flags & VB2_CONTEXT_SECDATA_KERNEL_CHANGED) {
-		log_info("Saving secdatak\n");
-		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK,
-					     ctx->secdata_kernel,
-					     sizeof(ctx->secdata_kernel));
-		if (ret)
-			return log_msg_ret("secdatak", ret);
-		ctx->flags &= ~VB2_CONTEXT_SECDATA_KERNEL_CHANGED;
+		ctx->flags &= ~VB2_CONTEXT_NVDATA_CHANGED;
 	}
 
 	return 0;
@@ -174,10 +181,12 @@ int vboot_run_stages(struct vboot_info *vboot, enum vboot_stage_t start,
 
 	for (stagenum = start; !ret && stagenum < VBOOT_STAGE_COUNT;
 	     stagenum++) {
+		enum vb2_return_code vberr;
+
 		if (!stages[stagenum].name)
 			break;
 		ret = vboot_run_stage(vboot, stagenum);
-		save_if_needed(vboot);
+		vboot_save_if_needed(vboot, &vberr);
 
 		if (stagenum == VBOOT_STAGE_VER1_VBINIT &&
 		    ret == VB2_ERROR_API_PHASE1_RECOVERY) {
@@ -325,3 +334,4 @@ static int cros_load_image_spl(struct spl_image_info *spl_image,
 SPL_LOAD_IMAGE_METHOD("chromium_vboot_spl", 0, BOOT_DEVICE_CROS_VBOOT,
 		      cros_load_image_spl);
 #endif /* CONFIG_SPL_BUILD */
+

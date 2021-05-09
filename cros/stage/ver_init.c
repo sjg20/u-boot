@@ -31,17 +31,18 @@
  */
 static int vb2_init_blob(struct vboot_blob *blob, int work_buffer_size)
 {
-	struct vb2_context *ctx = &blob->ctx;
-	int ret;
+// 	struct vb2_context *ctx = &blob->ctx;
+// 	int ret;
 
 	/* initialise the vb2_context */
-	ctx->workbuf_size = work_buffer_size;
-	ctx->workbuf = memalign(VBOOT_CONTEXT_ALIGN, ctx->workbuf_size);
-	if (!ctx->workbuf)
-		return -ENOMEM;
-	ret = vb2_init_context(ctx);
-	if (ret)
-		return log_msg_ret("init_context", ret);
+	//TODO
+// 	ctx->workbuf_size = work_buffer_size;
+// 	ctx->workbuf = memalign(VBOOT_CONTEXT_ALIGN, ctx->workbuf_size);
+// 	if (!ctx->workbuf)
+// 		return -ENOMEM;
+// 	ret = vb2_init_context(ctx);
+// 	if (ret)
+// 		return log_msg_ret("init_context", ret);
 
 	return 0;
 }
@@ -71,7 +72,8 @@ int vboot_ver_init(struct vboot_info *vboot)
 	vboot->blob = blob;
 	ctx = &blob->ctx;
 	vboot->ctx = ctx;
-	ctx->non_vboot_context = vboot;
+	//TODO
+// 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
 
 	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
@@ -85,11 +87,12 @@ int vboot_ver_init(struct vboot_info *vboot)
 
 	/* initialise and read nvdata from non-volatile storage */
 	/* TODO(sjg@chromium.org): Support full-size context */
-	ret = cros_nvdata_read_walk(CROS_NV_DATA, ctx->nvdata, VBNV_BLOCK_SIZE);
+	ret = cros_nvdata_read_walk(CROS_NV_DATA, ctx->nvdata,
+				    VB2_NVDATA_SIZE_V2);
 	if (ret)
 		return log_msg_ret("read nvdata", ret);
 
-	vboot_dump_nvdata(ctx->nvdata, EC_VBNV_BLOCK_SIZE);
+	vboot_dump_nvdata(ctx->nvdata, VB2_NVDATA_SIZE_V2);
 
 	ret = cros_ofnode_flashmap(&vboot->fmap);
 	if (ret)
@@ -132,14 +135,10 @@ int vboot_ver_init(struct vboot_info *vboot)
 		   sizeof(ctx->secdata_firmware), 0);
 
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
-	if (vboot_flag_read_walk(VBOOT_FLAG_DEVELOPER) == 1) {
-		ctx->flags |= VB2_CONTEXT_FORCE_DEVELOPER_MODE;
-		log_info("Enabled developer mode\n");
-	}
 	if (vboot_flag_read_walk(VBOOT_FLAG_RECOVERY) == 1) {
 		ctx->flags |= VB2_CONTEXT_FORCE_RECOVERY_MODE;
 		if (vboot->disable_dev_on_rec)
-			ctx->flags |= VB2_DISABLE_DEVELOPER_MODE;
+			ctx->flags |= VB2_CONTEXT_DISABLE_DEVELOPER_MODE;
 		log_info("Enabled recovery mode\n");
 	}
 

@@ -190,7 +190,7 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 	log_info("Hashing firmware body, expected size %x\n", expected_size);
 
 	/* Start the body hash */
-	ret = vb2api_init_hash(ctx, VB2_HASH_TAG_FW_BODY, &expected_size);
+	ret = vb2api_init_hash(ctx, VB2_HASH_TAG_FW_BODY);
 	if (ret)
 		return log_msg_retz("init hash", ret);
 
@@ -206,12 +206,14 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 		return log_msg_ret("restrict", ret);
 	}
 
-	struct vb2_shared_data *sd = vb2_get_sd(ctx);
-	struct vb2_digest_context *dc = (struct vb2_digest_context *)
-		(ctx->workbuf + sd->workbuf_hash_offset);
+// 	struct vb2_shared_data *sd = vb2_get_sd(ctx);
+// 	struct vb2_digest_context *dc = NULL;
+	//TODO
+		/*(struct vb2_digest_context *)
+		(ctx->workbuf + sd->workbuf_hash_offset);*/
 
-	log_debug("extend, ctx=%p, sd=%p, dc=%p, sd->workbuf_hash_size=%x\n",
-		  ctx, sd, dc, sd->workbuf_hash_size);
+// 	log_debug("extend, ctx=%p, sd=%p, dc=%p, sd->workbuf_hash_size=%x\n",
+// 		  ctx, sd, dc, sd->workbuf_hash_size);
 	/* Extend over the body */
 	for (blk = 0; ; blk++) {
 		int nbytes;

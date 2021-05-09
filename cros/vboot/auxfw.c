@@ -36,7 +36,7 @@ static int locate_aux_fw(struct udevice *dev, struct fmap_entry *entry)
 	return 0;
 }
 
-vb2_error_t VbExCheckAuxFw(enum vb2_auxfw_update_severity *severityp)
+vb2_error_t vb2ex_auxfw_check(enum vb2_auxfw_update_severity *severityp)
 {
 	enum aux_fw_severity max, current;
 	struct udevice *dev;
@@ -143,7 +143,7 @@ static int do_aux_fw_update(struct vboot_info *vboot, struct udevice *dev,
 	return 0;
 }
 
-vb2_error_t VbExUpdateAuxFw(void)
+vb2_error_t vb2ex_auxfw_update(void)
 {
 	struct vboot_info *vboot = vboot_get();
 	struct aux_fw_state state = {0};
@@ -184,3 +184,10 @@ vb2_error_t VbExUpdateAuxFw(void)
 
 	return 0;
 }
+
+vb2_error_t vb2ex_auxfw_finalize(struct vb2_context *ctx)
+{
+	//TODO
+	return 0;
+}
+

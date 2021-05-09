@@ -457,4 +457,14 @@ int vboot_secdata_set(void *secdata, int size, enum secdata_t field, int val);
  */
 int vboot_secdata_get(const void *secdata, int size, enum secdata_t field);
 
+/**
+ * vboot_save_if_needed() - Save non-volatile and/or secure data if changed
+ *
+ * @vboot: vboot context
+ * @vberrp: Returns which part failed (VB2_ERROR_SECDATA_KERNEL_WRITE,
+ *	VB2_ERROR_SECDATA_FIRMWARE_WRITE or VB2_ERROR_NV_WRITE)
+ * @return 0 if OK, -ve if save failed
+ */
+int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp);
+
 #endif /* __CROS_VBOOT_H */

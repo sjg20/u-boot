@@ -32,12 +32,12 @@ struct abuf {
 	bool alloced;
 };
 
-static inline void *abuf_data(struct abuf *abuf)
+static inline void *abuf_data(const struct abuf *abuf)
 {
 	return abuf->data;
 }
 
-static inline size_t abuf_size(struct abuf *abuf)
+static inline size_t abuf_size(const struct abuf *abuf)
 {
 	return abuf->size;
 }

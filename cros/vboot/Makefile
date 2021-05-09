@@ -3,10 +3,11 @@
 # Copyright 2018 Google LLC
 #
 
+obj-y += altfw.o
 obj-y += cros_ec_vboot.o
+obj-y += diag.o
 obj-y += ec.o
 obj-y += handoff.o
-obj-y += legacy.o
 obj-y += misc.o
 obj-y += tlcl_stub.o
 obj-y += utility.o

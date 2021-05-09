@@ -9,6 +9,8 @@
 #ifndef __CROS_VBOOT_EC_H
 #define __CROS_VBOOT_EC_H
 
+struct abuf;
+
 enum {
 	/* Maximum size of the hash value for an EC image */
 	VBOOT_EC_MAX_HASH_SIZE	= 64,
@@ -85,7 +87,7 @@ struct vboot_ec_ops {
 	 * @return 0 if OK, non-zero on error
 	 */
 	int (*update_image)(struct udevice *dev, enum vb2_firmware_selection select,
-			    const u8 *image, int image_size);
+			    const struct abuf *buf);
 
 	/**
 	 * protect() - Lock the selected EC code until the EC is rebooted
@@ -118,7 +120,7 @@ int vboot_ec_disable_jump(struct udevice *dev);
 int vboot_ec_hash_image(struct udevice *dev, enum vb2_firmware_selection select,
 			const u8 **hashp, int *hash_sizep);
 int vboot_ec_update_image(struct udevice *dev, enum vb2_firmware_selection select,
-			  const u8 *image, int image_size);
+			  const struct abuf *buf);
 int vboot_ec_protect(struct udevice *dev, enum vb2_firmware_selection select);
 int vboot_ec_reboot_to_ro(struct udevice *dev);
 

@@ -72,7 +72,7 @@ int vboot_ec_hash_image(struct udevice *dev, enum vb2_firmware_selection select,
 }
 
 int vboot_ec_update_image(struct udevice *dev, enum vb2_firmware_selection select,
-			  const u8 *image, int image_size)
+			  const struct abuf *buf)
 {
 	struct vboot_ec_ops *ops = vboot_ec_get_ops(dev);
 
@@ -81,7 +81,7 @@ int vboot_ec_update_image(struct udevice *dev, enum vb2_firmware_selection selec
 	if (!ops->update_image)
 		return -ENOSYS;
 
-	return ops->update_image(dev, select, image, image_size);
+	return ops->update_image(dev, select, buf);
 }
 
 int vboot_ec_protect(struct udevice *dev, enum vb2_firmware_selection select)

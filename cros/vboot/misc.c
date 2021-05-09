@@ -10,6 +10,7 @@
 #include <log.h>
 #include <vb2_api.h>
 #include <cros/cros_common.h>
+#include <cros/vboot.h>
 #include <cros/vboot_flag.h>
 
 u32 VbExIsShutdownRequested(void)
@@ -47,4 +48,73 @@ u8 VbExOverrideGptEntryPriority(const GptEntry *e)
 u32 VbExGetSwitches(u32 request_mask)
 {
 	return 0;
+}
+
+vb2_error_t vb2ex_commit_data(struct vb2_context *ctx)
+{
+	struct vboot_info *vboot = ctx_to_vboot(ctx);
+	vb2_error_t vberr;
+	int ret;
+
+	ret = vboot_save_if_needed(vboot, &vberr);
+	if (ret) {
+		if (vberr == VB2_ERROR_NV_WRITE) {
+			log_err("write nvdata returned %#x\n", ret);
+			/*
+			 * We can't write to nvdata, so it's impossible to
+			 * trigger * recovery mode.  Skip calling vb2api_fail()
+			 * and just die.
+			 */
+			if (!vboot_is_recovery(vboot))
+			        panic("can't write recovery reason to nvdata");
+			/*
+			 * If we *are* in recovery mode, ignore any error and
+			 * return
+			 */
+			return VB2_SUCCESS;
+			}
+
+		return vberr;
+	}
+
+	return VB2_SUCCESS;
+}
+
+int vb2ex_physical_presence_pressed(void)
+{
+	return 0;
+}
+
+const char *vb2ex_get_debug_info(struct vb2_context *ctx)
+{
+	return "";
+}
+
+const char *vb2ex_get_firmware_log(int reset)
+{
+	return "";
+}
+
+uint32_t vb2ex_prepare_log_screen(enum vb2_screen screen, uint32_t locale_id,
+				  const char *str)
+{
+	//TODO
+	return 0;
+}
+
+vb2_error_t vb2ex_display_ui(enum vb2_screen screen,
+			     uint32_t locale_id,
+			     uint32_t selected_item,
+			     uint32_t disabled_item_mask,
+			     uint32_t hidden_item_mask,
+			     int timer_disabled,
+			     uint32_t current_page,
+			     enum vb2_ui_error error_code)
+{
+	return 0;
+}
+
+uint32_t vb2ex_get_locale_count(void)
+{
+	return 1;
 }

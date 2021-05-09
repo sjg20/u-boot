@@ -84,7 +84,7 @@ void vb2ex_beep(u32 msec, u32 frequency)
 	}
 }
 
-u64 VbExGetTimer(void)
+u32 vb2ex_mtime(void)
 {
 	return timer_get_us();
 }
@@ -98,4 +98,9 @@ void vb2ex_printf(const char *func, const char *fmt, ...)
 		printf("%s: ", func);
 	vprintf(fmt, ap);
 	va_end(ap);
+}
+
+void vb2ex_abort(void)
+{
+        panic("vboot has aborted execution; exit\n");
 }

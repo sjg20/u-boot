@@ -22,7 +22,8 @@ int vboot_spl_init(struct vboot_info *vboot)
 	vboot->blob = blob;
 	ctx = &blob->ctx;
 	vboot->ctx = ctx;
-	ctx->non_vboot_context = vboot;
+	//TODO
+// 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
 
 	ret = uclass_first_device_err(UCLASS_CROS_FWSTORE, &vboot->fwstore);
