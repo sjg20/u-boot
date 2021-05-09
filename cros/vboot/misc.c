@@ -8,6 +8,7 @@
 #include <common.h>
 #include <gpt.h>
 #include <log.h>
+#include <malloc.h>
 #include <vb2_api.h>
 #include <cros/cros_common.h>
 #include <cros/vboot.h>
@@ -117,4 +118,9 @@ vb2_error_t vb2ex_display_ui(enum vb2_screen screen,
 uint32_t vb2ex_get_locale_count(void)
 {
 	return 1;
+}
+
+void *vbex_malloc(size_t size)
+{
+	return malloc(size);
 }
