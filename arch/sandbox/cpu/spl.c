@@ -6,6 +6,7 @@
 #include <common.h>
 #include <dm.h>
 #include <hang.h>
+#include <handoff.h>
 #include <init.h>
 #include <log.h>
 #include <os.h>
@@ -73,7 +74,7 @@ void spl_board_init(void)
 		/* continue execution into U-Boot */
 	}
 
-	if (IS_ENABLED(CONFIG_CHROMEOS_VBOOT)) {
+	if (CONFIG_IS_ENABLED(CHROMEOS_VBOOT)) {
 		void cros_do_stage(void);
 
 		cros_do_stage();

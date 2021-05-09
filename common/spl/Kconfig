@@ -1692,6 +1692,16 @@ config VPL_FRAMEWORK
 	  This framework supports MMC, NAND and YMODEM and other methods
 	  loading of U-Boot's next stage. If unsure, say Y.
 
+config VPL_HANDOFF
+	bool "Pass hand-off information from VPL to SPL"
+	depends on HANDOFF && VPL_BLOBLIST
+	default y
+	help
+	  This option enables VPL to write handoff information. This can be
+	  used to pass information like the size of SDRAM from VPL to SPL. Also
+	  VPL can receive information from TPL in the same place if that is
+	  enabled.
+
 config VPL_LIBCOMMON_SUPPORT
 	bool "Support common libraries"
 	default y if SPL_LIBCOMMON_SUPPORT
@@ -1717,6 +1727,14 @@ config VPL_DRIVERS_MISC_SUPPORT
 	  tasks that don't fall nicely into other categories, Enable this
 	  option to build the drivers in drivers/misc as part of an VPL
 	  build, for those that support building in VPL (not all drivers do).
+
+config VPL_ENV_SUPPORT
+	bool "Support an environment"
+	help
+	  Enable environment support in VPL. The U-Boot environment provides
+	  a number of settings (essentially name/value pairs) which can
+	  control many aspects of U-Boot's operation. Enabling this option will
+	  make env_get() and env_set() available in VSPL.
 
 config VPL_GPIO_SUPPORT
 	bool "Support GPIO in VPL"
