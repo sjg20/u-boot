@@ -549,17 +549,6 @@ config SPL_HASH_SUPPORT
 	  this option to build system-specific drivers for hash acceleration
 	  as part of an SPL build.
 
-config TPL_HASH_SUPPORT
-	bool "Support hashing drivers in TPL"
-	depends on TPL
-	select SHA1
-	select SHA256
-	help
-	  Enable hashing drivers in SPL. These drivers can be used to
-	  accelerate secure boot processing in secure applications. Enable
-	  this option to build system-specific drivers for hash acceleration
-	  as part of an SPL build.
-
 config SPL_DMA
 	bool "Support DMA drivers"
 	help
@@ -1542,6 +1531,17 @@ config TPL_GPIO_SUPPORT
 	  for example. Enable this option to build the drivers in
 	  drivers/gpio as part of an TPL build.
 
+config TPL_HASH_SUPPORT
+	bool "Support hashing drivers in TPL"
+	depends on TPL
+	select SHA1
+	select SHA256
+	help
+	  Enable hashing drivers in SPL. These drivers can be used to
+	  accelerate secure boot processing in secure applications. Enable
+	  this option to build system-specific drivers for hash acceleration
+	  as part of an SPL build.
+
 config TPL_I2C_SUPPORT
 	bool "Support I2C"
 	help
@@ -1747,6 +1747,17 @@ config VPL_GPIO_SUPPORT
 	  input. GPIOs can be useful in TPL to enable a 'sign-of-life' LED,
 	  for example. Enable this option to build the drivers in
 	  drivers/gpio as part of an TPL build.
+
+config VPL_HASH_SUPPORT
+	bool "Support hashing drivers in VPL"
+	depends on VPL
+	select SHA1
+	select SHA256
+	help
+	  Enable hashing drivers in SPL. These drivers can be used to
+	  accelerate secure boot processing in secure applications. Enable
+	  this option to build system-specific drivers for hash acceleration
+	  as part of an SPL build.
 
 config VPL_I2C_SUPPORT
 	bool "Support I2C in VPL"

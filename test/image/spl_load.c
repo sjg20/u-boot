@@ -68,7 +68,7 @@ static int spl_test_load(struct unit_test_state *uts)
 	load.bl_len = 512;
 	load.read = read_fit_image;
 
-	ret = os_find_u_boot(fname, sizeof(fname), true);
+	ret = sandbox_find_next_stage(fname, sizeof(fname), true);
 	if (ret) {
 		printf("(%s not found, error %d)\n", fname, ret);
 		return ret;

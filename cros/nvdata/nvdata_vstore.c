@@ -12,7 +12,7 @@
 #include <log.h>
 #include <cros/nvdata.h>
 
-static int cros_ec_nvdata_read(struct udevice *dev, enum cros_nvdata_type type,
+static int cros_ec_vstore_read(struct udevice *dev, enum cros_nvdata_type type,
 			       u8 *data, int size)
 {
 	struct udevice *cros_ec = dev_get_parent(dev);
@@ -50,7 +50,7 @@ static int cros_ec_nvdata_read(struct udevice *dev, enum cros_nvdata_type type,
 	return 0;
 }
 
-static int cros_ec_nvdata_write(struct udevice *dev, enum cros_nvdata_type type,
+static int cros_ec_vstore_write(struct udevice *dev, enum cros_nvdata_type type,
 				const u8 *data, int size)
 {
 	struct udevice *cros_ec = dev_get_parent(dev);
@@ -63,19 +63,19 @@ static int cros_ec_nvdata_write(struct udevice *dev, enum cros_nvdata_type type,
 	return cros_ec_write_nvdata(cros_ec, data, size);
 }
 
-static const struct cros_nvdata_ops cros_ec_nvdata_ops = {
-	.read	= cros_ec_nvdata_read,
-	.write	= cros_ec_nvdata_write,
+static const struct cros_nvdata_ops cros_ec_vstore_ops = {
+	.read	= cros_ec_vstore_read,
+	.write	= cros_ec_vstore_write,
 };
 
 static const struct udevice_id cros_ec_nvdata_ids[] = {
-	{ .compatible = "google,cros-ec-nvdata" },
+	{ .compatible = "google,cros-ec-vstore" },
 	{ }
 };
 
-U_BOOT_DRIVER(cros_ec_nvdata_drv) = {
-	.name		= "cros-ec-nvdata",
+U_BOOT_DRIVER(cros_ec_vstore) = {
+	.name		= "cros_ec_vstore",
 	.id		= UCLASS_CROS_NVDATA,
 	.of_match	= cros_ec_nvdata_ids,
-	.ops		= &cros_ec_nvdata_ops,
+	.ops		= &cros_ec_vstore_ops,
 };

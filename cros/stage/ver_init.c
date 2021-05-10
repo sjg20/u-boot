@@ -10,6 +10,7 @@
 #include <ec_commands.h>
 #include <dm.h>
 #include <log.h>
+#include <spl.h>
 #include <cros/cros_common.h>
 #include <cros/nvdata.h>
 #include <cros/vboot.h>
@@ -53,6 +54,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 	struct vb2_context *ctx;
 	int ret;
 
+	printf("vboot starting in %s\n", spl_phase_name(spl_phase()));
 	log_debug("vboot is at %p, size %lx, bloblist %p\n", vboot,
 		  (ulong)sizeof(*vboot), gd->bloblist);
 	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, sizeof(struct vboot_blob),

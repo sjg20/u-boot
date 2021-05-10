@@ -5,6 +5,7 @@
  */
 
 #define LOG_CATEGORY UCLASS_CROS_NVDATA
+#define LOG_DEBUG
 
 #include <common.h>
 #include <dm.h>

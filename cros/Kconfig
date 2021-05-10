@@ -119,6 +119,7 @@ config VPL_CHROMEOS
 	imply VPL_NVDATA_CMOS if X86
 	imply VPL_FWSTORE_SPI_FLASH
 	imply VPL_HANDOFF
+	imply VPL_TPM
 
 config TPL_CHROMEOS_VBOOT_A
 	bool "Run vboot stage A (SPL selection) in TPL"
