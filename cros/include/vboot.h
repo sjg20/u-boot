@@ -401,12 +401,12 @@ int cros_tpm_extend_pcrs(struct vboot_info *vboot);
 int cros_tpm_factory_initialise(struct vboot_info *vboot);
 
 /**
- * cros_tpm_setup() - Set up the TPM ready for use
+ * vboot_setup_tpm() - Set up the TPM ready for use
  *
  * @vboot: Pointer to vboot structure
  * @return 0 if OK, non-zero on error
  */
-int cros_tpm_setup(struct vboot_info *vboot);
+int vboot_setup_tpm(struct vboot_info *vboot);
 
 /**
  * vboot_dump_nvdata() - Dump the vboot non-volatile data

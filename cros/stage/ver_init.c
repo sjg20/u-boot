@@ -81,11 +81,21 @@ int vboot_ver_init(struct vboot_info *vboot)
 	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
 	if (ret)
 		return log_msg_ret("find TPM", ret);
-	ret = cros_tpm_setup(vboot);
+
+	/*
+	 * Read secdata from TPM. Initialise TPM if secdata not found. We don't
+	 * check the return value here because vb2api_fw_phase1 will catch
+	 * invalid secdata and tell us what to do (=reboot).
+	 */
+	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
+	ret = vboot_setup_tpm(vboot);
 	if (ret) {
 		log_err("TPM setup failed (err=%x)\n", ret);
-		return log_msg_ret("tpm_setup", -EIO);
+	} else {
+		antirollback_read_space_firmware(ctx);
+		antirollback_read_space_kernel(ctx);
 	}
+	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
 
 	/* initialise and read nvdata from non-volatile storage */
 	/* TODO(sjg@chromium.org): Support full-size context */
@@ -119,24 +129,6 @@ int vboot_ver_init(struct vboot_info *vboot)
 	    vboot_platform_is_resuming())
 		ctx->flags |= VB2_CONTEXT_S3_RESUME;
 
-	/*
-	 * Read secdata from TPM. initialise TPM if secdata not found. We don't
-	 * check the return value here because vb2api_fw_phase1 will catch
-	 * invalid secdata and tell us what to do (=reboot).
-	 */
-	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
-	ret = cros_nvdata_read_walk(CROS_NV_SECDATAF, ctx->secdata_firmware,
-				    sizeof(ctx->secdata_firmware));
-	if (ret == -ENOENT)
-		ret = cros_tpm_factory_initialise(vboot);
-	else if (ret)
-		return log_msg_ret("Cannot read secdata", ret);
-	vboot_secdata_dump(ctx->secdata_firmware, sizeof(ctx->secdata_firmware));
-	log_debug("secdata:\n");
-	log_buffer(LOGC_VBOOT, LOGL_DEBUG, 0, ctx->secdata_firmware, 1,
-		   sizeof(ctx->secdata_firmware), 0);
-
-	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
 	if (vboot_flag_read_walk(VBOOT_FLAG_RECOVERY) == 1) {
 		ctx->flags |= VB2_CONTEXT_FORCE_RECOVERY_MODE;
 		if (vboot->disable_dev_on_rec)
