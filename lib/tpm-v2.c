@@ -659,3 +659,9 @@ u32 tpm2_disable_platform_hierarchy(struct udevice *dev)
 
 	return 0;
 }
+
+u32 tpm2_cr50_enable_nvcommits(struct udevice *dev)
+{
+	//TODO
+	return 0;
+}

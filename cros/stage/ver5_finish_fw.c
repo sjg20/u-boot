@@ -40,7 +40,7 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 
 	/* Lock rec hash space if available */
 	if (vboot->has_rec_mode_mrc) {
-		ret = cros_nvdata_lock_walk(CROS_NV_REC_HASH);
+		ret = cros_nvdata_lock_walk(CROS_NV_MRC_REC_HASH);
 		if (ret) {
 			log_info("Failed to lock rec hash space(%x)\n", ret);
 			vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_REC_HASH_L_ERROR,

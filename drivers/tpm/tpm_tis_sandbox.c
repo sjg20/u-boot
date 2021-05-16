@@ -15,7 +15,7 @@
 #define KERNEL_NV_INDEX			0x1008
 #define BACKUP_NV_INDEX                 0x1009
 #define FWMP_NV_INDEX                   0x100a
-#define REC_HASH_NV_INDEX               0x100b
+#define MRC_REC_HASH_NV_INDEX               0x100b
 #define REC_HASH_NV_SIZE                VB2_SHA256_DIGEST_SIZE
 
 #define NV_DATA_PUBLIC_PERMISSIONS_OFFSET	60
@@ -151,7 +151,7 @@ static int index_to_seq(uint32_t index)
 		return NV_SEQ_BACKUP;
 	case FWMP_NV_INDEX:
 		return NV_SEQ_FWMP;
-	case REC_HASH_NV_INDEX:
+	case MRC_REC_HASH_NV_INDEX:
 		return NV_SEQ_REC_HASH;
 	case 0:
 		return NV_GLOBAL_LOCK;

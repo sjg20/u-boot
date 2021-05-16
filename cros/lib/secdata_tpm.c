@@ -1,11 +1,8 @@
-// SPDX-License-Identifier:     BSD-3-Clause
+/* SPDX-License-Identifier: BSD-3-Clause */
+
 /*
  * Functions for querying, manipulating and locking rollback indices
  * stored in the TPM NVRAM.
- *
- * Taken from coreboot file secdata_tpm.c
- *
- * Copyright 2018 Google LLC
  */
 
 #define LOG_CATEGORY LOGC_VBOOT
@@ -14,30 +11,115 @@
 #include <log.h>
 #include <tpm-common.h>
 #include <tpm_api.h>
-#include <cros/nvdata.h>
+#include <cros/antirollback.h>
 #include <cros/cros_common.h>
+#include <cros/nvdata.h>
 #include <cros/vboot.h>
 
+#if 0
+#include <security/vboot/antirollback.h>
+#include <security/vboot/tpm_common.h>
+#include <security/tpm/tspi.h>
+#include <security/tpm/tss.h>
+#include <security/tpm/tss/tcg-1.2/tss_structures.h>
+#include <vb2_api.h>
+#include <console/console.h>
+
+#define log_debug(format, args...) \
+	printk(BIOS_INFO, "%s():%d: " format,  __func__, __LINE__, ## args)
+
+#define RETURN_ON_FAILURE(tpm_cmd) do {				\
+		u32 result_;					\
+		if ((result_ = (tpm_cmd)) != TPM_SUCCESS) {		\
+			log_debug("Antirollback: %08x returned by " #tpm_cmd \
+				 "\n", (int)result_);			\
+			return result_;					\
+		}							\
+	} while (0)
+
+#endif
+
+static int read_space_firmware(struct vb2_context *ctx)
+{
+	int ret;
+
+	ret = cros_nvdata_read_walk(CROS_NV_SECDATAF, ctx->secdata_firmware,
+				    VB2_SECDATA_FIRMWARE_SIZE);
+	if (ret)
+		return log_msg_ret("read", ret);
+
+	return 0;
+}
+
+int antirollback_read_space_kernel(const struct vboot_info *vboot)
+{
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
+	u8 size;
+	int ret;
+
+	if (tpm_is_v1(vboot->tpm)) {
+		/*
+		 * Before reading the kernel space, verify its permissions. If
+		 * the kernel space has the wrong permission, we give up. This
+		 * will need to be fixed by the recovery kernel. We will have
+		 * to worry about this because at any time (even with PP turned
+		 * off) the TPM owner can remove and redefine a PP-protected
+		 * space (but not write to it).
+		 */
+		u32 perms;
+
+		ret = tpm_get_permissions(vboot->tpm, KERNEL_NV_INDEX, &perms);
+		if (ret)
+			return log_msg_retz("gperm", ret);
+
+		if (perms != TPM_NV_PER_PPWRITE) {
+			log_err("TPM: invalid secdata_kernel permissions\n");
+			return log_msg_ret("perm", -EBADFD);
+		}
+	}
+
+	size = VB2_SECDATA_KERNEL_MIN_SIZE;
+	ret = cros_nvdata_read_walk(CROS_NV_SECDATAK, ctx->secdata_kernel,
+				    size);
+	if (ret)
+		return log_msg_ret("read1", ret);
+
+	if (vb2api_secdata_kernel_check(ctx, &size)
+	    == VB2_ERROR_SECDATA_KERNEL_INCOMPLETE) {
+		/* Re-read. vboot will run the check and handle errors */
+		ret = cros_nvdata_read_walk(CROS_NV_SECDATAK,
+					    ctx->secdata_kernel, size);
+		if (ret)
+			return log_msg_ret("read1", ret);
+	}
+
+	return 0;
+}
+
+static int read_space_mrc_hash(u32 index, u8 *data)
+{
+	int ret;
+
+	ret = cros_nvdata_read_walk(CROS_NV_MRC_REC_HASH, data, HASH_NV_SIZE);
+	if (ret)
+		return log_msg_ret("read1", ret);
+
+	return 0;
+}
+
 /*
- * Default data when setting up the TPM.
- *
- * This is derived from rollback_index.h of vboot_reference. see struct
- * RollbackSpaceKernel for details.
+ * This is used to initialize the TPM space for recovery hash after defining
+ * it. Since there is no data available to calculate hash at the point where TPM
+ * space is defined, initialize it to all 0s.
  */
-static const u8 secdata_kernel[] = {
-	0x02,
-	0x4c, 0x57, 0x52, 0x47,
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00,
-	0xe8,
-};
+static const uint8_t mrc_hash_data[HASH_NV_SIZE] = { };
 
 /*
  * Different sets of NVRAM space attributes apply to the "ro" spaces,
  * i.e. those which should not be possible to delete or modify once
  * the RO exits, and the rest of the NVRAM spaces.
  */
-static const enum tpm_index_attrs v2_ro_space_attributes =
+static const enum tpm_index_attrs ro_space_attributes =
 	TPMA_NV_PPWRITE |
 	TPMA_NV_AUTHREAD |
 	TPMA_NV_PPREAD |
@@ -45,7 +127,7 @@ static const enum tpm_index_attrs v2_ro_space_attributes =
 	TPMA_NV_WRITE_STCLEAR |
 	TPMA_NV_POLICY_DELETE;
 
-static const u32 v2_rw_space_attributes =
+static const u32 rw_space_attributes =
 	TPMA_NV_PPWRITE |
 	TPMA_NV_AUTHREAD |
 	TPMA_NV_PPREAD |
@@ -84,144 +166,53 @@ static const u32 v2_rw_space_attributes =
  * at early RO stages (before extending PCR0) or from recovery mode.
  */
 static const uint8_t pcr0_allowed_policy[] = {
-	0x44, 0x44, 0x79, 0x00, 0xCB, 0xB8, 0x3F, 0x5B, 0x15, 0x76, 0x56,
-	0x50, 0xEF, 0x96, 0x98, 0x0A, 0x2B, 0x96, 0x6E, 0xA9, 0x09, 0x04,
-	0x4A, 0x01, 0xB8, 0x5F, 0xA5, 0x4A, 0x96, 0xFC, 0x59, 0x84};
+	0x44, 0x44, 0x79, 0x00, 0xcb, 0xb8, 0x3f, 0x5b, 0x15, 0x76, 0x56,
+	0x50, 0xef, 0x96, 0x98, 0x0a, 0x2b, 0x96, 0x6e, 0xa9, 0x09, 0x04,
+	0x4a, 0x01, 0xb8, 0x5f, 0xa5, 0x4a, 0x96, 0xfc, 0x59, 0x84};
 
-static const int v1_ro_space_attributes = TPM_NV_PER_GLOBALLOCK |
-			TPM_NV_PER_PPWRITE;
-static const int v1_rw_space_attributes = TPM_NV_PER_GLOBALLOCK |
-			TPM_NV_PER_PPWRITE;
-static const u8 v1_pcr0_unchanged_policy[0];
-
-static uint32_t set_space(const char *name, uint32_t index, const void *data,
-			  uint32_t length, const TPMA_NV nv_attributes,
-			  const uint8_t *nv_policy, size_t nv_policy_size)
+static int safe_write(enum cros_nvdata_type type, const void *data, u32 length)
 {
-	uint32_t rv;
-
-	rv = tlcl_define_space(index, length, nv_attributes, nv_policy,
-			       nv_policy_size);
-	if (rv == TPM_E_NV_DEFINED) {
-		/*
-		 * Continue with writing: it may be defined, but not written
-		 * to. In that case a subsequent tlcl_read() would still return
-		 * TPM_E_BADINDEX on TPM 2.0. The cases when some non-firmware
-		 * space is defined while the firmware space is not there
-		 * should be rare (interrupted initialization), so no big harm
-		 * in writing once again even if it was written already.
-		 */
-		VBDEBUG("%s: %s space already exists\n", __func__, name);
-		rv = TPM_SUCCESS;
-	}
-
-	if (rv != TPM_SUCCESS)
-		return rv;
-
-	return safe_write(index, data, length);
-}
-
-static uint32_t read_space_firmware(struct vb2_context *ctx)
-{
-	RETURN_ON_FAILURE(tlcl_read(FIRMWARE_NV_INDEX,
-				    ctx->secdata_firmware,
-				    VB2_SECDATA_FIRMWARE_SIZE));
-	return TPM_SUCCESS;
-}
-
-uint32_t antirollback_read_space_kernel(struct vb2_context *ctx)
-{
-	if (!CONFIG(TPM2)) {
-		/*
-		 * Before reading the kernel space, verify its permissions. If
-		 * the kernel space has the wrong permission, we give up. This
-		 * will need to be fixed by the recovery kernel. We will have
-		 * to worry about this because at any time (even with PP turned
-		 * off) the TPM owner can remove and redefine a PP-protected
-		 * space (but not write to it).
-		 */
-		uint32_t perms;
-
-		RETURN_ON_FAILURE(tlcl_get_permissions(KERNEL_NV_INDEX,
-						       &perms));
-		if (perms != TPM_NV_PER_PPWRITE) {
-			printk(BIOS_ERR,
-			       "TPM: invalid secdata_kernel permissions\n");
-			return TPM_E_CORRUPTED_STATE;
-		}
-	}
-
-	uint8_t size = VB2_SECDATA_KERNEL_MIN_SIZE;
-
-	RETURN_ON_FAILURE(tlcl_read(KERNEL_NV_INDEX, ctx->secdata_kernel,
-				    size));
-
-	if (vb2api_secdata_kernel_check(ctx, &size)
-	    == VB2_ERROR_SECDATA_KERNEL_INCOMPLETE)
-		/* Re-read. vboot will run the check and handle errors. */
-		RETURN_ON_FAILURE(tlcl_read(KERNEL_NV_INDEX,
-					    ctx->secdata_kernel, size));
-
-	return TPM_SUCCESS;
-}
-
-/*
- * This is used to initialise the TPM space for recovery hash after defining
- * it. Since there is no data available to calculate hash at the point where TPM
- * space is defined, initialise it to all 0s.
- */
-static const u8 rec_hash_data[REC_HASH_NV_SIZE] = {};
-
-static int extend_pcr(struct vboot_info *vboot, int pcr,
-		      enum vb2_pcr_digest which_digest)
-{
-	u8 buffer[VB2_PCR_DIGEST_RECOMMENDED_SIZE];
-	u8 out[VB2_PCR_DIGEST_RECOMMENDED_SIZE];
-	struct vb2_context *ctx = vboot_get_ctx(vboot);
-	u32 size = sizeof(buffer);
 	int ret;
 
-	ret = vb2api_get_pcr_digest(ctx, which_digest, buffer, &size);
+	ret = cros_nvdata_write_walk(type, data, length);
 	if (ret)
-		return log_msg_retz("get", ret);
-	if (size < TPM_PCR_MINIMUM_DIGEST_SIZE)
-		return log_msg_retz("size", VB2_ERROR_UNKNOWN);
-
-	ret = tpm_pcr_extend(vboot->tpm, pcr, buffer, out);
-	if (ret)
-		return log_msg_retz("extend", VB2_ERROR_UNKNOWN);
+		return log_msg_ret("fwrite", -EIO);
 
 	return 0;
 }
 
-int cros_tpm_extend_pcrs(struct vboot_info *vboot)
+static int set_space(const char *name, enum cros_nvdata_type type,
+		     const void *data, u32 length, const uint nv_attributes,
+		     const uint8_t *nv_policy, size_t nv_policy_size)
 {
 	int ret;
 
-	ret = extend_pcr(vboot, 0, BOOT_MODE_PCR);
+	ret = cros_nvdata_setup_walk(type, nv_attributes, length, nv_policy,
+				     nv_policy_size);
 	if (ret)
-		return log_msg_retz("boot_mode", ret);
-	ret = extend_pcr(vboot, 1, HWID_DIGEST_PCR);
+		return log_msg_ret("setup", -EIO);
+
+	ret = safe_write(type, data, length);
 	if (ret)
-		return log_msg_retz("hwid", ret);
+		return log_msg_ret("write", -EIO);
 
 	return 0;
 }
 
-static uint32_t set_firmware_space(const void *firmware_blob)
+static u32 set_firmware_space(const void *firmware_blob)
 {
 	return set_space("firmware", FIRMWARE_NV_INDEX, firmware_blob,
 			 VB2_SECDATA_FIRMWARE_SIZE, ro_space_attributes,
 			 pcr0_allowed_policy, sizeof(pcr0_allowed_policy));
 }
 
-static uint32_t set_kernel_space(const void *kernel_blob)
+static u32 set_kernel_space(const void *kernel_blob)
 {
 	return set_space("kernel", KERNEL_NV_INDEX, kernel_blob,
 			 VB2_SECDATA_KERNEL_SIZE, rw_space_attributes, NULL, 0);
 }
 
-static uint32_t set_mrc_hash_space(uint32_t index, const uint8_t *data)
+static u32 set_mrc_hash_space(u32 index, const uint8_t *data)
 {
 	if (index == MRC_REC_HASH_NV_INDEX) {
 		return set_space("RO MRC Hash", index, data, HASH_NV_SIZE,
@@ -233,40 +224,26 @@ static uint32_t set_mrc_hash_space(uint32_t index, const uint8_t *data)
 	}
 }
 
-static int setup_space(struct udevice *dev, enum cros_nvdata_type type,
-		       uint attr, const void *nv_policy, uint nv_policy_size,
-		       const void *data, uint size)
+static int v2_factory_initialize_tpm(struct vboot_info *vboot)
 {
-	int ret;
-
-	ret = cros_nvdata_setup_walk(type, attr, size, nv_policy,
-				     nv_policy_size);
-	if (ret)
-		return ret;
-	ret = cros_nvdata_write_walk(type, data, size);
-	if (ret)
-		return ret;
-
-	return 0;
-}
-
-static int setup_spaces(struct vboot_info *vboot)
-{
-	enum tpm_version version = tpm_get_version(vboot->tpm);
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
+
+	vb2api_secdata_kernel_create(ctx);
+
+	ret = tpm_force_clear(vboot->tpm);
+	if (ret != TPM_SUCCESS)
+		return log_msg_ret("clear", -EIO);
 
 	/*
 	 * Of all NVRAM spaces defined by this function the firmware space
 	 * must be defined last, because its existence is considered an
-	 * indication that TPM factory initialisation was successfully
+	 * indication that TPM factory initialization was successfully
 	 * completed.
 	 */
-	ret = setup_space(vboot->tpm, CROS_NV_SECDATAK, version == TPM_V1 ?
-			  v1_rw_space_attributes : v2_rw_space_attributes,
-			  NULL, 0, secdata_kernel, sizeof(secdata_kernel));
+	ret = set_kernel_space(ctx->secdata_kernel);
 	if (ret)
-		return ret;
+		return log_msg_ret("kern", ret);
 
 	/*
 	 * Define and set rec hash space, if available.  No need to
@@ -276,92 +253,84 @@ static int setup_spaces(struct vboot_info *vboot)
 	 * our hands.
 	 */
 	if (vboot->has_rec_mode_mrc) {
-		ret = setup_space(vboot->tpm, CROS_NV_REC_HASH,
-				  version == TPM_V1 ? v1_ro_space_attributes :
-				  v2_ro_space_attributes,
-				  version == TPM_V1 ? v1_pcr0_unchanged_policy :
-				  v2_pcr0_unchanged_policy,
-				  version == TPM_V1 ?
-				  sizeof(v1_pcr0_unchanged_policy) :
-				  sizeof(v2_pcr0_unchanged_policy),
-				  rec_hash_data, sizeof(rec_hash_data));
+		ret = set_mrc_hash_space(CROS_NV_MRC_REC_HASH, mrc_hash_data);
 		if (ret)
-			return ret;
+			return log_msg_ret("rec", ret);
 	}
-	vb2api_secdata_firmware_create(ctx);
-	ret = setup_space(vboot->tpm, CROS_NV_SECDATAF, version == TPM_V1 ?
-			  v1_rw_space_attributes : v2_rw_space_attributes,
-			  NULL, 0, ctx->secdata_firmware,
-			  VB2_SECDATA_FIRMWARE_SIZE);
+
+	ret = set_firmware_space(ctx->secdata_firmware);
 	if (ret)
-		return ret;
+		return log_msg_ret("fw", ret);
+
+	return TPM_SUCCESS;
+}
+
+int antirollback_lock_space_firmware(void)
+{
+	int ret;
+
+	ret = cros_nvdata_lock_walk(CROS_NV_SECDATAF);
+	if (ret)
+		return log_msg_ret("lock", ret);
 
 	return 0;
 }
 
-uint32_t antirollback_lock_space_firmware(void)
-{
-	return tlcl_lock_nv_write(FIRMWARE_NV_INDEX);
-}
-
-uint32_t antirollback_read_space_mrc_hash(uint32_t index, uint8_t *data, uint32_t size)
+int antirollback_read_space_mrc_hash(enum cros_nvdata_type type, uint8_t *data,
+				     u32 size)
 {
 	if (size != HASH_NV_SIZE) {
-		VBDEBUG("TPM: Incorrect buffer size for hash idx 0x%x. "
-			"(Expected=0x%x Actual=0x%x).\n", index, HASH_NV_SIZE,
+		log_debug("TPM: Incorrect buffer size for hash type 0x%x. "
+			"(Expected=0x%x Actual=0x%x).\n", type, HASH_NV_SIZE,
 			size);
 		return TPM_E_READ_FAILURE;
 	}
-	return read_space_mrc_hash(index, data);
+
+	return read_space_mrc_hash(type, data);
 }
 
-uint32_t antirollback_write_space_mrc_hash(uint32_t index, const uint8_t *data, uint32_t size)
+int antirollback_write_space_mrc_hash(enum cros_nvdata_type type,
+				      const uint8_t *data, u32 size)
 {
 	uint8_t spc_data[HASH_NV_SIZE];
-	uint32_t rv;
+	int ret;
 
 	if (size != HASH_NV_SIZE) {
-		VBDEBUG("TPM: Incorrect buffer size for hash idx 0x%x. "
-			"(Expected=0x%x Actual=0x%x).\n", index, HASH_NV_SIZE,
+		log_debug("TPM: Incorrect buffer size for hash type 0x%x. "
+			"(Expected=0x%x Actual=0x%x).\n", type, HASH_NV_SIZE,
 			size);
 		return TPM_E_WRITE_FAILURE;
 	}
 
-	rv = read_space_mrc_hash(index, spc_data);
-	if (rv == TPM_E_BADINDEX) {
+	ret = read_space_mrc_hash(type, spc_data);
+	if (ret == -ENOENT) {
 		/*
 		 * If space is not defined already for hash, define
 		 * new space.
 		 */
-		VBDEBUG("TPM: Initializing hash space.\n");
-		return set_mrc_hash_space(index, data);
+		log_debug("TPM: Initializing hash space.\n");
+		return set_mrc_hash_space(type, data);
 	}
+	if (ret != TPM_SUCCESS)
+		return ret;
 
-	if (rv != TPM_SUCCESS)
-		return rv;
-
-	return safe_write(index, data, size);
+	return safe_write(type, data, size);
 }
 
-uint32_t antirollback_lock_space_mrc_hash(uint32_t index)
-{
-	return tlcl_lock_nv_write(index);
-}
-
-static u32 v2_factory_initialise_tpm(struct vboot_info *vboot)
+int antirollback_lock_space_mrc_hash(enum cros_nvdata_type type)
 {
 	int ret;
 
-	log_warning("Setting up TPM for first time from factory\n");
-	ret = tpm_force_clear(vboot->tpm);
-	if (ret)
-		return ret;
+	ret = cros_nvdata_lock_walk(CROS_NV_SECDATAF);
+	if (ret != TPM_SUCCESS)
+		return log_msg_ret("flags", ret);
 
-	return setup_spaces(vboot);
+	return 0;
 }
 
-static int v1_factory_initialise_tpm(struct vboot_info *vboot)
+static int v1_factory_initialize_tpm(struct vboot_info *vboot)
 {
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	struct tpm_permanent_flags pflags;
 	int ret;
 
@@ -369,71 +338,83 @@ static int v1_factory_initialise_tpm(struct vboot_info *vboot)
 
 	ret = tpm1_get_permanent_flags(vboot->tpm, &pflags);
 	if (ret != TPM_SUCCESS)
-		return -EIO;
+		return log_msg_ret("flags", -EIO);
 
 	/*
-	 * TPM may come from the factory without physical presence finalised.
+	 * TPM may come from the factory without physical presence finalized.
 	 * Fix if necessary.
 	 */
-	log_debug("physical_presence_lifetime_lock=%d\n",
-		  pflags.physical_presence_lifetime_lock);
+	log_debug("TPM: physical_presence_lifetime_lock=%d\n",
+		 pflags.physical_presence_lifetime_lock);
 	if (!pflags.physical_presence_lifetime_lock) {
-		log_debug("Finalising physical presence\n");
+		log_debug("TPM: Finalizing physical presence\n");
 		ret = tpm_finalise_physical_presence(vboot->tpm);
 		if (ret != TPM_SUCCESS)
-			return -EIO;
+			return log_msg_ret("final", -EIO);
 	}
 
 	/*
 	 * The TPM will not enforce the NV authorization restrictions until the
 	 * execution of a TPM_NV_DefineSpace with the handle of
 	 * TPM_NV_INDEX_LOCK.  Here we create that space if it doesn't already
-	 * exist
-	 */
-	log_debug("nv_locked=%d\n", pflags.nv_locked);
+	 * exist */
+	log_debug("TPM: nv_locked=%d\n", pflags.nv_locked);
 	if (!pflags.nv_locked) {
-		log_debug("Enabling NV locking\n");
+		log_debug("TPM: Enabling NV locking\n");
 		ret = tpm_nv_enable_locking(vboot->tpm);
 		if (ret != TPM_SUCCESS)
-			return -EIO;
+			return log_msg_ret("lock", -EIO);
 	}
 
 	/* Clear TPM owner, in case the TPM is already owned for some reason */
 	log_debug("TPM: Clearing owner\n");
 	ret = tpm_clear_and_reenable(vboot->tpm);
-	if (ret != TPM_SUCCESS)
-		return -EIO;
+	if (ret)
+		return log_msg_ret("enable", -EIO);
 
-	return setup_spaces(vboot);
+	/* Define and write secdata_kernel space */
+	ret = cros_nvdata_setup_walk(CROS_NV_SECDATAK, TPM_NV_PER_PPWRITE,
+				     VB2_SECDATA_KERNEL_SIZE_V02, NULL, 0);
+	if (ret)
+		return log_msg_ret("ksetup", -EIO);
+	ret = cros_nvdata_write_walk(CROS_NV_SECDATAK, ctx->secdata_kernel,
+				     VB2_SECDATA_KERNEL_SIZE_V02);
+	if (ret)
+		return log_msg_ret("kwrite", -EIO);
+
+	/* Define and write secdata_firmware space */
+	ret = cros_nvdata_setup_walk(CROS_NV_SECDATAF, TPM_NV_PER_GLOBALLOCK |
+				     TPM_NV_PER_PPWRITE,
+				     VB2_SECDATA_FIRMWARE_SIZE, NULL, 0);
+	if (ret)
+		return log_msg_ret("fsetup", -EIO);
+	ret = cros_nvdata_write_walk(CROS_NV_SECDATAF, ctx->secdata_firmware,
+					VB2_SECDATA_FIRMWARE_SIZE);
+	if (ret)
+		return log_msg_ret("fwrite", -EIO);
+
+	return TPM_SUCCESS;
 }
-
-uint32_t antirollback_lock_space_firmware(void)
-{
-	return tlcl_set_global_lock();
-}
-
-#endif
 
 /**
- * Perform one-time initialisation
+ * Perform one-time initializations.
  *
  * Create the NVRAM spaces, and set their initial values as needed.  Sets the
  * nvLocked bit and ensures the physical presence command is enabled and
  * locked.
  */
-int factory_initialise_tpm(struct vboot_info *vboot)
+static int factory_initialize_tpm(struct vboot_info *vboot)
 {
-	enum tpm_version version = tpm_get_version(vboot->tpm);
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
 
 	/*
 	 * Set initial values of secdata_firmware space.
-	 * kernel space is created in _factory_initialise_tpm().
+	 * kernel space is created in _factory_initialize_tpm().
 	 */
 	vb2api_secdata_firmware_create(ctx);
 
-	log_debug("TPM: factory initialisation\n");
+	log_debug("TPM: factory initialization\n");
 
 	/*
 	 * Do a full test.  This only happens the first time the device is
@@ -445,223 +426,76 @@ int factory_initialise_tpm(struct vboot_info *vboot)
 	 */
 	ret = tpm_self_test_full(vboot->tpm);
 	if (ret)
-		return -EIO;
+		return log_msg_ret("selftest", ret);
 
 	ret = -ENOSYS;
-	switch (version) {
-	case TPM_V1:
-		if (IS_ENABLED(CONFIG_TPM_V1))
-			ret = v1_factory_initialise_tpm(vboot);
-		break;
-	case TPM_V2:
-		if (IS_ENABLED(CONFIG_TPM_V2))
-			ret = v2_factory_initialise_tpm(vboot);
-		break;
+	if (tpm_is_v1(vboot->tpm))
+		ret = v1_factory_initialize_tpm(vboot);
+	else if (tpm_is_v2(vboot->tpm))
+		ret = v2_factory_initialize_tpm(vboot);
 	if (ret)
 		return log_msg_ret("init", ret);
-	}
 
 	/*
-	 * ..._factory_initialize_tpm() writes initial secdata values to the TPM
+	 * _factory_initialize_tpm() writes initial secdata values to TPM
 	 * immediately, so let vboot know that it's up to date now
 	 */
 	ctx->flags &= ~(VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED |
 			VB2_CONTEXT_SECDATA_KERNEL_CHANGED);
 
-	log_debug("TPM: factory initialisation successful\n");
-
-	return 0;
-}
-
-static u32 tpm_get_flags(struct udevice *dev, bool *disablep,
-			 bool *deactivatedp, bool *nvlockedp)
-{
-	struct tpm_permanent_flags pflags;
-	u32 ret = tpm1_get_permanent_flags(dev, &pflags);
-
-	if (ret == TPM_SUCCESS) {
-		if (disablep)
-			*disablep = pflags.disable;
-		if (deactivatedp)
-			*deactivatedp = pflags.deactivated;
-		if (nvlockedp)
-			*nvlockedp = pflags.nv_locked;
-		log_debug("TPM: flags disable=%d, deactivated=%d, nv_locked=%d\n",
-			  pflags.disable, pflags.deactivated, pflags.nv_locked);
-	}
-	return ret;
-}
-
-static u32 tpm1_invoke_state_machine(struct vboot_info *vboot,
-				     struct udevice *dev)
-{
-	bool disable;
-	bool deactivated;
-	u32 ret = TPM_SUCCESS;
-
-	/* Check that the TPM is enabled and activated */
-	ret = tpm_get_flags(dev, &disable, &deactivated, NULL);
-	if (ret != TPM_SUCCESS) {
-		log_err("TPM: Can't read capabilities\n");
-		return ret;
-	}
-
-	if (!!deactivated != vboot->deactivate_tpm) {
-		log_info("TPM: Unexpected TPM deactivated state; toggling..\n");
-		ret = tpm_physical_set_deactivated(dev, !deactivated);
-		if (ret != TPM_SUCCESS) {
-			log_err("TPM: Can't toggle deactivated state\n");
-			return ret;
-		}
-
-		deactivated = !deactivated;
-		ret = TPM_E_MUST_REBOOT;
-	}
-
-	if (disable && !deactivated) {
-		log_info("TPM: disabled (%d). Enabling..\n", disable);
-
-		ret = tpm_physical_enable(dev);
-		if (ret != TPM_SUCCESS) {
-			log_err("TPM: Can't set enabled state\n");
-			return ret;
-		}
-
-		log_info("TPM: Must reboot to re-enable\n");
-		ret = TPM_E_MUST_REBOOT;
-	}
-
-	return ret;
-}
-
-/*
- * This starts the TPM and establishes the root of trust for the
- * anti-rollback mechanism.  This can fail for three reasons.  1 A bug. 2 a
- * TPM hardware failure. 3 An unexpected TPM state due to some attack.  In
- * general we cannot easily distinguish the kind of failure, so our strategy is
- * to reboot in recovery mode in all cases.  The recovery mode calls this code
- * again, which executes (almost) the same sequence of operations.  There is a
- * good chance that, if recovery mode was entered because of a TPM failure, the
- * failure will repeat itself.  (In general this is impossible to guarantee
- * because we have no way of creating the exact TPM initial state at the
- * previous boot.)  In recovery mode, we ignore the failure and continue, thus
- * giving the recovery kernel a chance to fix things (that's why we don't set
- * bGlobalLock).  The choice is between a known-insecure device and a
- * bricked device.
- *
- * As a side note, observe that we go through considerable hoops to avoid using
- * the STCLEAR permissions for the index spaces.  We do this to avoid writing
- * to the TPM flashram at every reboot or wake-up, because of concerns about
- * the durability of the NVRAM.
- */
-static u32 do_setup(struct vboot_info *vboot, bool s3flag)
-{
-	u32 ret;
-
-	log(UCLASS_TPM, LOGL_DEBUG, "Setting up TPM (s3=%d):\n", s3flag);
-	ret = tpm_open(vboot->tpm);
-	if (ret != TPM_SUCCESS) {
-		log_err("TPM: Can't initialise\n");
-		goto out;
-	}
-
-	/* Handle special init for S3 resume path */
-	if (s3flag) {
-		ret = tpm_resume(vboot->tpm);
-		if (ret == TPM_INVALID_POSTINIT)
-			log_info("TPM: Already initialised\n");
-
-		return TPM_SUCCESS;
-	}
-
-	log(UCLASS_TPM, LOGL_DEBUG, "TPM startup:\n");
-	ret = tpm_startup(vboot->tpm, TPM_ST_CLEAR);
-	if (ret != TPM_SUCCESS) {
-		log_err("TPM: Can't run startup command\n");
-		goto out;
-	}
-
-	log(UCLASS_TPM, LOGL_DEBUG, "TPM presence:\n");
-	ret = tpm_tsc_physical_presence(vboot->tpm,
-					TPM_PHYSICAL_PRESENCE_PRESENT);
-	if (ret != TPM_SUCCESS) {
-		/*
-		 * It is possible that the TPM was delivered with the physical
-		 * presence command disabled.  This tries enabling it, then
-		 * tries asserting PP again.
-		 */
-		ret = tpm_tsc_physical_presence(vboot->tpm,
-					TPM_PHYSICAL_PRESENCE_CMD_ENABLE);
-		if (ret != TPM_SUCCESS) {
-			log_err("Can't enable physical presence command\n");
-			goto out;
-		}
-
-		ret = tpm_tsc_physical_presence(vboot->tpm,
-				TPM_PHYSICAL_PRESENCE_PRESENT);
-		if (ret != TPM_SUCCESS) {
-			log_err("Can't assert physical presence\n");
-			goto out;
-		}
-	}
-
-	if (tpm_get_version(vboot->tpm) == TPM_V1) {
-		if (!IS_ENABLED(CONFIG_TPM_V1))
-			return log_msg_ret("tpm_v1", -ENOSYS);
-		ret = tpm1_invoke_state_machine(vboot, vboot->tpm);
-		if (ret != TPM_SUCCESS)
-			return ret;
-	}
-
-out:
-	if (ret != TPM_SUCCESS)
-		log_err("TPM: setup failed\n");
-	else
-		log_debug("TPM: setup succeeded\n");
-
-	return ret;
-}
-
-int antirollback_read_space_firmware(struct vboot_info *vboot)
-{
-	uint32_t rv;
-
-	/*
-	 * Read secdata from TPM. initialise TPM if secdata not found. We don't
-	 * check the return value here because vb2api_fw_phase1 will catch
-	 * invalid secdata and tell us what to do (=reboot).
-	 */
-	ret = cros_nvdata_read_walk(CROS_NV_SECDATAF, ctx->secdata_firmware,
-				    sizeof(ctx->secdata_firmware));
-	if (ret == -ENOENT) {
-		/* This seems the first time we've run. Initialise the TPM. */
-		ret = factory_initialise_tpm(vboot);
-		if (ret)
-			return log_msg_ret("init", ret);
-	} else if (ret) {
-		log_err("TPM: Firmware space in a bad state; giving up\n");
-		return log_msg_ret("secdata", ret);
-	}
-	vboot_secdata_dump(ctx->secdata_firmware, sizeof(ctx->secdata_firmware));
-	log_debug("secdata:\n");
-	log_buffer(LOGC_VBOOT, LOGL_DEBUG, 0, ctx->secdata_firmware, 1,
-		   sizeof(ctx->secdata_firmware), 0);
+	log_debug("TPM: factory initialization successful\n");
 
 	return TPM_SUCCESS;
 }
 
-uint32_t antirollback_write_space_firmware(struct vb2_context *ctx)
+int antirollback_read_space_firmware(struct vboot_info *vboot)
 {
-	if (CONFIG(CR50_IMMEDIATELY_COMMIT_FW_SECDATA))
-		tlcl_cr50_enable_nvcommits();
-	return safe_write(FIRMWARE_NV_INDEX, ctx->secdata_firmware,
-			  VB2_SECDATA_FIRMWARE_SIZE);
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
+	int ret;
+
+	/* Read the firmware space */
+	ret = read_space_firmware(ctx);
+	if (ret == -ENOENT) {
+		/* This seems the first time we've run. Initialize the TPM */
+		log_warning("TPM: Not initialized yet\n");
+		ret = factory_initialize_tpm(vboot);
+		if (ret) {
+			log_err("TPM: Firmware space in a bad state; giving up\n");
+			return -EBADFD;
+		}
+	} else if (ret) {
+		return log_msg_ret("Cannot read secdata", ret);
+	}
+
+	return 0;
 }
 
-uint32_t antirollback_write_space_kernel(struct vb2_context *ctx)
+int antirollback_write_space_firmware(const struct vboot_info *vboot)
 {
-	/* Learn the expected size. */
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
+	int ret;
+
+	if (vboot->cr50_commit_secdata) {
+		ret = tpm2_cr50_enable_nvcommits(vboot->tpm);
+		if (ret)
+			log_warning("Failed to enable Cr50 NV commits\n");
+	}
+
+	ret = cros_nvdata_write_walk(CROS_NV_SECDATAF, ctx->secdata_firmware,
+				     VB2_SECDATA_FIRMWARE_SIZE);
+	if (ret)
+		return log_msg_ret("write", ret);
+
+	return 0;
+}
+
+int antirollback_write_space_kernel(const struct vboot_info *vboot)
+{
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	uint8_t size = VB2_SECDATA_KERNEL_MIN_SIZE;
+	int ret;
+
+	/* Learn the expected size */
 	vb2api_secdata_kernel_check(ctx, &size);
 
 	/*
@@ -669,12 +503,20 @@ uint32_t antirollback_write_space_kernel(struct vb2_context *ctx)
 	 * there is a power loss or other unexpected event. The AP does not
 	 * write to the TPM during normal boot flow; it only writes during
 	 * recovery, software sync, or other special boot flows. When the AP
-	 * wants to write, it is imporant to actually commit changes.
+	 * wants to write, it is important to actually commit changes.
 	 */
-	if (CONFIG(CR50_IMMEDIATELY_COMMIT_FW_SECDATA))
-		tlcl_cr50_enable_nvcommits();
+	if (vboot->cr50_commit_secdata) {
+		ret = tpm2_cr50_enable_nvcommits(vboot->tpm);
+		if (ret)
+			log_warning("Failed to enable Cr50 NV commits\n");
+	}
 
-	return safe_write(KERNEL_NV_INDEX, ctx->secdata_kernel, size);
+	ret = cros_nvdata_write_walk(CROS_NV_SECDATAK, ctx->secdata_kernel,
+				     size);
+	if (ret)
+		return log_msg_ret("write", ret);
+
+	return 0;
 }
 
 vb2_error_t vb2ex_tpm_clear_owner(struct vb2_context *ctx)
@@ -688,16 +530,4 @@ vb2_error_t vb2ex_tpm_clear_owner(struct vb2_context *ctx)
 		return VB2_ERROR_EX_TPM_CLEAR_OWNER;
 
 	return VB2_SUCCESS;
-}
-
-int vboot_setup_tpm(struct vboot_info *vboot)
-{
-	struct vb2_context *ctx = vboot_get_ctx(vboot);
-	int ret;
-
-	ret = do_setup(vboot, ctx->flags & VB2_CONTEXT_S3_RESUME);
-	if (ret == TPM_E_MUST_REBOOT)
-		ctx->flags |= VB2_CONTEXT_SECDATA_WANTS_REBOOT;
-
-	return ret;
 }

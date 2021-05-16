@@ -27,8 +27,8 @@ static int get_index(enum cros_nvdata_type type)
 		return FIRMWARE_NV_INDEX;
 	case CROS_NV_SECDATAK:
 		return KERNEL_NV_INDEX;
-	case CROS_NV_REC_HASH:
-		return REC_HASH_NV_INDEX;
+	case CROS_NV_MRC_REC_HASH:
+		return MRC_REC_HASH_NV_INDEX;
 	default:
 		/* We cannot handle these */
 		break;
@@ -208,7 +208,7 @@ static int tpm_secdata_lock(struct udevice *dev, enum cros_nvdata_type type)
 		if (type == CROS_NV_SECDATAF)
 			return tpm_set_global_lock(tpm);
 	} else if (IS_ENABLED(CONFIG_TPM_V2) && version == TPM_V2) {
-		if (type == CROS_NV_SECDATAF || type == CROS_NV_REC_HASH)
+		if (type == CROS_NV_SECDATAF || type == CROS_NV_MRC_REC_HASH)
 			return log_retz(tpm2_write_lock(tpm, index));
 		else if (type == CROS_NV_SECDATAK)
 			return log_retz(tpm2_disable_platform_hierarchy(tpm));

@@ -21,14 +21,16 @@ struct udevice;
  * @CROS_NV_DATA: Standard data (can be lost)
  * @CROS_NV_SECDATAF: Secure data (e.g. stored in TPM)
  * @CROS_NV_SECDATAK: Secure data for kernel
- * @CROS_NV_REC_HASH: Recovery-mode hash
+ * @CROS_NV_MRC_REC_HASH: Recovery-mode memory-reference-code hash
+ * @CROS_NV_MRC_RW_HASH: Normal-mode memory-reference-code hash
  * @CROS_NV_VSTORE: Verified boot storage slot 0
  */
 enum cros_nvdata_type {
 	CROS_NV_DATA	= 0,
 	CROS_NV_SECDATAF,
 	CROS_NV_SECDATAK,
-	CROS_NV_REC_HASH,
+	CROS_NV_MRC_REC_HASH,
+	CROS_NV_MRC_RW_HASH,
 	CROS_NV_VSTORE,
 };
 
@@ -41,7 +43,7 @@ enum cros_nvdata_type {
  */
 #define BACKUP_NV_INDEX                 0x1009
 #define FWMP_NV_INDEX                   0x100a
-#define REC_HASH_NV_INDEX               0x100b
+#define MRC_REC_HASH_NV_INDEX               0x100b
 #define REC_HASH_NV_SIZE                VB2_SHA256_DIGEST_SIZE
 
 /**

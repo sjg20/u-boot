@@ -115,6 +115,8 @@ struct vboot_handoff {
  * @physical_dev_switch: Developer mode has a physical switch (i.e. not in TPM)
  * @physical_rec_switch: Recovery mode has a physical switch (i.e. not in TPM)
  * @resume_path_same_as_boot: Resume path boots through the reset vector
+ * @cr50_commit_secdata: Tell Cr50 to commit changes immediately when they are
+ *	written
  *
  * @detachable_ui: Use the keyboard-less UI
  * @disable_memwipe: Disable memory wiping on this platform
@@ -167,6 +169,7 @@ struct vboot_info {
 	bool physical_dev_switch;
 	bool physical_rec_switch;
 	bool resume_path_same_as_boot;
+	bool cr50_commit_secdata;
 #ifndef CONFIG_SPL_BUILD
 	bool detachable_ui;
 	bool disable_memwipe;
@@ -377,36 +380,6 @@ int vboot_fill_handoff(struct vboot_info *vboot);
  * @return GBB flag value
  */
 u32 vboot_get_gbb_flags(struct vboot_info *vboot);
-
-/**
- * cros_tpm_extend_pcrs() - Extend TPM PCRs with the vboot digests
- *
- * Vboot generates digests for the boot mode and the hardware ID. This extends
- * TPM PCRs with these values
- *
- * @vboot: Pointer to vboot structure
- * @return 0 if OK, non-zero on error
- */
-int cros_tpm_extend_pcrs(struct vboot_info *vboot);
-
-/**
- * cros_tpm_factory_initialise() - Set up the TPM for the first time
- *
- * This sets up the TPM ready for use. It should be called if the TPM is found
- * to not be inited.
- *
- * @vboot: Pointer to vboot structure
- * @return 0 if OK, non-zero on error
- */
-int cros_tpm_factory_initialise(struct vboot_info *vboot);
-
-/**
- * vboot_setup_tpm() - Set up the TPM ready for use
- *
- * @vboot: Pointer to vboot structure
- * @return 0 if OK, non-zero on error
- */
-int vboot_setup_tpm(struct vboot_info *vboot);
 
 /**
  * vboot_dump_nvdata() - Dump the vboot non-volatile data
