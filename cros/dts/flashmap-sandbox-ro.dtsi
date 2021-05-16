@@ -9,6 +9,7 @@
 	binman {
 		u-boot,dm-pre-reloc;
 		compatible = "chromeos,flashmap";
+		align-default = <4>;
 		fdtmap {
 		};
 		read-only {

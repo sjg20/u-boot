@@ -13,15 +13,16 @@
 int vboot_spl_init(struct vboot_info *vboot)
 {
 	struct vboot_blob *blob;
-	struct vb2_context *ctx;
+// 	struct vb2_context *ctx;
 	int ret;
 
 	blob = bloblist_find(BLOBLISTT_VBOOT_CTX, sizeof(*blob));
 	if (!blob)
 		return log_msg_ret("ctx", -ENOENT);
+	// TODO
 	vboot->blob = blob;
-	ctx = &blob->ctx;
-	vboot->ctx = ctx;
+// 	ctx = &blob->ctx;
+// 	vboot->ctx = ctx;
 	//TODO
 // 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;

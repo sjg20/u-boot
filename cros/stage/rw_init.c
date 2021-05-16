@@ -314,7 +314,8 @@ int vboot_rw_init(struct vboot_info *vboot)
 		 * This is not actually used since this part of vboot uses the
 		 * old v1 API
 		 */
-		ctx = &blob->ctx;
+		//TODO
+// 		ctx = &blob->ctx;
 		vboot->ctx = ctx;
 		// TODO
 // 		ctx->non_vboot_context = vboot;

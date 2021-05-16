@@ -32,9 +32,10 @@
  * @blob: Pointer to the persistent blob for vboot
  * @workbuf_size: Size to use for work buffer
  */
-static int vb2_init_blob(struct vboot_blob *blob, int workbuf_size)
+static int vb2_init_blob(struct vboot_blob *blob, int workbuf_size,
+			 struct vb2_context **ctxp)
 {
-	struct vb2_context *ctx = &blob->ctx;
+	struct vb2_context *ctx;
 	void *work;
 	int ret;
 
@@ -47,6 +48,7 @@ static int vb2_init_blob(struct vboot_blob *blob, int workbuf_size)
 	ret = vb2api_init(work, workbuf_size, &ctx);
 	if (ret)
 		return log_msg_ret("init_context", ret);
+	*ctxp = ctx;
 
 	return 0;
 }
@@ -63,7 +65,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, sizeof(struct vboot_blob),
 			    VBOOT_CONTEXT_ALIGN);
 	if (!blob)
-		return log_msg_ret("set up vboot context", -ENOSPC);
+		return log_msg_ret("blob", -ENOSPC);
 
 	bootstage_mark(BOOTSTAGE_VBOOT_START);
 
@@ -71,11 +73,10 @@ int vboot_ver_init(struct vboot_info *vboot)
 	if (ret)
 		return log_msg_ret("load config", ret);
 	/* Set up context and work buffer */
-	ret = vb2_init_blob(blob, vboot->workbuf_size);
+	ret = vb2_init_blob(blob, VB2_FIRMWARE_WORKBUF_RECOMMENDED_SIZE, &ctx);
 	if (ret)
 		return log_msg_ret("set up work context", ret);
 	vboot->blob = blob;
-	ctx = &blob->ctx;
 	vboot->ctx = ctx;
 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
@@ -100,7 +101,6 @@ int vboot_ver_init(struct vboot_info *vboot)
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
 
 	/* initialise and read nvdata from non-volatile storage */
-	/* TODO(sjg@chromium.org): Support full-size context */
 	ret = cros_nvdata_read_walk(CROS_NV_DATA, ctx->nvdata,
 				    VB2_NVDATA_SIZE_V2);
 	if (ret)

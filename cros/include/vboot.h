@@ -59,7 +59,8 @@ struct vboot_fw_info {
  *	U-Boot slot
  */
 struct vboot_blob {
-	struct vb2_context ctx __aligned(VBOOT_CONTEXT_ALIGN);
+	u8 share_data[VB2_FIRMWARE_WORKBUF_RECOMMENDED_SIZE]
+		 __aligned(VBOOT_CONTEXT_ALIGN);
 	struct fmap_entry spl_entry;
 	struct fmap_entry u_boot_entry;
 };
@@ -124,7 +125,6 @@ struct vboot_handoff {
  * @disable_power_button_during_update: Disable the power button during an aux
  *	firmware update
  * @usb_is_enumerated: true if USB ports have been enumerated already
- * @workbuf_size: Size of vboot2 work buffer
  *
  * @handoff: Vboot handoff info
  * @fmap: Firmare map, parsed from the binman information
@@ -177,7 +177,6 @@ struct vboot_info {
 	bool disable_power_button_during_update;
 	bool usb_is_enumerated;
 #endif
-	int workbuf_size;
 
 	struct vboot_handoff *handoff;
 	struct cros_fmap fmap;

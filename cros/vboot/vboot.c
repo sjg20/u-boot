@@ -79,8 +79,6 @@ int vboot_load_config(struct vboot_info *vboot)
 	vboot->disable_power_button_during_update = ofnode_read_bool(node,
 					"disable-power-button-during-update");
 #endif
-	vboot->workbuf_size = ofnode_read_u32_default(node,
-					"vboot2-work-buffer-size", 0x3000);
 
 	vboot->config = node;
 
