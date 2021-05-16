@@ -438,7 +438,7 @@
 	nvdata {
 		u-boot,dm-pre-reloc;
 		compatible = "google,cros-ec-nvdata";
-		nvdata,types = <CROS_NV_DATA>;
+		nvdata,types = <CROS_NV_DATA CROS_NV_VSTORE>;
 	};
 
 	cros_ec_vboot: vboot {

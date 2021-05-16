@@ -8,7 +8,7 @@
 
 #include <cros/vboot.h>
 
-u32 vboot_extend_pcrs(struct vboot_info *vboot);
+int vboot_extend_pcrs(struct vboot_info *vboot);
 
 /* Start of the root of trust */
 int vboot_setup_tpm(struct vboot_info *vboot);

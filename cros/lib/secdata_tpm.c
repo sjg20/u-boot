@@ -16,29 +16,6 @@
 #include <cros/nvdata.h>
 #include <cros/vboot.h>
 
-#if 0
-#include <security/vboot/antirollback.h>
-#include <security/vboot/tpm_common.h>
-#include <security/tpm/tspi.h>
-#include <security/tpm/tss.h>
-#include <security/tpm/tss/tcg-1.2/tss_structures.h>
-#include <vb2_api.h>
-#include <console/console.h>
-
-#define log_debug(format, args...) \
-	printk(BIOS_INFO, "%s():%d: " format,  __func__, __LINE__, ## args)
-
-#define RETURN_ON_FAILURE(tpm_cmd) do {				\
-		u32 result_;					\
-		if ((result_ = (tpm_cmd)) != TPM_SUCCESS) {		\
-			log_debug("Antirollback: %08x returned by " #tpm_cmd \
-				 "\n", (int)result_);			\
-			return result_;					\
-		}							\
-	} while (0)
-
-#endif
-
 static int read_space_firmware(struct vb2_context *ctx)
 {
 	int ret;

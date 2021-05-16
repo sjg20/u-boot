@@ -23,7 +23,7 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMPCR);
 	ret = vboot_extend_pcrs(vboot);
 	if (ret) {
-		log_warning("Failed to extend TPM PCRs (%#x)\n", ret);
+		log_warning("Failed to extend TPM PCRs (%d)\n", ret);
 		vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_U_ERROR, ret);
 		return VB2_REQUEST_REBOOT;
 	}

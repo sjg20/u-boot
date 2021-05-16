@@ -185,12 +185,13 @@ vb2_error_t vboot_extend_pcr(struct vboot_info *vboot, int pcr,
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	u32 size = sizeof(buffer);
 	vb2_error_t rv;
+	int ret;
 
 	rv = vb2api_get_pcr_digest(ctx, which_digest, buffer, &size);
 	if (rv != VB2_SUCCESS)
-		return rv;
+		return log_msg_retz("digest", rv);
 	if (size < TPM_PCR_MINIMUM_DIGEST_SIZE)
-		return VB2_ERROR_UNKNOWN;
+		return log_msg_retz("size", VB2_ERROR_UNKNOWN);
 
 	/*
 	 * On TPM 1.2, all PCRs are intended for use with SHA1. We truncate our
@@ -211,21 +212,38 @@ vb2_error_t vboot_extend_pcr(struct vboot_info *vboot, int pcr,
 	switch (which_digest) {
 	/* SHA1 of (devmode|recmode|keyblock) bits */
 	case BOOT_MODE_PCR:
-		return tpm_pcr_extend(vboot->tpm, pcr, buffer,
-				      vb2_digest_size(algo), NULL,
-				      TPM_PCR_BOOT_MODE);
+		ret = tpm_pcr_extend(vboot->tpm, pcr, buffer,
+				     vb2_digest_size(algo), buffer,
+				     TPM_PCR_BOOT_MODE);
+		if (ret)
+			return log_msg_ret("boot", ret);
+		break;
 	 /* SHA256 of HWID */
 	case HWID_DIGEST_PCR:
-		return tpm_pcr_extend(vboot->tpm, pcr, buffer,
-				      vb2_digest_size(algo), NULL,
-				      TPM_PCR_GBB_HWID_NAME);
+		ret = tpm_pcr_extend(vboot->tpm, pcr, buffer,
+				     vb2_digest_size(algo), buffer,
+				     TPM_PCR_GBB_HWID_NAME);
+		if (ret)
+			return log_msg_ret("hwid", ret);
+		break;
 	default:
-		return VB2_ERROR_UNKNOWN;
+		return log_msg_retz("none", VB2_ERROR_UNKNOWN);
 	}
+
+	return 0;
 }
 
-u32 vboot_extend_pcrs(struct vboot_info *vboot)
+int vboot_extend_pcrs(struct vboot_info *vboot)
 {
-	return vboot_extend_pcr(vboot, 0, BOOT_MODE_PCR) ||
-		   vboot_extend_pcr(vboot, 1, HWID_DIGEST_PCR);
+	int ret;
+
+	ret = vboot_extend_pcr(vboot, 0, BOOT_MODE_PCR);
+	if (ret)
+		return log_msg_ret("boot", -EIO);
+
+	ret = vboot_extend_pcr(vboot, 1, HWID_DIGEST_PCR);
+	if (ret)
+		return log_msg_ret("hwid", -EIO);
+
+	return 0;
 }
