@@ -88,7 +88,7 @@ static int extend_pcr(struct vboot_info *vboot, int pcr,
 	if (size < TPM_PCR_MINIMUM_DIGEST_SIZE)
 		return log_msg_retz("size", VB2_ERROR_UNKNOWN);
 
-	ret = tpm_pcr_extend(vboot->tpm, pcr, buffer, out);
+	ret = tpm_pcr_extend(vboot->tpm, pcr, size, buffer, out);
 	if (ret)
 		return log_msg_retz("extend", VB2_ERROR_UNKNOWN);
 

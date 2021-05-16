@@ -10,6 +10,7 @@
 #include <bloblist.h>
 #include <log.h>
 #include <cros/cros_common.h>
+#include <cros/tpm_common.h>
 #include <cros/nvdata.h>
 #include <cros/vboot.h>
 
@@ -20,7 +21,7 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 	int ret;
 
 	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMPCR);
-	ret = cros_tpm_extend_pcrs(vboot);
+	ret = vboot_extend_pcrs(vboot);
 	if (ret) {
 		log_warning("Failed to extend TPM PCRs (%#x)\n", ret);
 		vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_U_ERROR, ret);
