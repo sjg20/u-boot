@@ -461,7 +461,8 @@ u32 tpm1_get_permissions(struct udevice *dev, u32 index, u32 *perm)
 	size_t response_length = sizeof(response);
 	u32 err;
 
-	if (pack_byte_string(buf, sizeof(buf), "d", 0, command, sizeof(command),
+	if (pack_byte_string(buf, sizeof(buf), "sd",
+			     0, command, sizeof(command),
 			     index_offset, index))
 		return TPM_LIB_ERROR;
 	err = tpm_sendrecv_command(dev, buf, response, &response_length);

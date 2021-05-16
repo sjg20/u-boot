@@ -212,13 +212,13 @@ vb2_error_t vboot_extend_pcr(struct vboot_info *vboot, int pcr,
 	/* SHA1 of (devmode|recmode|keyblock) bits */
 	case BOOT_MODE_PCR:
 		return tpm_pcr_extend(vboot->tpm, pcr, buffer,
-				      vb2_digest_size(algo), TPM_PCR_BOOT_MODE,
-				      NULL);
+				      vb2_digest_size(algo), NULL,
+				      TPM_PCR_BOOT_MODE);
 	 /* SHA256 of HWID */
 	case HWID_DIGEST_PCR:
 		return tpm_pcr_extend(vboot->tpm, pcr, buffer,
-				      vb2_digest_size(algo),
-				      TPM_PCR_GBB_HWID_NAME, NULL);
+				      vb2_digest_size(algo), NULL,
+				      TPM_PCR_GBB_HWID_NAME);
 	default:
 		return VB2_ERROR_UNKNOWN;
 	}

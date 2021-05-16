@@ -11,8 +11,10 @@
 #include <dm.h>
 #include <log.h>
 #include <spl.h>
+#include <cros/antirollback.h>
 #include <cros/cros_common.h>
 #include <cros/nvdata.h>
+#include <cros/tpm_common.h>
 #include <cros/vboot.h>
 #include <cros/vboot_flag.h>
 
@@ -28,22 +30,23 @@
  * the boot.
  *
  * @blob: Pointer to the persistent blob for vboot
- * @work_buffer_size: Size to use for work buffer
+ * @workbuf_size: Size to use for work buffer
  */
-static int vb2_init_blob(struct vboot_blob *blob, int work_buffer_size)
+static int vb2_init_blob(struct vboot_blob *blob, int workbuf_size)
 {
-// 	struct vb2_context *ctx = &blob->ctx;
-// 	int ret;
+	struct vb2_context *ctx = &blob->ctx;
+	void *work;
+	int ret;
 
 	/* initialise the vb2_context */
-	//TODO
-// 	ctx->workbuf_size = work_buffer_size;
-// 	ctx->workbuf = memalign(VBOOT_CONTEXT_ALIGN, ctx->workbuf_size);
-// 	if (!ctx->workbuf)
-// 		return -ENOMEM;
-// 	ret = vb2_init_context(ctx);
-// 	if (ret)
-// 		return log_msg_ret("init_context", ret);
+	work = memalign(VBOOT_CONTEXT_ALIGN, workbuf_size);
+	if (!work)
+		return -ENOMEM;
+
+	/* Initialize vb2_shared_data and friends. */
+	ret = vb2api_init(work, workbuf_size, &ctx);
+	if (ret)
+		return log_msg_ret("init_context", ret);
 
 	return 0;
 }
@@ -68,14 +71,13 @@ int vboot_ver_init(struct vboot_info *vboot)
 	if (ret)
 		return log_msg_ret("load config", ret);
 	/* Set up context and work buffer */
-	ret = vb2_init_blob(blob, vboot->work_buffer_size);
+	ret = vb2_init_blob(blob, vboot->workbuf_size);
 	if (ret)
 		return log_msg_ret("set up work context", ret);
 	vboot->blob = blob;
 	ctx = &blob->ctx;
 	vboot->ctx = ctx;
-	//TODO
-// 	ctx->non_vboot_context = vboot;
+	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
 
 	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
@@ -92,8 +94,8 @@ int vboot_ver_init(struct vboot_info *vboot)
 	if (ret) {
 		log_err("TPM setup failed (err=%x)\n", ret);
 	} else {
-		antirollback_read_space_firmware(ctx);
-		antirollback_read_space_kernel(ctx);
+		antirollback_read_space_firmware(vboot);
+		antirollback_read_space_kernel(vboot);
 	}
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
 

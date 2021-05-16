@@ -42,8 +42,8 @@ struct vboot_info;
  */
 #define FLAG_LAST_BOOT_DEVELOPER 0x01
 
-/* All functions return TPM_SUCCESS (zero) if successful, non-zero if error */
-// int antirollback_read_space_firmware(struct vboot_info *vboot);
+/* All functions return 0 if successful, non-zero if error */
+int antirollback_read_space_firmware(struct vboot_info *vboot);
 
 /**
  * Write may be called if the versions change.

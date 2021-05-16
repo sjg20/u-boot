@@ -124,7 +124,7 @@ struct vboot_handoff {
  * @disable_power_button_during_update: Disable the power button during an aux
  *	firmware update
  * @usb_is_enumerated: true if USB ports have been enumerated already
- * @work_buffer_size: Size of vboot2 work buffer
+ * @workbuf_size: Size of vboot2 work buffer
  *
  * @handoff: Vboot handoff info
  * @fmap: Firmare map, parsed from the binman information
@@ -177,7 +177,7 @@ struct vboot_info {
 	bool disable_power_button_during_update;
 	bool usb_is_enumerated;
 #endif
-	int work_buffer_size;
+	int workbuf_size;
 
 	struct vboot_handoff *handoff;
 	struct cros_fmap fmap;
@@ -212,8 +212,7 @@ enum secdata_t {
  */
 static inline struct vboot_info *ctx_to_vboot(struct vb2_context *ctx)
 {
-// 	return ctx->non_vboot_context;
-	return NULL;
+	return ctx->non_vboot_context;
 }
 
 /**
