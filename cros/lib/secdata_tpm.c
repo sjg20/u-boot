@@ -73,7 +73,8 @@ int antirollback_read_space_kernel(const struct vboot_info *vboot)
 			return log_msg_retz("gperm", ret);
 
 		if (perms != TPM_NV_PER_PPWRITE) {
-			log_err("TPM: invalid secdata_kernel permissions\n");
+			log_err("TPM: invalid secdata_kernel permissions %x\n",
+				perms);
 			return log_msg_ret("perm", -EBADFD);
 		}
 	}
@@ -96,11 +97,11 @@ int antirollback_read_space_kernel(const struct vboot_info *vboot)
 	return 0;
 }
 
-static int read_space_mrc_hash(u32 index, u8 *data)
+static int read_space_mrc_hash(enum cros_nvdata_type type, u8 *data)
 {
 	int ret;
 
-	ret = cros_nvdata_read_walk(CROS_NV_MRC_REC_HASH, data, HASH_NV_SIZE);
+	ret = cros_nvdata_read_walk(type, data, HASH_NV_SIZE);
 	if (ret)
 		return log_msg_ret("read1", ret);
 
@@ -201,25 +202,25 @@ static int set_space(const char *name, enum cros_nvdata_type type,
 
 static u32 set_firmware_space(const void *firmware_blob)
 {
-	return set_space("firmware", FIRMWARE_NV_INDEX, firmware_blob,
+	return set_space("firmware", CROS_NV_SECDATAF, firmware_blob,
 			 VB2_SECDATA_FIRMWARE_SIZE, ro_space_attributes,
 			 pcr0_allowed_policy, sizeof(pcr0_allowed_policy));
 }
 
 static u32 set_kernel_space(const void *kernel_blob)
 {
-	return set_space("kernel", KERNEL_NV_INDEX, kernel_blob,
+	return set_space("kernel", CROS_NV_SECDATAK, kernel_blob,
 			 VB2_SECDATA_KERNEL_SIZE, rw_space_attributes, NULL, 0);
 }
 
-static u32 set_mrc_hash_space(u32 index, const uint8_t *data)
+static u32 set_mrc_hash_space(enum cros_nvdata_type type, const uint8_t *data)
 {
-	if (index == MRC_REC_HASH_NV_INDEX) {
-		return set_space("RO MRC Hash", index, data, HASH_NV_SIZE,
+	if (type == CROS_NV_MRC_REC_HASH) {
+		return set_space("RO MRC Hash", type, data, HASH_NV_SIZE,
 				 ro_space_attributes, pcr0_allowed_policy,
 				 sizeof(pcr0_allowed_policy));
 	} else {
-		return set_space("RW MRC Hash", index, data, HASH_NV_SIZE,
+		return set_space("RW MRC Hash", type, data, HASH_NV_SIZE,
 				 rw_space_attributes, NULL, 0);
 	}
 }
@@ -229,6 +230,7 @@ static int v2_factory_initialize_tpm(struct vboot_info *vboot)
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
 
+	log_warning("starting\n");
 	vb2api_secdata_kernel_create(ctx);
 
 	ret = tpm_force_clear(vboot->tpm);
@@ -261,6 +263,7 @@ static int v2_factory_initialize_tpm(struct vboot_info *vboot)
 	ret = set_firmware_space(ctx->secdata_firmware);
 	if (ret)
 		return log_msg_ret("fw", ret);
+	log_warning("done\n");
 
 	return TPM_SUCCESS;
 }
@@ -334,6 +337,7 @@ static int v1_factory_initialize_tpm(struct vboot_info *vboot)
 	struct tpm_permanent_flags pflags;
 	int ret;
 
+	log_warning("starting\n");
 	vb2api_secdata_kernel_create_v0(ctx);
 
 	ret = tpm1_get_permanent_flags(vboot->tpm, &pflags);
@@ -392,6 +396,7 @@ static int v1_factory_initialize_tpm(struct vboot_info *vboot)
 					VB2_SECDATA_FIRMWARE_SIZE);
 	if (ret)
 		return log_msg_ret("fwrite", -EIO);
+	log_warning("done\n");
 
 	return TPM_SUCCESS;
 }

@@ -102,7 +102,8 @@ int vboot_run_stage(struct vboot_info *vboot, enum vboot_stage_t stagenum)
 	struct vboot_stage *stage = &stages[stagenum];
 	int ret;
 
-	log_info("Running stage '%s'\n", stage->name);
+	log_info("--\n");
+	log_info("* Running stage '%s'\n", stage->name);
 	if (!stage->run) {
 		log_debug("   - Stage '%s' not available\n", stage->name);
 		return -EPERM;

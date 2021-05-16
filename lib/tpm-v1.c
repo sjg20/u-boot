@@ -456,7 +456,7 @@ u32 tpm1_get_permissions(struct udevice *dev, u32 index, u32 *perm)
 		0x0, 0x0, 0x0, 0x4,
 	};
 	const size_t index_offset = 18;
-	const size_t perm_offset = 60;
+	const size_t perm_offset = 74;
 	u8 buf[COMMAND_BUFFER_SIZE], response[COMMAND_BUFFER_SIZE];
 	size_t response_length = sizeof(response);
 	u32 err;

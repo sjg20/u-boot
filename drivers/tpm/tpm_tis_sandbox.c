@@ -13,10 +13,10 @@
 /* TPM NVRAM location indices. */
 #define FIRMWARE_NV_INDEX		0x1007
 #define KERNEL_NV_INDEX			0x1008
-#define BACKUP_NV_INDEX                 0x1009
-#define FWMP_NV_INDEX                   0x100a
-#define MRC_REC_HASH_NV_INDEX               0x100b
-#define REC_HASH_NV_SIZE                VB2_SHA256_DIGEST_SIZE
+#define BACKUP_NV_INDEX			0x1009
+#define FWMP_NV_INDEX			0x100a
+#define MRC_REC_HASH_NV_INDEX		0x100b
+#define REC_HASH_NV_SIZE		VB2_SHA256_DIGEST_SIZE
 
 #define NV_DATA_PUBLIC_PERMISSIONS_OFFSET	60
 
@@ -46,7 +46,8 @@ struct rollback_space_kernel {
 
 /* These are the different non-volatile spaces that we emulate */
 enum {
-	NV_GLOBAL_LOCK,
+	NV_SEQ_ENABLE_LOCKING,
+	NV_SEQ_GLOBAL_LOCK,
 	NV_SEQ_FIRMWARE,
 	NV_SEQ_KERNEL,
 	NV_SEQ_BACKUP,
@@ -154,7 +155,9 @@ static int index_to_seq(uint32_t index)
 	case MRC_REC_HASH_NV_INDEX:
 		return NV_SEQ_REC_HASH;
 	case 0:
-		return NV_GLOBAL_LOCK;
+		return NV_SEQ_GLOBAL_LOCK;
+	case TPM_NV_INDEX_LOCK:
+		return NV_SEQ_ENABLE_LOCKING;
 	}
 
 	printf("Invalid nv index %#x\n", index);
@@ -208,9 +211,10 @@ static int sandbox_tpm_xfer(struct udevice *dev, const uint8_t *sendbuf,
 				break;
 			case KERNEL_NV_INDEX:
 				handle_cap_flag_space(&data, index);
-				*recv_len = data - recvbuf -
+				*recv_len = data - recvbuf; /* -
 					TPM_RESPONSE_HEADER_LENGTH -
-					sizeof(uint32_t);
+					sizeof(uint32_t);*/
+				print_buffer(0, recvbuf, 1, data - recvbuf, 0);
 				break;
 			case TPM_CAP_FLAG_PERMANENT: {
 				struct tpm_permanent_flags *pflags;
@@ -294,6 +298,16 @@ static int sandbox_tpm_xfer(struct udevice *dev, const uint8_t *sendbuf,
 		memset(recvbuf, '\0', *recv_len);
 		break;
 	case TPM_CMD_NV_DEFINE_SPACE:
+		index = get_unaligned_be32(sendbuf + 12);
+		length = get_unaligned_be32(sendbuf + 77);
+		seq = index_to_seq(index);
+		if (seq < 0)
+			return -EINVAL;
+		printf("tpm: define_space index=%#02x, len=%#02x, seq=%#02x\n",
+		       index, length, seq);
+		*recv_len = 12;
+		memset(recvbuf, '\0', *recv_len);
+		break;
 	case 0x15: /* pcr read */
 	case 0x5d: /* force clear */
 	case 0x6f: /* physical enable */
