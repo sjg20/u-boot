@@ -66,24 +66,6 @@ struct vboot_blob {
 };
 
 /**
- * struct vboot_handoff - vboot information passed through the phases
- *
- * The vboot_handoff structure contains the data to be consumed by downstream
- * firmware after firmware selection has been completed. Namely it provides
- * vboot shared data as well as the flags from VbInit.
- *
- * @init_params: vboot parameters
- * @selected_firmware: This is the firmware selected to run (fw_slot). This is 0
- *	for A, 1 for B
- * @shared_data: Shared data used by vboot
- */
-struct vboot_handoff {
-// 	VbInitParams init_params;
-	u32 selected_firmware;
-// 	char shared_data[VB_SHARED_DATA_MIN_SIZE];
-} __packed;
-
-/**
  * Main verified boot data structure
  *
  * @valid: false if this structure is not yet set up, true if it is
@@ -126,7 +108,6 @@ struct vboot_handoff {
  *	firmware update
  * @usb_is_enumerated: true if USB ports have been enumerated already
  *
- * @handoff: Vboot handoff info
  * @fmap: Firmare map, parsed from the binman information
  * @fwstore: Firmware storage device
  * @kparams: Kernel params passed to Vboot library
@@ -178,7 +159,6 @@ struct vboot_info {
 	bool usb_is_enumerated;
 #endif
 
-	struct vboot_handoff *handoff;
 	struct cros_fmap fmap;
 	struct udevice *fwstore;
 #ifndef CONFIG_SPL_BUILD
@@ -358,16 +338,6 @@ int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry);
  *	and this platform uses OPROMs), false if not
  */
 bool vboot_wants_oprom(struct vboot_info *vboot);
-
-/**
- * vboot_fill_handoff() - Add the handoff information to vboot
- *
- * This writes out the handoff information so that the following phases know
- * what to do
- *
- * @vboot: Pointer to vboot structure
- */
-int vboot_fill_handoff(struct vboot_info *vboot);
 
 /**
  * vboot_get_gbb_flags() - Get the Google Binary Block (GBB) flags

@@ -56,9 +56,6 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 		&fmap->readwrite_a.spl : &fmap->readwrite_b.spl,
 		vboot_is_slot_a(vboot) ?
 		&fmap->readwrite_a.boot : &fmap->readwrite_b.boot);
-	ret = vboot_fill_handoff(vboot);
-	if (ret)
-		return log_msg_ret("Cannot setup vboot handoff", ret);
 	bloblist_finish();
 	bootstage_mark(BOOTSTAGE_VBOOT_END);
 

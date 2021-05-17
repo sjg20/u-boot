@@ -243,76 +243,25 @@ static int vboot_do_init_out_flags(struct vboot_info *vboot, u32 out_flags)
 }
 #endif
 
-/**
- * vboot_init_handoff() - Read in the hand-off information from previous phase
- *
- * This handles both booting bare-metal and from coreboot. It collects the
- * provided handoff information and sets things up ready for the read/write
- * phase of vboot, containing the UI.
- *
- * @vboot: vboot context
- */
-static int vboot_init_handoff(struct vboot_info *vboot)
-{
-	// TOO
-#if 0
-	struct vboot_handoff *handoff;
-	VbSharedDataHeader *vdat;
-	int ret;
-
-	if (!vboot_from_cb(vboot)) {
-		handoff = bloblist_find(BLOBLISTT_VBOOT_HANDOFF,
-					sizeof(*handoff));
-		if (!handoff)
-			return log_msg_ret("handoff\n", -ENOENT);
-	} else {
-		handoff = cb_get_vboot_handoff();
-	}
-	vboot->handoff = handoff;
-
-	/* Set up the common param structure, not clearing shared data */
-	ret = common_params_init(vboot, 0);
-	if (ret)
-		return ret;
-
-	vdat = vboot->cparams.shared_data_blob;
-	/*
-	 * If the lid is closed, don't count down the boot tries for updates,
-	 * since the OS will shut down before it can register success.
-	 *
-	 * VbInit() was already called in stage A, so we need to update the
-	 * vboot internal flags ourself.
-	 */
-	if (vboot_flag_read_walk(VBOOT_FLAG_LID_OPEN) == 0) {
-		/* Tell kernel selection to not count down */
-		vdat->flags |= VBSD_NOFAIL_BOOT;
-	}
-
-	ret = vboot_do_init_out_flags(vboot, handoff->init_params.out_flags);
-	if (ret)
-		return log_msg_ret("flags", ret);
-#endif
-
-	return 0;
-}
-
 int vboot_rw_init(struct vboot_info *vboot)
 {
 	struct fmap_section *section;
 	struct vboot_blob *blob;
-	struct vb2_context *ctx;
 	bool is_rw;
 	int ret;
 
 	if (!IS_ENABLED(CONFIG_SYS_COREBOOT) || ll_boot_init()) {
+		struct vb2_context *ctx;
+
 		blob = bloblist_find(BLOBLISTT_VBOOT_CTX, sizeof(*blob));
 		if (!blob)
 			return log_msg_ret("blob", -ENOENT);
 		vboot->blob = blob;
 
-		ret = vb2api_reinit(blob, &vboot->ctx);
+		ret = vb2api_reinit(blob, &ctx);
 		if (ret)
 			return log_msg_ret("blob", ret);
+		vboot->ctx = ctx;
 		ctx->non_vboot_context = vboot;
 		log_warning("flags %llx %d\n", ctx->flags,
 			    ((ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0));
@@ -377,9 +326,6 @@ int vboot_rw_init(struct vboot_info *vboot)
 		if (ret)
 			return log_msg_ret("ec", ret);
 	}
-	ret = vboot_init_handoff(vboot);
-	if (ret)
-		return log_msg_ret("handoff", ret);
 
 	return 0;
 }
