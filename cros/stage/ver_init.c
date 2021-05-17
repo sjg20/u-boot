@@ -36,16 +36,10 @@ static int vb2_init_blob(struct vboot_blob *blob, int workbuf_size,
 			 struct vb2_context **ctxp)
 {
 	struct vb2_context *ctx;
-	void *work;
 	int ret;
 
-	/* initialise the vb2_context */
-	work = memalign(VBOOT_CONTEXT_ALIGN, workbuf_size);
-	if (!work)
-		return -ENOMEM;
-
 	/* Initialize vb2_shared_data and friends. */
-	ret = vb2api_init(work, workbuf_size, &ctx);
+	ret = vb2api_init((void *)blob, workbuf_size, &ctx);
 	if (ret)
 		return log_msg_ret("init_context", ret);
 	*ctxp = ctx;

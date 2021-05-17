@@ -310,15 +310,10 @@ int vboot_rw_init(struct vboot_info *vboot)
 			return log_msg_ret("blob", -ENOENT);
 		vboot->blob = blob;
 
-		/*
-		 * This is not actually used since this part of vboot uses the
-		 * old v1 API
-		 */
-		//TODO
-// 		ctx = &blob->ctx;
-		vboot->ctx = ctx;
-		// TODO
-// 		ctx->non_vboot_context = vboot;
+		ret = vb2api_reinit(blob, &vboot->ctx);
+		if (ret)
+			return log_msg_ret("blob", ret);
+		ctx->non_vboot_context = vboot;
 		log_warning("flags %llx %d\n", ctx->flags,
 			    ((ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0));
 	} else {
