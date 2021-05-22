@@ -23,7 +23,8 @@ struct udevice;
  * @CROS_NV_SECDATAK: Secure data for kernel
  * @CROS_NV_MRC_REC_HASH: Recovery-mode memory-reference-code hash
  * @CROS_NV_MRC_RW_HASH: Normal-mode memory-reference-code hash
- * @CROS_NV_VSTORE: Verified boot storage slot 0
+ * @CROS_NV_FWMP: Firmware Management Parameters (TPM)
+ * @CROS_NV_VSTORE: Verified boot storage slot 0 (typically stored in EC)
  */
 enum cros_nvdata_type {
 	CROS_NV_DATA	= 0,
@@ -31,20 +32,9 @@ enum cros_nvdata_type {
 	CROS_NV_SECDATAK,
 	CROS_NV_MRC_REC_HASH,
 	CROS_NV_MRC_RW_HASH,
+	CROS_NV_FWMP,
 	CROS_NV_VSTORE,
 };
-
-/* TPM NVRAM location indices */
-#define FIRMWARE_NV_INDEX               0x1007
-#define KERNEL_NV_INDEX                 0x1008
-/*
- * 0x1009 used to be used as a backup space. Think of conflicts if you
- * want to use 0x1009 for something else.
- */
-#define BACKUP_NV_INDEX                 0x1009
-#define FWMP_NV_INDEX                   0x100a
-#define MRC_REC_HASH_NV_INDEX               0x100b
-#define REC_HASH_NV_SIZE                VB2_SHA256_DIGEST_SIZE
 
 /**
  * struct nvdata_uc_priv - private uclass data for each device

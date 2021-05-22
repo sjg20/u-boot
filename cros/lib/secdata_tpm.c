@@ -111,6 +111,13 @@ static const u32 rw_space_attributes =
 	TPMA_NV_PPREAD |
 	TPMA_NV_PLATFORMCREATE;
 
+static const u32 fwmp_attr =
+	TPMA_NV_PLATFORMCREATE |
+	TPMA_NV_OWNERWRITE |
+	TPMA_NV_AUTHREAD |
+	TPMA_NV_PPREAD |
+	TPMA_NV_PPWRITE;
+
 /*
  * This policy digest was obtained using TPM2_PolicyOR on 3 digests
  * corresponding to a sequence of
@@ -152,6 +159,7 @@ static int safe_write(enum cros_nvdata_type type, const void *data, u32 length)
 {
 	int ret;
 
+	/* the nvdata_tpm driver handles retrying if needed */
 	ret = cros_nvdata_write_walk(type, data, length);
 	if (ret)
 		return log_msg_ret("fwrite", -EIO);
@@ -159,12 +167,13 @@ static int safe_write(enum cros_nvdata_type type, const void *data, u32 length)
 	return 0;
 }
 
-static int set_space(const char *name, enum cros_nvdata_type type,
-		     const void *data, u32 length, const uint nv_attributes,
-		     const uint8_t *nv_policy, size_t nv_policy_size)
+static int setup_space(const char *name, enum cros_nvdata_type type,
+		       const void *data, u32 length, const uint nv_attributes,
+		       const uint8_t *nv_policy, size_t nv_policy_size)
 {
 	int ret;
 
+	/* the nvdata_tpm driver handles retrying if needed */
 	ret = cros_nvdata_setup_walk(type, nv_attributes, length, nv_policy,
 				     nv_policy_size);
 	if (ret)
@@ -177,28 +186,41 @@ static int set_space(const char *name, enum cros_nvdata_type type,
 	return 0;
 }
 
-static u32 set_firmware_space(const void *firmware_blob)
+static u32 setup_firmware_space(struct vb2_context *ctx)
 {
-	return set_space("firmware", CROS_NV_SECDATAF, firmware_blob,
-			 VB2_SECDATA_FIRMWARE_SIZE, ro_space_attributes,
-			 pcr0_allowed_policy, sizeof(pcr0_allowed_policy));
+	uint firmware_space_size = vb2api_secdata_firmware_create(ctx);
+
+	return setup_space("firmware", CROS_NV_SECDATAF, ctx->secdata_firmware,
+			   firmware_space_size, ro_space_attributes,
+			   pcr0_allowed_policy, sizeof(pcr0_allowed_policy));
 }
 
-static u32 set_kernel_space(const void *kernel_blob)
+static uint32_t setup_fwmp_space(struct vb2_context *ctx)
 {
-	return set_space("kernel", CROS_NV_SECDATAK, kernel_blob,
-			 VB2_SECDATA_KERNEL_SIZE, rw_space_attributes, NULL, 0);
+	uint32_t fwmp_space_size = vb2api_secdata_fwmp_create(ctx);
+
+	return setup_space("FWMP", CROS_NV_FWMP, ctx->secdata_fwmp,
+			   fwmp_space_size, fwmp_attr, NULL, 0);
+}
+
+static u32 setup_kernel_space(struct vb2_context *ctx)
+{
+	uint kernel_space_size = vb2api_secdata_kernel_create(ctx);
+
+	return setup_space("kernel", CROS_NV_SECDATAK, ctx->secdata_kernel,
+			   kernel_space_size, rw_space_attributes, NULL,
+			   0);
 }
 
 static u32 set_mrc_hash_space(enum cros_nvdata_type type, const uint8_t *data)
 {
 	if (type == CROS_NV_MRC_REC_HASH) {
-		return set_space("RO MRC Hash", type, data, HASH_NV_SIZE,
-				 ro_space_attributes, pcr0_allowed_policy,
-				 sizeof(pcr0_allowed_policy));
+		return setup_space("RO MRC Hash", type, data, HASH_NV_SIZE,
+				   ro_space_attributes, pcr0_allowed_policy,
+				   sizeof(pcr0_allowed_policy));
 	} else {
-		return set_space("RW MRC Hash", type, data, HASH_NV_SIZE,
-				 rw_space_attributes, NULL, 0);
+		return setup_space("RW MRC Hash", type, data, HASH_NV_SIZE,
+				   rw_space_attributes, NULL, 0);
 	}
 }
 
@@ -206,9 +228,6 @@ static int v2_factory_initialize_tpm(struct vboot_info *vboot)
 {
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
-
-	log_warning("starting\n");
-	vb2api_secdata_kernel_create(ctx);
 
 	ret = tpm_force_clear(vboot->tpm);
 	if (ret != TPM_SUCCESS)
@@ -220,7 +239,7 @@ static int v2_factory_initialize_tpm(struct vboot_info *vboot)
 	 * indication that TPM factory initialization was successfully
 	 * completed.
 	 */
-	ret = set_kernel_space(ctx->secdata_kernel);
+	ret = setup_kernel_space(ctx);
 	if (ret)
 		return log_msg_ret("kern", ret);
 
@@ -237,7 +256,12 @@ static int v2_factory_initialize_tpm(struct vboot_info *vboot)
 			return log_msg_ret("rec", ret);
 	}
 
-	ret = set_firmware_space(ctx->secdata_firmware);
+	/* Define and write firmware management parameters space. */
+	ret = setup_fwmp_space(ctx);
+	if (ret)
+		return log_msg_ret("fwmp", ret);
+
+	ret = setup_firmware_space(ctx);
 	if (ret)
 		return log_msg_ret("fw", ret);
 	log_warning("done\n");
@@ -328,7 +352,7 @@ static int v1_factory_initialize_tpm(struct vboot_info *vboot)
 	log_debug("TPM: physical_presence_lifetime_lock=%d\n",
 		 pflags.physical_presence_lifetime_lock);
 	if (!pflags.physical_presence_lifetime_lock) {
-		log_debug("TPM: Finalizing physical presence\n");
+		log_info("TPM: Finalizing physical presence\n");
 		ret = tpm_finalise_physical_presence(vboot->tpm);
 		if (ret != TPM_SUCCESS)
 			return log_msg_ret("final", -EIO);

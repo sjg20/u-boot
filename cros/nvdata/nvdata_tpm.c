@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <log.h>
 #include <tpm_api.h>
+#include <cros/antirollback.h>
 #include <cros/nvdata.h>
 
 /**
@@ -29,6 +30,8 @@ static int get_index(enum cros_nvdata_type type)
 		return KERNEL_NV_INDEX;
 	case CROS_NV_MRC_REC_HASH:
 		return MRC_REC_HASH_NV_INDEX;
+	case CROS_NV_FWMP:
+		return FWMP_NV_INDEX;
 	default:
 		/* We cannot handle these */
 		break;
@@ -173,6 +176,7 @@ static int tpm_secdata_setup(struct udevice *dev, enum cros_nvdata_type type,
 	index = get_index(type);
 	if (index == -1)
 		return -EINVAL;
+	log_warning("index=%x\n", index);
 
 	if (IS_ENABLED(CONFIG_TPM_V1) && version == TPM_V1)
 		ret = safe_define_space(tpm, index, attr, size);
