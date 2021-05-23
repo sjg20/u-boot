@@ -470,7 +470,7 @@ int antirollback_read_space_firmware(struct vboot_info *vboot)
 			return -EBADFD;
 		}
 	} else if (ret) {
-		return log_msg_ret("Cannot read secdata", ret);
+		return log_msg_ret("read", ret);
 	}
 
 	return 0;

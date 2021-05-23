@@ -89,7 +89,13 @@ int vboot_ver_init(struct vboot_info *vboot)
 	if (ret) {
 		log_err("TPM setup failed (err=%x)\n", ret);
 	} else {
-		antirollback_read_space_firmware(vboot);
+		ret = antirollback_read_space_firmware(vboot);
+		/*
+		 * This indicates a coding error (e.g. not supported in TPM
+		 * emulator
+		 */
+		if (ret == -ENOTSUPP)
+			return log_msg_ret("inval", ret);
 		antirollback_read_space_kernel(vboot);
 	}
 	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);

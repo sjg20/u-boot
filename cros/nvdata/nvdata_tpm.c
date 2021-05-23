@@ -69,7 +69,7 @@ static u32 safe_write(struct udevice *tpm, u32 index, const void *data,
 	}
 	if (ret) {
 		log_err("Failed to write secdata (err=%x)\n", ret);
-		return -EIO;
+		return log_msg_ret("fail", -EIO);
 	}
 
 	return 0;
@@ -88,10 +88,12 @@ int tpm_secdata_read(struct udevice *dev, enum cros_nvdata_type type, u8 *data,
 
 	ret = tpm_nv_read_value(tpm, index, data, size);
 	if (ret == TPM_BADINDEX) {
-		return log_msg_ret("TPM has no secdata for index", -ENOENT);
+		return log_msg_ret("type", -ENOENT);
+	} else if (ret == TPM2_RC_COMMAND_CODE) {
+		return log_msg_ret("cmd", -ENOTSUPP);
 	} else if (ret != TPM_SUCCESS) {
 		log_err("Failed to read secdata (err=%x)\n", ret);
-		return -EIO;
+		return log_msg_ret("fail", -EIO);
 	}
 
 	return 0;
@@ -111,7 +113,7 @@ static int tpm_secdata_write(struct udevice *dev, enum cros_nvdata_type type,
 	ret = safe_write(tpm, index, data, size);
 	if (ret != TPM_SUCCESS) {
 		log_err("Failed to write secdata (err=%x)\n", ret);
-		return -EIO;
+		return log_msg_ret("fail", -EIO);
 	}
 
 	return 0;
@@ -187,7 +189,7 @@ static int tpm_secdata_setup(struct udevice *dev, enum cros_nvdata_type type,
 		return log_msg_ret("no tpm", -ENOENT);
 	if (ret != TPM_SUCCESS) {
 		log_err("Failed to setup secdata (err=%x)\n", ret);
-		return -EIO;
+		return log_msg_ret("fail", -EIO);
 	}
 
 	return 0;

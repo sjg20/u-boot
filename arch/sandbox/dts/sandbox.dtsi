@@ -289,6 +289,10 @@
 
 	tpm {
 		compatible = "google,sandbox-tpm";
+	};
+
+	tpm2 {
+		compatible = "sandbox,tpm2";
 		u-boot,dm-pre-reloc;
 
 		nvdata {
@@ -299,10 +303,6 @@
 				CROS_NV_MRC_REC_HASH>;
 		};
 
-	};
-
-	tpm2 {
-		compatible = "sandbox,tpm2";
 	};
 
 	triangle {
