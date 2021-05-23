@@ -11,6 +11,7 @@
 #include <asm/unaligned.h>
 #include <linux/bitops.h>
 #include <u-boot/crc.h>
+#include "sandbox_common.h"
 
 /* Hierarchies */
 enum tpm2_hierarchy {
@@ -557,6 +558,23 @@ static int sandbox_tpm2_xfer(struct udevice *dev, const u8 *sendbuf,
 		sandbox_tpm2_fill_buf(recv, recv_len, tag, rc);
 		break;
 
+	case TPM2_CC_NV_READ: {
+		int index, seq;
+
+		index = get_unaligned_be32(sendbuf + TPM2_HDR_LEN);
+		length = get_unaligned_be32(sendbuf + TPM2_HDR_LEN + 8 + 13);
+		/* ignore offset */
+		seq = sb_tpm_index_to_seq(index);
+		if (seq < 0)
+			return -EINVAL;
+		printf("tpm: nvread index=%#02x, len=%#02x, seq=%#02x\n", index,
+		       length, seq);
+		*recv_len = TPM2_HDR_LEN + 6 + length;
+		memset(recvbuf, '\0', *recv_len);
+		put_unaligned_be32(length, recvbuf + 2);
+		sb_tpm_read_data(dev, seq, recvbuf, TPM2_HDR_LEN + 4 + 2);
+		break;
+	}
 	default:
 		printf("TPM2 command %02x unknown in Sandbox\n", command);
 		rc = TPM2_RC_COMMAND_CODE;

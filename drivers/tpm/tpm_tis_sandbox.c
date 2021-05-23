@@ -9,6 +9,7 @@
 #include <asm/state.h>
 #include <asm/unaligned.h>
 #include <u-boot/crc.h>
+#include "sandbox_common.h"
 
 /* TPM NVRAM location indices. */
 #define FIRMWARE_NV_INDEX		0x1007
@@ -19,43 +20,6 @@
 #define REC_HASH_NV_SIZE		VB2_SHA256_DIGEST_SIZE
 
 #define NV_DATA_PUBLIC_PERMISSIONS_OFFSET	60
-
-/* Kernel TPM space - KERNEL_NV_INDEX, locked with physical presence */
-#define ROLLBACK_SPACE_KERNEL_VERSION	2
-#define ROLLBACK_SPACE_KERNEL_UID	0x4752574C  /* 'GRWL' */
-
-struct rollback_space_kernel {
-	/* Struct version, for backwards compatibility */
-	uint8_t struct_version;
-	/* Unique ID to detect space redefinition */
-	uint32_t uid;
-	/* Kernel versions */
-	uint32_t kernel_versions;
-	/* Reserved for future expansion */
-	uint8_t reserved[3];
-	/* Checksum (v2 and later only) */
-	uint8_t crc8;
-} __packed rollback_space_kernel;
-
-/*
- * These numbers derive from adding the sizes of command fields as shown in
- * the TPM commands manual.
- */
-#define TPM_REQUEST_HEADER_LENGTH	10
-#define TPM_RESPONSE_HEADER_LENGTH	10
-
-/* These are the different non-volatile spaces that we emulate */
-enum {
-	NV_SEQ_ENABLE_LOCKING,
-	NV_SEQ_GLOBAL_LOCK,
-	NV_SEQ_FIRMWARE,
-	NV_SEQ_KERNEL,
-	NV_SEQ_BACKUP,
-	NV_SEQ_FWMP,
-	NV_SEQ_REC_HASH,
-
-	NV_SEQ_COUNT,
-};
 
 /* Size of each non-volatile space */
 #define NV_DATA_SIZE		0x20
@@ -141,29 +105,6 @@ static int sandbox_tpm_write_state(void *blob, int node)
 SANDBOX_STATE_IO(sandbox_tpm, "google,sandbox-tpm", sandbox_tpm_read_state,
 		 sandbox_tpm_write_state);
 
-static int index_to_seq(uint32_t index)
-{
-	switch (index) {
-	case FIRMWARE_NV_INDEX:
-		return NV_SEQ_FIRMWARE;
-	case KERNEL_NV_INDEX:
-		return NV_SEQ_KERNEL;
-	case BACKUP_NV_INDEX:
-		return NV_SEQ_BACKUP;
-	case FWMP_NV_INDEX:
-		return NV_SEQ_FWMP;
-	case MRC_REC_HASH_NV_INDEX:
-		return NV_SEQ_REC_HASH;
-	case 0:
-		return NV_SEQ_GLOBAL_LOCK;
-	case TPM_NV_INDEX_LOCK:
-		return NV_SEQ_ENABLE_LOCKING;
-	}
-
-	printf("Invalid nv index %#x\n", index);
-	return -1;
-}
-
 static void handle_cap_flag_space(u8 **datap, uint index)
 {
 	struct tpm_nv_data_public pub;
@@ -204,15 +145,14 @@ static int sandbox_tpm_xfer(struct udevice *dev, const uint8_t *sendbuf,
 			printf("Get flags index %#02x\n", index);
 			*recv_len = 22;
 			memset(recvbuf, '\0', *recv_len);
-			data = recvbuf + TPM_RESPONSE_HEADER_LENGTH +
-					sizeof(uint32_t);
+			data = recvbuf + TPM_HDR_LEN + sizeof(uint32_t);
 			switch (index) {
 			case FIRMWARE_NV_INDEX:
 				break;
 			case KERNEL_NV_INDEX:
 				handle_cap_flag_space(&data, index);
 				*recv_len = data - recvbuf; /* -
-					TPM_RESPONSE_HEADER_LENGTH -
+					TPM_HDR_LEN -
 					sizeof(uint32_t);*/
 				print_buffer(0, recvbuf, 1, data - recvbuf, 0);
 				break;
@@ -231,15 +171,12 @@ static int sandbox_tpm_xfer(struct udevice *dev, const uint8_t *sendbuf,
 				printf("   ** Unknown flags index %x\n", index);
 				return -ENOSYS;
 			}
-			put_unaligned_be32(*recv_len,
-					   recvbuf +
-					   TPM_RESPONSE_HEADER_LENGTH);
+			put_unaligned_be32(*recv_len, recvbuf + TPM_HDR_LEN);
 			break;
 		case TPM_CAP_NV_INDEX:
 			index = get_unaligned_be32(sendbuf + 18);
 			printf("Get cap nv index %#02x\n", index);
-			put_unaligned_be32(22, recvbuf +
-					   TPM_RESPONSE_HEADER_LENGTH);
+			put_unaligned_be32(22, recvbuf + TPM_HDR_LEN);
 			break;
 		default:
 			printf("   ** Unknown 0x65 command type %#02x\n",
@@ -250,7 +187,7 @@ static int sandbox_tpm_xfer(struct udevice *dev, const uint8_t *sendbuf,
 	case TPM_CMD_NV_WRITE_VALUE:
 		index = get_unaligned_be32(sendbuf + 10);
 		length = get_unaligned_be32(sendbuf + 18);
-		seq = index_to_seq(index);
+		seq = sb_tpm_index_to_seq(index);
 		if (seq < 0)
 			return -EINVAL;
 		printf("tpm: nvwrite index=%#02x, len=%#02x\n", index, length);
@@ -262,36 +199,15 @@ static int sandbox_tpm_xfer(struct udevice *dev, const uint8_t *sendbuf,
 	case TPM_CMD_NV_READ_VALUE: /* nvread */
 		index = get_unaligned_be32(sendbuf + 10);
 		length = get_unaligned_be32(sendbuf + 18);
-		seq = index_to_seq(index);
+		seq = sb_tpm_index_to_seq(index);
 		if (seq < 0)
 			return -EINVAL;
 		printf("tpm: nvread index=%#02x, len=%#02x, seq=%#02x\n", index,
 		       length, seq);
-		*recv_len = TPM_RESPONSE_HEADER_LENGTH + sizeof(uint32_t) +
-					length;
+		*recv_len = TPM_HDR_LEN + sizeof(uint32_t) + length;
 		memset(recvbuf, '\0', *recv_len);
-		put_unaligned_be32(length, recvbuf +
-				   TPM_RESPONSE_HEADER_LENGTH);
-		if (seq == NV_SEQ_KERNEL) {
-			struct rollback_space_kernel rsk;
-
-			data = recvbuf + TPM_RESPONSE_HEADER_LENGTH +
-					sizeof(uint32_t);
-			memset(&rsk, 0, sizeof(struct rollback_space_kernel));
-			rsk.struct_version = 2;
-			rsk.uid = ROLLBACK_SPACE_KERNEL_UID;
-			rsk.crc8 = crc8(0, (unsigned char *)&rsk,
-					offsetof(struct rollback_space_kernel,
-						 crc8));
-			memcpy(data, &rsk, sizeof(rsk));
-		} else if (!tpm->nvdata[seq].present) {
-			put_unaligned_be32(TPM_BADINDEX, recvbuf +
-					   sizeof(uint16_t) + sizeof(uint32_t));
-		} else {
-			memcpy(recvbuf + TPM_RESPONSE_HEADER_LENGTH +
-			       sizeof(uint32_t), &tpm->nvdata[seq].data,
-			       length);
-		}
+		put_unaligned_be32(length, recvbuf + TPM_HDR_LEN);
+		sb_tpm_read_data(dev, seq, recvbuf, TPM_HDR_LEN + 4);
 		break;
 	case TPM_CMD_EXTEND:
 		*recv_len = 30;
@@ -300,7 +216,7 @@ static int sandbox_tpm_xfer(struct udevice *dev, const uint8_t *sendbuf,
 	case TPM_CMD_NV_DEFINE_SPACE:
 		index = get_unaligned_be32(sendbuf + 12);
 		length = get_unaligned_be32(sendbuf + 77);
-		seq = index_to_seq(index);
+		seq = sb_tpm_index_to_seq(index);
 		if (seq < 0)
 			return -EINVAL;
 		printf("tpm: define_space index=%#02x, len=%#02x, seq=%#02x\n",

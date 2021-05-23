@@ -92,7 +92,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 		ret = antirollback_read_space_firmware(vboot);
 		/*
 		 * This indicates a coding error (e.g. not supported in TPM
-		 * emulator
+		 * emulator, so fail immediately.
 		 */
 		if (ret == -ENOTSUPP)
 			return log_msg_ret("inval", ret);
