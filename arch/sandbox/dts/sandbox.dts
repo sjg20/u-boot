@@ -16,6 +16,8 @@
 		rtc0 = &rtc_0;
 		axi0 = &axi;
 		spi0 = &spi;
+		tpm0 = &tpm_v2;
+		tpm1 = &tpm_v1;
 		vboot-ec0 = &cros_ec_vboot;
 	};
 

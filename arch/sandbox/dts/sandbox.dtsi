@@ -287,11 +287,11 @@
 		clock-frequency = <1000000>;
 	};
 
-	tpm {
+	tpm_v1: tpm {
 		compatible = "google,sandbox-tpm";
 	};
 
-	tpm2 {
+	tpm_v2: tpm2 {
 		compatible = "sandbox,tpm2";
 		u-boot,dm-pre-reloc;
 

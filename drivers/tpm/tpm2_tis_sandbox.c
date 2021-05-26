@@ -567,7 +567,7 @@ static int sandbox_tpm2_xfer(struct udevice *dev, const u8 *sendbuf,
 		int index, seq;
 
 		index = get_unaligned_be32(sendbuf + TPM2_HDR_LEN + 4);
-		length = get_unaligned_be32(sendbuf + TPM2_HDR_LEN + 8 + 13);
+		length = get_unaligned_be16(sendbuf + TPM2_HDR_LEN + 8 + 13);
 		/* ignore offset */
 		seq = sb_tpm_index_to_seq(index);
 		if (seq < 0)

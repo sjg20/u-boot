@@ -11,6 +11,7 @@
 #include <dm.h>
 #include <log.h>
 #include <spl.h>
+#include <tpm-common.h>
 #include <cros/antirollback.h>
 #include <cros/cros_common.h>
 #include <cros/nvdata.h>
@@ -75,9 +76,13 @@ int vboot_ver_init(struct vboot_info *vboot)
 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
 
-	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
+	ret = uclass_get_device_by_seq(UCLASS_TPM, 0, &vboot->tpm);
+	if (ret)
+		ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
 	if (ret)
 		return log_msg_ret("find TPM", ret);
+	log_info("TPM: %s, version %s\n", vboot->tpm->name,
+		tpm_get_version(vboot->tpm) == TPM_V1 ? "v1.2" : "v2");
 
 	/*
 	 * Read secdata from TPM. Initialise TPM if secdata not found. We don't

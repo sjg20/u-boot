@@ -123,6 +123,15 @@ config SPL_DM_SEQ_ALIAS
 	  numbered devices (e.g. serial0 = &serial0). This feature can be
 	  disabled if it is not required, to save code space in SPL.
 
+config VPL_DM_SEQ_ALIAS
+	bool "Support numbered aliases in device tree in VPL"
+	depends on VPL_DM
+	default y
+	help
+	  Most boards will have a '/aliases' node containing the path to
+	  numbered devices (e.g. serial0 = &serial0). This feature can be
+	  disabled if it is not required, to save code space in VPL.
+
 config SPL_DM_INLINE_OFNODE
 	bool "Inline some ofnode functions which are seldom used in SPL"
 	depends on SPL_DM

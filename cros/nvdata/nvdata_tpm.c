@@ -171,7 +171,6 @@ static int tpm_secdata_setup(struct udevice *dev, enum cros_nvdata_type type,
 			     int nv_policy_size)
 {
 	struct udevice *tpm = dev_get_parent(dev);
-	enum tpm_version version = tpm_get_version(tpm);
 	int ret;
 	int index;
 
@@ -180,13 +179,13 @@ static int tpm_secdata_setup(struct udevice *dev, enum cros_nvdata_type type,
 		return -EINVAL;
 	log_warning("index=%x\n", index);
 
-	if (IS_ENABLED(CONFIG_TPM_V1) && version == TPM_V1)
+	if (tpm_is_v1(tpm))
 		ret = safe_define_space(tpm, index, attr, size);
-	else if (IS_ENABLED(CONFIG_TPM_V2) && version == TPM_V2)
-		ret = set_space(dev, index, attr, size, nv_policy,
+	else if (tpm_is_v2(tpm))
+		ret = set_space(tpm, index, attr, size, nv_policy,
 				nv_policy_size);
 	else
-		return log_msg_ret("no tpm", -ENOENT);
+		return log_msg_ret("version", -ENOENT);
 	if (ret != TPM_SUCCESS) {
 		log_err("Failed to setup secdata (err=%x)\n", ret);
 		return log_msg_ret("fail", -EIO);
