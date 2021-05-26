@@ -15,7 +15,8 @@
 #define CROS_NV_SECDATAF	1	/* Secure data (e.g. stored in TPM) */
 #define CROS_NV_SECDATAK	2	/* Secure data for kernel */
 #define CROS_NV_MRC_REC_HASH	3	/* Recovery-mode hash */
-#define CROS_NV_MRC_RW_HASH	4	/* Recovery-mode hash */
-#define CROS_NV_VSTORE		5	/* Verified boot storage slot 0 */
+#define CROS_NV_MRC_RW_HASH	4	/* Normal-mode hash */
+#define CROS_NV_FWMP		5	/* Firmware Management Params (TPM) */
+#define CROS_NV_VSTORE		6	/* Verified boot storage slot 0 */
 
 #endif /* _DT_BINDINGS_CROS_NVDATA_H */

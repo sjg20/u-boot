@@ -97,6 +97,8 @@ static int sandbox_tpm2_check_session(struct udevice *dev, u32 command, u16 tag,
 	case TPM2_CC_DAM_PARAMETERS:
 	case TPM2_CC_PCR_EXTEND:
 	case TPM2_CC_NV_READ:
+	case TPM2_CC_NV_WRITE:
+	case TPM2_CC_NV_DEFINE_SPACE:
 		if (tag != TPM2_ST_SESSIONS) {
 			printf("Session required for command 0x%x\n", command);
 			return TPM2_RC_AUTH_CONTEXT;
@@ -125,7 +127,8 @@ static int sandbox_tpm2_check_session(struct udevice *dev, u32 command, u16 tag,
 			break;
 		case TPM2_RH_PLATFORM:
 			*hierarchy = TPM2_HIERARCHY_PLATFORM;
-			if (command == TPM2_CC_NV_READ)
+			if (command == TPM2_CC_NV_READ ||
+			    command == TPM2_CC_NV_WRITE)
 				*auth += sizeof(u32);
 			break;
 		default:
@@ -567,11 +570,11 @@ static int sandbox_tpm2_xfer(struct udevice *dev, const u8 *sendbuf,
 		int index, seq;
 
 		index = get_unaligned_be32(sendbuf + TPM2_HDR_LEN + 4);
-		length = get_unaligned_be16(sendbuf + TPM2_HDR_LEN + 8 + 13);
+		length = get_unaligned_be16(sent);
 		/* ignore offset */
 		seq = sb_tpm_index_to_seq(index);
 		if (seq < 0)
-			return -EINVAL;
+			return log_msg_ret("index", -EINVAL);
 		printf("tpm: nvread index=%#02x, len=%#02x, seq=%#02x\n", index,
 		       length, seq);
 		*recv_len = TPM2_HDR_LEN + 6 + length;
@@ -579,6 +582,40 @@ static int sandbox_tpm2_xfer(struct udevice *dev, const u8 *sendbuf,
 		put_unaligned_be32(length, recvbuf + 2);
 		sb_tpm_read_data(tpm->nvdata, seq, recvbuf,
 				 TPM2_HDR_LEN + 4 + 2, length);
+		break;
+	}
+	case TPM2_CC_NV_WRITE: {
+		int index, seq;
+
+		index = get_unaligned_be32(sendbuf + TPM2_HDR_LEN + 4);
+		length = get_unaligned_be16(sent);
+		sent += sizeof(u16);
+
+		/* ignore offset */
+		seq = sb_tpm_index_to_seq(index);
+		if (seq < 0)
+			return log_msg_ret("index", -EINVAL);
+		printf("tpm: nvwrite index=%#02x, len=%#02x, seq=%#02x\n", index,
+		       length, seq);
+		memcpy(&tpm->nvdata[seq].data, sent, length);
+		tpm->nvdata[seq].present = true;
+		*recv_len = TPM2_HDR_LEN + 2;
+		memset(recvbuf, '\0', *recv_len);
+		break;
+	}
+	case TPM2_CC_NV_DEFINE_SPACE: {
+		int policy_size, index, seq;
+
+		policy_size = get_unaligned_be16(sent);
+		index = get_unaligned_be32(sent + 2);
+		length = get_unaligned_be32(sent + policy_size);
+		seq = sb_tpm_index_to_seq(index);
+		if (seq < 0)
+			return -EINVAL;
+		printf("tpm: define_space index=%#02x, len=%#02x, seq=%#02x\n",
+		       index, length, seq);
+		*recv_len = 12;
+		memset(recvbuf, '\0', *recv_len);
 		break;
 	}
 	default:

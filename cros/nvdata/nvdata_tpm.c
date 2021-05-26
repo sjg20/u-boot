@@ -90,7 +90,7 @@ int tpm_secdata_read(struct udevice *dev, enum cros_nvdata_type type, u8 *data,
 	if (ret == TPM_BADINDEX) {
 		return log_msg_ret("type", -ENOENT);
 	} else if (ret == TPM2_RC_COMMAND_CODE) {
-		return log_msg_ret("cmd", -ENOTSUPP);
+		return log_msg_ret("cmd", -ENOSYS);
 	} else if (ret != TPM_SUCCESS) {
 		log_err("Failed to read secdata (err=%x)\n", ret);
 		return log_msg_ret("fail", -EIO);

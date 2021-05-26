@@ -177,11 +177,11 @@ static int setup_space(const char *name, enum cros_nvdata_type type,
 	ret = cros_nvdata_setup_walk(type, nv_attributes, length, nv_policy,
 				     nv_policy_size);
 	if (ret)
-		return log_msg_ret("setup", -EIO);
+		return log_msg_ret("setup", ret);
 
 	ret = safe_write(type, data, length);
 	if (ret)
-		return log_msg_ret("write", -EIO);
+		return log_msg_ret("write", ret);
 
 	return 0;
 }
@@ -467,7 +467,7 @@ int antirollback_read_space_firmware(struct vboot_info *vboot)
 		ret = factory_initialize_tpm(vboot);
 		if (ret) {
 			log_err("TPM: Firmware space in a bad state; giving up\n");
-			return -EBADFD;
+			return ret;
 		}
 	} else if (ret) {
 		return log_msg_ret("read", ret);

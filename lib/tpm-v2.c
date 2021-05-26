@@ -89,7 +89,7 @@ u32 tpm2_nv_define_space(struct udevice *dev, u32 space_index,
 	 * Calculate the offset of the nv_policy piece by adding each of the
 	 * chunks below.
 	 */
-	uint offset = 10 + 8 + 13 + 14;
+	uint offset = 10 + 8 + 13 + 16;
 	u8 command_v2[COMMAND_BUFFER_SIZE] = {
 		/* header 10 bytes */
 		tpm_u16(TPM2_ST_SESSIONS),	/* TAG */
@@ -112,7 +112,10 @@ u32 tpm2_nv_define_space(struct udevice *dev, u32 space_index,
 		tpm_u16(TPM2_ALG_SHA256),
 		tpm_u32(nv_attributes),
 		tpm_u16(nv_policy_size),
-		/* nv_policy */
+		/*
+		 * nv_policy
+		 * space_size
+		 */
 	};
 	int ret;
 
@@ -120,8 +123,9 @@ u32 tpm2_nv_define_space(struct udevice *dev, u32 space_index,
 	 * Fill the command structure starting from the first buffer:
 	 *     - the password (if any)
 	 */
-	ret = pack_byte_string(command_v2, sizeof(command_v2), "s",
-			       offset, nv_policy, nv_policy_size);
+	ret = pack_byte_string(command_v2, sizeof(command_v2), "sw",
+			       offset, nv_policy, nv_policy_size,
+			       offset + nv_policy_size, space_size);
 	if (ret)
 		return TPM_LIB_ERROR;
 

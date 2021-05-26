@@ -99,7 +99,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 		 * This indicates a coding error (e.g. not supported in TPM
 		 * emulator, so fail immediately.
 		 */
-		if (ret == -ENOTSUPP)
+		if (ret == -ENOSYS)
 			return log_msg_ret("inval", ret);
 		antirollback_read_space_kernel(vboot);
 	}
