@@ -33,7 +33,6 @@ struct udevice;
 				 sizeof(u32)) / sizeof(struct tpms_tagged_property))
 
 #define TPM2_HDR_LEN		10
-#define TPM2_ERR_CODE_OFS	(2 + 4)		/* after tag and size */
 
 /*
  *  We deviate from this draft of the specification by increasing the value of

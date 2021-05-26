@@ -27,6 +27,13 @@ enum sandbox_nv_space {
 	NV_SEQ_COUNT,
 };
 
+/* TPM NVRAM location indices */
+#define FIRMWARE_NV_INDEX		0x1007
+#define KERNEL_NV_INDEX			0x1008
+#define BACKUP_NV_INDEX			0x1009
+#define FWMP_NV_INDEX			0x100a
+#define MRC_REC_HASH_NV_INDEX		0x100b
+
 struct __packed rollback_space_kernel {
 	/* Struct version, for backwards compatibility */
 	uint8_t struct_version;
@@ -40,10 +47,18 @@ struct __packed rollback_space_kernel {
 	uint8_t crc8;
 };
 
+/* Size of each non-volatile space */
+#define NV_DATA_SIZE		0x20
+
+struct nvdata_state {
+	bool present;
+	u8 data[NV_DATA_SIZE];
+};
+
 int sb_tpm_index_to_seq(uint index);
 
-void sb_tpm_read_data(struct udevice *tpm, enum sandbox_nv_space seq,
-		      u8 *recvbuf, int data_ofs);
+void sb_tpm_read_data(const struct nvdata_state nvdata[NV_SEQ_COUNT],
+		      enum sandbox_nv_space seq, u8 *recvbuf, int data_ofs,
+		      int length);
 
 #endif
-

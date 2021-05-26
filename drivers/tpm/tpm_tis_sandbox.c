@@ -11,23 +11,9 @@
 #include <u-boot/crc.h>
 #include "sandbox_common.h"
 
-/* TPM NVRAM location indices. */
-#define FIRMWARE_NV_INDEX		0x1007
-#define KERNEL_NV_INDEX			0x1008
-#define BACKUP_NV_INDEX			0x1009
-#define FWMP_NV_INDEX			0x100a
-#define MRC_REC_HASH_NV_INDEX		0x100b
 #define REC_HASH_NV_SIZE		VB2_SHA256_DIGEST_SIZE
 
 #define NV_DATA_PUBLIC_PERMISSIONS_OFFSET	60
-
-/* Size of each non-volatile space */
-#define NV_DATA_SIZE		0x20
-
-struct nvdata_state {
-	bool present;
-	u8 data[NV_DATA_SIZE];
-};
 
 /*
  * Information about our TPM emulation. This is preserved in the sandbox
@@ -207,7 +193,8 @@ static int sandbox_tpm_xfer(struct udevice *dev, const uint8_t *sendbuf,
 		*recv_len = TPM_HDR_LEN + sizeof(uint32_t) + length;
 		memset(recvbuf, '\0', *recv_len);
 		put_unaligned_be32(length, recvbuf + TPM_HDR_LEN);
-		sb_tpm_read_data(dev, seq, recvbuf, TPM_HDR_LEN + 4);
+		sb_tpm_read_data(tpm->nvdata, seq, recvbuf, TPM_HDR_LEN + 4,
+				 length);
 		break;
 	case TPM_CMD_EXTEND:
 		*recv_len = 30;

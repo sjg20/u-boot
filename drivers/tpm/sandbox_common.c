@@ -6,7 +6,14 @@
  */
 
 #include <common.h>
+#include <dm.h>
+#include <tpm-v1.h>
+#include <tpm-v2.h>
+#include <asm/unaligned.h>
+#include <u-boot/crc.h>
 #include "sandbox_common.h"
+
+#define TPM_ERR_CODE_OFS	(2 + 4)		/* after tag and size */
 
 /* Kernel TPM space - KERNEL_NV_INDEX, locked with physical presence */
 #define ROLLBACK_SPACE_KERNEL_VERSION	2
@@ -14,8 +21,9 @@
 
 struct rollback_space_kernel rollback_space_kernel;
 
-int sb_tpm_index_to_seq(uint32_t index)
+int sb_tpm_index_to_seq(u32 index)
 {
+	index &= ~HR_NV_INDEX;
 	switch (index) {
 	case FIRMWARE_NV_INDEX:
 		return NV_SEQ_FIRMWARE;
@@ -37,9 +45,12 @@ int sb_tpm_index_to_seq(uint32_t index)
 	return -1;
 }
 
-void sb_tpm_read_data(struct udevice *tpm, enum sandbox_nv_space seq,
-		      u8 *recvbuf, int data_ofs)
+void sb_tpm_read_data(const struct nvdata_state nvdata[NV_SEQ_COUNT],
+		      enum sandbox_nv_space seq, u8 *recvbuf, int data_ofs,
+		      int length)
 {
+	u8 *data = recvbuf + data_ofs;
+
 	if (seq == NV_SEQ_KERNEL) {
 		struct rollback_space_kernel rsk;
 
@@ -50,10 +61,10 @@ void sb_tpm_read_data(struct udevice *tpm, enum sandbox_nv_space seq,
 				offsetof(struct rollback_space_kernel,
 					 crc8));
 		memcpy(data, &rsk, sizeof(rsk));
-	} else if (!tpm->nvdata[seq].present) {
+	} else if (!nvdata[seq].present) {
 		put_unaligned_be32(TPM_BADINDEX,
-				   recvbuf + TPM2_ERR_CODE_OFS);
+				   recvbuf + TPM_ERR_CODE_OFS);
 	} else {
-		memcpy(data, &tpm->nvdata[seq].data, length);
+		memcpy(data, &nvdata[seq].data, length);
 	}
 }

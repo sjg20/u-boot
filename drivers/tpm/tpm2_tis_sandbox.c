@@ -60,6 +60,8 @@ struct sandbox_tpm2 {
 	u8 pcr[SANDBOX_TPM_PCR_NB][TPM2_DIGEST_LEN];
 	/* TPM PCR extensions */
 	u32 pcr_extensions[SANDBOX_TPM_PCR_NB];
+	/* non-volatile data */
+	struct nvdata_state nvdata[NV_SEQ_COUNT];
 };
 
 /*
@@ -94,6 +96,7 @@ static int sandbox_tpm2_check_session(struct udevice *dev, u32 command, u16 tag,
 	case TPM2_CC_DAM_RESET:
 	case TPM2_CC_DAM_PARAMETERS:
 	case TPM2_CC_PCR_EXTEND:
+	case TPM2_CC_NV_READ:
 		if (tag != TPM2_ST_SESSIONS) {
 			printf("Session required for command 0x%x\n", command);
 			return TPM2_RC_AUTH_CONTEXT;
@@ -122,6 +125,8 @@ static int sandbox_tpm2_check_session(struct udevice *dev, u32 command, u16 tag,
 			break;
 		case TPM2_RH_PLATFORM:
 			*hierarchy = TPM2_HIERARCHY_PLATFORM;
+			if (command == TPM2_CC_NV_READ)
+				*auth += sizeof(u32);
 			break;
 		default:
 			printf("Wrong handle 0x%x\n", handle);
@@ -561,7 +566,7 @@ static int sandbox_tpm2_xfer(struct udevice *dev, const u8 *sendbuf,
 	case TPM2_CC_NV_READ: {
 		int index, seq;
 
-		index = get_unaligned_be32(sendbuf + TPM2_HDR_LEN);
+		index = get_unaligned_be32(sendbuf + TPM2_HDR_LEN + 4);
 		length = get_unaligned_be32(sendbuf + TPM2_HDR_LEN + 8 + 13);
 		/* ignore offset */
 		seq = sb_tpm_index_to_seq(index);
@@ -572,7 +577,8 @@ static int sandbox_tpm2_xfer(struct udevice *dev, const u8 *sendbuf,
 		*recv_len = TPM2_HDR_LEN + 6 + length;
 		memset(recvbuf, '\0', *recv_len);
 		put_unaligned_be32(length, recvbuf + 2);
-		sb_tpm_read_data(dev, seq, recvbuf, TPM2_HDR_LEN + 4 + 2);
+		sb_tpm_read_data(tpm->nvdata, seq, recvbuf,
+				 TPM2_HDR_LEN + 4 + 2, length);
 		break;
 	}
 	default:
