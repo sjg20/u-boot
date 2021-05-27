@@ -11,6 +11,7 @@
 #include <asm/unaligned.h>
 #include <linux/bitops.h>
 #include <u-boot/crc.h>
+#include <u-boot/sha256.h>
 #include "sandbox_common.h"
 
 /* Hierarchies */
@@ -98,6 +99,7 @@ static int sandbox_tpm2_check_session(struct udevice *dev, u32 command, u16 tag,
 	case TPM2_CC_PCR_EXTEND:
 	case TPM2_CC_NV_READ:
 	case TPM2_CC_NV_WRITE:
+	case TPM2_CC_NV_WRITELOCK:
 	case TPM2_CC_NV_DEFINE_SPACE:
 		if (tag != TPM2_ST_SESSIONS) {
 			printf("Session required for command 0x%x\n", command);
@@ -128,7 +130,8 @@ static int sandbox_tpm2_check_session(struct udevice *dev, u32 command, u16 tag,
 		case TPM2_RH_PLATFORM:
 			*hierarchy = TPM2_HIERARCHY_PLATFORM;
 			if (command == TPM2_CC_NV_READ ||
-			    command == TPM2_CC_NV_WRITE)
+			    command == TPM2_CC_NV_WRITE ||
+			    command == TPM2_CC_NV_WRITELOCK)
 				*auth += sizeof(u32);
 			break;
 		default:
@@ -251,15 +254,19 @@ static int sandbox_tpm2_extend(struct udevice *dev, int pcr_index,
 			       const u8 *extension)
 {
 	struct sandbox_tpm2 *tpm = dev_get_priv(dev);
-	int i;
 
-	/* Only simulate the first extensions from all '0' with only '0' */
-	for (i = 0; i < TPM2_DIGEST_LEN; i++)
-		if (tpm->pcr[pcr_index][i] || extension[i])
-			return TPM2_RC_FAILURE;
+	if (!pcr_index) {
+		memcpy(tpm->pcr[pcr_index], sandbox_extended_once_pcr,
+		       TPM2_DIGEST_LEN);
+	} else {
+		sha256_context ctx;
 
-	memcpy(tpm->pcr[pcr_index], sandbox_extended_once_pcr,
-	       TPM2_DIGEST_LEN);
+		sha256_starts(&ctx);
+		sha256_update(&ctx, tpm->pcr[pcr_index], TPM2_DIGEST_LEN);
+		sha256_update(&ctx, extension, TPM2_DIGEST_LEN);
+		sha256_finish(&ctx, tpm->pcr[pcr_index]);
+	}
+
 	tpm->pcr_extensions[pcr_index]++;
 
 	return 0;
@@ -618,6 +625,10 @@ static int sandbox_tpm2_xfer(struct udevice *dev, const u8 *sendbuf,
 		memset(recvbuf, '\0', *recv_len);
 		break;
 	}
+	case TPM2_CC_NV_WRITELOCK:
+		*recv_len = 12;
+		memset(recvbuf, '\0', *recv_len);
+		break;
 	default:
 		printf("TPM2 command %02x unknown in Sandbox\n", command);
 		rc = TPM2_RC_COMMAND_CODE;

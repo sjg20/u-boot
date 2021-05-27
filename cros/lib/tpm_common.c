@@ -216,7 +216,7 @@ vb2_error_t vboot_extend_pcr(struct vboot_info *vboot, int pcr,
 				     vb2_digest_size(algo), buffer,
 				     TPM_PCR_BOOT_MODE);
 		if (ret)
-			return log_msg_ret("boot", ret);
+			return log_msg_retz("boot", ret);
 		break;
 	 /* SHA256 of HWID */
 	case HWID_DIGEST_PCR:
@@ -224,7 +224,7 @@ vb2_error_t vboot_extend_pcr(struct vboot_info *vboot, int pcr,
 				     vb2_digest_size(algo), buffer,
 				     TPM_PCR_GBB_HWID_NAME);
 		if (ret)
-			return log_msg_ret("hwid", ret);
+			return log_msg_retz("hwid", ret);
 		break;
 	default:
 		return log_msg_retz("none", VB2_ERROR_UNKNOWN);
