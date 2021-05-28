@@ -5,8 +5,11 @@
 # Holds and modifies the state information held by binman
 #
 
+from collections import defaultdict
 import hashlib
 import re
+import threading
+import time
 
 from dtoc import fdt
 import os
@@ -55,6 +58,18 @@ allow_entry_expansion = True
 # result in a larger compressed size than the new ones, but then after updating
 # to the new ones, the compressed size increases, etc.
 allow_entry_contraction = False
+
+class Timing:
+    def __init__(self, name):
+        self.name = name
+        self.start = None # cause an error if TimingStart() is not called
+        self.accum = 0.0
+
+
+timing_info = {}
+
+num_threads = None
+
 
 def GetFdtForEtype(etype):
     """Get the Fdt object for a particular device-tree entry
@@ -421,3 +436,36 @@ def AllowEntryContraction():
             raised
     """
     return allow_entry_contraction
+
+def GetTiming(name):
+    threaded_name = '%s:%d' % (name, threading.get_ident())
+    timing = timing_info.get(threaded_name)
+    if not timing:
+        timing = Timing(threaded_name)
+        timing_info[threaded_name] = timing
+    return timing
+
+def TimingStart(name):
+    timing = GetTiming(name)
+    timing.start = time.monotonic()
+
+def TimingAccum(name):
+    timing = GetTiming(name)
+    timing.accum += time.monotonic() - timing.start
+
+def TimingShow():
+    duration = defaultdict(float)
+    for threaded_name, timing in timing_info.items():
+        name = threaded_name.split(':')[0]
+        duration[name] += timing.accum
+
+    for name, seconds in duration.items():
+        print('%10s: %10.1fms' % (name, seconds * 1000))
+
+def SetThreads(threads):
+    global num_threads
+
+    num_threads = threads
+
+def GetThreads():
+    return num_threads
