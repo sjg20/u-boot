@@ -527,12 +527,15 @@ class Entry_section(Entry):
     def GetEntryContents(self):
         """Call ObtainContents() for each entry in the section
         """
+        def _CheckDone(entry):
+            if not entry.ObtainContents():
+                next_todo.append(entry)
+
         todo = self._entries.values()
         for passnum in range(3):
             next_todo = []
             for entry in todo:
-                if not entry.ObtainContents():
-                    next_todo.append(entry)
+                _CheckDone(entry)
             todo = next_todo
             if not todo:
                 break
