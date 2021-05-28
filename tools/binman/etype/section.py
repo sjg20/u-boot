@@ -530,15 +530,37 @@ class Entry_section(Entry):
         def _CheckDone(entry):
             if not entry.ObtainContents():
                 next_todo.append(entry)
+            return entry
 
         todo = self._entries.values()
         for passnum in range(3):
+            threads = state.GetThreads()
             next_todo = []
-            for entry in todo:
-                _CheckDone(entry)
+
+            if threads == 0:
+                for entry in todo:
+                    _CheckDone(entry)
+            else:
+                with concurrent.futures.ThreadPoolExecutor(
+                        max_workers=threads) as executor:
+                    future_to_data = {
+                        entry: executor.submit(_CheckDone, entry)
+                        for entry in todo}
+                    done, not_done = concurrent.futures.wait(future_to_data.values(),
+                                                             timeout=60)
+                    # Make sure we check the result, so any exceptions are
+                    # generated. Check the results in entry order, since tests
+                    # may expect earlier entries to fail first.
+                    for entry in todo:
+                        job = future_to_data[entry]
+                        job.result()
+                    if not_done:
+                        self.Raise('Timed out obtaining contents')
+
             todo = next_todo
             if not todo:
                 break
+
         if todo:
             self.Raise('Internal error: Could not complete processing of contents: remaining %s' %
                        todo)
