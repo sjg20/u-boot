@@ -287,13 +287,14 @@ vb2_error_t vb2ex_ec_protect(enum vb2_firmware_selection select)
 vb2_error_t vb2ex_ec_vboot_done(struct vb2_context *ctx)
 {
 	struct vboot_info *vboot = ctx_to_vboot(ctx);
-	struct udevice *dev;
+	struct udevice *dev, *cros_ec;
 	int limit_power;
 	int ret;
 
 	ret = ec_get(0, &dev);
 	if (ret)
 		return log_msg_ret("ec", ret);
+	cros_ec = dev_get_parent(dev);
 
 	log_debug("start\n");
 	/* Ensure we have enough power to continue booting */
@@ -302,7 +303,7 @@ vb2_error_t vb2ex_ec_vboot_done(struct vb2_context *ctx)
 		int limit_power_wait_time = 0;
 		int ret;
 
-		ret = cros_ec_read_limit_power(dev, &limit_power);
+		ret = cros_ec_read_limit_power(cros_ec, &limit_power);
 		if (ret == -ENOSYS) {
 			limit_power = 0;
 		} else if (ret) {
@@ -343,6 +344,10 @@ vb2_error_t vb2ex_ec_battery_cutoff(void)
 	int ret;
 
 	log_debug("start\n");
+	if (!dev) {
+		log_warning("No EC\n");
+		return VB2_ERROR_UNKNOWN;
+	}
 	ret = cros_ec_battery_cutoff(dev, EC_BATTERY_CUTOFF_FLAG_AT_SHUTDOWN);
 	if (ret) {
 		log_err("Failed, err=%d\n", ret);
