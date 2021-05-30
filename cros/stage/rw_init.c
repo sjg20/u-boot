@@ -251,16 +251,21 @@ int vboot_rw_init(struct vboot_info *vboot)
 	int ret;
 
 	if (!IS_ENABLED(CONFIG_SYS_COREBOOT) || ll_boot_init()) {
+		int new_size = VB2_KERNEL_WORKBUF_RECOMMENDED_SIZE;
 		struct vb2_context *ctx;
+		int ret;
 
 		blob = bloblist_find(BLOBLISTT_VBOOT_CTX, sizeof(*blob));
 		if (!blob)
 			return log_msg_ret("blob", -ENOENT);
-		vboot->blob = blob;
-
-		ret = vb2api_reinit(blob, &ctx);
+		ret = bloblist_resize(BLOBLISTT_VBOOT_CTX, new_size);
 		if (ret)
-			return log_msg_ret("blob", ret);
+			return log_msg_ret("resize", ret);
+
+		ret = vb2api_relocate(blob, blob, new_size, &ctx);
+		if (ret)
+			return log_msg_ret("reloc", ret);
+
 		vboot->ctx = ctx;
 		ctx->non_vboot_context = vboot;
 		log_warning("flags %llx %d\n", ctx->flags,

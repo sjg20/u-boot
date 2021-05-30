@@ -182,7 +182,8 @@ int bloblist_ensure_size_ret(uint tag, int *sizep, void **blobp);
 /**
  * bloblist_resize() - resize a blob
  *
- * Any blobs above this one are relocated up or down
+ * Any blobs above this one are relocated up or down. The resized blob remains
+ * in the same place.
  *
  * @tag:	Tag to add (enum bloblist_tag_t)
  * @new_size:	New size of the blob (>0 to expand, <0 to contract)
