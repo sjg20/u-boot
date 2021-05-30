@@ -177,10 +177,7 @@ static int sandbox_tpm_xfer(struct udevice *dev, const uint8_t *sendbuf,
 		if (seq < 0)
 			return -EINVAL;
 		printf("tpm: nvwrite index=%#02x, len=%#02x\n", index, length);
-		memcpy(&tpm->nvdata[seq].data, sendbuf + 22, length);
-		tpm->nvdata[seq].present = true;
-		*recv_len = 12;
-		memset(recvbuf, '\0', *recv_len);
+		sb_tpm_write_data(tpm->nvdata, seq, sendbuf, 22, length);
 		break;
 	case TPM_CMD_NV_READ_VALUE: /* nvread */
 		index = get_unaligned_be32(sendbuf + 10);
@@ -208,6 +205,7 @@ static int sandbox_tpm_xfer(struct udevice *dev, const uint8_t *sendbuf,
 			return -EINVAL;
 		printf("tpm: define_space index=%#02x, len=%#02x, seq=%#02x\n",
 		       index, length, seq);
+		sb_tpm_define_data(tpm->nvdata, seq, length);
 		*recv_len = 12;
 		memset(recvbuf, '\0', *recv_len);
 		break;

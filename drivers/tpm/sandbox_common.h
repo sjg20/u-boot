@@ -52,6 +52,7 @@ struct __packed rollback_space_kernel {
 
 struct nvdata_state {
 	bool present;
+	int length;
 	u8 data[NV_DATA_SIZE];
 };
 
@@ -60,5 +61,12 @@ int sb_tpm_index_to_seq(uint index);
 void sb_tpm_read_data(const struct nvdata_state nvdata[NV_SEQ_COUNT],
 		      enum sandbox_nv_space seq, u8 *recvbuf, int data_ofs,
 		      int length);
+
+void sb_tpm_write_data(struct nvdata_state nvdata[NV_SEQ_COUNT],
+		       enum sandbox_nv_space seq, const u8 *buf, int data_ofs,
+		       int length);
+
+void sb_tpm_define_data(struct nvdata_state nvdata[NV_SEQ_COUNT],
+			enum sandbox_nv_space seq, int length);
 
 #endif

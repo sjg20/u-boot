@@ -177,7 +177,7 @@ static int tpm_secdata_setup(struct udevice *dev, enum cros_nvdata_type type,
 	index = get_index(type);
 	if (index == -1)
 		return -EINVAL;
-	log_warning("index=%x\n", index);
+	log_info("index=%x\n", index);
 
 	if (tpm_is_v1(tpm))
 		ret = safe_define_space(tpm, index, attr, size);

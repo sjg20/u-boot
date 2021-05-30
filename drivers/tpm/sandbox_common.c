@@ -5,6 +5,8 @@
  * Copyright 2021 Google LLC
  */
 
+#define LOG_CATEGORY	UCLASS_TPM
+
 #include <common.h>
 #include <dm.h>
 #include <tpm-v1.h>
@@ -46,25 +48,37 @@ int sb_tpm_index_to_seq(u32 index)
 }
 
 void sb_tpm_read_data(const struct nvdata_state nvdata[NV_SEQ_COUNT],
-		      enum sandbox_nv_space seq, u8 *recvbuf, int data_ofs,
+		      enum sandbox_nv_space seq, u8 *buf, int data_ofs,
 		      int length)
 {
-	u8 *data = recvbuf + data_ofs;
+	const struct nvdata_state *nvd = &nvdata[seq];
 
-	if (seq == NV_SEQ_KERNEL) {
-		struct rollback_space_kernel rsk;
+	if (!nvd->present)
+		put_unaligned_be32(TPM_BADINDEX, buf + TPM_ERR_CODE_OFS);
+	else if (length > nvd->length)
+		put_unaligned_be32(TPM_BAD_DATASIZE, buf + TPM_ERR_CODE_OFS);
+	else
+		memcpy(buf + data_ofs, &nvd->data, length);
+}
 
-		memset(&rsk, 0, sizeof(struct rollback_space_kernel));
-		rsk.struct_version = 2;
-		rsk.uid = ROLLBACK_SPACE_KERNEL_UID;
-		rsk.crc8 = crc8(0, (unsigned char *)&rsk,
-				offsetof(struct rollback_space_kernel,
-					 crc8));
-		memcpy(data, &rsk, sizeof(rsk));
-	} else if (!nvdata[seq].present) {
-		put_unaligned_be32(TPM_BADINDEX,
-				   recvbuf + TPM_ERR_CODE_OFS);
+void sb_tpm_write_data(struct nvdata_state nvdata[NV_SEQ_COUNT],
+		       enum sandbox_nv_space seq, const u8 *buf, int data_ofs,
+		       int length)
+{
+	struct nvdata_state *nvd = &nvdata[seq];
+
+	if (length > nvd->length) {
+		log_err("Invalid length %x (max %x)\n", length, nvd->length);
 	} else {
-		memcpy(data, &nvdata[seq].data, length);
+		memcpy(&nvdata[seq].data, buf + data_ofs, length);
+		nvd->present = true;
 	}
+}
+
+void sb_tpm_define_data(struct nvdata_state nvdata[NV_SEQ_COUNT],
+			enum sandbox_nv_space seq, int length)
+{
+	struct nvdata_state *nvd = &nvdata[seq];
+
+	nvd->length = length;
 }

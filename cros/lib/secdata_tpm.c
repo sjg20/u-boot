@@ -179,6 +179,8 @@ static int setup_space(const char *name, enum cros_nvdata_type type,
 	if (ret)
 		return log_msg_ret("setup", ret);
 
+	log_buffer(UCLASS_TPM, LOGL_INFO, 0, data, 1, length, 0);
+
 	ret = safe_write(type, data, length);
 	if (ret)
 		return log_msg_ret("write", ret);
@@ -229,6 +231,7 @@ static int v2_factory_initialize_tpm(struct vboot_info *vboot)
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
 
+	log_notice("Init TPM v2\n");
 	ret = tpm_force_clear(vboot->tpm);
 	if (ret != TPM_SUCCESS)
 		return log_msg_ret("clear", -EIO);
@@ -338,7 +341,7 @@ static int v1_factory_initialize_tpm(struct vboot_info *vboot)
 	struct tpm_permanent_flags pflags;
 	int ret;
 
-	log_warning("starting\n");
+	log_notice("Init TPM v1.2\n");
 	vb2api_secdata_kernel_create_v0(ctx);
 
 	ret = tpm1_get_permanent_flags(vboot->tpm, &pflags);

@@ -13,10 +13,14 @@
 
 int vboot_ver3_try_fw(struct vboot_info *vboot)
 {
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	int ret;
 
 	bootstage_mark(BOOTSTAGE_VBOOT_START_VERIFY_SLOT);
-	ret = vb2api_fw_phase3(vboot_get_ctx(vboot));
+
+	log_buffer(UCLASS_TPM, LOGL_INFO, 0, ctx->secdata_kernel, 1, 0x28, 0);
+
+	ret = vb2api_fw_phase3(ctx);
 	bootstage_mark(BOOTSTAGE_VBOOT_END_VERIFY_SLOT);
 	if (ret) {
 		log_info("Reboot reqested (%x)\n", ret);
