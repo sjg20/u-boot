@@ -19,6 +19,9 @@
 #include <malloc.h>
 #include <video.h>
 #include <cros/cb_gfx.h>
+#include <cros/fpmath.h>
+#include <cros/vboot.h>
+#include <linux/log2.h>
 
 /*
  * 'canvas' is the drawing area located in the center of the screen. It's a
@@ -28,6 +31,16 @@
  */
 static struct rect canvas;
 static struct rect screen;
+
+static u8 *gfx_buffer;
+
+/* Panel orientation, matches drm_connector.h in the Linux kernel. */
+enum cb_fb_orientation {
+	CB_FB_ORIENTATION_NORMAL = 0,
+	CB_FB_ORIENTATION_BOTTOM_UP = 1,
+	CB_FB_ORIENTATION_LEFT_UP = 2,
+	CB_FB_ORIENTATION_RIGHT_UP = 3,
+};
 
 struct cb_framebuffer {
 	u32 tag;
@@ -46,25 +59,108 @@ struct cb_framebuffer {
 	u8 blue_mask_size;
 	u8 reserved_mask_pos;
 	u8 reserved_mask_size;
+	u8 orientation;
 };
 
 /*
  * Framebuffer is assumed to assign a higher coordinate (larger x, y) to
  * a higher address
  */
-static struct cb_framebuffer s_fbinfo, *fbinfo = &s_fbinfo;
-static u8 *fbaddr;
+static struct cb_framebuffer *fbinfo;
+
+/* Shorthand for up-to-date virtual framebuffer address */
+#define REAL_FB ((unsigned char *)phys_to_virt(fbinfo->physical_address))
+#define FB	(gfx_buffer ? gfx_buffer : REAL_FB)
 
 #define PIVOT_H_MASK	(PIVOT_H_LEFT | PIVOT_H_CENTER | PIVOT_H_RIGHT)
 #define PIVOT_V_MASK	(PIVOT_V_TOP | PIVOT_V_CENTER | PIVOT_V_BOTTOM)
 #define ROUNDUP(x, y)	((((x) + ((y) - 1)) / (y)) * (y))
 #define ABS(x)		((x) < 0 ? -(x) : (x))
 
-static void add_vectors(struct vector *out, const struct vector *v1,
-			const struct vector *v2)
+static char initialized = 0;
+
+static const struct vector vzero = {
+	.x = 0,
+	.y = 0,
+};
+
+struct color_transformation {
+	uint8_t base;
+	int16_t scale;
+};
+
+struct color_mapping {
+	struct color_transformation red;
+	struct color_transformation green;
+	struct color_transformation blue;
+	int enabled;
+};
+
+static struct color_mapping color_map;
+
+static inline void set_color_trans(struct color_transformation *trans,
+				   uint8_t bg_color, uint8_t fg_color)
+{
+	trans->base = bg_color;
+	trans->scale = fg_color - bg_color;
+}
+
+int set_color_map(const struct rgb_color *background,
+		  const struct rgb_color *foreground)
+{
+	if (background == NULL || foreground == NULL)
+		return CBGFX_ERROR_INVALID_PARAMETER;
+
+	set_color_trans(&color_map.red, background->red, foreground->red);
+	set_color_trans(&color_map.green, background->green,
+			foreground->green);
+	set_color_trans(&color_map.blue, background->blue, foreground->blue);
+	color_map.enabled = 1;
+
+	return CBGFX_SUCCESS;
+}
+
+void clear_color_map(void)
+{
+	color_map.enabled = 0;
+}
+
+struct blend_value {
+	uint8_t alpha;
+	struct rgb_color rgb;
+};
+
+static struct blend_value blend;
+
+int set_blend(const struct rgb_color *rgb, uint8_t alpha)
+{
+	if (rgb == NULL)
+		return CBGFX_ERROR_INVALID_PARAMETER;
+
+	blend.alpha = alpha;
+	blend.rgb = *rgb;
+
+	return CBGFX_SUCCESS;
+}
+
+void clear_blend(void)
+{
+	blend.alpha = 0;
+	blend.rgb.red = 0;
+	blend.rgb.green = 0;
+	blend.rgb.blue = 0;
+}
+
+static void add_vectors(struct vector *out,
+			const struct vector *v1, const struct vector *v2)
 {
 	out->x = v1->x + v2->x;
 	out->y = v1->y + v2->y;
+}
+
+static int fraction_equal(const struct fraction *f1, const struct fraction *f2)
+{
+	return (int64_t)f1->n * f2->d == (int64_t)f2->n * f1->d;
 }
 
 static int is_valid_fraction(const struct fraction *f)
@@ -72,117 +168,620 @@ static int is_valid_fraction(const struct fraction *f)
 	return f->d != 0;
 }
 
+static int is_valid_scale(const struct scale *s)
+{
+	return is_valid_fraction(&s->x) && is_valid_fraction(&s->y);
+}
+
+static void reduce_fraction(struct fraction *out, int64_t n, int64_t d)
+{
+	/* Simplest way to reduce the fraction until fitting in int32_t */
+	int shift = ilog2(max(ABS(n), ABS(d)) >> 31) + 1;
+	out->n = n >> shift;
+	out->d = d >> shift;
+}
+
+/* out = f1 + f2 */
+static void add_fractions(struct fraction *out,
+			  const struct fraction *f1, const struct fraction *f2)
+{
+	reduce_fraction(out,
+			(int64_t)f1->n * f2->d + (int64_t)f2->n * f1->d,
+			(int64_t)f1->d * f2->d);
+}
+
+/* out = f1 - f2 */
+static void subtract_fractions(struct fraction *out,
+			       const struct fraction *f1,
+			       const struct fraction *f2)
+{
+	reduce_fraction(out,
+			(int64_t)f1->n * f2->d - (int64_t)f2->n * f1->d,
+			(int64_t)f1->d * f2->d);
+}
+
+static void add_scales(struct scale *out,
+		       const struct scale *s1, const struct scale *s2)
+{
+	add_fractions(&out->x, &s1->x, &s2->x);
+	add_fractions(&out->y, &s1->y, &s2->y);
+}
+
 /*
  * Transform a vector:
  *	x' = x * a_x + offset_x
  *	y' = y * a_y + offset_y
  */
-static int transform_vector(struct vector *out, const struct vector *in,
-			    const struct scale *a, const struct vector *offset)
+static int transform_vector(struct vector *out,
+			    const struct vector *in,
+			    const struct scale *a,
+			    const struct vector *offset)
 {
-	if (!is_valid_fraction(&a->x) || !is_valid_fraction(&a->y))
+	if (!is_valid_scale(a))
 		return CBGFX_ERROR_INVALID_PARAMETER;
-	out->x = a->x.n * in->x / a->x.d + offset->x;
-	out->y = a->y.n * in->y / a->y.d + offset->y;
+	out->x = (int64_t)a->x.n * in->x / a->x.d + offset->x;
+	out->y = (int64_t)a->y.n * in->y / a->y.d + offset->y;
 	return CBGFX_SUCCESS;
 }
 
 /*
  * Returns 1 if v is exclusively within box, 0 if v is inclusively within box,
- * or -1 otherwise. Note that only the right and bottom edges are examined.
+ * or -1 otherwise.
  */
 static int within_box(const struct vector *v, const struct rect *bound)
 {
-	if (v->x < bound->offset.x + bound->size.width &&
+	if (v->x > bound->offset.x &&
+	    v->y > bound->offset.y &&
+	    v->x < bound->offset.x + bound->size.width &&
 	    v->y < bound->offset.y + bound->size.height)
 		return 1;
-	else if (v->x <= bound->offset.x + bound->size.width &&
+	else if (v->x >= bound->offset.x &&
+		 v->y >= bound->offset.y &&
+		 v->x <= bound->offset.x + bound->size.width &&
 		 v->y <= bound->offset.y + bound->size.height)
 		return 0;
 	else
 		return -1;
 }
 
-static inline u32 calculate_colour(const struct rgb_color *rgb, u8 invert)
+/* Helper function that applies color_map to the color. */
+static inline uint8_t apply_map(uint8_t color,
+				const struct color_transformation *trans)
 {
-	u32 colour = 0;
+	if (!color_map.enabled)
+		return color;
+	return trans->base + trans->scale * color / UINT8_MAX;
+}
 
-	colour |= (rgb->red >> (8 - fbinfo->red_mask_size))
-		<< fbinfo->red_mask_pos;
-	colour |= (rgb->green >> (8 - fbinfo->green_mask_size))
-		<< fbinfo->green_mask_pos;
-	colour |= (rgb->blue >> (8 - fbinfo->blue_mask_size))
-		<< fbinfo->blue_mask_pos;
+/*
+ * Helper function that applies color and opacity from blend struct
+ * into the color.
+ */
+static inline uint8_t apply_blend(uint8_t color, uint8_t blend_color)
+{
+	if (blend.alpha == 0 || color == blend_color)
+		return color;
+
+	return (color * (256 - blend.alpha) +
+		blend_color * blend.alpha) / 256;
+}
+
+static inline uint32_t calculate_color(const struct rgb_color *rgb,
+				       uint8_t invert)
+{
+	uint32_t color = 0;
+
+	color |= (apply_blend(apply_map(rgb->red, &color_map.red),
+			      blend.rgb.red)
+		  >> (8 - fbinfo->red_mask_size))
+		 << fbinfo->red_mask_pos;
+	color |= (apply_blend(apply_map(rgb->green, &color_map.green),
+			      blend.rgb.green)
+		  >> (8 - fbinfo->green_mask_size))
+		 << fbinfo->green_mask_pos;
+	color |= (apply_blend(apply_map(rgb->blue, &color_map.blue),
+			      blend.rgb.blue)
+		  >> (8 - fbinfo->blue_mask_size))
+		 << fbinfo->blue_mask_pos;
 	if (invert)
-		colour ^= 0xffffffff;
-	return colour;
+		color ^= 0xffffffff;
+	return color;
 }
 
 /*
  * Plot a pixel in a framebuffer. This is called from tight loops. Keep it slim
  * and do the validation at callers' site.
  */
-static inline void set_pixel(struct vector *coord, u32 colour)
+static inline void set_pixel(struct vector *coord, u32 color)
 {
 	const int bpp = fbinfo->bits_per_pixel;
 	const int bpl = fbinfo->bytes_per_line;
+	struct vector rcoord;
 	int i;
-	u8 * const pixel = fbaddr + coord->y * bpl + coord->x * bpp / 8;
 
+	switch (fbinfo->orientation) {
+	case CB_FB_ORIENTATION_NORMAL:
+	default:
+		rcoord.x = coord->x;
+		rcoord.y = coord->y;
+		break;
+	case CB_FB_ORIENTATION_BOTTOM_UP:
+		rcoord.x = screen.size.width - 1 - coord->x;
+		rcoord.y = screen.size.height - 1 - coord->y;
+		break;
+	case CB_FB_ORIENTATION_LEFT_UP:
+		rcoord.x = coord->y;
+		rcoord.y = screen.size.width - 1 - coord->x;
+		break;
+	case CB_FB_ORIENTATION_RIGHT_UP:
+		rcoord.x = screen.size.height - 1 - coord->y;
+		rcoord.y = coord->x;
+		break;
+	}
+
+	uint8_t * const pixel = FB + rcoord.y * bpl + rcoord.x * bpp / 8;
 	for (i = 0; i < bpp / 8; i++)
-		pixel[i] = (colour >> (i * 8));
+		pixel[i] = (color >> (i * 8));
 }
 
-int cbgfx_clear_screen(const struct rgb_color *rgb)
+/*
+ * Initializes the library. Automatically called by APIs. It sets up
+ * the canvas and the framebuffer.
+ */
+int cbgfx_init(struct udevice *dev)
 {
-	struct vector p;
-	u32 colour = calculate_colour(rgb, 0);
-	const int bpp = fbinfo->bits_per_pixel;
-	const int bpl = fbinfo->bytes_per_line;
+	struct video_uc_plat *plat = dev_get_uclass_plat(dev);
+	struct video_priv *priv = dev_get_uclass_priv(dev);
+
+	if (initialized)
+		return 0;
+
+	fbinfo->physical_address = plat->base;
+	fbinfo->x_resolution = priv->xsize;
+	fbinfo->y_resolution = priv->ysize;
+	fbinfo->bytes_per_line = priv->line_length;
+	fbinfo->bits_per_pixel = 1 << priv->bpix;
+	fbinfo->reserved_mask_pos = 0;
+	fbinfo->reserved_mask_size = 0;
+	switch (priv->bpix) {
+	case VIDEO_BPP32:
+		fbinfo->red_mask_pos = 16;
+		fbinfo->red_mask_size = 8;
+		fbinfo->green_mask_pos = 8;
+		fbinfo->green_mask_size = 8;
+		fbinfo->blue_mask_pos = 0;
+		fbinfo->blue_mask_size = 8;
+		break;
+	case VIDEO_BPP16:
+		fbinfo->red_mask_pos = 11;
+		fbinfo->red_mask_size = 5;
+		fbinfo->green_mask_pos = 5;
+		fbinfo->green_mask_size = 6;
+		fbinfo->blue_mask_pos = 0;
+		fbinfo->blue_mask_size = 5;
+		break;
+	default:
+		log_err("Invalid bpix %d\n", priv->bpix);
+		return CBGFX_ERROR_INIT;
+	}
+
+	if (!fbinfo->physical_address)
+		return CBGFX_ERROR_FRAMEBUFFER_ADDR;
+
+	switch (fbinfo->orientation) {
+	default: /* Normal or rotated 180 degrees. */
+		screen.size.width = fbinfo->x_resolution;
+		screen.size.height = fbinfo->y_resolution;
+		break;
+	case CB_FB_ORIENTATION_LEFT_UP: /* 90 degree rotation. */
+	case CB_FB_ORIENTATION_RIGHT_UP:
+		screen.size.width = fbinfo->y_resolution;
+		screen.size.height = fbinfo->x_resolution;
+		break;
+	}
+	screen.offset.x = 0;
+	screen.offset.y = 0;
+
+	/* Calculate canvas size & offset. Canvas is always square. */
+	if (screen.size.height > screen.size.width) {
+		canvas.size.height = screen.size.width;
+		canvas.size.width = canvas.size.height;
+		canvas.offset.x = 0;
+		canvas.offset.y = (screen.size.height - canvas.size.height) / 2;
+	} else {
+		canvas.size.height = screen.size.height;
+		canvas.size.width = canvas.size.height;
+		canvas.offset.x = (screen.size.width - canvas.size.width) / 2;
+		canvas.offset.y = 0;
+	}
+
+	initialized = 1;
+	log_info("cbgfx initialized: screen:width=%d, height=%d, offset=%d canvas:width=%d, height=%d, offset=%d\n",
+		 screen.size.width, screen.size.height, screen.offset.x,
+		 canvas.size.width, canvas.size.height, canvas.offset.x);
+
+	return 0;
+}
+
+int draw_box(const struct rect *box, const struct rgb_color *rgb)
+{
+	struct vector top_left;
+	struct vector p, t;
+
+	const uint32_t color = calculate_color(rgb, 0);
+	const struct scale top_left_s = {
+		.x = { .n = box->offset.x, .d = CANVAS_SCALE, },
+		.y = { .n = box->offset.y, .d = CANVAS_SCALE, }
+	};
+	const struct scale bottom_right_s = {
+		.x = { .n = box->offset.x + box->size.x, .d = CANVAS_SCALE, },
+		.y = { .n = box->offset.y + box->size.y, .d = CANVAS_SCALE, }
+	};
+
+	transform_vector(&top_left, &canvas.size, &top_left_s, &canvas.offset);
+	transform_vector(&t, &canvas.size, &bottom_right_s, &canvas.offset);
+	if (within_box(&t, &canvas) < 0) {
+		log_warning("Box exceeds canvas boundary\n");
+		return CBGFX_ERROR_BOUNDARY;
+	}
+
+	for (p.y = top_left.y; p.y < t.y; p.y++)
+		for (p.x = top_left.x; p.x < t.x; p.x++)
+			set_pixel(&p, color);
+
+	return CBGFX_SUCCESS;
+}
+
+int draw_rounded_box(const struct scale *pos_rel, const struct scale *dim_rel,
+		     const struct rgb_color *rgb,
+		     const struct fraction *thickness,
+		     const struct fraction *radius)
+{
+	struct scale pos_end_rel;
+	struct vector top_left;
+	struct vector p, t;
+
+	const uint32_t color = calculate_color(rgb, 0);
+
+	if (!is_valid_scale(pos_rel) || !is_valid_scale(dim_rel))
+		return CBGFX_ERROR_INVALID_PARAMETER;
+
+	add_scales(&pos_end_rel, pos_rel, dim_rel);
+	transform_vector(&top_left, &canvas.size, pos_rel, &canvas.offset);
+	transform_vector(&t, &canvas.size, &pos_end_rel, &canvas.offset);
+	if (within_box(&t, &canvas) < 0) {
+		log_warning("Box exceeds canvas boundary\n");
+		return CBGFX_ERROR_BOUNDARY;
+	}
+
+	if (!is_valid_fraction(thickness) || !is_valid_fraction(radius))
+		return CBGFX_ERROR_INVALID_PARAMETER;
+
+	struct scale thickness_scale = {
+		.x = { .n = thickness->n, .d = thickness->d },
+		.y = { .n = thickness->n, .d = thickness->d },
+	};
+	struct scale radius_scale = {
+		.x = { .n = radius->n, .d = radius->d },
+		.y = { .n = radius->n, .d = radius->d },
+	};
+	struct vector d, r, s;
+	transform_vector(&d, &canvas.size, &thickness_scale, &vzero);
+	transform_vector(&r, &canvas.size, &radius_scale, &vzero);
+	const uint8_t has_thickness = d.x > 0 && d.y > 0;
+	if (thickness->n != 0 && !has_thickness)
+		log_warning("Thickness truncated to 0\n");
+	const uint8_t has_radius = r.x > 0 && r.y > 0;
+	if (radius->n != 0 && !has_radius)
+		log_warning("Radius truncated to 0\n");
+	if (has_radius) {
+		if (d.x > r.x || d.y > r.y) {
+			log_warning("Thickness cannot be greater than radius\n");
+			return CBGFX_ERROR_INVALID_PARAMETER;
+		}
+		if (r.x * 2 > t.x - top_left.x || r.y * 2 > t.y - top_left.y) {
+			log_warning("Radius cannot be greater than half of the box\n");
+			return CBGFX_ERROR_INVALID_PARAMETER;
+		}
+	}
+
+	/* Step 1: Draw edges */
+	int32_t x_begin, x_end;
+	if (has_thickness) {
+		/* top */
+		for (p.y = top_left.y; p.y < top_left.y + d.y; p.y++)
+			for (p.x = top_left.x + r.x; p.x < t.x - r.x; p.x++)
+				set_pixel(&p, color);
+		/* bottom */
+		for (p.y = t.y - d.y; p.y < t.y; p.y++)
+			for (p.x = top_left.x + r.x; p.x < t.x - r.x; p.x++)
+				set_pixel(&p, color);
+		for (p.y = top_left.y + r.y; p.y < t.y - r.y; p.y++) {
+			/* left */
+			for (p.x = top_left.x; p.x < top_left.x + d.x; p.x++)
+				set_pixel(&p, color);
+			/* right */
+			for (p.x = t.x - d.x; p.x < t.x; p.x++)
+				set_pixel(&p, color);
+		}
+	} else {
+		/* Fill the regions except circular sectors */
+		for (p.y = top_left.y; p.y < t.y; p.y++) {
+			if (p.y >= top_left.y + r.y && p.y < t.y - r.y) {
+				x_begin = top_left.x;
+				x_end = t.x;
+			} else {
+				x_begin = top_left.x + r.x;
+				x_end = t.x - r.x;
+			}
+			for (p.x = x_begin; p.x < x_end; p.x++)
+				set_pixel(&p, color);
+		}
+	}
+
+	if (!has_radius)
+		return CBGFX_SUCCESS;
 
 	/*
-	 * If all significant bytes in colour are equal, fastpath through
-	 * memset(). We assume that for 32bpp the high byte gets ignored anyway
+	 * Step 2: Draw rounded corners
+	 * When has_thickness, only the border is drawn. With fixed thickness,
+	 * the time complexity is linear to the size of the box.
 	 */
-	if ((((colour >> 8) & 0xff) == (colour & 0xff)) &&
-	    (bpp == 16 || (((colour >> 16) & 0xff) == (colour & 0xff)))) {
-		memset(fbaddr, colour & 0xff, screen.size.height * bpl);
+	if (has_thickness) {
+		s.x = r.x - d.x;
+		s.y = r.y - d.y;
 	} else {
-		for (p.y = 0; p.y < screen.size.height; p.y++)
-			for (p.x = 0; p.x < screen.size.width; p.x++)
-				set_pixel(&p, colour);
+		s.x = 0;
+		s.y = 0;
+	}
+
+	/* Use 64 bits to avoid overflow */
+	int32_t x, y;
+	uint64_t yy;
+	const uint64_t rrx = (uint64_t)r.x * r.x, rry = (uint64_t)r.y * r.y;
+	const uint64_t ssx = (uint64_t)s.x * s.x, ssy = (uint64_t)s.y * s.y;
+	x_begin = 0;
+	x_end = 0;
+	for (y = r.y - 1; y >= 0; y--) {
+		/*
+		 * The inequality is valid in the beginning of each iteration:
+		 * y^2 + x_end^2 < r^2
+		 */
+		yy = (uint64_t)y * y;
+		/* Check yy/ssy + xx/ssx < 1 */
+		while (yy * ssx + x_begin * x_begin * ssy < ssx * ssy)
+			x_begin++;
+		/* The inequality must be valid now: y^2 + x_begin >= s^2 */
+		x = x_begin;
+		/* Check yy/rry + xx/rrx < 1 */
+		while (x < x_end || yy * rrx + x * x * rry < rrx * rry) {
+			/*
+			 * Example sequence of (y, x) when s = (4, 4) and
+			 * r = (5, 5):
+			 *   [(4, 0), (4, 1), (4, 2), (3, 3), (2, 4),
+			 *    (1, 4), (0, 4)].
+			 * If s.x==s.y r.x==r.y, then the sequence will be
+			 * symmetric, and x and y will range from 0 to (r-1).
+			 */
+			/* top left */
+			p.y = top_left.y + r.y - 1 - y;
+			p.x = top_left.x + r.x - 1 - x;
+			set_pixel(&p, color);
+			/* top right */
+			p.y = top_left.y + r.y - 1 - y;
+			p.x = t.x - r.x + x;
+			set_pixel(&p, color);
+			/* bottom left */
+			p.y = t.y - r.y + y;
+			p.x = top_left.x + r.x - 1 - x;
+			set_pixel(&p, color);
+			/* bottom right */
+			p.y = t.y - r.y + y;
+			p.x = t.x - r.x + x;
+			set_pixel(&p, color);
+			x++;
+		}
+		x_end = x;
+		/* (x_begin <= x_end) must hold now */
 	}
 
 	return CBGFX_SUCCESS;
 }
 
-/*
- * Bi-linear Interpolation
- *
- * It estimates the value of a middle point (tx, ty) using the values from four
- * adjacent points (q00, q01, q10, q11).
- */
-static u32 bli(u32 q00, u32 q10, u32 q01, u32 q11, struct fraction *tx,
-	       struct fraction *ty)
+int draw_line(const struct scale *pos1, const struct scale *pos2,
+	      const struct fraction *thickness, const struct rgb_color *rgb)
 {
-	u32 r0 = (tx->n * q10 + (tx->d - tx->n) * q00) / tx->d;
-	u32 r1 = (tx->n * q11 + (tx->d - tx->n) * q01) / tx->d;
-	u32 p = (ty->n * r1 + (ty->d - ty->n) * r0) / ty->d;
-	return p;
+	struct fraction len;
+	struct vector top_left;
+	struct vector size;
+	struct vector p, t;
+
+	const uint32_t color = calculate_color(rgb, 0);
+
+	if (!is_valid_fraction(thickness))
+		return CBGFX_ERROR_INVALID_PARAMETER;
+
+	transform_vector(&top_left, &canvas.size, pos1, &canvas.offset);
+	if (fraction_equal(&pos1->y, &pos2->y)) {
+		/* Horizontal line */
+		subtract_fractions(&len, &pos2->x, &pos1->x);
+		struct scale dim = {
+			.x = { .n = len.n, .d = len.d },
+			.y = { .n = thickness->n, .d = thickness->d },
+		};
+		transform_vector(&size, &canvas.size, &dim, &vzero);
+		size.y = max(size.y, 1);
+	} else if (fraction_equal(&pos1->x, &pos2->x)) {
+		/* Vertical line */
+		subtract_fractions(&len, &pos2->y, &pos1->y);
+		struct scale dim = {
+			.x = { .n = thickness->n, .d = thickness->d },
+			.y = { .n = len.n, .d = len.d },
+		};
+		transform_vector(&size, &canvas.size, &dim, &vzero);
+		size.x = max(size.x, 1);
+	} else {
+		log_warning("Only support horizontal and vertical lines\n");
+		return CBGFX_ERROR_INVALID_PARAMETER;
+	}
+
+	add_vectors(&t, &top_left, &size);
+	if (within_box(&t, &canvas) < 0) {
+		log_warning("Line exceeds canvas boundary\n");
+		return CBGFX_ERROR_BOUNDARY;
+	}
+
+	for (p.y = top_left.y; p.y < t.y; p.y++)
+		for (p.x = top_left.x; p.x < t.x; p.x++)
+			set_pixel(&p, color);
+
+	return CBGFX_SUCCESS;
+}
+
+int clear_canvas(const struct rgb_color *rgb)
+{
+	const struct rect box = {
+		vzero,
+		.size = {
+			.width = CANVAS_SCALE,
+			.height = CANVAS_SCALE,
+		},
+	};
+
+	return draw_box(&box, rgb);
+}
+
+int clear_screen(const struct rgb_color *rgb)
+{
+	struct vector p;
+	uint32_t color = calculate_color(rgb, 0);
+	const int bpp = fbinfo->bits_per_pixel;
+	const int bpl = fbinfo->bytes_per_line;
+
+	/* If all significant bytes in color are equal, fastpath through memset.
+	 * We assume that for 32bpp the high byte gets ignored anyway. */
+	if ((((color >> 8) & 0xff) == (color & 0xff)) && (bpp == 16 ||
+	    (((color >> 16) & 0xff) == (color & 0xff)))) {
+		memset(FB, color & 0xff, fbinfo->y_resolution * bpl);
+	} else {
+		for (p.y = 0; p.y < screen.size.height; p.y++)
+			for (p.x = 0; p.x < screen.size.width; p.x++)
+				set_pixel(&p, color);
+	}
+
+	return CBGFX_SUCCESS;
+}
+
+static int pal_to_rgb(uint8_t index, const struct bmp_color_table_entry *pal,
+		      size_t palcount, struct rgb_color *out)
+{
+	if (index >= palcount) {
+		log_warning("Color index %d exceeds palette boundary\n", index);
+		return CBGFX_ERROR_BITMAP_DATA;
+	}
+
+	out->red = pal[index].red;
+	out->green = pal[index].green;
+	out->blue = pal[index].blue;
+	return CBGFX_SUCCESS;
+}
+
+/*
+ * We're using the Lanczos resampling algorithm to rescale images to a new size.
+ * Since output size is often not cleanly divisible by input size, an output
+ * pixel (ox,oy) corresponds to a point that lies in the middle between several
+ * input pixels (ix,iy), meaning that if you transformed the coordinates of the
+ * output pixel into the input image space, they would be fractional. To sample
+ * the color of this "virtual" pixel with fractional coordinates, we gather the
+ * 6x6 grid of nearest real input pixels in a sample array. Then we multiply the
+ * color values for each of those pixels (separately for red, green and blue)
+ * with a "weight" value that was calculated from the distance between that
+ * input pixel and the fractional output pixel coordinates. This is done for
+ * both X and Y dimensions separately. The combined weights for all 36 sample
+ * pixels add up to 1.0, so by adding up the multiplied color values we get the
+ * interpolated color for the output pixel.
+ *
+ * The CONFIG_LP_CBGFX_FAST_RESAMPLE option let's the user change the 'a'
+ * parameter from the Lanczos weight formula from 3 to 2, which effectively
+ * reduces the size of the sample array from 6x6 to 4x4. This is a bit faster
+ * but doesn't look as good. Most use cases should be fine without it.
+ */
+#if IS_ENABLED(CONFIG_LP_CBGFX_FAST_RESAMPLE)
+#define LNCZ_A 2
+#else
+#define LNCZ_A 3
+#endif
+
+/*
+ * When walking the sample array we often need to start at a pixel close to our
+ * fractional output pixel (for convenience we choose the pixel on the top-left
+ * which corresponds to the integer parts of the output pixel coordinates) and
+ * then work our way outwards in both directions from there. Arrays in C must
+ * start at 0 but we'd really prefer indexes to go from -2 to 3 (for 6x6)
+ * instead, so that this "start pixel" could be 0. Since we cannot do that,
+ * define a constant for the index of that "0th" pixel instead.
+ */
+#define S0 (LNCZ_A - 1)
+
+/* The size of the sample array, which we need a lot. */
+#define SSZ (LNCZ_A * 2)
+
+/*
+ * This is implementing the Lanczos kernel according to:
+ * https://en.wikipedia.org/wiki/Lanczos_resampling
+ *
+ *         / 1							if x = 0
+ * L(x) = <  a * sin(pi * x) * sin(pi * x / a) / (pi^2 * x^2)	if -a < x <= a
+ *	   \ 0							otherwise
+ */
+static fpmath_t lanczos_weight(fpmath_t in, int off)
+{
+	/*
+	 * |in| is the output pixel coordinate scaled into the input pixel
+	 * space. |off| is the offset in the sample array for the pixel whose
+	 * weight we're calculating. (off - S0) is the distance from that
+	 * sample pixel to the S0 pixel, and the fractional part of |in|
+	 * (in - floor(in)) is by definition the distance between S0 and the
+	 * output pixel.
+	 *
+	 * So (off - S0) - (in - floor(in)) is the distance from the sample
+	 * pixel to S0 minus the distance from S0 to the output pixel, aka
+	 * the distance from the sample pixel to the output pixel.
+	 */
+	fpmath_t x = fpisub(off - S0, fpsubi(in, fpfloor(in)));
+
+	if (fpequals(x, fp(0)))
+		return fp(1);
+
+	/* x * 2 / a can save some instructions if a == 2 */
+	fpmath_t x2a = x;
+	if (LNCZ_A != 2)
+		x2a = fpmul(x, fpfrac(2, LNCZ_A));
+
+	fpmath_t x_times_pi = fpmul(x, fppi());
+
+	/*
+	 * Rather than using sinr(pi*x), we leverage the "one-based" sine
+	 * function (see <fpmath.h>) with sin1(2*x) so that the pi is eliminated
+	 * since multiplication by an integer is a slightly faster operation.
+	 */
+	fpmath_t tmp = fpmuli(fpdiv(fpsin1(fpmuli(x, 2)), x_times_pi), LNCZ_A);
+	return fpdiv(fpmul(tmp, fpsin1(x2a)), x_times_pi);
 }
 
 static int draw_bitmap_v3(const struct vector *top_left,
-			  const struct scale *scale,
 			  const struct vector *dim,
 			  const struct vector *dim_org,
 			  const struct bmp_header *header,
 			  const struct bmp_color_table_entry *pal,
-			  const u8 *pixel_array,
-			  u8 invert)
+			  const uint8_t *pixel_array, uint8_t invert)
 {
 	const int bpp = header->bit_count;
-	s32 dir;
+	int32_t dir;
 	struct vector p;
+	int32_t ox, oy;		/* output (resampled) pixel coordinates */
+	int32_t ix, iy;		/* input (source image) pixel coordinates */
+	int sx, sy;	/* index into |sample| (not ringbuffer adjusted) */
 
 	if (header->compression) {
 		log_err("Compressed bitmaps are not supported\n");
@@ -195,10 +794,6 @@ static int draw_bitmap_v3(const struct vector *top_left,
 	if (bpp != 8) {
 		log_err("Unsupported bits per pixel: %d\n", bpp);
 		return CBGFX_ERROR_BITMAP_FORMAT;
-	}
-	if (scale->x.n == 0 || scale->y.n == 0) {
-		log_err("Scaling out of range\n");
-		return CBGFX_ERROR_SCALE_OUT_OF_RANGE;
 	}
 
 	const s32 y_stride = ROUNDUP(dim_org->width * bpp / 8, 4);
@@ -218,66 +813,201 @@ static int draw_bitmap_v3(const struct vector *top_left,
 		p.y += dim->height - 1;
 		dir = -1;
 	}
-	/*
-	 * Plot pixels scaled by the bilinear interpolation. We scan over the
-	 * image on canvas (using d) and find the corresponding pixel in the
-	 * bitmap data (using s0, s1).
-	 *
-	 * When d hits the right bottom corner, s0 also hits the right bottom
-	 * corner of the pixel array because that's how scale->x and scale->y
-	 * have been set. Since the pixel array size is already validated in
-	 * parse_bitmap_header_v3, s0 is guranteed not to exceed pixel array
-	 * boundary.
-	 */
-	struct vector s0, s1, d;
-	struct fraction tx, ty;
 
-	for (d.y = 0; d.y < dim->height; d.y++, p.y += dir) {
-		s0.y = d.y * scale->y.d / scale->y.n;
-		s1.y = s0.y;
-		if (s1.y + 1 < dim_org->height)
-			s1.y++;
-		ty.d = scale->y.n;
-		ty.n = (d.y * scale->y.d) % scale->y.n;
-		const u8 *data0 = pixel_array + s0.y * y_stride;
-		const u8 *data1 = pixel_array + s1.y * y_stride;
-
-		p.x = top_left->x;
-		for (d.x = 0; d.x < dim->width; d.x++, p.x++) {
-			s0.x = d.x * scale->x.d / scale->x.n;
-			s1.x = s0.x;
-			if (s1.x + 1 < dim_org->width)
-				s1.x++;
-			tx.d = scale->x.n;
-			tx.n = (d.x * scale->x.d) % scale->x.n;
-			u8 c00 = data0[s0.x];
-			u8 c10 = data0[s1.x];
-			u8 c01 = data1[s0.x];
-			u8 c11 = data1[s1.x];
-
-			if (c00 >= header->colors_used ||
-			    c10 >= header->colors_used ||
-			    c01 >= header->colors_used ||
-			    c11 >= header->colors_used) {
-				log_err("colour index exceeds palette boundary\n");
-				return CBGFX_ERROR_BITMAP_DATA;
+	/* Don't waste time resampling when the scale is 1:1. */
+	if (dim_org->width == dim->width && dim_org->height == dim->height) {
+		for (oy = 0; oy < dim->height; oy++, p.y += dir) {
+			p.x = top_left->x;
+			for (ox = 0; ox < dim->width; ox++, p.x++) {
+				struct rgb_color rgb;
+				if (pal_to_rgb(pixel_array[oy * y_stride + ox],
+					       pal, header->colors_used, &rgb))
+					return CBGFX_ERROR_BITMAP_DATA;
+				set_pixel(&p, calculate_color(&rgb, invert));
 			}
-			const struct rgb_color rgb = {
-				.red = bli(pal[c00].red, pal[c10].red,
-					   pal[c01].red, pal[c11].red,
-					   &tx, &ty),
-				.green = bli(pal[c00].green, pal[c10].green,
-					     pal[c01].green, pal[c11].green,
-					     &tx, &ty),
-				.blue = bli(pal[c00].blue, pal[c10].blue,
-					    pal[c01].blue, pal[c11].blue,
-					    &tx, &ty),
-			};
-			set_pixel(&p, calculate_colour(&rgb, invert));
+		}
+		return CBGFX_SUCCESS;
+	}
+
+	/* Precalculate the X-weights for every possible ox so that we only have
+	   to multiply weights together in the end. */
+	fpmath_t (*weight_x)[SSZ] = malloc(sizeof(fpmath_t) * SSZ * dim->width);
+	if (!weight_x)
+		return CBGFX_ERROR_UNKNOWN;
+	for (ox = 0; ox < dim->width; ox++) {
+		for (sx = 0; sx < SSZ; sx++) {
+			fpmath_t ixfp = fpfrac(ox * dim_org->width, dim->width);
+			weight_x[ox][sx] = lanczos_weight(ixfp, sx);
 		}
 	}
 
+	/*
+	 * For every sy in the sample array, we directly cache a pointer into
+	 * the .BMP pixel array for the start of the corresponding line. On the
+	 * edges of the image (where we don't have any real pixels to fill all
+	 * lines in the sample array), we just reuse the last valid lines inside
+	 * the image for all lines that would lie outside.
+	 */
+	const uint8_t *ypix[SSZ];
+	for (sy = 0; sy < SSZ; sy++) {
+		if (sy <= S0)
+			ypix[sy] = pixel_array;
+		else if (sy - S0 >= dim_org->height)
+			ypix[sy] = ypix[sy - 1];
+		else
+			ypix[sy] = &pixel_array[y_stride * (sy - S0)];
+	}
+
+	/* iy and ix track the input pixel corresponding to sample[S0][S0]. */
+	iy = 0;
+	for (oy = 0; oy < dim->height; oy++, p.y += dir) {
+		struct rgb_color sample[SSZ][SSZ];
+
+		/* Like with X weights, we also cache all Y weights. */
+		fpmath_t iyfp = fpfrac(oy * dim_org->height, dim->height);
+		fpmath_t weight_y[SSZ];
+		for (sy = 0; sy < SSZ; sy++)
+			weight_y[sy] = lanczos_weight(iyfp, sy);
+
+		/*
+		 * If we have a new input pixel line between the last oy and
+		 * this one, we have to adjust iy forward. When upscaling, this
+		 * is not always the case for each new output line. When
+		 * downscaling, we may even cross more than one line per output
+		 * pixel.
+		 */
+		while (fpfloor(iyfp) > iy) {
+			iy++;
+
+			/* Shift ypix array up to center around next iy line. */
+			for (sy = 0; sy < SSZ - 1; sy++)
+				ypix[sy] = ypix[sy + 1];
+
+			/* Calculate the last ypix that is being shifted in,
+			   but beware of reaching the end of the input image. */
+			if (iy + LNCZ_A < dim_org->height)
+				ypix[SSZ - 1] = &pixel_array[y_stride *
+							     (iy + LNCZ_A)];
+		}
+
+		/*
+		 * Initialize the sample array for this line, and also
+		 * the equals counter, which counts how many of the latest
+		 * pixels were exactly equal.
+		 */
+		int equals = 0;
+		uint8_t last_equal = ypix[0][0];
+		for (sx = 0; sx < SSZ; sx++) {
+			for (sy = 0; sy < SSZ; sy++) {
+				if (sx - S0 >= dim_org->width) {
+					sample[sx][sy] = sample[sx - 1][sy];
+					equals++;
+					continue;
+				}
+				/*
+				 * For pixels to the left of S0 there are no
+				 * corresponding input pixels so just use
+				 * ypix[sy][0].
+				 */
+				uint8_t i = ypix[sy][max(0, sx - S0)];
+				if (pal_to_rgb(i, pal, header->colors_used,
+					       &sample[sx][sy]))
+					goto bitmap_error;
+				if (i == last_equal) {
+					equals++;
+				} else {
+					last_equal = i;
+					equals = 1;
+				}
+			}
+		}
+
+		ix = 0;
+		p.x = top_left->x;
+		for (ox = 0; ox < dim->width; ox++, p.x++) {
+			/* Adjust ix forward, same as iy above. */
+			fpmath_t ixfp = fpfrac(ox * dim_org->width, dim->width);
+			while (fpfloor(ixfp) > ix) {
+				ix++;
+
+				/*
+				 * We want to reuse the sample columns we
+				 * already have, but we don't want to copy them
+				 * all around for every new column either.
+				 * Instead, treat the X dimension of the sample
+				 * array like a ring buffer indexed by ix. rx is
+				 * the ringbuffer-adjusted offset of the new
+				 * column in sample (the rightmost one) we're
+				 * trying to fill.
+				 */
+				int rx = (SSZ - 1 + ix) % SSZ;
+				for (sy = 0; sy < SSZ; sy++) {
+					if (ix + LNCZ_A >= dim_org->width) {
+						sample[rx][sy] = sample[(SSZ - 2
+							+ ix) % SSZ][sy];
+						equals++;
+						continue;
+					}
+					uint8_t i = ypix[sy][ix + LNCZ_A];
+					if (i == last_equal) {
+						if (equals++ >= (SSZ * SSZ))
+							continue;
+					} else {
+						last_equal = i;
+						equals = 1;
+					}
+					if (pal_to_rgb(i, pal,
+						       header->colors_used,
+						       &sample[rx][sy]))
+						goto bitmap_error;
+				}
+			}
+
+			/* If all pixels in sample are equal, fast path. */
+			if (equals >= (SSZ * SSZ)) {
+				set_pixel(&p, calculate_color(&sample[0][0],
+							      invert));
+				continue;
+			}
+
+			fpmath_t red = fp(0);
+			fpmath_t green = fp(0);
+			fpmath_t blue = fp(0);
+			for (sy = 0; sy < SSZ; sy++) {
+				for (sx = 0; sx < SSZ; sx++) {
+					int rx = (sx + ix) % SSZ;
+					fpmath_t weight = fpmul(weight_x[ox][sx],
+								weight_y[sy]);
+					red = fpadd(red, fpmuli(weight,
+						sample[rx][sy].red));
+					green = fpadd(green, fpmuli(weight,
+						sample[rx][sy].green));
+					blue = fpadd(blue, fpmuli(weight,
+						sample[rx][sy].blue));
+				}
+			}
+
+			/*
+			 * Weights *should* sum up to 1.0 (making this not
+			 * necessary) but just to hedge against rounding errors
+			 * we should clamp color values to their legal limits.
+			 */
+			struct rgb_color rgb = {
+				.red = max(0, min(UINT8_MAX, fpround(red))),
+				.green = max(0, min(UINT8_MAX, fpround(green))),
+				.blue = max(0, min(UINT8_MAX, fpround(blue))),
+			};
+
+			set_pixel(&p, calculate_color(&rgb, invert));
+		}
+	}
+
+	free(weight_x);
 	return CBGFX_SUCCESS;
+
+bitmap_error:
+	free(weight_x);
+	return CBGFX_ERROR_BITMAP_DATA;
 }
 
 static int get_bitmap_file_header(const void *bitmap, size_t size,
@@ -472,15 +1202,14 @@ static int check_boundary(const struct vector *top_left,
 	return CBGFX_SUCCESS;
 }
 
-int cbgfx_draw_bitmap(const void *bitmap, size_t size,
-		      const struct scale *pos_rel, const struct scale *dim_rel,
-		      u32 flags)
+int draw_bitmap(const void *bitmap, size_t size,
+		const struct scale *pos_rel, const struct scale *dim_rel,
+		u32 flags)
 {
 	struct bmp_header header;
 	const struct bmp_color_table_entry *palette;
 	const u8 *pixel_array;
 	struct vector top_left, dim, dim_org;
-	struct scale scale;
 	int rv;
 	const u8 pivot = flags & PIVOT_MASK;
 	const u8 invert = (flags & INVERT_COLORS) >> INVERT_SHIFT;
@@ -496,12 +1225,6 @@ int cbgfx_draw_bitmap(const void *bitmap, size_t size,
 	if (rv)
 		return rv;
 
-	/* Calculate self scale */
-	scale.x.n = dim.width;
-	scale.x.d = dim_org.width;
-	scale.y.n = dim.height;
-	scale.y.d = dim_org.height;
-
 	/* Calculate coordinate */
 	rv = calculate_position(&dim, pos_rel, pivot, &top_left);
 	if (rv)
@@ -513,12 +1236,36 @@ int cbgfx_draw_bitmap(const void *bitmap, size_t size,
 		return rv;
 	}
 
-	return draw_bitmap_v3(&top_left, &scale, &dim, &dim_org,
+	return draw_bitmap_v3(&top_left, &dim, &dim_org,
 			      &header, palette, pixel_array, invert);
 }
 
-int cbgfx_get_bitmap_dimension(const void *bitmap, size_t sz,
-			       struct scale *dim_rel)
+int draw_bitmap_direct(const void *bitmap, size_t size,
+		       const struct vector *top_left)
+{
+	struct bmp_header header;
+	const struct bmp_color_table_entry *palette;
+	const uint8_t *pixel_array;
+	struct vector dim;
+	int rv;
+
+	/* only v3 is supported now */
+	rv = parse_header(bitmap, size,
+				    &header, &palette, &pixel_array, &dim);
+	if (rv)
+		return rv;
+
+	rv = check_boundary(top_left, &dim, &screen);
+	if (rv) {
+		log_warning("Bitmap image exceeds screen boundary\n");
+		return rv;
+	}
+
+	return draw_bitmap_v3(top_left, &dim, &dim,
+			      &header, palette, pixel_array, 0);
+}
+
+int get_bitmap_dimension(const void *bitmap, size_t sz, struct scale *dim_rel)
 {
 	struct bmp_header header;
 	const struct bmp_color_table_entry *palette;
@@ -545,65 +1292,53 @@ int cbgfx_get_bitmap_dimension(const void *bitmap, size_t sz,
 	return CBGFX_SUCCESS;
 }
 
-int cbgfx_init(struct udevice *dev)
+int enable_graphics_buffer(void)
 {
-	struct video_uc_plat *plat = dev_get_uclass_plat(dev);
-	struct video_priv *priv = dev_get_uclass_priv(dev);
+	struct vboot_info *vboot = vboot_get();
+	const struct video_uc_plat *plat;
+	int ret;
 
-	fbinfo->physical_address = plat->base;
-	fbinfo->x_resolution = priv->xsize;
-	fbinfo->y_resolution = priv->ysize;
-	fbinfo->bytes_per_line = priv->line_length;
-	fbinfo->bits_per_pixel = 1 << priv->bpix;
-	fbinfo->reserved_mask_pos = 0;
-	fbinfo->reserved_mask_size = 0;
-	switch (priv->bpix) {
-	case VIDEO_BPP32:
-		fbinfo->red_mask_pos = 16;
-		fbinfo->red_mask_size = 8;
-		fbinfo->green_mask_pos = 8;
-		fbinfo->green_mask_size = 8;
-		fbinfo->blue_mask_pos = 0;
-		fbinfo->blue_mask_size = 8;
-		break;
-	case VIDEO_BPP16:
-		fbinfo->red_mask_pos = 11;
-		fbinfo->red_mask_size = 5;
-		fbinfo->green_mask_pos = 5;
-		fbinfo->green_mask_size = 6;
-		fbinfo->blue_mask_pos = 0;
-		fbinfo->blue_mask_size = 5;
-		break;
-	default:
-		log(UCLASS_VIDEO, LOGL_ERR, "Invalid bpix %d\n", priv->bpix);
-		return CBGFX_ERROR_INIT;
+	if (gfx_buffer)
+		return CBGFX_SUCCESS;
+
+	ret = uclass_first_device_err(UCLASS_VIDEO, &vboot->video);
+	if (ret) {
+		log_err("Cannot find video device (err=%d)\n", ret);
+		return VB2_ERROR_UNKNOWN;
 	}
 
-	fbaddr = map_sysmem(fbinfo->physical_address, plat->size);
-	if (!fbaddr)
+	ret = uclass_first_device_err(UCLASS_VIDEO_CONSOLE, &vboot->console);
+	if (ret) {
+		log_err("Cannot find console device (err=%d)\n", ret);
+		return VB2_ERROR_UNKNOWN;
+	}
+
+	ret = uclass_first_device_err(UCLASS_PANEL, &vboot->panel);
+	if (ret)
+		log_warning("No panel found (cannot adjust backlight)\n");
+
+	if (cbgfx_init(vboot->video))
+		return CBGFX_ERROR_INIT;
+
+	plat = dev_get_uclass_plat(vboot->video);
+	gfx_buffer = map_sysmem(plat->base, plat->size);
+	if (!gfx_buffer)
 		return CBGFX_ERROR_FRAMEBUFFER_ADDR;
 
-	screen.size.width = fbinfo->x_resolution;
-	screen.size.height = fbinfo->y_resolution;
-	screen.offset.x = 0;
-	screen.offset.y = 0;
+	return CBGFX_SUCCESS;
+}
 
-	/* Calculate canvas size & offset. Canvas is always square */
-	if (screen.size.height > screen.size.width) {
-		canvas.size.height = screen.size.width;
-		canvas.size.width = canvas.size.height;
-		canvas.offset.x = 0;
-		canvas.offset.y = (screen.size.height - canvas.size.height) / 2;
-	} else {
-		canvas.size.height = screen.size.height;
-		canvas.size.width = canvas.size.height;
-		canvas.offset.x = (screen.size.width - canvas.size.width) / 2;
-		canvas.offset.y = 0;
-	}
+int flush_graphics_buffer(void)
+{
+	if (!gfx_buffer)
+		return CBGFX_ERROR_GRAPHICS_BUFFER;
 
-	log_info("cbgfx initialised: screen:width=%d, height=%d, offset=%d canvas:width=%d, height=%d, offset=%d\n",
-		 screen.size.width, screen.size.height, screen.offset.x,
-		 canvas.size.width, canvas.size.height, canvas.offset.x);
+	memcpy(REAL_FB, gfx_buffer, fbinfo->y_resolution * fbinfo->bytes_per_line);
+	return CBGFX_SUCCESS;
+}
 
-	return 0;
+void disable_graphics_buffer(void)
+{
+	free(gfx_buffer);
+	gfx_buffer = NULL;
 }

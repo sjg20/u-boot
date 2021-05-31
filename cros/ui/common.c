@@ -93,28 +93,10 @@ static const struct ui_error errors[] = {
 
 static vb2_error_t init_screen(void)
 {
-	struct vboot_info *vboot = vboot_get();
 	static int initialized = 0;
-	int ret;
 
 	if (initialized)
 		return VB2_SUCCESS;
-
-	ret = uclass_first_device_err(UCLASS_VIDEO, &vboot->video);
-	if (ret) {
-		log_err("Cannot find video device (err=%d)\n", ret);
-		return VB2_ERROR_UNKNOWN;
-	}
-
-	ret = uclass_first_device_err(UCLASS_VIDEO_CONSOLE, &vboot->console);
-	if (ret) {
-		log_err("Cannot find console device (err=%d)\n", ret);
-		return VB2_ERROR_UNKNOWN;
-	}
-
-	ret = uclass_first_device_err(UCLASS_PANEL, &vboot->panel);
-	if (ret)
-		log_warning("No panel found (cannot adjust backlight)\n");
 
 	enable_graphics_buffer();
 
