@@ -16,6 +16,15 @@
  * GNU General Public License for more details.
  */
 
+#include <common.h>
+#include <cros_ec.h>
+#include <dm.h>
+#include <cros/cb_gfx.h>
+#include <cros/payload.h>
+#include <cros/ui.h>
+#include <cros/vboot.h>
+
+/*
 #include <libpayload.h>
 #include <vb2_api.h>
 
@@ -24,6 +33,7 @@
 #include "drivers/ec/cros/ec.h"
 #include "vboot/ui.h"
 #include "vboot/util/commonparams.h"
+*/
 
 #define UI_DESC(a) ((struct ui_desc){	\
 	.count = ARRAY_SIZE(a),		\
@@ -72,19 +82,23 @@
 
 static int is_battery_low(void)
 {
-	static uint32_t batt_pct;
-	static int batt_pct_initialized = 0;
+	static uint batt_pct;
+	static bool batt_pct_initialized = false;
 
 	if (!batt_pct_initialized) {
-		if (!CONFIG(DRIVER_EC_CROS)) {
-			log_warning("No EC support to get battery level; "
-				"assuming low battery\n");
-		} else if (cros_ec_read_batt_state_of_charge(&batt_pct)) {
-			log_warning("Failed to get battery level; "
-				"assuming low battery\n");
-			batt_pct = 0;
+		if (!IS_ENABLED(CONFIG_CROS_EC)) {
+			log_warning("No EC support to get battery level; assuming low battery\n");
+		} else {
+			struct udevice *cros_ec = board_get_cros_ec_dev();
+			uint batt_pct;
+
+			if (!cros_ec ||
+			    cros_ec_read_batt_charge(cros_ec, &batt_pct)) {
+				log_warning("Failed to get battery level; assuming low battery\n");
+				batt_pct = 0;
+			}
 		}
-		batt_pct_initialized = 1;
+		batt_pct_initialized = true;
 	}
 	return batt_pct < 10;
 }
@@ -158,6 +172,7 @@ static vb2_error_t draw_language_select(const struct ui_state *state,
 	const struct ui_locale *locale;
 	const struct rgb_color *bg_color, *fg_color;
 	struct ui_bitmap bitmap;
+	struct vboot_info *vboot = vboot_get();
 
 	/*
 	 * Call default drawing function to clear the screen if necessary, and
@@ -165,7 +180,7 @@ static vb2_error_t draw_language_select(const struct ui_state *state,
 	 */
 	VB2_TRY(ui_draw_default(state, prev_state));
 
-	num_lang = ui_get_locale_count();
+	num_lang = ui_get_locale_count(vboot);
 	if (num_lang == 0) {
 		log_err("Locale count is 0\n");
 		return VB2_ERROR_UI_INVALID_ARCHIVE;
@@ -180,7 +195,7 @@ static vb2_error_t draw_language_select(const struct ui_state *state,
 	y_end = UI_SCALE - UI_MARGIN_BOTTOM - UI_FOOTER_HEIGHT -
 		UI_FOOTER_MARGIN_TOP;
 	num_lang_per_page = (y_end - y_begin) / box_height;
-	menu_height = box_height * MIN(num_lang_per_page, num_lang);
+	menu_height = box_height * min((uint)num_lang_per_page, num_lang);
 	y_end = y_begin + menu_height;  /* Correct for integer division error */
 
 	/* Get current locale_id */
@@ -193,7 +208,7 @@ static vb2_error_t draw_language_select(const struct ui_state *state,
 	}
 
 	/* Draw language dropdown */
-	VB2_TRY(ui_get_locale_info(locale_id, &locale));
+	VB2_TRY(ui_get_locale_info(vboot, locale_id, &locale));
 	VB2_TRY(ui_draw_language_header(locale, state, 1));
 
 	/*
@@ -206,7 +221,7 @@ static vb2_error_t draw_language_select(const struct ui_state *state,
 		/* locale_id is too small to put at the center, or
 		   all languages fit in the screen */
 		id_begin = 0;
-		id_end = MIN(num_lang_per_page, num_lang);
+		id_end = min((uint)num_lang_per_page, num_lang);
 	} else if (locale_id > num_lang - num_lang_per_page + target_pos) {
 		/* locale_id is too large to put at the center */
 		id_begin = num_lang - num_lang_per_page;
@@ -235,7 +250,7 @@ static vb2_error_t draw_language_select(const struct ui_state *state,
 					       &ui_color_lang_menu_border));
 		/* Text */
 		y_center = y + box_height / 2;
-		VB2_TRY(ui_get_locale_info(id, &locale));
+		VB2_TRY(ui_get_locale_info(vboot, id, &locale));
 		VB2_TRY(ui_get_language_name_bitmap(locale->code, &bitmap));
 		VB2_TRY(ui_draw_mapped_bitmap(&bitmap, x, y_center,
 					      UI_SIZE_AUTO,
@@ -406,7 +421,8 @@ static vb2_error_t draw_recovery_select_desc(
 		"rec_sel_desc0.bmp",
 		"rec_sel_desc1_no_phone.bmp",
 	};
-	struct vb2_context *ctx = vboot_get_context();
+	struct vboot_info *vboot = vboot_get();
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	const struct ui_desc desc = vb2api_phone_recovery_ui_enabled(ctx) ?
 		UI_DESC(desc_files) : UI_DESC(desc_no_phone_files);
 
@@ -640,7 +656,8 @@ static vb2_error_t draw_recovery_invalid_desc(
 	const struct ui_state *prev_state,
 	int32_t *y)
 {
-	struct vb2_context *ctx = vboot_get_context();
+	struct vboot_info *vboot = vboot_get();
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
 	static const char *const desc_files[] = {
 		"rec_invalid_desc.bmp",
 	};
@@ -831,7 +848,7 @@ static const struct ui_menu_item developer_select_bootloader_items[] = {
 static vb2_error_t get_bootloader_menu(struct ui_menu *ret_menu)
 {
 	struct altfw_info *node;
-	ListNode *head;
+	struct list_head *head;
 	uint32_t num_bootloaders = 0;
 	static struct ui_menu_item *items;
 	static struct ui_menu menu;
@@ -862,7 +879,7 @@ static vb2_error_t get_bootloader_menu(struct ui_menu *ret_menu)
 		return VB2_SUCCESS;
 	}
 
-	list_for_each(node, *head, list_node) {
+	list_for_each_entry(node, head, list_node) {
 		/* Discount default seqnum=0, since it is duplicated. */
 		if (node->seqnum)
 			num_bootloaders++;
@@ -881,7 +898,7 @@ static vb2_error_t get_bootloader_menu(struct ui_menu *ret_menu)
 
 	/* Copy bootloaders. */
 	i = ARRAY_SIZE(menu_before);
-	list_for_each(node, *head, list_node) {
+	list_for_each_entry(node, head, list_node) {
 		/* Discount default seqnum=0, since it is duplicated. */
 		if (!node->seqnum)
 			continue;

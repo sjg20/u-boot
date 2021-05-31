@@ -8,3 +8,4 @@ obj-y += common.o
 obj-y += draw.o
 obj-y += layout.o
 obj-y += log.o
+obj-y += screens.o
