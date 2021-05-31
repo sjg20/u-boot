@@ -848,7 +848,7 @@ static vb2_error_t get_bootloader_menu(struct ui_menu *ret_menu)
 
 	/* Cached */
 	if (menu.num_items > 0) {
-		UI_INFO("Cached with %zu item(s)\n", menu.num_items);
+		log_info("Cached with %zu item(s)\n", menu.num_items);
 		return VB2_SUCCESS;
 	}
 
@@ -885,7 +885,7 @@ static vb2_error_t get_bootloader_menu(struct ui_menu *ret_menu)
 		/* Discount default seqnum=0, since it is duplicated. */
 		if (!node->seqnum)
 			continue;
-		UI_INFO("Bootloader: filename=%s, name=%s, "
+		log_info("Bootloader: filename=%s, name=%s, "
 			"desc=%s, seqnum=%d\n",
 			node->filename, node->name,
 			node->desc, node->seqnum);
@@ -908,7 +908,7 @@ static vb2_error_t get_bootloader_menu(struct ui_menu *ret_menu)
 	menu.items = items;
 	*ret_menu = menu;
 
-	UI_INFO("Returned with %zu item(s)\n", menu.num_items);
+	log_info("Returned with %zu item(s)\n", menu.num_items);
 	return VB2_SUCCESS;
 }
 

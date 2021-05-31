@@ -16,9 +16,17 @@
  * GNU General Public License for more details.
  */
 
+#include <common.h>
+#include <dm.h>
+#include <cros/ui.h>
+#include <cros/vboot.h>
+
+/*
+
 #include <vb2_api.h>
 
 #include "vboot/ui.h"
+*/
 
 vb2_error_t ui_log_init(enum vb2_screen screen, const char *locale_code,
 			const char *str, struct ui_log_info *log)
@@ -103,7 +111,7 @@ vb2_error_t ui_log_init(enum vb2_screen screen, const char *locale_code,
 	/* Set the last entry to the end of log string. */
 	log->page_start[pages] = ptr;
 
-	UI_INFO("Initialize log_info, page_count: %u, dimensions: %ux%u\n",
+	log_info("Initialize log_info, page_count: %u, dimensions: %ux%u\n",
 		log->page_count, log->lines_per_page, log->chars_per_line);
 
 	return VB2_SUCCESS;
