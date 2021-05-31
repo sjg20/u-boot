@@ -77,10 +77,10 @@ static int is_battery_low(void)
 
 	if (!batt_pct_initialized) {
 		if (!CONFIG(DRIVER_EC_CROS)) {
-			UI_WARN("No EC support to get battery level; "
+			log_warning("No EC support to get battery level; "
 				"assuming low battery\n");
 		} else if (cros_ec_read_batt_state_of_charge(&batt_pct)) {
-			UI_WARN("Failed to get battery level; "
+			log_warning("Failed to get battery level; "
 				"assuming low battery\n");
 			batt_pct = 0;
 		}
@@ -167,7 +167,7 @@ static vb2_error_t draw_language_select(const struct ui_state *state,
 
 	num_lang = ui_get_locale_count();
 	if (num_lang == 0) {
-		UI_ERROR("Locale count is 0\n");
+		log_err("Locale count is 0\n");
 		return VB2_ERROR_UI_INVALID_ARCHIVE;
 	}
 
@@ -186,7 +186,7 @@ static vb2_error_t draw_language_select(const struct ui_state *state,
 	/* Get current locale_id */
 	locale_id = state->selected_item;
 	if (locale_id >= num_lang) {
-		UI_WARN("selected_item (%u) exceeds number of locales (%u); "
+		log_warning("selected_item (%u) exceeds number of locales (%u); "
 			"falling back to locale 0\n",
 			locale_id, num_lang);
 		locale_id = 0;
@@ -858,7 +858,7 @@ static vb2_error_t get_bootloader_menu(struct ui_menu *ret_menu)
 
 	head = payload_get_altfw_list();
 	if (!head) {
-		UI_ERROR("Failed to get altfw list\n");
+		log_err("Failed to get altfw list\n");
 		return VB2_SUCCESS;
 	}
 
@@ -872,7 +872,7 @@ static vb2_error_t get_bootloader_menu(struct ui_menu *ret_menu)
 			 ARRAY_SIZE(menu_after);
 	items = malloc(menu.num_items * sizeof(struct ui_menu_item));
 	if (!items) {
-		UI_ERROR("Failed to malloc menu items for bootloaders\n");
+		log_err("Failed to malloc menu items for bootloaders\n");
 		return VB2_ERROR_UI_MEMORY_ALLOC;
 	}
 
@@ -891,7 +891,7 @@ static vb2_error_t get_bootloader_menu(struct ui_menu *ret_menu)
 			node->desc, node->seqnum);
 		const char *name = node->name;
 		if (!name || strlen(name) == 0) {
-			UI_WARN("Failed to get bootloader name with "
+			log_warning("Failed to get bootloader name with "
 				"seqnum=%d, use filename instead\n",
 				node->seqnum);
 			name = node->filename;

@@ -266,7 +266,7 @@ vb2_error_t ui_get_button_width(const struct ui_menu *menu,
 						  UI_BUTTON_TEXT_HEIGHT,
 						  &text_width));
 		} else {
-			UI_ERROR("Menu item #%d: no .file or .text\n", i);
+			log_err("Menu item #%d: no .file or .text\n", i);
 			return VB2_ERROR_UI_DRAW_FAILURE;
 		}
 		max_text_width = MAX(text_width, max_text_width);
@@ -339,7 +339,7 @@ vb2_error_t ui_draw_button(const struct ui_menu_item *item,
 				     bg_color, fg_color,
 				     flags, reverse));
 	} else {
-		UI_ERROR("No button image filename or text\n");
+		log_err("No button image filename or text\n");
 		return VB2_ERROR_UI_DRAW_FAILURE;
 	}
 
@@ -519,7 +519,7 @@ vb2_error_t ui_draw_textbox(const char *str, int32_t *y, int32_t min_lines)
 	/* Copy str to buf since strsep() will modify the string. */
 	buf = strdup(str);
 	if (!buf) {
-		UI_ERROR("Failed to malloc string buffer\n");
+		log_err("Failed to malloc string buffer\n");
 		return VB2_ERROR_UI_MEMORY_ALLOC;
 	}
 

@@ -4,3 +4,4 @@
 #
 
 obj-y += archive.o
+obj-y += common.o

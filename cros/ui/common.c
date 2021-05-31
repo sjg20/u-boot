@@ -16,11 +16,19 @@
  * GNU General Public License for more details.
  */
 
+#include <common.h>
+#include <dm.h>
+#include <cros/cb_gfx.h>
+#include <cros/ui.h>
+#include <cros/vboot.h>
+
+/*
 #include <libpayload.h>
 #include <vb2_api.h>
 
 #include "drivers/video/display.h"
 #include "vboot/ui.h"
+*/
 
 struct ui_error {
 	/* File name of error strings. */
@@ -85,17 +93,30 @@ static const struct ui_error errors[] = {
 
 static vb2_error_t init_screen(void)
 {
+	struct vboot_info *vboot = vboot_get();
 	static int initialized = 0;
+	int ret;
+
 	if (initialized)
 		return VB2_SUCCESS;
 
-	/* Make sure framebuffer is initialized before turning display on. */
-	clear_screen(&ui_color_bg);
-	if (display_init())
-		return VB2_ERROR_UI_DISPLAY_INIT;
+	ret = uclass_first_device_err(UCLASS_VIDEO, &vboot->video);
+	if (ret) {
+		log_err("Cannot find video device (err=%d)\n", ret);
+		return VB2_ERROR_UNKNOWN;
+	}
+
+	ret = uclass_first_device_err(UCLASS_VIDEO_CONSOLE, &vboot->console);
+	if (ret) {
+		log_err("Cannot find console device (err=%d)\n", ret);
+		return VB2_ERROR_UNKNOWN;
+	}
+
+	ret = uclass_first_device_err(UCLASS_PANEL, &vboot->panel);
+	if (ret)
+		log_warning("No panel found (cannot adjust backlight)\n");
 
 	enable_graphics_buffer();
-	backlight_update(1);
 
 	initialized = 1;
 	return VB2_SUCCESS;
@@ -261,7 +282,7 @@ vb2_error_t ui_display_screen(struct ui_state *state,
 		rv = ui_draw_default(state, prev_state);
 
 	if (rv) {
-		UI_ERROR("Drawing screen %#x failed: %#x\n", screen->id, rv);
+		log_err("Drawing screen %#x failed: %#x\n", screen->id, rv);
 		/* Print fallback message if drawing failed. */
 		if (screen->mesg)
 			ui_draw_textbox(screen->mesg, &y, 1);
@@ -280,7 +301,7 @@ vb2_error_t ui_display_screen(struct ui_state *state,
 	if (rv == VB2_SUCCESS && error) {
 		show_error_box(error, state->locale);
 		if (error->mesg)
-			UI_WARN("%s\n", error->mesg);
+			log_warning("%s\n", error->mesg);
 	}
 
 	return rv;

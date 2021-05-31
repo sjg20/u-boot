@@ -35,7 +35,7 @@ vb2_error_t ui_log_init(enum vb2_screen screen, const char *locale_code,
 
 	if (lines_per_page == 0 || chars_per_line == 0 ||
 	    str == NULL) {
-		UI_ERROR("Failed to initialize log_info, "
+		log_err("Failed to initialize log_info, "
 			 "dimensions: %ux%u, str: %s\n",
 			 lines_per_page, chars_per_line,
 			 str ? str : "NULL");
@@ -73,7 +73,7 @@ vb2_error_t ui_log_init(enum vb2_screen screen, const char *locale_code,
 	log->page_count = DIV_ROUND_UP(lines, lines_per_page);
 	log->page_start = malloc((log->page_count + 1) * sizeof(const char *));
 	if (!log->page_start) {
-		UI_ERROR("Failed to malloc page_start array, "
+		log_err("Failed to malloc page_start array, "
 			 "page_count: %u\n", log->page_count);
 		return VB2_ERROR_UI_MEMORY_ALLOC;
 	}
@@ -117,14 +117,14 @@ char *ui_log_get_page_content(const struct ui_log_info *log, uint32_t page)
 	const char *ptr, *line_start;
 
 	if (page >= log->page_count) {
-		UI_ERROR("Failed to get page content, "
+		log_err("Failed to get page content, "
 			 "page: %u, page_count: %u\n", page, log->page_count);
 		return NULL;
 	}
 
 	buf = malloc((log->chars_per_line + 1) * log->lines_per_page + 1);
 	if (!buf) {
-		UI_ERROR("Failed to malloc string buffer, page: %u, "
+		log_err("Failed to malloc string buffer, page: %u, "
 			 "dimensions: %ux%u\n",
 			 page, log->lines_per_page, log->chars_per_line);
 		return NULL;

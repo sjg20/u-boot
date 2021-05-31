@@ -251,7 +251,7 @@ void clear_blend(void);
  *	255 = max alpha argument
  *	0   = min alpha argument, 0% opacity
  */
-#define ALPHA(percentage) MIN(255, (256 * percentage / 100))
+#define ALPHA(percentage) min(255, (256 * percentage / 100))
 
 /**
  * Enable buffered I/O. All CBGFX operations will be redirected to a working

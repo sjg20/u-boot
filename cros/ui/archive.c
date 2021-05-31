@@ -33,11 +33,6 @@
 #include "vboot/util/commonparams.h"
 */
 
-static struct cbfs_priv *get_ro_cbfs(struct vboot_info *vboot)
-{
-	return vboot->cbfs_ro;
-}
-
 struct locale_data {
 	/* Number of supported languages and codes: en, ja, ... */
 	uint32_t count;

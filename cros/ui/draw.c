@@ -73,7 +73,7 @@ vb2_error_t ui_draw_bitmap(const struct ui_bitmap *bitmap,
 		 * WARNING: The following message might be grepped in FAFT.
 		 * DO NOT MODIFY it.
 		 */
-		UI_WARN("Drawing bitmap '%s' (x=%d, y=%d, w=%d, h=%d, f=%#x) "
+		log_warning("Drawing bitmap '%s' (x=%d, y=%d, w=%d, h=%d, f=%#x) "
 			"exceeded canvas; try scaling\n", bitmap->name,
 			 x, y, width, height, flags);
 		if (flags & PIVOT_H_LEFT)
@@ -89,7 +89,7 @@ vb2_error_t ui_draw_bitmap(const struct ui_bitmap *bitmap,
 	}
 
 	if (ret) {
-		UI_ERROR("Drawing bitmap '%s' (x=%d, y=%d, w=%d, h=%d, f=%#x) "
+		log_err("Drawing bitmap '%s' (x=%d, y=%d, w=%d, h=%d, f=%#x) "
 			 "failed: %#x\n", bitmap->name,
 			 x, y, width, height, flags, ret);
 		return VB2_ERROR_UI_DRAW_FAILURE;
@@ -188,7 +188,7 @@ vb2_error_t ui_get_text_width(const char *text, int32_t height, int32_t *width)
 		int32_t char_width;
 		vb2_error_t rv = get_char_width(*text, height, &char_width);
 		if (rv) {
-			UI_WARN("Failed to retrieve character bitmap of %#.2x, "
+			log_warning("Failed to retrieve character bitmap of %#.2x, "
 				"use '?' to get character width instead\n",
 				*text);
 			VB2_TRY(get_char_width('?', height, &char_width));
