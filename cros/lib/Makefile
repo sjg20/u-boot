@@ -6,6 +6,7 @@
 obj-$(CONFIG_$(SPL_)X86) += acpi.o
 obj-y += aux-fw-uclass.o
 obj-y += cros_ofnode.o
+obj-y += fpmath.o
 obj-y += secdata_tpm.o
 ifndef CONFIG_SANDBOX
 obj-y += jump.o
