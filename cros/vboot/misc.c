@@ -86,40 +86,6 @@ int vb2ex_physical_presence_pressed(void)
 	return 0;
 }
 
-const char *vb2ex_get_debug_info(struct vb2_context *ctx)
-{
-	return "";
-}
-
-const char *vb2ex_get_firmware_log(int reset)
-{
-	return "";
-}
-
-uint32_t vb2ex_prepare_log_screen(enum vb2_screen screen, uint32_t locale_id,
-				  const char *str)
-{
-	//TODO
-	return 0;
-}
-
-vb2_error_t vb2ex_display_ui(enum vb2_screen screen,
-			     uint32_t locale_id,
-			     uint32_t selected_item,
-			     uint32_t disabled_item_mask,
-			     uint32_t hidden_item_mask,
-			     int timer_disabled,
-			     uint32_t current_page,
-			     enum vb2_ui_error error_code)
-{
-	return 0;
-}
-
-uint32_t vb2ex_get_locale_count(void)
-{
-	return 1;
-}
-
 void *vbex_malloc(size_t size)
 {
 	return malloc(size);

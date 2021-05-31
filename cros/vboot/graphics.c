@@ -103,7 +103,7 @@ static int within_box(const struct vector *v, const struct rect *bound)
 		return -1;
 }
 
-static inline u32 calculate_colour(const struct rgb_colour *rgb, u8 invert)
+static inline u32 calculate_colour(const struct rgb_color *rgb, u8 invert)
 {
 	u32 colour = 0;
 
@@ -133,7 +133,7 @@ static inline void set_pixel(struct vector *coord, u32 colour)
 		pixel[i] = (colour >> (i * 8));
 }
 
-int cbgfx_clear_screen(const struct rgb_colour *rgb)
+int cbgfx_clear_screen(const struct rgb_color *rgb)
 {
 	struct vector p;
 	u32 colour = calculate_colour(rgb, 0);
@@ -262,7 +262,7 @@ static int draw_bitmap_v3(const struct vector *top_left,
 				log_err("colour index exceeds palette boundary\n");
 				return CBGFX_ERROR_BITMAP_DATA;
 			}
-			const struct rgb_colour rgb = {
+			const struct rgb_color rgb = {
 				.red = bli(pal[c00].red, pal[c10].red,
 					   pal[c01].red, pal[c11].red,
 					   &tx, &ty),
@@ -483,7 +483,7 @@ int cbgfx_draw_bitmap(const void *bitmap, size_t size,
 	struct scale scale;
 	int rv;
 	const u8 pivot = flags & PIVOT_MASK;
-	const u8 invert = (flags & INVERT_COLOURS) >> INVERT_SHIFT;
+	const u8 invert = (flags & INVERT_COLORS) >> INVERT_SHIFT;
 
 	/* only v3 is supported now */
 	rv = parse_header(bitmap, size, &header, &palette, &pixel_array,

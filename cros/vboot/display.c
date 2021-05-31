@@ -6,143 +6,28 @@
  */
 
 #include <common.h>
+#include <cros_ec.h>
 #include <dm.h>
 #include <log.h>
 #include <mapmem.h>
+#include <tpm_api.h>
 #include <video.h>
 #include <video_console.h>
 #include <cros/cros_ofnode.h>
 #include <cros/cros_common.h>
 #include <cros/screens.h>
+#include <cros/health_info.h>
+#include <cros/storage_test.h>
+#include <cros/memory.h>
+#include <cros/ui.h>
 #include <cros/vboot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
-
-/**
- * Write out a line of characters to the display
- *
- * @ch: Character to output
- * @len: Number of characters to output
- */
-static void out_line(struct udevice *console, int ch, int len)
-{
-	int i;
-
-	for (i = 0; i < len; i++)
-		vidconsole_put_char(console, ch);
-}
 
 static void out_str(struct udevice *console, const char *msg)
 {
 	while (*msg)
 		vidconsole_put_char(console, *msg++);
-}
-
-/* Print the message on the center of display (used for debug) */
-static void print_on_center(struct udevice *console, const char *message)
-{
-	struct vidconsole_priv *priv = dev_get_uclass_priv(console);
-	int cols = priv->cols;
-	int rows = priv->rows;
-	int row, len;
-
-	vidconsole_position_cursor(console, 0, 0);
-
-	for (row = 0; row < (rows - 4) / 2; row++)
-		out_line(console, '.', cols);
-	out_line(console, ' ', cols);
-	out_line(console, ' ', cols);
-
-	/* Center the message on its line */
-	len = strlen(message);
-	out_line(console, ' ', (cols - len) / 2);
-	out_str(console, message);
-	out_line(console, ' ', (cols - len + 1) / 2);
-
-	out_line(console, ' ', cols);
-	out_line(console, ' ', cols);
-
-	/* Don't write to the last row, since that will cause a scroll */
-	for (row += 5; row < rows - 1; row++)
-		out_line(console, '.', cols);
-}
-
-vb2_error_t VbExDisplayScreen(u32 screen_type, u32 locale)
-{
-	struct vboot_info *vboot = vboot_get();
-	const char *msg = NULL;
-
-	if (!vboot_draw_screen(screen_type, locale)) {
-		video_sync(vboot->video, true);
-		return VB2_SUCCESS;
-	}
-
-	/*
-	 * Show the debug messages for development. It is a backup method
-	 * when GBB does not contain a full set of bitmaps.
-	 */
-	switch (screen_type) {
-	case VB_SCREEN_BLANK:
-		/* clear the screen */
-		video_clear(vboot->video);
-		break;
-	case VB_SCREEN_DEVELOPER_WARNING:
-		msg = "developer mode warning";
-		break;
-	case VB_SCREEN_RECOVERY_INSERT:
-		msg = "insert recovery image";
-		break;
-	case VB_SCREEN_RECOVERY_NO_GOOD:
-		msg = "insert image invalid";
-		break;
-	case VB_SCREEN_RECOVERY_TO_DEV:
-		msg = "recovery to dev";
-		break;
-	case VB_SCREEN_DEVELOPER_TO_NORM:
-		msg = "developer to norm";
-		break;
-	case VB_SCREEN_WAIT:
-		msg = "wait for ec update";
-		break;
-	case VB_SCREEN_TO_NORM_CONFIRMED:
-		msg = "to norm confirmed";
-		break;
-	case VB_SCREEN_OS_BROKEN:
-		msg = "os broken";
-		break;
-	case VB_SCREEN_DEVELOPER_WARNING_MENU:
-		msg = "developer warning menu";
-		break;
-	case VB_SCREEN_DEVELOPER_MENU:
-		msg = "developer menu";
-		break;
-	case VB_SCREEN_RECOVERY_TO_DEV_MENU:
-		msg = "recovery to dev menu";
-		break;
-	case VB_SCREEN_DEVELOPER_TO_NORM_MENU:
-		msg = "developer to norm menu";
-		break;
-	case VB_SCREEN_LANGUAGES_MENU:
-		msg = "languages menu";
-		break;
-	case VB_SCREEN_OPTIONS_MENU:
-		msg = "options menu";
-		break;
-	case VB_SCREEN_ALT_FW_PICK:
-		msg = "altfw pick";
-		break;
-	case VB_SCREEN_ALT_FW_MENU:
-		msg = "altfw menu";
-		break;
-	default:
-		log_debug("Not a valid screen type: %08x.\n", screen_type);
-		return VBERROR_INVALID_SCREEN_INDEX;
-	}
-
-	if (msg)
-		print_on_center(vboot->console, msg);
-
-	return VB2_SUCCESS;
 }
 
 /**
@@ -193,4 +78,217 @@ vb2_error_t VbExDisplayMenu(u32 screen_type, u32 locale,
 {
 	return vboot_draw_ui(screen_type, locale, selected_index,
 			     disabled_idx_mask, redraw_base);
+}
+
+static struct ui_log_info log;
+
+uint32_t vb2ex_prepare_log_screen(enum vb2_screen screen, uint32_t locale_id,
+				  const char *str)
+{
+	const struct ui_locale *locale;
+
+	if (ui_get_locale_info(locale_id, &locale))
+		return 0;
+	if (ui_log_init(screen, locale->code, str, &log))
+		return 0;
+	return log.page_count;
+}
+
+uint32_t vb2ex_get_locale_count(void)
+{
+	return ui_get_locale_count();
+}
+
+#define DEBUG_INFO_EXTRA_LENGTH 256
+
+const char *vb2ex_get_debug_info(struct vb2_context *ctx)
+{
+	struct vboot_info *vboot = ctx_to_vboot(ctx);
+	static char *buf;
+	size_t buf_size;
+	char tpm_buf[80];
+	char *vboot_buf;
+	char *tpm_str = NULL;
+	char batt_pct_str[16];
+
+	/* Check if cache exists. */
+	if (buf)
+		return buf;
+
+	/* Debug info from the vboot context. */
+	vboot_buf = vb2api_get_debug_info(ctx);
+
+	buf_size = strlen(vboot_buf) + DEBUG_INFO_EXTRA_LENGTH + 1;
+	buf = malloc(buf_size);
+	if (buf == NULL) {
+		printf("%s: Failed to malloc string buffer\n", __func__);
+		free(vboot_buf);
+		return NULL;
+	}
+
+	/* States owned by firmware. */
+	if (!IS_ENABLED(CONFIG_TPM_V1) && !IS_ENABLED(CONFIG_TPM_V2))
+		tpm_str = "MOCK TPM";
+	else {
+		if (!tpm_report_state(tpm_buf, sizeof(tpm_buf)))
+			tpm_str = tpm_buf;
+	}
+
+	if (!tpm_str)
+		tpm_str = "(unsupported)";
+
+	if (!IS_ENABLED(CONFIG_CROSEC)) {
+		strncpy(batt_pct_str, "(unsupported)", sizeof(batt_pct_str));
+	} else {
+		struct udevice *cros_ec = board_get_cros_ec_dev();
+		uint batt_pct;
+
+		if (!cros_ec || cros_ec_read_batt_charge(cros_ec, &batt_pct))
+			strncpy(batt_pct_str, "(read failure)",
+				sizeof(batt_pct_str));
+		else
+			snprintf(batt_pct_str, sizeof(batt_pct_str),
+				 "%u%%", batt_pct);
+	}
+	snprintf(buf, buf_size,
+		 "%s\n"  /* vboot output does not include newline. */
+		 "read-only firmware id: %s\n"
+		 "active firmware id: %s\n"
+		 "battery level: %s\n"
+		 "TPM state: %s",
+		 vboot_buf,
+		 vboot->readonly_firmware_id,
+		 vboot->firmware_id,
+		 batt_pct_str, tpm_str);
+
+	free(vboot_buf);
+
+	buf[buf_size - 1] = '\0';
+	printf("debug info: %s\n", buf);
+	return buf;
+}
+
+const char *vb2ex_get_firmware_log(int reset)
+{
+	static char *buf;
+	if (!buf || reset) {
+		free(buf);
+		buf = cbmem_console_snapshot();
+		if (buf)
+			printf("Read cbmem console: size=%zu\n", strlen(buf));
+		else
+			printf("Failed to read cbmem console\n");
+	}
+	return buf;
+}
+
+#define DEFAULT_DIAGNOSTIC_OUTPUT_SIZE (64 * KiB)
+
+vb2_error_t vb2ex_diag_get_storage_health(const char **out)
+{
+	static char *buf;
+	if (!buf)
+		buf = malloc(DEFAULT_DIAGNOSTIC_OUTPUT_SIZE);
+	*out = buf;
+	if (!buf)
+		return VB2_ERROR_UI_MEMORY_ALLOC;
+
+	dump_all_health_info(buf, buf + DEFAULT_DIAGNOSTIC_OUTPUT_SIZE);
+
+	return VB2_SUCCESS;
+}
+
+vb2_error_t vb2ex_diag_get_storage_test_log(const char **out)
+{
+	static char *buf;
+	if (!buf)
+		buf = malloc(DEFAULT_DIAGNOSTIC_OUTPUT_SIZE);
+	*out = buf;
+	if (!buf)
+		return VB2_ERROR_UI_MEMORY_ALLOC;
+
+	return diag_dump_storage_test_log(buf,
+					  buf + DEFAULT_DIAGNOSTIC_OUTPUT_SIZE);
+}
+
+vb2_error_t vb2ex_diag_memory_quick_test(int reset, const char **out)
+{
+	*out = NULL;
+	if (reset)
+		VB2_TRY(memory_test_init(MEMORY_TEST_MODE_QUICK));
+	return memory_test_run(out);
+}
+
+vb2_error_t vb2ex_diag_memory_full_test(int reset, const char **out)
+{
+	*out = NULL;
+	if (reset)
+		VB2_TRY(memory_test_init(MEMORY_TEST_MODE_FULL));
+	return memory_test_run(out);
+}
+
+vb2_error_t vb2ex_display_ui(enum vb2_screen screen,
+			     uint32_t locale_id,
+			     uint32_t selected_item,
+			     uint32_t disabled_item_mask,
+			     uint32_t hidden_item_mask,
+			     int timer_disabled,
+			     uint32_t current_page,
+			     enum vb2_ui_error error_code)
+{
+	vb2_error_t rv;
+	const struct ui_locale *locale = NULL;
+	const struct ui_screen_info *screen_info;
+	printf("%s: screen=%#x, locale=%u, selected_item=%u, "
+	       "disabled_item_mask=%#x, hidden_item_mask=%#x, "
+	       "timer_disabled=%d, current_page=%u, error=%#x\n",
+	       __func__,
+	       screen, locale_id, selected_item,
+	       disabled_item_mask, hidden_item_mask,
+	       timer_disabled, current_page, error_code);
+
+	rv = ui_get_locale_info(locale_id, &locale);
+	if (rv == VB2_ERROR_UI_INVALID_LOCALE) {
+		printf("Locale %u not found, falling back to locale 0",
+		       locale_id);
+		rv = ui_get_locale_info(0, &locale);
+	}
+	if (rv)
+		goto fail;
+
+	screen_info = ui_get_screen_info(screen);
+	if (!screen_info) {
+		printf("%s: Not a valid screen: %#x\n", __func__, screen);
+		rv = VB2_ERROR_UI_INVALID_SCREEN;
+		goto fail;
+	}
+
+	struct ui_state state = {
+		.screen = screen_info,
+		.locale = locale,
+		.selected_item = selected_item,
+		.disabled_item_mask = disabled_item_mask,
+		.hidden_item_mask = hidden_item_mask,
+		.timer_disabled = timer_disabled,
+		.log = &log,
+		.current_page = current_page,
+		.error_code = error_code,
+	};
+
+	static struct ui_state prev_state;
+	static int has_prev_state = 0;
+
+	rv = ui_display_screen(&state, has_prev_state ? &prev_state : NULL);
+	flush_graphics_buffer();
+	if (rv)
+		goto fail;
+
+	memcpy(&prev_state, &state, sizeof(struct ui_state));
+	has_prev_state = 1;
+
+	return VB2_SUCCESS;
+
+ fail:
+	has_prev_state = 0;
+	return rv;
 }

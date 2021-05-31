@@ -535,7 +535,7 @@ static vb2_error_t vboot_draw_language(struct vboot_info *vboot, u32 locale)
 static vb2_error_t draw_base_screen(struct vboot_info *vboot, u32 locale,
 				  int show_language)
 {
-	const struct rgb_colour white = { 0xff, 0xff, 0xff };
+	const struct rgb_color white = { 0xff, 0xff, 0xff };
 
 	if (cbgfx_clear_screen(&white))
 		return VB2_ERROR_UNKNOWN;

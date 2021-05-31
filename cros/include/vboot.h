@@ -408,4 +408,9 @@ int vboot_secdata_get(const void *secdata, int size, enum secdata_t field);
  */
 int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp);
 
+// TODO
+#include <linux/sizes.h>
+char *cbmem_console_snapshot(void);
+#define KiB	SZ_1K
+
 #endif /* __CROS_VBOOT_H */

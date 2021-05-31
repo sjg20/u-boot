@@ -34,4 +34,3 @@ vb2_error_t vb2ex_diag_storage_test_control(enum vb2_diag_storage_test ops)
 {
 	return VB2_ERROR_EX_DIAG_TEST_INIT_FAILED;
 }
-

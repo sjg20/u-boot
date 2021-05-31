@@ -5,7 +5,6 @@
 
 obj-y += altfw.o
 obj-y += cros_ec_vboot.o
-obj-y += diag.o
 obj-y += ec.o
 obj-y += handoff.o
 obj-y += misc.o
@@ -18,7 +17,7 @@ ifndef CONFIG_SPL_BUILD
 obj-y += auxfw.o
 obj-y += boot_device.o
 obj-$(CONFIG_X86) += cb_helper.o
-#obj-y += display.o
+obj-y += display.o
 obj-y += graphics.o
 obj-y += keyboard.o
 #obj-y += screens.o
