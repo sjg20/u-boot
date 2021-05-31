@@ -5,3 +5,4 @@
 
 obj-y += archive.o
 obj-y += common.o
+obj-y += draw.o

@@ -16,12 +16,19 @@
  * GNU General Public License for more details.
  */
 
+
+#include <common.h>
+#include <dm.h>
+#include <cros/cb_gfx.h>
+#include <cros/ui.h>
+#include <cros/vboot.h>
+/*
 #include <ctype.h>
 #include <libpayload.h>
 #include <vb2_api.h>
 
 #include "vboot/ui.h"
-
+*/
 #define SCREEN_FRACTION(numerator) ((struct fraction){	\
 	.n = numerator,					\
 	.d = UI_SCALE,					\
@@ -81,7 +88,7 @@ vb2_error_t ui_draw_bitmap(const struct ui_bitmap *bitmap,
 		else if (flags & PIVOT_H_RIGHT)
 			width = x - UI_MARGIN_H;
 		else
-			width = MIN(UI_SCALE - UI_MARGIN_H - x,
+			width = min(UI_SCALE - UI_MARGIN_H - x,
 				    x - UI_MARGIN_H) * 2;
 		dim.x.n = width;
 		ret = draw_bitmap(bitmap->data, bitmap->size, &pos, &dim,
