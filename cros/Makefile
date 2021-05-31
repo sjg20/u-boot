@@ -5,6 +5,7 @@
 
 ifndef CONFIG_SPL_BUILD
 obj-y += cmd/
+obj-y += diag/
 obj-y += ui/
 endif
 obj-y += crypto/

@@ -132,3 +132,14 @@ int vboot_platform_is_resuming(void)
 
 	return 0;
 }
+
+void *xzalloc(size_t size)
+{
+	void *ptr;
+
+	ptr = calloc(1, size);
+	if (!ptr)
+		panic("Cannot alloc");
+
+	return ptr;
+}

@@ -7,6 +7,12 @@
 #define __DIAG_MEMORY_H__
 
 #include <vb2_api.h>
+#include <cros/ranges.h>
+
+/* memory functions (could be in a separate file) */
+int memory_range_init_and_get_unused(Ranges *ranges);
+int memory_wipe_unused(void);
+void memory_mark_used(uint64_t start, uint64_t end);
 
 typedef enum {
 	MEMORY_TEST_MODE_QUICK,

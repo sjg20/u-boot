@@ -412,5 +412,9 @@ int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp);
 #include <linux/sizes.h>
 char *cbmem_console_snapshot(void);
 #define KiB	SZ_1K
+#define MiB	SZ_1M
+#define GiB	SZ_1G
+
+void *xzalloc(size_t size);
 
 #endif /* __CROS_VBOOT_H */

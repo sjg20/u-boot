@@ -3,6 +3,15 @@
  * Copyright 2020 Google Inc.
  */
 
+#include <common.h>
+#include <cros/memory.h>
+#include <cros/pattern.h>
+#include <cros/physmem.h>
+#include <cros/ranges.h>
+#include <cros/vboot.h>
+#include <linux/list.h>
+
+/*
 #include <assert.h>
 #include <libpayload.h>
 #include <vb2_api.h>
@@ -14,7 +23,7 @@
 
 #include "diag/memory.h"
 #include "diag/pattern.h"
-
+*/
 #define DEBUG(format, args...)                                                 \
 	printf("%s:%d:%s: " format, __FILE__, __LINE__, __func__, ##args)
 #define OUTPUT(format, args...)                                                \
@@ -54,7 +63,7 @@ typedef struct {
 	const char *buf_end; // The end of output buffer.
 
 	// Test patterns
-	const ListNode *patterns; // The pattern list
+	const struct list_head *patterns; // The pattern list
 	int num_pattern;
 	const Pattern *pattern_cur;
 	// Operations
@@ -94,7 +103,7 @@ static void op_write(uint64_t phys_addr, void *start, uint64_t size,
 
 	size_t pat_size = sizeof(data->pattern);
 	for (uint64_t pos = 0, cur_size; pos < size; pos += cur_size) {
-		cur_size = MIN(size - pos, pat_size);
+		cur_size = min(size - pos, (u64)pat_size);
 		memcpy(start + pos, data->pattern, cur_size);
 	}
 }
@@ -106,7 +115,7 @@ static void op_read_and_check(uint64_t phys_addr, void *start, uint64_t size,
 
 	size_t pat_size = sizeof(data->pattern);
 	for (uint64_t pos = 0, cur_size; pos < size; pos += cur_size) {
-		cur_size = MIN(size - pos, pat_size);
+		cur_size = min(size - pos, (u64)pat_size);
 
 		int res = memcmp(start + pos, data->pattern, cur_size);
 		if (res != 0) {
@@ -137,7 +146,7 @@ static MemoryTestState state;
 
 static inline uint64_t get_current_chunk_end(void)
 {
-	return MIN(state.range_cur->next->pos, state.chunk_st + CHUNK_SIZE);
+	return min(state.range_cur->next->pos, state.chunk_st + CHUNK_SIZE);
 }
 
 static inline void reset_chunk(void)
@@ -183,7 +192,7 @@ static inline void reset_memory_test(void)
 
 static inline void go_next_pattern(void)
 {
-	ListNode *next = state.pattern_cur->list_node.next;
+	struct list_head *next = state.pattern_cur->list_node.next;
 
 	// If no next pattern, then we are done.
 	if (!next) {
@@ -261,7 +270,7 @@ vb2_error_t memory_test_init(MemoryTestMode mode)
 	}
 	const Pattern *pattern;
 	state.num_pattern = 0;
-	list_for_each(pattern, *state.patterns, list_node)
+	list_for_each_entry(pattern, state.patterns, list_node)
 	{
 		state.num_pattern += 1;
 	}
@@ -309,7 +318,7 @@ vb2_error_t memory_test_init(MemoryTestMode mode)
 	OUTPUT("Free memory (will be tested): %lld.%03lld GiB\n",
 	       state.num_bytes / GiB, (1000 * state.num_bytes / GiB) % 1000);
 	OUTPUT("Loaded test patterns:");
-	list_for_each(pattern, *state.patterns, list_node)
+	list_for_each_entry(pattern, state.patterns, list_node)
 	{
 		OUTPUT(" '%s'", pattern->name);
 	}
@@ -339,9 +348,9 @@ static void memory_test_run_step(void)
 
 	// TODO(menghuan): Add intergration test hook here.
 
-	uint64_t start_time = timer_us(0);
+	uint64_t start_time = get_timer_us(0);
 	arch_phys_map(start, size, *state.op, state.single_operation_data);
-	uint64_t delta_us = timer_us(start_time);
+	uint64_t delta_us = get_timer_us(start_time);
 
 	state.num_bytes_processed += size;
 	update_progress();
@@ -403,11 +412,11 @@ vb2_error_t memory_test_run(const char **out)
 {
 	// Previous chunk timestemp.
 	static uint64_t prev_end = 0;
-	uint64_t start = timer_us(0);
+	uint64_t start = get_timer_us(0);
 
 	vb2_error_t rv = memory_test_run_impl(out);
 
-	uint64_t end = timer_us(0);
+	uint64_t end = get_timer_us(0);
 	DEBUG("UI Delay: %lld ms, Mem test cost: %lld ms\n",
 	      (start - prev_end) / 1000, (end - start) / 1000);
 
