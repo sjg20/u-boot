@@ -19,7 +19,6 @@
 
 #include <common.h>
 #include <dm.h>
-#include <cros/cb_gfx.h>
 #include <cros/ui.h>
 #include <cros/vboot.h>
 /*

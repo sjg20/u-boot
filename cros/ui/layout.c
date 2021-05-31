@@ -16,11 +16,16 @@
  * GNU General Public License for more details.
  */
 
+#include <common.h>
+#include <cros/ui.h>
+#include <cros/vboot.h>
+
+/*
 #include <libpayload.h>
 
 #include "vboot/ui.h"
 #include "vboot/util/commonparams.h"
-
+*/
 vb2_error_t ui_draw_language_header(const struct ui_locale *locale,
 				    const struct ui_state *state, int focused)
 {
@@ -141,9 +146,10 @@ static vb2_error_t draw_footer(const struct ui_state *state)
 	const int32_t footer_y = UI_SCALE - UI_MARGIN_BOTTOM - UI_FOOTER_HEIGHT;
 	const int32_t footer_height = UI_FOOTER_HEIGHT;
 	struct ui_bitmap bitmap;
+	struct vboot_info *vboot = vboot_get();
 
 	/* hwid */
-	if (vb2api_gbb_read_hwid(vboot_get_context(), hwid, &size) ==
+	if (vb2api_gbb_read_hwid(vboot_get_ctx(vboot), hwid, &size) ==
 	    VB2_SUCCESS) {
 		/* Truncate everything after the first whitespace. */
 		p = strchr(hwid, ' ');
@@ -209,7 +215,7 @@ static vb2_error_t draw_footer(const struct ui_state *state)
 		icon_height - UI_FOOTER_COL3_PARA_SPACING;
 	/* Not enough room for the vspacing; reduce the para_spacing */
 	if (vspacing < 0) {
-		para_spacing = MAX(para_spacing + vspacing -
+		para_spacing = max(para_spacing + vspacing -
 				   UI_FOOTER_COL3_SPACING_MIN,
 				   UI_FOOTER_COL3_SPACING_MIN);
 		vspacing = UI_FOOTER_COL3_SPACING_MIN;
@@ -269,7 +275,7 @@ vb2_error_t ui_get_button_width(const struct ui_menu *menu,
 			log_err("Menu item #%d: no .file or .text\n", i);
 			return VB2_ERROR_UI_DRAW_FAILURE;
 		}
-		max_text_width = MAX(text_width, max_text_width);
+		max_text_width = max(text_width, max_text_width);
 	}
 
 	*button_width = max_text_width + UI_BUTTON_TEXT_PADDING_H * 2;
@@ -532,7 +538,7 @@ vb2_error_t ui_draw_textbox(const char *str, int32_t *y, int32_t min_lines)
 		if (*ptr =='\t')
 			*ptr = ' ';
 
-	num_lines = MAX(count_lines(buf), min_lines);
+	num_lines = max(count_lines(buf), min_lines);
 	max_content_height = UI_SCALE - UI_BOX_MARGIN_V * 2 -
 		UI_BOX_PADDING_V * 2;
 	line_spacing = UI_BOX_TEXT_LINE_SPACING * (num_lines - 1);
@@ -636,7 +642,8 @@ vb2_error_t ui_draw_log_textbox(const char *str, const struct ui_state *state,
 
 static vb2_error_t ui_draw_dev_signed_warning(void)
 {
-	struct vb2_context *ctx = vboot_get_context();
+	struct vboot_info *vboot = vboot_get();
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
 
 	/* Dev-mode boots everything anyway, this is only interesting in rec. */
 	if (!(ctx->flags & VB2_CONTEXT_RECOVERY_MODE))
