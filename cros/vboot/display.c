@@ -15,6 +15,7 @@
 #include <video_console.h>
 #include <cros/cros_ofnode.h>
 #include <cros/cros_common.h>
+#include <cros/memory.h>
 #include <cros/screens.h>
 #include <cros/health_info.h>
 #include <cros/storage_test.h>
