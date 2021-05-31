@@ -5,6 +5,7 @@
 
 ifndef CONFIG_SPL_BUILD
 obj-y += cmd/
+obj-y += ui/
 endif
 obj-y += crypto/
 obj-$(CONFIG_CROS_FLAG) += flag/

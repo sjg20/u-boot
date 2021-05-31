@@ -65,29 +65,15 @@ vb2_error_t VbExDisplayDebugInfo(const char *info_str)
 	return VB2_SUCCESS;
 }
 
-vb2_error_t VbExGetLocalizationCount(u32 *count)
-{
-	*count = vboot_get_locale_count();
-
-	return VB2_SUCCESS;
-}
-
-vb2_error_t VbExDisplayMenu(u32 screen_type, u32 locale,
-			  u32 selected_index, u32 disabled_idx_mask,
-			  u32 redraw_base)
-{
-	return vboot_draw_ui(screen_type, locale, selected_index,
-			     disabled_idx_mask, redraw_base);
-}
-
 static struct ui_log_info log;
 
 uint32_t vb2ex_prepare_log_screen(enum vb2_screen screen, uint32_t locale_id,
 				  const char *str)
 {
+	struct vboot_info *vboot = vboot_get();
 	const struct ui_locale *locale;
 
-	if (ui_get_locale_info(locale_id, &locale))
+	if (ui_get_locale_info(vboot, locale_id, &locale))
 		return 0;
 	if (ui_log_init(screen, locale->code, str, &log))
 		return 0;
@@ -96,7 +82,9 @@ uint32_t vb2ex_prepare_log_screen(enum vb2_screen screen, uint32_t locale_id,
 
 uint32_t vb2ex_get_locale_count(void)
 {
-	return ui_get_locale_count();
+	struct vboot_info *vboot = vboot_get();
+
+	return ui_get_locale_count(vboot);
 }
 
 #define DEBUG_INFO_EXTRA_LENGTH 256
@@ -236,6 +224,7 @@ vb2_error_t vb2ex_display_ui(enum vb2_screen screen,
 			     uint32_t current_page,
 			     enum vb2_ui_error error_code)
 {
+	struct vboot_info *vboot = vboot_get();
 	vb2_error_t rv;
 	const struct ui_locale *locale = NULL;
 	const struct ui_screen_info *screen_info;
@@ -247,11 +236,11 @@ vb2_error_t vb2ex_display_ui(enum vb2_screen screen,
 	       disabled_item_mask, hidden_item_mask,
 	       timer_disabled, current_page, error_code);
 
-	rv = ui_get_locale_info(locale_id, &locale);
+	rv = ui_get_locale_info(vboot, locale_id, &locale);
 	if (rv == VB2_ERROR_UI_INVALID_LOCALE) {
 		printf("Locale %u not found, falling back to locale 0",
 		       locale_id);
-		rv = ui_get_locale_info(0, &locale);
+		rv = ui_get_locale_info(vboot, 0, &locale);
 	}
 	if (rv)
 		goto fail;

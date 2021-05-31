@@ -34,11 +34,6 @@
 #include <cros/cb_gfx.h>
 #include <cros/vboot.h>
 
-#define _UI_PRINT(fmt, args...) printf("%s: " fmt, __func__, ##args)
-#define UI_INFO(...) _UI_PRINT(__VA_ARGS__)
-#define UI_WARN(...) _UI_PRINT(__VA_ARGS__)
-#define UI_ERROR(...) _UI_PRINT(__VA_ARGS__)
-
 /* Maximum lengths */
 #define UI_LOCALE_CODE_MAX_LEN 8
 #define UI_CBFS_FILENAME_MAX_LEN 256
@@ -338,12 +333,13 @@ struct ui_log_info {
  * Subsequent calls with the same locale_id are guaranteed to set an identical
  * pointer.
  *
+ * @param vboot		Vboot context
  * @param locale_id	Locale id.
  * @param locale	Pointer to a ui_locale struct pointer to be set.
  *
  * @return VB2_SUCCESS on success, non-zero on error.
  */
-vb2_error_t ui_get_locale_info(uint32_t locale_id,
+vb2_error_t ui_get_locale_info(struct vboot_info *vboot, uint32_t locale_id,
 			       struct ui_locale const **locale);
 
 /*
@@ -351,9 +347,11 @@ vb2_error_t ui_get_locale_info(uint32_t locale_id,
  *
  * Returns the number of locales available in CBFS.
  *
+ * @param vboot		Vboot context
+ *
  * @returns Number of locales.  0 if none or on error.
  */
-uint32_t ui_get_locale_count(void);
+uint32_t ui_get_locale_count(struct vboot_info *vboot);
 
 /*
  * Get bitmap.
