@@ -14,9 +14,6 @@
 #include <cros/fwstore.h>
 #include <cros/vbfile.h>
 #include <cros/vboot.h>
-#include <lzma/LzmaTypes.h>
-#include <lzma/LzmaDec.h>
-#include <lzma/LzmaTools.h>
 
 int vbfile_load(struct vboot_info *vboot, const char *name, struct abuf *buf)
 {
@@ -29,7 +26,6 @@ int vbfile_load(struct vboot_info *vboot, const char *name, struct abuf *buf)
 		if (ret)
 			return log_msg_ret("find", ret);
 
-		/* Load locale list */
 		ret = fwstore_load_image(vboot->fwstore, &entry, buf);
 		if (ret)
 			return log_msg_ret("read", ret);
@@ -59,4 +55,11 @@ int vbfile_load(struct vboot_info *vboot, const char *name, struct abuf *buf)
 	}
 
 	return 0;
+}
+
+int vbfile_section_load(struct vboot_info *vboot, const char *section,
+			const char *name, struct abuf *buf)
+{
+	//TODO
+	return -ENOSYS;
 }

@@ -280,3 +280,11 @@ u32 tpm_get_random(struct udevice *dev, void *data, u32 count)
 	else
 		return -ENOSYS;
 }
+
+int tpm_report_state(char *buf, int max_size)
+{
+	//TODO
+	strcpy(buf, "todo");
+
+	return 0;
+}

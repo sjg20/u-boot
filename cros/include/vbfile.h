@@ -27,4 +27,7 @@ struct vboot_info;
  */
 int vbfile_load(struct vboot_info *vboot, const char *name, struct abuf *buf);
 
+int vbfile_section_load(struct vboot_info *vboot, const char *section,
+			const char *name, struct abuf *buf);
+
 #endif /* __CROS_VBFILE_H */

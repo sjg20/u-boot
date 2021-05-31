@@ -20,11 +20,16 @@
 #include <common.h>
 #include <abuf.h>
 #include <cbfs.h>
+#include <dm.h>
 #include <log.h>
+#include <cros/crossystem.h>
 #include <cros/payload.h>
 #include <cros/vbfile.h>
 #include <cros/vboot.h>
+#include <dm/root.h>
 #include <linux/list.h>
+#include <lzma/LzmaTypes.h>
+#include <lzma/LzmaTools.h>
 
 /*
 #include <stdbool.h>
@@ -46,10 +51,11 @@
 static struct list_head *altfw_head;
 
 /* Media to use for reading payloads */
-static struct cbfs_media cbfs_media;
-static bool cbfs_media_valid;
+// static struct cbfs_media cbfs_media;
+// static bool cbfs_media_valid;
 
-#define PAYLOAD_HASH_SUFFIX ".sha256"
+#define PAYLOAD_HASH_SUFFIX	".sha256"
+#define PAYLOAD_SECTION		"RW_LEGACY"
 
 /*
  * get_payload_hash() - Obtain the hash for a given payload.
@@ -134,12 +140,19 @@ static int payload_load(struct cbfs_payload *payload, void **entryp)
 				}
 				memcpy(dst, src, src_len);
 				break;
-			case CBFS_COMPRESS_LZMA:
-				if (!ulzman(src, src_len, dst, dst_len)) {
-					printf("LZMA: Decompression failed.\n");
+			case CBFS_COMPRESS_LZMA: {
+				SizeT inout_size = dst_len;
+				int ret;
+
+				ret = lzmaBuffToBuffDecompress(dst, &inout_size,
+							       src, src_len);
+				if (ret) {
+					log_err("LZMA: Decompression failed (err-%d)\n",
+						ret);
 					return -1;
 				}
 				break;
+			}
 			default:
 				printf("Compression type %x not supported\n",
 				       comp);
@@ -165,38 +178,20 @@ static int payload_load(struct cbfs_payload *payload, void **entryp)
 	}
 }
 
-struct cbfs_media *payload_get_media(void)
-{
-	if (!cbfs_media_valid) {
-		int ret;
-
-		ret = cbfs_media_from_fmap("RW_LEGACY", &cbfs_media);
-		if (ret) {
-			printf("%s: Cannot set up CBFS\n", __func__);
-			return NULL;
-		}
-		cbfs_media_valid = true;
-	}
-
-	return &cbfs_media;
-}
-
 int payload_run(const char *payload_name, int verify)
 {
-	struct cbfs_media *media;
+	struct vboot_info *vboot = vboot_get();
 	struct cbfs_payload *payload;
 	size_t payload_size = 0;
+	void (*entry_func)(void);
+	struct abuf buf;
 	void *entry;
 	int ret;
 
-	media = payload_get_media();
-	if (!media)
-		return 1;
-
-	payload = cbfs_get_file_content(media, payload_name, CBFS_TYPE_SELF,
-					&payload_size);
-	if (!payload) {
-		printf("Could not find '%s'.\n", payload_name);
+	abuf_init(&buf);
+	ret = vbfile_section_load(vboot, PAYLOAD_SECTION, payload_name, &buf);
+	if (ret) {
+		log_err("Could not find '%s'\n", payload_name);
 		return 1;
 	}
 
@@ -243,11 +238,22 @@ int payload_run(const char *payload_name, int verify)
 		return 1;
 	}
 	crossystem_setup(FIRMWARE_TYPE_LEGACY);
-	run_cleanup_funcs(CleanupOnLegacy);
+
+	//TODO: Use bootm stuff for this
+	/*
+	 * Call remove function of all devices with a removal flag set.
+	 * This may be useful for last-stage operations, like cancelling
+	 * of DMA operation or releasing device internal buffers.
+	 */
+	dm_remove_devices_flags(DM_REMOVE_ACTIVE_ALL | DM_REMOVE_NON_VITAL);
+
+	/* Remove all active vital devices next */
+	dm_remove_devices_flags(DM_REMOVE_ACTIVE_ALL);
 
 	printf("Starting %s at %p...", payload_name, entry);
-	cache_sync_instructions();
-	selfboot(entry);
+	cleanup_before_linux();
+	entry_func = entry;
+	entry_func();
 
 	printf("%s returned, unfortunately", payload_name);
 
@@ -256,21 +262,23 @@ int payload_run(const char *payload_name, int verify)
 
 static struct list_head *get_altfw_list(struct cbfs_media *media)
 {
+	struct vboot_info *vboot = vboot_get();
 	char *loaders, *ptr;
 	struct list_head *head, *tail;
-	size_t size;
+	struct abuf buf;
+	int ret;
 
 	/* Load alternate bootloader list from cbfs */
-	loaders = cbfs_get_file_content(media, "altfw/list", CBFS_TYPE_RAW,
-					&size);
-	if (!loaders || !size) {
-		printf("%s: altfw list not found\n", __func__);
+	abuf_init(&buf);
+	ret = vbfile_section_load(vboot, PAYLOAD_SECTION, "altfw/list", &buf);
+	if (ret) {
+		log_info("altfw list not found (err=%d)\n", ret);
 		return NULL;
 	}
 
 	printf("%s: Supported alternate bootloaders:\n", __func__);
 	ptr = loaders;
-	head = xzalloc(sizeof (*head));
+	head = xzalloc(sizeof(*head));
 	tail = head;
 	do {
 		struct altfw_info *node;
@@ -296,6 +304,7 @@ static struct list_head *get_altfw_list(struct cbfs_media *media)
 		list_add_tail(&node->list_node, tail);
 		tail = &node->list_node;
 	} while (1);
+	abuf_uninit(&buf);
 
 	return head;
 }

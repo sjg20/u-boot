@@ -185,3 +185,8 @@ int memory_wipe_unused(void)
 	ranges_teardown(&ranges);
 	return result;
 }
+
+void arch_phys_map(uint64_t start, uint64_t size, PhysMapFunc func, void *data)
+{
+	//TODO
+}

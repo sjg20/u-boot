@@ -417,5 +417,6 @@ char *cbmem_console_snapshot(void);
 
 void *xzalloc(size_t size);
 void *xmalloc(size_t size);
+char *cbmem_console_snapshot(void);;
 
 #endif /* __CROS_VBOOT_H */
