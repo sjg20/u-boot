@@ -20,6 +20,7 @@ obj-$(CONFIG_X86) += cb_helper.o
 obj-y += display.o
 obj-y += graphics.o
 obj-y += keyboard.o
+obj-y += payload.o
 #obj-y += screens.o
 obj-y += vbfile.o
 endif

@@ -416,5 +416,6 @@ char *cbmem_console_snapshot(void);
 #define GiB	SZ_1G
 
 void *xzalloc(size_t size);
+void *xmalloc(size_t size);
 
 #endif /* __CROS_VBOOT_H */
