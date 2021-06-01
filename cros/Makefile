@@ -15,4 +15,5 @@ obj-y += lib/
 obj-y += nvdata/
 obj-y += stage/
 obj-y += vboot/
+obj-y += vb2ex/
 obj-$(CONFIG_SANDBOX) += soc/sandbox/
