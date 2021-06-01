@@ -7,13 +7,10 @@
 #define __DIAG_STORAGE_TEST_H__
 
 #include <vb2_api.h>
+#include <cros/storage_info.h>
 
 // #include "drivers/storage/blockdev.h"
 // #include "drivers/storage/info.h"
-// TODO
-enum BlockDevTestOpsType {
-	block_dev_dummy,
-};
 
 vb2_error_t diag_dump_storage_test_log(char *buf, const char *end);
 vb2_error_t diag_storage_test_control(enum BlockDevTestOpsType ops);

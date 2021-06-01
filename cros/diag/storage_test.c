@@ -3,17 +3,29 @@
  * Copyright 2021 Google Inc.
  */
 
+#include <common.h>
+#include <blk.h>
+#include <dm.h>
+#include <cros/health_info.h>
+#include <cros/storage_info.h>
+#include <cros/vboot.h>
+#include <linux/log2.h>
+
+/*
 #include <libpayload.h>
 
 #include "diag/storage_test.h"
+*/
 
 #define HALF_BYTE_LOW(x) ((x) & 0xf)
 #define HALF_BYTE_HIGH(x) ((x) >> 4)
 
+typedef struct blk_desc BlockDev;
+
 static BlockDev *get_first_fixed_block_device(void)
 {
-	ListNode *devs;
-	int n = get_all_bdevs(BLOCKDEV_FIXED, &devs);
+// 	struct list_head *devs;
+	int n = 0; //TODO get_all_bdevs(BLOCKDEV_FIXED, &devs);
 	if (!n) {
 		printf("%s: No storage device found.\n", __func__);
 		return NULL;
@@ -22,8 +34,8 @@ static BlockDev *get_first_fixed_block_device(void)
 		printf("%s: More than one device found.\n", __func__);
 		return NULL;
 	}
-	BlockDev *bdev;
-	list_for_each(bdev, *devs, list_node) { return bdev; }
+// 	BlockDev *bdev;
+// 	list_for_each_entry(bdev, devs, list_node) { return bdev; }
 	return NULL;
 }
 
@@ -123,7 +135,7 @@ static int32_t get_test_remain_time_seconds(uint8_t current_completion,
 	static uint64_t start_us;
 	static uint64_t now_us;
 	if (reset) {
-		start_us = now_us = timer_us(0);
+		start_us = now_us = get_timer_us(0);
 		return 0;
 	}
 	if (current_completion == 0)
@@ -132,7 +144,7 @@ static int32_t get_test_remain_time_seconds(uint8_t current_completion,
 	/* If the passed time since the last call less than 1 second, don't
 	 * update the estimated time to prevent the value changing too quickly.
 	 */
-	uint64_t now_us_tmp = timer_us(0);
+	uint64_t now_us_tmp = get_timer_us(0);
 	if (now_us_tmp - now_us > USECS_PER_SEC)
 		now_us = now_us_tmp;
 
@@ -196,12 +208,15 @@ static int is_test_running(StorageTestLog *log)
 vb2_error_t diag_dump_storage_test_log(char *buf, const char *end)
 {
 	BlockDev *dev = get_first_fixed_block_device();
-	if (!dev || !(dev->ops.get_test_log)) {
-		printf("%s: No supported.\n", __func__);
-		return VB2_ERROR_EX_UNIMPLEMENTED;
-	}
+//TODO
+// 	if (!dev || !(dev->ops.get_test_log)) {
+// 		printf("%s: No supported.\n", __func__);
+// 		return VB2_ERROR_EX_UNIMPLEMENTED;
+// 	}
+
 	StorageTestLog log = {0};
 
+#if 0
 	int res = dev->ops.get_test_log(&dev->ops, &log);
 	if (res) {
 		buf += snprintf(buf, end - buf,
@@ -209,18 +224,21 @@ vb2_error_t diag_dump_storage_test_log(char *buf, const char *end)
 				res);
 		return VB2_ERROR_EX_DIAG_TEST_INIT_FAILED;
 	}
+#endif
 
-	buf += snprintf(buf, end - buf, "Block device '%s':\n", dev->name);
+	buf += snprintf(buf, end - buf, "Block device '%s':\n", dev->bdev->name);
 
 	buf = stringify_test_status(buf, end, &log);
 
 	if (is_test_running(&log))
 		return VB2_ERROR_EX_DIAG_TEST_RUNNING;
+
 	return VB2_SUCCESS;
 }
 
 vb2_error_t diag_storage_test_control(enum BlockDevTestOpsType ops)
 {
+#if 0 // TODO
 	BlockDev *dev = get_first_fixed_block_device();
 	if (!dev || !(dev->ops.test_control)) {
 		printf("%s: No supported.\n", __func__);
@@ -229,5 +247,7 @@ vb2_error_t diag_storage_test_control(enum BlockDevTestOpsType ops)
 	if (dev->ops.test_control(&dev->ops, ops))
 		return VB2_ERROR_EX;
 	get_test_remain_time_seconds(0, 1);
+#endif
+
 	return VB2_SUCCESS;
 }

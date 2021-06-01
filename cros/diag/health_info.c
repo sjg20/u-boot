@@ -3,6 +3,13 @@
  * Copyright 2020 Google Inc.
  */
 
+#include <common.h>
+#include <cros/health_info.h>
+#include <cros/storage_info.h>
+#include <cros/vboot.h>
+#include <linux/log2.h>
+
+/*
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -12,6 +19,7 @@
 
 #include "drivers/storage/blockdev.h"
 #include "drivers/storage/info.h"
+*/
 
 typedef struct {
 	uint64_t lo;
@@ -25,14 +33,14 @@ static inline u128 le128_to_u128(const uint8_t val[16])
 	uint64_t *lo_ptr = (uint64_t *)val;
 	uint64_t *hi_ptr = (uint64_t *)(val + 8);
 
-	ret.lo = le64toh(*lo_ptr);
-	ret.hi = le64toh(*hi_ptr);
+	ret.lo = le32_to_cpu(*lo_ptr);
+	ret.hi = le32_to_cpu(*hi_ptr);
 
 	return ret;
 }
 
 // Round up to the multiple of base
-static inline int round_up(int val, int base)
+static inline int _round_up(int val, int base)
 {
 	int diff = base - val % base;
 	return val % base ? val + diff : val;
@@ -44,7 +52,7 @@ static uint64_t u128_to_u64(const u128 val, int *shift_ret)
 	int shift = (val.hi >> 32) ? 64 - clz(val.hi >> 32) : 32 - clz(val.hi);
 
 	// Round up to the multiple of 10
-	shift = round_up(shift, 10);
+	shift = _round_up(shift, 10);
 
 	uint64_t value = 0;
 
@@ -89,10 +97,10 @@ static const char *u128_to_capacity_str(const u128 unit_val,
 	/* clz(x) are the amount of bits "free" in x. The goal is to get enough
 	 * free bits in value to fit multiplying bytes_per_unit in without
 	 * overflowing. */
-	int need_adjust = log2(bytes_per_unit) + 1 - clz(value >> 32);
+	int need_adjust = ilog2(bytes_per_unit) + 1 - clz(value >> 32);
 	if (need_adjust > 0) {
 		/* round up to multiple of 10 */
-		need_adjust = round_up(need_adjust, 10);
+		need_adjust = _round_up(need_adjust, 10);
 		shift += need_adjust;
 		value >>= need_adjust;
 	}
@@ -355,11 +363,11 @@ char *stringify_health_info(char *buf, const char *end, const HealthInfo *info)
 {
 	switch (info->type) {
 	case STORAGE_INFO_TYPE_NVME:
-		if (!CONFIG(DRIVER_STORAGE_NVME))
+		if (!IS_ENABLED(CONFIG_NVME))
 			break;
 		return stringify_nvme_smart(buf, end, &info->data.nvme_data);
 	case STORAGE_INFO_TYPE_MMC:
-		if (!CONFIG(DRIVER_STORAGE_MMC))
+		if (!IS_ENABLED(CONFIG_MMC))
 			break;
 		return stringify_mmc_health(buf, end, &info->data.mmc_data);
 	case STORAGE_INFO_TYPE_UNKNOWN:
@@ -372,7 +380,8 @@ char *stringify_health_info(char *buf, const char *end, const HealthInfo *info)
 
 char *dump_all_health_info(char *buf, const char *end)
 {
-	ListNode *devs;
+#if 0 //TODO
+	struct list_head *devs;
 	int n = get_all_bdevs(BLOCKDEV_FIXED, &devs);
 	if (!n) {
 		buf += snprintf(buf, end - buf, "No storage device found\n\n");
@@ -385,8 +394,7 @@ char *dump_all_health_info(char *buf, const char *end)
 	// Fill them from the BlockDev structures.
 	BlockDev *bdev;
 	int idx = 1;
-	list_for_each(bdev, *devs, list_node)
-	{
+	list_for_each_entry(bdev, devs, list_node) {
 		if (bdev->ops.get_health_info) {
 			HealthInfo info = {0};
 
@@ -416,5 +424,8 @@ char *dump_all_health_info(char *buf, const char *end)
 					idx, n, bdev->name);
 		}
 	}
+#endif
+	*buf = '\0';
+
 	return buf;
 }

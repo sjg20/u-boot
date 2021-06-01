@@ -414,6 +414,7 @@ char *cbmem_console_snapshot(void);
 #define KiB	SZ_1K
 #define MiB	SZ_1M
 #define GiB	SZ_1G
+#define USECS_PER_SEC	1000000
 
 void *xzalloc(size_t size);
 void *xmalloc(size_t size);
