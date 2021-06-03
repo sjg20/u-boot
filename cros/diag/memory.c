@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include <cros/memory.h>
+#include <cros/memory_util.h>
 #include <cros/pattern.h>
 #include <cros/physmem.h>
 #include <cros/ranges.h>

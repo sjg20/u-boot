@@ -211,25 +211,6 @@ static inline bool vboot_from_cb(struct vboot_info *vboot)
 }
 
 /**
- * vboot_update_acpi() - Update ACPI data
- *
- * For x86 systems, this writes a basic level of information in binary to
- * the ACPI tables for use by the kernel.
- *
- * It also updates the SMBIOS type 0 version string with the firmware ID of the
- * firmware being booted.
- *
- * This uses the BLOBLISTT_ACPI_GNVS blob in the bloblist.
- *
- * When booting frem coreboot, bloblist is not available. In that case it uses
- * the sysinfo acpi_gnvs pointer to find the correct place to update.
- *
- * @vboot: Pointer to vboot structure
- * @return 0 if OK, -ve on error
- */
-int vboot_update_acpi(struct vboot_info *vboot);
-
-/**
  * vboot_get() - Get a pointer to the vboot structure
  *
  * @vboot: Pointer to vboot structure, if valid, else NULL

@@ -7,6 +7,7 @@ obj-$(CONFIG_$(SPL_)X86) += acpi.o
 obj-y += aux-fw-uclass.o
 ifndef CONFIG_SPL_BUILD
 obj-y += cbmem.o
+obj-y += crossystem.o
 endif
 obj-y += cros_ofnode.o
 obj-y += fpmath.o

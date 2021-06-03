@@ -237,7 +237,9 @@ int payload_run(const char *payload_name, int verify)
 		printf("Failed: error %d\n", ret);
 		return 1;
 	}
-	crossystem_setup(FIRMWARE_TYPE_LEGACY);
+	ret = crossystem_setup(vboot, FIRMWARE_TYPE_LEGACY);
+	if (ret)
+		log_warning("Failed to set up crossystem data\n");
 
 	//TODO: Use bootm stuff for this
 	/*
@@ -260,7 +262,7 @@ int payload_run(const char *payload_name, int verify)
 	return 1;
 }
 
-static struct list_head *get_altfw_list(struct cbfs_media *media)
+static struct list_head *get_altfw_list(void)
 {
 	struct vboot_info *vboot = vboot_get();
 	char *loaders, *ptr;
@@ -311,14 +313,8 @@ static struct list_head *get_altfw_list(struct cbfs_media *media)
 
 struct list_head *payload_get_altfw_list(void)
 {
-	struct cbfs_media *media;
-
-	media = payload_get_media();
-	if (!media)
-		return NULL;
-
 	if (!altfw_head)
-		altfw_head = get_altfw_list(media);
+		altfw_head = get_altfw_list();
 
 	return altfw_head;
 }
