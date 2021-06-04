@@ -85,11 +85,12 @@ int fwstore_decomp_with_algo(enum fmap_compress_t algo, void *data, size_t size,
 
 	if (!is_cbfs) {
 		if (size < sizeof(u32))
-			return -ETOOSMALL;
+			return log_msg_ret("sz", -ETOOSMALL);
+		log_info("data=%p\n", data);
 		comp_len = *(u32 *)data;
 		if (comp_len > size - sizeof(u32)) {
 			log_warning("comp_len=%zx, size=%zx\n", comp_len, size);
-			return -EOVERFLOW;
+			return log_msg_ret("norm", -EOVERFLOW);
 		}
 		in = data + sizeof(u32);	/* skip uncompressed size */
 	} else {
@@ -249,17 +250,6 @@ int fwstore_load_image(struct udevice *dev, struct fmap_entry *entry,
 	}
 
 	data = abuf_data(&tmp);
-	if (entry->compress_algo != FMAP_COMPRESS_NONE) {
-		ret = fwstore_decomp_data(entry, data, is_cbfs, abuf);
-		if (ret) {
-			ret = log_msg_ret("decomp", ret);
-			goto err;
-		}
-	} else {
-		abuf_set(abuf, data, entry->length);
-	}
-	abuf_uninit(&tmp);
-
 	if (entry->compress_algo != FMAP_COMPRESS_NONE) {
 		ret = fwstore_decomp_data(entry, data, is_cbfs, abuf);
 		if (ret) {

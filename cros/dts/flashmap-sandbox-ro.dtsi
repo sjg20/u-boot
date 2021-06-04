@@ -51,6 +51,7 @@
 				pattern = "locales/*";
 				require-matches;
 				files-compress = "lz4";
+				align-default = <4>;
 			};
 		};
 
