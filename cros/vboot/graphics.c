@@ -336,6 +336,10 @@ int cbgfx_init(struct udevice *dev)
 	if (initialized)
 		return 0;
 
+	fbinfo = calloc(1, sizeof(*fbinfo));
+	if (!fbinfo)
+		return log_msg_ret("fbinfo", -ENOMEM);
+
 	fbinfo->physical_address = plat->base;
 	fbinfo->x_resolution = priv->xsize;
 	fbinfo->y_resolution = priv->ysize;

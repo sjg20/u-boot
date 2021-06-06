@@ -22,7 +22,7 @@ int vbfile_load(struct vboot_info *vboot, const char *name, struct abuf *buf)
 	if (!vboot_from_cb(vboot)) {
 		struct fmap_entry entry;
 
-		ret = cros_ofnode_find_locale("locales", &entry);
+		ret = cros_ofnode_find_locale(name, &entry);
 		if (ret)
 			return log_msg_ret("find", ret);
 

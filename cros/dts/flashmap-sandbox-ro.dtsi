@@ -50,7 +50,7 @@
 				type = "files";
 				pattern = "locales/*";
 				require-matches;
-				files-compress = "lz4";
+				files-compress = "lzma";
 				align-default = <4>;
 			};
 		};

@@ -159,7 +159,6 @@ static vb2_error_t load_archive(const char *name,
 	struct directory *dir;
 	struct dentry *entry;
 	struct abuf buf;
-	size_t size;
 	int ret;
 	int i;
 
@@ -172,10 +171,13 @@ static vb2_error_t load_archive(const char *name,
 		log_err("Cannot read locale '%s'\n", name);
 		return log_msg_ret("read", ret);
 	}
+	log_info("loaded '%s'\n", name);
+	log_buffer(LOGC_VBOOT, LOGL_INFO, 0, abuf_data(&buf), 1, 0x20, 0);
+	dir = abuf_data(&buf);
 
-	if (!dir || !size) {
+	if (!dir || !abuf_size(&buf)) {
 		log_err("Failed to load %s (dir: %p, size: %zu)\n",
-			 name, dir, size);
+			 name, dir, abuf_size(&buf));
 		return VB2_ERROR_UI_INVALID_ARCHIVE;
 	}
 
@@ -184,8 +186,9 @@ static vb2_error_t load_archive(const char *name,
 	dir->size = le32_to_cpu(dir->size);
 
 	/* Validate the total size */
-	if (dir->size != size) {
-		log_err("Archive size does not match\n");
+	if (dir->size != abuf_size(&buf)) {
+		log_err("Archive size %x does not match buf size %zx\n",
+			dir->size, abuf_size(&buf));
 		return VB2_ERROR_UI_INVALID_ARCHIVE;
 	}
 

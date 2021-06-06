@@ -43,12 +43,14 @@
 			rw_a_spl: u-boot-spl {
 				u-boot,dm-pre-reloc;
 				type = "u-boot-spl-elf";
+				compress = "lzma";
 				strip;
 			};
 			u-boot {
 				u-boot,dm-pre-reloc;
 				type = "u-boot-elf";
-				compress = "lz4";
+				compress = "lzma";
+				strip;
 				hash {
 					u-boot,dm-pre-reloc;
 					algo = "sha256";
@@ -56,6 +58,7 @@
 			};
 			cros-ec-rw {
 				align-size = <0x1000>;
+				compress = "lzma";
 				hash {
 					u-boot,dm-pre-reloc;
 					algo = "sha256";
