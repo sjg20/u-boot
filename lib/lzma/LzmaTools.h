@@ -26,6 +26,6 @@
  *	see also other SZ_ERROR... values
  */
 int lzmaBuffToBuffDecompress(unsigned char *outStream, SizeT *uncompressedSize,
-			     unsigned char *inStream, SizeT length);
+			     const unsigned char *inStream, SizeT length);
 
 #endif

@@ -86,7 +86,7 @@ void vb2ex_beep(u32 msec, u32 frequency)
 
 u32 vb2ex_mtime(void)
 {
-	return timer_get_us();
+	return get_timer(0);
 }
 
 void vb2ex_printf(const char *func, const char *fmt, ...)

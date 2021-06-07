@@ -115,6 +115,28 @@ bool abuf_realloc(struct abuf *abuf, size_t new_size);
 void *abuf_uninit_move(struct abuf *abuf, size_t *sizep);
 
 /**
+ * abuf_init_set() - Set up a new abuf
+ *
+ * Inits a new abuf and sets up its (unallocated) data
+ *
+ * @abuf: abuf to set up
+ * @data: New contents of abuf
+ * @size: New size of abuf
+ */
+void abuf_init_set(struct abuf *abuf, void *data, size_t size);
+
+/**
+ * abuf_init_move() - Make abuf take over the management of an allocated region
+ *
+ * After this, @data must not be used. All access must be via the abuf.
+ *
+ * @abuf: abuf to init
+ * @data: Existing allocated buffer to place in the abuf
+ * @size: Size of allocated buffer
+ */
+void abuf_init_move(struct abuf *abuf, void *data, size_t size);
+
+/**
  * abuf_uninit() - Free any memory used by an abuf
  *
  * The buffer must be inited before this can be called.

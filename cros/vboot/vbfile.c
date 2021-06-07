@@ -41,14 +41,16 @@ int vbfile_load(struct vboot_info *vboot, const char *name, struct abuf *buf)
 			abuf_set(buf, file->data, file->data_length);
 		} else {
 			enum fmap_compress_t compress_algo;
+			struct abuf in;
 
 			compress_algo = cb_conv_compress_type(file->comp_algo);
 			if (!abuf_realloc(buf, file->decomp_size))
 				return log_msg_ret("lzma", -ENOMEM);
 
-			ret = fwstore_decomp_with_algo(compress_algo,
-				file->data, file->data_length, abuf_data(buf),
-				abuf_size(buf), true);
+			abuf_init_set(&in, file->data, file->data_length);
+			ret = fwstore_decomp_with_algo(compress_algo, &in, buf,
+						       true);
+			abuf_uninit(&in);
 		}
 
 		return 0;

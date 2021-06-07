@@ -50,7 +50,6 @@
 				u-boot,dm-pre-reloc;
 				type = "u-boot-elf";
 				compress = "lzma";
-				strip;
 				hash {
 					u-boot,dm-pre-reloc;
 					algo = "sha256";

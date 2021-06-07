@@ -82,6 +82,18 @@ void *abuf_uninit_move(struct abuf *abuf, size_t *sizep)
 	return ptr;
 }
 
+void abuf_init_set(struct abuf *abuf, void *data, size_t size)
+{
+	abuf_init(abuf);
+	abuf_set(abuf, data, size);
+}
+
+void abuf_init_move(struct abuf *abuf, void *data, size_t size)
+{
+	abuf_init_set(abuf, data, size);
+	abuf->alloced = true;
+}
+
 void abuf_uninit(struct abuf *abuf)
 {
 	if (abuf->alloced)

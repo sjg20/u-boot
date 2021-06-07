@@ -171,8 +171,7 @@ static vb2_error_t load_archive(const char *name,
 		log_err("Cannot read locale '%s'\n", name);
 		return log_msg_ret("read", ret);
 	}
-	log_info("loaded '%s'\n", name);
-	log_buffer(LOGC_VBOOT, LOGL_INFO, 0, abuf_data(&buf), 1, 0x20, 0);
+	log_buffer(LOGC_VBOOT, LOGL_DEBUG, 0, abuf_data(&buf), 1, 0x20, 0);
 	dir = abuf_data(&buf);
 
 	if (!dir || !abuf_size(&buf)) {
