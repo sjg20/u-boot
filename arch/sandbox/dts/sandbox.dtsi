@@ -318,6 +318,7 @@
 	uart0: serial {
 		u-boot,dm-spl;
 		u-boot,dm-tpl;
+		u-boot,dm-vpl;
 		compatible = "sandbox,serial";
 		sandbox,text-colour = "cyan";
 		pinctrl-names = "default";

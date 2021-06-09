@@ -65,6 +65,8 @@ struct sandbox_tpm2 {
 	struct nvdata_state nvdata[NV_SEQ_COUNT];
 };
 
+add state
+
 /*
  * Check the tag validity depending on the command (authentication required or
  * not). If authentication is required, check it is valid. Update the auth

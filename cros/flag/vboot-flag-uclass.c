@@ -79,17 +79,19 @@ int vboot_flag_read_walk_prev(enum vboot_flag_t flag, int *prevp,
 			continue;
 
 		ret = vboot_flag_read(dev);
-		if (ret == -ENOENT)
+		if (ret == -ENOENT) {
 			continue;
-		else if (ret)
+		} else if (ret < 0) {
+			log_warning("%s: Failed to read\n", dev->name);
 			break;
+		}
 
 		if (prevp)
 			*prevp = priv->value[flag];
 		if (devp)
 			*devp = dev;
 		priv->value[flag] = ret;
-		return 0;
+		return ret;
 	}
 
 	/* No devices provided the flag */

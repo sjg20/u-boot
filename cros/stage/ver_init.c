@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <bloblist.h>
+#include <cros_ec.h>
 #include <ec_commands.h>
 #include <dm.h>
 #include <log.h>
@@ -125,6 +126,13 @@ int vboot_ver_init(struct vboot_info *vboot)
 		ret = uclass_get_device(UCLASS_CROS_EC, 0, &vboot->cros_ec);
 		if (ret)
 			return log_msg_ret("locate Chromium OS EC", ret);
+
+		/*
+		 * Allow for special key combinations on sandbox, e.g. to enter
+		 * recovery mode
+		 */
+		if (IS_ENABLED(CONFIG_SANDBOX))
+			cros_ec_check_keyboard(vboot->cros_ec);
 	}
 	/*
 	 * Set S3 resume flag if vboot should behave differently when selecting
@@ -147,7 +155,7 @@ int vboot_ver_init(struct vboot_info *vboot)
 		ctx->flags |= VB2_CONTEXT_FORCE_WIPEOUT_MODE;
 	if (vboot_flag_read_walk(VBOOT_FLAG_LID_OPEN) == 0)
 		ctx->flags |= VB2_CONTEXT_NOFAIL_BOOT;
-	ctx->flags = VB2_CONTEXT_NVDATA_V2;
+	ctx->flags |= VB2_CONTEXT_NVDATA_V2;
 	ctx->flags |= VB2_CONTEXT_DEVELOPER_MODE;
 
 	return 0;

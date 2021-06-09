@@ -32,7 +32,7 @@ int sandbox_find_next_stage(char *fname, int maxlen, bool use_img)
 	return 0;
 }
 
-/* SPL / TPL init function */
+/* SPL / TPL / VPL init function */
 void board_init_f(ulong flag)
 {
 	struct sandbox_state *state = state_get_current();
@@ -88,6 +88,10 @@ void spl_board_init(void)
 		/* continue execution into U-Boot */
 	}
 
+	/*
+	 * Go straight into Chromium Os, which will handle loading the next
+	 * phase
+	 */
 	if (CONFIG_IS_ENABLED(CHROMEOS_VBOOT)) {
 		void cros_do_stage(void);
 

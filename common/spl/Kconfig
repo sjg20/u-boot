@@ -176,6 +176,13 @@ config SPL_BOARD_INIT
 	  spl_board_init() from board_init_r(). This function should be
 	  provided by the board.
 
+config VPL_BOARD_INIT
+	bool "Call board-specific initialization in VPL"
+	help
+	  If this option is enabled, U-Boot will call the function
+	  spl_board_init() from board_init_r(). This function should be
+	  provided by the board.
+
 config SPL_BOOTROM_SUPPORT
         bool "Support returning to the BOOTROM"
 	help

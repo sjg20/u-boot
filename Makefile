@@ -901,6 +901,7 @@ vboot:
 		CFLAGS="$(CFLAGS_VBOOT)" NO_STDINT=1 \
 		$(if $(CONFIG_CHROMEOS_TPM2),TPM2_MODE=1) \
 		$(MAKE) -C $(VBOOT_SOURCE) DEBUG=1 \
+		DIAGNOSTIC_UI=y \
 		BUILD=$(CURDIR)/include/generated/vboot \
 		fwlib
 
