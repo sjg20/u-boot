@@ -59,8 +59,7 @@ class Entry_fmap(Entry):
                 # Drop @ symbols in name
                 name = entry.name.replace('@', '')
                 areas.append(
-                    fmap_util.FmapArea(pos, entry.size or 0,
-                                       tools.FromUnicode(name), 0))
+                    fmap_util.FmapArea(pos, entry.size or 0, name, 0))
                 for subentry in entries.values():
                     _AddEntries(areas, subentry)
             else:
