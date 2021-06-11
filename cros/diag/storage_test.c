@@ -208,11 +208,11 @@ static int is_test_running(StorageTestLog *log)
 vb2_error_t diag_dump_storage_test_log(char *buf, const char *end)
 {
 	BlockDev *dev = get_first_fixed_block_device();
-//TODO
-// 	if (!dev || !(dev->ops.get_test_log)) {
-// 		printf("%s: No supported.\n", __func__);
-// 		return VB2_ERROR_EX_UNIMPLEMENTED;
-// 	}
+
+	if (!dev /* TODO || !(dev->ops.get_test_log) */) {
+		printf("%s: No supported.\n", __func__);
+		return VB2_ERROR_EX_UNIMPLEMENTED;
+	}
 
 	StorageTestLog log = {0};
 

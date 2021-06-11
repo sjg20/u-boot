@@ -112,7 +112,11 @@ int vboot_ver_init(struct vboot_info *vboot)
 	if (ret)
 		return log_msg_ret("read nvdata", ret);
 
-	vboot_dump_nvdata(ctx->nvdata, VB2_NVDATA_SIZE_V2);
+	/* Dump all the context */
+	vboot_nvdata_dump(ctx->nvdata, VB2_NVDATA_SIZE_V2);
+	vboot_secdataf_dump(ctx->secdata_firmware,
+			    sizeof(ctx->secdata_firmware));
+	vboot_secdatak_dump(ctx->secdata_kernel, sizeof(ctx->secdata_kernel));
 
 	ret = cros_ofnode_flashmap(&vboot->fmap);
 	if (ret)

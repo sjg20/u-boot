@@ -48,7 +48,7 @@ struct __packed rollback_space_kernel {
 };
 
 /* Size of each non-volatile space */
-#define NV_DATA_SIZE		0x20
+#define NV_DATA_SIZE		0x28
 
 struct nvdata_state {
 	bool present;

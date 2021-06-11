@@ -135,6 +135,9 @@ int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp)
 
 	if (ctx->flags & VB2_CONTEXT_SECDATA_KERNEL_CHANGED) {
 		log_info("Saving secdatak\n");
+		if (spl_phase() != PHASE_SPL)
+			vboot_secdatak_dump(ctx->secdata_kernel,
+					    sizeof(ctx->secdata_kernel));
 		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK,
 					     ctx->secdata_kernel,
 					     sizeof(ctx->secdata_kernel));
@@ -147,6 +150,9 @@ int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp)
 
 	if (ctx->flags & VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED) {
 		log_info("Saving secdataf\n");
+		if (spl_phase() != PHASE_SPL)
+			vboot_secdataf_dump(ctx->secdata_firmware,
+					    sizeof(ctx->secdata_firmware));
 		ret = cros_nvdata_write_walk(CROS_NV_SECDATAF, ctx->secdata_firmware,
 					     sizeof(ctx->secdata_firmware));
 		if (ret) {
@@ -162,7 +168,7 @@ int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp)
 		log_buffer(LOGC_VBOOT, LOGL_DEBUG, 0, ctx->nvdata, 1,
 			   sizeof(ctx->nvdata), 0);
 		if (spl_phase() != PHASE_SPL)
-			vboot_dump_nvdata(ctx->nvdata, sizeof(ctx->nvdata));
+			vboot_nvdata_dump(ctx->nvdata, sizeof(ctx->nvdata));
 		ret = cros_nvdata_write_walk(CROS_NV_DATA, ctx->nvdata,
 					     sizeof(ctx->nvdata));
 		if (ret) {

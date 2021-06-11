@@ -47,25 +47,177 @@ static const u8 sandbox_extended_once_pcr[] = {
 	0xea, 0x98, 0x31, 0xa9, 0x27, 0x59, 0xfb, 0x4b,
 };
 
+/*
+ * Information about our TPM emulation. This is preserved in the sandbox
+ * state file if enabled.
+ *
+ * @valid: true if this is valid (only used in s_state)
+ * @init_done: true if open() has been called
+ * @startup_done: true if TPM2_CC_STARTUP has been processed
+ * @tests_done: true if TPM2_CC_SELF_TEST has be processed
+ * @pw: TPM password per hierarchy
+ * @pw_sz: Size of each password in bytes
+ * @properties: TPM properties
+ * @pcr: TPM Platform Configuration Registers. Each of these holds a hash and
+ *	can be 'extended' a number of times, meaning another hash is added into
+ *	its value (initial value all zeroes)
+ * @pcr_extensions: Number of times each PCR has been extended (starts at 0)
+ * @nvdata: non-volatile data, used to store important things for the platform
+ */
 struct sandbox_tpm2 {
+	bool valid;
 	/* TPM internal states */
 	bool init_done;
 	bool startup_done;
 	bool tests_done;
-	/* TPM password per hierarchy */
 	char pw[TPM2_HIERARCHY_NB][TPM2_DIGEST_LEN + 1];
 	int pw_sz[TPM2_HIERARCHY_NB];
-	/* TPM properties */
 	u32 properties[TPM2_PROPERTY_NB];
-	/* TPM PCRs */
 	u8 pcr[SANDBOX_TPM_PCR_NB][TPM2_DIGEST_LEN];
-	/* TPM PCR extensions */
 	u32 pcr_extensions[SANDBOX_TPM_PCR_NB];
-	/* non-volatile data */
 	struct nvdata_state nvdata[NV_SEQ_COUNT];
 };
 
-add state
+static struct sandbox_tpm2 s_state, *g_state;
+
+/**
+ * sandbox_tpm2_read_state() - read the sandbox EC state from the state file
+ *
+ * If data is available, then blob and node will provide access to it. If
+ * not this function sets up an empty TPM.
+ *
+ * @blob: Pointer to device tree blob, or NULL if no data to read
+ * @node: Node offset to read from
+ */
+static int sandbox_tpm2_read_state(const void *blob, int node)
+{
+	struct sandbox_tpm2 *state = &s_state;
+	char prop_name[20];
+	const char *prop;
+	int len;
+	int i;
+
+	if (!blob)
+		return 0;
+	state->tests_done = fdtdec_get_int(blob, node, "tests-done", 0);
+
+	for (i = 0; i < TPM2_HIERARCHY_NB; i++) {
+		snprintf(prop_name, sizeof(prop_name), "pw%d", i);
+
+		prop = fdt_getprop(blob, node, prop_name, &len);
+		if (len > TPM2_DIGEST_LEN)
+			return log_msg_ret("pw", -E2BIG);
+		if (prop) {
+			memcpy(state->pw[i], prop, len);
+			state->pw_sz[i] = len;
+		}
+	}
+
+	for (i = 0; i < TPM2_PROPERTY_NB; i++) {
+		snprintf(prop_name, sizeof(prop_name), "properties%d", i);
+		state->properties[i] = fdtdec_get_uint(blob, node, prop_name,
+						       0);
+	}
+
+	for (i = 0; i < SANDBOX_TPM_PCR_NB; i++) {
+		int subnode;
+
+		snprintf(prop_name, sizeof(prop_name), "pcr%d", i);
+		subnode = fdt_subnode_offset(blob, node, prop_name);
+		if (subnode < 0)
+			continue;
+		prop = fdt_getprop(blob, subnode, "value", &len);
+		if (len != TPM2_DIGEST_LEN)
+			return log_msg_ret("pcr", -E2BIG);
+		memcpy(state->pcr[i], prop, TPM2_DIGEST_LEN);
+		state->pcr_extensions[i] = fdtdec_get_uint(blob, subnode,
+							   "extensions", 0);
+	}
+
+	for (i = 0; i < NV_SEQ_COUNT; i++) {
+		struct nvdata_state *nvd = &state->nvdata[i];
+
+		sprintf(prop_name, "nvdata%d", i);
+		prop = fdt_getprop(blob, node, prop_name, &len);
+		if (len > NV_DATA_SIZE)
+			return log_msg_ret("nvd", -E2BIG);
+		if (prop) {
+			memcpy(nvd->data, prop, len);
+			nvd->length = len;
+			nvd->present = true;
+		}
+	}
+	s_state.valid = true;
+
+	return 0;
+}
+
+/**
+ * sandbox_tpm2_write_state() - Write out our state to the state file
+ *
+ * The caller will ensure that there is a node ready for the state. The node
+ * may already contain the old state, in which case it is overridden.
+ *
+ * @blob: Device tree blob holding state
+ * @node: Node to write our state into
+ */
+static int sandbox_tpm2_write_state(void *blob, int node)
+{
+	const struct sandbox_tpm2 *state = g_state;
+	char prop_name[20];
+	int i;
+
+	if (!state)
+		return 0;
+
+	/*
+	 * We are guaranteed enough space to write basic properties. This is
+	 * SANDBOX_STATE_MIN_SPACE.
+	 *
+	 * We could use fdt_add_subnode() to put each set of data in its
+	 * own node - perhaps useful if we add access information to each.
+	 */
+	fdt_setprop_u32(blob, node, "tests-done", state->tests_done);
+
+	for (i = 0; i < TPM2_HIERARCHY_NB; i++) {
+		if (state->pw_sz[i]) {
+			snprintf(prop_name, sizeof(prop_name), "pw%d", i);
+			fdt_setprop(blob, node, prop_name, state->pw[i],
+				    state->pw_sz[i]);
+		}
+	}
+
+	for (i = 0; i < TPM2_PROPERTY_NB; i++) {
+		snprintf(prop_name, sizeof(prop_name), "properties%d", i);
+		fdt_setprop_u32(blob, node, prop_name, state->properties[i]);
+	}
+
+	for (i = 0; i < SANDBOX_TPM_PCR_NB; i++) {
+		int subnode;
+
+		snprintf(prop_name, sizeof(prop_name), "pcr%d", i);
+		subnode = fdt_add_subnode(blob, node, prop_name);
+		fdt_setprop(blob, subnode, "value", state->pcr[i],
+			    TPM2_DIGEST_LEN);
+		fdt_setprop_u32(blob, subnode, "extensions",
+				state->pcr_extensions[i]);
+	}
+
+	for (i = 0; i < NV_SEQ_COUNT; i++) {
+		const struct nvdata_state *nvd = &state->nvdata[i];
+
+		if (nvd->present) {
+			snprintf(prop_name, sizeof(prop_name), "nvdata%d", i);
+			fdt_setprop(blob, node, prop_name, nvd->data,
+				    nvd->length);
+		}
+	}
+
+	return 0;
+}
+
+SANDBOX_STATE_IO(sandbox_tpm2, "sandbox,tpm2", sandbox_tpm2_read_state,
+		 sandbox_tpm2_write_state);
 
 /*
  * Check the tag validity depending on the command (authentication required or
@@ -615,14 +767,16 @@ static int sandbox_tpm2_xfer(struct udevice *dev, const u8 *sendbuf,
 	case TPM2_CC_NV_DEFINE_SPACE: {
 		int policy_size, index, seq;
 
-		policy_size = get_unaligned_be16(sent);
+		policy_size = get_unaligned_be16(sent + 12);
 		index = get_unaligned_be32(sent + 2);
-		length = get_unaligned_be32(sent + policy_size);
+		sent += 14 + policy_size;
+		length = get_unaligned_be16(sent);
 		seq = sb_tpm_index_to_seq(index);
 		if (seq < 0)
 			return -EINVAL;
-		printf("tpm: define_space index=%#02x, len=%#02x, seq=%#02x\n",
-		       index, length, seq);
+		printf("tpm: define_space index=%x, len=%x, seq=%x, policy_size=%x\n",
+		       index, length, seq, policy_size);
+		sb_tpm_define_data(tpm->nvdata, seq, length);
 		*recv_len = 12;
 		memset(recvbuf, '\0', *recv_len);
 		break;
@@ -668,10 +822,12 @@ static int sandbox_tpm2_probe(struct udevice *dev)
 	/* Use the TPM v2 stack */
 	priv->version = TPM_V2;
 
-	memset(tpm, 0, sizeof(*tpm));
-
 	priv->pcr_count = 32;
 	priv->pcr_select_min = 2;
+
+	if (s_state.valid)
+		memcpy(tpm, &s_state, sizeof(*tpm));
+	g_state = tpm;
 
 	return 0;
 }

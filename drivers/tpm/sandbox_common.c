@@ -67,12 +67,10 @@ void sb_tpm_write_data(struct nvdata_state nvdata[NV_SEQ_COUNT],
 {
 	struct nvdata_state *nvd = &nvdata[seq];
 
-	if (length > nvd->length) {
+	if (length > nvd->length)
 		log_err("Invalid length %x (max %x)\n", length, nvd->length);
-	} else {
+	else
 		memcpy(&nvdata[seq].data, buf + data_ofs, length);
-		nvd->present = true;
-	}
 }
 
 void sb_tpm_define_data(struct nvdata_state nvdata[NV_SEQ_COUNT],
@@ -80,5 +78,8 @@ void sb_tpm_define_data(struct nvdata_state nvdata[NV_SEQ_COUNT],
 {
 	struct nvdata_state *nvd = &nvdata[seq];
 
+	if (length > NV_DATA_SIZE)
+		log_err("Invalid length %x (max %x)\n", length, NV_DATA_SIZE);
 	nvd->length = length;
+	nvd->present = true;
 }

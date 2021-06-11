@@ -331,7 +331,7 @@ bool vboot_wants_oprom(struct vboot_info *vboot);
 u32 vboot_get_gbb_flags(struct vboot_info *vboot);
 
 /**
- * vboot_dump_nvdata() - Dump the vboot non-volatile data
+ * vboot_nvdata_dump() - Dump the vboot non-volatile data
  *
  * This shows the NV data in human-readable form
  *
@@ -339,10 +339,10 @@ u32 vboot_get_gbb_flags(struct vboot_info *vboot);
  * @size: Size of NV data (typically EC_VBNV_BLOCK_SIZE)
  * @return 0 if it is valid, -ve error otherwise
  */
-int vboot_dump_nvdata(const void *nvdata, int size);
+int vboot_nvdata_dump(const void *nvdata, int size);
 
 /**
- * vboot_dump_nvdata() - Dump the vboot secure data
+ * vboot_secdataf_dump() - Dump the vboot secure data
  *
  * This shows the context in human-readable form
  *
@@ -350,10 +350,32 @@ int vboot_dump_nvdata(const void *nvdata, int size);
  * @size: Size of NV context (typically sizeof(struct vb2_secdata_firmware))
  * @return 0 if it is valid, -ve error otherwise
  */
-int vboot_secdata_dump(const void *secdata, int size);
+int vboot_secdataf_dump(const void *secdata, int size);
 
 /**
- * vboot_secdata_set() - Set a field in the secure data
+ * vboot_secdatak_dump() - Dump the vboot secure kernel data
+ *
+ * This shows the context in human-readable form
+ *
+ * @nvdata: Pointer to context
+ * @size: Size of NV context (typically sizeof(struct vb2_secdata_firmware))
+ * @return 0 if it is valid, -ve error otherwise
+ */
+int vboot_secdatak_dump(const void *secdata, int size);
+
+/**
+ * vboot_fwmp_dump() - Dump the vboot secure firmware manager parameters
+ *
+ * This shows the context in human-readable form
+ *
+ * @nvdata: Pointer to context
+ * @size: Size of NV context (typically sizeof(struct vb2_secdata_firmware))
+ * @return 0 if it is valid, -ve error otherwise
+ */
+int vboot_fwmp_dump(const void *secdata, int size);
+
+/**
+ * vboot_secdataf_set() - Set a field in the secure data
  *
  * This is used to update a single field in the secure data, for testing and
  * development purpsoes
@@ -364,10 +386,10 @@ int vboot_secdata_dump(const void *secdata, int size);
  * @val: Value to set
  * @return 0 if OK, -ve on error
  */
-int vboot_secdata_set(void *secdata, int size, enum secdata_t field, int val);
+int vboot_secdataf_set(void *secdata, int size, enum secdata_t field, int val);
 
 /**
- * vboot_secdata_get() - Get a field from secure data
+ * vboot_secdataf_get() - Get a field from secure data
  *
  * This is read used read a single field in the secure data, for testing and
  * development purposes
@@ -377,7 +399,7 @@ int vboot_secdata_set(void *secdata, int size, enum secdata_t field, int val);
  * @field: Field to read
  * @return value read, or -ve on error
  */
-int vboot_secdata_get(const void *secdata, int size, enum secdata_t field);
+int vboot_secdataf_get(const void *secdata, int size, enum secdata_t field);
 
 /**
  * vboot_save_if_needed() - Save non-volatile and/or secure data if changed

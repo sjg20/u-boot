@@ -163,7 +163,7 @@ vb2_error_t VbExNvStorageWrite(const u8 *buf)
 #ifdef DEBUG
 	print_buffer(0, buf, 1, EC_VBNV_BLOCK_SIZE, 0);
 #endif
-	vboot_dump_nvdata(buf, EC_VBNV_BLOCK_SIZE);
+	vboot_nvdata_dump(buf, EC_VBNV_BLOCK_SIZE);
 	ret = cros_nvdata_write_walk(CROS_NV_DATA, buf, EC_VBNV_BLOCK_SIZE);
 	if (ret)
 		return VB2_ERROR_UNKNOWN;

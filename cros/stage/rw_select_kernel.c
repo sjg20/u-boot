@@ -77,10 +77,11 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 	if (res != VB2_SUCCESS) {
 		log_info("VbSelectAndLoadKernel() returned %#x (%d), doing a cold reboot\n",
 			 res, ret);
-		sysreset_walk_halt(SYSRESET_COLD);
+		return VB2_REQUEST_REBOOT;
+// 		sysreset_walk_halt(SYSRESET_COLD);
 	}
 	if (ret)
-		return log_msg_ret("reboot/power off", ret);
+		return log_msg_retz("reboot/power off", ret);
 
 	return 0;
 }

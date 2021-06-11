@@ -247,12 +247,12 @@ int vboot_rw_init(struct vboot_info *vboot)
 {
 	struct fmap_section *section;
 	struct vboot_blob *blob;
+	struct vb2_context *ctx;
 	bool is_rw;
 	int ret;
 
 	if (!IS_ENABLED(CONFIG_SYS_COREBOOT) || ll_boot_init()) {
 		int new_size = VB2_KERNEL_WORKBUF_RECOMMENDED_SIZE;
-		struct vb2_context *ctx;
 		int ret;
 
 		blob = bloblist_find(BLOBLISTT_VBOOT_CTX, sizeof(*blob));
@@ -266,15 +266,15 @@ int vboot_rw_init(struct vboot_info *vboot)
 		if (ret)
 			return log_msg_ret("reloc", ret);
 
-		vboot->ctx = ctx;
-		ctx->non_vboot_context = vboot;
 		log_warning("flags %llx %d\n", ctx->flags,
 			    ((ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0));
 	} else {
-		ret = cb_vboot_rw_init(vboot);
+		ret = cb_vboot_rw_init(vboot, &ctx);
 		if (ret)
 			return log_msg_ret("cb", ret);
 	}
+	vboot->ctx = ctx;
+	ctx->non_vboot_context = vboot;
 
 	if (vboot_is_recovery(vboot))
 		log_info("Recovery mode\n");
@@ -331,6 +331,13 @@ int vboot_rw_init(struct vboot_info *vboot)
 		if (ret)
 			return log_msg_ret("ec", ret);
 	}
+
+	/* initialise and read fwmp from TPM */
+	ret = cros_nvdata_read_walk(CROS_NV_FWMP, ctx->secdata_fwmp,
+				    VB2_SECDATA_FWMP_MIN_SIZE);
+	if (ret)
+		return log_msg_ret("read nvdata", ret);
+	vboot_fwmp_dump(ctx->secdata_fwmp, VB2_SECDATA_FWMP_MIN_SIZE);
 
 	return 0;
 }

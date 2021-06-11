@@ -141,7 +141,7 @@ vb2_error_t VbExDiskGetInfo(VbDiskInfo **infos_ptr, u32 *count_ptr,
 		free(infos);
 	}
 	bootstage_accum(BOOTSTAGE_ACCUM_VBOOT_BOOT_DEVICE_INFO);
-	log_info("Found %u disks\n", count);
+	log_debug("Found %u disks\n", count);
 
 	/* The operation itself succeeds, despite scan failure all about */
 	return VB2_SUCCESS;

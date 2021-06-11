@@ -158,7 +158,7 @@ static int dump_nvdata(void)
 	ret = cros_nvdata_read_walk(CROS_NV_DATA, nvdata, sizeof(nvdata));
 	if (ret)
 		return log_msg_ret("read", ret);
-	ret = vboot_dump_nvdata(nvdata, sizeof(nvdata));
+	ret = vboot_nvdata_dump(nvdata, sizeof(nvdata));
 	if (ret)
 		return log_msg_ret("dump", ret);
 
@@ -196,7 +196,7 @@ static int dump_secdata(void)
 	ret = cros_nvdata_read_walk(CROS_NV_SECDATAF, secdata, sizeof(secdata));
 	if (ret)
 		return log_msg_ret("read", ret);
-	ret = vboot_secdata_dump(secdata, sizeof(secdata));
+	ret = vboot_secdataf_dump(secdata, sizeof(secdata));
 	if (ret)
 		return log_msg_ret("dump", ret);
 
@@ -235,7 +235,7 @@ static int do_secdata_set(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 	if (argc <= 1) {
 		for (i = 0; i < SECDATA_COUNT; i++) {
-			int val = vboot_secdata_get(secdata, sizeof(secdata),
+			int val = vboot_secdataf_get(secdata, sizeof(secdata),
 						    i);
 
 			printf("%s: %d (%#x)\n", secdata_name[i], val, val);
@@ -258,7 +258,7 @@ static int do_secdata_set(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		val = simple_strtol(argv[2], NULL, 16);
 		printf("Set '%s' to %x\n", secdata_name[field], val);
-		ret = vboot_secdata_set(secdata, sizeof(secdata), field, val);
+		ret = vboot_secdataf_set(secdata, sizeof(secdata), field, val);
 		if (ret) {
 			printf("Cannot set (err=%d)\n", ret);
 			return CMD_RET_FAILURE;
