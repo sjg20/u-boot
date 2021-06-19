@@ -108,11 +108,14 @@ static int get_unused_memory(Ranges *ranges)
 			return 1;
 		}
 	}
+#elif defined(CONFIG_SANDBOX)
+	ranges_add(ranges, CONFIG_SYS_SDRAM_BASE + 0x100000,
+		   CONFIG_SYS_SDRAM_SIZE - 0x100000);
+#endif
 
 	// Exclude memory that's being used.
 	used_list_initialize();
 	ranges_for_each(&used, &remove_range, ranges);
-#endif
 
 	return 0;
 }

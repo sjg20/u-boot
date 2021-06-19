@@ -75,7 +75,6 @@ static inline void add_pattern(struct list_head *head, const char *name,
 	pattern->name = name;
 	pattern->data = buf;
 	pattern->len = len;
-
 	list_add_tail(&pattern->list_node, head);
 }
 
@@ -95,8 +94,10 @@ const struct list_head *DiagGetSimpleTestPatterns(void)
 {
 	static struct list_head pattern_list;
 
-	if (!pattern_list.next)
+	if (!pattern_list.next) {
+		INIT_LIST_HEAD(&pattern_list);
 		ADD_PATTERN_BY_ARRAY(pattern_list, five_a_8);
+	}
 
 	return &pattern_list;
 }
@@ -106,6 +107,7 @@ const struct list_head *DiagGetTestPatterns(void)
 	static struct list_head pattern_list;
 
 	if (!pattern_list.next) {
+		INIT_LIST_HEAD(&pattern_list);
 		ADD_PATTERN_BY_FUNC(pattern_list, walking_ones);
 		ADD_PATTERN_BY_ARRAY(pattern_list, one_zero);
 		ADD_PATTERN_BY_ARRAY(pattern_list, zero);

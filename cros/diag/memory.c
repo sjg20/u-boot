@@ -193,14 +193,15 @@ static inline void reset_memory_test(void)
 
 static inline void go_next_pattern(void)
 {
-	struct list_head *next = state.pattern_cur->list_node.next;
+	struct list_head *next;
 
 	// If no next pattern, then we are done.
-	if (!next) {
+	if (list_is_last(&state.pattern_cur->list_node, state.patterns)) {
 		state.is_running = 0;
 		DEBUG("No more patterns. We are done!\n");
 		return;
 	}
+	next = state.pattern_cur->list_node.next;
 
 	state.pattern_cur =
 		container_of(next, typeof(*state.pattern_cur), list_node);
@@ -360,7 +361,7 @@ static void memory_test_run_step(void)
 	DEBUG("%15s: [%#016llx, %#016llx): %lld ms (%lld bytes/us) ... "
 	       "(%d%%)\n",
 	       state.pattern_cur->name, start, end, delta_us / 1000,
-	       size / delta_us, state.percent);
+	       delta_us ? size / delta_us : 0, state.percent);
 
 	if (state.single_operation_data->result != TEST_SUCCESS) {
 		OUTPUT("\n"
