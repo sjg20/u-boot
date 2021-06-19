@@ -4,6 +4,8 @@
  */
 
 #include <common.h>
+#include <blk.h>
+#include <dm.h>
 #include <cros/health_info.h>
 #include <cros/storage_info.h>
 #include <cros/vboot.h>
@@ -380,9 +382,7 @@ char *stringify_health_info(char *buf, const char *end, const HealthInfo *info)
 
 char *dump_all_health_info(char *buf, const char *end)
 {
-#if 0 //TODO
-	struct list_head *devs;
-	int n = get_all_bdevs(BLOCKDEV_FIXED, &devs);
+	int n = blk_count_devices(BLKF_FIXED);
 	if (!n) {
 		buf += snprintf(buf, end - buf, "No storage device found\n\n");
 		return buf;
@@ -392,10 +392,11 @@ char *dump_all_health_info(char *buf, const char *end)
 			n > 1 ? "s" : "");
 
 	// Fill them from the BlockDev structures.
-	BlockDev *bdev;
+	struct udevice *dev;
 	int idx = 1;
-	list_for_each_entry(bdev, devs, list_node) {
-		if (bdev->ops.get_health_info) {
+	blk_foreach_probe(BLKF_FIXED, dev) {
+		if (0 /* TODO bdev->ops.get_health_info */) {
+/* TODO
 			HealthInfo info = {0};
 
 			int res = bdev->ops.get_health_info(&bdev->ops, &info);
@@ -417,14 +418,14 @@ char *dump_all_health_info(char *buf, const char *end)
 				buf += snprintf(buf, end - buf, "\n");
 
 			idx += 1;
+*/
 		} else {
 			buf += snprintf(buf, end - buf,
 					"(%d/%d) Block device '%s' does not "
 					"provide health info.\n",
-					idx, n, bdev->name);
+					idx, n, dev->name);
 		}
 	}
-#endif
 	*buf = '\0';
 
 	return buf;

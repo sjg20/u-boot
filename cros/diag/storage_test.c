@@ -11,32 +11,32 @@
 #include <cros/vboot.h>
 #include <linux/log2.h>
 
-/*
-#include <libpayload.h>
-
-#include "diag/storage_test.h"
-*/
-
 #define HALF_BYTE_LOW(x) ((x) & 0xf)
 #define HALF_BYTE_HIGH(x) ((x) >> 4)
 
-typedef struct blk_desc BlockDev;
+typedef struct udevice BlockDev;
 
 static BlockDev *get_first_fixed_block_device(void)
 {
-// 	struct list_head *devs;
-	int n = 0; //TODO get_all_bdevs(BLOCKDEV_FIXED, &devs);
-	if (!n) {
-		printf("%s: No storage device found.\n", __func__);
-		return NULL;
-	}
-	if (n > 1) {
+	struct udevice *dev;
+	struct uclass *uc;
+	int count;
+	int ret;
+
+	count = 0;
+	uclass_id_foreach_dev(UCLASS_BLK, dev, uc)
+		count++;
+	if (count > 1) {
 		printf("%s: More than one device found.\n", __func__);
 		return NULL;
 	}
-// 	BlockDev *bdev;
-// 	list_for_each_entry(bdev, devs, list_node) { return bdev; }
-	return NULL;
+	ret = uclass_first_device_err(UCLASS_BLK, &dev);
+	if (ret) {
+		printf("%s: No storage device found.\n", __func__);
+		return NULL;
+	}
+
+	return dev;
 }
 
 static inline const char *type_str(uint8_t type)
@@ -226,7 +226,7 @@ vb2_error_t diag_dump_storage_test_log(char *buf, const char *end)
 	}
 #endif
 
-	buf += snprintf(buf, end - buf, "Block device '%s':\n", dev->bdev->name);
+	buf += snprintf(buf, end - buf, "Block device '%s':\n", dev->name);
 
 	buf = stringify_test_status(buf, end, &log);
 
@@ -238,16 +238,16 @@ vb2_error_t diag_dump_storage_test_log(char *buf, const char *end)
 
 vb2_error_t diag_storage_test_control(enum BlockDevTestOpsType ops)
 {
-#if 0 // TODO
 	BlockDev *dev = get_first_fixed_block_device();
-	if (!dev || !(dev->ops.test_control)) {
+	if (!dev /*|| !(dev->ops.test_control)*/) {
 		printf("%s: No supported.\n", __func__);
 		return VB2_ERROR_EX_UNIMPLEMENTED;
 	}
+	/* TODO
 	if (dev->ops.test_control(&dev->ops, ops))
 		return VB2_ERROR_EX;
+	*/
 	get_test_remain_time_seconds(0, 1);
-#endif
 
 	return VB2_SUCCESS;
 }

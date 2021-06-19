@@ -9,62 +9,12 @@
 #include <cros_ec.h>
 #include <dm.h>
 #include <log.h>
-#include <mapmem.h>
 #include <tpm_api.h>
-#include <video.h>
-#include <video_console.h>
-#include <cros/cros_ofnode.h>
-#include <cros/cros_common.h>
 #include <cros/memory.h>
-#include <cros/screens.h>
 #include <cros/health_info.h>
 #include <cros/storage_test.h>
-#include <cros/memory.h>
 #include <cros/ui.h>
 #include <cros/vboot.h>
-
-DECLARE_GLOBAL_DATA_PTR;
-
-static void out_str(struct udevice *console, const char *msg)
-{
-	while (*msg)
-		vidconsole_put_char(console, *msg++);
-}
-
-/**
- * show_cdata_string() - Display a prompt followed a checked string
- *
- * This is used to show string information from crossystem_data. if this is
- * not set up correctly then we need to make sure we don't print garbage.
- *
- * @prompt:	Prompt string to show
- * @str:	String to print. If the length if > 200 then we assume it is
- *		corrupted
- */
-static void show_cdata_string(struct udevice *console, const char *prompt,
-			      const char *str)
-{
-	out_str(console, prompt);
-	if (strlen(str) > 200)
-		str = "corrupted";
-	out_str(console, str);
-	out_str(console, "\n");
-}
-
-vb2_error_t VbExDisplayDebugInfo(const char *info_str)
-{
-	struct vboot_info *vboot = vboot_get();
-	struct udevice *console = vboot->console;
-
-	vidconsole_position_cursor(console, 0, 0);
-	out_str(console, info_str);
-
-	show_cdata_string(console, "read-only firmware id: ",
-			  vboot->readonly_firmware_id);
-	show_cdata_string(console, "active firmware id: ", vboot->firmware_id);
-
-	return VB2_SUCCESS;
-}
 
 static struct ui_log_info log;
 

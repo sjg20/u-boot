@@ -683,4 +683,93 @@ const char *blk_get_if_type_name(enum if_type if_type);
 int blk_common_cmd(int argc, char *const argv[], enum if_type if_type,
 		   int *cur_devnump);
 
+enum blk_flag_t {
+	BLKF_FIXED	= 1 << 0,
+	BLKF_REMOVABLE	= 1 << 1,
+	BLKF_BOTH	= 3 << 0,
+};
+
+/**
+ * blk_first_device_err() - Get the first block device
+ *
+ * The device returned is probed if necessary, and ready for use
+ *
+ * @removable: Indicates type of device to return
+ * @devp: Returns pointer to the first device in that uclass, or NULL if none
+ * @return 0 if found, -ENODEV if not found, other -ve on error
+ */
+int blk_first_device_err(enum blk_flag_t flags, struct udevice **devp);
+
+/**
+ * blk_next_device_err() - Get the next block device
+ *
+ * The device returned is probed if necessary, and ready for use
+ *
+ * @removable: Indicates type of device to return
+ * @devp: On entry, pointer to device to lookup. On exit, returns pointer
+ * to the next device in the uclass if no error occurred, or -ENODEV if
+ * there is no next device.
+ * @return 0 if found, -ENODEV if not found, other -ve on error
+ */
+int blk_next_device_err(enum blk_flag_t flags, struct udevice **devp);
+
+/**
+ * blk_find_first() - Return the first matching block device
+ * @flags: Indicates type of device to return
+ * @devp:	Returns pointer to device, or NULL on error
+ *
+ * The device is not prepared for use - this is an internal function.
+ * The function uclass_get_device_tail() can be used to probe the device.
+ *
+ * @return 0 if OK (found or not found), -ve on error
+ */
+int blk_find_first(enum blk_flag_t flags, struct udevice **devp);
+
+/**
+ * blk_find_next() - Return the next matching block device
+ * @flags: Indicates type of device to return
+ * @devp: On entry, pointer to device to lookup. On exit, returns pointer
+ * to the next device in the same uclass, or NULL if none
+ *
+ * The device is not prepared for use - this is an internal function.
+ * The function uclass_get_device_tail() can be used to probe the device.
+ *
+ * @return 0 if OK (found or not found), -ve on error
+ */
+int blk_find_next(enum blk_flag_t flags, struct udevice **devp);
+
+/**
+ * blk_foreach() - iterate through block devices
+ *
+ * This creates a for() loop which works through the available block devices in
+ * order from start to end.
+ *
+ * If for some reason the uclass cannot be found, this does nothing.
+ *
+ * @flags: Indicates type of device to return
+ * @pos: struct udevice * to hold the current device. Set to NULL when there
+ * are no more devices.
+ */
+#define blk_foreach(flags, pos) \
+	for (int _ret = blk_find_first(flags, &pos); !_ret && dev; \
+	     _ret = blk_find_next(flags, &pos))
+
+/**
+ * blk_foreach_probe() - Helper function to iteration through block devices
+ *
+ * This creates a for() loop which works through the available devices in
+ * a uclass in order from start to end. Devices are probed if necessary,
+ * and ready for use.
+ *
+ * @flags: Indicates type of device to return
+ * @dev: struct udevice * to hold the current device. Set to NULL when there
+ * are no more devices.
+ */
+#define blk_foreach_probe(flags, pos)	\
+	for (int _ret = blk_first_device_err(flags, &pos); \
+	     !_ret && pos; \
+	     _ret = blk_next_device_err(flags, &pos))
+
+int blk_count_devices(enum blk_flag_t flag);
+
 #endif

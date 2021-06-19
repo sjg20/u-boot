@@ -8,6 +8,8 @@
 #include <cros/storage_test.h>
 #include <cros/vboot.h>
 
+#define DEFAULT_DIAGNOSTIC_OUTPUT_SIZE (64 * KiB)
+
 vb2_error_t vb2ex_diag_storage_test_control(enum vb2_diag_storage_test ops)
 {
 	enum BlockDevTestOpsType blockdev_ops;
