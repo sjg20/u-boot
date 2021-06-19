@@ -10,7 +10,6 @@
 #include <dm.h>
 #include <log.h>
 #include <sound.h>
-#include <sysreset.h>
 #include <cros/cros_common.h>
 #include <cros/vboot.h>
 #include <linux/delay.h>
@@ -19,23 +18,6 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #define TICKS_PER_MSEC		(CONFIG_SYS_HZ / 1000)
 #define MAX_MSEC_PER_LOOP	((u32)((UINT32_MAX / TICKS_PER_MSEC) / 2))
-
-static void system_abort(void)
-{
-	/* Wait for 3 seconds to let users see error messages and reboot */
-	vb2ex_msleep(3000);
-	sysreset_walk_halt(SYSRESET_POWER);
-}
-
-void VbExError(const char *format, ...)
-{
-	va_list ap;
-
-	va_start(ap, format);
-	vprintf(format, ap);
-	va_end(ap);
-	system_abort();
-}
 
 void vb2ex_msleep(u32 msec)
 {

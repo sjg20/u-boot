@@ -14,7 +14,6 @@
 
 vb2_error_t vb2ex_tpm_init(void)
 {
-	/* tpm_lite lib doesn't call VbExTpmOpen after vb2ex_tpm_init */
 	return vb2ex_tpm_open();
 }
 

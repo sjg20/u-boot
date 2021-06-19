@@ -40,17 +40,6 @@ u32 VbExIsShutdownRequested(void)
 	return 0;
 }
 
-u8 VbExOverrideGptEntryPriority(const GptEntry *e)
-{
-	return 0;
-}
-
-/* This should never get called */
-u32 VbExGetSwitches(u32 request_mask)
-{
-	return 0;
-}
-
 vb2_error_t vb2ex_commit_data(struct vb2_context *ctx)
 {
 	struct vboot_info *vboot = ctx_to_vboot(ctx);
