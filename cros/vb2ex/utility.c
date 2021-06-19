@@ -86,3 +86,25 @@ void vb2ex_abort(void)
 {
         panic("vboot has aborted execution; exit\n");
 }
+
+void *xmalloc(size_t size)
+{
+	void *ptr;
+
+	ptr = malloc(size);
+	if (!ptr)
+		panic("Cannot alloc");
+
+	return ptr;
+}
+
+void *xzalloc(size_t size)
+{
+	void *ptr;
+
+	ptr = calloc(1, size);
+	if (!ptr)
+		panic("Cannot alloc");
+
+	return ptr;
+}

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Implementation of TPM callbacks
+ * Stubs for tpm access from vboot
  *
  * Copyright 2018 Google LLC
  */
@@ -8,9 +8,22 @@
 #define LOG_CATEGORY	UCLASS_TPM
 
 #include <common.h>
-#include <config.h>
-#include <tpm-v1.h>
+#include <vb2_api.h>
+#include <tpm_api.h>
 #include <cros/vboot.h>
+
+vb2_error_t vb2ex_tpm_clear_owner(struct vb2_context *ctx)
+{
+	struct vboot_info *vboot = vboot_get();
+	u32 rv;
+
+	log_info("Clearing TPM owner\n");
+	rv = tpm_clear_and_reenable(vboot->tpm);
+	if (rv)
+		return VB2_ERROR_EX_TPM_CLEAR_OWNER;
+
+	return VB2_SUCCESS;
+}
 
 vb2_error_t vb2ex_tpm_init(void)
 {

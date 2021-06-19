@@ -8,23 +8,22 @@
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
+#include <cros_ec.h>
 #include <dm.h>
 #include <errno.h>
 #include <log.h>
 #include <mapmem.h>
 #include <asm/io.h>
-#include <cros_ec.h>
 #include <cros/vboot.h>
 
 int vboot_alloc(struct vboot_info **vbootp)
 {
-	gd->vboot = malloc(sizeof(struct vboot_info));
+	gd->vboot = calloc(1, sizeof(struct vboot_info));
 	if (!gd->vboot) {
 		log_err("Cannot allocate vboot %x\n",
                         (uint)sizeof(struct vboot_info));
 		return -ENOMEM;
 	}
-	memset(gd->vboot, '\0', sizeof(struct vboot_info));
 	*vbootp = gd->vboot;
 
 	return 0;
@@ -131,26 +130,4 @@ int vboot_platform_is_resuming(void)
 	/* TODO(sjg@chromium.org): Implement this */
 
 	return 0;
-}
-
-void *xmalloc(size_t size)
-{
-	void *ptr;
-
-	ptr = malloc(size);
-	if (!ptr)
-		panic("Cannot alloc");
-
-	return ptr;
-}
-
-void *xzalloc(size_t size)
-{
-	void *ptr;
-
-	ptr = calloc(1, size);
-	if (!ptr)
-		panic("Cannot alloc");
-
-	return ptr;
 }

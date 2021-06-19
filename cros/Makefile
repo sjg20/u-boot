@@ -8,7 +8,6 @@ obj-y += cmd/
 obj-y += diag/
 obj-y += ui/
 endif
-obj-y += crypto/
 obj-$(CONFIG_CROS_FLAG) += flag/
 obj-y += fwstore/
 obj-y += lib/

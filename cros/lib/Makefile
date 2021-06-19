@@ -17,7 +17,6 @@ endif
 obj-y += memory.o
 obj-y += memwipe.o
 obj-y += ranges.o
-obj-y += resource.o
 obj-y += secdata_tpm.o
 obj-y += tpm_common.o
 obj-y += vboot_internal.o

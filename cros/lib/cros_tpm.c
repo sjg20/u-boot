@@ -434,16 +434,3 @@ int cros_tpm_setup(struct vboot_info *vboot)
 
 	return ret;
 }
-
-vb2_error_t vb2ex_tpm_clear_owner(struct vb2_context *ctx)
-{
-	struct vboot_info *vboot = vboot_get();
-	u32 rv;
-
-	log_info("Clearing TPM owner\n");
-	rv = tpm_clear_and_reenable(vboot->tpm);
-	if (rv)
-		return VB2_ERROR_EX_TPM_CLEAR_OWNER;
-
-	return VB2_SUCCESS;
-}
