@@ -411,12 +411,13 @@ int vboot_secdataf_get(const void *secdata, int size, enum secdata_t field);
  */
 int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp);
 
-// TODO
+/* Some compatibility things for code pulled from coreboot, etc. */
 #include <linux/sizes.h>
 char *cbmem_console_snapshot(void);
-#define KiB	SZ_1K
-#define MiB	SZ_1M
-#define GiB	SZ_1G
+
+#define KiB		SZ_1K
+#define MiB		SZ_1M
+#define GiB		SZ_1G
 #define USECS_PER_SEC	1000000
 
 void *xzalloc(size_t size);

@@ -26,8 +26,6 @@ struct vboot_info *vboot;
  * The values must match host/lib/include/crossystem_arch.h BINF3_*.
  * Pass FIRMWARE_TYPE_AUTO_DETECT to crossystem_setup to detect and select
  * from one of the types: (recovery, normal, developer).
- * TODO(hungte): the FIRMWARE_TYPE_NETBOOT was used only by U-Boot and we
- * should change Depthcharge netboot to use it in future.
  */
 enum cros_fw_type_t {
 	FIRMWARE_TYPE_AUTO_DETECT = -1,

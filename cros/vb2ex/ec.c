@@ -248,9 +248,8 @@ vb2_error_t vb2ex_ec_update_image(enum vb2_firmware_selection select)
 		switch (ret) {
 		case -EINVAL:
 			return VB2_ERROR_INVALID_PARAMETER;
-		// TODO
-// 		case -EPERM:
-// 			return VBERROR_EC_REBOOT_TO_RO_REQUIRED;
+		case -EPERM:
+			return VB2_REQUEST_REBOOT_EC_TO_RO;
 		case -EIO:
 		default:
 			return VB2_ERROR_UNKNOWN;

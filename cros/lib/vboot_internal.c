@@ -19,14 +19,8 @@ bool vboot_wants_oprom(struct vboot_info *vboot)
 #ifndef CONFIG_SPL_BUILD
 u32 vboot_get_gbb_flags(struct vboot_info *vboot)
 {
-	// TODO
-#if 0
-	VbCommonParams *cparams = &vboot->cparams;
-	struct vb2_gbb_header *hdr = cparams->gbb_data;
+	struct vb2_context *ctx = vboot_get_ctx(vboot);
 
-	return hdr->flags;
-#endif
-
-	return 0;
+	return vb2api_gbb_get_flags(ctx);
 }
 #endif
