@@ -187,7 +187,7 @@ vb2_error_t vb2ex_auxfw_update(void)
 
 vb2_error_t vb2ex_auxfw_finalize(struct vb2_context *ctx)
 {
-	//TODO
+	/* TODO(sjg@chromium.org): Implement this */
 	return 0;
 }
 

@@ -211,7 +211,10 @@ static int fwstore_mmc_probe(struct udevice *dev)
 		return ret;
 	}
 
-	/* TODO(sjg@chromium.org): Lookup partition size in binman table */
+	/*
+	 * We could look up the partition size in the binman table but for now,
+	 * use a fixed size of 2MB.
+	 */
 	priv->ro_section_size = 2 << 20;
 	priv->mmc = mmc_get_mmc_dev(priv->dev);
 	priv->blk = blk_get_by_device(priv->dev);

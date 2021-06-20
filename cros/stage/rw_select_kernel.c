@@ -41,7 +41,7 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 			log_warning("Failed to configure power button (err=%d)\n",
 				    ret);
 
-		/* TODO: Re-enable before boot */
+		/* TODO(sjg@chromium.org): Re-enable before boot */
 	}
 
 	if (CONFIG_IS_ENABLED(CROS_EC))
@@ -60,7 +60,10 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 
 	if (res == VB2_REQUEST_REBOOT_EC_TO_RO) {
 		printf("EC Reboot requested. Doing cold reboot.\n");
-		/* TODO(sjg@chromium.org): Create a sysreset driver for this */
+		/*
+		 * We could create a sysreset driver for cros_ec and have it
+		 * do the reset. But for now this seems sufficient.
+		 */
 		if (CONFIG_IS_ENABLED(CROS_EC))
 			cros_ec_reboot(vboot->cros_ec, EC_REBOOT_COLD,
 				       EC_REBOOT_FLAG_ON_AP_SHUTDOWN);

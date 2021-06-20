@@ -10,6 +10,6 @@
 
 char *cbmem_console_snapshot(void)
 {
-	//TODO
+	/* TODO(sjg@chromium.org): Implement this */
 	return "todo";
 }

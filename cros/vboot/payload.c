@@ -241,7 +241,7 @@ int payload_run(const char *payload_name, int verify)
 	if (ret)
 		log_warning("Failed to set up crossystem data\n");
 
-	//TODO: Use bootm stuff for this
+	/* TODO(sjg@chromium.org): Use bootm stuff for this */
 	/*
 	 * Call remove function of all devices with a removal flag set.
 	 * This may be useful for last-stage operations, like cancelling

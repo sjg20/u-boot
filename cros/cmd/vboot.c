@@ -379,7 +379,6 @@ U_BOOT_CMD_WITH_SUBCMDS(flags, "Cros vboot flags", flags_help_text,
 	U_BOOT_CMD_MKENT(list, 4, 0, do_flags_list, "", ""),
 );
 
-
 static int do_vboot_go_auto(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])
 {

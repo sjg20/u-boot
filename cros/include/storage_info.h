@@ -120,13 +120,8 @@ typedef struct HealthInfo {
 	StorageInfoType type;
 
 	union {
-		//TODO
-// #ifdef CONFIG_DRIVER_STORAGE_NVME
 		NvmeSmartLogData nvme_data;
-// #endif
-// #ifdef CONFIG_DRIVER_STORAGE_MMC
 		MmcHealthData mmc_data;
-// #endif
 	} data;
 } HealthInfo;
 

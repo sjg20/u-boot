@@ -209,14 +209,14 @@ vb2_error_t diag_dump_storage_test_log(char *buf, const char *end)
 {
 	BlockDev *dev = get_first_fixed_block_device();
 
-	if (!dev /* TODO || !(dev->ops.get_test_log) */) {
+	if (!dev /* || !(dev->ops.get_test_log) */) {
 		printf("%s: No supported.\n", __func__);
 		return VB2_ERROR_EX_UNIMPLEMENTED;
 	}
 
 	StorageTestLog log = {0};
 
-#if 0
+#if 0 /* TODO(sjg@chromium.org): Implement this */
 	int res = dev->ops.get_test_log(&dev->ops, &log);
 	if (res) {
 		buf += snprintf(buf, end - buf,
@@ -243,10 +243,11 @@ vb2_error_t diag_storage_test_control(enum BlockDevTestOpsType ops)
 		printf("%s: No supported.\n", __func__);
 		return VB2_ERROR_EX_UNIMPLEMENTED;
 	}
-	/* TODO
-	if (dev->ops.test_control(&dev->ops, ops))
-		return VB2_ERROR_EX;
-	*/
+	/*
+	 * TODO(sjg@chromium.org): Implement this
+	 * if (dev->ops.test_control(&dev->ops, ops))
+	 *	return VB2_ERROR_EX;
+	 */
 	get_test_remain_time_seconds(0, 1);
 
 	return VB2_SUCCESS;

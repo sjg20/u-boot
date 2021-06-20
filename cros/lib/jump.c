@@ -59,7 +59,12 @@ int vboot_jump(struct vboot_info *vboot, struct fmap_entry *entry)
 #if USE_RAM
 	log_info("Reading firmware offset %x (addr %x, size %x)\n",
 		 entry->offset, addr, entry->length);
-	/* TODO(sjg@chromium.org): Find out the real end of the buffer */
+	/*
+	 * We don't really know where the buffer ends, since we don't have a
+	 * size for the SPL load area. For now, use a length of triple the
+	 * compressed size, which should be large enough. We could add
+	 * something like spl_get_image_text_size() to obtain the true size.
+	 */
 	ret = fwstore_read_decomp(vboot->fwstore, entry, buf,
 				  entry->length * 3);
 	if (ret)

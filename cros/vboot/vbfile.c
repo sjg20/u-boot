@@ -62,6 +62,6 @@ int vbfile_load(struct vboot_info *vboot, const char *name, struct abuf *buf)
 int vbfile_section_load(struct vboot_info *vboot, const char *section,
 			const char *name, struct abuf *buf)
 {
-	//TODO
+	/* TODO(sjg@chromium.org): Implement this, needed for altfw support */
 	return -ENOSYS;
 }

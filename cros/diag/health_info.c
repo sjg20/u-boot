@@ -395,8 +395,9 @@ char *dump_all_health_info(char *buf, const char *end)
 	struct udevice *dev;
 	int idx = 1;
 	blk_foreach_probe(BLKF_FIXED, dev) {
-		if (0 /* TODO bdev->ops.get_health_info */) {
-/* TODO
+		if (0 /* bdev->ops.get_health_info */) {
+/* TODO(sjg@chromium.org): Implement this */
+#if 0
 			HealthInfo info = {0};
 
 			int res = bdev->ops.get_health_info(&bdev->ops, &info);
@@ -418,7 +419,7 @@ char *dump_all_health_info(char *buf, const char *end)
 				buf += snprintf(buf, end - buf, "\n");
 
 			idx += 1;
-*/
+#endif
 		} else {
 			buf += snprintf(buf, end - buf,
 					"(%d/%d) Block device '%s' does not "

@@ -206,14 +206,6 @@ static int hash_body(struct vboot_info *vboot, struct udevice *fw_main)
 		return log_msg_ret("restrict", ret);
 	}
 
-// 	struct vb2_shared_data *sd = vb2_get_sd(ctx);
-// 	struct vb2_digest_context *dc = NULL;
-	//TODO
-		/*(struct vb2_digest_context *)
-		(ctx->workbuf + sd->workbuf_hash_offset);*/
-
-// 	log_debug("extend, ctx=%p, sd=%p, dc=%p, sd->workbuf_hash_size=%x\n",
-// 		  ctx, sd, dc, sd->workbuf_hash_size);
 	/* Extend over the body */
 	for (blk = 0; ; blk++) {
 		int nbytes;

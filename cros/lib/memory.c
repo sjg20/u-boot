@@ -122,7 +122,7 @@ static int get_unused_memory(Ranges *ranges)
 
 static int get_mmu_used_memory(Ranges *ranges)
 {
-	// TODO
+	/* TODO(sjg@chromium.org): Implement this */
 #if IS_ENABLED(CONFIG_LP_ARCH_ARM64)
 	// In ARM64, we may allocate DMA and framebuffer in libpayload
 	// during MMU initialization.
@@ -191,5 +191,5 @@ int memory_wipe_unused(void)
 
 void arch_phys_map(uint64_t start, uint64_t size, PhysMapFunc func, void *data)
 {
-	//TODO
+	/* TODO(sjg@chromium.org): Implement this */
 }

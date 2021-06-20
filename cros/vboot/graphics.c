@@ -2,8 +2,8 @@
 /*
  * Taken from coreboot file of the same name
  *
- * TODO(sjg@chromium.org): Use U-Boot BMP support (may need scaling support)
- * and drop this file.
+ * TODO(sjg@chromium.org): Use U-Boot BMP support instead of rewriting it here
+ * (may need scaling support)
  *
  * Copyright 2018 Google LLC
  */
