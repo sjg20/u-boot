@@ -25,10 +25,18 @@ $ cp firmware-imx-8.9/firmware/ddr/synopsys/lpddr4*.bin .
 Build U-Boot
 ============
 $ make imx8mm_venice_defconfig
-$ make flash.bin CROSS_COMPILE=aarch64-linux-gnu- ATF_LOAD_ADDR=0x920000
+$ make CROSS_COMPILE=aarch64-linux-gnu- ATF_LOAD_ADDR=0x920000
 
 Update eMMC
 ===========
 => tftpboot $loadaddr flash.bin
 => setexpr blkcnt $filesize + 0x1ff && setexpr blkcnt $blkcnt / 0x200
 => mmc dev 2 && mmc write $loadaddr 0x42 $blkcnt
+=> tftpboot $loadaddr u-boot.itb
+=> setexpr blkcnt $filesize + 0x1ff && setexpr blkcnt $blkcnt / 0x200
+=> mmc dev 2 && mmc write $loadaddr 0x300 $blkcnt
+
+Update uSD:
+===========
+sudo dd if=flash.bin of=/dev/sd[x] bs=1024 seek=33 conv=notrunc
+sudo dd if=u-boot.itb of=/dev/sd[x] bs=1024 seek=384 conv=sync
