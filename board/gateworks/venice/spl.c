@@ -306,15 +306,17 @@ void board_init_f(ulong dummy)
 /* determine prioritized order of boot devices to load U-Boot from */
 void board_boot_order(u32 *spl_boot_list)
 {
+	int i = 0;
+
 	/*
 	 * If the SPL was loaded via serial loader, we try to get
 	 * U-Boot proper via USB SDP.
 	 */
 	if (spl_boot_device() == BOOT_DEVICE_BOARD)
-		spl_boot_list[0] = BOOT_DEVICE_BOARD;
+		spl_boot_list[i++] = BOOT_DEVICE_BOARD;
 
 	/* we have only eMMC in default venice dt */
-	spl_boot_list[0] = BOOT_DEVICE_MMC1;
+	spl_boot_list[i++] = BOOT_DEVICE_MMC1;
 }
 
 /* return boot device based on where the SPL was loaded from */
