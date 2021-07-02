@@ -277,3 +277,4 @@ int enable_i2c_clk(unsigned char enable, unsigned int i2c_num);
 int set_clk_enet(enum enet_freq type);
 int set_clk_eqos(enum enet_freq type);
 void hab_caam_clock_enable(unsigned char enable);
+void enable_usboh3_clk(unsigned char enable);
