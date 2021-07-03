@@ -11,6 +11,7 @@
 #include <asm/unaligned.h>
 #include <linux/bitops.h>
 #include <u-boot/crc.h>
+#include <u-boot/sha256.h>
 #include "sandbox_common.h"
 
 /* Hierarchies */
@@ -407,15 +408,19 @@ static int sandbox_tpm2_extend(struct udevice *dev, int pcr_index,
 			       const u8 *extension)
 {
 	struct sandbox_tpm2 *tpm = dev_get_priv(dev);
-	int i;
 
-	/* Only simulate the first extensions from all '0' with only '0' */
-	for (i = 0; i < TPM2_DIGEST_LEN; i++)
-		if (tpm->pcr[pcr_index][i] || extension[i])
-			return TPM2_RC_FAILURE;
+	if (!pcr_index) {
+		memcpy(tpm->pcr[pcr_index], sandbox_extended_once_pcr,
+		       TPM2_DIGEST_LEN);
+	} else {
+		sha256_context ctx;
 
-	memcpy(tpm->pcr[pcr_index], sandbox_extended_once_pcr,
-	       TPM2_DIGEST_LEN);
+		sha256_starts(&ctx);
+		sha256_update(&ctx, tpm->pcr[pcr_index], TPM2_DIGEST_LEN);
+		sha256_update(&ctx, extension, TPM2_DIGEST_LEN);
+		sha256_finish(&ctx, tpm->pcr[pcr_index]);
+	}
+
 	tpm->pcr_extensions[pcr_index]++;
 
 	return 0;
