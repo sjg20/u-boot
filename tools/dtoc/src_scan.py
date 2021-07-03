@@ -468,7 +468,7 @@ class Scanner:
 
         # Matches the references to the udevice_id list
         re_of_match = re.compile(
-            r'\.of_match\s*=\s*(of_match_ptr\()?([a-z0-9_]+)(\))?,')
+            r'\.of_match\s*=\s*(of_match_ptr\()?([a-z0-9_]+)([^,]*),')
 
         re_phase = re.compile('^\s*DM_PHASE\((.*)\).*$')
         re_hdr = re.compile('^\s*DM_HEADER\((.*)\).*$')
@@ -514,6 +514,11 @@ class Scanner:
                     driver.uclass_id = m_id.group(1)
                 elif m_of_match:
                     compat = m_of_match.group(2)
+                    suffix = m_of_match.group(3)
+                    if suffix and suffix != ')':
+                        self._warnings[driver.name].add(
+                            "%s: Warning: unexpected suffix '%s' on .of_match line for compat '%s'" %
+                            (fname, suffix, compat))
                 elif m_phase:
                     driver.phase = m_phase.group(1)
                 elif m_hdr:
