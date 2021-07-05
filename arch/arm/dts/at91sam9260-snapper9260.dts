@@ -1,0 +1,18 @@
+/*
+ * Copyright 2021 Designa Electronics Ltd
+ *
+ * Based on:
+ * at91sam9g20ek.dts - Device Tree file for Atmel at91sam9g20ek board
+ *
+ * Copyright (C) 2012 Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+ *
+ * Licensed under GPLv2.
+ */
+
+/dts-v1/;
+#include "at91sam9260.dtsi"
+
+/ {
+	model = "Bluewater Systems Snapper 9260";
+	compatible = "atmel,at91sam9260", "atmel,at91sam9";
+};
