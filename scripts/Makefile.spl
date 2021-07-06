@@ -106,8 +106,7 @@ libs-$(CONFIG_SPL_FRAMEWORK) += common/spl/
 endif
 libs-y += common/init/
 
-# Special handling for a few options which support SPL/TPL/VPL
-libs-$(CONFIG_$(SPL_TPL_)LIBCOMMON_SUPPORT) += common/ cmd/ env/
+libs-$(CONFIG_$(SPL_TPL_)LIBCOMMON_SUPPORT) += boot/ common/ cmd/ env/
 libs-$(CONFIG_$(SPL_TPL_)LIBGENERIC_SUPPORT) += lib/
 
 # Special handling for a few options which support SPL/TPL
