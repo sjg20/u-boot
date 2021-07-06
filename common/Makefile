@@ -12,20 +12,11 @@ obj-$(CONFIG_HASH) += hash.o
 obj-$(CONFIG_HUSH_PARSER) += cli_hush.o
 obj-$(CONFIG_AUTOBOOT) += autoboot.o
 
-# This option is not just y/n - it can have a numeric value
-ifdef CONFIG_BOOT_RETRY_TIME
-obj-y += bootretry.o
-endif
-
 # # boards
 obj-y += board_f.o
 obj-y += board_r.o
 obj-$(CONFIG_DISPLAY_BOARDINFO) += board_info.o
 obj-$(CONFIG_DISPLAY_BOARDINFO_LATE) += board_info.o
-
-obj-$(CONFIG_CMD_BOOTM) += bootm.o bootm_os.o
-obj-$(CONFIG_CMD_BOOTZ) += bootm.o bootm_os.o
-obj-$(CONFIG_CMD_BOOTI) += bootm.o bootm_os.o
 
 obj-$(CONFIG_CMD_BEDBUG) += bedbug.o
 obj-$(CONFIG_$(SPL_TPL_)OF_LIBFDT) += fdt_support.o
@@ -68,7 +59,6 @@ obj-$(CONFIG_DFU_OVER_USB) += dfu.o
 endif
 obj-$(CONFIG_SPL_HASH_SUPPORT) += hash.o
 obj-$(CONFIG_TPL_HASH_SUPPORT) += hash.o
-obj-$(CONFIG_SPL_LOAD_FIT) += common_fit.o
 obj-$(CONFIG_SPL_NET_SUPPORT) += miiphyutil.o
 obj-$(CONFIG_$(SPL_TPL_)OF_LIBFDT) += fdt_support.o
 
@@ -104,21 +94,9 @@ obj-y += malloc_simple.o
 endif
 endif
 
-obj-y += image.o
-obj-$(CONFIG_ANDROID_AB) += android_ab.o
-obj-$(CONFIG_ANDROID_BOOT_IMAGE) += image-android.o image-android-dt.o
-obj-$(CONFIG_$(SPL_TPL_)OF_LIBFDT) += image-fdt.o
-obj-$(CONFIG_$(SPL_TPL_)FIT_SIGNATURE) += fdt_region.o
-obj-$(CONFIG_$(SPL_TPL_)FIT) += image-fit.o
-obj-$(CONFIG_$(SPL_)MULTI_DTB_FIT) += boot_fit.o common_fit.o
-obj-$(CONFIG_$(SPL_TPL_)IMAGE_SIGN_INFO) += image-sig.o
-obj-$(CONFIG_$(SPL_TPL_)FIT_SIGNATURE) += image-fit-sig.o
-obj-$(CONFIG_$(SPL_TPL_)FIT_CIPHER) += image-cipher.o
 obj-$(CONFIG_IO_TRACE) += iotrace.o
 obj-y += memsize.o
 obj-y += stdio.o
-
-obj-$(CONFIG_CMD_ADTIMG) += image-android-dt.o
 
 ifdef CONFIG_CMD_EEPROM_LAYOUT
 obj-y += eeprom/eeprom_field.o eeprom/eeprom_layout.o
