@@ -74,9 +74,7 @@ void spl_board_init(void)
 {
 	struct sandbox_state *state = state_get_current();
 
-	preloader_console_init();
-
-	if (state->run_unittests) {
+	if (CONFIG_IS_ENABLED(UNIT_TEST) && state->run_unittests) {
 		struct unit_test *tests = UNIT_TEST_ALL_START();
 		const int count = UNIT_TEST_ALL_COUNT();
 		int ret;

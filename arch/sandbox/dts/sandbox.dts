@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ *  Main sandbox devicetree
+ *
+ *  Copyright 2021 Google LLC
+ */
+
 /dts-v1/;
 
 #include <config.h>
@@ -14,6 +21,10 @@
 		rtc0 = &rtc_0;
 		axi0 = &axi;
 		spi0 = &spi;
+	};
+
+	chosen {
+		stdout-path = &uart0;
 	};
 
 	memory {
@@ -69,7 +80,7 @@
 		clock-frequency = <400000>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_i2c0>;
-		u-boot,dm-pre-reloc;
+		u-boot,dm-spl;
 	};
 
 	pcic: pci@0 {
@@ -95,3 +106,7 @@
 #include "sandbox.dtsi"
 #include "cros-ec-keyboard.dtsi"
 #include "sandbox_pmic.dtsi"
+/*
+#include "vbe.dtsi"
+*/
+

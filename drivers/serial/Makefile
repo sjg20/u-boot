@@ -5,7 +5,7 @@
 
 ifdef CONFIG_SPL_BUILD
 
-ifeq ($(CONFIG_$(SPL_TPL_)BUILD)$(CONFIG_$(SPL_TPL_)DM_SERIAL),yy)
+ifeq ($(CONFIG_$(SPL_TPL_)DM_SERIAL),y)
 obj-y += serial-uclass.o
 else
 obj-y += serial.o

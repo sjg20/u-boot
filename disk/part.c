@@ -9,6 +9,7 @@
 #include <command.h>
 #include <env.h>
 #include <errno.h>
+#include <fs.h>
 #include <ide.h>
 #include <log.h>
 #include <malloc.h>
@@ -796,4 +797,27 @@ void part_set_generic_name(const struct blk_desc *dev_desc,
 	}
 
 	sprintf(name, "%s%c%d", devtype, 'a' + dev_desc->devnum, part_num);
+}
+
+int part_guess_fstype(struct disk_partition *info)
+{
+#ifdef CONFIG_DOS_PARTITION
+	switch (info->sys_ind) {
+	case 0xc:
+		return FS_TYPE_FAT;
+	case 0x82:
+		return FS_TYPE_NONE;
+	case 0x83:
+		/* U-Boot supports ext and btrfs so this provides no info */
+		break;
+	}
+#endif
+#ifdef CONFIG_PARTITION_TYPE_GUID
+	/*
+	 * There are so many GUIDs and they don't indicate the FS type anyway.
+	 * We could perhaps exclude swap (0657fd6d-a4ab-43c4-84e5-0933c84b4f4f)
+	 */
+#endif
+
+	return FS_TYPE_ANY;
 }

@@ -33,3 +33,13 @@ S:	Maintained
 F:	board/sandbox/
 F:	include/configs/sandbox.h
 F:	configs/sandbox_flattree_defconfig
+<<<<<<< HEAD
+=======
+
+SANDBOX VBE BOARD
+M:	Simon Glass <sjg@chromium.org>
+S:	Maintained
+F:	board/sandbox/
+F:	include/configs/sandbox.h
+F:	configs/sandbox_vbe_defconfig
+>>>>>>> ef943e7ef06... wip

@@ -886,7 +886,11 @@ static int btrfs_scan_fs_devices(struct blk_desc *desc,
 
 	ret = btrfs_scan_one_device(desc, part, fs_devices, &total_devs);
 	if (ret) {
-		fprintf(stderr, "No valid Btrfs found\n");
+		/*
+		 * Avoid showing this when probing for a possible Btrfs
+		 *
+		 * fprintf(stderr, "No valid Btrfs found\n");
+		 */
 		return ret;
 	}
 	return 0;
@@ -975,7 +979,7 @@ struct btrfs_fs_info *open_ctree_fs_info(struct blk_desc *desc,
 	disk_super = fs_info->super_copy;
 	ret = btrfs_read_dev_super(desc, part, disk_super);
 	if (ret) {
-		printk("No valid btrfs found\n");
+		debug("No valid btrfs found\n");
 		goto out_devices;
 	}
 

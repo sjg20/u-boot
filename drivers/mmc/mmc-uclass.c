@@ -8,6 +8,7 @@
 #define LOG_CATEGORY UCLASS_MMC
 
 #include <common.h>
+#include <bootmethod.h>
 #include <log.h>
 #include <mmc.h>
 #include <dm.h>
@@ -315,12 +316,26 @@ int mmc_get_next_devnum(void)
 	return blk_find_max_devnum(IF_TYPE_MMC);
 }
 
+int mmc_get_blk(struct udevice *dev, struct udevice **blkp)
+{
+	struct udevice *blk;
+	int ret;
+
+	device_find_first_child_by_uclass(dev, UCLASS_BLK, &blk);
+	ret = device_probe(blk);
+	if (ret)
+		return ret;
+	*blkp = blk;
+
+	return 0;
+}
+
 struct blk_desc *mmc_get_blk_desc(struct mmc *mmc)
 {
 	struct blk_desc *desc;
 	struct udevice *dev;
 
-	device_find_first_child(mmc->dev, &dev);
+	device_find_first_child_by_uclass(mmc->dev, UCLASS_BLK, &dev);
 	if (!dev)
 		return NULL;
 	desc = dev_get_uclass_plat(dev);
@@ -403,6 +418,27 @@ int mmc_bind(struct udevice *dev, struct mmc *mmc, const struct mmc_config *cfg)
 	mmc->cfg = cfg;
 	mmc->priv = dev;
 
+	/* Create a bootmethod if supported */
+	if (CONFIG_IS_ENABLED(BOOTMETHOD)) {
+		struct udevice *bm;
+
+		ret = device_find_first_child_by_uclass(dev, UCLASS_BOOTMETHOD,
+							&bm);
+		if (ret) {
+			if (ret != -ENODEV) {
+				log_debug("Cannot access bootmethod device\n");
+				return ret;
+			}
+
+			ret = bootmethod_bind(dev, "mmc_bootmethod",
+					      "bootmethod", &bm);
+			if (ret) {
+				log_debug("Cannot create bootmethod device\n");
+				return ret;
+			}
+		}
+	}
+
 	/* the following chunk was from mmc_register() */
 
 	/* Setup dsr related values */
@@ -422,7 +458,7 @@ int mmc_unbind(struct udevice *dev)
 {
 	struct udevice *bdev;
 
-	device_find_first_child(dev, &bdev);
+	device_find_first_child_by_uclass(dev, UCLASS_BLK, &bdev);
 	if (bdev) {
 		device_remove(bdev, DM_REMOVE_NORMAL);
 		device_unbind(bdev);
@@ -502,7 +538,6 @@ U_BOOT_DRIVER(mmc_blk) = {
 #endif
 };
 #endif /* CONFIG_BLK */
-
 
 UCLASS_DRIVER(mmc) = {
 	.id		= UCLASS_MMC,

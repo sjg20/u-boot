@@ -496,6 +496,14 @@ int layout_mbr_partitions(struct disk_partition *p, int count,
 
 #endif
 
+/**
+ * part_guess_fstype() - Guess the filesystem type based on the partition info
+ *
+ * @info: Partition info to examine
+ * @return filesystem type (FS_TYPE_...) or -1 if not known
+ */
+int part_guess_fstype(struct disk_partition *info);
+
 #ifdef CONFIG_PARTITIONS
 /**
  * part_driver_get_count() - get partition driver count

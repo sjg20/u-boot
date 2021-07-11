@@ -28,6 +28,10 @@ int cmd_ut_category(const char *name, const char *prefix,
 
 static struct cmd_tbl cmd_ut_sub[] = {
 	U_BOOT_CMD_MKENT(all, CONFIG_SYS_MAXARGS, 1, do_ut_all, "", ""),
+#ifdef CONFIG_BOOTMETHOD
+	U_BOOT_CMD_MKENT(bootmethod, CONFIG_SYS_MAXARGS, 1, do_ut_bootmethod,
+			 "", ""),
+#endif
 	U_BOOT_CMD_MKENT(common, CONFIG_SYS_MAXARGS, 1, do_ut_common, "", ""),
 #if defined(CONFIG_UT_DM)
 	U_BOOT_CMD_MKENT(dm, CONFIG_SYS_MAXARGS, 1, do_ut_dm, "", ""),
