@@ -91,7 +91,7 @@ static void serial_find_console_or_panic(void)
 			gd->cur_serial_dev = dev;
 			return;
 		}
-	} else if (CONFIG_IS_ENABLED(OF_CONTROL) && blob) {
+	} else if (CONFIG_IS_ENABLED(OF_CONTROL)) {
 		/* Live tree has support for stdout */
 		if (of_live_active()) {
 			struct device_node *np = of_get_stdout();
@@ -108,7 +108,7 @@ static void serial_find_console_or_panic(void)
 			}
 		}
 	}
-	if (!SPL_BUILD || !CONFIG_IS_ENABLED(OF_CONTROL) || !blob) {
+	if (!SPL_BUILD || !CONFIG_IS_ENABLED(OF_CONTROL)) {
 		/*
 		 * Try to use CONFIG_CONS_INDEX if available (it is numbered
 		 * from 1!).

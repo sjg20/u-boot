@@ -1,0 +1,51 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ *  VBE (Verified Boot for Embedded) image layout
+ *
+ *  Copyright 2021 Google LLC
+ */
+
+/ {
+	vbe_image: binman {
+	};
+};
+
+&vbe_image {
+	read-only {
+		type = "section";
+		u-boot-tpl-elf {
+		};
+		u-boot-vpl {
+		};
+	};
+
+	recovery {
+		type = "section";
+
+		u-boot-spl-elf {
+		};
+
+		u-boot-elf {
+		};
+	};
+
+	read-write-a {
+		type = "section";
+
+		u-boot-spl-elf {
+		};
+
+		u-boot-elf {
+		};
+	};
+
+	read-write-a {
+		type = "section";
+
+		u-boot-spl-elf {
+		};
+
+		u-boot-elf {
+		};
+	};
+};

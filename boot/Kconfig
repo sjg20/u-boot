@@ -25,6 +25,20 @@ config FIT
 
 if FIT
 
+config VBE
+	bool "Verified boot for Embedded (VBE)"
+	select BINMAN
+	select CONFIG_BINMAN_FDT
+	# default y
+	help
+	  Support booting using VBE, a method for handling selection of the
+	  image to boot, dealing with updates and providing verification of
+	  images.
+
+	  For more information about VBE, see
+
+	    https://drive.google.com/file/d/1ggW0KJpUOR__vBkj3l61L2dav4ZkNC12/view?usp=sharing
+
 config FIT_EXTERNAL_OFFSET
 	hex "FIT external data offset"
 	default 0x0

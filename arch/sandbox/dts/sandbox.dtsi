@@ -30,14 +30,14 @@
 	};
 
 	clk_fixed: clk-fixed {
-		u-boot,dm-pre-reloc;
+		u-boot,dm-spl;
 		compatible = "sandbox,fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <1234>;
 	};
 
 	clk_sandbox: clk-sbox {
-		u-boot,dm-pre-reloc;
+		u-boot,dm-spl;
 		compatible = "sandbox,clk";
 		#clock-cells = <1>;
 		assigned-clocks = <&clk_sandbox 3>;
@@ -45,7 +45,7 @@
 	};
 
 	clk-test {
-		u-boot,dm-pre-reloc;
+		u-boot,dm-spl;
 		compatible = "sandbox,clk-test";
 		clocks = <&clk_fixed>,
 			 <&clk_sandbox 1>,
@@ -90,7 +90,7 @@
 			reg = <0x43>;
 			compatible = "sandbox-rtc";
 			sandbox,emul = <&emul0>;
-			u-boot,dm-pre-reloc;
+			u-boot,dm-spl;
 		};
 		sandbox_pmic: sandbox_pmic {
 			reg = <0x40>;
@@ -101,7 +101,7 @@
 		};
 
 		i2c_emul: emul {
-			u-boot,dm-pre-reloc;
+			u-boot,dm-spl;
 			reg = <0xff>;
 			compatible = "sandbox,i2c-emul-parent";
 			emul_eeprom: emul-eeprom {
@@ -111,7 +111,7 @@
 				#emul-cells = <0>;
 			};
 			emul0: emul0 {
-				u-boot,dm-pre-reloc;
+				u-boot,dm-spl;
 				compatible = "sandbox,i2c-rtc-emul";
 				#emul-cells = <0>;
 			};
@@ -259,7 +259,6 @@
 	};
 
 	spl-test5 {
-		u-boot,dm-vpl;
 		compatible = "sandbox,spl-test";
 		stringarray = "tpl";
 	};
@@ -307,7 +306,6 @@
 	uart0: serial {
 		u-boot,dm-spl;
 		u-boot,dm-tpl;
-		u-boot,dm-vpl;
 		compatible = "sandbox,serial";
 		sandbox,text-colour = "cyan";
 		pinctrl-names = "default";
