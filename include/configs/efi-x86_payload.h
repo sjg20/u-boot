@@ -10,6 +10,9 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+#define CONFIG_BOOTCOMMAND	\
+	"scsi scan; fatload scsi 0:0 01000000 vmlinuz; zboot 01000000"
+
 #include <configs/x86-common.h>
 
 #define CONFIG_SYS_MONITOR_LEN		(1 << 20)
