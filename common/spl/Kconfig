@@ -529,17 +529,6 @@ config SPL_HASH_SUPPORT
 	  this option to build system-specific drivers for hash acceleration
 	  as part of an SPL build.
 
-config TPL_HASH_SUPPORT
-	bool "Support hashing drivers in TPL"
-	depends on TPL
-	select SHA1
-	select SHA256
-	help
-	  Enable hashing drivers in SPL. These drivers can be used to
-	  accelerate secure boot processing in secure applications. Enable
-	  this option to build system-specific drivers for hash acceleration
-	  as part of an SPL build.
-
 config SPL_DMA
 	bool "Support DMA drivers"
 	help
@@ -1405,6 +1394,17 @@ config TPL_BOOTCOUNT_LIMIT
 	help
 	  If this option is enabled, the TPL will support bootcount.
 	  For example, it may be useful to choose the device to boot.
+
+config TPL_HASH_SUPPORT
+	bool "Support hashing drivers in TPL"
+	depends on TPL
+	select SHA1
+	select SHA256
+	help
+	  Enable hashing drivers in SPL. These drivers can be used to
+	  accelerate secure boot processing in secure applications. Enable
+	  this option to build system-specific drivers for hash acceleration
+	  as part of an SPL build.
 
 config TPL_LDSCRIPT
 	string "Linker script for the TPL stage"
