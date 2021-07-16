@@ -565,7 +565,7 @@ int gsc_init(int quiet)
 	ret = dm_i2c_read(dev, 0, buf, sizeof(buf));
 	if (ret) {
 		puts("ERROR: Failed reading GSC\n");
-		return ret;
+		hang();
 	}
 	gsc_read();
 
@@ -577,9 +577,6 @@ int gsc_init(int quiet)
 		printf("\n");
 		gsc_info(1);
 	}
-
-	if (ret)
-		hang();
 
 	return ((16 << som_info.sdram_size) / 1024);
 }
