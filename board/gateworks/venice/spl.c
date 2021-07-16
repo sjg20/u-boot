@@ -3,6 +3,7 @@
  * Copyright 2021 Gateworks Corporation
  */
 
+#include <binman_sym.h>
 #include <common.h>
 #include <cpu_func.h>
 #include <hang.h>
@@ -252,6 +253,11 @@ static int power_init_board(void)
 	return 0;
 }
 
+binman_sym_declare(ulong, blob_ext1, image_pos);
+binman_sym_declare(ulong, blob_ext2, image_pos);
+binman_sym_declare(ulong, blob_ext3, image_pos);
+binman_sym_declare(ulong, blob_ext4, image_pos);
+
 void board_init_f(ulong dummy)
 {
 	struct udevice *dev;
@@ -290,6 +296,11 @@ void board_init_f(ulong dummy)
 	/* need to hold PCIe switch in reset otherwise it can lock i2c bus EEPROM is on */
 	gpio_request(PCIE_RSTN, "perst#");
 	gpio_direction_output(PCIE_RSTN, 0);
+
+	printf("%s: blob_1:0x%0lx\n", __func__, binman_sym(ulong, blob_ext1, image_pos));
+	printf("%s: blob_2:0x%0lx\n", __func__, binman_sym(ulong, blob_ext2, image_pos));
+	printf("%s: blob_3:0x%0lx\n", __func__, binman_sym(ulong, blob_ext3, image_pos));
+	printf("%s: blob_4:0x%0lx\n", __func__, binman_sym(ulong, blob_ext4, image_pos));
 
 	/* GSC */
 	dram_sz = gsc_init(0);
