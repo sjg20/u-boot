@@ -590,7 +590,7 @@ efi_status_t efi_set_variable_int(u16 *variable_name, const efi_guid_t *vendor,
 	if (alt_ret != EFI_SUCCESS)
 		goto out;
 
-	if (!u16_strcmp(variable_name, L"PK"))
+	if (!u16_strcmp(variable_name, u"PK"))
 		alt_ret = efi_init_secure_state();
 out:
 	free(comm_buf);

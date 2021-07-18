@@ -746,9 +746,9 @@ struct efi_signature_store *efi_sigstore_parse_sigdb(u16 *name)
 	efi_uintn_t db_size;
 	efi_status_t ret;
 
-	if (!u16_strcmp(name, L"PK") || !u16_strcmp(name, L"KEK")) {
+	if (!u16_strcmp(name, u"PK") || !u16_strcmp(name, u"KEK")) {
 		vendor = &efi_global_variable_guid;
-	} else if (!u16_strcmp(name, L"db") || !u16_strcmp(name, L"dbx")) {
+	} else if (!u16_strcmp(name, u"db") || !u16_strcmp(name, u"dbx")) {
 		vendor = &efi_guid_image_security_database;
 	} else {
 		EFI_PRINT("unknown signature database, %ls\n", name);
