@@ -35,12 +35,12 @@ config SYS_CONFIG_NAME
 
 choice
 	prompt "Run sandbox on 32/64-bit host"
-	default HOST_64BIT
+	default HOST_DETECT_BIT
 	help
-	  Sandbox can be built on 32-bit and 64-bit hosts.
-	  The default is to build on a 64-bit host and run
-	  on a 64-bit host. If you want to run sandbox on
-	  a 32-bit host, change it here.
+	  Sandbox can be built on 32-bit and 64-bit hosts. This is generally
+	  auto-detected but you can force a particular word size here. If you
+	  see strange warnings about SANDBOX_BITS_PER_LONG then you may have
+	  selected the wrong value.
 
 config HOST_32BIT
 	bool "32-bit host"
@@ -48,6 +48,9 @@ config HOST_32BIT
 
 config HOST_64BIT
 	bool "64-bit host"
+
+config HOST_DETECT_BIT
+	bool "Auto-detect bit size"
 
 endchoice
 
