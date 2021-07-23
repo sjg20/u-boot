@@ -253,10 +253,10 @@ static int power_init_board(void)
 	return 0;
 }
 
-binman_sym_declare(ulong, blob_ext1, image_pos);
-binman_sym_declare(ulong, blob_ext2, image_pos);
-binman_sym_declare(ulong, blob_ext3, image_pos);
-binman_sym_declare(ulong, blob_ext4, image_pos);
+binman_sym_declare(ulong, ddr_1, image_pos);
+binman_sym_declare(ulong, ddr_2, image_pos);
+binman_sym_declare(ulong, ddr_3, image_pos);
+binman_sym_declare(ulong, ddr_4, image_pos);
 
 void board_init_f(ulong dummy)
 {
@@ -297,10 +297,10 @@ void board_init_f(ulong dummy)
 	gpio_request(PCIE_RSTN, "perst#");
 	gpio_direction_output(PCIE_RSTN, 0);
 
-	printf("%s: blob_1:0x%0lx\n", __func__, binman_sym(ulong, blob_ext1, image_pos));
-	printf("%s: blob_2:0x%0lx\n", __func__, binman_sym(ulong, blob_ext2, image_pos));
-	printf("%s: blob_3:0x%0lx\n", __func__, binman_sym(ulong, blob_ext3, image_pos));
-	printf("%s: blob_4:0x%0lx\n", __func__, binman_sym(ulong, blob_ext4, image_pos));
+	printf("%s: blob_1:0x%0lx\n", __func__, binman_sym(ulong, ddr_1, image_pos));
+	printf("%s: blob_2:0x%0lx\n", __func__, binman_sym(ulong, ddr_2, image_pos));
+	printf("%s: blob_3:0x%0lx\n", __func__, binman_sym(ulong, ddr_3, image_pos));
+	printf("%s: blob_4:0x%0lx\n", __func__, binman_sym(ulong, ddr_4, image_pos));
 
 	/* GSC */
 	dram_sz = gsc_init(0);

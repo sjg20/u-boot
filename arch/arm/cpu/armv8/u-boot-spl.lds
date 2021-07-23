@@ -22,6 +22,7 @@ ENTRY(_start)
 SECTIONS
 {
 	.text : {
+		__image_copy_start = .;
 		. = ALIGN(8);
 		*(.__image_copy_start)
 		CPUDIR/start.o (.text*)

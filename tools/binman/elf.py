@@ -112,12 +112,14 @@ def LookupAndWriteSymbols(elf_fname, entry, section):
     if not syms:
         return
     base = syms.get('__image_copy_start')
-    if not base:
-        return
     for name, sym in syms.items():
         if name.startswith('_binman'):
             msg = ("Section '%s': Symbol '%s'\n   in entry '%s'" %
                    (section.GetPath(), name, entry.GetPath()))
+            if not base:
+                raise ValueError("Cannot process symbol '%s' since there is no __image_copy_start" %
+                                 name)
+
             offset = sym.address - base.address
             if offset < 0 or offset + sym.size > entry.contents_size:
                 raise ValueError('%s has offset %x (size %x) but the contents '
@@ -135,6 +137,7 @@ def LookupAndWriteSymbols(elf_fname, entry, section):
             value = section.GetImage().LookupImageSymbol(name, sym.weak, msg,
                                                          base.address)
             if value is None:
+                raise ValueError("Symbol '%s' did not have a value" % name)
                 value = -1
                 pack_string = pack_string.lower()
             value_bytes = struct.pack(pack_string, value)
