@@ -1190,7 +1190,7 @@ u-boot.bin: u-boot-fit-dtb.bin FORCE
 u-boot-dtb.bin: u-boot-nodtb.bin dts/dt.dtb FORCE
 	$(call if_changed,cat)
 
-else ifeq ($(CONFIG_OF_SEPARATE),y)
+else ifeq ($(CONFIG_OF_SEPARATE)$(CONFIG_OF_HOSTFILE),y)
 u-boot-dtb.bin: u-boot-nodtb.bin dts/dt.dtb FORCE
 	$(call if_changed,cat)
 
