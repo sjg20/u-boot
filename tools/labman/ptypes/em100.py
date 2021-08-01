@@ -95,6 +95,9 @@ class Part_em100(Part):
         serial = rem.group(1)
         return serial
 
+    def select_ts(self, retry=True):
+        pass
+
     def check(self):
         # Sometimes the em100 says "Could not claim interface"
         for i in range(10):
@@ -116,7 +119,7 @@ class Part_em100(Part):
 
     @classmethod
     def guess_part(cls, lab, phys):
-        result = lab.get_usb_files(phys, 'idProduct', 'idVendor', 'serial')
+        result = lab.get_usb_files(phys, 'idProduct', 'idVendor')
         if not result:
             return
         if result['idVendor'] == '04b4' and result['idProduct'] == '1235':

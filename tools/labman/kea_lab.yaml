@@ -25,6 +25,7 @@ hubs:
       port8: &huba_8
         port-number: 3.4
 
+      # Power for LCD display
       port9: &huba_9
         port-number: 4.1
       port10: &huba_10
@@ -133,9 +134,12 @@ hubs:
         port-number: 2.2
       port3: &hubd_3
         port-number: 2.3
+
+      # volteer servo v4
       port4: &hubd_4
         port-number: 2.4
 
+      # volteer jtag
       port5: &hubd_5
         port-number: 3.1
       port6: &hubd_6
@@ -285,6 +289,12 @@ em100s:
     serial: DP138817
     chip: W25Q32DW
 
+  em100-6: &em100_coral
+    hub-port: *huba_15
+    symlink: em100_coral
+    serial: DP033694
+    chip: w25q128fw
+
 sdwires:
   sdwire0: &sdwire0
     serial: sdwire-18
@@ -408,6 +418,12 @@ servos:
     port: 9904
     hub-port: *hube_14
 
+  svcoral: &servo_coral
+    board: coral
+    serial: 911416-00840
+    port: 9905
+    hub-port: *hube_2
+
 ykushs:
   ykush0: &ykush0
     serial: YK17698
@@ -438,8 +454,8 @@ ykushs:
   ykush2: &ykush2
     serial: YK19191
     symlink: ykush2
-    hub-port: *huba_15
-    hub-power-port: *hube_10
+    hub-port: *hube_10
+    hub-power-port: *hube_7
     ports:
       port1: &ykush2_port1
         port-number: 1
@@ -806,7 +822,8 @@ duts:
     desc: Chromebook Pixel 2
     console: *servo_samus
     bootdev: *em100_samus
-    power: *servo_samus
+    power: *dli_second_port3
+    reset: *servo_samus
     username: root
     password: test0000
     flash:
@@ -1108,3 +1125,22 @@ duts:
       salmon:
         target: snapper9260
         toolchain: armv7-a
+
+  coral:
+    desc: Chromebook Coral
+    console: *servo_coral
+    bootdev: *em100_coral
+    power: *dli_second_port2
+    reset: *servo_coral
+    blobs:
+      dest: board/google/chromebook_coral
+      src: /vid/software/devel/coral/bin/*.bin
+    flash:
+      method: em100
+    network:
+      method: ethernet
+      mac-address: none
+    builds:
+      bob:
+        target: chromebook_coral
+        toolchain: i386

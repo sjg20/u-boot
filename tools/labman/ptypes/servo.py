@@ -9,6 +9,7 @@ import shutil
 import sys
 import threading
 import time
+from typing import Optional
 
 from labman.part import Part
 from labman import work
@@ -215,6 +216,9 @@ class Part_servo(Part):
 
     def stop(self):
         #self._comms.kill()
+        pass
+
+    def set_power(self, power_on: bool, port: Optional[int] = None):
         pass
 
     def get_reset(self):
