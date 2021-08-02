@@ -390,6 +390,11 @@ static int sandbox_cmdline_cb_select_unittests(struct sandbox_state *state,
 }
 SANDBOX_CMDLINE_OPT_SHORT(select_unittests, 'k', 1, "Select unit tests to run");
 
+__weak int board_run_command(const char *cmdline)
+{
+	return 0;
+}
+
 static int sandbox_cmdline_cb_signals(struct sandbox_state *state,
 				      const char *arg)
 {

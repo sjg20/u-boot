@@ -1,0 +1,20 @@
+if TARGET_SANDBOX || TARGET_SANDBOX_FLATTREE || TARGET_SANDBOX64
+
+config SYS_CONFIG_NAME
+	default "sandbox"
+
+endif
+
+if TARGET_SANDBOX_SPL
+
+config SYS_CONFIG_NAME
+	default "sandbox_spl"
+
+endif
+
+if TARGET_CHROMEOS_SANDBOX
+
+config SYS_CONFIG_NAME
+	default "chromeos_sandbox"
+
+endif
