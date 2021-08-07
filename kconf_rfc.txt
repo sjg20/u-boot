@@ -1,0 +1,258 @@
+Hi,
+
+U-Boot can be configured to build the source multiple times to product multiple
+'phases'. The main phase is the full U-Boot, but an 'SPL' (Secondary Program
+Loader) build can produce a cut-down image only suitable for loading U-Boot
+proper.
+
+SPL does not want to use the same Kconfig options, since that would produce the
+same binary. Instead we have two copies of some options, one with an SPL prefix,
+that can be configured independently. In the source code we can use a macro to
+see if code should be run:
+
+   if (CONFIG_IS_ENABLED(SYS_STDIO_DEREGISTER)) {
+       ...
+   }
+
+This expands to check either checking SYS_STDIO_DEREGISTER or
+SPL_SYS_STDIO_DEREGISTER, depending on which phase is being built.
+
+U-Boot also has TPL (Tertiary Program Loader) which works a similar way. This
+is causing quite an expansion of the Kconfig source, with quite a bit of
+duplication. Each time a new feature needs to be supported in SPL, it involves
+a patch to add the same options again but for SPL.
+
+
+Here are some proposed changes to make it easier to deal with SPL/TPL:
+
+1. Kconfig support
+
+At present we do things like this when we need to control an option separately
+in U-Boot proper and SPL:
+
+    config SYS_STDIO_DEREGISTER
+      bool "Allow deregistering stdio devices"
+      depends on DM_DEVICE_REMOVE
+      default y if USB_KEYBOARD
+      help
+        Generally there is no need to deregister stdio devices since they
+        are never deactivated. But if a stdio device is used which can be
+        removed (for example a USB keyboard) then this option can be
+        enabled to ensure this is handled correctly.
+
+    config SPL_SYS_STDIO_DEREGISTER
+      bool "Allow deregistering stdio devices in SPL"
+      depends on SPL_DM_DEVICE_REMOVE
+      help
+        Generally there is no need to deregister stdio devices since they
+        are never deactivated. But if a stdio device is used which can be
+        removed (for example a USB keyboard) then this option can be
+        enabled to ensure this is handled correctly. This is very rarely
+        needed in SPL.
+
+This is a pain. Apart from the duplication, sometimes the SPL version is in a
+different file or a different part of the file, making it hard to find related
+options or update them in sync.
+
+Instead, we can add a 'phase' command to the Kconfig language, so we can do:
+
+    config SYS_STDIO_DEREGISTER
+      bool "Allow deregistering stdio devices"
+      phases
+      depends on p.DM_DEVICE_REMOVE
+      phase MAIN default y if USB_KEYBOARD
+      help
+        Generally there is no need to deregister stdio devices since they
+        are never deactivated. But if a stdio device is used which can be
+        removed (for example a USB keyboard) then this option can be
+        enabled to ensure this is handled correctly.
+
+'phases' means this Kconfig option exists in all phases. You can also say
+'phases MAIN SPL' to select just MAIN (U-Boot) and SPL.
+
+'p.DM_DEVICE_REMOVE' means to prefix the phase with each symbol, so for U-Boot
+(which uses SYS_STDIO_DEREGISTER) this means DM_DEVICE_REMOVE (p is empty) and
+for SPL (which uses SPL_SYS_STDIO_DEREGISTER) it means SPL_DM_DEVICE_REMOVE
+(p is SPL_). This is somewhat similar in style to the special-case
+'depends on m' in Kconfig.
+
+To make this work, we tell Kconfig that SPL is a phase with 'def_phase':
+
+    config SPL
+      def_phase
+      depends on SUPPORT_SPL
+      prompt "Enable SPL"
+      help
+        If you want to build SPL as well as the normal image, say Y.
+
+It works just the same as a bool, but kconfig also uses it to automatically add
+new Kconfigs for each phase. In the above example it creates both
+SYS_STDIO_DEREGISTER and SPL_SYS_STDIO_DEREGISTER. The option name has the text
+'(SPL) ' shown before the SPL option.
+
+This can easily handle Kconfigs with similar dependencies and even different
+ones. If the Kconfig options are not actually very similar we can still
+create two separate copies instead, as now.
+
+This allows us to substantially reduce the size and duplication in the Kconfig
+defintions. It also reduces the pain of adding another phase to U-Boot.
+
+Note: This change needs to be done in Linux, which owns Kconfig upstream.
+
+
+2.Rename SPL_TPL_
+
+This Makefile variable is used to reduce the number of duplicate rules in
+makefiles:
+
+    obj-$(CONFIG_$(SPL_TPL_)FIT_SIGNATURE) += fdt_region.o
+
+The SPL_TPL_ expands to empty for U-Boot and either SPL_ or TPL_ for the other
+phases.
+
+This is confusing though, since CONFIG_SPL_BUILD it set even for TPL builds, so
+for example. with:
+
+    obj-$(CONFIG_$(SPL_)FIT_SIGNATURE) += fdt_region.o
+
+the file is built for both SPL and TPL.
+
+To help with this, We can rename SPL_TPL to PHASE_:
+
+    obj-$(CONFIG_$(PHASE_)FIT_SIGNATURE) += fdt_region.o
+
+or perhaps P_ which is more readable:
+
+    obj-$(CONFIG_$(P_)FIT_SIGNATURE) += fdt_region.o
+
+
+3. Rename CONFIG_IS_ENABLED()
+
+This macro is used to determine whether an option is enabled in the current
+build phase:
+
+   if (CONFIG_IS_ENABLED(FIT_SIGNATURE)) {
+      printf("## Checking hash(es) for Image %s ... ",
+             fit_get_name(fit, node, NULL));
+
+It is quite long-winded and people sometimes add CONFIG_ to the option inside
+the brakets by mistake. It is also a bit confusing that IS_ENABLED() and
+CONFIG_IS_ENABLED() mean completely different things.
+
+Instead we can rename it to CONFIG:
+
+   if (CONFIG(FIT_SIGNATURE)) {
+      printf("## Checking hash(es) for Image %s ... ",
+             fit_get_name(fit, node, NULL));
+
+This is shorter and looks more like CONFIG_FIT_SIGATURE so people should find
+it easier to understand. Being shorter is a big help when converting from
+use #if to if(), since an indentation is always enabled. This change makes
+the CONFIG() check no longer than IS_ENABLED().
+
+It also makes CONFIG(OPTION) not much longer than CONFIG_OPTION, which makes
+things much more convenient, since ideally if the toolchain permitted it, we
+would just use CONFIG_OPTION in the code. This is not possible at present since
+the option may not be defined, so can cause a compiler error.
+
+Over time, perhaps the existing IS_ENABLED() will phase out, since in many
+cases SPL will have its own options. We already see that CONFIG_IS_ENABLED is
+more popular / useful:
+
+   $ git grep -w  IS_ENABLED |wc -l
+       902
+   $ git grep -w  CONFIG_IS_ENABLED |wc -l
+      2282
+
+
+4. Add macros to help avoid more #ifdefs
+
+We sometimes have to use #ifdefs in structs or drivers:
+
+    struct spl_image_loader {
+    #ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
+        const char *name;
+    #endif
+        ...
+    };
+
+    UCLASS_DRIVER(spi) = {
+        .id      = UCLASS_SPI,
+        .name      = "spi",
+        .flags      = DM_UC_FLAG_SEQ_ALIAS,
+    #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
+        .post_bind   = dm_scan_fdt_dev,
+    #endif
+        ...
+    };
+
+This is a pain. We can add an IF_CONFIG macro to help with this:
+
+    struct spl_image_loader {
+        IF_CONFIG(LIBCOMMON_SUPPORT, const char *name;)
+        ...
+    };
+
+    UCLASS_DRIVER(spi) = {
+        .id      = UCLASS_SPI,
+        .name      = "spi",
+        .flags      = DM_UC_FLAG_SEQ_ALIAS,
+        IF_CONFIG(REAL, .post_bind   = dm_scan_fdt_dev,)
+        ...
+    };
+
+It still isn't wonderfully readable but it seems like an improvement. The
+IF_CONFIG() macros could be implemented easily with the current
+CONFIG_IS_EANBLED() macro.
+
+
+5. IF_CONFIG_INT() or similar
+
+See here: https://lists.denx.de/pipermail/u-boot/2020-May/412950.html
+
+
+6. Discarding static functions
+
+We sometimes see code like this:
+
+    #if CONFIG_IS_ENABLED(OF_REAL)
+    static const struct udevice_id apl_ns16550_serial_ids[] = {
+        { .compatible = "intel,apl-ns16550" },
+        { },
+        };
+    #endif
+
+    U_BOOT_DRIVER(intel_apl_ns16550) = {
+        .name   = "intel_apl_ns16550",
+        .id   = UCLASS_SERIAL,
+        .of_match = of_match_ptr(apl_ns16550_serial_ids),
+        .plat_auto   = sizeof(struct apl_ns16550_plat),
+        .priv_auto   = sizeof(struct ns16550),
+            ...
+        };
+
+The of_match_ptr() avoids an #ifdef in the driver declaration since it evaluates
+to NULL if !CONFIG_IS_ENABLED(OF_REAL) but we still need an #ifdef around the
+function, since it is static and would otherwise produce a warning.
+
+One solution is to drop the 'static'. But this is not very nice, since the
+structure clearly should not be used from another file.
+
+We can add STATIC_IF_CONFIG() to help with this:
+
+    STATIC_IF_CONFIG(OF_REAL) const struct udevice_id apl_ns16550_serial_ids[] = {
+        { .compatible = "intel,apl-ns16550" },
+        { },
+        };
+    #endif
+
+It expands to 'static' if CONFIG(OF_REAL) is enabled, otherwise it expand to
+nothing, in the hope that the compiler drops the data. Failing that it would
+also be possible to have it expand to '__section(".discard.config")' so at least
+the struct is discarded, even if the compatible string is not. The behaviour of
+gcc/binutils in this area is not always as might be hoped.
+
+
+Comments welcome!
+
+- Simon
