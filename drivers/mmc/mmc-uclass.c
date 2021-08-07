@@ -8,6 +8,7 @@
 #define LOG_CATEGORY UCLASS_MMC
 
 #include <common.h>
+#include <bootmethod.h>
 #include <log.h>
 #include <mmc.h>
 #include <dm.h>
@@ -502,7 +503,6 @@ U_BOOT_DRIVER(mmc_blk) = {
 #endif
 };
 #endif /* CONFIG_BLK */
-
 
 UCLASS_DRIVER(mmc) = {
 	.id		= UCLASS_MMC,
