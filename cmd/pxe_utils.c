@@ -1432,8 +1432,9 @@ void handle_pxe_menu(struct pxe_context *ctx, struct pxe_menu *cfg)
 }
 
 void pxe_setup_ctx(struct pxe_context *ctx, struct cmd_tbl *cmdtp,
-		   pxe_getfile_func getfile)
+		   pxe_getfile_func getfile, void *userdata)
 {
 	ctx->cmdtp = cmdtp;
 	ctx->getfile = getfile;
+	ctx->userdata = userdata;
 }
