@@ -830,6 +830,22 @@ char *simple_itoa(ulong i)
 	return p + 1;
 }
 
+char *simple_itox(ulong num)
+{
+	/* 16 digits plus nul terminator, good for 64-bit or smaller ints */
+	static char local[17];
+	char *p = &local[17];
+
+	*--p = '\0';
+	do {
+		p -= 2;
+		hex_byte_pack(p, num & 0xff);
+		num >>= 8;
+	} while (num > 0);
+
+	return p;
+}
+
 /* We don't seem to have %'d in U-Boot */
 void print_grouped_ull(unsigned long long int_val, int digits)
 {
