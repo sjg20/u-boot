@@ -39,7 +39,7 @@ int distro_boot_setup(struct blk_desc *desc, int partnum,
 	if (size > 0x10000)
 		return log_msg_ret("chk", -E2BIG);
 
-	// FIXME: FS closes the file after fs_size()
+	/* Sadly FS closes the file after fs_size() so we must redo this */
 	ret = fs_set_blk_dev_with_part(desc, partnum);
 	if (ret)
 		return log_msg_ret("set", ret);

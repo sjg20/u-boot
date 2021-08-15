@@ -28,6 +28,7 @@ static const char *const bootmethod_state[BOOTFLOWST_COUNT] = {
 	"base",
 	"media",
 	"part",
+	"fs",
 	"file",
 	"loaded",
 };
@@ -311,7 +312,7 @@ int bootmethod_find_in_blk(struct udevice *dev, struct udevice *blk, int seq,
 
 	bflow->dev = dev;
 	bflow->seq = seq;
-	sprintf(name, "part %x", partnum);
+	sprintf(name, "%s_part_%x", dev->name, partnum);
 	bflow->name = strdup(name);
 	if (!bflow->name)
 		return log_msg_ret("name", -ENOMEM);
@@ -329,7 +330,7 @@ int bootmethod_find_in_blk(struct udevice *dev, struct udevice *blk, int seq,
 	if (ret)
 		return log_msg_ret("fs", ret);
 
-	bflow->state = BOOTFLOWST_MEDIA;
+	bflow->state = BOOTFLOWST_FS;
 
 	if (CONFIG_IS_ENABLED(BOOTMETHOD_DISTRO)) {
 		ret = distro_boot_setup(desc, partnum, bflow);

@@ -306,7 +306,7 @@ endif # FIT
 
 config BOOTMETHOD
 	bool "Bootmethod support"
-	default y if SANDBOX
+	default y
 	help
 	  A bootmethod is a standard way of locating something to boot,
 	  typically an Operating System such as Linux. Enable this to support

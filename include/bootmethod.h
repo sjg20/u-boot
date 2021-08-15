@@ -16,6 +16,7 @@ enum bootflow_state_t {
 	BOOTFLOWST_BASE,	/**< Nothing known yet */
 	BOOTFLOWST_MEDIA,	/**< Media exists */
 	BOOTFLOWST_PART,	/**< Partition exists */
+	BOOTFLOWST_FS,		/**< Filesystem exists */
 	BOOTFLOWST_FILE,	/**< Bootflow file exists */
 	BOOTFLOWST_LOADED,	/**< Bootflow file loaded */
 
@@ -77,6 +78,7 @@ extern struct bootflow_cmds g_bootflow_cmds;
  * @part: Partition number
  * @fname: Filename of bootflow file (allocated)
  * @buf: Bootflow file contents (allocated)
+ * @err: Error number received (0 if OK)
  */
 struct bootflow {
 	struct list_head bm_node;
@@ -89,6 +91,7 @@ struct bootflow {
 	int part;
 	char *fname;
 	char *buf;
+	int err;
 };
 
 struct bootmethod_iter {

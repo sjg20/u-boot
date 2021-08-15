@@ -11,12 +11,64 @@
 #include <command.h>
 #include <dm.h>
 
-static void show_bootflow(int seq, struct bootflow *bflow)
+/**
+ * report_bootflow_err() - Report where a bootflow failed
+ *
+ * When a bootflow does not make it to the 'loaded' state, something went wrong.
+ * Print a helpful message if there is an error
+ *
+ * @bflow: Bootflow to process
+ * @err: Error code (0 if none)
+ */
+static void report_bootflow_err(struct bootflow *bflow, int err)
 {
-	printf("%3x  %-11s  %-6s  %4x  %-14s  %s\n", seq,
+	if (!err)
+		return;
+
+	/* Indent out to 'Type' */
+	printf("     ** ");
+
+	switch (bflow->state) {
+	case BOOTFLOWST_BASE:
+		printf("No media/partition found");
+		break;
+	case BOOTFLOWST_MEDIA:
+		printf("No partition found");
+		break;
+	case BOOTFLOWST_PART:
+		printf("No filesystem found");
+		break;
+	case BOOTFLOWST_FS:
+		printf("File not found");
+		break;
+	case BOOTFLOWST_FILE:
+		printf("File cannot be loaded");
+		break;
+	case BOOTFLOWST_LOADED:
+		printf("File loaded");
+		break;
+	case BOOTFLOWST_COUNT:
+		break;
+	}
+
+	printf(", err=%d\n", err);
+}
+
+/**
+ * show_bootflow() - Show the status of a bootflow
+ *
+ * @seq: Bootflow index
+ * @bflow: Bootflow to show
+ * @errors: True to show the error received, if any
+ */
+static void show_bootflow(int index, struct bootflow *bflow, bool errors)
+{
+	printf("%3x  %-11s  %-6s  %4x  %-14s  %s\n", index,
 	       bootmethod_type_get_name(bflow->type),
 	       bootmethod_state_get_name(bflow->state), bflow->part,
 	       bflow->name, bflow->fname);
+	if (errors)
+		report_bootflow_err(bflow, bflow->err);
 }
 
 static void show_header(void)
@@ -39,7 +91,11 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 	struct udevice *dev;
 	struct bootflow *bflow;
 	int num_valid = 0;
+	bool errors = false;
 	int ret, i;
+
+	if (*argv[1] == '-')
+		errors = strchr(argv[1], 'e');
 
 	ret = bootmethod_get_state(&state);
 	if (ret)
@@ -52,7 +108,7 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 		     !ret;
 		     ret = bootmethod_next_bootflow(&bflow), i++) {
 			num_valid += bflow->state == BOOTFLOWST_LOADED;
-			show_bootflow(i, bflow);
+			show_bootflow(i, bflow, errors);
 		}
 	} else {
 		printf("Showing all bootflows\n");
@@ -61,7 +117,7 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 		     !ret;
 		     ret = bootflow_next_glob(&bflow), i++) {
 			num_valid += bflow->state == BOOTFLOWST_LOADED;
-			show_bootflow(i, bflow);
+			show_bootflow(i, bflow, errors);
 		}
 	}
 	show_footer(i, num_valid);
@@ -76,13 +132,14 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 	struct bootmethod_iter iter;
 	struct udevice *dev;
 	struct bootflow bflow;
+	bool list = false, all = false, errors = false;
 	int num_valid = 0;
-	bool list, all;
 	int ret, i;
 
 	if (*argv[1] == '-') {
 		list = strchr(argv[1], 'l');
 		all = strchr(argv[1], 'a');
+		errors = strchr(argv[1], 'e');
 	}
 
 	ret = bootmethod_get_state(&state);
@@ -99,6 +156,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			ret = bootmethod_get_bootflow(dev, i, &bflow);
 			if ((ret && !all) || ret == -ESHUTDOWN)
 				continue;
+			bflow.err = ret;
 			ret = bootmethod_add_bootflow(&bflow);
 			if (ret) {
 				printf("Out of memory\n");
@@ -106,7 +164,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			}
 			num_valid++;
 			if (list)
-				show_bootflow(i, &bflow);
+				show_bootflow(i, &bflow, errors);
 		}
 	} else {
 		if (list)
@@ -117,13 +175,14 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 		     !ret;
 		     num_valid++,
 	             ret = bootmethod_scan_next_bootflow(&iter, &bflow)) {
+			bflow.err = ret;
 			ret = bootmethod_add_bootflow(&bflow);
 			if (ret) {
 				printf("Out of memory\n");
 				return CMD_RET_FAILURE;
 			}
 			if (list)
-				show_bootflow(num_valid, &bflow);
+				show_bootflow(num_valid, &bflow, errors);
 		}
 		i = num_valid;
 	}
@@ -227,14 +286,14 @@ static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 
 #ifdef CONFIG_SYS_LONGHELP
 static char bootflow_help_text[] =
-	"scan [-la]   - scan for valid bootflows (-l to list, -a for all))\n"
-	"list         - list scanned bootflows\n"
+	"scan [-lae]  - scan for valid bootflows (-l list, -a all, -e errors))\n"
+	"list [-e]    - list scanned bootflows (-e errors)\n"
 	"select       - select a bootflow\n"
 	"boot         - boot a bootflow";
 #endif
 
 U_BOOT_CMD_WITH_SUBCMDS(bootflow, "Bootflows", bootflow_help_text,
 	U_BOOT_SUBCMD_MKENT(scan, 2, 1, do_bootflow_scan),
-	U_BOOT_SUBCMD_MKENT(list, 1, 1, do_bootflow_list),
+	U_BOOT_SUBCMD_MKENT(list, 2, 1, do_bootflow_list),
 	U_BOOT_SUBCMD_MKENT(select, 2, 1, do_bootflow_select),
 	U_BOOT_SUBCMD_MKENT(boot, 1, 1, do_bootflow_boot));
