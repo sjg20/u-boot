@@ -30,6 +30,20 @@
 
 #define MAX_TFTP_PATH_LEN 512
 
+int pxe_get_file_size(ulong *sizep)
+{
+	const char *val;
+
+	val = from_env("filesize");
+	if (!val)
+		return -ENOENT;
+
+	if (strict_strtoul(val, 16, sizep) < 0)
+		return -EINVAL;
+
+	return 0;
+}
+
 /**
  * format_mac_pxe() - obtain a MAC address in the PXE format
  *
@@ -75,14 +89,17 @@ int format_mac_pxe(char *outbuf, size_t outbuf_len)
  * @ctx: PXE context
  * @file_path: File path to read (relative to the PXE file)
  * @file_addr: Address to load file to
+ * @filesizep: If not NULL, returns the file size in bytes
  * Returns 1 for success, or < 0 on error
  */
 static int get_relfile(struct pxe_context *ctx, const char *file_path,
-		       unsigned long file_addr)
+		       unsigned long file_addr, ulong *filesizep)
 {
 	size_t path_len;
 	char relfile[MAX_TFTP_PATH_LEN + 1];
 	char addr_buf[18];
+	ulong size;
+	int ret;
 
 	if (file_path[0] == '/' && ctx->allow_abs_path)
 		*relfile = '\0';
@@ -103,7 +120,13 @@ static int get_relfile(struct pxe_context *ctx, const char *file_path,
 
 	sprintf(addr_buf, "%lx", file_addr);
 
-	return ctx->getfile(ctx, relfile, addr_buf);
+	ret = ctx->getfile(ctx, relfile, addr_buf, &size);
+	if (ret < 0)
+		return log_msg_ret("get", ret);
+	if (filesizep)
+		*filesizep = size;
+
+	return 1;
 }
 
 /**
@@ -117,29 +140,17 @@ static int get_relfile(struct pxe_context *ctx, const char *file_path,
  * Returns 1 for success, or < 0 on error
  */
 int get_pxe_file(struct pxe_context *ctx, const char *file_path,
-		 unsigned long file_addr)
+		 ulong file_addr)
 {
-	unsigned long config_file_size;
-	char *tftp_filesize;
+	ulong size;
 	int err;
 	char *buf;
 
-	err = get_relfile(ctx, file_path, file_addr);
+	err = get_relfile(ctx, file_path, file_addr, &size);
 	if (err < 0)
 		return err;
 
-	/*
-	 * the file comes without a NUL byte at the end, so find out its size
-	 * and add the NUL byte.
-	 */
-	tftp_filesize = from_env("filesize");
-	if (!tftp_filesize)
-		return -ENOENT;
-
-	if (strict_strtoul(tftp_filesize, 16, &config_file_size) < 0)
-		return -EINVAL;
-
-	buf = map_sysmem(file_addr + config_file_size, 1);
+	buf = map_sysmem(file_addr + size, 1);
 	*buf = '\0';
 	unmap_sysmem(buf);
 
@@ -184,12 +195,13 @@ int get_pxelinux_path(struct pxe_context *ctx, const char *file,
  * @file_path: File path to read (relative to the PXE file)
  * @envaddr_name: Name of environment variable which contains the address to
  *	load to
+ * @filesizep: Returns the file size in bytes
  * Returns 1 on success, -ENOENT if @envaddr_name does not exist as an
  *	environment variable, -EINVAL if its format is not valid hex, or other
  *	value < 0 on other error
  */
 static int get_relfile_envaddr(struct pxe_context *ctx, const char *file_path,
-			       const char *envaddr_name)
+			       const char *envaddr_name, ulong *filesizep)
 {
 	unsigned long file_addr;
 	char *envaddr;
@@ -201,7 +213,7 @@ static int get_relfile_envaddr(struct pxe_context *ctx, const char *file_path,
 	if (strict_strtoul(envaddr, 16, &file_addr) < 0)
 		return -EINVAL;
 
-	return get_relfile(ctx, file_path, file_addr);
+	return get_relfile(ctx, file_path, file_addr, filesizep);
 }
 
 /**
@@ -357,8 +369,8 @@ static void label_boot_fdtoverlay(struct pxe_context *ctx,
 			goto skip_overlay;
 
 		/* Load overlay file */
-		err = get_relfile_envaddr(ctx, overlayfile,
-					  "fdtoverlay_addr_r");
+		err = get_relfile_envaddr(ctx, overlayfile, "fdtoverlay_addr_r",
+					  NULL);
 		if (err < 0) {
 			printf("Failed loading overlay %s\n", overlayfile);
 			goto skip_overlay;
@@ -438,7 +450,10 @@ static int label_boot(struct pxe_context *ctx, struct pxe_label *label)
 	}
 
 	if (label->initrd) {
-		if (get_relfile_envaddr(ctx, label->initrd, "ramdisk_addr_r") < 0) {
+		ulong size;
+
+		if (get_relfile_envaddr(ctx, label->initrd, "ramdisk_addr_r",
+					&size) < 0) {
 			printf("Skipping %s for failure retrieving initrd\n",
 			       label->name);
 			return 1;
@@ -447,11 +462,12 @@ static int label_boot(struct pxe_context *ctx, struct pxe_label *label)
 		bootm_argv[2] = initrd_str;
 		strncpy(bootm_argv[2], env_get("ramdisk_addr_r"), 18);
 		strcat(bootm_argv[2], ":");
-		strncat(bootm_argv[2], env_get("filesize"), 9);
+		strcat(bootm_argv[2], simple_xtoa(size));
 		bootm_argc = 3;
 	}
 
-	if (get_relfile_envaddr(ctx, label->kernel, "kernel_addr_r") < 0) {
+	if (get_relfile_envaddr(ctx, label->kernel, "kernel_addr_r",
+				NULL) < 0) {
 		printf("Skipping %s for failure retrieving kernel\n",
 		       label->name);
 		return 1;
@@ -592,7 +608,7 @@ static int label_boot(struct pxe_context *ctx, struct pxe_label *label)
 
 		if (fdtfile) {
 			int err = get_relfile_envaddr(ctx, fdtfile,
-						      "fdt_addr_r");
+						      "fdt_addr_r", NULL);
 
 			free(fdtfilefree);
 			if (err < 0) {
@@ -1384,7 +1400,7 @@ void handle_pxe_menu(struct pxe_context *ctx, struct pxe_menu *cfg)
 	if (IS_ENABLED(CONFIG_CMD_BMP)) {
 		/* display BMP if available */
 		if (cfg->bmp) {
-			if (get_relfile(ctx, cfg->bmp, image_load_addr)) {
+			if (get_relfile(ctx, cfg->bmp, image_load_addr, NULL)) {
 				if (CONFIG_IS_ENABLED(CMD_CLS))
 					run_command("cls", 0);
 				bmp_display(image_load_addr,
