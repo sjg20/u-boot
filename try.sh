@@ -5,7 +5,7 @@ set -e
 file=mmc.img
 mnt=/mnt/x
 fat=/mnt/y
-dstdir=$fat/boot/extlinux
+dstdir=$fat/extlinux
 
 old() {
 	mkfs.vfat $file

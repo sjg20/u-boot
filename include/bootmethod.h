@@ -70,6 +70,7 @@ extern struct bootflow_cmds g_bootflow_cmds;
  * @bm_node: Points to siblings in the same bootmethod
  * @glob_node: Points to siblings in the global list (all bootmethod)
  * @dev: Bootmethod device which produced this bootflow
+ * @blk: Block device which contains this bootflow
  * @seq: Sequence number of bootflow within its bootmethod, typically the
  *	partition number (0...)
  * @name: Name of bootflow (allocated)
@@ -84,6 +85,7 @@ struct bootflow {
 	struct list_head bm_node;
 	struct list_head glob_node;
 	struct udevice *dev;
+	struct udevice *blk;
 	int seq;
 	char *name;
 	enum bootflow_type_t type;
@@ -98,11 +100,13 @@ struct bootflow {
  * enum bootflow_flags_t - flags for the bootflow
  *
  * @BOOTFLOWF_FIXED: Only used fixed/internal media
- * @BOOTFLOWF_SHOW_BOOTMETHOD: Show each bootmethod before scanning it
+ * @BOOTFLOWF_SHOW: Show each bootmethod before scanning it
+ * @BOOTFLOWF_ALL: Return bootflows with errors as well
  */
 enum bootflow_flags_t {
-	BOOTFLOWF_FIXED			= 1 << 0,
-	BOOTFLOWF_SHOW_BOOTMETHOD	= 1 << 1,
+	BOOTFLOWF_FIXED		= 1 << 0,
+	BOOTFLOWF_SHOW		= 1 << 1,
+	BOOTFLOWF_ALL		= 1 << 2,
 };
 
 /**
@@ -155,6 +159,8 @@ int bootmethod_get_bootflow(struct udevice *dev, int seq,
  *
  * This works through the available bootmethod devices until it finds one that
  * can supply a bootflow. It then returns that
+ *
+ * If @flags includes BOOTFLOWF_ALL then bootflows with errors are returned too
  *
  * @iter:	Place to store private info (inited by this call)
  * @flags:	Flags for bootmethod (enum bootflow_flags_t)

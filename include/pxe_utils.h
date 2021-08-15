@@ -199,7 +199,7 @@ int format_mac_pxe(char *outbuf, size_t outbuf_len);
  * @ctx: Context to set up
  * @cmdtp: Command table entry which started this action
  * @getfile: Function to call to read a file
- * @userdata: Data the called requires for @getfile
+ * @userdata: Data the caller requires for @getfile - stored in ctx->userdata
  * @allow_abs_path: true to allow absolute paths
  * @bootfile: Bootfile whose directory loaded files are relative to, NULL if
  *	none

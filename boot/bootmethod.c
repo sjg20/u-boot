@@ -225,8 +225,12 @@ static void bootmethod_iter_set_dev(struct bootmethod_iter *iter,
 				    struct udevice *dev)
 {
 	iter->dev = dev;
-	if (BOOTFLOWF_SHOW_BOOTMETHOD)
-		printf("Scanning bootmethod '%s':\n", dev->name);
+	if (iter->flags & BOOTFLOWF_SHOW) {
+		if (dev)
+			printf("Scanning bootmethod '%s':\n", dev->name);
+		else
+			printf("No more bootmethods\n");
+	}
 }
 
 int bootmethod_scan_first_bootflow(struct bootmethod_iter *iter, int flags,
@@ -256,12 +260,13 @@ int bootmethod_scan_next_bootflow(struct bootmethod_iter *iter,
 	int ret;
 
 	do {
-		ret = next_bootflow(iter->dev, iter->seq, bflow);
+		dev = iter->dev;
+		ret = next_bootflow(dev, iter->seq, bflow);
 
 		/* If we got a valid bootflow, return it */
 		if (!ret) {
 			log_debug("Bootmethod '%s' seq %d: Found bootflow\n",
-				  iter->dev->name, iter->seq);
+				  dev->name, iter->seq);
 			iter->seq++;
 			return 0;
 		}
@@ -269,20 +274,22 @@ int bootmethod_scan_next_bootflow(struct bootmethod_iter *iter,
 		/* If we got some other error, try the next partition */
 		else if (ret != -ESHUTDOWN) {
 			log_debug("Bootmethod '%s' seq %d: Error %d\n",
-				  iter->dev->name, iter->seq, ret);
+				  dev->name, iter->seq, ret);
 			if (iter->seq++ == MAX_BOOTFLOWS_PER_BOOTMETHOD)
-				return log_msg_ret("max", -E2BIG);
-			continue;
+				/* fall through to next device */;
+			else if (iter->flags & BOOTFLOWF_ALL)
+				return log_msg_ret("all", ret);
+			else
+				continue;
 		}
 
 		/* we got to the end of that bootmethod, try the next */
 		ret = uclass_next_device_err(&dev);
+		bootmethod_iter_set_dev(iter, dev);
 
 		/* if there are no more bootmethods, give up */
 		if (ret)
 			return ret;
-
-		bootmethod_iter_set_dev(iter, dev);
 
 		/* start at the beginning of this bootmethod */
 		iter->seq = 0;
@@ -314,7 +321,7 @@ int bootmethod_find_in_blk(struct udevice *dev, struct udevice *blk, int seq,
 {
 	struct blk_desc *desc = dev_get_uclass_plat(blk);
 	struct disk_partition info;
-	char name[17];
+	char name[60];
 	int partnum = seq + 1;
 	int ret;
 
@@ -322,8 +329,9 @@ int bootmethod_find_in_blk(struct udevice *dev, struct udevice *blk, int seq,
 		return -ESHUTDOWN;
 
 	bflow->dev = dev;
+	bflow->blk = blk;
 	bflow->seq = seq;
-	sprintf(name, "%s_part_%x", dev->name, partnum);
+	snprintf(name, sizeof(name), "%s.part_%x", dev->name, partnum);
 	bflow->name = strdup(name);
 	if (!bflow->name)
 		return log_msg_ret("name", -ENOMEM);

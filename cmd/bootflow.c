@@ -94,7 +94,7 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 	bool errors = false;
 	int ret, i;
 
-	if (*argv[1] == '-')
+	if (argc > 1 && *argv[1] == '-')
 		errors = strchr(argv[1], 'e');
 
 	ret = bootmethod_get_state(&state);
@@ -136,7 +136,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 	int num_valid = 0;
 	int ret, i;
 
-	if (*argv[1] == '-') {
+	if (argc > 1 && *argv[1] == '-') {
 		list = strchr(argv[1], 'l');
 		all = strchr(argv[1], 'a');
 		errors = strchr(argv[1], 'e');
@@ -167,25 +167,31 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 				show_bootflow(i, &bflow, errors);
 		}
 	} else {
+		int flags = 0;
+
 		if (list)
 			printf("Scanning for bootflows in all bootmethods\n");
 		show_header();
 		bootmethod_clear_glob();
-		iter.flags = list ? BOOTFLOWF_SHOW_BOOTMETHOD : 0;
-		for (ret = bootmethod_scan_first_bootflow(&iter, 0, &bflow);
-		     !ret;
-		     num_valid++,
-	             ret = bootmethod_scan_next_bootflow(&iter, &bflow)) {
+		if (list)
+			flags |= BOOTFLOWF_SHOW;
+		if (all)
+			flags |= BOOTFLOWF_ALL;
+		for (i = 0,
+		     ret = bootmethod_scan_first_bootflow(&iter, flags, &bflow);
+		     i < 1000 && ret != -ENODEV;
+	             i++, ret = bootmethod_scan_next_bootflow(&iter, &bflow)) {
 			bflow.err = ret;
+			if (!ret)
+				num_valid++;
 			ret = bootmethod_add_bootflow(&bflow);
 			if (ret) {
 				printf("Out of memory\n");
 				return CMD_RET_FAILURE;
 			}
 			if (list)
-				show_bootflow(num_valid, &bflow, errors);
+				show_bootflow(i, &bflow, errors);
 		}
-		i = num_valid;
 	}
 	if (list)
 		show_footer(i, num_valid);

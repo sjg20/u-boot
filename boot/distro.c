@@ -17,7 +17,16 @@
 #include <mapmem.h>
 #include <pxe_utils.h>
 
-#define DISTRO_FNAME	"/boot/extlinux/extlinux.conf"
+#define DISTRO_FNAME	"extlinux/extlinux.conf"
+
+/**
+ * struct distro_info - useful information for distro_getfile()
+ *
+ * @bflow: bootflow being booted
+ */
+struct distro_info {
+	struct bootflow *bflow;
+};
 
 int distro_boot_setup(struct blk_desc *desc, int partnum,
 		      struct bootflow *bflow)
@@ -65,8 +74,21 @@ int distro_boot_setup(struct blk_desc *desc, int partnum,
 static int disto_getfile(struct pxe_context *ctx, const char *file_path,
 			 char *file_addr, ulong *sizep)
 {
-	printf("get file %s %s\n", file_path, file_addr);
-	//TODO
+	struct distro_info *info = ctx->userdata;
+	struct bootflow *bflow = info->bflow;
+	struct blk_desc *desc = dev_get_uclass_plat(bflow->blk);
+	loff_t len_read;
+	ulong addr;
+	int ret;
+
+	addr = simple_strtoul(file_addr, NULL, 16);
+	ret = fs_set_blk_dev_with_part(desc, bflow->part);
+	if (ret)
+		return ret;
+	ret = fs_read(file_path, addr, 0, 0, &len_read);
+	if (ret)
+		return ret;
+	*sizep = len_read;
 
 	return 0;
 }
@@ -75,11 +97,13 @@ int distro_boot(struct bootflow *bflow)
 {
 	struct cmd_tbl cmdtp = {};	/* dummy */
 	struct pxe_context ctx;
+	struct distro_info info;
 	ulong addr;
 	int ret;
 
 	addr = map_to_sysmem(bflow->buf);
-	ret = pxe_setup_ctx(&ctx, &cmdtp, disto_getfile, NULL, true,
+	info.bflow = bflow;
+	ret = pxe_setup_ctx(&ctx, &cmdtp, disto_getfile, &info, true,
 			    bflow->fname);
 	if (ret)
 		return log_msg_ret("ctx", -EINVAL);
