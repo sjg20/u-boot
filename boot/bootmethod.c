@@ -221,8 +221,16 @@ static int next_bootflow(struct udevice *dev, int seq, struct bootflow *bflow)
 	return 0;
 }
 
+static void bootmethod_iter_set_dev(struct bootmethod_iter *iter,
+				    struct udevice *dev)
+{
+	iter->dev = dev;
+	if (BOOTFLOWF_SHOW_BOOTMETHOD)
+		printf("Scanning bootmethod '%s':\n", dev->name);
+}
+
 int bootmethod_scan_first_bootflow(struct bootmethod_iter *iter, int flags,
-			      struct bootflow *bflow)
+				   struct bootflow *bflow)
 {
 	struct udevice *dev;
 	int ret;
@@ -232,7 +240,7 @@ int bootmethod_scan_first_bootflow(struct bootmethod_iter *iter, int flags,
 	ret = uclass_first_device_err(UCLASS_BOOTMETHOD, &dev);
 	if (ret)
 		return ret;
-	iter->dev = dev;
+	bootmethod_iter_set_dev(iter, dev);
 
 	ret = bootmethod_scan_next_bootflow(iter, bflow);
 	if (ret)
@@ -242,8 +250,9 @@ int bootmethod_scan_first_bootflow(struct bootmethod_iter *iter, int flags,
 }
 
 int bootmethod_scan_next_bootflow(struct bootmethod_iter *iter,
-			     struct bootflow *bflow)
+				  struct bootflow *bflow)
 {
+	struct udevice *dev;
 	int ret;
 
 	do {
@@ -267,11 +276,13 @@ int bootmethod_scan_next_bootflow(struct bootmethod_iter *iter,
 		}
 
 		/* we got to the end of that bootmethod, try the next */
-		ret = uclass_next_device_err(&iter->dev);
+		ret = uclass_next_device_err(&dev);
 
 		/* if there are no more bootmethods, give up */
 		if (ret)
 			return ret;
+
+		bootmethod_iter_set_dev(iter, dev);
 
 		/* start at the beginning of this bootmethod */
 		iter->seq = 0;

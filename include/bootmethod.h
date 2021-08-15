@@ -94,19 +94,29 @@ struct bootflow {
 	int err;
 };
 
-struct bootmethod_iter {
-	int flags;
-	int seq;
-	struct udevice *dev;
-};
-
 /**
  * enum bootflow_flags_t - flags for the bootflow
  *
  * @BOOTFLOWF_FIXED: Only used fixed/internal media
+ * @BOOTFLOWF_SHOW_BOOTMETHOD: Show each bootmethod before scanning it
  */
 enum bootflow_flags_t {
-	BOOTFLOWF_FIXED		= 1 << 0,
+	BOOTFLOWF_FIXED			= 1 << 0,
+	BOOTFLOWF_SHOW_BOOTMETHOD	= 1 << 1,
+};
+
+/**
+ * struct bootmethod_iter - state for iterating through bootflows
+ *
+ * @flags: Flags to use (see enum bootflow_flags_t)
+ * @dev: Current bootmethod
+ * @seq: Current sequence number within that bootmethod (determines partition
+ *	number, for example)
+ */
+struct bootmethod_iter {
+	int flags;
+	struct udevice *dev;
+	int seq;
 };
 
 /**
@@ -152,7 +162,7 @@ int bootmethod_get_bootflow(struct udevice *dev, int seq,
  * @return 0 if found, -ESHUTDOWN if no more bootflows, other -ve on error
  */
 int bootmethod_scan_first_bootflow(struct bootmethod_iter *iter, int flags,
-			      struct bootflow *bflow);
+				   struct bootflow *bflow);
 
 /**
  * bootmethod_scan_next_bootflow() - find the next bootflow
@@ -165,7 +175,7 @@ int bootmethod_scan_first_bootflow(struct bootmethod_iter *iter, int flags,
  * @return 0 if found, -ESHUTDOWN if no more bootflows, -ve on error
  */
 int bootmethod_scan_next_bootflow(struct bootmethod_iter *iter,
-			     struct bootflow *bflow);
+				  struct bootflow *bflow);
 
 /**
  * bootmethod_bind() - Bind a new named bootmethod device

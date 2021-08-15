@@ -171,6 +171,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			printf("Scanning for bootflows in all bootmethods\n");
 		show_header();
 		bootmethod_clear_glob();
+		iter.flags = list ? BOOTFLOWF_SHOW_BOOTMETHOD : 0;
 		for (ret = bootmethod_scan_first_bootflow(&iter, 0, &bflow);
 		     !ret;
 		     num_valid++,
