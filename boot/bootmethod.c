@@ -19,9 +19,10 @@
 enum {
 	/*
 	 * Set some sort of limit on the number of bootflows a bootmethod can
-	 * return
+	 * return. Note that for disks this limits the partitions numbers that
+	 * are scanned to 1..MAX_BOOTFLOWS_PER_BOOTMETHOD
 	 */
-	MAX_BOOTFLOWS_PER_BOOTMETHOD	= 10,
+	MAX_BOOTFLOWS_PER_BOOTMETHOD	= 20,
 };
 
 static const char *const bootmethod_state[BOOTFLOWST_COUNT] = {
@@ -206,6 +207,7 @@ int bootmethod_get_bootflow(struct udevice *dev, int seq,
 	if (!ops->get_bootflow)
 		return -ENOSYS;
 	memset(bflow, '\0', sizeof(*bflow));
+	bflow->dev = dev;
 
 	return ops->get_bootflow(dev, seq, bflow);
 }
@@ -271,8 +273,11 @@ int bootmethod_scan_next_bootflow(struct bootmethod_iter *iter,
 			return 0;
 		}
 
-		/* If we got some other error, try the next partition */
-		else if (ret != -ESHUTDOWN) {
+		/*
+		 * Unless there are no more partitions or no bootflow support,
+		 * try the next partition
+		 */
+		else if (ret != -ESHUTDOWN && ret != -ENOSYS) {
 			log_debug("Bootmethod '%s' seq %d: Error %d\n",
 				  dev->name, iter->seq, ret);
 			if (iter->seq++ == MAX_BOOTFLOWS_PER_BOOTMETHOD)
@@ -328,7 +333,6 @@ int bootmethod_find_in_blk(struct udevice *dev, struct udevice *blk, int seq,
 	if (seq >= MAX_BOOTFLOWS_PER_BOOTMETHOD)
 		return -ESHUTDOWN;
 
-	bflow->dev = dev;
 	bflow->blk = blk;
 	bflow->seq = seq;
 	snprintf(name, sizeof(name), "%s.part_%x", dev->name, partnum);
@@ -338,6 +342,10 @@ int bootmethod_find_in_blk(struct udevice *dev, struct udevice *blk, int seq,
 
 	bflow->state = BOOTFLOWST_BASE;
 	ret = part_get_info(desc, partnum, &info);
+
+	/* This error indicates the media is not present */
+	if (ret != -EOPNOTSUPP)
+		bflow->state = BOOTFLOWST_MEDIA;
 	if (ret)
 		return log_msg_ret("part", ret);
 
@@ -366,7 +374,7 @@ int bootflow_boot(struct bootflow *bflow)
 	int ret;
 
 	if (bflow->state != BOOTFLOWST_LOADED)
-		return log_msg_ret("load", ret);
+		return log_msg_ret("load", -EPROTO);
 
 	switch (bflow->type) {
 	case BOOTFLOWT_DISTRO:

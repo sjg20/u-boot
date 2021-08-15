@@ -9,7 +9,9 @@
 #include <common.h>
 #include <bootmethod.h>
 #include <command.h>
+#include <console.h>
 #include <dm.h>
+#include <mapmem.h>
 
 /**
  * report_bootflow_err() - Report where a bootflow failed
@@ -154,8 +156,10 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 		bootmethod_clear_bootflows(dev);
 		for (i = 0, ret = 0; i < 100 && ret != -ESHUTDOWN; i++) {
 			ret = bootmethod_get_bootflow(dev, i, &bflow);
-			if ((ret && !all) || ret == -ESHUTDOWN)
+			if ((ret && !all) || ret == -ESHUTDOWN) {
+				/* TODO(sjg@chromium.org): free bflow fields */
 				continue;
+			}
 			bflow.err = ret;
 			ret = bootmethod_add_bootflow(&bflow);
 			if (ret) {
@@ -256,6 +260,57 @@ static int do_bootflow_select(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
+static int do_bootflow_info(struct cmd_tbl *cmdtp, int flag, int argc,
+			    char *const argv[])
+{
+	struct bootflow_state *state;
+	struct bootflow *bflow;
+	bool dump = false;
+	int ret;
+
+	if (argc > 1 && *argv[1] == '-')
+		dump = strchr(argv[1], 'd');
+
+	ret = bootmethod_get_state(&state);
+	if (ret)
+		return CMD_RET_FAILURE;
+
+	if (!state->cur_bootflow) {
+		printf("No bootflow selected\n");
+		return CMD_RET_FAILURE;
+	}
+	bflow = state->cur_bootflow;
+
+	printf("Name:      %s\n", bflow->name);
+	printf("Device:    %s\n", bflow->dev->name);
+	printf("Block dev: %s\n", bflow->blk ? bflow->blk->name : "(none)");
+	printf("Sequence:  %d\n", bflow->seq);
+	printf("Type:      %s\n", bootmethod_type_get_name(bflow->type));
+	printf("State:     %s\n", bootmethod_state_get_name(bflow->state));
+	printf("Partition: %d\n", bflow->part);
+	printf("Filename:  %s\n", bflow->fname);
+	printf("Buffer:    %lx\n", (ulong)map_to_sysmem(bflow->buf));
+	printf("Size:      %x (%d bytes)\n", bflow->size, bflow->size);
+	printf("Error:     %d\n", bflow->err);
+	printf("Contents:\n\n");
+	if (dump && bflow->buf) {
+		/* Set some sort of maximum on the size */
+		int size = min(bflow->size, 10 << 10);
+		int i;
+
+		for (i = 0; i < size; i++) {
+			putc(bflow->buf[i]);
+			if (!(i % 128) && ctrlc()) {
+				printf("...interrupted\n");
+				break;
+			}
+
+		}
+	}
+
+	return 0;
+}
+
 static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])
 {
@@ -271,8 +326,8 @@ static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 		printf("No bootflow selected\n");
 		return CMD_RET_FAILURE;
 	}
-
 	bflow = state->cur_bootflow;
+
 	ret = bootflow_boot(bflow);
 	switch (ret) {
 	case -EPROTO:
@@ -296,11 +351,13 @@ static char bootflow_help_text[] =
 	"scan [-lae]  - scan for valid bootflows (-l list, -a all, -e errors))\n"
 	"list [-e]    - list scanned bootflows (-e errors)\n"
 	"select       - select a bootflow\n"
-	"boot         - boot a bootflow";
+	"info [-d]    - show info on current bootflow (-d dump bootflow)\n"
+	"boot         - boot current bootflow";
 #endif
 
 U_BOOT_CMD_WITH_SUBCMDS(bootflow, "Bootflows", bootflow_help_text,
 	U_BOOT_SUBCMD_MKENT(scan, 2, 1, do_bootflow_scan),
 	U_BOOT_SUBCMD_MKENT(list, 2, 1, do_bootflow_list),
 	U_BOOT_SUBCMD_MKENT(select, 2, 1, do_bootflow_select),
+	U_BOOT_SUBCMD_MKENT(info, 2, 1, do_bootflow_info),
 	U_BOOT_SUBCMD_MKENT(boot, 1, 1, do_bootflow_boot));

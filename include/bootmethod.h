@@ -79,6 +79,7 @@ extern struct bootflow_cmds g_bootflow_cmds;
  * @part: Partition number
  * @fname: Filename of bootflow file (allocated)
  * @buf: Bootflow file contents (allocated)
+ * @size: Size of bootflow in bytes
  * @err: Error number received (0 if OK)
  */
 struct bootflow {
@@ -93,6 +94,7 @@ struct bootflow {
 	int part;
 	char *fname;
 	char *buf;
+	int size;
 	int err;
 };
 

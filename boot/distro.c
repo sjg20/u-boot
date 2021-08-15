@@ -44,6 +44,7 @@ int distro_boot_setup(struct blk_desc *desc, int partnum,
 	if (ret)
 		return log_msg_ret("size", ret);
 	bflow->state = BOOTFLOWST_FILE;
+	bflow->size = size;
 	log_debug("   - distro file size %x\n", (uint)size);
 	if (size > 0x10000)
 		return log_msg_ret("chk", -E2BIG);
