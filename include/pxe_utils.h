@@ -88,6 +88,7 @@ typedef int (*pxe_getfile_func)(struct pxe_context *ctx, const char *file_path,
  * @allow_abs_path: true to allow absolute paths
  * @bootdir: Directory that files are loaded from ("" if no directory). This is
  *	allocated
+ * @pxe_file: File that was loaded by this context
  */
 struct pxe_context {
 	struct cmd_tbl *cmdtp;
@@ -106,6 +107,7 @@ struct pxe_context {
 	void *userdata;
 	bool allow_abs_path;
 	char *bootdir;
+	char *pxe_file;
 };
 
 /**
@@ -233,5 +235,7 @@ int pxe_process(struct pxe_context *ctx, ulong pxefile_addr_r, bool prompt);
  * @return 0 if OK, -ENOENT if no such variable, -EINVAL if format is invalid
  */
 int pxe_get_file_size(ulong *sizep);
+
+int pxe_get(ulong pxefile_addr_r, char **fnamep);
 
 #endif /* __PXE_UTILS_H */

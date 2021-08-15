@@ -1452,6 +1452,7 @@ int pxe_setup_ctx(struct pxe_context *ctx, struct cmd_tbl *cmdtp,
 	ctx->getfile = getfile;
 	ctx->userdata = userdata;
 	ctx->allow_abs_path = allow_abs_path;
+	ctx->pxe_file = NULL;
 
 	/* figure out the boot directory, if there is one */
 	if (bootfile && strlen(bootfile) >= MAX_TFTP_PATH_LEN)
@@ -1471,6 +1472,7 @@ int pxe_setup_ctx(struct pxe_context *ctx, struct cmd_tbl *cmdtp,
 void pxe_destroy_ctx(struct pxe_context *ctx)
 {
 	free(ctx->bootdir);
+	free(ctx->pxe_file);
 }
 
 int pxe_process(struct pxe_context *ctx, ulong pxefile_addr_r, bool prompt)

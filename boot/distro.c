@@ -16,6 +16,7 @@
 #include <malloc.h>
 #include <mapmem.h>
 #include <pxe_utils.h>
+#include <vsprintf.h>
 
 #define DISTRO_FNAME	"extlinux/extlinux.conf"
 
@@ -27,6 +28,34 @@
 struct distro_info {
 	struct bootflow *bflow;
 };
+
+int distro_net_setup(struct bootflow *bflow)
+{
+	const char *addr_str;
+	ulong addr;
+	char *buf;
+	int ret;
+
+	addr_str = env_get("pxefile_addr_r");
+	if (!addr_str)
+		return log_msg_ret("pxeb", -EPERM);
+	addr = simple_strtoul(addr_str, NULL, 16);
+
+	bflow->type = BOOTFLOWT_DISTRO;
+	ret = pxe_get(addr, &bflow->name);
+	if (ret)
+		return log_msg_ret("pxeb", ret);
+
+	bflow->fname = strdup(DISTRO_FNAME);
+	if (!bflow->fname)
+		return log_msg_ret("name", -ENOMEM);
+
+	bflow->state = BOOTFLOWST_LOADED;
+	buf = map_sysmem(addr, 0);
+	bflow->buf = buf;
+
+	return 0;
+}
 
 int distro_boot_setup(struct blk_desc *desc, int partnum,
 		      struct bootflow *bflow)
