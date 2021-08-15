@@ -418,26 +418,9 @@ int mmc_bind(struct udevice *dev, struct mmc *mmc, const struct mmc_config *cfg)
 	mmc->cfg = cfg;
 	mmc->priv = dev;
 
-	/* Create a bootmethod if supported */
-	if (CONFIG_IS_ENABLED(BOOTMETHOD)) {
-		struct udevice *bm;
-
-		ret = device_find_first_child_by_uclass(dev, UCLASS_BOOTMETHOD,
-							&bm);
-		if (ret) {
-			if (ret != -ENODEV) {
-				log_debug("Cannot access bootmethod device\n");
-				return ret;
-			}
-
-			ret = bootmethod_bind(dev, "mmc_bootmethod",
-					      "bootmethod", &bm);
-			if (ret) {
-				log_debug("Cannot create bootmethod device\n");
-				return ret;
-			}
-		}
-	}
+	ret = bootmethod_setup_for_dev(dev, "mmc_bootmethod");
+	if (ret)
+		return log_msg_ret("bootmethod", ret);
 
 	/* the following chunk was from mmc_register() */
 

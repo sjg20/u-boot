@@ -426,6 +426,32 @@ void bootmethod_list(bool probe)
 	printf("(%d device%s)\n", i, i != 1 ? "s" : "");
 }
 
+int bootmethod_setup_for_dev(struct udevice *parent, const char *drv_name)
+{
+	struct udevice *bm;
+	int ret;
+
+	if (!CONFIG_IS_ENABLED(BOOTMETHOD))
+		return 0;
+
+	ret = device_find_first_child_by_uclass(parent, UCLASS_BOOTMETHOD,
+						&bm);
+	if (ret) {
+		if (ret != -ENODEV) {
+			log_debug("Cannot access bootmethod device\n");
+			return ret;
+		}
+
+		ret = bootmethod_bind(parent, drv_name, "bootmethod", &bm);
+		if (ret) {
+			log_debug("Cannot create bootmethod device\n");
+			return ret;
+		}
+	}
+
+	return 0;
+}
+
 static int bootmethod_init(struct uclass *uc)
 {
 	struct bootflow_state *state = uclass_get_priv(uc);

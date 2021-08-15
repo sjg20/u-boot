@@ -137,7 +137,9 @@ struct bootmethod_ops {
 	 * @dev:	Bootflow device to check
 	 * @seq:	Sequence number of bootflow to read (0 for first)
 	 * @bflow:	Returns bootflow if found
-	 * @return sequence number of bootflow (>=0) if found, -ve on error
+	 * @return 0 if OK, -ESHUTDOWN if there are no more bootflows on this
+	 *	device, -ENOSYS if this device doesn't support bootflows,
+	 *	other -ve value on other error
 	 */
 	int (*get_bootflow)(struct udevice *dev, int seq,
 			    struct bootflow *bflow);
@@ -151,7 +153,9 @@ struct bootmethod_ops {
  * @dev:	Bootflow device to check
  * @seq:	Sequence number of bootflow to read (0 for first)
  * @bflow:	Returns bootflow if found
- * @return 0 if OK, -ve on error (e.g. there is no SPI base)
+ * @return 0 if OK, -ESHUTDOWN if there are no more bootflows on this device,
+ *	-ENOSYS if this device doesn't support bootflows, other -ve value on
+ *	other error
  */
 int bootmethod_get_bootflow(struct udevice *dev, int seq,
 			    struct bootflow *bflow);
@@ -272,5 +276,7 @@ void bootflow_free(struct bootflow *bflow);
  *	when we are expecting it to boot
  */
 int bootflow_boot(struct bootflow *bflow);
+
+int bootmethod_setup_for_dev(struct udevice *parent, const char *drv_name);
 
 #endif
