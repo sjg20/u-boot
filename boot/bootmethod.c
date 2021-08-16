@@ -69,8 +69,9 @@ const char *bootmethod_type_get_name(enum bootflow_type_t type)
 
 void bootflow_free(struct bootflow *bflow)
 {
-	free(bflow->fname);
 	free(bflow->name);
+	free(bflow->subdir);
+	free(bflow->fname);
 	free(bflow->buf);
 }
 

@@ -319,8 +319,8 @@ config BOOTMETHOD_DISTRO
 	default y
 	help
 	  Enables support for distro boot using bootmethods. This makes the
-	  bootmethods look for a 'boot/extlinux/extlinux.conf' on each
-	  filesystem they scan.
+	  bootmethods look for a 'extlinux/extlinux.conf' on each filesystem
+	  they scan.
 
 	  This provides a way to try out bootmethod on an existing boot flow.
 

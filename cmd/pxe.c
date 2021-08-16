@@ -31,7 +31,6 @@ static int do_get_tftp(struct pxe_context *ctx, const char *file_path,
 	char *tftp_argv[] = {"tftp", NULL, NULL, NULL};
 	int ret;
 
-	printf("get %s %s\n", file_addr, file_path);
 	tftp_argv[1] = file_addr;
 	tftp_argv[2] = (void *)file_path;
 
@@ -117,11 +116,9 @@ int pxe_get(ulong pxefile_addr_r, char **fnamep, ulong *sizep)
 	struct pxe_context ctx;
 	int i;
 
-	printf("pxe_get: bootfile=%s\n", env_get("bootfile"));
 	if (pxe_setup_ctx(&ctx, cmdtp, do_get_tftp, NULL, false,
 			  env_get("bootfile")))
 		return -ENOMEM;
-	printf("line %d\n", __LINE__);
 	/*
 	 * Keep trying paths until we successfully get a file we're looking
 	 * for.
@@ -130,7 +127,6 @@ int pxe_get(ulong pxefile_addr_r, char **fnamep, ulong *sizep)
 	    pxe_mac_path(&ctx, pxefile_addr_r) > 0 ||
 	    pxe_ipaddr_paths(&ctx, pxefile_addr_r) > 0)
 		goto done;
-	printf("line %d\n", __LINE__);
 
 	i = 0;
 	while (pxe_default_paths[i]) {

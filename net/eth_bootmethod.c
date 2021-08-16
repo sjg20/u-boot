@@ -54,7 +54,6 @@ static int eth_get_bootflow(struct udevice *dev, int seq,
 
 	if (CONFIG_IS_ENABLED(BOOTMETHOD_DISTRO)) {
 		ret = distro_net_setup(bflow);
-		printf("ret=%d\n", ret);
 		if (ret)
 			return log_msg_ret("distro", ret);
 	}
