@@ -159,7 +159,8 @@
 	"scriptaddr=0x02400000\0" \
 	"pxefile_addr_r=0x02500000\0" \
 	"fdt_addr_r=0x02600000\0" \
-	"ramdisk_addr_r=0x02700000\0"
+	"ramdisk_addr_r=0x02700000\0" \
+	"ethaddr=b8:27:eb:a6:61:e1\0"
 
 #if CONFIG_IS_ENABLED(CMD_MMC)
 	#define BOOT_TARGET_MMC(func) \
