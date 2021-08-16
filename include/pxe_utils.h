@@ -89,6 +89,7 @@ typedef int (*pxe_getfile_func)(struct pxe_context *ctx, const char *file_path,
  * @bootdir: Directory that files are loaded from ("" if no directory). This is
  *	allocated
  * @pxe_file: File that was loaded by this context
+ * @pxe_file_size: Size of the PXE file
  */
 struct pxe_context {
 	struct cmd_tbl *cmdtp;
@@ -108,6 +109,7 @@ struct pxe_context {
 	bool allow_abs_path;
 	char *bootdir;
 	char *pxe_file;
+	ulong pxe_file_size;
 };
 
 /**
@@ -236,6 +238,6 @@ int pxe_process(struct pxe_context *ctx, ulong pxefile_addr_r, bool prompt);
  */
 int pxe_get_file_size(ulong *sizep);
 
-int pxe_get(ulong pxefile_addr_r, char **fnamep);
+int pxe_get(ulong pxefile_addr_r, char **fnamep, ulong *sizep);
 
 #endif /* __PXE_UTILS_H */

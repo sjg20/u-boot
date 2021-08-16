@@ -65,7 +65,7 @@ static void report_bootflow_err(struct bootflow *bflow, int err)
  */
 static void show_bootflow(int index, struct bootflow *bflow, bool errors)
 {
-	printf("%3x  %-11s  %-6s  %4x  %-14s  %s\n", index,
+	printf("%3x  %-11s  %-6s  %4x  %-24s  %s\n", index,
 	       bootmethod_type_get_name(bflow->type),
 	       bootmethod_state_get_name(bflow->state), bflow->part,
 	       bflow->name, bflow->fname);
@@ -75,8 +75,8 @@ static void show_bootflow(int index, struct bootflow *bflow, bool errors)
 
 static void show_header(void)
 {
-	printf("Seq  Type         State   Part  Name            Filename\n");
-	printf("---  -----------  ------  ----  --------------  ----------------\n");
+	printf("Seq  Type         State   Part  Name                      Filename\n");
+	printf("---  -----------  ------  ----  ------------------------  ----------------\n");
 }
 
 static void show_footer(int count, int num_valid)
@@ -288,16 +288,17 @@ static int do_bootflow_info(struct cmd_tbl *cmdtp, int flag, int argc,
 	printf("Type:      %s\n", bootmethod_type_get_name(bflow->type));
 	printf("State:     %s\n", bootmethod_state_get_name(bflow->state));
 	printf("Partition: %d\n", bflow->part);
+	printf("Subdir:    %s\n", bflow->subdir ? bflow->subdir : "(none)");
 	printf("Filename:  %s\n", bflow->fname);
 	printf("Buffer:    %lx\n", (ulong)map_to_sysmem(bflow->buf));
 	printf("Size:      %x (%d bytes)\n", bflow->size, bflow->size);
 	printf("Error:     %d\n", bflow->err);
-	printf("Contents:\n\n");
 	if (dump && bflow->buf) {
 		/* Set some sort of maximum on the size */
 		int size = min(bflow->size, 10 << 10);
 		int i;
 
+		printf("Contents:\n\n");
 		for (i = 0; i < size; i++) {
 			putc(bflow->buf[i]);
 			if (!(i % 128) && ctrlc()) {

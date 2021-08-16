@@ -31,6 +31,7 @@ static int do_get_tftp(struct pxe_context *ctx, const char *file_path,
 	char *tftp_argv[] = {"tftp", NULL, NULL, NULL};
 	int ret;
 
+	printf("get %s %s\n", file_addr, file_path);
 	tftp_argv[1] = file_addr;
 	tftp_argv[2] = (void *)file_path;
 
@@ -39,6 +40,7 @@ static int do_get_tftp(struct pxe_context *ctx, const char *file_path,
 	ret = pxe_get_file_size(sizep);
 	if (ret)
 		return log_msg_ret("tftp", ret);
+	ctx->pxe_file_size = *sizep;
 
 	ctx->pxe_file = strdup(file_path);
 	if (!ctx->pxe_file)
@@ -109,41 +111,45 @@ static int pxe_ipaddr_paths(struct pxe_context *ctx, unsigned long pxefile_addr_
 	return -ENOENT;
 }
 
-int pxe_get(ulong pxefile_addr_r, char **fnamep)
+int pxe_get(ulong pxefile_addr_r, char **fnamep, ulong *sizep)
 {
 	struct cmd_tbl cmdtp[] = {};	/* dummy */
 	struct pxe_context ctx;
 	int i;
 
+	printf("pxe_get: bootfile=%s\n", env_get("bootfile"));
 	if (pxe_setup_ctx(&ctx, cmdtp, do_get_tftp, NULL, false,
 			  env_get("bootfile")))
 		return -ENOMEM;
+	printf("line %d\n", __LINE__);
 	/*
 	 * Keep trying paths until we successfully get a file we're looking
 	 * for.
 	 */
 	if (pxe_uuid_path(&ctx, pxefile_addr_r) > 0 ||
 	    pxe_mac_path(&ctx, pxefile_addr_r) > 0 ||
-	    pxe_ipaddr_paths(&ctx, pxefile_addr_r) > 0) {
-		pxe_destroy_ctx(&ctx);
-		return 0;
-	}
+	    pxe_ipaddr_paths(&ctx, pxefile_addr_r) > 0)
+		goto done;
+	printf("line %d\n", __LINE__);
 
 	i = 0;
 	while (pxe_default_paths[i]) {
 		if (get_pxelinux_path(&ctx, pxe_default_paths[i],
-				      pxefile_addr_r) > 0) {
-			pxe_destroy_ctx(&ctx);
-			return 0;
-		}
+				      pxefile_addr_r) > 0)
+			goto done;
 		i++;
 	}
-	*fnamep = ctx.pxe_file;
-	ctx.pxe_file = NULL;
 
 	pxe_destroy_ctx(&ctx);
 
 	return -ENOENT;
+done:
+	*fnamep = ctx.pxe_file;
+	ctx.pxe_file = NULL;
+	*sizep = ctx.pxe_file_size;
+	pxe_destroy_ctx(&ctx);
+
+	return 0;
 }
 
 /*
@@ -166,6 +172,7 @@ do_pxe_get(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	char *pxefile_addr_str;
 	ulong pxefile_addr_r;
 	char *fname;
+	ulong size;
 	int ret;
 
 	if (argc != 1)
@@ -181,7 +188,7 @@ do_pxe_get(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	if (ret < 0)
 		return 1;
 
-	ret = pxe_get(pxefile_addr_r, &fname);
+	ret = pxe_get(pxefile_addr_r, &fname, &size);
 	switch (ret) {
 	case 0:
 		printf("Config file '%s' found\n", fname);

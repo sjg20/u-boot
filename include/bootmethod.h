@@ -70,16 +70,18 @@ extern struct bootflow_cmds g_bootflow_cmds;
  * @bm_node: Points to siblings in the same bootmethod
  * @glob_node: Points to siblings in the global list (all bootmethod)
  * @dev: Bootmethod device which produced this bootflow
- * @blk: Block device which contains this bootflow
+ * @blk: Block device which contains this bootflow, NULL if this is a network
+ *	device
  * @seq: Sequence number of bootflow within its bootmethod, typically the
  *	partition number (0...)
  * @name: Name of bootflow (allocated)
  * @type: Bootflow type (enum bootflow_type_t)
  * @state: Current state (enum bootflow_state_t)
  * @part: Partition number
+ * @subdir: Subdirectory to fetch files from (with trailing /), or NULL if none
  * @fname: Filename of bootflow file (allocated)
  * @buf: Bootflow file contents (allocated)
- * @size: Size of bootflow in bytes
+ * @size: Size of bootflow file in bytes
  * @err: Error number received (0 if OK)
  */
 struct bootflow {
@@ -92,6 +94,7 @@ struct bootflow {
 	enum bootflow_type_t type;
 	enum bootflow_state_t state;
 	int part;
+	char *subdir;
 	char *fname;
 	char *buf;
 	int size;
