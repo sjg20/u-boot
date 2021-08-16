@@ -7,6 +7,10 @@ mnt=/mnt/x
 fat=/mnt/y
 dstdir=$fat/extlinux
 
+vmlinux=vmlinuz-5.3.7-301.fc31.armv7hl
+initrd=initramfs-5.3.7-301.fc31.armv7hl.img
+dtb=dtb-5.3.7-301.fc31.armv7hl/sandbox.dtb
+
 old() {
 	mkfs.vfat $file
 	sudo mount -o loop $file $mnt
@@ -50,6 +54,22 @@ fat_setup() {
 fat_finish() {
 	sudo mkdir -p $dstdir
 	sudo cp /tmp/extlinux.conf $dstdir
+
+	echo "vmlinux" | gzip >/tmp/inf
+	mkimage -f auto -d /tmp/inf /tmp/$vmlinux
+
+	sudo cp /tmp/$vmlinux $fat
+
+	echo "initd" >/tmp/$initrd
+	sudo cp /tmp/$initrd $fat
+
+	dtb_dir="$(dirname /tmp/$dtb)"
+	mkdir -p $dtb_dir
+	echo "/dts-v1/; / {};" | dtc >/tmp/$dtb
+	sudo cp -r $dtb_dir $fat
+
+	ls $dstdir
+
 	sudo umount $fat
 
 	losetup -d $loop
@@ -91,10 +111,10 @@ timeout 20
 totaltimeout 600
 
 label Fedora-Workstation-armhfp-31-1.9 (5.3.7-301.fc31.armv7hl)
-	kernel /vmlinuz-5.3.7-301.fc31.armv7hl
+	kernel /$vmlinux
 	append ro root=UUID=9732b35b-4cd5-458b-9b91-80f7047e0b8a rhgb quiet LANG=en_US.UTF-8 cma=192MB cma=256MB
 	fdtdir /dtb-5.3.7-301.fc31.armv7hl/
-	initrd /initramfs-5.3.7-301.fc31.armv7hl.img
+	initrd /$initrd
 EOF
 	fat_finish
 }

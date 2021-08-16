@@ -174,10 +174,11 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 		return CMD_RET_FAILURE;
 	dev = state->cur_bootmethod;
 	if (dev) {
-		if (list)
+		if (list) {
 			printf("Scanning for bootflows in bootmethod '%s'\n",
 			       dev->name);
-		show_header();
+			show_header();
+		}
 		bootmethod_clear_bootflows(dev);
 		for (i = 0, ret = 0; i < 100 && ret != -ESHUTDOWN; i++) {
 			ret = bootmethod_get_bootflow(dev, i, &bflow);
@@ -200,9 +201,10 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 	} else {
 		int flags = 0;
 
-		if (list)
+		if (list) {
 			printf("Scanning for bootflows in all bootmethods\n");
-		show_header();
+			show_header();
+		}
 		bootmethod_clear_glob();
 		if (list)
 			flags |= BOOTFLOWF_SHOW;

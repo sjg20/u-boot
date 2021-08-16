@@ -639,6 +639,15 @@ static int label_boot(struct pxe_context *ctx, struct pxe_label *label)
 		bootm_argc = 4;
 	}
 
+	{
+		int i;
+
+		printf("cmdline: ");
+		for (i = 0; i < bootm_argc; i++)
+			printf("%s ", bootm_argv[i]);
+		printf("\n");
+	}
+
 	kernel_addr = genimg_get_kernel_addr(bootm_argv[1]);
 	buf = map_sysmem(kernel_addr, 0);
 	/* Try bootm for legacy and FIT format image */

@@ -81,7 +81,9 @@ static int do_bootmethod_info(struct cmd_tbl *cmdtp, int flag, int argc,
 	ret = bootmethod_check_state(&state);
 	if (ret)
 		return CMD_RET_FAILURE;
-	printf("%s\n", state->cur_bootmethod->name);
+	printf("Name:      %s\n", state->cur_bootmethod->name);
+	printf("Uclass:    %s\n",
+	       dev_get_uclass_name(dev_get_parent(state->cur_bootmethod)));
 
 	return 0;
 }
