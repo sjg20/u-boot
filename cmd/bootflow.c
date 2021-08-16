@@ -366,11 +366,11 @@ static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 
 #ifdef CONFIG_SYS_LONGHELP
 static char bootflow_help_text[] =
-	"scan [-abel]  - scan for valid bootflows (-l list, -a all, -e errors, -b boot)\n"
-	"list [-e]    - list scanned bootflows (-e errors)\n"
-	"select       - select a bootflow\n"
-	"info [-d]    - show info on current bootflow (-d dump bootflow)\n"
-	"boot         - boot current bootflow (or first available if none selected)";
+	"scan [-abel] - scan for valid bootflows (-l list, -a all, -e errors, -b boot)\n"
+	"bootflow list [-e]    - list scanned bootflows (-e errors)\n"
+	"bootflow select       - select a bootflow\n"
+	"bootflow info [-d]    - show info on current bootflow (-d dump bootflow)\n"
+	"bootflow boot         - boot current bootflow (or first available if none selected)";
 #endif
 
 U_BOOT_CMD_WITH_SUBCMDS(bootflow, "Bootflows", bootflow_help_text,
