@@ -19,6 +19,12 @@ static int mmc_get_bootflow(struct udevice *dev, int seq,
 	int ret;
 
 	ret = mmc_get_blk(mmc_dev, &blk);
+	/*
+	 * If there is no media, indicate that no more partitions should be
+	 * checked
+	 */
+	if (ret == -EOPNOTSUPP)
+		ret = -ESHUTDOWN;
 	if (ret)
 		return log_msg_ret("blk", ret);
 	assert(blk);

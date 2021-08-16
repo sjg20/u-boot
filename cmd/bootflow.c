@@ -65,9 +65,10 @@ static void report_bootflow_err(struct bootflow *bflow, int err)
  */
 static void show_bootflow(int index, struct bootflow *bflow, bool errors)
 {
-	printf("%3x  %-11s  %-6s  %4x  %-24s  %s\n", index,
+	printf("%3x  %-11s  %-6s  %-9.9s %4x  %-25.25s %s\n", index,
 	       bootmethod_type_get_name(bflow->type),
-	       bootmethod_state_get_name(bflow->state), bflow->part,
+	       bootmethod_state_get_name(bflow->state),
+	       dev_get_uclass_name(dev_get_parent(bflow->dev)), bflow->part,
 	       bflow->name, bflow->fname);
 	if (errors)
 		report_bootflow_err(bflow, bflow->err);
@@ -75,13 +76,13 @@ static void show_bootflow(int index, struct bootflow *bflow, bool errors)
 
 static void show_header(void)
 {
-	printf("Seq  Type         State   Part  Name                      Filename\n");
-	printf("---  -----------  ------  ----  ------------------------  ----------------\n");
+	printf("Seq  Type         State   Uclass    Part  Name                      Filename\n");
+	printf("---  -----------  ------  --------  ----  ------------------------  ----------------\n");
 }
 
 static void show_footer(int count, int num_valid)
 {
-	printf("---  -----------  ------  ----  --------------  ----------------\n");
+	printf("---  -----------  ------  --------  ----  ------------------------  ----------------\n");
 	printf("(%d bootflow%s, %d valid)\n", count, count != 1 ? "s" : "",
 	       num_valid);
 }

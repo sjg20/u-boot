@@ -206,7 +206,7 @@ int bootmethod_bind(struct udevice *parent, const char *drv_name,
 /**
  * bootmethod_find_in_blk() - Find a bootmethod in a block device
  *
- * @dev: Bootflow device containing this block device
+ * @dev: Bootflow device associated with this block device
  * @blk: Block device to search
  * @seq: Sequence number within block device, used as the partition number,
  *	after adding 1

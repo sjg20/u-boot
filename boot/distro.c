@@ -51,8 +51,9 @@ static int distro_net_getfile(struct pxe_context *ctx, const char *file_path,
 
 int distro_net_setup(struct bootflow *bflow)
 {
-	const char *addr_str, *bootfile;
+	const char *addr_str;
 	char fname[200];
+	char *bootfile;
 	ulong addr;
 	ulong size;
 	char *buf;
@@ -64,13 +65,12 @@ int distro_net_setup(struct bootflow *bflow)
 	addr = simple_strtoul(addr_str, NULL, 16);
 
 	bflow->type = BOOTFLOWT_DISTRO;
-	ret = pxe_get(addr, &bflow->name, &size);
+	ret = pxe_get(addr, &bootfile, &size);
 	if (ret)
 		return log_msg_ret("pxeb", ret);
 	bflow->size = size;
 
 	/* Use the directory of the dhcp bootfile as our subdir, if provided */
-	bootfile = env_get("bootfile");
 	if (bootfile) {
 		const char *last_slash;
 		int path_len;
