@@ -485,7 +485,7 @@ static int eth_post_bind(struct udevice *dev)
 #ifdef CONFIG_DM_ETH_PHY
 	eth_phy_binds_nodes(dev);
 #endif
-	if (CONFIG_IS_ENABLED(CONFIG_BOOTMETHOD_ETH)) {
+	if (CONFIG_IS_ENABLED(BOOTMETHOD_ETH)) {
 		ret = bootmethod_setup_for_dev(dev, "eth_bootmethod");
 		if (ret)
 			return log_msg_ret("bootmethod", ret);

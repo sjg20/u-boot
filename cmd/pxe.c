@@ -110,7 +110,7 @@ static int pxe_ipaddr_paths(struct pxe_context *ctx, unsigned long pxefile_addr_
 	return -ENOENT;
 }
 
-int pxe_get(ulong pxefile_addr_r, char **fnamep, ulong *sizep)
+int pxe_get(ulong pxefile_addr_r, char **bootdirp, ulong *sizep)
 {
 	struct cmd_tbl cmdtp[] = {};	/* dummy */
 	struct pxe_context ctx;
@@ -140,8 +140,12 @@ int pxe_get(ulong pxefile_addr_r, char **fnamep, ulong *sizep)
 
 	return -ENOENT;
 done:
-	*fnamep = ctx.pxe_file;
-	ctx.pxe_file = NULL;
+	*bootdirp = env_get("bootfile");
+
+	/*
+	 * The PXE file size is returned but not the name. It is probably not
+	 * that useful.
+	 */
 	*sizep = ctx.pxe_file_size;
 	pxe_destroy_ctx(&ctx);
 

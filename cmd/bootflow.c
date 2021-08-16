@@ -128,6 +128,29 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
+static int bootflow_run_boot(struct bootflow *bflow)
+{
+	int ret;
+
+	printf("Booting bootflow '%s'\n", bflow->name);
+	ret = bootflow_boot(bflow);
+	switch (ret) {
+	case -EPROTO:
+		printf("Bootflow not loaded (state '%s')\n",
+		       bootmethod_state_get_name(bflow->state));
+		break;
+	case -ENOSYS:
+		printf("Boot type '%s' not supported\n",
+		       bootmethod_type_get_name(bflow->type));
+		break;
+	default:
+		printf("Boot failed (err=%d)\n", ret);
+		break;
+	}
+
+	return 0;
+}
+
 static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])
 {
@@ -135,14 +158,15 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 	struct bootmethod_iter iter;
 	struct udevice *dev;
 	struct bootflow bflow;
-	bool list = false, all = false, errors = false;
+	bool all = false, boot = false, errors = false, list = false;
 	int num_valid = 0;
 	int ret, i;
 
 	if (argc > 1 && *argv[1] == '-') {
-		list = strchr(argv[1], 'l');
 		all = strchr(argv[1], 'a');
+		boot = strchr(argv[1], 'b');
 		errors = strchr(argv[1], 'e');
+		list = strchr(argv[1], 'l');
 	}
 
 	ret = bootmethod_get_state(&state);
@@ -170,6 +194,8 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			num_valid++;
 			if (list)
 				show_bootflow(i, &bflow, errors);
+			if (boot && !bflow.err)
+				bootflow_run_boot(&bflow);
 		}
 	} else {
 		int flags = 0;
@@ -196,6 +222,8 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			}
 			if (list)
 				show_bootflow(i, &bflow, errors);
+			if (boot && !bflow.err)
+				bootflow_run_boot(&bflow);
 		}
 	}
 	if (list)
@@ -306,7 +334,6 @@ static int do_bootflow_info(struct cmd_tbl *cmdtp, int flag, int argc,
 				printf("...interrupted\n");
 				break;
 			}
-
 		}
 	}
 
@@ -329,32 +356,19 @@ static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 		return CMD_RET_FAILURE;
 	}
 	bflow = state->cur_bootflow;
-
-	ret = bootflow_boot(bflow);
-	switch (ret) {
-	case -EPROTO:
-		printf("Bootflow not loaded (state '%s')\n",
-		       bootmethod_state_get_name(bflow->state));
-		break;
-	case -ENOSYS:
-		printf("Boot type '%s' not supported\n",
-		       bootmethod_type_get_name(bflow->type));
-		break;
-	default:
-		printf("Boot failed (err=%d)\n", ret);
-		break;
-	}
+	if (bootflow_run_boot(bflow))
+		return CMD_RET_FAILURE;
 
 	return 0;
 }
 
 #ifdef CONFIG_SYS_LONGHELP
 static char bootflow_help_text[] =
-	"scan [-lae]  - scan for valid bootflows (-l list, -a all, -e errors))\n"
+	"scan [-abel]  - scan for valid bootflows (-l list, -a all, -e errors, -b boot)\n"
 	"list [-e]    - list scanned bootflows (-e errors)\n"
 	"select       - select a bootflow\n"
 	"info [-d]    - show info on current bootflow (-d dump bootflow)\n"
-	"boot         - boot current bootflow";
+	"boot         - boot current bootflow (or first available if none selected)";
 #endif
 
 U_BOOT_CMD_WITH_SUBCMDS(bootflow, "Bootflows", bootflow_help_text,

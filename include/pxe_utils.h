@@ -88,7 +88,7 @@ typedef int (*pxe_getfile_func)(struct pxe_context *ctx, const char *file_path,
  * @allow_abs_path: true to allow absolute paths
  * @bootdir: Directory that files are loaded from ("" if no directory). This is
  *	allocated
- * @pxe_file: File that was loaded by this context
+ * @pxe_file: PXE file that was loaded by this context. This is allocated
  * @pxe_file_size: Size of the PXE file
  */
 struct pxe_context {
@@ -238,6 +238,18 @@ int pxe_process(struct pxe_context *ctx, ulong pxefile_addr_r, bool prompt);
  */
 int pxe_get_file_size(ulong *sizep);
 
-int pxe_get(ulong pxefile_addr_r, char **fnamep, ulong *sizep);
+/**
+ * pxe_get() - Get the PXE file from the server
+ *
+ * This tries various filenames to obtain a PXE file
+ *
+ * @pxefile_addr_r: Address to put file
+ * @bootdirp: Returns the boot filename, or NULL if none. This the 'bootfile'
+ *	option provided by the DHCP server. If none, returns NULL. For example,
+ *	"rpi/info", which indicates that all files should be fetched from the
+ *	"rpi/" subdirectory
+ * @sizep: Size of the PXE file (not bootfile)
+ */
+int pxe_get(ulong pxefile_addr_r, char **bootdirp, ulong *sizep);
 
 #endif /* __PXE_UTILS_H */

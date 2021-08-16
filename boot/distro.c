@@ -53,7 +53,7 @@ int distro_net_setup(struct bootflow *bflow)
 {
 	const char *addr_str;
 	char fname[200];
-	char *bootfile;
+	char *bootdir;
 	ulong addr;
 	ulong size;
 	char *buf;
@@ -65,21 +65,21 @@ int distro_net_setup(struct bootflow *bflow)
 	addr = simple_strtoul(addr_str, NULL, 16);
 
 	bflow->type = BOOTFLOWT_DISTRO;
-	ret = pxe_get(addr, &bootfile, &size);
+	ret = pxe_get(addr, &bootdir, &size);
 	if (ret)
 		return log_msg_ret("pxeb", ret);
 	bflow->size = size;
 
-	/* Use the directory of the dhcp bootfile as our subdir, if provided */
-	if (bootfile) {
+	/* Use the directory of the dhcp bootdir as our subdir, if provided */
+	if (bootdir) {
 		const char *last_slash;
 		int path_len;
 
-		last_slash = strrchr(bootfile, '/');
+		last_slash = strrchr(bootdir, '/');
 		if (last_slash) {
-			path_len = (last_slash - bootfile) + 1;
+			path_len = (last_slash - bootdir) + 1;
 			bflow->subdir = malloc(path_len + 1);
-			memcpy(bflow->subdir, bootfile, path_len);
+			memcpy(bflow->subdir, bootdir, path_len);
 			bflow->subdir[path_len] = '\0';
 		}
 	}
@@ -89,7 +89,6 @@ int distro_net_setup(struct bootflow *bflow)
 	bflow->fname = strdup(fname);
 	if (!bflow->fname)
 		return log_msg_ret("name", -ENOMEM);
-	printf("bflow->fname %s, addr %lx\n", bflow->fname, addr);
 
 	bflow->state = BOOTFLOWST_LOADED;
 	buf = map_sysmem(addr, 0);
@@ -103,7 +102,7 @@ int distro_boot_setup(struct blk_desc *desc, int partnum,
 {
 	loff_t size, bytes_read;
 	ulong addr;
-	void *buf;
+	char *buf;
 	int ret;
 
 	bflow->type = BOOTFLOWT_DISTRO;
@@ -124,7 +123,7 @@ int distro_boot_setup(struct blk_desc *desc, int partnum,
 	if (ret)
 		return log_msg_ret("set", ret);
 
-	buf = malloc(size);
+	buf = malloc(size + 1);
 	if (!buf)
 		return log_msg_ret("buf", -ENOMEM);
 	addr = map_to_sysmem(buf);
@@ -136,6 +135,7 @@ int distro_boot_setup(struct blk_desc *desc, int partnum,
 	}
 	if (size != bytes_read)
 		return log_msg_ret("bread", -EINVAL);
+	buf[size] = '\0';
 	bflow->state = BOOTFLOWST_LOADED;
 	bflow->buf = buf;
 
