@@ -647,6 +647,7 @@ F:	include/bootflow.h
 F:	include/bootmeth.h
 F:	include/distro.h
 F:	net/eth_bootdevice.c
+F:	test/boot/bootdev.c
 
 BTRFS
 M:	Marek Behun <marek.behun@nic.cz>
