@@ -195,7 +195,7 @@ config CMD_BOOTM
 	  Boot an application image from the memory.
 
 config CMD_BOOTSTD
-	bool "bootdev, bootflow"
+	bool "bootdev, bootflow, bootmeth"
 	default y if BOOTSTD
 	help
 	  Support working with standard boot, including listing available
@@ -206,6 +206,7 @@ config CMD_BOOTSTD
 
 	     bootdev
 	     bootflow
+	     bootmeth
 
 config BOOTM_EFI
 	bool "Support booting UEFI FIT images"
