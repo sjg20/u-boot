@@ -194,6 +194,16 @@ config CMD_BOOTM
 	help
 	  Boot an application image from the memory.
 
+config CMD_BOOTDEV
+	bool "bootdev"
+	depends on BOOTSTD
+	default y if BOOTSTD_FULL
+	help
+	  Support listing available bootdevs (boot devices) which can provide an
+	  OS to boot, as well as showing information about a particular one.
+
+	  This command is not necessary for bootstd to work.
+
 config BOOTM_EFI
 	bool "Support booting UEFI FIT images"
 	depends on CMD_BOOTEFI && CMD_BOOTM && FIT
