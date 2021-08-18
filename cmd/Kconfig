@@ -195,12 +195,18 @@ config CMD_BOOTM
 	  Boot an application image from the memory.
 
 config CMD_BOOTSTD
-	bool "bootdev"
+	bool "bootdev, bootflow"
 	depends on BOOTSTD
 	default y
 	help
 	  Support working with standard boot, including listing available
-	  bootdevs and showing information about a particular one.
+	  bootdevs and showing information about a particular one. It also
+	  allows scanning for bootflows available with the bootdev.
+
+	  This enables the following commands:
+
+	     bootdev
+	     bootflow
 
 config BOOTM_EFI
 	bool "Support booting UEFI FIT images"
