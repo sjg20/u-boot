@@ -8,6 +8,7 @@
 #include <blk.h>
 #include <bootdev.h>
 #include <bootflow.h>
+#include <bootmeth.h>
 #include <dm.h>
 #include <fs.h>
 #include <log.h>
@@ -94,6 +95,80 @@ int bootdev_bind(struct udevice *parent, const char *drv_name, const char *name,
 		return ret;
 	device_set_name_alloced(dev);
 	*devp = dev;
+
+	return 0;
+}
+
+int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
+			struct bootflow_iter *iter, struct bootflow *bflow)
+{
+	struct blk_desc *desc = dev_get_uclass_plat(blk);
+	struct disk_partition info;
+	char partstr[20];
+	char name[60];
+	int ret;
+
+	/* Sanity check */
+	if (iter->part >= MAX_PART_PER_BOOTDEV)
+		return log_msg_ret("max", -ESHUTDOWN);
+
+	bflow->blk = blk;
+	if (iter->part)
+		snprintf(partstr, sizeof(partstr), "part_%x", iter->part);
+	else
+		strcpy(partstr, "whole");
+	snprintf(name, sizeof(name), "%s.%s", dev->name, partstr);
+	bflow->name = strdup(name);
+	if (!bflow->name)
+		return log_msg_ret("name", -ENOMEM);
+
+	bflow->state = BOOTFLOWST_BASE;
+	bflow->part = iter->part;
+
+	/*
+	 * partition numbers start at 0 so this cannot succeed, but it can tell
+	 * us whether there is valid media there
+	 */
+	ret = part_get_info(desc, iter->part, &info);
+	if (!iter->part && ret == -ENOENT)
+		ret = 0;
+
+	/*
+	 * This error indicates the media is not present. Otherwise we just
+	 * blindly scan the next partition. We could be more intelligent here
+	 * and check which partition numbers actually exist.
+	 */
+	if (ret == -EOPNOTSUPP)
+		ret = -ESHUTDOWN;
+	else
+		bflow->state = BOOTFLOWST_MEDIA;
+	if (ret)
+		return log_msg_ret("part", ret);
+
+	/*
+	 * Currently we don't get the number of partitions, so just
+	 * assume a large number
+	 */
+	iter->max_part = MAX_PART_PER_BOOTDEV;
+
+	if (iter->part) {
+		ret = fs_set_blk_dev_with_part(desc, bflow->part);
+		bflow->state = BOOTFLOWST_PART;
+
+		/* Use an #ifdef due to info.sys_ind */
+#ifdef CONFIG_DOS_PARTITION
+		log_debug("%s: Found partition %x type %x fstype %d\n",
+			  blk->name, bflow->part, info.sys_ind,
+			  ret ? -1 : fs_get_type());
+#endif
+		if (ret)
+			return log_msg_ret("fs", ret);
+		bflow->state = BOOTFLOWST_FS;
+	}
+
+	ret = bootmeth_read_bootflow(bflow->method, bflow);
+	if (ret)
+		return log_msg_ret("method", ret);
 
 	return 0;
 }
