@@ -141,7 +141,7 @@ void bootflow_reset_iter(struct bootflow_iter *iter, int flags);
  * @return 0 if found, other -ve on error
  */
 int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
-			     int flags, struct bootflow *bflow);
+			  int flags, struct bootflow *bflow);
 
 /**
  * bootflow_scan_first() - find the first bootflow

@@ -274,6 +274,15 @@ endif # SPL
 
 endif # FIT
 
+config BOOTDEV
+	bool "Bootdevice support"
+	default y
+	help
+	  A bootdev is a standard way of locating something to boot,
+	  typically an Operating System such as Linux. Enable this to support
+	  iterating through available bootdevs to find a bootflow suitable
+	  for booting.
+
 config LEGACY_IMAGE_FORMAT
 	bool "Enable support for the legacy image format"
 	default y if !FIT_SIGNATURE
