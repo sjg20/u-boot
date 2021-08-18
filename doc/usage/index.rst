@@ -21,9 +21,12 @@ Shell commands
    addrmap
    askenv
    base
+   bootdev
    bootefi
+   bootflow
    booti
    bootmenu
+   bootmeth
    button
    x86/cbsysinfo
    conitrace
