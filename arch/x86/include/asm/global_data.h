@@ -133,6 +133,8 @@ struct arch_global_data {
 #ifndef __ASSEMBLY__
 # if defined(CONFIG_EFI_APP) || CONFIG_IS_ENABLED(X86_64)
 
+extern struct global_data *global_data_ptr;
+
 /* TODO(sjg@chromium.org): Consider using a fixed register for gd on x86_64 */
 #define gd global_data_ptr
 
