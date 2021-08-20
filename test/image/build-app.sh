@@ -5,7 +5,7 @@
 
 TMP=/tmp/efi32
 MNT=/mnt/x
-BUILD=efi-x86_app
+BUILD=efi-x86_app32
 
 qemu-img create try.img 20M
 mkfs.vfat try.img
