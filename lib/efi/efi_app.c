@@ -105,6 +105,96 @@ static void free_memory(struct efi_priv *priv)
 	global_data_ptr = NULL;
 }
 
+static int setup_disks(void)
+{
+	return 0;
+	efi_guid_t efi_disk_guid = EFI_DISK_IO_PROTOCOL_GUID;
+	struct efi_boot_services *boot = efi_get_boot();
+	struct efi_disk *disk;
+	int ret;
+
+	if (!boot)
+		return log_msg_ret("sys", -ENOSYS);
+	ret = boot->locate_protocol(&efi_disk_guid, NULL, (void **)&disk);
+	if (ret)
+		return log_msg_ret("prot", -ENOTSUPP);
+
+	printf("got disks\n");
+
+	return 0;
+}
+
+static int setup_block(void)
+{
+	efi_guid_t efi_blkio_guid = EFI_BLOCK_IO_PROTOCOL_GUID;
+	efi_guid_t efi_devpath_guid = EFI_DEVICE_PATH_PROTOCOL_GUID;
+	struct efi_boot_services *boot = efi_get_boot();
+	struct efi_block_io *blkio;
+	struct efi_device_path device_path;
+	efi_handle_t handle[100];
+	efi_uintn_t buf_size;
+	int num_handles;
+	int ret, i;
+
+	if (!boot)
+		return log_msg_ret("sys", -ENOSYS);
+
+	buf_size = sizeof(handle);
+	ret = boot->locate_handle(BY_PROTOCOL, &efi_blkio_guid, NULL,
+				  &buf_size, handle);
+	if (ret)
+		return log_msg_ret("loc", -ENOTSUPP);
+
+	num_handles = buf_size / sizeof(efi_handle_t);
+	printf("Found %d handles\n", num_handles);
+
+	for (i = 0; i < num_handles; i++) {
+		ret = boot->handle_protocol(handle[i], &efi_devpath_guid,
+					    (void **)&device_path);
+		if (ret) {
+			printf("- devpath %d failed (ret=%d)\n", i, ret);
+			continue;
+		}
+
+		ret = boot->handle_protocol(handle[i], &efi_blkio_guid,
+					    (void **)&blkio);
+		if (ret) {
+			printf("- blkio %d failed (ret=%d)\n", i, ret);
+			continue;
+		}
+
+		ret = efi_bind_block(handle[i], blkio);
+		if (ret) {
+			printf("- blkio bind %d failed (ret=%d)\n", i, ret);
+			continue;
+		}
+	}
+	if (ret)
+		return log_msg_ret("prot", -ENOTSUPP);
+
+
+	printf("got blk\n");
+	dm_dump_all();
+
+	return 0;
+}
+
+int dm_scan_other(bool pre_reloc_only)
+{
+	if (gd->flags & GD_FLG_RELOC) {
+		int ret;
+
+		ret = setup_block();
+		if (ret)
+			return ret;
+		ret = setup_disks();
+		if (ret)
+			return ret;
+	}
+
+	return 0;
+}
+
 /**
  * efi_main() - Start an EFI image
  *

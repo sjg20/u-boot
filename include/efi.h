@@ -507,4 +507,19 @@ void efi_putc(struct efi_priv *priv, const char ch);
  */
 int efi_info_get(enum efi_entry_t type, void **datap, int *sizep);
 
+/**
+ * efi_bind_block() - bind a new block device to an EFI device
+ *
+ * Binds a new top-level EFI_MEDIA device as well as a child block device so
+ * that the block device can be accessed in U-Boot.
+ *
+ * The device can then be accessed using 'part list efi 0', 'fat ls efi 0:1',
+ * for example, just like any other interface type.
+ *
+ * @handle: handle of the controller on which this driver is installed
+ * @blkio: block io protocol proxied by this driver
+ * @return 0 if OK, -ve on error
+ */
+int efi_bind_block(efi_handle_t handle, struct efi_block_io *blkio);
+
 #endif /* _LINUX_EFI_H */
