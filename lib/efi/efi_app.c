@@ -97,6 +97,7 @@ static efi_status_t setup_memory(struct efi_priv *priv)
 			return ret;
 		priv->use_pool_for_malloc = true;
 	} else {
+		printf("(using allocated RAM address %lx) ", (ulong)addr);
 		priv->ram_base = addr;
 	}
 	gd->ram_size = pages << 12;
