@@ -15,6 +15,7 @@ config SYS_CONFIG_NAME
 config BOARD_SPECIFIC_OPTIONS # dummy
 	def_bool y
 	imply VIDEO_EFI
+	imply BINMAN
 
 endif
 

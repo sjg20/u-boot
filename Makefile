@@ -1033,7 +1033,6 @@ ifneq ($(CONFIG_SPL_TARGET),)
 INPUTS-$(CONFIG_SPL) += $(CONFIG_SPL_TARGET:"%"=%)
 endif
 INPUTS-$(CONFIG_REMAKE_ELF) += u-boot.elf
-INPUTS-$(CONFIG_EFI_APP) += u-boot-app.efi
 INPUTS-$(CONFIG_EFI_STUB) += u-boot-payload.efi
 
 # Generate this input file for binman
@@ -1166,12 +1165,17 @@ cros_targets := image.bin
 endif
 endif
 
-all: .binman_stamp inputs $(cros_targets)
+# Build an ELF file with updated devicetree
+u-boot.out: .binman_stamp inputs $(cros_targets)
 ifeq ($(CONFIG_BINMAN),y)
 ifeq ($(CONFIG_CHROMEOS_VBOOT),)
 	$(call if_changed,binman)
 endif
+else
+	@cat u-boot >$@
 endif
+
+all: u-boot.out
 
 # Timestamp file to make sure that binman always runs
 .binman_stamp: FORCE
@@ -1387,10 +1391,16 @@ default_dt := $(if $(DEVICE_TREE),$(DEVICE_TREE),$(CONFIG_DEFAULT_DEVICE_TREE))
 have_spl_dt := $(if $(CONFIG_SPL_OF_PLATDATA),,$(CONFIG_SPL_OF_CONTROL))
 have_tpl_dt := $(if $(CONFIG_TPL_OF_PLATDATA),,$(CONFIG_TPL_OF_CONTROL))
 
-quiet_cmd_binman = BINMAN  $@
-cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
+BINMAN_COMMON := $(if $(BINMAN_DEBUG),-D) \
                 --toolpath $(objtree)/tools \
-		$(if $(BINMAN_VERBOSE),-v$(BINMAN_VERBOSE)) \
+		$(if $(BINMAN_VERBOSE),-v$(BINMAN_VERBOSE))
+
+ifdef $((CONFIG_OF_EMBED)
+BINMAN_ELF_UPDATE := --update-dtb-in-elf u-boot,__dtb_dt_begin,__dtb_dt_end
+endif
+
+quiet_cmd_binman = BINMAN  $@
+cmd_binman = $(srctree)/tools/binman/binman $(BINMAN_COMMON) \
 		build -u -d u-boot.dtb -O . -m --allow-missing \
 		-I . -I $(srctree) -I $(srctree)/board/$(BOARDDIR) \
 		-I arch/$(ARCH)/dts -a of-list=$(CONFIG_OF_LIST) \
@@ -1401,7 +1411,12 @@ cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
 		-a spl-bss-pad=$(if $(CONFIG_SPL_SEPARATE_BSS),,1) \
 		-a tpl-bss-pad=$(if $(CONFIG_TPL_SEPARATE_BSS),,1) \
 		-a spl-dtb=$(have_spl_dt) -a tpl-dtb=$(have_tpl_dt) \
+		$(BINMAN_ELF_UPDATE) \
 		$(BINMAN_$(@F))
+
+quiet_cmd_binman = BINMAN  $@
+cmd_binman = $(srctree)/tools/binman/binman $(BINMAN_COMMON) \
+		update-elf $@
 
 OBJCOPYFLAGS_u-boot.ldr.hex := -I binary -O ihex
 
@@ -1715,7 +1730,7 @@ image.bin: $(INPUTS-y) \
 	$(call if_changed,binman)
 
 OBJCOPYFLAGS_u-boot-app.efi := $(OBJCOPYFLAGS_EFI)
-u-boot-app.efi: u-boot FORCE
+u-boot-app.efi: u-boot.out FORCE
 	$(call if_changed,zobjcopy)
 
 u-boot.bin.o: u-boot.bin FORCE
