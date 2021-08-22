@@ -172,9 +172,7 @@ static int setup_block(void)
 	if (ret)
 		return log_msg_ret("prot", -ENOTSUPP);
 
-
 	printf("got blk\n");
-	dm_dump_all();
 
 	return 0;
 }

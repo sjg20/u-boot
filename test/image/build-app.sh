@@ -5,7 +5,8 @@
 
 TMP=/tmp/efi32
 MNT=/mnt/x
-BUILD=efi-x86_app32
+#BUILD=efi-x86_app32
+BUILD=chromeos_efi-x86_app32
 
 qemu-img create try.img 20M
 mkfs.vfat try.img
