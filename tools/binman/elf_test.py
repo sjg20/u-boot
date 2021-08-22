@@ -6,6 +6,7 @@
 
 import os
 import shutil
+import struct
 import sys
 import tempfile
 import unittest
@@ -220,6 +221,20 @@ class TestElf(unittest.TestCase):
                                      load, entry, len(expected)),
                          elf.DecodeElf(data, load + 2))
         shutil.rmtree(outdir)
+
+    def testEmbedData(self):
+        """Test for the GetSymbolFileOffset() function"""
+        if not elf.ELF_TOOLS:
+            self.skipTest('Python elftools not available')
+
+        fname = self.ElfTestFile('embed_data')
+        offset = elf.GetSymbolFileOffset(fname, ['embed_start', 'embed_end'])
+        start = offset['embed_start'].offset
+        end = offset['embed_end'].offset
+        data = tools.ReadFile(fname)
+        embed_data = data[start:end]
+        expect = struct.pack('<III', 0x1234, 0x5678, 0)
+        self.assertEqual(expect, embed_data)
 
 
 if __name__ == '__main__':
