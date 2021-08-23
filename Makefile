@@ -1395,13 +1395,16 @@ BINMAN_COMMON := $(if $(BINMAN_DEBUG),-D) \
                 --toolpath $(objtree)/tools \
 		$(if $(BINMAN_VERBOSE),-v$(BINMAN_VERBOSE))
 
-ifdef $((CONFIG_OF_EMBED)
-BINMAN_ELF_UPDATE := --update-dtb-in-elf u-boot,__dtb_dt_begin,__dtb_dt_end
+BINMAN_DTB := u-boot.dtb
+
+ifdef CONFIG_OF_EMBED
+BINMAN_ELF_UPDATE := --update-fdt-in-elf u-boot,__dtb_dt_begin,__dtb_dt_end
+BINMAN_DTB := dts/dt.dtb
 endif
 
 quiet_cmd_binman = BINMAN  $@
 cmd_binman = $(srctree)/tools/binman/binman $(BINMAN_COMMON) \
-		build -u -d u-boot.dtb -O . -m --allow-missing \
+		build -u -d $(BINMAN_DTB) -O . -m --allow-missing \
 		-I . -I $(srctree) -I $(srctree)/board/$(BOARDDIR) \
 		-I arch/$(ARCH)/dts -a of-list=$(CONFIG_OF_LIST) \
 		-a atf-bl31-path=${BL31} \
@@ -1413,10 +1416,6 @@ cmd_binman = $(srctree)/tools/binman/binman $(BINMAN_COMMON) \
 		-a spl-dtb=$(have_spl_dt) -a tpl-dtb=$(have_tpl_dt) \
 		$(BINMAN_ELF_UPDATE) \
 		$(BINMAN_$(@F))
-
-quiet_cmd_binman = BINMAN  $@
-cmd_binman = $(srctree)/tools/binman/binman $(BINMAN_COMMON) \
-		update-elf $@
 
 OBJCOPYFLAGS_u-boot.ldr.hex := -I binary -O ihex
 

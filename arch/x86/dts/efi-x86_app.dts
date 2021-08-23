@@ -9,6 +9,10 @@
 
 #include "tsc_timer.dtsi"
 
+#if defined(CONFIG_CHROMEOS_VBOOT)
+#include "chromeos-efi.dtsi"
+#endif
+
 / {
 	model = "EFI x86 Application";
 	compatible = "efi,x86-app";
