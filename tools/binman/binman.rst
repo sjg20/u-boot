@@ -822,6 +822,17 @@ the 'warning' line in scripts/Makefile.lib to see what it has found::
    # u_boot_dtsi_options_debug = $(u_boot_dtsi_options_raw)
 
 
+Updating an ELF file
+====================
+
+Updating file 'u-boot' with data length 0x400a (16394) between symbols '__dtb_dt_begin' and '__dtb_dt_end'
+
+ValueError: Not enough space in 'u-boot' for data length 0x400a (16394); size is 0x1744 (5956)
+
+See the dts Makefile for your arch, e.g.
+arch/x86/dts/Makefile
+
+
 Entry Documentation
 ===================
 
