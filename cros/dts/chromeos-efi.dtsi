@@ -19,14 +19,12 @@
 	filename = "image.bin";
 	u-boot,dm-spl;
 	u-boot,dm-vpl;
-	end-at-4gb;
 	sort-by-offset;
 	pad-byte = <0xff>;
 	size = <0x800000>;
 	compatible = "chromeos,flashmap";
 	/* ---- Section: Vital-product data (VPD) ---- */
 	read-only-vpd {
-		offset = <0xff800000>;
 		type = "section";
 		label-prefix = "ro-";
 		read-only;
@@ -46,7 +44,6 @@
 		label-prefix = "ro-";
 		sort-by-offset;
 		read-only;
-		offset = <0xff000000>;
 		fmap {
 			align = <0x1000>;
 			size = <0x1200>;

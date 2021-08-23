@@ -1160,7 +1160,7 @@ PHONY += inputs
 inputs: $(INPUTS-y)
 
 ifneq ($(CONFIG_CHROMEOS_VBOOT),)
-ifneq ($(CONFIG_ROM_SIZE)$(CONFIG_SANDBOX),)
+ifneq ($(CONFIG_ROM_SIZE)$(CONFIG_SANDBOX)$(CONFIG_EFI_APP),)
 cros_targets := image.bin
 endif
 endif
@@ -1721,6 +1721,7 @@ BINMAN_image.bin := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
 	-abmpblk=$(KBUILD_SRC)/cros/data/bmpblk.bin -I $(KBUILD_SRC)/cros/data \
 	"-ahardware-id=CORAL TEST 8594" \
 	"-afrid=123412 123" -acros-ec-rw-path=$(KBUILD_SRC)/cros/data/ecrw.bin \
+	$(BINMAN_ELF_UPDATE) \
 	 -m -i image
 image.bin: $(INPUTS-y) \
 		$(if($(CONFIG_TPL),tpl/u-boot-tpl) \
