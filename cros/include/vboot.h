@@ -107,6 +107,7 @@ struct vboot_blob {
  * @disable_power_button_during_update: Disable the power button during an aux
  *	firmware update
  * @usb_is_enumerated: true if USB ports have been enumerated already
+ * @tpm_optional: true if the TPM is optional
  *
  * @fmap: Firmare map, parsed from the binman information
  * @fwstore: Firmware storage device
@@ -157,6 +158,7 @@ struct vboot_info {
 	bool disable_lid_shutdown_during_update;
 	bool disable_power_button_during_update;
 	bool usb_is_enumerated;
+	bool tpm_optional;
 #endif
 
 	struct cros_fmap fmap;

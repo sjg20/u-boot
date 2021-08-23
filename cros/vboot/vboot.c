@@ -77,6 +77,7 @@ int vboot_load_config(struct vboot_info *vboot)
 					"disable-lid-shutdown-during-update");
 	vboot->disable_power_button_during_update = ofnode_read_bool(node,
 					"disable-power-button-during-update");
+	vboot->tpm_optional = ofnode_read_bool(node, "tpm-optional");
 #endif
 
 	vboot->config = node;
