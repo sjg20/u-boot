@@ -1168,14 +1168,18 @@ endif
 # Build an ELF file with updated devicetree
 u-boot.out: .binman_stamp inputs $(cros_targets)
 ifeq ($(CONFIG_BINMAN),y)
-ifeq ($(CONFIG_CHROMEOS_VBOOT),)
+ifeq ($(CONFIG_CHROMEOS_VBOOT)$(CONFIG_EFI_APP),)
 	$(call if_changed,binman)
+	echo here
 endif
 else
 	@cat u-boot >$@
+	echo not here
 endif
 
-all: u-boot.out
+$(warning $(if $(CONFIG_EFI_APP),u-boot-app.efi,u-boot.out))
+
+all: $(if $(CONFIG_EFI_APP),u-boot-app.efi,u-boot.out)
 
 # Timestamp file to make sure that binman always runs
 .binman_stamp: FORCE
@@ -1398,7 +1402,8 @@ BINMAN_COMMON := $(if $(BINMAN_DEBUG),-D) \
 BINMAN_DTB := u-boot.dtb
 
 ifdef CONFIG_OF_EMBED
-BINMAN_ELF_UPDATE := --update-fdt-in-elf u-boot,__dtb_dt_begin,__dtb_dt_end
+BINMAN_ELF_UPDATE := --update-fdt-in-elf \
+	u-boot,u-boot.out,__dtb_dt_begin,__dtb_dt_end
 BINMAN_DTB := dts/dt.dtb
 endif
 

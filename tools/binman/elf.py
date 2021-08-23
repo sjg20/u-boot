@@ -353,21 +353,23 @@ def DecodeElf(data, location):
     return ElfInfo(output, data_start, elf.header['e_entry'] + virt_to_phys,
                    mem_end - data_start)
 
-def UpdateFile(fname, start_sym, end_sym, data):
-    with open(fname, 'r+b') as fd:
-        tout.Notice("Updating file '%s' with data length %#x (%d) between symbols '%s' and '%s'" %
-                    (fname, len(data), len(data), start_sym, end_sym))
-        syms = GetSymbolFileOffset(fname, [start_sym, end_sym])
-        if len(syms) != 2:
-            raise ValueError("Expected two symbols '%s' and '%s': got $d: %s" %
-                             (start_sym, end_sym, len(syms),
-                              ','.join(syms.keys())))
+def UpdateFile(infile, outfile, start_sym, end_sym, insert):
+    tout.Notice("Creting file '%s' with data length %#x (%d) between symbols '%s' and '%s'" %
+                (outfile, len(insert), len(insert), start_sym, end_sym))
+    syms = GetSymbolFileOffset(infile, [start_sym, end_sym])
+    if len(syms) != 2:
+        raise ValueError("Expected two symbols '%s' and '%s': got $d: %s" %
+                         (start_sym, end_sym, len(syms),
+                          ','.join(syms.keys())))
 
-        size = syms[end_sym].offset - syms[start_sym].offset
-        if len(data) > size:
-            raise ValueError("Not enough space in '%s' for data length %#x (%d); size is %#x (%d)" %
-                             (fname, len(data), len(data), size, size))
-        fd.seek(syms[start_sym].offset)
-        fd.write(data)
-        with open('/tmp/asc', 'wb') as out:
-            out.write(data)
+    size = syms[end_sym].offset - syms[start_sym].offset
+    if len(insert) > size:
+        raise ValueError("Not enough space in '%s' for data length %#x (%d); size is %#x (%d)" %
+                         (fname, len(insert), len(insert), size, size))
+
+    with open(outfile, 'wb') as fd:
+        data = tools.ReadFile(infile)
+        newdata = data[:syms[start_sym].offset]
+        newdata += insert + tools.GetBytes(0, size - len(insert))
+        newdata += data[:syms[end_sym].offset]
+        tools.WriteFile(outfile, data)

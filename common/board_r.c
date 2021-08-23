@@ -325,6 +325,7 @@ static int initr_binman(void)
 {
 	int ret;
 
+        return 0;
 	if (!CONFIG_IS_ENABLED(BINMAN_FDT))
 		return 0;
 

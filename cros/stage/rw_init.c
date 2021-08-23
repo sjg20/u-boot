@@ -117,6 +117,12 @@ static int vboot_check_wipe_memory(struct vboot_info *vboot)
 	return 0;
 }
 
+static int vboot_init_for_efi(struct vb2_context **ctxp)
+{
+	*ctxp = NULL;
+
+	return 0;
+}
 
 int vboot_rw_init(struct vboot_info *vboot)
 {
@@ -127,9 +133,12 @@ int vboot_rw_init(struct vboot_info *vboot)
 	int ret;
 
 	log_notice("Chromium OS verified boot starting\n");
-	if (!IS_ENABLED(CONFIG_SYS_COREBOOT) || ll_boot_init()) {
+	if (IS_ENABLED(CONFIG_EFI)) {
+		ret = vboot_init_for_efi(&ctx);
+		if (ret)
+			return log_msg_ret("efi", -ENOENT);
+	} else if (!IS_ENABLED(CONFIG_SYS_COREBOOT) || ll_boot_init()) {
 		int new_size = VB2_KERNEL_WORKBUF_RECOMMENDED_SIZE;
-		int ret;
 
 		blob = bloblist_find(BLOBLISTT_VBOOT_CTX, sizeof(*blob));
 		if (!blob)
