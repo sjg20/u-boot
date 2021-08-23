@@ -119,7 +119,20 @@ static int vboot_check_wipe_memory(struct vboot_info *vboot)
 
 static int vboot_init_for_efi(struct vb2_context **ctxp)
 {
-	*ctxp = NULL;
+	const int size = VB2_KERNEL_WORKBUF_RECOMMENDED_SIZE;
+	struct vb2_context *ctx;
+	void *blob;
+	int ret;
+
+	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, size, VBOOT_CONTEXT_ALIGN);
+	if (!blob)
+		return log_msg_ret("blob", -ENOSPC);
+
+	/* Initialize vb2_shared_data and friends. */
+	ret = vb2api_init((void *)blob, size, &ctx);
+	if (ret)
+		return log_msg_ret("init_context", ret);
+	*ctxp = ctx;
 
 	return 0;
 }
@@ -177,8 +190,11 @@ int vboot_rw_init(struct vboot_info *vboot)
 		return log_msg_ret("cfg", ret);
 
 	ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
-	if (ret)
-		return log_msg_ret("tpm", ret);
+	if (ret) {
+		if (!vboot->tpm_optional)
+			return log_msg_ret("tpm", ret);
+		log_warning("No TPM present: performing a limited vboot\n");
+	}
 
 	ret = uclass_first_device_err(UCLASS_CROS_FWSTORE, &vboot->fwstore);
 	if (ret)

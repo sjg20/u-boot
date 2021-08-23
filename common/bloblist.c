@@ -3,7 +3,8 @@
  * Copyright 2018 Google, Inc
  * Written by Simon Glass <sjg@chromium.org>
  */
-
+#define LOG_DEBUG
+#
 #include <common.h>
 #include <bloblist.h>
 #include <log.h>
