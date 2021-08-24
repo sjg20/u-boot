@@ -1165,6 +1165,7 @@ cros_targets := image.bin
 endif
 endif
 
+$(warning CONFIG_CHROMEOS_VBOOT $(CONFIG_CHROMEOS_VBOOT))
 ifeq ($(CONFIG_CHROMEOS_VBOOT),)
 PHONY += binman
 binman: .binman_stamp inputs
@@ -1734,6 +1735,8 @@ u-boot-x86-reset16.bin: u-boot FORCE
 	$(call if_changed,objcopy)
 
 endif # CONFIG_X86
+
+#u-boot.out &:
 
 BINMAN_image.bin := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
 	-abmpblk=$(KBUILD_SRC)/cros/data/bmpblk.bin -I $(KBUILD_SRC)/cros/data \

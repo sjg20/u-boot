@@ -193,6 +193,7 @@ config CHROMEOS_TEST
 	  This option currently does nothing, but the intention is that it will
 	  enable building unit tests for each piece of functionality.
 
+
 source "cros/cmd/Kconfig"
 source "cros/flag/Kconfig"
 source "cros/fwstore/Kconfig"
