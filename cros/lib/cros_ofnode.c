@@ -4,6 +4,7 @@
  */
 
 #define LOG_CATEGORY LOGC_VBOOT
+#define LOG_DEBUG
 
 #include <common.h>
 #include <errno.h>

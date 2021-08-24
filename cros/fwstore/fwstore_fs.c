@@ -20,7 +20,7 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 /**
- * @dev: Media device to read from
+ * @dev: Media device to read/write
  * @part: Partition number on that device (0=whole device, 1=partition 1)
  * @filename: Filename within filesystem
  */
@@ -57,6 +57,8 @@ static int fwstore_fs_read(struct udevice *dev, ulong offset, ulong count,
 	ret = get_fs(priv);
 	if (ret)
 		return log_msg_ret("get", ret);
+	if (!count)
+		return 0;
 	addr = map_to_sysmem(buf);
 	ret = fs_read(priv->filename, addr, offset, count, &actual);
 	if (ret)

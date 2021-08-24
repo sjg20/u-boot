@@ -18,14 +18,12 @@
 #define VBOOT_HASH_VSLOT_MASK	(1 << (VBOOT_HASH_VSLOT))
 
 /**
- * @dev: Media device to read from
+ * @dev: Media device to read/write
  * @part: Partition number on that device (0=whole device, 1=partition 1)
- * @filename: Filename within filesystem
  */
 struct fs_nvdata_priv {
 	struct udevice *dev;
 	int part;
-	const char *filename;
 };
 
 static int get_fs(struct fs_nvdata_priv *priv)
@@ -70,8 +68,18 @@ static int fs_nvdata_read(struct udevice *dev, enum cros_nvdata_type type,
 	addr = map_to_sysmem(data);
 	get_nvdata_filename(type, fname, sizeof(fname));
 	ret = fs_read(fname, addr, 0, size, &actual);
-	if (ret)
-		return log_msg_ret("read", ret);
+	if (ret) {
+		if (ret != -ENOENT)
+			return log_msg_ret("read", ret);
+
+		/*
+		 * If the file was not found, use zero data. At some point the
+		 * data will be set up and then written in fs_nvdata_write(),
+		 * for next time we boot
+		 */
+		memset(data, '\0', size);
+		actual = size;
+	}
 	if (size != actual)
 		return log_msg_ret("size", -EIO);
 
@@ -115,6 +123,26 @@ static int fs_nvdata_lock(struct udevice *dev, enum cros_nvdata_type type)
 	return 0;
 }
 
+static int fs_nvdata_of_to_plat(struct udevice *dev)
+{
+	struct fs_nvdata_priv *priv = dev_get_priv(dev);
+	int ret;
+
+	ret = cros_nvdata_of_to_plat(dev);
+	if (ret)
+		return log_msg_ret("cros", ret);
+
+	/* For now, use the first available device */
+	ret = uclass_first_device_err(UCLASS_EFI_MEDIA, &priv->dev);
+	if (ret)
+		return log_msg_ret("dev", ret);
+	ret = dev_read_u32(dev, "partition", &priv->part);
+	if (ret)
+		return log_msg_ret("part", ret);
+
+	return 0;
+}
+
 static const struct cros_nvdata_ops fs_nvdata_ops = {
 	.read	= fs_nvdata_read,
 	.write	= fs_nvdata_write,
@@ -131,5 +159,6 @@ U_BOOT_DRIVER(google_fs_nvdata) = {
 	.id		= UCLASS_CROS_NVDATA,
 	.of_match	= fs_nvdata_ids,
 	.ops		= &fs_nvdata_ops,
-	.of_to_plat	= cros_nvdata_of_to_plat,
+	.of_to_plat	= fs_nvdata_of_to_plat,
+	.priv_auto	= sizeof(struct fs_nvdata_priv),
 };

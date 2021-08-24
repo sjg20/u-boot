@@ -102,6 +102,8 @@ int vboot_ver_init(struct vboot_info *vboot)
 			    VBOOT_CONTEXT_ALIGN);
 	if (!blob)
 		return log_msg_ret("blob", -ENOSPC);
+	log_notice("Bloblist at %p, size %zx\n", blob,
+		   sizeof(struct vboot_blob));
 
 	bootstage_mark(BOOTSTAGE_VBOOT_START);
 

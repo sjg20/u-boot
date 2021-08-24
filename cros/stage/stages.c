@@ -133,36 +133,33 @@ int vboot_save_if_needed(struct vboot_info *vboot, vb2_error_t *vberrp)
 	if (!ctx)
 		return -ENOENT;
 
-	if (vboot->tpm) {
-		if (ctx->flags & VB2_CONTEXT_SECDATA_KERNEL_CHANGED) {
-			log_info("Saving secdatak\n");
-			if (spl_phase() != PHASE_SPL)
-				vboot_secdatak_dump(ctx->secdata_kernel,
+	if (ctx->flags & VB2_CONTEXT_SECDATA_KERNEL_CHANGED) {
+		log_info("Saving secdatak\n");
+		if (spl_phase() != PHASE_SPL)
+			vboot_secdatak_dump(ctx->secdata_kernel,
 					    sizeof(ctx->secdata_kernel));
-			ret = cros_nvdata_write_walk(CROS_NV_SECDATAK,
-						     ctx->secdata_kernel,
-						     sizeof(ctx->secdata_kernel));
-			if (ret) {
-				*vberrp = VB2_ERROR_SECDATA_KERNEL_WRITE;
-				return log_msg_ret("secdatak", ret);
-			}
-			ctx->flags &= ~VB2_CONTEXT_SECDATA_KERNEL_CHANGED;
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAK,
+					     ctx->secdata_kernel,
+					     sizeof(ctx->secdata_kernel));
+		if (ret) {
+			*vberrp = VB2_ERROR_SECDATA_KERNEL_WRITE;
+			return log_msg_ret("secdatak", ret);
 		}
+		ctx->flags &= ~VB2_CONTEXT_SECDATA_KERNEL_CHANGED;
+	}
 
-		if (ctx->flags & VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED) {
-			log_info("Saving secdataf\n");
-			if (spl_phase() != PHASE_SPL)
-				vboot_secdataf_dump(ctx->secdata_firmware,
+	if (ctx->flags & VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED) {
+		log_info("Saving secdataf\n");
+		if (spl_phase() != PHASE_SPL)
+			vboot_secdataf_dump(ctx->secdata_firmware,
 					    sizeof(ctx->secdata_firmware));
-			ret = cros_nvdata_write_walk(CROS_NV_SECDATAF,
-				ctx->secdata_firmware,
-				sizeof(ctx->secdata_firmware));
-			if (ret) {
-				*vberrp = VB2_ERROR_SECDATA_FIRMWARE_WRITE;
-				return log_msg_ret("secdata", ret);
-			}
-			ctx->flags &= ~VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED;
+		ret = cros_nvdata_write_walk(CROS_NV_SECDATAF, ctx->secdata_firmware,
+					     sizeof(ctx->secdata_firmware));
+		if (ret) {
+			*vberrp = VB2_ERROR_SECDATA_FIRMWARE_WRITE;
+			return log_msg_ret("secdata", ret);
 		}
+		ctx->flags &= ~VB2_CONTEXT_SECDATA_FIRMWARE_CHANGED;
 	}
 
 	if (ctx->flags & VB2_CONTEXT_NVDATA_CHANGED) {
