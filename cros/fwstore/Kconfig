@@ -3,6 +3,13 @@
 # Copyright 2018 Google LLC
 #
 
+config FWSTORE_FS
+	bool "Firmware storage driver that uses a filesystem"
+	help
+	  This provides a driver for firmware storage that uses a filesystem
+	  on a device. A single file is used to hold the data and it can be
+	  read or written
+
 config FWSTORE_SPI_FLASH
 	bool "Firmware storage driver that uses SPI flash"
 	select SPI

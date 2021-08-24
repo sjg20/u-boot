@@ -1165,19 +1165,28 @@ cros_targets := image.bin
 endif
 endif
 
+PHONY += binman
+binman: .binman_stamp inputs
+ifeq ($(CONFIG_BINMAN),y)
+	$(call if_changed,binman)
+endif
+
 # Build an ELF file with updated devicetree
 u-boot.out: .binman_stamp inputs $(cros_targets)
 ifeq ($(CONFIG_BINMAN),y)
-ifeq ($(CONFIG_CHROMEOS_VBOOT)$(CONFIG_EFI_APP),)
 	$(call if_changed,binman)
-	echo here
-endif
 else
 	@cat u-boot >$@
-	echo not here
 endif
 
-all: $(if $(CONFIG_EFI_APP),u-boot-app.efi,u-boot.out)
+# ifeq ($(CONFIG_CHROMEOS_VBOOT)$(CONFIG_EFI_APP),)
+# all: binman
+
+ifneq ($(CONFIG_EFI_APP),)
+all: u-boot-app.efi
+else
+all: binman
+endif
 
 # Timestamp file to make sure that binman always runs
 .binman_stamp: FORCE
@@ -2205,7 +2214,7 @@ CHANGELOG:
 
 # Directories & files removed with 'make clean'
 CLEAN_DIRS  += $(MODVERDIR) \
-	       $(foreach d, spl tpl, $(patsubst %,$d/%, \
+	       $(foreach d, spl tpl, $(patsubst ,$d/%, \
 			$(filter-out include, $(shell ls -1 $d 2>/dev/null))))
 
 CLEAN_FILES += include/bmp_logo.h include/bmp_logo_data.h tools/version.h \

@@ -17,6 +17,12 @@
 	chromeos-config {
 		tpm-optional;
 	};
+
+	fwstore {
+		compatible = "google,fwstore-fs";
+		filename = "chromeos.rom";
+		partition = <0>;
+	};
 };
 
 &chromeos {
