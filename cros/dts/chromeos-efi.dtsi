@@ -15,7 +15,9 @@
 	};
 
 	chromeos-config {
+		compatible = "chromeos-config";
 		tpm-optional;
+		kernel-addr = /bits/ 64 <0x00100000 0x2000000>;
 	};
 
 	fwstore {

@@ -237,12 +237,14 @@ int vboot_rw_init(struct vboot_info *vboot)
 			return log_msg_ret("ec", ret);
 	}
 
-	/* initialise and read fwmp from TPM */
-	ret = cros_nvdata_read_walk(CROS_NV_FWMP, ctx->secdata_fwmp,
-				    VB2_SECDATA_FWMP_MIN_SIZE);
-	if (ret)
-		return log_msg_ret("read nvdata", ret);
-	vboot_fwmp_dump(ctx->secdata_fwmp, VB2_SECDATA_FWMP_MIN_SIZE);
+	if (!IS_ENABLED(CONFIG_EFI)) {
+		/* initialise and read fwmp from TPM */
+		ret = cros_nvdata_read_walk(CROS_NV_FWMP, ctx->secdata_fwmp,
+					    VB2_SECDATA_FWMP_MIN_SIZE);
+		if (ret)
+			return log_msg_ret("read nvdata", ret);
+		vboot_fwmp_dump(ctx->secdata_fwmp, VB2_SECDATA_FWMP_MIN_SIZE);
+	}
 
 	return 0;
 }
