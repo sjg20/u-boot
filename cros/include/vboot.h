@@ -106,8 +106,8 @@ struct vboot_blob {
  * @disable_lid_shutdown_during_update: Ignore LID closed during auxfw update
  * @disable_power_button_during_update: Disable the power button during an aux
  *	firmware update
- * @usb_is_enumerated: true if USB ports have been enumerated already
  * @tpm_optional: true if the TPM is optional
+ * @usb_is_enumerated: true if USB ports have been enumerated already
  *
  * @fmap: Firmare map, parsed from the binman information
  * @fwstore: Firmware storage device
@@ -152,13 +152,13 @@ struct vboot_info {
 	bool physical_rec_switch;
 	bool resume_path_same_as_boot;
 	bool cr50_commit_secdata;
+	bool tpm_optional;
 #ifndef CONFIG_SPL_BUILD
 	bool detachable_ui;
 	bool disable_memwipe;
 	bool disable_lid_shutdown_during_update;
 	bool disable_power_button_during_update;
 	bool usb_is_enumerated;
-	bool tpm_optional;
 #endif
 
 	struct cros_fmap fmap;

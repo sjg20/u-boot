@@ -22,6 +22,13 @@ config VPL_NVDATA_CROS_EC
 	  running out of battery, etc.). This driver supports CROS_NV_DATA and
 	  CROS_NV_VSTORE.
 
+config NVDATA_FS
+	bool "Non-volatile data driver that uses a filesystem"
+	help
+	  This stores non-volatile data in a filesystem on a block device.
+	  This data may be lost if the filesystem is corrupted but it does not
+	  not happen often. This driver supports all data types.
+
 config NVDATA_TPM
 	bool "Non-volatile data driver that uses the TPM"
 	help
