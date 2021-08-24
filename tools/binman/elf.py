@@ -354,7 +354,7 @@ def DecodeElf(data, location):
                    mem_end - data_start)
 
 def UpdateFile(infile, outfile, start_sym, end_sym, insert):
-    tout.Notice("Creting file '%s' with data length %#x (%d) between symbols '%s' and '%s'" %
+    tout.Notice("Creating file '%s' with data length %#x (%d) between symbols '%s' and '%s'" %
                 (outfile, len(insert), len(insert), start_sym, end_sym))
     syms = GetSymbolFileOffset(infile, [start_sym, end_sym])
     if len(syms) != 2:
@@ -367,9 +367,10 @@ def UpdateFile(infile, outfile, start_sym, end_sym, insert):
         raise ValueError("Not enough space in '%s' for data length %#x (%d); size is %#x (%d)" %
                          (fname, len(insert), len(insert), size, size))
 
-    with open(outfile, 'wb') as fd:
-        data = tools.ReadFile(infile)
-        newdata = data[:syms[start_sym].offset]
-        newdata += insert + tools.GetBytes(0, size - len(insert))
-        newdata += data[:syms[end_sym].offset]
-        tools.WriteFile(outfile, data)
+    data = tools.ReadFile(infile)
+    newdata = data[:syms[start_sym].offset]
+    newdata += insert + tools.GetBytes(0, size - len(insert))
+    newdata += data[:syms[end_sym].offset]
+    tools.WriteFile(outfile, data)
+    tools.WriteFile('/tmp/asc', insert)
+    tout.Info('Written to offset %#x' % syms[start_sym].offset)
