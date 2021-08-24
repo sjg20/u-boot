@@ -138,6 +138,14 @@ config VPL_CHROMEOS_VBOOT_A
 
 config SPL_CHROMEOS_VBOOT_B
 	bool "Run vboot stage B (U-Boot selection) in SPL"
+	default y if SPL
+
+config CHROMEOS_VBOOT_A
+	bool "Run vboot stage A (SPL selection) in U-Boot proper"
+	default y
+
+config CHROMEOS_VBOOT_B
+	bool "Run vboot stage B (U-Boot selection) in U-Boot proper"
 	default y
 
 config CHROMEOS_VBOOT_C
@@ -184,6 +192,7 @@ config CHROMEOS_TEST
 	  flow, other than the large functional test of running it in sandbox.
 	  This option currently does nothing, but the intention is that it will
 	  enable building unit tests for each piece of functionality.
+
 
 source "cros/cmd/Kconfig"
 source "cros/flag/Kconfig"

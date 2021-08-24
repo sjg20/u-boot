@@ -131,7 +131,7 @@ static int vboot_init_for_efi(struct vb2_context **ctxp)
 	/* Initialize vb2_shared_data and friends. */
 	ret = vb2api_init((void *)blob, size, &ctx);
 	if (ret)
-		return log_msg_ret("init_context", ret);
+		return log_msg_retz("init_context", ret);
 	*ctxp = ctx;
 
 	return 0;
@@ -162,7 +162,7 @@ int vboot_rw_init(struct vboot_info *vboot)
 
 		ret = vb2api_relocate(blob, blob, new_size, &ctx);
 		if (ret)
-			return log_msg_ret("reloc", ret);
+			return log_msg_retz("reloc", ret);
 
 		log_warning("flags %llx %d\n", ctx->flags,
 			    ((ctx->flags & VB2_CONTEXT_RECOVERY_MODE) != 0));
@@ -237,13 +237,31 @@ int vboot_rw_init(struct vboot_info *vboot)
 			return log_msg_ret("ec", ret);
 	}
 
-	if (!IS_ENABLED(CONFIG_EFI)) {
+	if (vboot->tpm) {
 		/* initialise and read fwmp from TPM */
 		ret = cros_nvdata_read_walk(CROS_NV_FWMP, ctx->secdata_fwmp,
 					    VB2_SECDATA_FWMP_MIN_SIZE);
 		if (ret)
 			return log_msg_ret("read nvdata", ret);
 		vboot_fwmp_dump(ctx->secdata_fwmp, VB2_SECDATA_FWMP_MIN_SIZE);
+	} else {
+		/*
+		ret = vb2api_fw_phase1(ctx);
+		if (ret)
+			return log_msg_retz("phase1", ret);
+		ret = vb2api_fw_phase2(ctx);
+		if (ret)
+			return log_msg_retz("phase2", ret);
+		ret = vb2api_fw_phase3(ctx);
+		if (ret)
+			return log_msg_retz("phase3", ret);
+
+		ctx->flags |= VB2_CONTEXT_NO_SECDATA_FWMP;
+		vb2api_secdata_kernel_create_v0(ctx);
+		ret = vb2_secdata_kernel_init(ctx);
+		if (ret)
+			return log_msg_retz("seck", ret);
+		*/
 	}
 
 	return 0;

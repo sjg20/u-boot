@@ -24,4 +24,10 @@ if TARGET_CHROMEOS_EFI_APP32
 config SYS_CONFIG_NAME
 	default "chromeos_efi-x86_app"
 
+config BOARD_SPECIFIC_OPTIONS # dummy
+	def_bool y
+	imply CHROMEOS_VBOOT_A
+	imply CHROMEOS_VBOOT_B
+	imply CHROMEOS_VBOOT_C
+
 endif
