@@ -1165,6 +1165,7 @@ cros_targets := image.bin
 endif
 endif
 
+ifeq ($(CONFIG_CHROMEOS_VBOOT),)
 PHONY += binman
 binman: .binman_stamp inputs
 ifeq ($(CONFIG_BINMAN),y)
@@ -1172,12 +1173,13 @@ ifeq ($(CONFIG_BINMAN),y)
 endif
 
 # Build an ELF file with updated devicetree
-u-boot.out: .binman_stamp inputs $(cros_targets)
+u-boot.out: .binman_stamp inputs #$(cros_targets)
 ifeq ($(CONFIG_BINMAN),y)
 	$(call if_changed,binman)
 else
 	@cat u-boot >$@
 endif
+endif   # !VBOOT
 
 # ifeq ($(CONFIG_CHROMEOS_VBOOT)$(CONFIG_EFI_APP),)
 # all: binman
@@ -1185,7 +1187,11 @@ endif
 ifneq ($(CONFIG_EFI_APP),)
 all: u-boot-app.efi
 else
+ifneq ($(CONFIG_CHROMEOS_VBOOT),)
+all: image.bin
+else
 all: binman
+endif
 endif
 
 # Timestamp file to make sure that binman always runs
@@ -1735,14 +1741,17 @@ BINMAN_image.bin := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
 	"-afrid=123412 123" -acros-ec-rw-path=$(KBUILD_SRC)/cros/data/ecrw.bin \
 	$(BINMAN_ELF_UPDATE) \
 	 -m -i image
-image.bin: $(INPUTS-y) \
+image.bin: .binman_stamp inputs \
 		$(if($(CONFIG_TPL),tpl/u-boot-tpl) \
 		$(if($(CONFIG_SPL),spl/u-boot-spl) \
 		u-boot.bin FORCE
 	$(call if_changed,binman)
 
 OBJCOPYFLAGS_u-boot-app.efi := $(OBJCOPYFLAGS_EFI)
-u-boot-app.efi: u-boot.out FORCE
+u-boot-app.efi: u-boot.out $(if $(CONFIG_CHROMEOS_VBOOT),image.bin) FORCE
+	echo here $<
+	ls -l u-boot.out
+	file u-boot.out
 	$(call if_changed,zobjcopy)
 
 u-boot.bin.o: u-boot.bin FORCE

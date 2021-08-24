@@ -370,7 +370,8 @@ def UpdateFile(infile, outfile, start_sym, end_sym, insert):
     data = tools.ReadFile(infile)
     newdata = data[:syms[start_sym].offset]
     newdata += insert + tools.GetBytes(0, size - len(insert))
-    newdata += data[:syms[end_sym].offset]
-    tools.WriteFile(outfile, data)
+    newdata += data[syms[end_sym].offset:]
+    print('newdata', len(newdata), len(data))
+    tools.WriteFile(outfile, newdata)
     tools.WriteFile('/tmp/asc', insert)
     tout.Info('Written to offset %#x' % syms[start_sym].offset)
