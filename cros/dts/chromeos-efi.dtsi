@@ -96,19 +96,6 @@
 			/* Intel SPI flash driver requires word alignment */
 			files-align = <4>;
 		};
-		boot-rec {
-			align = <0x1000>;
-			u-boot,dm-vpl;
-			type = "u-boot";
-			hash {
-				u-boot,dm-vpl;
-				algo = "sha256";
-			};
-		};
-		u-boot-dtb {
-		};
-		u-boot-ucode {
-		};
 	};
 
 	read-write-a {
@@ -123,6 +110,38 @@
 			type = "text";
 			text-label = "frid";
 		};
+
+		vblock {
+			align = <0x1000>;
+			align-size = <0x1000>;
+			/*
+			 * Alignment: 4k (for updating) and must be in
+			 * start of each RW_SECTION
+			 */
+			size = <0x2000>;
+			content = <&rw_a_spl>;
+			keyblock = "firmware.keyblock";
+			signprivate = "firmware_data_key.vbprivk";
+			version = <1>;
+			kernelkey = "kernel_subkey.vbpubk";
+			preamble-flags = <0>;
+		};
+
+		/* Dummy to keep vboot happy */
+		rw_a_spl: u-boot-spl {
+			align = <4>;
+			type = "fill";
+			size = <0x100>;
+			fill-value = [ff];
+		};
+
+		/* Dummy to keep vboot happy */
+		u-boot {
+			align = <4>;
+			type = "fill";
+			size = <0x100>;
+			fill-value = [ff];
+		};
 	};
 
 	read-write-b {
@@ -136,6 +155,38 @@
 			size = <0x100>;
 			type = "text";
 			text-label = "frid";
+		};
+
+		vblock {
+			align = <0x1000>;
+			align-size = <0x1000>;
+			/*
+			 * Alignment: 4k (for updating) and must be in
+			 * start of each RW_SECTION
+			 */
+			size = <0x2000>;
+			content = <&rw_b_spl>;
+			keyblock = "firmware.keyblock";
+			signprivate = "firmware_data_key.vbprivk";
+			version = <1>;
+			kernelkey = "kernel_subkey.vbpubk";
+			preamble-flags = <0>;
+		};
+
+		/* Dummy to keep vboot happy */
+		rw_b_spl: u-boot-spl {
+			align = <4>;
+			type = "fill";
+			size = <0x100>;
+			fill-value = [ff];
+		};
+
+		/* Dummy to keep vboot happy */
+		u-boot {
+			align = <4>;
+			type = "fill";
+			size = <0x100>;
+			fill-value = [ff];
 		};
 	};
 

@@ -20,24 +20,26 @@ int vboot_ver5_finish_fw(struct vboot_info *vboot)
 	struct cros_fmap *fmap;
 	int ret;
 
-	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMPCR);
-	ret = vboot_extend_pcrs(vboot);
-	if (ret) {
-		log_warning("Failed to extend TPM PCRs (%d)\n", ret);
-		vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_U_ERROR, ret);
-		return VB2_REQUEST_REBOOT;
-	}
-	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMPCR);
+	if (vboot->tpm) {
+		bootstage_mark(BOOTSTAGE_VBOOT_START_TPMPCR);
+		ret = vboot_extend_pcrs(vboot);
+		if (ret) {
+			log_warning("Failed to extend TPM PCRs (%d)\n", ret);
+			vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_U_ERROR, ret);
+			return VB2_REQUEST_REBOOT;
+		}
+		bootstage_mark(BOOTSTAGE_VBOOT_END_TPMPCR);
 
-	/* Lock TPM */
-	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMLOCK);
-	ret = cros_nvdata_lock_walk(CROS_NV_SECDATAF);
-	if (ret) {
-		log_info("Failed to lock TPM (%x)\n", ret);
-		vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_L_ERROR, 0);
-		return VB2_REQUEST_REBOOT;
+		/* Lock TPM */
+		bootstage_mark(BOOTSTAGE_VBOOT_START_TPMLOCK);
+		ret = cros_nvdata_lock_walk(CROS_NV_SECDATAF);
+		if (ret) {
+			log_info("Failed to lock TPM (%x)\n", ret);
+			vb2api_fail(ctx, VB2_RECOVERY_RO_TPM_L_ERROR, 0);
+			return VB2_REQUEST_REBOOT;
+		}
+		bootstage_mark(BOOTSTAGE_VBOOT_END_TPMLOCK);
 	}
-	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMLOCK);
 
 	/* Lock rec hash space if available */
 	if (vboot->has_rec_mode_mrc) {
