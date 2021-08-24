@@ -5,6 +5,8 @@
  * Copyright 2018 Google LLC
  */
 
+#include <dt-bindings/cros/nvdata.h>
+
 / {
 	chromeos_dev: chromeos {
 	};
@@ -29,6 +31,9 @@
 	nvdata {
 		compatible = "google,fs-nvdata";
 		partition = <0>;
+		nvdata,types = <CROS_NV_DATA CROS_NV_SECDATAF CROS_NV_SECDATAK
+			CROS_NV_MRC_REC_HASH CROS_NV_MRC_RW_HASH CROS_NV_FWMP
+			CROS_NV_VSTORE>;
 	};
 };
 
@@ -61,6 +66,7 @@
 		label-prefix = "ro-";
 		sort-by-offset;
 		read-only;
+		align = <0x1000>;
 		fmap {
 			align = <0x1000>;
 			size = <0x1200>;
