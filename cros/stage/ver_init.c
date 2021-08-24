@@ -49,6 +49,46 @@ static int vb2_init_blob(struct vboot_blob *blob, int workbuf_size,
 	return 0;
 }
 
+static int prepare_tpm(struct vboot_info *vboot)
+{
+	int ret;
+
+	ret = uclass_get_device_by_seq(UCLASS_TPM, 0, &vboot->tpm);
+	if (ret)
+		ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
+	if (ret) {
+		if (!vboot->tpm_optional)
+			return log_msg_ret("find TPM", ret);
+		log_warning("No TPM present: performing a limited vboot\n");
+		return 0;
+	}
+	log_info("TPM: %s, version %s\n", vboot->tpm->name,
+		tpm_get_version(vboot->tpm) == TPM_V1 ? "v1.2" : "v2");
+
+	/*
+	 * Read secdata from TPM. Initialise TPM if secdata not found. We don't
+	 * check the return value here because vb2api_fw_phase1 will catch
+	 * invalid secdata and tell us what to do (=reboot).
+	 */
+	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
+	ret = vboot_setup_tpm(vboot);
+	if (ret) {
+		log_err("TPM setup failed (err=%x)\n", ret);
+	} else {
+		ret = antirollback_read_space_firmware(vboot);
+		/*
+		 * This indicates a coding error (e.g. not supported in TPM
+		 * emulator, so fail immediately.
+		 */
+		if (ret == -ENOSYS)
+			return log_msg_ret("inval", ret);
+		antirollback_read_space_kernel(vboot);
+	}
+	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
+
+	return 0;
+}
+
 int vboot_ver_init(struct vboot_info *vboot)
 {
 	struct vboot_blob *blob;
@@ -77,34 +117,9 @@ int vboot_ver_init(struct vboot_info *vboot)
 	ctx->non_vboot_context = vboot;
 	vboot->valid = true;
 
-	ret = uclass_get_device_by_seq(UCLASS_TPM, 0, &vboot->tpm);
+	ret = prepare_tpm(vboot);
 	if (ret)
-		ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
-	if (ret)
-		return log_msg_ret("find TPM", ret);
-	log_info("TPM: %s, version %s\n", vboot->tpm->name,
-		tpm_get_version(vboot->tpm) == TPM_V1 ? "v1.2" : "v2");
-
-	/*
-	 * Read secdata from TPM. Initialise TPM if secdata not found. We don't
-	 * check the return value here because vb2api_fw_phase1 will catch
-	 * invalid secdata and tell us what to do (=reboot).
-	 */
-	bootstage_mark(BOOTSTAGE_VBOOT_START_TPMINIT);
-	ret = vboot_setup_tpm(vboot);
-	if (ret) {
-		log_err("TPM setup failed (err=%x)\n", ret);
-	} else {
-		ret = antirollback_read_space_firmware(vboot);
-		/*
-		 * This indicates a coding error (e.g. not supported in TPM
-		 * emulator, so fail immediately.
-		 */
-		if (ret == -ENOSYS)
-			return log_msg_ret("inval", ret);
-		antirollback_read_space_kernel(vboot);
-	}
-	bootstage_mark(BOOTSTAGE_VBOOT_END_TPMINIT);
+		return log_msg_ret("tpm", ret);
 
 	/* initialise and read nvdata from non-volatile storage */
 	ret = cros_nvdata_read_walk(CROS_NV_DATA, ctx->nvdata,

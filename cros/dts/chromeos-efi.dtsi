@@ -25,6 +25,11 @@
 		filename = "chromeos.rom";
 		partition = <0>;
 	};
+
+	nvdata {
+		compatible = "google,fs-nvdata";
+		partition = <0>;
+	};
 };
 
 &chromeos {
