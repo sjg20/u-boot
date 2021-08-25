@@ -26,13 +26,13 @@
 
 	fwstore {
 		compatible = "google,fwstore-fs";
-		filename = "chromeos.rom";
-		partition = <0>;
+		filename = "efi/chromium/chromeos.rom";
+		partition = <0xc>;
 	};
 
 	nvdata {
 		compatible = "google,fs-nvdata";
-		partition = <0>;
+		partition = <0xc>;
 		nvdata,types = <CROS_NV_DATA CROS_NV_SECDATAF CROS_NV_SECDATAK
 			CROS_NV_MRC_REC_HASH CROS_NV_MRC_RW_HASH CROS_NV_FWMP
 			CROS_NV_VSTORE>;

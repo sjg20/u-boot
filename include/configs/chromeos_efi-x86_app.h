@@ -9,6 +9,9 @@
 #include <configs/efi-x86_app.h>
 #include <configs/chromeos.h>
 
+#undef CONFIG_SYS_MALLOC_LEN
+#define CONFIG_SYS_MALLOC_LEN	(8 << 20)
+
 #undef CONFIG_BOOTCOMMAND
 #define CONFIG_BOOTCOMMAND	"vboot go auto"
 
