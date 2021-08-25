@@ -27,7 +27,8 @@ int vboot_ver1_vbinit(struct vboot_info *vboot)
 		 */
 		if (ret == VB2_ERROR_API_PHASE1_RECOVERY) {
 			log_warning("Recovery requested (%x)\n", ret);
-			vboot_extend_pcrs(vboot);	/* ignore failures */
+			if (vboot->tpm)
+				vboot_extend_pcrs(vboot); /* ignore failures */
 			bootstage_mark(BOOTSTAGE_VBOOT_END);
 			return ret;
 		}
