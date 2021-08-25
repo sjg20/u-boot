@@ -17,6 +17,7 @@
 			type = "section";
 			label-prefix = "ro-";
 			read-only;
+			align = <0x1000>;
 
 			cros-ec-rw {
 				filename = "ec-rw.bin";
@@ -51,7 +52,7 @@
 				pattern = "locales/*";
 				require-matches;
 				files-compress = "lzma";
-				align-default = <4>;
+				align-default = <16>;
 			};
 		};
 
