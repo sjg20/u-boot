@@ -601,8 +601,8 @@ def Binman(args):
     elf_params = None
     if args.update_fdt_in_elf:
         elf_params = args.update_fdt_in_elf.split(',')
-        if len(elf_params) != 3:
-            raise ValueError('Invalid args to --update-fdt-in-elf: expected fname,begin_sym,end_sym')
+        if len(elf_params) != 4:
+            raise ValueError('Invalid args %s to --update-fdt-in-elf: expected infile,outfile,begin_sym,end_sym' % elf_params)
 
     # Try to figure out which device tree contains our image description
     if args.dt:
