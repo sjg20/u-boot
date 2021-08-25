@@ -194,7 +194,6 @@ int vboot_ver_init(struct vboot_info *vboot)
 	if (vboot_flag_read_walk(VBOOT_FLAG_LID_OPEN) == 0)
 		ctx->flags |= VB2_CONTEXT_NOFAIL_BOOT;
 	ctx->flags |= VB2_CONTEXT_NVDATA_V2;
-	ctx->flags |= VB2_CONTEXT_DEVELOPER_MODE;
 
 	if (!vboot->tpm)
 		ctx->flags |= VB2_CONTEXT_NO_SECDATA_FWMP;
