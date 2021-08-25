@@ -52,8 +52,10 @@ static inline fpmath_t fp(int32_t a)
 /* Create an fpmath_t from a fraction. (numerator / denominator)  */
 static inline fpmath_t fpfrac(int32_t numerator, int32_t denominator)
 {
-	return (fpmath_t){ .v = lldiv((int64_t)numerator << FPMATH_SHIFT,
-		denominator) };
+	return (fpmath_t){ .v = ((int64_t)numerator << FPMATH_SHIFT) / denominator };
+
+// 	return (fpmath_t){ .v = lldiv((int64_t)numerator << FPMATH_SHIFT,
+// 		denominator) };
 }
 
 /* Turn an fpmath_t back into an integer, rounding towards -INF. */
@@ -121,8 +123,9 @@ static inline fpmath_t fpmuli(fpmath_t a, int32_t b)
    Truncates integral part of a to 16 bits! Careful with this one! */
 static inline fpmath_t fpdiv(fpmath_t a, fpmath_t b)
 {
-	return (fpmath_t){ .v = lldiv(a.v << (FPMATH_SHIFT/2),
-		b.v >> (FPMATH_SHIFT/2)) };
+	return (fpmath_t){ .v = (a.v << (FPMATH_SHIFT/2)) / (b.v >> (FPMATH_SHIFT/2)) };
+// 	return (fpmath_t){ .v = lldiv(a.v << (FPMATH_SHIFT/2),
+// 		b.v >> (FPMATH_SHIFT/2)) };
 }
 
 /* Divide an fpmath_t by an integer. (a / b) */
