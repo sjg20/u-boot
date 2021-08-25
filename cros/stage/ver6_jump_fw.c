@@ -15,6 +15,9 @@ int vboot_ver6_jump_fw(struct vboot_info *vboot)
 	struct fmap_entry *entry;
 	int ret;
 
+	if (vboot->disable_firmware_jump)
+		return 0;
+
 	entry = &vboot->blob->spl_entry;
 	ret = vboot_jump(vboot, entry);
 	if (ret)

@@ -57,9 +57,22 @@ static int prepare_tpm(struct vboot_info *vboot)
 	if (ret)
 		ret = uclass_first_device_err(UCLASS_TPM, &vboot->tpm);
 	if (ret) {
+		struct vb2_context *ctx = vboot_get_ctx(vboot);
+		vb2_error_t vberr;
+
 		if (!vboot->tpm_optional)
 			return log_msg_ret("find TPM", ret);
 		log_warning("No TPM present: performing a limited vboot\n");
+
+		/* Set up required structures */
+		vb2api_secdata_firmware_create(ctx);
+		vb2api_secdata_kernel_create(ctx);
+		ret = vboot_save_if_needed(vboot, &vberr);
+		if (ret)
+			return log_msg_ret("setup", ret);
+		if (vberr)
+			log_err("Failed to commit nvdata (err=%x)\n", vberr);
+
 		return 0;
 	}
 	log_info("TPM: %s, version %s\n", vboot->tpm->name,
@@ -93,25 +106,29 @@ int vboot_ver_init(struct vboot_info *vboot)
 {
 	struct vboot_blob *blob;
 	struct vb2_context *ctx;
+	int ctx_size;
 	int ret;
 
-	printf("vboot starting in %s\n", spl_phase_name(spl_phase()));
-	log_debug("vboot is at %p, size %lx, bloblist %p\n", vboot,
-		  (ulong)sizeof(*vboot), gd->bloblist);
-	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, sizeof(struct vboot_blob),
-			    VBOOT_CONTEXT_ALIGN);
-	if (!blob)
-		return log_msg_ret("blob", -ENOSPC);
-	log_notice("Bloblist at %p, size %zx\n", blob,
-		   sizeof(struct vboot_blob));
+	log_notice("Chromium OS verified boot stage A starting in %s\n",
+		   spl_phase_name(spl_phase()));
 
 	bootstage_mark(BOOTSTAGE_VBOOT_START);
 
 	ret = vboot_load_config(vboot);
 	if (ret)
 		return log_msg_ret("load config", ret);
+
+	ctx_size = sizeof(struct vboot_blob);
+	log_debug("vboot is at %p, size %x, bloblist %p\n", vboot, ctx_size,
+		  gd->bloblist);
+	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, ctx_size, VBOOT_CONTEXT_ALIGN);
+	if (!blob)
+		return log_msg_ret("blob", -ENOSPC);
+	log_notice("Bloblist at %p, size %zx\n", blob,
+		   sizeof(struct vboot_blob));
+
 	/* Set up context and work buffer */
-	ret = vb2_init_blob(blob, VB2_FIRMWARE_WORKBUF_RECOMMENDED_SIZE, &ctx);
+	ret = vb2_init_blob(blob, ctx_size, &ctx);
 	if (ret)
 		return log_msg_ret("set up work context", ret);
 	vboot->blob = blob;
@@ -178,6 +195,9 @@ int vboot_ver_init(struct vboot_info *vboot)
 		ctx->flags |= VB2_CONTEXT_NOFAIL_BOOT;
 	ctx->flags |= VB2_CONTEXT_NVDATA_V2;
 	ctx->flags |= VB2_CONTEXT_DEVELOPER_MODE;
+
+	if (!vboot->tpm)
+		ctx->flags |= VB2_CONTEXT_NO_SECDATA_FWMP;
 
 	return 0;
 }

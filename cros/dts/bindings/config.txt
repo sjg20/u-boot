@@ -30,6 +30,11 @@ detachable-ui
 disable-dev-on-rec
 	Disable entry to developer mode from recovery
 
+disable-firmware-jump
+	Don't jump to firmware at the end of the verification phase. This is
+	used if U-Boot is running as one program and not actually supporting
+	verified boot in firwware, just in kernel.
+
 disable-memwipe
 	Disable memory wipe, ie, bypass function wipe_unused_memory(). This
 	flag is useful for boards where memory wipe is not absolutely needed
@@ -76,6 +81,11 @@ recovery-mode-mrc
 	memory parameters are kept. This is done on some Intel platforms where
 	memory init is so slow that users thing the machine is broken when
 	trying to get to recovery mode.
+
+tpm-optional
+	TPM is optional and vboot runs normally if it is not present. This
+	disables some features and is not actually very secure. But it does
+	retain the vboot flow and allow booting.
 
 vboot2-work-buffer-size
 	Size of the vboot2 work buffer. Should normaly be 0x3000.

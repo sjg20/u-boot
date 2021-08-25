@@ -70,6 +70,8 @@ int vboot_load_config(struct vboot_info *vboot)
 						      "physical-rec-switch");
 	vboot->resume_path_same_as_boot = ofnode_read_bool(node,
 						"resume-path-same-as-boot");
+	vboot->disable_firmware_jump = ofnode_read_bool(node,
+						"disable-firmware-jump");
 #ifndef CONFIG_SPL_BUILD
 	vboot->detachable_ui = ofnode_read_bool(node, "detachable-ui");
 	vboot->disable_memwipe = ofnode_read_bool(node, "disable-memwipe");

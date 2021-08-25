@@ -119,17 +119,16 @@ static int vboot_check_wipe_memory(struct vboot_info *vboot)
 
 static int vboot_init_for_efi(struct vb2_context **ctxp)
 {
-	const int size = VB2_KERNEL_WORKBUF_RECOMMENDED_SIZE;
+	const int size = sizeof(struct vboot_blob);
 	struct vb2_context *ctx;
 	void *blob;
 	int ret;
 
-	blob = bloblist_add(BLOBLISTT_VBOOT_CTX, size, VBOOT_CONTEXT_ALIGN);
+	blob = bloblist_find(BLOBLISTT_VBOOT_CTX, size);
 	if (!blob)
 		return log_msg_ret("blob", -ENOSPC);
 
-	/* Initialize vb2_shared_data and friends. */
-	ret = vb2api_init((void *)blob, size, &ctx);
+	ret = vb2api_relocate(blob, blob, size, &ctx);
 	if (ret)
 		return log_msg_retz("init_context", ret);
 	*ctxp = ctx;
@@ -145,7 +144,7 @@ int vboot_rw_init(struct vboot_info *vboot)
 	bool is_rw;
 	int ret;
 
-	log_notice("Chromium OS verified boot starting\n");
+	log_notice("Chromium OS verified boot stage C starting\n");
 	if (IS_ENABLED(CONFIG_EFI)) {
 		ret = vboot_init_for_efi(&ctx);
 		if (ret)

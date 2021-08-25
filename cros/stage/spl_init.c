@@ -15,6 +15,7 @@ int vboot_spl_init(struct vboot_info *vboot)
 	struct vboot_blob *blob;
 	int ret;
 
+	log_notice("Chromium OS verified boot stage B starting\n");
 	blob = bloblist_find(BLOBLISTT_VBOOT_CTX, sizeof(*blob));
 	if (!blob)
 		return log_msg_ret("ctx", -ENOENT);

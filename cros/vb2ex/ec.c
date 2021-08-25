@@ -290,6 +290,10 @@ vb2_error_t vb2ex_ec_vboot_done(struct vb2_context *ctx)
 	int limit_power;
 	int ret;
 
+	/* If there is no EC there is nothing to do here */
+	if (!CONFIG_IS_ENABLED(CROS_EC))
+		return 0;
+
 	ret = ec_get(0, &dev);
 	if (ret)
 		return log_msg_ret("ec", ret);

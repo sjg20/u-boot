@@ -47,6 +47,12 @@ struct vboot_fw_info {
 	struct fmap_entry *entry;
 };
 
+#ifdef CONFIG_EFI
+#define VBOOT_CTX_SIZE		VB2_KERNEL_WORKBUF_RECOMMENDED_SIZE
+#else
+#define VBOOT_CTX_SIZE		VB2_FIRMWARE_WORKBUF_RECOMMENDED_SIZE
+#endif
+
 /**
  * struct vboot_blob - Vboot information in the bloblist
  *
@@ -59,8 +65,7 @@ struct vboot_fw_info {
  *	U-Boot slot
  */
 struct vboot_blob {
-	u8 share_data[VB2_FIRMWARE_WORKBUF_RECOMMENDED_SIZE]
-		 __aligned(VBOOT_CONTEXT_ALIGN);
+	u8 share_data[VBOOT_CTX_SIZE] __aligned(VBOOT_CONTEXT_ALIGN);
 	struct fmap_entry spl_entry;
 	struct fmap_entry u_boot_entry;
 };
@@ -106,6 +111,7 @@ struct vboot_blob {
  * @disable_lid_shutdown_during_update: Ignore LID closed during auxfw update
  * @disable_power_button_during_update: Disable the power button during an aux
  *	firmware update
+ * @disable-firmware-jump: Disable jumping to firmware (ver6)
  * @tpm_optional: true if the TPM is optional
  * @usb_is_enumerated: true if USB ports have been enumerated already
  *
@@ -153,6 +159,7 @@ struct vboot_info {
 	bool resume_path_same_as_boot;
 	bool cr50_commit_secdata;
 	bool tpm_optional;
+	bool disable_firmware_jump;
 #ifndef CONFIG_SPL_BUILD
 	bool detachable_ui;
 	bool disable_memwipe;
