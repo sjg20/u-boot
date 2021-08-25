@@ -84,6 +84,7 @@ static efi_status_t setup_memory(struct efi_priv *priv)
 			return ret;
 		priv->use_pool_for_malloc = true;
 	} else {
+		printf("(using fixed RAM address %lx) ", (ulong)addr);
 		priv->ram_base = addr;
 	}
 	gd->ram_size = pages << 12;
@@ -207,8 +208,11 @@ efi_status_t EFIAPI efi_main(efi_handle_t image,
 	efi_status_t ret;
 
 	/* Set up access to EFI data structures */
-	efi_init(priv, "App", image, sys_table);
-
+	ret = efi_init(priv, "App", image, sys_table);
+	if (ret) {
+		printf("Failed to set up ARP: err=%lx\n", ret);
+		return ret;
+	}
 	global_priv = priv;
 
 	/*

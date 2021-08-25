@@ -9,6 +9,8 @@
  * Marius Groeger <mgroeger@sysgo.de>
  */
 
+#define DEBUG
+
 #include <common.h>
 #include <bloblist.h>
 #include <bootstage.h>
@@ -655,8 +657,14 @@ static int reloc_bootstage(void)
 static int reloc_bloblist(void)
 {
 #ifdef CONFIG_BLOBLIST
-	if (gd->flags & GD_FLG_SKIP_RELOC)
+	/*
+	 * Relocate only if we are supposed to send it
+	 */
+	if ((gd->flags & GD_FLG_SKIP_RELOC) &&
+	    CONFIG_BLOBLIST_SIZE == CONFIG_BLOBLIST_SIZE_RELOC) {
+		debug("Not relocating bloblist\n");
 		return 0;
+	}
 	if (gd->new_bloblist) {
 		int size = CONFIG_BLOBLIST_SIZE;
 
