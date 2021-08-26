@@ -54,13 +54,15 @@ enum {
 struct vboot_info *boot_kernel_vboot_ptr;
 
 /**
+ * get_kernel_config() - Find the address of the kernel command line
+ *
  * This loads the kernel command line from the buffer that holds the loaded
- * kernel * image. This function calculates the address of the command line from
- * the * bootloader address.
+ * kernel image. This function calculates the address of the command line from
+ * the bootloader address.
  *
  * @kernel_buffer: Address of kernel buffer in memory
  * @bootloader_offset: Offset of bootloader in kernel_buffer
- * @return kernel config address
+ * @return kernel command-line address
  */
 static char *get_kernel_config(void *kernel_buffer, size_t bootloader_offset)
 {
@@ -210,7 +212,14 @@ static int boot_kernel(struct vboot_info *vboot,
 
 	addr = map_to_sysmem(kparams->kernel_buffer);
 	log_info("Kernel buffer at %lx (dest %lx)\n", addr,
-		 (ulong)kparams->kernel_buffer);
+		 (ulong)vboot->kaddr);
+
+	/* Sanity check - we set this in vboot_rw_select_kernel() */
+	if (vboot->kernel_buffer != kparams->kernel_buffer) {
+		log_err("Kernel buffer mismatch: expected %p, got %p from vboot\n",
+			vboot->kernel_buffer, kparams->kernel_buffer);
+		return log_msg_ret("buf", -EFAULT);
+	}
 #ifndef CONFIG_X86
 	/* Chromium OS kernel has to be loaded at fixed location */
 	struct cmd_tbl cmdtp;
@@ -240,6 +249,7 @@ static int boot_kernel(struct vboot_info *vboot,
 	cmdline = get_kernel_config(kparams->kernel_buffer,
 				    kparams->bootloader_address -
 				    CROS_32BIT_ENTRY_ADDR);
+	printf("cur cmdline at %p\n", cmdline);
 	/*
 	 * strncat could write CMDLINE_SIZE + 1 bytes to cmdline_buf. This
 	 * is okay because the extra 1 byte has been reserved in sizeof().
@@ -296,30 +306,42 @@ static int boot_kernel(struct vboot_info *vboot,
 		return log_msg_ret("bootserv", -EPERM);
 	printf("done\n");
 
+	if (vboot->alloc_kernel) {
+		void *ptr;
+
+		log_info("Copying kernel into place at %lx, size %x\n",
+			 (ulong)vboot->kaddr, kparams->kernel_size);
+		ptr = map_sysmem(vboot->kaddr, vboot->ksize);
+		memmove(ptr, kparams->kernel_buffer, kparams->kernel_size);
+
+		cmdline += vboot->kaddr - addr;
+// 		cmdline = get_kernel_config(kparams->kernel_buffer,
+// 					    kparams->bootloader_address -
+// 					    CROS_32BIT_ENTRY_ADDR);
+		printf("cmdline at %p\n", cmdline);
+	}
+
 	params = (struct boot_params *)(cmdline + CMDLINE_SIZE);
-	log_info("kernel_buffer=%p, size=%x, bootloader_address=%llx, size=%x, cmdline=%p, params=%p\n",
-		  kparams->kernel_buffer, kparams->kernel_buffer_size,
-		  kparams->bootloader_address, kparams->bootloader_size,
-		  cmdline, params);
+	log_info("kernel_buffer=%lx, size=%lx, cmdline=%p, params=%p\n",
+		 (ulong)vboot->kaddr, (ulong)vboot->ksize, cmdline, params);
 	log_buffer(LOGC_VBOOT, LOGL_INFO, (ulong)params + 0x1f1,
 		   (void *)params + 0x1f1, 1, 0xf, 0);
-	if (!setup_zimage(params, cmdline, 0, 0, 0, 0)) {
+
+	if (!setup_zimage(params, cmdline, 0, 0, 0, false)) {
 #ifdef LOG_DEBUG
 		zimage_dump(params);
 #endif
-		log_buffer(LOGC_VBOOT, 0x1f1,
-			   (ulong)kparams->kernel_buffer,
-			   kparams->kernel_buffer, 1, 0x100, 0);
-		log_debug("go %p, %p\n", params, kparams->kernel_buffer);
-		boot_linux_kernel((ulong)params, (ulong)kparams->kernel_buffer,
-				  false);
+		log_buffer(LOGC_VBOOT, 0x1f1, (ulong)vboot->kaddr,
+			   map_sysmem(vboot->kaddr, 0), 1, 0x100, 0);
+		log_info("go %p, %lx\n", params, (ulong)vboot->kaddr);
+		boot_linux_kernel((ulong)params, vboot->kaddr, false);
 	}
 #else
 	cmdtp.name = "bootm";
 	do_bootm(&cmdtp, 0, ARRAY_SIZE(argv), argv);
 #endif
 	boot_kernel_vboot_ptr = NULL;
-	log_debug("failed to boot; is kernel broken?\n");
+	log_err("failed to boot; is kernel broken?\n");
 
 	return 1;
 }

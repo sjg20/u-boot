@@ -26,17 +26,18 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 	if (ret)
 		return log_msg_ret("config", ret);
 	if (vboot->alloc_kernel) {
-		vboot->kernel_buffer = malloc(vboot->ksize);
-		if (vboot->kernel_buffer) {
+		vboot->kernel_buffer = memalign(16, vboot->ksize);
+		if (!vboot->kernel_buffer) {
 			log_err("Not enough space for kernel (%lx bytes)\n",
 				(ulong)vboot->ksize);
 			return log_msg_ret("kern", -ENOMEM);
 		}
+		kparams->kernel_buffer = vboot->kernel_buffer;
 	} else {
 		kparams->kernel_buffer = map_sysmem(vboot->kaddr, vboot->ksize);
 	}
-	log_debug("Loading kernel to address %lx\n",
-		  (ulong)map_to_sysmem(kparams->kernel_buffer));
+	log_info("Loading kernel to address %lx\n",
+		 (ulong)map_to_sysmem(kparams->kernel_buffer));
 	kparams->kernel_buffer_size = vboot->ksize;
 
 	/* On x86 systems, inhibit power button pulse from EC */

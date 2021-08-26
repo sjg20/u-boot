@@ -119,7 +119,8 @@ struct vboot_blob {
  *
  * @fmap: Firmare map, parsed from the binman information
  * @fwstore: Firmware storage device
- * @kernel_buffer: Address of kernel buffer
+ * @kernel_buffer: Address of kernel buffer. If @alloc_kernel then this is not
+ *	the final position, but the one to which it is loaded for verification
  * @kparams: Kernel params passed to Vboot library
  * @vb_error: Vboot library error, if any
  * @fw_size: Size of firmware image in bytes - this starts off as the number

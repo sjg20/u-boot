@@ -4,6 +4,8 @@
  * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
  */
 
+#define DEBUG
+
 #ifndef USE_HOSTCC
 #include <common.h>
 #include <bootstage.h>
@@ -575,6 +577,7 @@ int bootm_process_cmdline(char *buf, int maxlen, int flags)
 {
 	int ret;
 
+	printf("here\n");
 	/* Check config first to enable compiler to eliminate code */
 	if (IS_ENABLED(CONFIG_SILENT_CONSOLE) &&
 	    !IS_ENABLED(CONFIG_SILENT_U_BOOT_ONLY) &&

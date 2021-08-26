@@ -10,7 +10,7 @@
 #include <configs/chromeos.h>
 
 #undef CONFIG_SYS_MALLOC_LEN
-#define CONFIG_SYS_MALLOC_LEN	(8 << 20)
+#define CONFIG_SYS_MALLOC_LEN	(40 << 20)
 
 #undef CONFIG_BOOTCOMMAND
 #define CONFIG_BOOTCOMMAND	"vboot go auto"

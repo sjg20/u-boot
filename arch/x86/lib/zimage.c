@@ -13,6 +13,7 @@
  */
 
 #define LOG_CATEGORY	LOGC_BOOT
+#define LOG_DEBUG
 
 #include <common.h>
 #include <bootm.h>
@@ -353,6 +354,7 @@ int setup_zimage(struct boot_params *setup_base, char *cmd_line, int auto_boot,
 		if (bootproto >= 0x0202) {
 			hdr->cmd_line_ptr = (uintptr_t)cmd_line;
 		} else if (bootproto >= 0x0200) {
+		printf("line %d\n", __LINE__);
 			setup_base->screen_info.cl_magic = COMMAND_LINE_MAGIC;
 			setup_base->screen_info.cl_offset =
 				(uintptr_t)cmd_line - (uintptr_t)setup_base;
@@ -361,16 +363,23 @@ int setup_zimage(struct boot_params *setup_base, char *cmd_line, int auto_boot,
 		}
 
 		/* build command line at COMMAND_LINE_OFFSET */
+		printf("line %d\n", __LINE__);
 		if (cmdline_force)
 			strcpy(cmd_line, (char *)cmdline_force);
 		else
 			build_command_line(cmd_line, auto_boot);
-		ret = bootm_process_cmdline(cmd_line, max_size, BOOTM_CL_ALL);
-		if (ret) {
-			printf("Cmdline setup failed (max_size=%x, bootproto=%x, err=%d)\n",
-			       max_size, bootproto, ret);
-			return ret;
+		printf("line %d %p %x\n", __LINE__, cmd_line, max_size);
+		if (IS_ENABLED(CONFIG_CMD_BOOTM)) {
+			ret = bootm_process_cmdline(cmd_line, max_size,
+						    BOOTM_CL_ALL);
+			printf("line %d\n", __LINE__);
+			if (ret) {
+				printf("Cmdline setup failed (max_size=%x, bootproto=%x, err=%d)\n",
+				       max_size, bootproto, ret);
+				return ret;
+			}
 		}
+		printf("line %d\n", __LINE__);
 		printf("Kernel command line: \"");
 		puts(cmd_line);
 		printf("\"\n");
