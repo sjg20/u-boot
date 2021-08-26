@@ -194,30 +194,6 @@ int efi_call_exit_boot_services(void)
 	ret = boot->exit_boot_services(priv->parent_image, priv->memmap_key);
 	if (ret)
 		return ret;
-#if 0
-	printf("key=%x, image=%p\n", priv->memmap_key, priv->parent_image);
-	if (ret) {
-		/*
-		 * Unfortunately it happens that we cannot exit boot services
-		 * the first time. But the second time it work. I don't know
-		 * why but this seems to be a repeatable problem. To get
-		 * around it, just try again.
-		 */
-		printhex2(ret);
-		puts(" Can't exit boot services\n");
-		if (ret) {
-			printhex2(ret);
-			puts(" Can't get memory map\n");
-			return ret;
-		}
-		ret = boot->exit_boot_services(priv->parent_image,
-					       priv->memmap_key);
-		if (ret) {
-			printhex2(ret);
-			puts(" Can't exit boot services 2\n");
-			return ret;
-		}
-	}
-#endif
+
 	return 0;
 }
