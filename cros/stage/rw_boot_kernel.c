@@ -290,6 +290,12 @@ static int boot_kernel(struct vboot_info *vboot,
 	if (ret)
 		log_warning("Failed to write vboot to ACPI (err=%d)\n", ret);
 
+	printf("Exiting boot services...");
+	ret = efi_call_exit_boot_services();
+	if (ret)
+		return log_msg_ret("bootserv", -EPERM);
+	printf("done\n");
+
 	params = (struct boot_params *)(cmdline + CMDLINE_SIZE);
 	log_info("kernel_buffer=%p, size=%x, bootloader_address=%llx, size=%x, cmdline=%p, params=%p\n",
 		  kparams->kernel_buffer, kparams->kernel_buffer_size,

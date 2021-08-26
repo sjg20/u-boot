@@ -20,9 +20,6 @@
 #include <linux/types.h>
 #include <efi.h>
 #include <efi_api.h>
-#include <dm/lists.h>
-#include <dm/device-internal.h>
-#include <dm/root.h>
 
 static struct efi_priv *global_priv;
 
@@ -150,7 +147,13 @@ int efi_store_memory_map(struct efi_priv *priv)
 		puts(" No memory map\n");
 		return ret;
 	}
-	size += 1024;	/* Since doing a malloc() may change the memory map! */
+	/*
+	 * Since doing a malloc() may change the memory map and also we want to
+	 * be able to read the memory map in efi_call_exit_boot_services()
+	 * below, after more changes have happened
+	 */
+	priv->memmap_alloc = size + 1024;
+	priv->memmap_size = priv->memmap_alloc;
 	priv->memmap_desc = efi_malloc(priv, size, &ret);
 	if (!priv->memmap_desc) {
 		printhex2(ret);
@@ -158,14 +161,15 @@ int efi_store_memory_map(struct efi_priv *priv)
 		return ret;
 	}
 
-	ret = boot->get_memory_map(&size, priv->memmap_desc, &priv->memmap_key,
-				   &desc_size, &priv->memmap_version);
+	ret = boot->get_memory_map(&priv->memmap_size, priv->memmap_desc,
+				   &priv->memmap_key, &desc_size,
+				   &priv->memmap_version);
 	if (ret) {
 		printhex2(ret);
 		puts(" Can't get memory map\n");
 		return ret;
 	}
-	priv->memmap_size = size;
+	printf("key=%x, image=%p\n", priv->memmap_key, priv->parent_image);
 
 	return 0;
 }
@@ -175,8 +179,9 @@ int efi_call_exit_boot_services(void)
 	struct efi_priv *priv = efi_get_priv();
 	const struct efi_boot_services *boot = priv->boot;
 	u32 version;
-	int ret;
+	efi_status_t ret;
 
+	printf("key=%x, image=%p\n", priv->memmap_key, priv->parent_image);
 	ret = boot->exit_boot_services(priv->parent_image, priv->memmap_key);
 	if (ret) {
 		efi_uintn_t size;
@@ -188,7 +193,7 @@ int efi_call_exit_boot_services(void)
 		 */
 		printhex2(ret);
 		puts(" Can't exit boot services\n");
-		size = priv->memmap_size;
+		size = priv->memmap_alloc;
 		ret = boot->get_memory_map(&size, priv->memmap_desc,
 					   &priv->memmap_key,
 					   &priv->memmap_desc_size, &version);

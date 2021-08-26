@@ -387,8 +387,9 @@ static inline struct efi_mem_desc *efi_get_next_mem_desc(
  * @run: Pointer to runtime-services table
  * @memmap_key: Key returned from get_memory_map()
  * @memmap_desc: List of memory-map records
- * @memmap_size Size of memory map in bytes
- * @memmap_desc_size: Size of an individual memory record, in bytes
+ * @memmap_alloc: Amount of memory allocated for memory map list
+ * @memmap_size Size of memory-map list in bytes
+ * @memmap_desc_size: Size of an individual memory-map record, in bytes
  * @memmap_version: Memory-map version
  *
  * Used by app only:
@@ -411,6 +412,7 @@ struct efi_priv {
 	struct efi_runtime_services *run;
 	efi_uintn_t memmap_key;
 	struct efi_mem_desc *memmap_desc;
+	efi_uintn_t memmap_alloc;
 	efi_uintn_t memmap_size;
 	efi_uintn_t memmap_desc_size;
 	u32 memmap_version;
