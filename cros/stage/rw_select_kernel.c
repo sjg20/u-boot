@@ -19,20 +19,25 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 {
 	VbSelectAndLoadKernelParams *kparams = &vboot->kparams;
 	struct vb2_context *ctx = vboot_get_ctx(vboot);
-	fdt_addr_t kaddr;
-	fdt_size_t ksize;
 	vb2_error_t res;
 	int ret;
 
 	ret = vboot_load_config(vboot);
 	if (ret)
 		return log_msg_ret("config", ret);
-	kaddr = ofnode_get_addr_size(vboot->config, "kernel-addr", &ksize);
-	if (kaddr == FDT_ADDR_T_NONE)
-		return log_msg_ret("kernel address", -EINVAL);
-	log_debug("Loading kernel to address %lx\n", (ulong)kaddr);
-	kparams->kernel_buffer = map_sysmem(kaddr, ksize);
-	kparams->kernel_buffer_size = ksize;
+	if (vboot->alloc_kernel) {
+		vboot->kernel_buffer = malloc(vboot->ksize);
+		if (vboot->kernel_buffer) {
+			log_err("Not enough space for kernel (%lx bytes)\n",
+				(ulong)vboot->ksize);
+			return log_msg_ret("kern", -ENOMEM);
+		}
+	} else {
+		kparams->kernel_buffer = map_sysmem(vboot->kaddr, vboot->ksize);
+	}
+	log_debug("Loading kernel to address %lx\n",
+		  (ulong)map_to_sysmem(kparams->kernel_buffer));
+	kparams->kernel_buffer_size = vboot->ksize;
 
 	/* On x86 systems, inhibit power button pulse from EC */
 	if (IS_ENABLED(CONFIG_X86) && CONFIG_IS_ENABLED(CROS_EC)) {
@@ -45,7 +50,7 @@ int vboot_rw_select_kernel(struct vboot_info *vboot)
 	}
 
 	/*
-	 * TODO(sjg@chromium.org): enable this
+	 * TODO(sjg@chromium.org): enable this (needs a binary in the image)
 	 * if (CONFIG_IS_ENABLED(CROS_EC))
 	 *	ctx->flags |= VB2_CONTEXT_EC_SYNC_SUPPORTED;
 	 */

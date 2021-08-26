@@ -21,6 +21,7 @@
 		tpm-optional;
 		disable-firmware-jump;
 		disable-memwipe;
+		alloc-kernel;
 		kernel-addr = /bits/ 64 <0x00100000 0x2000000>;
 	};
 

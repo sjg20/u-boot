@@ -202,19 +202,22 @@ static int boot_kernel(struct vboot_info *vboot,
 	char *cmdline;
 	struct udevice *dev;
 	char guid[UUID_STR_LEN + 1];
+	ulong addr;
 #ifdef CONFIG_X86
 	struct boot_params *params;
 	int ret;
 #endif
 
+	addr = map_to_sysmem(kparams->kernel_buffer);
+	log_info("Kernel buffer at %lx (dest %lx)\n", addr,
+		 (ulong)kparams->kernel_buffer);
 #ifndef CONFIG_X86
 	/* Chromium OS kernel has to be loaded at fixed location */
 	struct cmd_tbl cmdtp;
-	ulong addr = map_to_sysmem(kparams->kernel_buffer);
 	char address[20];
 	char *argv[] = { "bootm", address };
 
-	sprintf(address, "%08lx", addr);
+	sprintf(address, "%08lx", (ulong)kparams->kaddr);
 #endif
 	strcpy(cmdline_buf, CHROMEOS_BOOTARGS);
 
@@ -288,11 +291,11 @@ static int boot_kernel(struct vboot_info *vboot,
 		log_warning("Failed to write vboot to ACPI (err=%d)\n", ret);
 
 	params = (struct boot_params *)(cmdline + CMDLINE_SIZE);
-	log_debug("kernel_buffer=%p, size=%x, bootloader_address=%llx, size=%x, cmdline=%p, params=%p\n",
+	log_info("kernel_buffer=%p, size=%x, bootloader_address=%llx, size=%x, cmdline=%p, params=%p\n",
 		  kparams->kernel_buffer, kparams->kernel_buffer_size,
 		  kparams->bootloader_address, kparams->bootloader_size,
 		  cmdline, params);
-	log_buffer(LOGC_VBOOT, LOGL_DEBUG, (ulong)params + 0x1f1,
+	log_buffer(LOGC_VBOOT, LOGL_INFO, (ulong)params + 0x1f1,
 		   (void *)params + 0x1f1, 1, 0xf, 0);
 	if (!setup_zimage(params, cmdline, 0, 0, 0, 0)) {
 #ifdef LOG_DEBUG

@@ -80,6 +80,10 @@ int vboot_load_config(struct vboot_info *vboot)
 	vboot->disable_power_button_during_update = ofnode_read_bool(node,
 					"disable-power-button-during-update");
 	vboot->tpm_optional = ofnode_read_bool(node, "tpm-optional");
+	vboot->alloc_kernel = ofnode_read_bool(node, "alloc-kernel");
+	vboot->kaddr = ofnode_get_addr_size(node, "kernel-addr", &vboot->ksize);
+	if (vboot->kaddr == FDT_ADDR_T_NONE)
+		return log_msg_ret("kern", -EINVAL);
 #endif
 
 	vboot->config = node;

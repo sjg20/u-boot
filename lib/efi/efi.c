@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
+ * Functions shared by the app and stub
+ *
  * Copyright (c) 2015 Google, Inc
  *
  * EFI information obtained here:
@@ -21,6 +23,33 @@
 #include <dm/lists.h>
 #include <dm/device-internal.h>
 #include <dm/root.h>
+
+static struct efi_priv *global_priv;
+
+struct efi_priv *efi_get_priv(void)
+{
+	return global_priv;
+}
+
+void efi_set_priv(struct efi_priv *priv)
+{
+	global_priv = priv;
+}
+
+struct efi_system_table *efi_get_sys_table(void)
+{
+	return global_priv->sys_table;
+}
+
+struct efi_boot_services *efi_get_boot(void)
+{
+	return global_priv->boot;
+}
+
+unsigned long efi_get_ram_base(void)
+{
+	return global_priv->ram_base;
+}
 
 /*
  * Unfortunately we cannot access any code outside what is built especially
@@ -103,29 +132,79 @@ void efi_free(struct efi_priv *priv, void *ptr)
 	boot->free_pool(ptr);
 }
 
-/**
- * Create a block device so U-Boot can access an EFI device
- *
- * @handle:	EFI handle to bind
- * @blkio:	block io protocol
- * Return:	0 = success
- */
-int efi_bind_block(efi_handle_t handle, struct efi_block_io *blkio)
+int efi_store_memory_map(struct efi_priv *priv)
 {
-	struct efi_media_plat plat;
-	struct udevice *dev;
-	char name[18];
+	struct efi_boot_services *boot = priv->sys_table->boottime;
+	efi_uintn_t size, desc_size;
+	efi_status_t ret;
+
+	/* Get the memory map so we can switch off EFI */
+	size = 0;
+	ret = boot->get_memory_map(&size, NULL, &priv->memmap_key,
+				   &priv->memmap_desc_size,
+				   &priv->memmap_version);
+	if (ret != EFI_BUFFER_TOO_SMALL) {
+		printhex2(EFI_BITS_PER_LONG);
+		putc(' ');
+		printhex2(ret);
+		puts(" No memory map\n");
+		return ret;
+	}
+	size += 1024;	/* Since doing a malloc() may change the memory map! */
+	priv->memmap_desc = efi_malloc(priv, size, &ret);
+	if (!priv->memmap_desc) {
+		printhex2(ret);
+		puts(" No memory for memory descriptor\n");
+		return ret;
+	}
+
+	ret = boot->get_memory_map(&size, priv->memmap_desc, &priv->memmap_key,
+				   &desc_size, &priv->memmap_version);
+	if (ret) {
+		printhex2(ret);
+		puts(" Can't get memory map\n");
+		return ret;
+	}
+	priv->memmap_size = size;
+
+	return 0;
+}
+
+int efi_call_exit_boot_services(void)
+{
+	struct efi_priv *priv = efi_get_priv();
+	const struct efi_boot_services *boot = priv->boot;
+	u32 version;
 	int ret;
 
-	plat.handle = handle;
-	plat.blkio = blkio;
-	ret = device_bind(dm_root(), DM_DRIVER_GET(efi_media), "efi_media",
-			  &plat, ofnode_null(), &dev);
-	if (ret)
-		return log_msg_ret("bind", ret);
-
-	snprintf(name, sizeof(name), "efi_media_%x", dev_seq(dev));
-	device_set_name(dev, name);
+	ret = boot->exit_boot_services(priv->parent_image, priv->memmap_key);
+	if (ret) {
+		efi_uintn_t size;
+		/*
+		 * Unfortunately it happens that we cannot exit boot services
+		 * the first time. But the second time it work. I don't know
+		 * why but this seems to be a repeatable problem. To get
+		 * around it, just try again.
+		 */
+		printhex2(ret);
+		puts(" Can't exit boot services\n");
+		size = priv->memmap_size;
+		ret = boot->get_memory_map(&size, priv->memmap_desc,
+					   &priv->memmap_key,
+					   &priv->memmap_desc_size, &version);
+		if (ret) {
+			printhex2(ret);
+			puts(" Can't get memory map\n");
+			return ret;
+		}
+		ret = boot->exit_boot_services(priv->parent_image,
+					       priv->memmap_key);
+		if (ret) {
+			printhex2(ret);
+			puts(" Can't exit boot services 2\n");
+			return ret;
+		}
+	}
 
 	return 0;
 }

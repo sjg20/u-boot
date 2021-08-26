@@ -21,29 +21,42 @@
 #include <efi.h>
 #include <efi_api.h>
 #include <sysreset.h>
+#include <dm/device-internal.h>
+#include <dm/lists.h>
+#include <dm/root.h>
 
 DECLARE_GLOBAL_DATA_PTR;
-
-static struct efi_priv *global_priv;
-
-struct efi_system_table *efi_get_sys_table(void)
-{
-	return global_priv->sys_table;
-}
-
-struct efi_boot_services *efi_get_boot(void)
-{
-	return global_priv->boot;
-}
-
-unsigned long efi_get_ram_base(void)
-{
-	return global_priv->ram_base;
-}
 
 int efi_info_get(enum efi_entry_t type, void **datap, int *sizep)
 {
 	return -ENOSYS;
+}
+
+/**
+ * Create a block device so U-Boot can access an EFI device
+ *
+ * @handle:	EFI handle to bind
+ * @blkio:	block io protocol
+ * Return:	0 = success
+ */
+int efi_bind_block(efi_handle_t handle, struct efi_block_io *blkio)
+{
+	struct efi_media_plat plat;
+	struct udevice *dev;
+	char name[18];
+	int ret;
+
+	plat.handle = handle;
+	plat.blkio = blkio;
+	ret = device_bind(dm_root(), DM_DRIVER_GET(efi_media), "efi_media",
+			  &plat, ofnode_null(), &dev);
+	if (ret)
+		return log_msg_ret("bind", ret);
+
+	snprintf(name, sizeof(name), "efi_media_%x", dev_seq(dev));
+	device_set_name(dev, name);
+
+	return 0;
 }
 
 static efi_status_t setup_memory(struct efi_priv *priv)
@@ -84,7 +97,7 @@ static efi_status_t setup_memory(struct efi_priv *priv)
 			return ret;
 		priv->use_pool_for_malloc = true;
 	} else {
-		printf("(using fixed RAM address %lx) ", (ulong)addr);
+		printf("(using allocated RAM address %lx) ", (ulong)addr);
 		priv->ram_base = addr;
 	}
 	gd->ram_size = pages << 12;
@@ -213,7 +226,7 @@ efi_status_t EFIAPI efi_main(efi_handle_t image,
 		printf("Failed to set up ARP: err=%lx\n", ret);
 		return ret;
 	}
-	global_priv = priv;
+	efi_set_priv(priv);
 
 	/*
 	 * Set up the EFI debug UART so that printf() works. This is
@@ -227,6 +240,9 @@ efi_status_t EFIAPI efi_main(efi_handle_t image,
 		printf("Failed to set up memory: ret=%lx\n", ret);
 		return ret;
 	}
+	ret = efi_store_memory_map(priv);
+	if (ret)
+		return ret;
 
 	printf("starting\n");
 
@@ -239,7 +255,7 @@ efi_status_t EFIAPI efi_main(efi_handle_t image,
 
 static void efi_exit(void)
 {
-	struct efi_priv *priv = global_priv;
+	struct efi_priv *priv = efi_get_priv();
 
 	free_memory(priv);
 	printf("U-Boot EFI exiting\n");

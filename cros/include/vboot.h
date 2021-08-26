@@ -114,11 +114,13 @@ struct vboot_blob {
  * @disable-firmware-jump: Disable jumping to firmware (ver6)
  * @tpm_optional: true if the TPM is optional
  * @usb_is_enumerated: true if USB ports have been enumerated already
+ * @alloc_kernel: Allocate space for the kernel and copy it to the final
+ *	address just before booting
  *
  * @fmap: Firmare map, parsed from the binman information
  * @fwstore: Firmware storage device
+ * @kernel_buffer: Address of kernel buffer
  * @kparams: Kernel params passed to Vboot library
- * @cparams: Common params passed to Vboot library
  * @vb_error: Vboot library error, if any
  * @fw_size: Size of firmware image in bytes - this starts off as the number
  *	of bytes in the section containing the firmware, but may be smaller if
@@ -166,13 +168,16 @@ struct vboot_info {
 	bool disable_lid_shutdown_during_update;
 	bool disable_power_button_during_update;
 	bool usb_is_enumerated;
+	bool alloc_kernel;
 #endif
 
 	struct cros_fmap fmap;
 	struct udevice *fwstore;
+	void *kernel_buffer;
 #ifndef CONFIG_SPL_BUILD
 	VbSelectAndLoadKernelParams kparams;
-// 	VbCommonParams cparams;
+	fdt_addr_t kaddr;
+	fdt_size_t ksize;
 #endif
 	enum vb2_return_code vb_error;
 	u32 fw_size;
