@@ -178,13 +178,25 @@ int efi_call_exit_boot_services(void)
 {
 	struct efi_priv *priv = efi_get_priv();
 	const struct efi_boot_services *boot = priv->boot;
+	efi_uintn_t size;
 	u32 version;
 	efi_status_t ret;
 
-	printf("key=%x, image=%p\n", priv->memmap_key, priv->parent_image);
-	ret = boot->exit_boot_services(priv->parent_image, priv->memmap_key);
+	size = priv->memmap_alloc;
+	ret = boot->get_memory_map(&size, priv->memmap_desc,
+				   &priv->memmap_key,
+				   &priv->memmap_desc_size, &version);
 	if (ret) {
-		efi_uintn_t size;
+		printhex2(ret);
+		puts(" Can't get memory map\n");
+		return ret;
+	}
+	ret = boot->exit_boot_services(priv->parent_image, priv->memmap_key);
+	if (ret)
+		return ret;
+#if 0
+	printf("key=%x, image=%p\n", priv->memmap_key, priv->parent_image);
+	if (ret) {
 		/*
 		 * Unfortunately it happens that we cannot exit boot services
 		 * the first time. But the second time it work. I don't know
@@ -193,10 +205,6 @@ int efi_call_exit_boot_services(void)
 		 */
 		printhex2(ret);
 		puts(" Can't exit boot services\n");
-		size = priv->memmap_alloc;
-		ret = boot->get_memory_map(&size, priv->memmap_desc,
-					   &priv->memmap_key,
-					   &priv->memmap_desc_size, &version);
 		if (ret) {
 			printhex2(ret);
 			puts(" Can't get memory map\n");
@@ -210,6 +218,6 @@ int efi_call_exit_boot_services(void)
 			return ret;
 		}
 	}
-
+#endif
 	return 0;
 }

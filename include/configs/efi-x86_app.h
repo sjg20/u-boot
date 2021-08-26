@@ -10,11 +10,11 @@
 
 #undef CONFIG_TPM_TIS_BASE_ADDRESS
 
-#define xCONFIG_STD_DEVICES_SETTINGS	"stdin=serial\0" \
+#define CONFIG_STD_DEVICES_SETTINGS	"stdin=serial\0" \
 					"stdout=vidconsole\0" \
 					"stderr=vidconsole\0"
 
-#define CONFIG_STD_DEVICES_SETTINGS	"stdin=serial\0" \
+#define xCONFIG_STD_DEVICES_SETTINGS	"stdin=serial\0" \
 					"stdout=serial\0" \
 					"stderr=serial\0"
 

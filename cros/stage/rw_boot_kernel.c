@@ -307,7 +307,7 @@ static int boot_kernel(struct vboot_info *vboot,
 #ifdef LOG_DEBUG
 		zimage_dump(params);
 #endif
-		log_buffer(LOGC_VBOOT, LOGL_DEBUG,
+		log_buffer(LOGC_VBOOT, 0x1f1,
 			   (ulong)kparams->kernel_buffer,
 			   kparams->kernel_buffer, 1, 0x100, 0);
 		log_debug("go %p, %p\n", params, kparams->kernel_buffer);
