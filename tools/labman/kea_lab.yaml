@@ -298,7 +298,7 @@ em100s:
 sdwires:
   sdwire0: &sdwire0
     serial: sdwire-18
-    mount-uuid: B529-9710
+    mount-uuid: 5B0C-97DF
     mount-point: rpi3_b_boot
     symlink: sdwire0
     hub-port: *hubc_9
