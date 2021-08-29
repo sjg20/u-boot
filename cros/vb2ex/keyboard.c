@@ -121,8 +121,28 @@ u32 VbExKeyboardRead(void)
 		 */
 		if (ch == '\n')
 			ch = VB_KEY_CTRL_ENTER;
+
+		/*
+		 * Support U-Boot direction keys, returned when running under
+		 * EFI */
+		switch (ch) {
+		case 'P' - '@':
+			ch = VB_KEY_UP;
+			break;
+		case 'N' - '@':
+			ch = VB_KEY_DOWN;
+			break;
+		case 'F' - '@':
+			ch = VB_KEY_RIGHT;
+			break;
+		case 'B' - '@':
+			ch = VB_KEY_LEFT;
+			break;
+		}
+
 		goto out;
 	}
+
 
 	/* Filter out non- Escape-[ sequence */
 	if (getchar() != CSI_1) {

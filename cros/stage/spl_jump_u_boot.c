@@ -16,6 +16,9 @@ int vboot_spl_jump_u_boot(struct vboot_info *vboot)
 	struct fmap_entry *entry;
 	int ret;
 
+	if (vboot->disable_firmware_jump)
+		return 0;
+
 	/* TODO(sjg@chromium.org): Verify the hash here */
 	bloblist_finish();
 	entry = &vboot->blob->u_boot_entry;

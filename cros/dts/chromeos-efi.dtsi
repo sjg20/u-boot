@@ -1,0 +1,196 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Chromium OS-specific options for x86
+ *
+ * Copyright 2018 Google LLC
+ */
+
+#include <dt-bindings/cros/nvdata.h>
+
+/ {
+	chromeos_dev: chromeos {
+	};
+
+	binman {
+		chromeos: image {
+		};
+	};
+
+	chromeos-config {
+		compatible = "chromeos-config";
+		tpm-optional;
+		disable-firmware-jump;
+		disable-memwipe;
+		alloc-kernel;
+		kernel-addr = /bits/ 64 <0x00100000 0x2000000>;
+	};
+
+	fwstore {
+		compatible = "google,fwstore-fs";
+		filename = "efi/chromium/chromeos.rom";
+		partition = <0xc>;
+	};
+
+	nvdata {
+		compatible = "google,fs-nvdata";
+		partition = <0xc>;
+		nvdata,types = <CROS_NV_DATA CROS_NV_SECDATAF CROS_NV_SECDATAK
+			CROS_NV_MRC_REC_HASH CROS_NV_MRC_RW_HASH CROS_NV_FWMP
+			CROS_NV_VSTORE>;
+	};
+};
+
+&chromeos {
+	filename = "image.bin";
+	u-boot,dm-spl;
+	u-boot,dm-vpl;
+	sort-by-offset;
+	pad-byte = <0xff>;
+	size = <0x800000>;
+	compatible = "chromeos,flashmap";
+	/* ---- Section: Vital-product data (VPD) ---- */
+	read-only-vpd {
+		type = "section";
+		label-prefix = "ro-";
+		read-only;
+		align-size = <0x10000>;
+		vpd {
+			size = <0x4000>;
+			type = "fill";
+			fill-value = [ff];
+		};
+	};
+	fdtmap {
+	};
+	read-only {
+		u-boot,dm-spl;
+		u-boot,dm-vpl;
+		type = "section";
+		label-prefix = "ro-";
+		sort-by-offset;
+		read-only;
+		align = <0x1000>;
+		fmap {
+			align = <0x1000>;
+			size = <0x1200>;
+		};
+		firmware-id {
+			u-boot,dm-vpl;
+			size = <0x40>;
+			type = "text";
+			text-label = "frid";
+		};
+
+		gbb {
+			type = "gbb";
+			u-boot,dm-vpl;
+			size = <0x3000>;
+			expand-size;
+			align = <0x1000>;
+		};
+		locales {
+			compatible = "chromeos,locales";
+			type = "files";
+			pattern = "locales/*";
+			require-matches;
+			files-compress = "lz4";
+			align = <0x40>;
+
+			/* Intel SPI flash driver requires word alignment */
+			files-align = <4>;
+		};
+	};
+
+	read-write-a {
+		align = <0x10000>;
+		u-boot,dm-vpl;
+		type = "section";
+		label-prefix = "rw-a-";
+		firmware-id {
+			/* Alignment: no requirement */
+			align = <4>;
+			size = <0x100>;
+			type = "text";
+			text-label = "frid";
+		};
+
+		vblock {
+			align = <0x1000>;
+			align-size = <0x1000>;
+			/*
+			 * Alignment: 4k (for updating) and must be in
+			 * start of each RW_SECTION
+			 */
+			size = <0x2000>;
+			content = <&rw_a_spl>;
+			keyblock = "firmware.keyblock";
+			signprivate = "firmware_data_key.vbprivk";
+			version = <1>;
+			kernelkey = "kernel_subkey.vbpubk";
+			preamble-flags = <0>;
+		};
+
+		/* Dummy to keep vboot happy */
+		rw_a_spl: u-boot-spl {
+			align = <4>;
+			type = "fill";
+			size = <0x100>;
+			fill-value = [ff];
+		};
+
+		/* Dummy to keep vboot happy */
+		u-boot {
+			align = <4>;
+			type = "fill";
+			size = <0x100>;
+			fill-value = [ff];
+		};
+	};
+
+	read-write-b {
+		align = <0x10000>;
+		u-boot,dm-vpl;
+		type = "section";
+		label-prefix = "rw-b-";
+		firmware-id {
+			/* Alignment: no requirement */
+			align = <4>;
+			size = <0x100>;
+			type = "text";
+			text-label = "frid";
+		};
+
+		vblock {
+			align = <0x1000>;
+			align-size = <0x1000>;
+			/*
+			 * Alignment: 4k (for updating) and must be in
+			 * start of each RW_SECTION
+			 */
+			size = <0x2000>;
+			content = <&rw_b_spl>;
+			keyblock = "firmware.keyblock";
+			signprivate = "firmware_data_key.vbprivk";
+			version = <1>;
+			kernelkey = "kernel_subkey.vbpubk";
+			preamble-flags = <0>;
+		};
+
+		/* Dummy to keep vboot happy */
+		rw_b_spl: u-boot-spl {
+			align = <4>;
+			type = "fill";
+			size = <0x100>;
+			fill-value = [ff];
+		};
+
+		/* Dummy to keep vboot happy */
+		u-boot {
+			align = <4>;
+			type = "fill";
+			size = <0x100>;
+			fill-value = [ff];
+		};
+	};
+
+};

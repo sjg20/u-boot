@@ -47,6 +47,12 @@ struct vboot_fw_info {
 	struct fmap_entry *entry;
 };
 
+#ifdef CONFIG_EFI
+#define VBOOT_CTX_SIZE		VB2_KERNEL_WORKBUF_RECOMMENDED_SIZE
+#else
+#define VBOOT_CTX_SIZE		VB2_FIRMWARE_WORKBUF_RECOMMENDED_SIZE
+#endif
+
 /**
  * struct vboot_blob - Vboot information in the bloblist
  *
@@ -59,8 +65,7 @@ struct vboot_fw_info {
  *	U-Boot slot
  */
 struct vboot_blob {
-	u8 share_data[VB2_FIRMWARE_WORKBUF_RECOMMENDED_SIZE]
-		 __aligned(VBOOT_CONTEXT_ALIGN);
+	u8 share_data[VBOOT_CTX_SIZE] __aligned(VBOOT_CONTEXT_ALIGN);
 	struct fmap_entry spl_entry;
 	struct fmap_entry u_boot_entry;
 };
@@ -106,12 +111,17 @@ struct vboot_blob {
  * @disable_lid_shutdown_during_update: Ignore LID closed during auxfw update
  * @disable_power_button_during_update: Disable the power button during an aux
  *	firmware update
+ * @disable-firmware-jump: Disable jumping to firmware (ver6)
+ * @tpm_optional: true if the TPM is optional
  * @usb_is_enumerated: true if USB ports have been enumerated already
+ * @alloc_kernel: Allocate space for the kernel and copy it to the final
+ *	address just before booting
  *
  * @fmap: Firmare map, parsed from the binman information
  * @fwstore: Firmware storage device
+ * @kernel_buffer: Address of kernel buffer. If @alloc_kernel then this is not
+ *	the final position, but the one to which it is loaded for verification
  * @kparams: Kernel params passed to Vboot library
- * @cparams: Common params passed to Vboot library
  * @vb_error: Vboot library error, if any
  * @fw_size: Size of firmware image in bytes - this starts off as the number
  *	of bytes in the section containing the firmware, but may be smaller if
@@ -151,19 +161,24 @@ struct vboot_info {
 	bool physical_rec_switch;
 	bool resume_path_same_as_boot;
 	bool cr50_commit_secdata;
+	bool tpm_optional;
+	bool disable_firmware_jump;
 #ifndef CONFIG_SPL_BUILD
 	bool detachable_ui;
 	bool disable_memwipe;
 	bool disable_lid_shutdown_during_update;
 	bool disable_power_button_during_update;
 	bool usb_is_enumerated;
+	bool alloc_kernel;
 #endif
 
 	struct cros_fmap fmap;
 	struct udevice *fwstore;
+	void *kernel_buffer;
 #ifndef CONFIG_SPL_BUILD
 	VbSelectAndLoadKernelParams kparams;
-// 	VbCommonParams cparams;
+	fdt_addr_t kaddr;
+	fdt_size_t ksize;
 #endif
 	enum vb2_return_code vb_error;
 	u32 fw_size;

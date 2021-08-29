@@ -70,6 +70,8 @@ int vboot_load_config(struct vboot_info *vboot)
 						      "physical-rec-switch");
 	vboot->resume_path_same_as_boot = ofnode_read_bool(node,
 						"resume-path-same-as-boot");
+	vboot->disable_firmware_jump = ofnode_read_bool(node,
+						"disable-firmware-jump");
 #ifndef CONFIG_SPL_BUILD
 	vboot->detachable_ui = ofnode_read_bool(node, "detachable-ui");
 	vboot->disable_memwipe = ofnode_read_bool(node, "disable-memwipe");
@@ -77,6 +79,11 @@ int vboot_load_config(struct vboot_info *vboot)
 					"disable-lid-shutdown-during-update");
 	vboot->disable_power_button_during_update = ofnode_read_bool(node,
 					"disable-power-button-during-update");
+	vboot->tpm_optional = ofnode_read_bool(node, "tpm-optional");
+	vboot->alloc_kernel = ofnode_read_bool(node, "alloc-kernel");
+	vboot->kaddr = ofnode_get_addr_size(node, "kernel-addr", &vboot->ksize);
+	if (vboot->kaddr == FDT_ADDR_T_NONE)
+		return log_msg_ret("kern", -EINVAL);
 #endif
 
 	vboot->config = node;

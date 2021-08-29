@@ -17,7 +17,12 @@ vb2_error_t vb2ex_tpm_clear_owner(struct vb2_context *ctx)
 	struct vboot_info *vboot = vboot_get();
 	u32 rv;
 
-	log_info("Clearing TPM owner\n");
+	log_info("Clearing TPM owner %p\n", vboot->tpm);
+	if (!vboot->tpm) {
+		log_info("(no TPM)\n");
+		return 0;
+	}
+
 	rv = tpm_clear_and_reenable(vboot->tpm);
 	if (rv)
 		return VB2_ERROR_EX_TPM_CLEAR_OWNER;

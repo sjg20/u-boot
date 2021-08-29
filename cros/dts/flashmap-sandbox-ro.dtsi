@@ -17,6 +17,7 @@
 			type = "section";
 			label-prefix = "ro-";
 			read-only;
+			align = <0x1000>;
 
 			cros-ec-rw {
 				filename = "ec-rw.bin";

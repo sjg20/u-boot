@@ -121,8 +121,17 @@ static inline fpmath_t fpmuli(fpmath_t a, int32_t b)
    Truncates integral part of a to 16 bits! Careful with this one! */
 static inline fpmath_t fpdiv(fpmath_t a, fpmath_t b)
 {
-	return (fpmath_t){ .v = lldiv(a.v << (FPMATH_SHIFT/2),
-		b.v >> (FPMATH_SHIFT/2)) };
+// 	return (fpmath_t){ .v = (a.v << (FPMATH_SHIFT/2)) / (b.v >> (FPMATH_SHIFT/2)) };
+	double factor = 1ULL << FPMATH_SHIFT;
+	double aval = (double)a.v / factor;
+	double bval = (double)b.v / factor;
+	double result = aval / bval;
+
+	return (fpmath_t){ .v = result * factor };
+
+	/* This one needs 64/64 division...need to add that function */
+// 	return (fpmath_t){ .v = lldiv(a.v << (FPMATH_SHIFT/2),
+// 		b.v >> (FPMATH_SHIFT/2)) };
 }
 
 /* Divide an fpmath_t by an integer. (a / b) */

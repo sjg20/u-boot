@@ -34,6 +34,8 @@ enum cros_nvdata_type {
 	CROS_NV_MRC_RW_HASH,
 	CROS_NV_FWMP,
 	CROS_NV_VSTORE,
+
+	CROS_NV_COUNT,
 };
 
 /**
@@ -247,5 +249,13 @@ int cros_nvdata_lock_walk(enum cros_nvdata_type );
  * @dev: Device whose node is to be read
  */
 int cros_nvdata_of_to_plat(struct udevice *dev);
+
+/**
+ * cros_nvdata_name() - Get the short name for an nvdata type
+ *
+ * @type: Type to check
+ * @return name, or NULL for an invalid type
+ */
+const char *cros_nvdata_name(enum cros_nvdata_type type);
 
 #endif /* __CROS_NVDATA_H */

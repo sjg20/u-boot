@@ -138,7 +138,15 @@ config VPL_CHROMEOS_VBOOT_A
 
 config SPL_CHROMEOS_VBOOT_B
 	bool "Run vboot stage B (U-Boot selection) in SPL"
-	default y
+	default y if SPL
+
+config CHROMEOS_VBOOT_A
+	bool "Run vboot stage A (SPL selection) in U-Boot proper"
+	default y if !SPL
+
+config CHROMEOS_VBOOT_B
+	bool "Run vboot stage B (U-Boot selection) in U-Boot proper"
+	default y if !SPL
 
 config CHROMEOS_VBOOT_C
 	bool "Run vboot stage C (kernel selection) in U-Boot proper"

@@ -13,6 +13,24 @@
 #include <cros/nvdata.h>
 #include <cros/vboot.h>
 
+static const char *nvdata_name[CROS_NV_COUNT] = {
+	[CROS_NV_DATA] = "nvdata",
+	[CROS_NV_SECDATAF] = "secdataf",
+	[CROS_NV_SECDATAK] = "secdatak",
+	[CROS_NV_MRC_REC_HASH] = "mrc-rec",
+	[CROS_NV_MRC_RW_HASH] = "mrc-rw",
+	[CROS_NV_FWMP] = "fwmp",
+	[CROS_NV_VSTORE] = "vstore",
+};
+
+const char *cros_nvdata_name(enum cros_nvdata_type type)
+{
+	if (type >= 0 && type < CROS_NV_COUNT)
+		return nvdata_name[type];
+
+	return NULL;
+}
+
 int cros_nvdata_read(struct udevice *dev, enum cros_nvdata_type type, u8 *data,
 		     int size)
 {
