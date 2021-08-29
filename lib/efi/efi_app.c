@@ -21,12 +21,42 @@
 #include <efi.h>
 #include <efi_api.h>
 #include <sysreset.h>
+#include <dm/device-internal.h>
+#include <dm/lists.h>
+#include <dm/root.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
 int efi_info_get(enum efi_entry_t type, void **datap, int *sizep)
 {
 	return -ENOSYS;
+}
+
+/**
+ * Create a block device so U-Boot can access an EFI device
+ *
+ * @handle:	EFI handle to bind
+ * @blkio:	block io protocol
+ * Return:	0 = success
+ */
+int efi_bind_block(efi_handle_t handle, struct efi_block_io *blkio)
+{
+	struct efi_media_plat plat;
+	struct udevice *dev;
+	char name[18];
+	int ret;
+
+	plat.handle = handle;
+	plat.blkio = blkio;
+	ret = device_bind(dm_root(), DM_DRIVER_GET(efi_media), "efi_media",
+			  &plat, ofnode_null(), &dev);
+	if (ret)
+		return log_msg_ret("bind", ret);
+
+	snprintf(name, sizeof(name), "efi_media_%x", dev_seq(dev));
+	device_set_name(dev, name);
+
+	return 0;
 }
 
 static efi_status_t setup_memory(struct efi_priv *priv)
