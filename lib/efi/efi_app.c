@@ -237,6 +237,9 @@ efi_status_t EFIAPI efi_main(efi_handle_t image,
 		printf("Failed to set up memory: ret=%lx\n", ret);
 		return ret;
 	}
+	ret = efi_store_memory_map(priv);
+	if (ret)
+		return ret;
 
 	printf("starting\n");
 
