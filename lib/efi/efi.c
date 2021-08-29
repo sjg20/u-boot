@@ -169,7 +169,8 @@ int efi_store_memory_map(struct efi_priv *priv)
 		puts(" Can't get memory map\n");
 		return ret;
 	}
-	printf("key=%x, image=%p\n", priv->memmap_key, priv->parent_image);
+	printf("key=%x, image=%p\n", (uint)priv->memmap_key,
+	       priv->parent_image);
 
 	return 0;
 }

@@ -1738,13 +1738,16 @@ endif # CONFIG_X86
 
 #u-boot.out &:
 
-BINMAN_image.bin := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
+BINMAN_ARGS := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
 	-abmpblk=$(KBUILD_SRC)/cros/data/bmpblk.bin -I $(KBUILD_SRC)/cros/data \
 	"-ahardware-id=CORAL TEST 8594" \
 	"-afrid=123412 123" -acros-ec-rw-path=$(KBUILD_SRC)/cros/data/ecrw.bin \
 	$(BINMAN_ELF_UPDATE) \
 	 -m -i image
-image.bin: .binman_stamp inputs \
+
+BINMAN_image.bin := $(BINMAN_ARGS)
+BINMAN_u-boot.out := $(BINMAN_ARGS)
+image.bin u-boot.out &: .binman_stamp inputs \
 		$(if($(CONFIG_TPL),tpl/u-boot-tpl) \
 		$(if($(CONFIG_SPL),spl/u-boot-spl) \
 		u-boot.bin FORCE
