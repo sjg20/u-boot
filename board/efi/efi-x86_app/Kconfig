@@ -10,10 +10,24 @@ config SYS_SOC
 	default "efi"
 
 config SYS_CONFIG_NAME
-	default "efi-x86_app"
+	default "efi-x86_app" if !TARGET_CHROMEOS_EFI_APP32
 
 config BOARD_SPECIFIC_OPTIONS # dummy
 	def_bool y
 	imply VIDEO_EFI
+	imply BINMAN
+
+endif
+
+if TARGET_CHROMEOS_EFI_APP32
+
+config SYS_CONFIG_NAME
+	default "chromeos_efi-x86_app"
+
+config BOARD_SPECIFIC_OPTIONS # dummy
+	def_bool y
+	imply CHROMEOS_VBOOT_A
+	imply CHROMEOS_VBOOT_B
+	imply CHROMEOS_VBOOT_C
 
 endif

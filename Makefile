@@ -999,7 +999,7 @@ cmd_static_rela =
 endif
 
 # Always append INPUTS so that arch config.mk's can add custom ones
-INPUTS-y += u-boot.srec u-boot.bin u-boot.sym System.map binary_size_check
+INPUTS-y += u-boot u-boot.srec u-boot.bin u-boot.sym System.map binary_size_check
 
 INPUTS-$(CONFIG_ONENAND_U_BOOT) += u-boot-onenand.bin
 ifeq ($(CONFIG_SPL_FSL_PBL),y)
@@ -1033,7 +1033,6 @@ ifneq ($(CONFIG_SPL_TARGET),)
 INPUTS-$(CONFIG_SPL) += $(CONFIG_SPL_TARGET:"%"=%)
 endif
 INPUTS-$(CONFIG_REMAKE_ELF) += u-boot.elf
-INPUTS-$(CONFIG_EFI_APP) += u-boot-app.efi
 INPUTS-$(CONFIG_EFI_STUB) += u-boot-payload.efi
 
 # Generate this input file for binman
@@ -1161,15 +1160,38 @@ PHONY += inputs
 inputs: $(INPUTS-y)
 
 ifneq ($(CONFIG_CHROMEOS_VBOOT),)
-ifneq ($(CONFIG_ROM_SIZE)$(CONFIG_SANDBOX),)
+ifneq ($(CONFIG_ROM_SIZE)$(CONFIG_SANDBOX)$(CONFIG_EFI_APP),)
 cros_targets := image.bin
 endif
 endif
 
-all: .binman_stamp inputs $(cros_targets)
-ifeq ($(CONFIG_BINMAN),y)
+$(warning CONFIG_CHROMEOS_VBOOT $(CONFIG_CHROMEOS_VBOOT))
 ifeq ($(CONFIG_CHROMEOS_VBOOT),)
+PHONY += binman
+binman: .binman_stamp inputs
+ifeq ($(CONFIG_BINMAN),y)
 	$(call if_changed,binman)
+endif
+
+# Build an ELF file with updated devicetree
+u-boot.out: .binman_stamp inputs #$(cros_targets)
+ifeq ($(CONFIG_BINMAN),y)
+	$(call if_changed,binman)
+else
+	@cat u-boot >$@
+endif
+endif   # !VBOOT
+
+# ifeq ($(CONFIG_CHROMEOS_VBOOT)$(CONFIG_EFI_APP),)
+# all: binman
+
+ifneq ($(CONFIG_EFI_APP),)
+all: u-boot-app.efi
+else
+ifneq ($(CONFIG_CHROMEOS_VBOOT),)
+all: image.bin
+else
+all: binman
 endif
 endif
 
@@ -1389,11 +1411,21 @@ default_dt := $(if $(DEVICE_TREE),$(DEVICE_TREE),$(CONFIG_DEFAULT_DEVICE_TREE))
 have_spl_dt := $(if $(CONFIG_SPL_OF_PLATDATA),,$(CONFIG_SPL_OF_CONTROL))
 have_tpl_dt := $(if $(CONFIG_TPL_OF_PLATDATA),,$(CONFIG_TPL_OF_CONTROL))
 
-quiet_cmd_binman = BINMAN  $@
-cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
+BINMAN_COMMON := $(if $(BINMAN_DEBUG),-D) \
                 --toolpath $(objtree)/tools \
-		$(if $(BINMAN_VERBOSE),-v$(BINMAN_VERBOSE)) \
-		build -u -d u-boot.dtb -O . -m --allow-missing \
+		$(if $(BINMAN_VERBOSE),-v$(BINMAN_VERBOSE))
+
+BINMAN_DTB := u-boot.dtb
+
+ifdef CONFIG_OF_EMBED
+BINMAN_ELF_UPDATE := --update-fdt-in-elf \
+	u-boot,u-boot.out,__dtb_dt_begin,__dtb_dt_end
+BINMAN_DTB := dts/dt.dtb
+endif
+
+quiet_cmd_binman = BINMAN  $@
+cmd_binman = $(srctree)/tools/binman/binman $(BINMAN_COMMON) \
+		build -u -d $(BINMAN_DTB) -O . -m --allow-missing \
 		-I . -I $(srctree) -I $(srctree)/board/$(BOARDDIR) \
 		-I arch/$(ARCH)/dts -a of-list=$(CONFIG_OF_LIST) \
 		-a atf-bl31-path=${BL31} \
@@ -1403,6 +1435,7 @@ cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
 		-a spl-bss-pad=$(if $(CONFIG_SPL_SEPARATE_BSS),,1) \
 		-a tpl-bss-pad=$(if $(CONFIG_TPL_SEPARATE_BSS),,1) \
 		-a spl-dtb=$(have_spl_dt) -a tpl-dtb=$(have_tpl_dt) \
+		$(BINMAN_ELF_UPDATE) \
 		$(BINMAN_$(@F))
 
 OBJCOPYFLAGS_u-boot.ldr.hex := -I binary -O ihex
@@ -1706,19 +1739,28 @@ u-boot-x86-reset16.bin: u-boot FORCE
 
 endif # CONFIG_X86
 
-BINMAN_image.bin := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
+#u-boot.out &:
+
+BINMAN_ARGS := -akeydir=$(KBUILD_SRC)/cros/data/devkeys \
 	-abmpblk=$(KBUILD_SRC)/cros/data/bmpblk.bin -I $(KBUILD_SRC)/cros/data \
 	"-ahardware-id=CORAL TEST 8594" \
 	"-afrid=123412 123" -acros-ec-rw-path=$(KBUILD_SRC)/cros/data/ecrw.bin \
+	$(BINMAN_ELF_UPDATE) \
 	 -m -i image
-image.bin: $(INPUTS-y) \
+
+BINMAN_image.bin := $(BINMAN_ARGS)
+BINMAN_u-boot.out := $(BINMAN_ARGS)
+image.bin u-boot.out &: .binman_stamp inputs \
 		$(if($(CONFIG_TPL),tpl/u-boot-tpl) \
 		$(if($(CONFIG_SPL),spl/u-boot-spl) \
 		u-boot.bin FORCE
 	$(call if_changed,binman)
 
 OBJCOPYFLAGS_u-boot-app.efi := $(OBJCOPYFLAGS_EFI)
-u-boot-app.efi: u-boot FORCE
+u-boot-app.efi: u-boot.out $(if $(CONFIG_CHROMEOS_VBOOT),image.bin) FORCE
+	echo here $<
+	ls -l u-boot.out
+	file u-boot.out
 	$(call if_changed,zobjcopy)
 
 u-boot.bin.o: u-boot.bin FORCE
@@ -2190,7 +2232,7 @@ CHANGELOG:
 
 # Directories & files removed with 'make clean'
 CLEAN_DIRS  += $(MODVERDIR) \
-	       $(foreach d, spl tpl, $(patsubst %,$d/%, \
+	       $(foreach d, spl tpl, $(patsubst ,$d/%, \
 			$(filter-out include, $(shell ls -1 $d 2>/dev/null))))
 
 CLEAN_FILES += include/bmp_logo.h include/bmp_logo_data.h tools/version.h \
