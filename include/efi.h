@@ -578,6 +578,10 @@ void efi_putc(struct efi_priv *priv, const char ch);
 /**
  * efi_info_get() - get an entry from an EFI table
  *
+ * This is called from U-Boot proper to read information set up by the EFI stub.
+ * It can only be used when running from the EFI stuff, not when U-Boot is
+ * running as an app.
+ *
  * @type:	Entry type to search for
  * @datap:	Returns pointer to entry data
  * @sizep:	Returns pointer to entry size
