@@ -20,9 +20,6 @@
 #include <linux/types.h>
 #include <efi.h>
 #include <efi_api.h>
-#include <dm/lists.h>
-#include <dm/device-internal.h>
-#include <dm/root.h>
 
 static struct efi_priv *global_priv;
 
@@ -130,31 +127,4 @@ void efi_free(struct efi_priv *priv, void *ptr)
 	struct efi_boot_services *boot = priv->boot;
 
 	boot->free_pool(ptr);
-}
-
-/**
- * Create a block device so U-Boot can access an EFI device
- *
- * @handle:	EFI handle to bind
- * @blkio:	block io protocol
- * Return:	0 = success
- */
-int efi_bind_block(efi_handle_t handle, struct efi_block_io *blkio)
-{
-	struct efi_media_plat plat;
-	struct udevice *dev;
-	char name[18];
-	int ret;
-
-	plat.handle = handle;
-	plat.blkio = blkio;
-	ret = device_bind(dm_root(), DM_DRIVER_GET(efi_media), "efi_media",
-			  &plat, ofnode_null(), &dev);
-	if (ret)
-		return log_msg_ret("bind", ret);
-
-	snprintf(name, sizeof(name), "efi_media_%x", dev_seq(dev));
-	device_set_name(dev, name);
-
-	return 0;
 }
