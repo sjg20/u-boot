@@ -59,6 +59,7 @@ run_qemu() {
 		qemu=qemu-system-i386
 		bios=OVMF-pure-efi.i386.fd
 	fi
+	echo "Running ${qemu}..."
 	"${qemu}" -bios "${bios}" \
 		-drive id=disk,file=try.img,if=none,format=raw \
 		-nic none -device ahci,id=ahci \
