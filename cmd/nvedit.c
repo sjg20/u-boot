@@ -59,11 +59,13 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #endif
 
+#if CONFIG_IS_ENABLED(ENV_SUPPORT)
 #if	!defined(ENV_IS_IN_DEVICE)		&& \
 	!defined(CONFIG_ENV_IS_NOWHERE)
 # error Define one of CONFIG_ENV_IS_IN_{EEPROM|FLASH|MMC|FAT|EXT4|\
 NAND|NVRAM|ONENAND|SATA|SPI_FLASH|REMOTE|UBI} or CONFIG_ENV_IS_NOWHERE
 #endif
+#endif /* ENV_SUPPORT */
 
 /*
  * Maximum expected input data size for import command
