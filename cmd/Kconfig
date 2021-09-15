@@ -23,6 +23,16 @@ config HUSH_PARSER
 	  If disabled, you get the old, much simpler behaviour with a somewhat
 	  smaller memory footprint.
 
+config SPL_CMDLINE
+	def_bool n
+	help
+	  Dummy option to ensure that the command line is not enabled in SPL.
+
+config SPL_HUSH_PARSER
+	def_bool n
+	help
+	  Dummy option to ensure that the hush parser is not enabled in SPL.
+
 config CMDLINE_EDITING
 	bool "Enable command line editing"
 	depends on CMDLINE
