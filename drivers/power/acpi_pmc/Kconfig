@@ -34,3 +34,8 @@ config ACPI_PMC_SANDBOX
 	  the uclass logic can be tested. You can use the 'pmc' command to
 	  access information from the driver. It uses I/O access to read
 	  from the PMC.
+
+config SPL_ACPI_PMC_SANDBOX
+	def_bool n
+	help
+	  Dummy option to ensure that this feature is not enabled in SPL.
