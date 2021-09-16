@@ -684,6 +684,10 @@ int main(int ac, char **av)
 		break;
 	}
 
+	/* U-Boot: Mark SPL symbols */
+	if (sync_kconfig)
+		conf_mark_spl_symbols();
+
 	if (sync_kconfig) {
 		/* syncconfig is used during the build so we shall update autoconf.
 		 * All other commands are only used to generate a config.

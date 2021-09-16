@@ -16,6 +16,15 @@
 
 #include "lkc.h"
 
+/* Number of SPL prefixes we recognise */
+#define NUM_SPLS	 4
+
+/*
+ * SPL prefixes recognised. For example CONFIG_SPL_xxx is considered to be an
+ * SPL version of CONFIG_xxx
+ */
+static const char *spl_name[NUM_SPLS] = {"SPL", "TPL", "VPL", "TOOLS"};
+
 /* return true if 'path' exists, false otherwise */
 static bool is_present(const char *path)
 {
@@ -571,11 +580,77 @@ static struct conf_printer kconfig_printer_cb =
 	.print_comment = kconfig_print_comment,
 };
 
+/**
+ * get_spl_name() - Look up an SPL symbol
+ *
+ * This is used to get the name of a Kconfig option to write in an SPL context.
+ * If the symbol has an SPL symbol, this means it is used for U-Boot proper, so
+ * should not be written at all.
+ *
+ * Otherwise, this returns the name of the option. If the option is an SPL
+ * option, then the prefix (SPL_ or TPL_) is removed
+ *
+ * @sym: Symbol to look up
+ * @arg: Argument passed to the symbol function. This is void * but is actually
+ *	an int, indicating the SPL index / type (see spl_name[])
+ * @return name to write out for this symbol xxx:
+ *	NULL (don't write) if xxx has an associated SPL symbol
+ *	xxx if xxx is a non-SPL symbol
+ *	xxx if SPL_xxx is an SPL symbol
+ */
+static const char *get_spl_name(const struct symbol *sym, const void *arg)
+{
+	int spl = (long)arg;
+	const char *name = sym->name;
+
+	/* Don't print it if this has an SPL symbol */
+	if (sym->flags & SYMBOL_HAS_SPL)
+		return NULL;
+
+	/*
+	 * If it is SPL, only print it if the SPL_ prefix matches
+	 * Drop the prefix.
+	 */
+	if (sym->flags & SYMBOL_SPL) {
+		int len = strlen(spl_name[spl]);
+
+		if (!strncmp(name, spl_name[spl], len) && name[len] == '_')
+			name += len + 1;
+	}
+
+	return name;
+}
+
+/*
+ * Kconfig configuration printer for SPL
+ *
+ * This printer is used when generating the resulting configuration after
+ * kconfig invocation and `defconfig' files. Unset symbol might be omitted by
+ * passing a non-NULL argument to the printer.
+ *
+ */
+static void spl_kconfig_print_symbol(FILE *fp, struct symbol *sym,
+				     const char *value, void *arg)
+{
+	const char *name;
+
+	name = get_spl_name(sym, arg);
+	if (!name)
+		return;
+
+	print_makefile_sym(fp, name, sym->type, value, false);
+	print_makefile_sym(fp, sym->name, sym->type, value, false);
+}
+
+static struct conf_printer spl_kconfig_printer_cb = {
+	.print_symbol = spl_kconfig_print_symbol,
+	.print_comment = kconfig_print_comment,
+};
+
 /* Print a symbol for a header file */
 static void print_header_sym(FILE *fp, const char *name, enum symbol_type type,
 			     const char *value)
 {
-
 	switch (type) {
 	case S_BOOLEAN:
 	case S_TRISTATE: {
@@ -648,6 +723,35 @@ header_print_comment(FILE *fp, const char *value, void *arg)
 static struct conf_printer header_printer_cb =
 {
 	.print_symbol = header_print_symbol,
+	.print_comment = header_print_comment,
+};
+
+/*
+ * SPL header printer
+ *
+ * This printer is used when generating SPL files such as
+ * `include/generated/autoconf_spl.h'
+ */
+static void spl_header_print_symbol(FILE *fp, struct symbol *sym,
+				    const char *value, void *arg)
+{
+	const char *name;
+
+	name = get_spl_name(sym, arg);
+	if (!name)
+		return;
+
+	if (!(sym->flags & (SYMBOL_SPL | SYMBOL_HAS_SPL))) {
+		/* This symbol cannot be used by CONFIG_IS_ENABLED() */
+		fprintf(fp, "#define %s%s_nospl 1\n", CONFIG_, name);
+	}
+
+	print_header_sym(fp, name, sym->type, value);
+	print_header_sym(fp, sym->name, sym->type, value);
+}
+
+static struct conf_printer spl_header_printer_cb = {
+	.print_symbol = spl_header_print_symbol,
 	.print_comment = header_print_comment,
 };
 
@@ -1027,7 +1131,9 @@ int conf_write_autoconf(void)
 	struct symbol *sym;
 	const char *name;
 	FILE *out, *tristate, *out_h;
-	int i;
+	FILE *out_spl[NUM_SPLS];
+	FILE *out_h_spl[NUM_SPLS];
+	int i, spl;
 
 	sym_clear_all_valid();
 
@@ -1053,11 +1159,50 @@ int conf_write_autoconf(void)
 		return 1;
 	}
 
+	for (spl = 0; spl < NUM_SPLS; spl++) {
+		char fname[80];
+
+		snprintf(fname, sizeof(fname), ".tmpconfig_%s",
+			 spl_name[spl]);
+
+		out_spl[spl] = fopen(fname, "w");
+		if (!out_spl[spl]) {
+			while (spl--) {
+				fclose(out_spl[spl]);
+				fclose(out_h_spl[spl]);
+			}
+			fclose(out_h);
+			fclose(out);
+			fclose(tristate);
+			return 1;
+		}
+
+		snprintf(fname, sizeof(fname), ".tmpconfig_%s.h",
+			 spl_name[spl]);
+
+		out_h_spl[spl] = fopen(fname, "w");
+		if (!out_h_spl[spl]) {
+			fclose(out_spl[spl]);
+			while (spl--) {
+				fclose(out_spl[spl]);
+				fclose(out_h_spl[spl]);
+			}
+			fclose(out_h);
+			fclose(out);
+			fclose(tristate);
+			return 1;
+		}
+	}
+
 	conf_write_heading(out, &kconfig_printer_cb, NULL);
 
 	conf_write_heading(tristate, &tristate_printer_cb, NULL);
 
 	conf_write_heading(out_h, &header_printer_cb, NULL);
+
+	for (spl = 0; spl < NUM_SPLS; spl++)
+		conf_write_heading(out_h_spl[spl], &spl_header_printer_cb,
+				   (void *)(long)spl);
 
 	for_all_symbols(i, sym) {
 		sym_calc_value(sym);
@@ -1070,10 +1215,22 @@ int conf_write_autoconf(void)
 		conf_write_symbol(tristate, sym, &tristate_printer_cb, (void *)1);
 
 		conf_write_symbol(out_h, sym, &header_printer_cb, NULL);
+
+		for (spl = 0; spl < NUM_SPLS; spl++) {
+			conf_write_symbol(out_spl[spl], sym,
+					  &spl_kconfig_printer_cb,
+					  (void *)(long)spl);
+
+			conf_write_symbol(out_h_spl[spl], sym,
+					  &spl_header_printer_cb,
+					  (void *)(long)spl);
+		}
 	}
 	fclose(out);
 	fclose(tristate);
 	fclose(out_h);
+	for (spl = 0; spl < NUM_SPLS; spl++)
+		fclose(out_h_spl[spl]);
 
 	name = getenv("KCONFIG_AUTOHEADER");
 	if (!name)
@@ -1082,6 +1239,29 @@ int conf_write_autoconf(void)
 		return 1;
 	if (rename(".tmpconfig.h", name))
 		return 1;
+
+	for (spl = 0; spl < NUM_SPLS; spl++) {
+		char tmpname[80], fname[80];
+		char *s;
+
+		snprintf(tmpname, sizeof(tmpname), ".tmpconfig_%s.h",
+			 spl_name[spl]);
+		snprintf(fname, sizeof(fname),
+			 "include/generated/autoconf_%s.h", spl_name[spl]);
+		for (s = fname; *s; s++)
+			*s = tolower(*s);
+		if (rename(tmpname, fname))
+			return 1;
+
+		snprintf(tmpname, sizeof(tmpname), ".tmpconfig_%s",
+			 spl_name[spl]);
+		snprintf(fname, sizeof(fname),
+			 "include/config/auto_%s.conf", spl_name[spl]);
+		for (s = fname; *s; s++)
+			*s = tolower(*s);
+		if (rename(tmpname, fname))
+			return 1;
+	}
 
 	name = getenv("KCONFIG_TRISTATE");
 	if (!name)
@@ -1326,3 +1506,48 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode)
 
 	return has_changed;
 }
+
+static bool is_spl(const char *name, int *lenp)
+{
+	const char *uscore;
+	int len;
+	int i;
+
+	uscore = strchr(name, '_');
+	if (!uscore)
+		return false;
+
+	len = uscore - name;
+	for (i = 0; i < NUM_SPLS; i++) {
+		if (len == strlen(spl_name[i]) &&
+		    !strncmp(name, spl_name[i], len)) {
+			*lenp = len;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void conf_mark_spl_symbols(void)
+{
+	struct symbol *sym;
+	int i;
+
+	for_all_symbols(i, sym) if (sym->name) {
+		int len;
+		bool spl = is_spl(sym->name, &len);
+
+		if (spl) {
+			struct symbol *non_spl;
+
+			sym->flags |= SYMBOL_SPL;
+			non_spl = sym_find(sym->name + len + 1);
+			if (non_spl)
+				non_spl->flags |= SYMBOL_HAS_SPL;
+			else
+				sym->flags |= SYMBOL_SPL_ONLY;
+		}
+	}
+}
+
