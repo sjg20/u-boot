@@ -19,8 +19,16 @@ _dummy := $(shell [ -d $(obj) ] || mkdir -p $(obj))
 
 include $(srctree)/scripts/Kbuild.include
 
--include include/config/auto.conf
 -include $(obj)/include/autoconf.mk
+
+# Read in the config for this SPL phase
+ifdef CONFIG_TPL_BUILD
+-include include/config/auto_tpl.conf
+else ifdef CONFIG_VPL_BUILD
+-include include/config/auto_vpl.conf
+else
+-include include/config/auto_spl.conf
+endif
 
 UBOOTINCLUDE := -I$(obj)/include $(UBOOTINCLUDE)
 

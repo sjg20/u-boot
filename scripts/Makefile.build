@@ -44,9 +44,19 @@ ldflags-y  :=
 subdir-asflags-y :=
 subdir-ccflags-y :=
 
-# Read auto.conf if it exists, otherwise ignore
+# Read appropriate auto.conf if it exists, otherwise ignore
 # Modified for U-Boot
+
+ifeq ($(SPL_NAME),tpl)
+-include include/config/auto_tpl.conf
+else ifeq ($(SPL_NAME),vpl)
+-include include/config/auto_vpl.conf
+else ifeq ($(SPL_NAME),spl)
+-include include/config/auto_spl.conf
+else
 -include include/config/auto.conf
+endif
+
 -include $(prefix)/include/autoconf.mk
 
 include scripts/Kbuild.include

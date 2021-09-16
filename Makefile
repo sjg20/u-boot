@@ -587,8 +587,17 @@ scripts: scripts_basic scripts_dtc include/config/auto.conf
 	$(Q)$(MAKE) $(build)=$(@)
 
 ifeq ($(dot-config),1)
-# Read in config
+
+# Read in the config for this phase
+ifdef CONFIG_TPL_BUILD
+-include include/config/auto_tpl.conf
+else ifdef CONFIG_VPL_BUILD
+-include include/config/auto_vpl.conf
+else ifdef CONFIG_SPL_BUILD
+-include include/config/auto_spl.conf
+else
 -include include/config/auto.conf
+endif
 
 # Read in dependencies to all Kconfig* files, make sure to run
 # oldconfig if changes are detected.

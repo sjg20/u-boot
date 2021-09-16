@@ -1,7 +1,17 @@
 #ifndef __LINUX_KCONFIG_H
 #define __LINUX_KCONFIG_H
 
+#ifdef USE_HOSTCC
+#include <generated/autoconf_tools.h>
+#elif defined(CONFIG_TPL_BUILD)
+#include <generated/autoconf_tpl.h>
+#elif defined(CONFIG_VPL_BUILD)
+#include <generated/autoconf_vpl.h>
+#elif defined(CONFIG_SPL_BUILD)
+#include <generated/autoconf_spl.h>
+#else
 #include <generated/autoconf.h>
+#endif
 
 /*
  * Helper macros to use CONFIG_ options in C/CPP expressions. Note that
@@ -28,37 +38,9 @@
  */
 #define IS_ENABLED(option)	config_enabled(option, 0)
 
-/*
- * U-Boot add-on: Helper macros to reference to different macros (prefixed by
- * CONFIG_, CONFIG_SPL_, CONFIG_TPL_ or CONFIG_TOOLS_), depending on the build
- * context.
- */
+#define __config_val(cfg) CONFIG_ ## cfg
 
-#ifdef USE_HOSTCC
-#define _CONFIG_PREFIX TOOLS_
-#elif defined(CONFIG_TPL_BUILD)
-#define _CONFIG_PREFIX TPL_
-#elif defined(CONFIG_VPL_BUILD)
-#define _CONFIG_PREFIX VPL_
-#elif defined(CONFIG_SPL_BUILD)
-#define _CONFIG_PREFIX SPL_
-#else
-#define _CONFIG_PREFIX
-#endif
-
-#define   config_val(cfg)       _config_val(_CONFIG_PREFIX, cfg)
-#define  _config_val(pfx, cfg) __config_val(pfx, cfg)
-#define __config_val(pfx, cfg) CONFIG_ ## pfx ## cfg
-
-/*
- * CONFIG_VAL(FOO) evaluates to the value of
- *  CONFIG_TOOLS_FOO if USE_HOSTCC is defined,
- *  CONFIG_FOO if CONFIG_SPL_BUILD is undefined,
- *  CONFIG_SPL_FOO if CONFIG_SPL_BUILD is defined.
- *  CONFIG_TPL_FOO if CONFIG_TPL_BUILD is defined.
- *  CONFIG_VPL_FOO if CONFIG_VPL_BUILD is defined.
- */
-#define CONFIG_VAL(option)  config_val(option)
+#define CONFIG_VAL(option)  __config_val(option)
 
 /*
  * This uses a similar mechanism to config_enabled() above. If cfg is enabled,
@@ -104,26 +86,17 @@ long invalid_use_of_IF_ENABLED_INT(void);
 	__concat(__unwrap, config_enabled(CONFIG_VAL(option), 0)) (case1, case0)
 
 /*
- * CONFIG_IS_ENABLED(FOO) expands to
- *  1 if USE_HOSTCC is defined and CONFIG_TOOLS_FOO is set to 'y',
- *  1 if CONFIG_SPL_BUILD is undefined and CONFIG_FOO is set to 'y',
- *  1 if CONFIG_SPL_BUILD is defined and CONFIG_SPL_FOO is set to 'y',
- *  1 if CONFIG_TPL_BUILD is defined and CONFIG_TPL_FOO is set to 'y',
- *  0 otherwise.
+ * CONFIG_IS_ENABLED(FOO) returns 1 if CONFIG_FOO is enabled for the phase being
+ * built, else 0. Note that CONFIG_FOO corresponds to CONFIG_SPL_FOO (in
+ * Kconfig) for the SPL phase, CONFIG_TPL_FOO for the TPL phase, etc.
  *
- * CONFIG_IS_ENABLED(FOO, (abc)) expands to
- *  abc if USE_HOSTCC is defined and CONFIG_TOOLS_FOO is set to 'y',
- *  abc if CONFIG_SPL_BUILD is undefined and CONFIG_FOO is set to 'y',
- *  abc if CONFIG_SPL_BUILD is defined and CONFIG_SPL_FOO is set to 'y',
- *  abc if CONFIG_TPL_BUILD is defined and CONFIG_TPL_FOO is set to 'y',
- *  nothing otherwise.
+ * The _nospl version of a CONFIG is emitted by kconfig when an option has no
+ * SPL equivalent. So in that case there is a CONFIG_xxx for example, but not a
+ * CONFIG_SPL_xxx
  *
- * CONFIG_IS_ENABLED(FOO, (abc), (def)) expands to
- *  abc if USE_HOSTCC is defined and CONFIG_TOOLS_FOO is set to 'y',
- *  abc if CONFIG_SPL_BUILD is undefined and CONFIG_FOO is set to 'y',
- *  abc if CONFIG_SPL_BUILD is defined and CONFIG_SPL_FOO is set to 'y',
- *  abc if CONFIG_TPL_BUILD is defined and CONFIG_TPL_FOO is set to 'y',
- *  def otherwise.
+ * This is needed as a transition measure while CONFIG_IS_ENABLED() is used on
+ * options without SPL equivalent, since in that case it should always return
+ * zero. Once we add SPL equivalents, this clause can be dropped.
  *
  * The optional second and third arguments must be parenthesized; that
  * allows one to include a trailing comma, e.g. for use in
@@ -135,10 +108,10 @@ long invalid_use_of_IF_ENABLED_INT(void);
  * set, and nothing otherwise.
  */
 
-#define CONFIG_IS_ENABLED(option, ...)					\
+#define CONFIG_IS_ENABLED(option, ...) \
 	__concat(__CONFIG_IS_ENABLED_, __count_args(option, ##__VA_ARGS__)) (option, ##__VA_ARGS__)
 
-#define CONFIG_IS_ENABLED_PPL(option)	IS_ENABLED(CONFIG_ ## option)
+#define CONFIG_IS_ENABLED_PPL(option)	IS_ENABLED(CONFIG_PPL_ ## option)
 
 #ifndef __ASSEMBLY__
 /*
@@ -156,5 +129,8 @@ long invalid_use_of_CONFIG_IF_ENABLED_INT(void);
 #define CONFIG_IF_ENABLED_INT(option, int_option) \
 	CONFIG_IS_ENABLED(option, (CONFIG_VAL(int_option)), \
 		(invalid_use_of_CONFIG_IF_ENABLED_INT()))
+
+#define CONFIG_IF_INT(option, int_option) \
+	CONFIG_IF_ENABLED_INT(option, int_option)
 
 #endif /* __LINUX_KCONFIG_H */
