@@ -118,6 +118,9 @@ long invalid_use_of_IF_ENABLED_INT(void);
 	(__concat(__CONFIG_NOT_ENABLED_, __count_args(option, ##__VA_ARGS__)) (option, ##__VA_ARGS__)) : \
 	(__concat(__CONFIG_IS_ENABLED_, __count_args(option, ##__VA_ARGS__)) (option, ##__VA_ARGS__))))
 
+/* CONFIG(FOO) is another name for CONFIG_IS_ENABLED() */
+#define CONFIG(option, ...) CONFIG_IS_ENABLED(option, ##__VA_ARGS__)
+
 #ifndef __ASSEMBLY__
 /*
  * Detect usage of a the value when the conditional is not enabled. When used
