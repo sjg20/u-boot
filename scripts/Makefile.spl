@@ -35,10 +35,8 @@ UBOOTINCLUDE := -I$(obj)/include $(UBOOTINCLUDE)
 KBUILD_CPPFLAGS += -DCONFIG_SPL_BUILD
 ifeq ($(CONFIG_TPL_BUILD),y)
 KBUILD_CPPFLAGS += -DCONFIG_TPL_BUILD
-else
-ifeq ($(CONFIG_VPL_BUILD),y)
+else ifeq ($(CONFIG_VPL_BUILD),y)
 KBUILD_CPPFLAGS += -DCONFIG_VPL_BUILD
-endif
 endif
 
 ifeq ($(CONFIG_VPL_BUILD),y)
@@ -56,21 +54,10 @@ endif
 
 export SPL_NAME
 
-ifdef CONFIG_SPL_BUILD
-SPL_ := SPL_
-ifeq ($(CONFIG_VPL_BUILD),y)
-SPL_TPL_ := VPL_
-else
-ifeq ($(CONFIG_TPL_BUILD),y)
-SPL_TPL_ := TPL_
-else
-SPL_TPL_ := SPL_
-endif
-endif
-else
+# The SPL_ and SPL_TPL_ vars resolve to nothing so they can be used in
+# Makefiles
 SPL_ :=
 SPL_TPL_ :=
-endif
 
 ifeq ($(obj)$(CONFIG_SUPPORT_SPL),spl)
 $(error You cannot build SPL without enabling CONFIG_SUPPORT_SPL)
