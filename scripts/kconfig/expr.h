@@ -158,6 +158,15 @@ struct symbol {
 /* Set symbol to y if allnoconfig; used for symbols that hide others */
 #define SYMBOL_ALLNOCONFIG_Y 0x200000
 
+/* U-Boot: Marks an SPL symbol */
+#define SYMBOL_SPL		0x400000
+
+/* U-Boot: Marks a non-SPL symbol that also has an SPL version */
+#define SYMBOL_HAS_SPL		0x800000
+
+/* U-Boot: Marks an-SPL symbol that does not have a non-SPL version */
+#define SYMBOL_SPL_ONLY		0x1000000
+
 #define SYMBOL_MAXLENGTH	256
 #define SYMBOL_HASHSIZE		9973
 
