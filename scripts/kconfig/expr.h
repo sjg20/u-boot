@@ -164,8 +164,17 @@ struct symbol {
 /* U-Boot: Marks a non-SPL symbol that also has an SPL version */
 #define SYMBOL_HAS_SPL		0x800000
 
-/* U-Boot: Marks an-SPL symbol that does not have a non-SPL version */
-#define SYMBOL_SPL_ONLY		0x1000000
+/*
+ * U-Boot: Marks a symbol with no SPL version. This is in the conf_nospl file
+ * and should not be enabled in any SPL build
+ */
+#define SYMBOL_NO_SPL		0x1000000
+
+/*
+ * U-Boot: Marks an SPL symbol that does not have a non-SPL version. This is in
+ * conf_noproper so should not be enabled in U-Boot proper
+  */
+#define SYMBOL_NO_PROPER	0x2000000
 
 #define SYMBOL_MAXLENGTH	256
 #define SYMBOL_HASHSIZE		9973

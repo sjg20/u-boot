@@ -72,13 +72,13 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode);
 void set_all_choice_values(struct symbol *csym);
 
 /**
- * conf_mark_spl_symbols() - Mark SPL symbols
+ * conf_mark_symbols() - Mark symbols with U-Boot flags
  *
- * Symbols which don't start with SPL_ (TPL_, etc.) but have an SPL version
- * should be marked with the SYMBOL_SPL flag, so we know to avoid writing them
- * in the SPL autoconf.h files.
+ * Symbols which don't have an SPL symbol are marked with SYMBOL_PROPER_ONLY and
+ * those with only SPL symbols are marked withSYMBOL_SPL_ONLY, so we know to
+ * avoid writing them to the wrong autoconf.h files.
  */
-void conf_mark_spl_symbols(void);
+int conf_mark_symbols(void);
 
 /* confdata.c and expr.c */
 static inline void xfwrite(const void *str, size_t len, size_t count, FILE *out)
