@@ -320,18 +320,7 @@ endif
 # do not delete intermediate files automatically
 .SECONDARY:
 
-ifdef CONFIG_SPL_BUILD
-SPL_ := SPL_
-ifeq ($(CONFIG_VPL_BUILD),y)
-SPL_TPL_ := VPL_
-else
-ifeq ($(CONFIG_TPL_BUILD),y)
-SPL_TPL_ := TPL_
-else
-SPL_TPL_ := SPL_
-endif
-endif
-else
+# The SPL_ and SPL_TPL_ vars resolve to nothing so they can be used in
+# Makefiles
 SPL_ :=
 SPL_TPL_ :=
-endif
