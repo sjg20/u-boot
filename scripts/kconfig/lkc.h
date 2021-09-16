@@ -71,6 +71,15 @@ void sym_add_change_count(int count);
 bool conf_set_all_new_symbols(enum conf_def_mode mode);
 void set_all_choice_values(struct symbol *csym);
 
+/**
+ * conf_mark_spl_symbols() - Mark SPL symbols
+ *
+ * Symbols which don't start with SPL_ (TPL_, etc.) but have an SPL version
+ * should be marked with the SYMBOL_SPL flag, so we know to avoid writing them
+ * in the SPL autoconf.h files.
+ */
+void conf_mark_spl_symbols(void);
+
 /* confdata.c and expr.c */
 static inline void xfwrite(const void *str, size_t len, size_t count, FILE *out)
 {

@@ -509,6 +509,28 @@ int conf_read(const char *name)
 	return 0;
 }
 
+/* Print a symbol for a Makefile */
+static void print_makefile_sym(FILE *fp, const char *name,
+			       enum symbol_type type, const char *value,
+			       bool skip_unset)
+{
+	switch (type) {
+	case S_BOOLEAN:
+	case S_TRISTATE:
+		if (*value == 'n') {
+			if (!skip_unset)
+				fprintf(fp, "# %s%s is not set\n",
+					CONFIG_, name);
+			return;
+		}
+		break;
+	default:
+		break;
+	}
+
+	fprintf(fp, "%s%s=%s\n", CONFIG_, name, value);
+}
+
 /*
  * Kconfig configuration printer
  *
@@ -520,24 +542,7 @@ int conf_read(const char *name)
 static void
 kconfig_print_symbol(FILE *fp, struct symbol *sym, const char *value, void *arg)
 {
-
-	switch (sym->type) {
-	case S_BOOLEAN:
-	case S_TRISTATE:
-		if (*value == 'n') {
-			bool skip_unset = (arg != NULL);
-
-			if (!skip_unset)
-				fprintf(fp, "# %s%s is not set\n",
-				    CONFIG_, sym->name);
-			return;
-		}
-		break;
-	default:
-		break;
-	}
-
-	fprintf(fp, "%s%s=%s\n", CONFIG_, sym->name, value);
+	print_makefile_sym(fp, sym->name, sym->type, value, arg != NULL);
 }
 
 static void
@@ -566,16 +571,12 @@ static struct conf_printer kconfig_printer_cb =
 	.print_comment = kconfig_print_comment,
 };
 
-/*
- * Header printer
- *
- * This printer is used when generating the `include/generated/autoconf.h' file.
- */
-static void
-header_print_symbol(FILE *fp, struct symbol *sym, const char *value, void *arg)
+/* Print a symbol for a header file */
+static void print_header_sym(FILE *fp, const char *name, enum symbol_type type,
+			     const char *value)
 {
 
-	switch (sym->type) {
+	switch (type) {
 	case S_BOOLEAN:
 	case S_TRISTATE: {
 		const char *suffix = "";
@@ -588,7 +589,7 @@ header_print_symbol(FILE *fp, struct symbol *sym, const char *value, void *arg)
 			/* fall through */
 		default:
 			fprintf(fp, "#define %s%s%s 1\n",
-			    CONFIG_, sym->name, suffix);
+			    CONFIG_, name, suffix);
 		}
 		break;
 	}
@@ -598,18 +599,28 @@ header_print_symbol(FILE *fp, struct symbol *sym, const char *value, void *arg)
 		if (value[0] != '0' || (value[1] != 'x' && value[1] != 'X'))
 			prefix = "0x";
 		fprintf(fp, "#define %s%s %s%s\n",
-		    CONFIG_, sym->name, prefix, value);
+		    CONFIG_, name, prefix, value);
 		break;
 	}
 	case S_STRING:
 	case S_INT:
 		fprintf(fp, "#define %s%s %s\n",
-		    CONFIG_, sym->name, value);
+		    CONFIG_, name, value);
 		break;
 	default:
 		break;
 	}
+}
 
+/*
+ * Header printer
+ *
+ * This printer is used when generating the `include/generated/autoconf.h' file.
+ */
+static void
+header_print_symbol(FILE *fp, struct symbol *sym, const char *value, void *arg)
+{
+	print_header_sym(fp, sym->name, sym->type, value);
 }
 
 static void
