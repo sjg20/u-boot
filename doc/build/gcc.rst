@@ -120,6 +120,24 @@ Further important build parameters are
 * O=<dir> - generate all output files in directory <dir>, including .config
 * V=1 - verbose build
 
+Link-time optimisation (LTO)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+U-Boot supports link-time optimisation which can reduce the size of the final
+U-Boot binaries, particularly with SPL.
+
+At present this can be enabled by ARM boards by adding `CONFIG_LTO=y` into the
+defconfig file. Other architectures are not supported. LTO is enabled by default
+for sandbox.
+
+This does incur a link-time penalty of several seconds. For faster incremental
+builds during development, you can disable it by setting `LTO_BUILD` to `n`.
+
+.. code-block:: bash
+
+    LTO_BUILD=n make
+
+
 Other build targets
 ~~~~~~~~~~~~~~~~~~~
 
