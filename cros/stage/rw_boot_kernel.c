@@ -228,7 +228,7 @@ static int boot_kernel(struct vboot_info *vboot,
 	char address[20];
 	char *argv[] = { "bootm", address };
 
-	sprintf(address, "%08lx", (ulong)kparams->kaddr);
+	sprintf(address, "%08lx", addr);
 #endif
 	strcpy(cmdline_buf, CHROMEOS_BOOTARGS);
 
