@@ -132,6 +132,12 @@ At least the following non-slow tests are known to fail:
 - test_pinmux_status
 - test_sqfs_load
 
+Controlling output
+~~~~~~~~~~~~~~~~~~
+
+By default a short backtrace is reported. If you would like a longer one,
+pass ``--tb=long`` when running the test. See the pytest documentation for
+more options.
 
 Testing under a debugger
 ~~~~~~~~~~~~~~~~~~~~~~~~
