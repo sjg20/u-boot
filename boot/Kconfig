@@ -294,6 +294,16 @@ config BOOTDEV_DISTRO
 
 	  This provides a way to try out bootdev on an existing boot flow.
 
+config BOOTDEV_PXE
+	bool "Bootdevice support for distro boot over network"
+	depends on BOOTDEV && CMD_PXE && NET && DM_ETH
+	default y
+	help
+	  Enables support for distro boot using bootdevs. This makes the
+	  bootdevs look for a 'extlinux/extlinux.conf' on the tftp server.
+
+	  This provides a way to try out bootdev on an existing boot flow.
+
 config LEGACY_IMAGE_FORMAT
 	bool "Enable support for the legacy image format"
 	default y if !FIT_SIGNATURE
