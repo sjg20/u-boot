@@ -8,6 +8,7 @@
 #include <dm.h>
 #include <bootdev.h>
 #include <bootflow.h>
+#include <bootmeth.h>
 #include <bootstd.h>
 #include <fs.h>
 #include <log.h>
@@ -121,8 +122,11 @@ int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
 	if (!bflow->name)
 		return log_msg_ret("name", -ENOMEM);
 
-	bflow->state = BOOTFLOWST_BASE;
 	bflow->part = iter->part;
+
+	ret = bootmeth_check(bflow->method, iter);
+	if (ret)
+		return log_msg_ret("check", ret);
 
 	/*
 	 * partition numbers start at 0 so this cannot succeed, but it can tell
@@ -164,6 +168,10 @@ int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
 			return log_msg_ret("fs", ret);
 		bflow->state = BOOTFLOWST_FS;
 	}
+
+	ret = bootmeth_read_bootflow(bflow->method, bflow);
+	if (ret)
+		return log_msg_ret("method", ret);
 
 	return 0;
 }
@@ -402,7 +410,7 @@ void bootdev_clear_bootflows(struct udevice *dev)
 
 		bflow = list_first_entry(&ucp->bootflow_head, struct bootflow,
 					 bm_node);
-		/* later bootflow_remove(bflow); */
+		bootflow_remove(bflow);
 	}
 }
 
