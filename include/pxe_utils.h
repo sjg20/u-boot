@@ -99,7 +99,8 @@ struct pxe_context {
 	 * @file_path: Path to the file
 	 * @file_addr: String containing the hex address to put the file in
 	 *	memory
-	 * @filesizep: Returns the file size in bytes
+	 * @filesizep: On entry, the maximum permitted size; returns the actual
+	 *	file size in bytes on success
 	 * Return 0 if OK, -ve on error
 	 */
 	pxe_getfile_func getfile;

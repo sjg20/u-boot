@@ -28,6 +28,11 @@
 		compatible = "mmc-pwrseq-simple";
 		reset-gpios = <&expgpio 1 GPIO_ACTIVE_LOW>;
 	};
+
+	bootstd {
+		compatible = "u-boot,boot-std";
+		filename-prefixes = "/", "/boot/";
+	};
 };
 
 &firmware {

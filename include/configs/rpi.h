@@ -132,48 +132,15 @@
 	"scriptaddr=0x02400000\0" \
 	"pxefile_addr_r=0x02500000\0" \
 	"fdt_addr_r=0x02600000\0" \
-	"ramdisk_addr_r=0x02700000\0"
-
-#if CONFIG_IS_ENABLED(CMD_MMC)
-	#define BOOT_TARGET_MMC(func) \
-		func(MMC, mmc, 0) \
-		func(MMC, mmc, 1)
-#else
-	#define BOOT_TARGET_MMC(func)
-#endif
-
-#if CONFIG_IS_ENABLED(CMD_USB)
-	#define BOOT_TARGET_USB(func) func(USB, usb, 0)
-#else
-	#define BOOT_TARGET_USB(func)
-#endif
-
-#if CONFIG_IS_ENABLED(CMD_PXE)
-	#define BOOT_TARGET_PXE(func) func(PXE, pxe, na)
-#else
-	#define BOOT_TARGET_PXE(func)
-#endif
-
-#if CONFIG_IS_ENABLED(CMD_DHCP)
-	#define BOOT_TARGET_DHCP(func) func(DHCP, dhcp, na)
-#else
-	#define BOOT_TARGET_DHCP(func)
-#endif
-
-#define BOOT_TARGET_DEVICES(func) \
-	BOOT_TARGET_MMC(func) \
-	BOOT_TARGET_USB(func) \
-	BOOT_TARGET_PXE(func) \
-	BOOT_TARGET_DHCP(func)
-
-#include <config_distro_bootcmd.h>
+	"ramdisk_addr_r=0x02700000\0" \
+	"ethaddr=b8:27:eb:a6:61:e1\0"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"dhcpuboot=usb start; dhcp u-boot.uimg; bootm\0" \
+	"boot_targets=mmc0 mmc1 usb0 pxe dhcp\0" \
 	ENV_DEVICE_SETTINGS \
 	ENV_DFU_SETTINGS \
-	ENV_MEM_LAYOUT_SETTINGS \
-	BOOTENV
+	ENV_MEM_LAYOUT_SETTINGS
 
 
 #endif

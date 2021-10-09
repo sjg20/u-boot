@@ -1061,7 +1061,8 @@ config USE_BOOTCOMMAND
 config BOOTCOMMAND
 	string "bootcmd value"
 	depends on USE_BOOTCOMMAND && !USE_DEFAULT_ENV_FILE
-	default "run distro_bootcmd" if DISTRO_DEFAULTS
+	default "bootflow scan -lb" if BOOTSTD
+	default "run distro_bootcmd" if !BOOTSTD && DISTRO_DEFAULTS
 	help
 	  This is the string of commands that will be used as bootcmd and if
 	  AUTOBOOT is set, automatically run.

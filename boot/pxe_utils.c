@@ -120,6 +120,8 @@ static int get_relfile(struct pxe_context *ctx, const char *file_path,
 
 	sprintf(addr_buf, "%lx", file_addr);
 
+	/* sanity check: limit size to 1GB */
+	size = 1 << 30;
 	ret = ctx->getfile(ctx, relfile, addr_buf, &size);
 	if (ret < 0)
 		return log_msg_ret("get", ret);
@@ -208,10 +210,10 @@ static int get_relfile_envaddr(struct pxe_context *ctx, const char *file_path,
 
 	envaddr = from_env(envaddr_name);
 	if (!envaddr)
-		return -ENOENT;
+		return log_msg_ret("env", -ENOENT);
 
 	if (strict_strtoul(envaddr, 16, &file_addr) < 0)
-		return -EINVAL;
+		return log_msg_ret("addr", -EINVAL);
 
 	return get_relfile(ctx, file_path, file_addr, filesizep);
 }
