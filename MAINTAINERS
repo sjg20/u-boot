@@ -637,6 +637,7 @@ BOOTDEVICE
 M:	Simon Glass <sjg@chromium.org>
 S:	Maintained
 F:	boot/bootdev*.c
+F:	boot/bootflow.c
 F:	boot/bootmeth*.c
 F:	include/bootdev.h
 F:	include/bootflow.h

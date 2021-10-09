@@ -219,4 +219,13 @@ int bootflow_boot(struct bootflow *bflow);
  */
 const char *bootflow_state_get_name(enum bootflow_state_t state);
 
+/**
+ * bootflow_remove() - Remove a bootflow and free its memory
+ *
+ * This updates the linked lists containing the bootflow then frees it.
+ *
+ * @bflow: Bootflow to remove
+ */
+void bootflow_remove(struct bootflow *bflow);
+
 #endif

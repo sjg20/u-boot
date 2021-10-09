@@ -45,7 +45,7 @@ void bootdev_clear_bootflows(struct udevice *dev)
 
 		bflow = list_first_entry(&ucp->bootflow_head, struct bootflow,
 					 bm_node);
-		/** Remove in future patch: bootflow_remove(bflow); */
+		bootflow_remove(bflow);
 	}
 }
 
@@ -56,7 +56,7 @@ static void bootdev_clear_glob_(struct bootdev_state *state)
 
 		bflow = list_first_entry(&state->glob_head, struct bootflow,
 					 glob_node);
-		/** Remove in future patch: bootflow_remove(bflow); */
+		bootflow_remove(bflow);
 	}
 }
 
