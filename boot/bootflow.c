@@ -24,7 +24,7 @@ static const char *const bootflow_state[BOOTFLOWST_COUNT] = {
 	"part",
 	"fs",
 	"file",
-	"loaded",
+	"ready",
 };
 
 const char *bootflow_state_get_name(enum bootflow_state_t state)
@@ -276,7 +276,7 @@ int bootflow_boot(struct bootflow *bflow)
 {
 	int ret;
 
-	if (bflow->state != BOOTFLOWST_LOADED)
+	if (bflow->state != BOOTFLOWST_READY)
 		return log_msg_ret("load", -EPROTO);
 
 	ret = bootmeth_boot(bflow->method, bflow);

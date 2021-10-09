@@ -12,7 +12,7 @@
 /**
  * enum bootflow_state_t - states that a particular bootflow can be in
  *
- * Only bootflows in state BOOTFLOWST_LOADED can be used to boot.
+ * Only bootflows in state BOOTFLOWST_READY can be used to boot.
  */
 enum bootflow_state_t {
 	BOOTFLOWST_BASE,	/**< Nothing known yet */
@@ -20,7 +20,7 @@ enum bootflow_state_t {
 	BOOTFLOWST_PART,	/**< Partition exists */
 	BOOTFLOWST_FS,		/**< Filesystem exists */
 	BOOTFLOWST_FILE,	/**< Bootflow file exists */
-	BOOTFLOWST_LOADED,	/**< Bootflow file loaded */
+	BOOTFLOWST_READY,	/**< Bootflow file loaded */
 
 	BOOTFLOWST_COUNT
 };

@@ -275,7 +275,7 @@ endif # SPL
 endif # FIT
 
 config BOOTDEV
-	bool "Bootdevice support"
+	bool "Bootdev support"
 	default y
 	help
 	  A bootdev is a standard way of locating something to boot,
@@ -284,7 +284,7 @@ config BOOTDEV
 	  for booting.
 
 config BOOTDEV_DISTRO
-	bool "Bootdevice support for distro boot"
+	bool "Bootdev support for distro boot"
 	depends on BOOTDEV && CMD_PXE
 	default y
 	help
@@ -295,7 +295,7 @@ config BOOTDEV_DISTRO
 	  This provides a way to try out bootdev on an existing boot flow.
 
 config BOOTDEV_PXE
-	bool "Bootdevice support for distro boot over network"
+	bool "Bootdev support for distro boot over network"
 	depends on BOOTDEV && CMD_PXE && NET && DM_ETH
 	default y
 	help
@@ -305,7 +305,7 @@ config BOOTDEV_PXE
 	  This provides a way to try out bootdev on an existing boot flow.
 
 config BOOTDEV_EFILOADER
-	bool "Bootdevice support for EFI boot"
+	bool "Bootdev support for EFI boot"
 	depends on BOOTDEV && CMD_BOOTEFI
 	default y
 	help

@@ -98,7 +98,7 @@ static int do_bootdev_info(struct cmd_tbl *cmdtp, int flag, int argc,
 	for (ret = bootdev_first_bootflow(dev, &bflow), i = 0;
 	     !ret;
 	     ret = bootdev_next_bootflow(&bflow), i++)
-		num_valid += bflow->state == BOOTFLOWST_LOADED;
+		num_valid += bflow->state == BOOTFLOWST_READY;
 
 	/*
 	 * Prove the device, if requested, otherwise assume that there is no

@@ -1,16 +1,18 @@
 .. SPDX-License-Identifier: GPL-2.0+:
 
-Bootdevice and Bootflow
-=======================
+U-Boot Bootflow
+===============
 
 Introduction
 ------------
 
-Bootdevice and bootflow provide a built-in way for U-Boot to automatically boot
-an Operating System without custom scripting and other customisation:
+Bootflow provides a built-in way for U-Boot to automatically boot
+an Operating System without custom scripting and other customisation. It
+consists of the following concepts:
 
-  - bootdev - a method to scan a device to find bootflows (owned by U-Boot)
-  - bootflow - a description of how to boot (owned by the distro)
+   - bootdev - a device which can hold a distro
+   - bootmeth - a method to scan a bootdev to find bootflows (owned by U-Boot)
+   - bootflow - a description of how to boot (owned by the distro)
 
 For Linux, the distro (Linux distribution, e.g. Debian, Fedora) is responsible
 for creating a bootflow for each kernel combination that it wants to offer.
@@ -24,7 +26,7 @@ disto_boodcmd_ for details. This is done because U-Boot has no native support
 for scanning devices. While the scripts work remarkably well, they can be hard
 to understand and extend, and the feature does not include tests.
 
-Bootdevice and bootflow together provide a more built-in way to boot with
+Bootdev, bootmeth and bootflow together provide a more built-in way to boot with
 U-Boot. The feature is extensible to different Operating Systems (such as
 Chromium OS) and devices (beyond just block and network devices).
 
@@ -57,34 +59,47 @@ Typically the first available bootflow is selected and booted. If that fails,
 then the next one is tried.
 
 
-Bootdevice
-----------
+Bootdev
+-------
 
-How does U-Boot find the bootflow files? That is the job of bootdevs.
-A bootdev is simply a device that locates bootflow files. For example, an
-MMC bootdev for distro boot would simply scan through the partitions on the
-MMC to find valid filesystems, then search each filesystem for a file called
-`extlinux/extlinux.conf`. Each of those files constitutes a bootflow, so the
-MMC device may produce multiple bootflows. Of course that is under control of
-the bootdev.
+Where does U-Boot find the media that holds the operating systems? That is the
+job of bootdev. A bootdev is simply a layer on top of a a media device (such as
+MMC, NVMe) that contains filesystems that might contain things related to an
+operating system.
+
+For example, an MMC bootdev provides access to the individual partitions on the
+MMC device. It scans through these to find filesystems, then provides a list of
+these for consideration.
+
+
+Bootmeth
+--------
+
+Once the list of filesystems is provided, how does U-Boot find the bootflow
+files in these filesystems. That is the job of bootmeth. Each boot method has
+its own way of doing this.
+
+For example, the distro boot simply scans through the provide filesystems
+looking for files called `extlinux/extlinux.conf`. Each of those files
+constitutes a bootflow, so the bootmeth may produce multiple bootflows.
+
+Note: it is possible to have a bootmeth that uses a partition or a device
+directly, but it is more common to use a filesystem.
 
 
 Boot process
 ------------
 
 U-Boot tries to use the 'lazy init' approach whereever possible and distro boot
-is no exception. The algorithm is:
+is no exception. The algorithm is::
 
    while (get next bootdev)
-      while (get next bootflow)
-          try to boot it
+      while (get next bootmeth)
+          while (get next bootflow)
+              try to boot it
 
-So U-Boot works its way through the bootdevs, trying in turn the bootflows
-provided by each, until it either boots or exhausts the available options.
-
-If you are familiar with the producer–consumer model, bootdevs are the
-producers and bootflows are the items produced. The consumer is the 'booter'
-which tries to boot each produced item.
+So U-Boot works its way through the bootdevs, trying each bootmeth in turn to
+obtain bootflows, until it either boots or exhausts the available options.
 
 Instead of 500 lines of #defines and a 4KB boot script, all that is needed is
 the following command::
@@ -95,29 +110,32 @@ which scans for available bootflows, listing each find it finds (-l) and trying
 to boot it (-b).
 
 
-Bootdevice uclass
------------------
+Bootdev uclass
+--------------
 
-The bootdev uclass provides an simple API call to obtain one or more
-bootflows from a device::
+The bootdev uclass provides an simple API call to obtain a bootflows from a
+device::
 
-   int bootdev_get_bootflow(struct udevice *dev, int seq,
-                               struct bootflow *bflow);
+   int bootdev_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
+                            struct bootflow *bflow);
 
-This takes a sequence number (0 for the first bootflow, 1 for the next) and
-returnS a bootflow. This is the core of the bootdev implementation. The
+This takes a iterator which indicates the bootdev, partition and bootmeth to
+use. It returns a bootflow. This is the core of the bootdev implementation. The
 bootdev drivers that implement this differ depending on the media they are
 reading from, but each is responsible for returning a valid bootflow if
 available.
 
+A helper called `bootdev_find_in_blk()` makes it fairly easy to implement this
+function for each media device uclass, in a few lines of code.
 
-Bootdevice drivers
-------------------
+
+Bootdev drivers
+---------------
 
 A bootdev driver is typically fairly simple. Here is one for mmc::
 
-    static int mmc_get_bootflow(struct udevice *dev, int seq,
-                    struct bootflow *bflow)
+    static int mmc_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
+                                struct bootflow *bflow)
     {
         struct udevice *mmc_dev = dev_get_parent(dev);
         struct udevice *blk;
@@ -133,7 +151,7 @@ A bootdev driver is typically fairly simple. Here is one for mmc::
         if (ret)
             return log_msg_ret("blk", ret);
         assert(blk);
-        ret = bootdev_find_in_blk(dev, blk, seq, bflow);
+        ret = bootdev_find_in_blk(dev, blk, iter, bflow);
         if (ret)
             return log_msg_ret("find", ret);
 
@@ -145,16 +163,16 @@ A bootdev driver is typically fairly simple. Here is one for mmc::
     };
 
     U_BOOT_DRIVER(mmc_bootdev) = {
-        .name        = "mmc_bootdev",
+        .name      = "mmc_bootdev",
         .id        = UCLASS_BOOTDEV,
-        .ops        = &mmc_bootdev_ops,
+        .ops       = &mmc_bootdev_ops,
     };
 
 The implementation of the `get_bootflow` method is simply to obtain the
 block device and call a bootdev helper function to do the rest. The
 implementation of `bootdev_find_in_blk()` checks the partition table, and
 attempts to read a file from a filesystem on the partition number given by the
-@seq parameter.
+@iter->part parameter.
 
 
 Device hierarchy
@@ -166,10 +184,10 @@ media device::
 
     mmc           0  [ + ]   bcm2835-sdhost        |   |-- mmc@7e202000
     blk           0  [ + ]   mmc_blk               |   |   |-- mmc@7e202000.blk
-    bootdev    0  [   ]   mmc_bootdev        |   |   `-- mmc@7e202000.bootdev
+    bootdev       0  [   ]   mmc_bootdev           |   |   `-- mmc@7e202000.bootdev
     mmc           1  [ + ]   sdhci-bcm2835         |   |-- sdhci@7e300000
     blk           1  [   ]   mmc_blk               |   |   |-- sdhci@7e300000.blk
-    bootdev    1  [   ]   mmc_bootdev        |   |   `-- sdhci@7e300000.bootdev
+    bootdev       1  [   ]   mmc_bootdev           |   |   `-- sdhci@7e300000.bootdev
 
 The bootdev device is typically created automatically in the media uclass'
 `post_bind()` method. This is typically something like this::
@@ -221,7 +239,17 @@ Configuration
 
 The bootdev/bootflow feature can be enabled with `CONFIG_BOOTDEV`. Each
 type of bootflow has its own CONFIG option also. For example,
-`CONFIG_BOOTDEV_DISTRO` enables support for distro boot.
+`CONFIG_BOOTDEV_DISTRO` enables support for distro boot from a disk.
+
+
+Available bootmeth drivers
+--------------------------
+
+Bootmeth drivers are provided for:
+
+   - distro boot from a disk (syslinux)
+   - distro boot from a network (PXE)
+   - EFI boot using bootefi
 
 
 Command interface
@@ -292,7 +320,6 @@ To do
 Most of the following things will be completd as part of initial development,
 before a final series is sent:
 
-- use `ready` instead of `loaded` for the state name?
 - `bootflow prep` to load everything preparing for boot, so that `bootflow boot`
   can just do the boot.
 - check ordering of bootdevs (should it use aliases?)
@@ -300,19 +327,10 @@ before a final series is sent:
 - implement boot_targets env var?
 - quick way to boot from particular media - 'bootflow boot mmc1' ?
 - add bootdev drivers for dhcp, sata, scsi, ide, usb, virtio
-- introduce an interface for disto_getfile() and disto_net_getfile() provided
-  by the bootdev
-- better name for this feature? It is clearly not auto-boot or distro-boot,
-  but perhaps standard boot?
 
 Other ideas:
 
-- rename bootflow to flow, bootdev to method (since this is a bootloader
-  after all)
 - bootdev flags for speed (e.g. network and USB are slow)
-- should the means of scanning for particular files on a bootdev device be
-  moved into a driver architecture, so we have drivers for distro boot,
-  Chromium OS, etc.?
 - automatically load kernel, FDT, etc. to suitable addresses so the board does
   not need to specific things like `pxefile_addr_r`
 

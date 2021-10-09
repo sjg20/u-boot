@@ -72,8 +72,8 @@ The list looks something like this:
 ===  ===========  ======  ========  ====  ===============================   ================
 Seq  Type         State   Uclass    Part  Name                              Filename
 ===  ===========  ======  ========  ====  ===============================   ================
-  0  distro-boot  loaded  mmc          2  mmc\@7e202000.bootdev.part_2   extlinux/extlinux.conf
-  1  distro-boot  loaded  ethernet     0  smsc95xx_eth.bootdev.0         rpi.pxe/extlinux/extlinux.conf
+  0  distro-boot  loaded  mmc          2  mmc\@7e202000.bootdev.part_2      extlinux/extlinux.conf
+  1  distro-boot  loaded  ethernet     0  smsc95xx_eth.bootdev.0            rpi.pxe/extlinux/extlinux.conf
 ===  ===========  ======  ========  ====  ===============================   ================
 
 The fields are as follows:

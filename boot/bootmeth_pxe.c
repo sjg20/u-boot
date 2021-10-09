@@ -76,7 +76,7 @@ int distro_pxe_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	if (!bflow->fname)
 		return log_msg_ret("name", -ENOMEM);
 
-	bflow->state = BOOTFLOWST_LOADED;
+	bflow->state = BOOTFLOWST_READY;
 
 	/* Allocate the buffer, including the \0 byte added by get_pxe_file() */
 	buf = malloc(size + 1);

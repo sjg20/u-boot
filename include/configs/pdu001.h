@@ -58,7 +58,7 @@
 		"elif test $boot_device = sdcard; then " \
 			"setenv mmc_boot 1;" \
 		"else " \
-			"echo Bootdevice is neither MMC0 nor MMC1;" \
+			"echo Bootdev is neither MMC0 nor MMC1;" \
 			"reset;" \
 		"fi;" \
 	"\0"

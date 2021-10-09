@@ -47,8 +47,8 @@ static void report_bootflow_err(struct bootflow *bflow, int err)
 	case BOOTFLOWST_FILE:
 		printf("File cannot be loaded");
 		break;
-	case BOOTFLOWST_LOADED:
-		printf("File loaded");
+	case BOOTFLOWST_READY:
+		printf("Ready");
 		break;
 	case BOOTFLOWST_COUNT:
 		break;
@@ -112,7 +112,7 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 		for (ret = bootdev_first_bootflow(dev, &bflow), i = 0;
 		     !ret;
 		     ret = bootdev_next_bootflow(&bflow), i++) {
-			num_valid += bflow->state == BOOTFLOWST_LOADED;
+			num_valid += bflow->state == BOOTFLOWST_READY;
 			show_bootflow(i, bflow, errors);
 		}
 	} else {
@@ -121,7 +121,7 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 		for (ret = bootflow_first_glob(&bflow), i = 0;
 		     !ret;
 		     ret = bootflow_next_glob(&bflow), i++) {
-			num_valid += bflow->state == BOOTFLOWST_LOADED;
+			num_valid += bflow->state == BOOTFLOWST_READY;
 			show_bootflow(i, bflow, errors);
 		}
 	}

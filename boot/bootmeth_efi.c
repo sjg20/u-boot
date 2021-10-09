@@ -87,7 +87,7 @@ static int efiload_read_file(struct blk_desc *desc, struct bootflow *bflow)
 	if (size != bytes_read)
 		return log_msg_ret("bread", -EINVAL);
 	buf[size] = '\0';
-	bflow->state = BOOTFLOWST_LOADED;
+	bflow->state = BOOTFLOWST_READY;
 	bflow->buf = buf;
 
 	/*
@@ -179,7 +179,7 @@ static int distro_efi_read_file(struct udevice *dev, struct bootflow *bflow,
 	if (size != bytes_read)
 		return log_msg_ret("bread", -EINVAL);
 	buf[size] = '\0';
-	bflow->state = BOOTFLOWST_LOADED;
+	bflow->state = BOOTFLOWST_READY;
 	bflow->buf = buf;
 
 	/*

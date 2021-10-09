@@ -78,7 +78,7 @@ static int bootdev_test_cmd_bootflow(struct unit_test_state *uts)
 	ut_assert_nextline("Scanning for bootflows in bootdev 'mmc1.bootdev'");
 	ut_assert_nextline("Seq  Method       State   Uclass    Part  Name                      Filename");
 	ut_assert_nextlinen("---");
-	ut_assert_nextline("  0  syslinux     loaded  mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
+	ut_assert_nextline("  0  syslinux     ready   mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("(1 bootflow, 1 valid)");
 	ut_assert_console_end();
@@ -87,7 +87,7 @@ static int bootdev_test_cmd_bootflow(struct unit_test_state *uts)
 	ut_assert_nextline("Showing bootflows for bootdev 'mmc1.bootdev'");
 	ut_assert_nextline("Seq  Method       State   Uclass    Part  Name                      Filename");
 	ut_assert_nextlinen("---");
-	ut_assert_nextline("  0  syslinux     loaded  mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
+	ut_assert_nextline("  0  syslinux     ready   mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("(1 bootflow, 1 valid)");
 	ut_assert_console_end();
@@ -106,7 +106,7 @@ static int bootdev_test_cmd_bootflow_glob(struct unit_test_state *uts)
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("Scanning bootdev 'mmc2.bootdev':");
 	ut_assert_nextline("Scanning bootdev 'mmc1.bootdev':");
-	ut_assert_nextline("  0  syslinux     loaded  mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
+	ut_assert_nextline("  0  syslinux     ready   mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
 	ut_assert_nextline("Scanning bootdev 'mmc0.bootdev':");
 	ut_assert_nextline("No more bootdevs");
 	ut_assert_nextlinen("---");
@@ -117,7 +117,7 @@ static int bootdev_test_cmd_bootflow_glob(struct unit_test_state *uts)
 	ut_assert_nextline("Showing all bootflows");
 	ut_assert_nextline("Seq  Method       State   Uclass    Part  Name                      Filename");
 	ut_assert_nextlinen("---");
-	ut_assert_nextline("  0  syslinux     loaded  mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
+	ut_assert_nextline("  0  syslinux     ready   mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("(1 bootflow, 1 valid)");
 	ut_assert_console_end();
@@ -145,7 +145,7 @@ static int bootdev_test_cmd_bootflow_scan_e(struct unit_test_state *uts)
 	ut_assert_nextline("     ** No partition found, err=-2");
 	ut_assert_nextline("  3  efi          media   mmc          0  mmc1.bootdev.whole        <NULL>");
 	ut_assert_nextline("     ** No partition found, err=-2");
-	ut_assert_nextline("  4  syslinux     loaded  mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
+	ut_assert_nextline("  4  syslinux     ready   mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
 	ut_assert_nextline("  5  efi          fs      mmc          1  mmc1.bootdev.part_1       efi/boot/bootsbox.efi");
 
 	ut_assert_skip_to_line("Scanning bootdev 'mmc0.bootdev':");
@@ -162,7 +162,7 @@ static int bootdev_test_cmd_bootflow_scan_e(struct unit_test_state *uts)
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("  0  syslinux     media   mmc          0  mmc2.bootdev.whole        <NULL>");
 	ut_assert_nextline("  1  efi          media   mmc          0  mmc2.bootdev.whole        <NULL>");
-	ut_assert_skip_to_line("  4  syslinux     loaded  mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
+	ut_assert_skip_to_line("  4  syslinux     ready   mmc          1  mmc1.bootdev.part_1       extlinux/extlinux.conf");
 	ut_assert_skip_to_line(" 3f  efi          media   mmc          0  mmc0.bootdev.whole        <NULL>");
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("(64 bootflows, 1 valid)");
@@ -188,7 +188,7 @@ static int bootdev_test_cmd_bootflow_info(struct unit_test_state *uts)
 	ut_assert_nextline("Block dev: mmc1.blk");
 	ut_assert_nextline("Sequence:  0");
 	ut_assert_nextline("Method:    syslinux");
-	ut_assert_nextline("State:     loaded");
+	ut_assert_nextline("State:     ready");
 	ut_assert_nextline("Partition: 1");
 	ut_assert_nextline("Subdir:    (none)");
 	ut_assert_nextline("Filename:  extlinux/extlinux.conf");
