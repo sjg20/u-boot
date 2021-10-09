@@ -288,8 +288,8 @@ fs       Filesystem was found but the file could not be read. It could be
          missing or in the wrong subdirectory.
 file     File was found and its size detected, but it could not be read. This
          could indicate filesystem corruption.
-loaded   File was loaded and is ready for use. In this state the bootflow can
-         be booted.
+ready    File was loaded and is ready for use. In this state the bootflow is
+         ready to be booted.
 =======  =======================================================================
 
 

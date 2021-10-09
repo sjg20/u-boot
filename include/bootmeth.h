@@ -8,6 +8,7 @@
 #define __bootmeth_h
 
 struct bootflow;
+struct udevice;
 
 /**
  * struct bootmeth_ops - Operations for the Platform Controller Hub
