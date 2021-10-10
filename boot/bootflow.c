@@ -283,13 +283,13 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 
 	ret = setup_order(iter, &dev);
 	if (ret)
-		return log_msg_ret("order", ret);
+		return log_msg_ret("order", -ENODEV);
 	bootflow_iter_set_dev(iter, dev);
 
 	/* Find the first bootmeth (there must be at least one!) */
 	ret = uclass_first_device_err(UCLASS_BOOTMETH, &iter->method);
 	if (ret)
-		return log_msg_ret("meth", ret);
+		return log_msg_ret("meth", -ENODEV);
 
 	ret = bootflow_check(iter, bflow);
 	if (ret) {

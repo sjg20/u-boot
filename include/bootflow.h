@@ -152,7 +152,8 @@ void bootflow_iter_uninit(struct bootflow_iter *iter);
  * @iter:	Place to store private info (inited by this call)
  * @flags:	Flags for bootdev (enum bootflow_flags_t)
  * @bflow:	Place to put the bootflow if found
- * @return 0 if found, other -ve on error
+ * @return 0 if found,  -ENODEV if no device, other -ve on other error
+ *	(iteration can continue)
  */
 int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 			  int flags, struct bootflow *bflow);
@@ -165,10 +166,11 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
  *
  * If @flags includes BOOTFLOWF_ALL then bootflows with errors are returned too
  *
- * @iter:	Place to store private info (inited by this call)
+ * @iter:	Place to store private info (inited by this call), with
  * @flags:	Flags for bootdev (enum bootflow_flags_t)
  * @bflow:	Place to put the bootflow if found
- * @return 0 if found, other -ve on error
+ * @return 0 if found, -ENODEV if no device, other -ve on other error (iteration
+ *	can continue)
  */
 int bootflow_scan_first(struct bootflow_iter *iter, int flags,
 			struct bootflow *bflow);
@@ -181,7 +183,8 @@ int bootflow_scan_first(struct bootflow_iter *iter, int flags,
  *
  * @iter:	Private info (as set up by bootflow_scan_first())
  * @bflow:	Place to put the bootflow if found
- * @return 0 if found, -ESHUTDOWN if no more bootflows, -ve on error
+ * @return 0 if found, -ENODEV if no device, -ESHUTDOWN if no more bootflows,
+ *	other -ve on other error (iteration can continue)
  */
 int bootflow_scan_next(struct bootflow_iter *iter, struct bootflow *bflow);
 
