@@ -31,15 +31,36 @@ struct bootdev_state {
 };
 
 /**
+ * enum bootdev_prio_t - priority of each bootdev
+ *
+ * These values are associated with each bootdev and set up by the driver.
+ *
+ * Smallest value is the highest priority. By default, bootdevs are scanned from
+ * highest to lowest priority
+ */
+enum bootdev_prio_t {
+	BOOTDEVP_0_INTERNAL_FAST	= 10,
+	BOOTDEVP_1_INTERNAL_SLOW	= 20,
+	BOOTDEVP_2_SCAN_FAST		= 30,
+	BOOTDEVP_3_SCAN_SLOW		= 40,
+	BOOTDEVP_4_NET_BASE		= 50,
+	BOOTDEVP_5_NET_FALLBACK		= 60,
+
+	BOOTDEVP_COUNT,
+};
+
+/**
  * struct bootdev_uc_plat - uclass information about a bootdev
  *
  * This is attached to each device in the bootdev uclass and accessible via
  * dev_get_uclass_plat(dev)
  *
  * @bootflows: List of available bootflows for this bootdev
+ * @piro: Priority of this bootdev
  */
 struct bootdev_uc_plat {
 	struct list_head bootflow_head;
+	enum bootdev_prio_t prio;
 };
 
 /**

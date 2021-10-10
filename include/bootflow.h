@@ -108,6 +108,10 @@ enum bootflow_flags_t {
  *	forward (e.g. to skip the current partition because it is not valid)
  *	-ENOTTY: try next partition
  *	-ESHUTDOWN: try next bootdev
+ * @num_devs: Number of bootdevs in @dev_order
+ * @cur_dev: Current bootdev number, an index into @dev_order[]
+ * @dev_order: List of bootdevs to scan, in order of priority. The scan starts
+ *	with the first one on the list
  */
 struct bootflow_iter {
 	int flags;
@@ -116,17 +120,27 @@ struct bootflow_iter {
 	struct udevice *method;
 	int max_part;
 	int err;
+	int num_devs;
+	int cur_dev;
+	struct udevice **dev_order;
 };
 
 /**
- * bootflow_reset_iter() - Reset a bootflow iterator
+ * bootflow_iter_init() - Reset a bootflow iterator
  *
  * This sets everything to the starting point, ready for use.
  *
  * @iter: Place to store private info (inited by this call)
  * @flags: Flags to use (see enum bootflow_flags_t)
  */
-void bootflow_reset_iter(struct bootflow_iter *iter, int flags);
+void bootflow_iter_init(struct bootflow_iter *iter, int flags);
+
+/**
+ * bootflow_iter_uninit() - Free memory used by an interator
+ *
+ * @iter:	Iterator to free
+ */
+void bootflow_iter_uninit(struct bootflow_iter *iter);
 
 /**
  * bootflow_scan_bootdev() - find the first bootflow in a bootdev

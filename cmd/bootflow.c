@@ -235,6 +235,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 				bootflow_run_boot(&bflow);
 		}
 	}
+	bootflow_iter_uninit(&iter);
 	if (list)
 		show_footer(i, num_valid);
 

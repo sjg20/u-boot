@@ -35,6 +35,15 @@ static int mmc_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
 	return 0;
 }
 
+static int mmc_bootdev_bind(struct udevice *dev)
+{
+	struct bootdev_uc_plat *ucp = dev_get_uclass_plat(dev);
+
+	ucp->prio = BOOTDEVP_0_INTERNAL_FAST;
+
+	return 0;
+}
+
 struct bootdev_ops mmc_bootdev_ops = {
 	.get_bootflow	= mmc_get_bootflow,
 };
@@ -43,4 +52,5 @@ U_BOOT_DRIVER(mmc_bootdev) = {
 	.name		= "mmc_bootdev",
 	.id		= UCLASS_BOOTDEV,
 	.ops		= &mmc_bootdev_ops,
+	.bind		= mmc_bootdev_bind,
 };

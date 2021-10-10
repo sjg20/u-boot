@@ -65,6 +65,15 @@ static int eth_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
 	return 0;
 }
 
+static int eth_bootdev_bind(struct udevice *dev)
+{
+	struct bootdev_uc_plat *ucp = dev_get_uclass_plat(dev);
+
+	ucp->prio = BOOTDEVP_4_NET_BASE;
+
+	return 0;
+}
+
 struct bootdev_ops eth_bootdev_ops = {
 	.get_bootflow	= eth_get_bootflow,
 };
@@ -73,4 +82,5 @@ U_BOOT_DRIVER(eth_bootdev) = {
 	.name		= "eth_bootdev",
 	.id		= UCLASS_BOOTDEV,
 	.ops		= &eth_bootdev_ops,
+	.bind		= eth_bootdev_bind,
 };

@@ -264,6 +264,7 @@ static int bootdev_test_get(struct unit_test_state *uts)
 	struct bootflow bflow;
 
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
+	bootflow_iter_uninit(&iter);
 
 	return 0;
 }

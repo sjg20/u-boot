@@ -73,10 +73,15 @@ int bootflow_next_glob(struct bootflow **bflowp)
 	return 0;
 }
 
-void bootflow_reset_iter(struct bootflow_iter *iter, int flags)
+void bootflow_iter_init(struct bootflow_iter *iter, int flags)
 {
 	memset(iter, '\0', sizeof(*iter));
 	iter->flags = flags;
+}
+
+void bootflow_iter_uninit(struct bootflow_iter *iter)
+{
+	free(iter->dev_order);
 }
 
 static void bootflow_iter_set_dev(struct bootflow_iter *iter,
@@ -196,7 +201,7 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 
 	if (dev)
 		flags |= BOOTFLOWF_SINGLE_DEV;
-	bootflow_reset_iter(iter, flags);
+	bootflow_iter_init(iter, flags);
 	if (!dev) {
 		ret = uclass_first_device_err(UCLASS_BOOTDEV, &dev);
 		if (ret)
