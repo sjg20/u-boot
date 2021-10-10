@@ -10,6 +10,8 @@
 #include <bootmeth.h>
 #include <dm.h>
 #include <malloc.h>
+#include <sort.h>
+#include <dm/device-internal.h>
 
 /* error codes used to signal running out of things */
 enum {
@@ -98,6 +100,81 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
 }
 
 /**
+ * h_cmp_bootdev() - Compare two bootdevs to find out which should go first
+ *
+ * @v1: struct udevice * of first device
+ * @v2: struct udevice * of second device
+ * @return sort order (<0 if dev1 < dev2, ==0 if equal, >0 if dev1 > dev2)
+ */
+static int h_cmp_bootdev(const void *v1, const void *v2)
+{
+	const struct udevice *dev1 = *(struct udevice **)v1;
+	const struct udevice *dev2 = *(struct udevice **)v2;
+	const struct bootdev_uc_plat *ucp1 = dev_get_uclass_plat(dev1);
+	const struct bootdev_uc_plat *ucp2 = dev_get_uclass_plat(dev2);
+
+	return ucp1->prio - ucp2->prio;
+}
+
+/**
+ * setup_order() - Set up the ordering of bootdevs to scan
+ *
+ * This sets up the ordering information in @iter, based on the priority of each
+ * bootdev.
+ *
+ * If a single device is requested, no ordering is needed
+ *
+ * @iter: Iterator to update with the order
+ * @dev: *devp is NULL to scan all, otherwise this is the (single) device to
+ *	scan. Returns the first device to use
+ * @return 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
+ *	on other error
+ */
+static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
+{
+	struct udevice *dev = *devp, **order;
+	struct uclass *uc;
+	int count;
+	int ret;
+	int i;
+
+	/* Handle scanning a single device */
+	if (dev) {
+		iter->flags |= BOOTFLOWF_SINGLE_DEV;
+		return 0;
+	}
+
+	count = uclass_id_count(UCLASS_BOOTDEV);
+	if (!count)
+		return log_msg_ret("count", -ENOENT);
+
+	order = calloc(count, sizeof(struct udevice *));
+	if (!order)
+		return log_msg_ret("order", -ENOMEM);
+
+	/* Get a list of bootdevs */
+	i = 0;
+	uclass_id_foreach_dev(UCLASS_BOOTDEV, dev, uc)
+		order[i++] = dev;
+
+	/* sort them into priorty order */
+	qsort(order, count, sizeof(struct udevice *), h_cmp_bootdev);
+
+	iter->dev_order = order;
+	iter->num_devs = count;
+	iter->cur_dev = 0;
+
+	/* Use 'boot_targets' environment variable if available */
+	dev = *order;
+	ret = device_probe(dev);
+	if (ret)
+		return log_msg_ret("probe", ret);
+	*devp = dev;
+
+	return 0;
+}
+
+/**
  * iter_incr() - Move to the next item (method, part, bootdev)
  *
  * @return 0 if OK, BF_NO_MORE_DEVICES if there are no more bootdevs
@@ -141,10 +218,13 @@ static int iter_incr(struct bootflow_iter *iter)
 	/* ...select next bootdev */
 	if (iter->flags & BOOTFLOWF_SINGLE_DEV) {
 		ret = -ENOENT;
+	} else if (++iter->cur_dev == iter->num_devs) {
+		ret = -ENOENT;
 	} else {
-		dev = iter->dev;
-		ret = uclass_next_device_err(&dev);
-		bootflow_iter_set_dev(iter, dev);
+		dev = iter->dev_order[iter->cur_dev];
+		ret = device_probe(dev);
+		if (!log_msg_ret("probe", ret))
+			bootflow_iter_set_dev(iter, dev);
 	}
 
 	/* if there are no more bootdevs, give up */
@@ -199,14 +279,11 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 {
 	int ret;
 
-	if (dev)
-		flags |= BOOTFLOWF_SINGLE_DEV;
 	bootflow_iter_init(iter, flags);
-	if (!dev) {
-		ret = uclass_first_device_err(UCLASS_BOOTDEV, &dev);
-		if (ret)
-			return ret;
-	}
+
+	ret = setup_order(iter, &dev);
+	if (ret)
+		return log_msg_ret("order", ret);
 	bootflow_iter_set_dev(iter, dev);
 
 	/* Find the first bootmeth (there must be at least one!) */
