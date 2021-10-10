@@ -220,6 +220,7 @@ static int iter_incr(struct bootflow_iter *iter)
 		ret = -ENOENT;
 	} else if (++iter->cur_dev == iter->num_devs) {
 		ret = -ENOENT;
+		bootflow_iter_set_dev(iter, NULL);
 	} else {
 		dev = iter->dev_order[iter->cur_dev];
 		ret = device_probe(dev);
