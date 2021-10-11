@@ -119,6 +119,24 @@ long trailing_strtol(const char *str);
 long trailing_strtoln(const char *str, const char *end);
 
 /**
+ * trailing_strtoln() - extract a trailing integer from a fixed-length string
+ *
+ * Given a fixed-length string this finds a trailing number on the string
+ * and returns it. For example, "abc123" would return 123. Only the
+ * characters between @str and @end - 1 are examined. If @end is NULL, it is
+ * set to str + strlen(str).
+ *
+ * @str:	String to exxamine
+ * @end:	Pointer to end of string to examine, or NULL to use the
+ *		whole string
+ * @lenp:	If non-NULL, this is set to the number of characters before the
+ *	number starts, e.g. for "mmc0" this would be 3; if no trailing number is
+ *	found, it is set to the length of the whole string
+ * @return training number if found, else -1
+ */
+long trailing_strtoln_len(const char *str, const char *end, int *lenp);
+
+/**
  * panic() - Print a message and reset/hang
  *
  * Prints a message on the console(s) and then resets. If CONFIG_PANIC_HANG is

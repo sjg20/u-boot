@@ -201,18 +201,18 @@ void bootdev_list(bool probe)
 
 int bootdev_setup_for_dev(struct udevice *parent, const char *drv_name)
 {
-	struct udevice *bm;
+	struct udevice *bdev;
 	int ret;
 
 	ret = device_find_first_child_by_uclass(parent, UCLASS_BOOTDEV,
-						&bm);
+						&bdev);
 	if (ret) {
 		if (ret != -ENODEV) {
 			log_debug("Cannot access bootdev device\n");
 			return ret;
 		}
 
-		ret = bootdev_bind(parent, drv_name, "bootdev", &bm);
+		ret = bootdev_bind(parent, drv_name, "bootdev", &bdev);
 		if (ret) {
 			log_debug("Cannot create bootdev device\n");
 			return ret;

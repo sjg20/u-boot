@@ -296,7 +296,7 @@ static int bootdev_test_boot_targets(struct unit_test_state *uts)
 	struct bootflow bflow;
 
 	/* Change the order using the 'boot_targets' env var */
-	ut_assertok(env_set("boot_targets", "mmc2,mmc1"));
+	ut_assertok(env_set("boot_targets", "mmc2 mmc1"));
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
 	ut_asserteq(2, iter.num_devs);
 	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
