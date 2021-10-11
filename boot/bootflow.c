@@ -9,9 +9,11 @@
 #include <bootflow.h>
 #include <bootmeth.h>
 #include <dm.h>
+#include <env.h>
 #include <malloc.h>
 #include <sort.h>
 #include <dm/device-internal.h>
+#include <dm/uclass-internal.h>
 
 /* error codes used to signal running out of things */
 enum {
@@ -102,8 +104,8 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
 /**
  * h_cmp_bootdev() - Compare two bootdevs to find out which should go first
  *
- * @v1: struct udevice * of first device
- * @v2: struct udevice * of second device
+ * @v1: struct udevice * of first bootdev device
+ * @v2: struct udevice * of second bootdev device
  * @return sort order (<0 if dev1 < dev2, ==0 if equal, >0 if dev1 > dev2)
  */
 static int h_cmp_bootdev(const void *v1, const void *v2)
@@ -113,6 +115,8 @@ static int h_cmp_bootdev(const void *v1, const void *v2)
 	const struct bootdev_uc_plat *ucp1 = dev_get_uclass_plat(dev1);
 	const struct bootdev_uc_plat *ucp2 = dev_get_uclass_plat(dev2);
 
+	if (dev_seq(dev1) != dev_seq(dev2))
+		return dev_seq(dev1) - dev_seq(dev2);
 	return ucp1->prio - ucp2->prio;
 }
 
@@ -133,10 +137,10 @@ static int h_cmp_bootdev(const void *v1, const void *v2)
 static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 {
 	struct udevice *dev = *devp, **order;
-	struct uclass *uc;
+	const char *targets;
+	int upto, i;
 	int count;
 	int ret;
-	int i;
 
 	/* Handle scanning a single device */
 	if (dev) {
@@ -152,13 +156,28 @@ static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 	if (!order)
 		return log_msg_ret("order", -ENOMEM);
 
-	/* Get a list of bootdevs */
-	i = 0;
-	uclass_id_foreach_dev(UCLASS_BOOTDEV, dev, uc)
-		order[i++] = dev;
+	/*
+	 * Get a list of bootdevs, in seq order (i.e. using aliases). There may
+	 * be gaps so try to count up high enough to find them all.
+	 */
+	for (i = 0, upto = 0; upto < count && i < 20 + count * 2; i++) {
+		ret = uclass_find_device_by_seq(UCLASS_BOOTDEV, i, &dev);
+		if (!ret)
+			order[upto++] = dev;
+	}
+	if (upto != count)
+		log_warning("Expected %d bootdevs, found %d using aliases\n",
+			    count, upto);
+	count = upto;
 
-	/* sort them into priorty order */
-	qsort(order, count, sizeof(struct udevice *), h_cmp_bootdev);
+	targets = env_get("boot_targets");
+	if (targets) {
+		for (i = 0; i < count; i++)
+			printf("%s:seq=%d ", order[i]->name, dev_seq(order[i]));
+	} else {
+		/* sort them into priorty order */
+		qsort(order, count, sizeof(struct udevice *), h_cmp_bootdev);
+	}
 
 	iter->dev_order = order;
 	iter->num_devs = count;

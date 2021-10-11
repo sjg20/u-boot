@@ -257,18 +257,56 @@ static int bootdev_test_cmd_bootflow_boot(struct unit_test_state *uts)
 }
 BOOTDEV_TEST(bootdev_test_cmd_bootflow_boot, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
-/* Check we can get a bootdev */
-static int bootdev_test_get(struct unit_test_state *uts)
+/* Check bootdev ordering */
+static int bootdev_test_order(struct unit_test_state *uts)
 {
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
+	ut_asserteq(3, iter.num_devs);
+	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
+	ut_asserteq_str("mmc1.bootdev", iter.dev_order[1]->name);
+	ut_asserteq_str("mmc0.bootdev", iter.dev_order[2]->name);
+
+	/*
+	 * Check that adding aliases for the bootdevs works. We just fake it by
+	 * setting the sequence numbers directly.
+	 */
+	iter.dev_order[0]->seq_ = 0;
+	iter.dev_order[1]->seq_ = 3;
+	iter.dev_order[2]->seq_ = 2;
+	bootflow_iter_uninit(&iter);
+
+	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
+	ut_asserteq(3, iter.num_devs);
+	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
+	ut_asserteq_str("mmc0.bootdev", iter.dev_order[1]->name);
+	ut_asserteq_str("mmc1.bootdev", iter.dev_order[2]->name);
 	bootflow_iter_uninit(&iter);
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_get, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTDEV_TEST(bootdev_test_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+
+/* Check bootdev ordering using "boot_targets" */
+static int bootdev_test_boot_targets(struct unit_test_state *uts)
+{
+	struct bootflow_iter iter;
+	struct bootflow bflow;
+
+	/* Change the order using the 'boot_targets' env var */
+	ut_assertok(env_set("boot_targets", "mmc2,mmc1"));
+	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
+	ut_asserteq(2, iter.num_devs);
+	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
+	ut_asserteq_str("mmc1.bootdev", iter.dev_order[1]->name);
+	bootflow_iter_uninit(&iter);
+
+	return 0;
+}
+BOOTDEV_TEST(bootdev_test_boot_targets, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+
 
 int do_ut_bootdev(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
