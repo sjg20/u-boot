@@ -79,3 +79,22 @@
 	u-boot,dm-spl;
 };
 
+&prcm {
+	u-boot,dm-spl;
+};
+
+&prcm_clocks {
+	u-boot,dm-spl;
+};
+
+&timer1_fck {
+	u-boot,dm-spl;
+};
+
+&am33xx_pinmux {
+	u-boot,dm-spl;
+};
+
+&scm {
+	u-boot,dm-spl;
+};
