@@ -456,6 +456,26 @@ int ofnode_read_string_count(ofnode node, const char *property)
 	}
 }
 
+int ofnode_read_string_list(ofnode node, const char *property, char ***valp)
+{
+	char **prop;
+	int count;
+
+	count = ofnode_read_string_count(node, property);
+	if (count < 0)
+		return count;
+
+	prop = calloc(count + 1, sizeof(char *));
+	if (!prop)
+		return NULL;
+	if (ofnode_is_np(node)) {
+		return of_property_count_strings(ofnode_to_np(node), property);
+	} else {
+		return fdt_stringlist_count(gd->fdt_blob,
+					    ofnode_to_offset(node), property);
+	}
+}
+
 static void ofnode_from_fdtdec_phandle_args(struct fdtdec_phandle_args *in,
 					    struct ofnode_phandle_args *out)
 {

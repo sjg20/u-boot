@@ -359,6 +359,22 @@ int dev_read_string_index(const struct udevice *dev, const char *propname,
  *   number of strings in the list, or -ve error value if not found
  */
 int dev_read_string_count(const struct udevice *dev, const char *propname);
+
+/**
+ * dev_read_string_list() - read a list of strings
+ *
+ * This produces a list of string pointers with each one pointing to a string
+ * in the string list. If the property does not exist, it returns {NULL}.
+ *
+ * The data is allocated and the caller is reponsible for freeing the return
+ * value.
+ *
+ * @dev: device to examine
+ * @propname: name of the property containing the string list
+ * @return: NULL-terminated list of strings (maybe empty if no property)
+ */
+char **dev_read_string_list(const struct udevice *dev, const char *property);
+
 /**
  * dev_read_phandle_with_args() - Find a node pointed by phandle in a list
  *
@@ -886,6 +902,12 @@ static inline int dev_read_string_count(const struct udevice *dev,
 					const char *propname)
 {
 	return ofnode_read_string_count(dev_ofnode(dev), propname);
+}
+
+static inline int dev_read_string_list(const struct udevice *dev,
+				       const char *propname)
+{
+	return ofnode_read_string_list(dev_ofnode(dev), propname);
 }
 
 static inline int dev_read_phandle_with_args(const struct udevice *dev,

@@ -39,6 +39,7 @@ enum uclass_id {
 	UCLASS_BLK,		/* Block device */
 	UCLASS_BOOTCOUNT,       /* Bootcount backing store */
 	UCLASS_BOOTDEV,		/* Bootdev for locating an OS to boot */
+	UCLASS_BOOTSTD,		/* Standard boot driver */
 	UCLASS_BOOTMETH,	/* Bootmethod for booting an OS */
 	UCLASS_BUTTON,		/* Button */
 	UCLASS_CACHE,		/* Cache controller */

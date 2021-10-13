@@ -610,6 +610,21 @@ int ofnode_read_string_index(ofnode node, const char *propname, int index,
 int ofnode_read_string_count(ofnode node, const char *property);
 
 /**
+ * ofnode_read_string_list() - read a list of strings
+ *
+ * This produces a list of string pointers with each one pointing to a string
+ * in the string list. If the property does not exist, it returns {NULL}.
+ *
+ * The data is allocated and the caller is reponsible for freeing the return
+ * value.
+ *
+ * @node: node to check
+ * @propname: name of the property containing the string list
+ * @return: NULL-terminated list of strings (maybe empty if no property)
+ */
+char **ofnode_read_string_list(ofnode node, const char *property);
+
+/**
  * ofnode_parse_phandle_with_args() - Find a node pointed by phandle in a list
  *
  * This function is useful to parse lists of phandles and their arguments.
