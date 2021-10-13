@@ -371,9 +371,12 @@ int dev_read_string_count(const struct udevice *dev, const char *propname);
  *
  * @dev: device to examine
  * @propname: name of the property containing the string list
- * @return: NULL-terminated list of strings (maybe empty if no property)
+ * @countp: if non-NULL, returns number of strings (0 if none, i.e. empty or no
+ *	property)
+ * @return: NULL-terminated list of strings (NULL if no property or empty)
  */
-char **dev_read_string_list(const struct udevice *dev, const char *property);
+char **dev_read_string_list(const struct udevice *dev, const char *property,
+			    int *countp);
 
 /**
  * dev_read_phandle_with_args() - Find a node pointed by phandle in a list
@@ -904,10 +907,10 @@ static inline int dev_read_string_count(const struct udevice *dev,
 	return ofnode_read_string_count(dev_ofnode(dev), propname);
 }
 
-static inline int dev_read_string_list(const struct udevice *dev,
-				       const char *propname)
+static inline char **dev_read_string_list(const struct udevice *dev,
+					  const char *property, int *countp)
 {
-	return ofnode_read_string_list(dev_ofnode(dev), propname);
+	return ofnode_read_string_list(dev_ofnode(dev), propname, countp);
 }
 
 static inline int dev_read_phandle_with_args(const struct udevice *dev,

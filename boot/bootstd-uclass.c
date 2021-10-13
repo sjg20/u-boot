@@ -15,8 +15,8 @@ static int bootstd_of_to_plat(struct udevice *dev)
 {
 	struct bootstd_plat *plat = dev_get_plat(dev);
 
-	plat->prefixes = dev_read_string_list(dev, "filename-prefixes");
-	plat->order = dev_read_string_list(dev, "bootmeth-order");
+	plat->prefixes = dev_read_string_list(dev, "filename-prefixes", NULL);
+	plat->order = dev_read_string_list(dev, "bootmeth-order", NULL);
 
 	return 0;
 }

@@ -620,9 +620,11 @@ int ofnode_read_string_count(ofnode node, const char *property);
  *
  * @node: node to check
  * @propname: name of the property containing the string list
- * @return: NULL-terminated list of strings (maybe empty if no property)
+ * @countp: if non-NULL, returns number of strings (0 if none, i.e. empty or no
+ *	property)
+ * @return: NULL-terminated list of strings (NULL if no property or empty)
  */
-char **ofnode_read_string_list(ofnode node, const char *property);
+char **ofnode_read_string_list(ofnode node, const char *property, int *countp);
 
 /**
  * ofnode_parse_phandle_with_args() - Find a node pointed by phandle in a list
