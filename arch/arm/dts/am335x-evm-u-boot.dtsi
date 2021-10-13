@@ -5,6 +5,12 @@
 
 #include "am33xx-u-boot.dtsi"
 
+/ {
+	chosen {
+		stdout-path = &uart0;
+	};
+};
+
 &l4_per {
 
 	segment@300000 {
@@ -17,6 +23,30 @@
 			};
 		};
 	};
+};
+
+&uart0 {
+	u-boot,dm-spl;
+};
+
+&uart0_pins {
+	u-boot,dm-spl;
+};
+
+&i2c0 {
+	u-boot,dm-spl;
+};
+
+&i2c0_pins {
+	u-boot,dm-spl;
+};
+
+&mmc1 {
+	u-boot,dm-spl;
+};
+
+&mmc1_pins {
+	u-boot,dm-spl;
 };
 
 &mmc3 {

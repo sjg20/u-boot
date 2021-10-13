@@ -81,7 +81,9 @@ static void serial_find_console_or_panic(void)
 	int ret;
 #endif
 
+	puts("in serial_find_console_or_panic\n");
 	if (CONFIG_IS_ENABLED(OF_PLATDATA)) {
+		puts("platdata case\n");
 		uclass_first_device(UCLASS_SERIAL, &dev);
 		if (dev) {
 			gd->cur_serial_dev = dev;
@@ -89,17 +91,22 @@ static void serial_find_console_or_panic(void)
 		}
 	} else if (CONFIG_IS_ENABLED(OF_CONTROL) && blob) {
 		/* Live tree has support for stdout */
+		puts("of control case\n");
 		if (of_live_active()) {
+			puts("of_live_active is true\n");
 			struct device_node *np = of_get_stdout();
 
 			if (np && !uclass_get_device_by_ofnode(UCLASS_SERIAL,
 					np_to_ofnode(np), &dev)) {
 				gd->cur_serial_dev = dev;
+				puts("Found one\n");
 				return;
 			}
 		} else {
+			puts("of_live_active is false\n");
 			if (!serial_check_stdout(blob, &dev)) {
 				gd->cur_serial_dev = dev;
+				puts("Found one\n");
 				return;
 			}
 		}
@@ -150,6 +157,7 @@ static void serial_find_console_or_panic(void)
 #undef INDEX
 	}
 
+	puts("none case");
 #ifdef CONFIG_REQUIRE_SERIAL_CONSOLE
 	panic_str("No serial driver found");
 #endif
@@ -159,10 +167,11 @@ static void serial_find_console_or_panic(void)
 /* Called prior to relocation */
 int serial_init(void)
 {
+	puts("serial_init in\n");
 #if CONFIG_IS_ENABLED(SERIAL_PRESENT)
 	serial_find_console_or_panic();
-	gd->flags |= GD_FLG_SERIAL_READY;
-	serial_setbrg();
+	//gd->flags |= GD_FLG_SERIAL_READY;
+	//serial_setbrg();
 #endif
 
 	return 0;
