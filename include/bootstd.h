@@ -8,15 +8,15 @@
 #define __bootstd_h
 
 /**
- * struct bootstd_plat - plat data for the bootstd driver
+ * struct bootstd_priv - priv data for the bootstd driver
  *
  * @prefixes: NULL-terminated list of prefixes to use for bootflow filenames,
- *	e.g. "/", "/boot/"
- * @order: Order to use for bootdevs, e.g. "mmc2", "mmc1"
+ *	e.g. "/", "/boot/"; NULL if none
+ * @order: Order to use for bootdevs, e.g. "mmc2", "mmc1"; NULL if none
  */
-struct bootstd_plat {
-	char **prefixes;
-	char **order;
+struct bootstd_priv {
+	char *const *prefixes;
+	char *const *order;
 };
 
 #endif

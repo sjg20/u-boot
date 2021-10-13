@@ -13,10 +13,15 @@
 
 static int bootstd_of_to_plat(struct udevice *dev)
 {
-	struct bootstd_plat *plat = dev_get_plat(dev);
+	struct bootstd_priv *priv = dev_get_priv(dev);
+	int ret;
 
-	plat->prefixes = dev_read_string_list(dev, "filename-prefixes", NULL);
-	plat->order = dev_read_string_list(dev, "bootmeth-order", NULL);
+	ret = dev_read_string_list(dev, "filename-prefixes", &priv->prefixes);
+	if (ret && ret != -ENOENT)
+		return log_msg_ret("fname", ret);
+	ret = dev_read_string_list(dev, "bootmeth-order", &priv->order);
+	if (ret && ret != -ENOENT)
+		return log_msg_ret("order", ret);
 
 	return 0;
 }
@@ -31,7 +36,7 @@ U_BOOT_DRIVER(bootstd_drv) = {
 	.name		= "bootstd_drv",
 	.of_to_plat	= bootstd_of_to_plat,
 	.of_match	= bootstd_ids,
-	.plat_auto	= sizeof(struct bootstd_plat),
+	.priv_auto	= sizeof(struct bootstd_priv),
 };
 
 UCLASS_DRIVER(bootstd) = {

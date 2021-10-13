@@ -456,24 +456,30 @@ int ofnode_read_string_count(ofnode node, const char *property)
 	}
 }
 
-char **ofnode_read_string_list(ofnode node, const char *property, int *countp)
+int ofnode_read_string_list(ofnode node, const char *property,
+			    char *const **listp)
 {
-	char **prop;
+	const char **prop;
 	int count;
+	int i;
 
+	*listp = NULL;
 	count = ofnode_read_string_count(node, property);
 	if (count < 0)
-		return NULL;
+		return count;
+	if (!count)
+		return 0;
 
 	prop = calloc(count + 1, sizeof(char *));
 	if (!prop)
-		return NULL;
-	if (ofnode_is_np(node)) {
-		return of_property_count_strings(ofnode_to_np(node), property);
-	} else {
-		return fdt_stringlist_count(gd->fdt_blob,
-					    ofnode_to_offset(node), property);
-	}
+		return -ENOMEM;
+
+	for (i = 0; i < count; i++)
+		ofnode_read_string_index(node, property, i, &prop[i]);
+	prop[i] = NULL;
+	*listp = prop;
+
+	return count;
 }
 
 static void ofnode_from_fdtdec_phandle_args(struct fdtdec_phandle_args *in,
