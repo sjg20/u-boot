@@ -59,4 +59,23 @@
 
 &l4_wkup {
 	u-boot,dm-spl;
+	segment@200000 {
+		u-boot,dm-spl;
+		target-module@0 {
+			u-boot,dm-spl;
+		};
+		target-module@9000 {
+			u-boot,dm-spl;
+		};
+	};
+
 };
+
+&am33xx_pinmux {
+	u-boot,dm-spl;
+};
+
+&scm {
+	u-boot,dm-spl;
+};
+
