@@ -19,4 +19,6 @@ struct bootstd_priv {
 	char *const *order;
 };
 
+char *const *bootstd_get_order(struct udevice *dev);
+
 #endif

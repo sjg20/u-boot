@@ -26,6 +26,21 @@ static int bootstd_of_to_plat(struct udevice *dev)
 	return 0;
 }
 
+static int bootstd_remove(struct udevice *dev)
+{
+	struct bootstd_priv *priv = dev_get_priv(dev);
+
+	free(priv->prefixes);
+	free(priv->order);
+}
+
+char *const *bootstd_get_order(struct udevice *dev)
+{
+	struct bootstd_priv *priv = dev_get_priv(dev);
+
+	return priv->order;
+}
+
 static const struct udevice_id bootstd_ids[] = {
 	{ .compatible = "u-boot,boot-standard" },
 	{ }
@@ -35,6 +50,7 @@ U_BOOT_DRIVER(bootstd_drv) = {
 	.id		= UCLASS_BOOTSTD,
 	.name		= "bootstd_drv",
 	.of_to_plat	= bootstd_of_to_plat,
+	.remove		= bootstd_remove,
 	.of_match	= bootstd_ids,
 	.priv_auto	= sizeof(struct bootstd_priv),
 };

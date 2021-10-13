@@ -8,6 +8,7 @@
 #include <bootdev.h>
 #include <bootflow.h>
 #include <bootmeth.h>
+#include <bootstd.h>
 #include <dm.h>
 #include <env.h>
 #include <malloc.h>
@@ -185,11 +186,15 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
  */
 static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 {
-	struct udevice *dev = *devp, **order;
-	const char *targets;
+	struct udevice *bootstd, *dev = *devp, **order;
+	char *const *targets;
 	int upto, i;
 	int count;
 	int ret;
+
+	ret = uclass_first_device_err(UCLASS_BOOTSTD, &bootstd);
+	if (ret)
+		return log_msg_ret("std", ret);
 
 	/* Handle scanning a single device */
 	if (dev) {
@@ -219,18 +224,10 @@ static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 			    count, upto);
 	count = upto;
 
-	targets = env_get("boot_targets");
-	if (targets) {
-		char *target;
-		char *str;
-
-		/* make a copy of the string, since strok() will change it */
-		str = strdup(targets);
-		if (!str)
-			return log_msg_ret("dup", -ENOMEM);
-		for (i = 0, target = strtok(str, " "); target;
-		     target = strtok(NULL, " ")) {
-			ret = find_bootdev_by_target(target, &dev);
+	target = bootstd_get_order(bootstd);
+	if (target) {
+		for (i = 0; target[i]; i++) {
+			ret = find_bootdev_by_target(target[i], &dev);
 			if (!ret) {
 				if (i == count) {
 					log_warning("Expected at most %d bootdevs, but overflowed with boot_target '%s'\n",
