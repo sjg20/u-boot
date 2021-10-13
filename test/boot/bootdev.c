@@ -130,6 +130,7 @@ BOOTDEV_TEST(bootdev_test_cmd_bootflow_glob, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 static int bootdev_test_cmd_bootflow_scan_e(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
+	ut_assertok(env_set("boot_targets", ""));
 	ut_assertok(run_command("bootflow scan -ale", 0));
 	ut_assert_nextline("Scanning for bootflows in all bootdevs");
 	ut_assert_nextline("Seq  Method       State   Uclass    Part  Name                      Filename");
@@ -263,6 +264,7 @@ static int bootdev_test_order(struct unit_test_state *uts)
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
+	ut_assertok(env_set("boot_targets", ""));
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
 	ut_asserteq(3, iter.num_devs);
 	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
@@ -289,19 +291,30 @@ static int bootdev_test_order(struct unit_test_state *uts)
 }
 BOOTDEV_TEST(bootdev_test_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
-/* Check bootdev ordering using "boot_targets" */
-static int bootdev_test_boot_targets(struct unit_test_state *uts)
+static int do_boot_targets(struct unit_test_state *uts)
 {
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
-	/* Change the order using the 'boot_targets' env var */
-	ut_assertok(env_set("boot_targets", "mmc2 mmc1"));
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
 	ut_asserteq(2, iter.num_devs);
 	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
 	ut_asserteq_str("mmc1.bootdev", iter.dev_order[1]->name);
 	bootflow_iter_uninit(&iter);
+
+	return 0;
+}
+
+/* Check bootdev ordering using "boot_targets" */
+static int bootdev_test_boot_targets(struct unit_test_state *uts)
+{
+	int ret;
+
+	/* Change the order using the 'boot_targets' env var */
+	ut_assertok(env_set("boot_targets", "mmc2 mmc1"));
+	ret = do_boot_targets(uts);
+	ut_assertok(env_set("boot_targets", ""));
+	ut_assertok(ret);
 
 	return 0;
 }

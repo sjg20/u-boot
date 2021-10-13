@@ -241,8 +241,11 @@ static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 			}
 		}
 		count = i;
-
 		free(str);
+		if (!count) {
+			free(order);
+			return log_msg_ret("targ", -ENOMEM);
+		}
 	} else {
 		/* sort them into priorty order */
 		qsort(order, count, sizeof(struct udevice *), h_cmp_bootdev);
