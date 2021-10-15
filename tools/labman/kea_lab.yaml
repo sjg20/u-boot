@@ -391,8 +391,15 @@ sdwires:
     serial: da61
     symlink: sdwire15
     hub-port: *hube_1
-    mount-uuid: B7F8-3D1C  # TODO
+    mount-uuid: B7F8-3D1C
     mount-point: rpi3z_b_boot
+
+  sdwire16: &sdwire16
+    serial: da62
+    symlink: sdwire16
+    hub-port: *hubd_7
+    mount-uuid: CC94-AA32
+    mount-point: bbb_boot
 
 servos:
   svsamus: &servo_samus
@@ -613,6 +620,10 @@ uarts:
     type: usb-uart
     symlink: ttyusb_port20
     hub-port: *hubd_6
+  usbport21: &ttyusb_port21
+    type: usb-uart
+    symlink: ttyusb_port21
+    hub-port: *hubd_8
   portserver1: &portserver1
     type: portserver
     host: 192.168.4.23
@@ -1178,3 +1189,16 @@ duts:
       64-bit:
         target: rpi_3
         toolchain: aarch64
+
+  bbb:
+    desc: TI Beaglebone Black
+    console: *ttyusb_port21
+    bootdev: *sdwire16
+    power: *dli_second_port4
+    reset: *usbrelay3_port6
+    flash:
+      method: bbb
+    builds:
+      salmon:
+        target: am335x_boneblack_vboot
+        toolchain: armv7-a
