@@ -383,9 +383,16 @@ sdwires:
 
   sdwire14: &sdwire14
     serial: sdwireda7
-    symlink: sdwire13
+    symlink: sdwire14
     hub-port: *hube_6
     block-symlink: sdcard10
+
+  sdwire15: &sdwire15
+    serial: da61
+    symlink: sdwire15
+    hub-port: *hube_1
+    mount-uuid: B7F8-3D1C  # TODO
+    mount-point: rpi3z_b_boot
 
 servos:
   svsamus: &servo_samus
@@ -452,11 +459,12 @@ ykushs:
         port-number: 3
 
   ykush2: &ykush2
-    serial: YK19191
+    serial: YK19193  # old one broke: YK19191
     symlink: ykush2
     hub-port: *hube_10
     hub-power-port: *hube_7
     ports:
+      # Used for Edison
       port1: &ykush2_port1
         port-number: 1
       port2: &ykush2_port2
@@ -601,6 +609,10 @@ uarts:
     symlink: ttyusb_port19
     hub-port: *hube_5
     speed: 1500000
+  usbport20: &ttyusb_port20
+    type: usb-uart
+    symlink: ttyusb_port20
+    hub-port: *hubd_6
   portserver1: &portserver1
     type: portserver
     host: 192.168.4.23
@@ -729,8 +741,8 @@ usbrelays:
         port-number: 8
 
 duts:
-  rpi_3:
-    desc: Raspberry Pi 3b
+  rpi3:
+    desc: Raspberry Pi 3b Fedora 34
     console: *ttyusb_port1
     bootdev: *sdwire0
     power: *ykush0_port1
@@ -1144,3 +1156,25 @@ duts:
       bob:
         target: chromebook_coral
         toolchain: i386
+
+  rpi3z:  # Second rpi3
+    desc: Raspberry Pi 3b Fedora 31
+    console: *ttyusb_port20
+    bootdev: *sdwire15
+    power: *ykush2_port2
+    flash:
+      method: rpi
+    network:
+      method: ethernet
+      mac-address: b8:27:eb:b4:f9:02  # TODO
+    prompt: U-Boot>
+    username: pi
+    password: raspberry
+    builds:
+      32-bit:
+        default: yes
+        target: rpi_3_32b
+        toolchain: armv7-a
+      64-bit:
+        target: rpi_3
+        toolchain: aarch64
