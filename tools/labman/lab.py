@@ -117,8 +117,8 @@ class Lab:
         part_list = self._parts.get_list()
         part_dict = {part.name: part for part in part_list}
         if show == SHOW_ALL:
-            print('%15s  %s' % ('Name', 'Description'))
-            print('%15s  %s' % ('=' * 15, '=' * 30))
+            print('%15s  %10s  %s' % ('Name', 'Type', 'Description'))
+            print('%15s  %10s  %s' % ('=' * 15, '=' * 10, '=' * 30))
             for name in sorted(part_dict.keys()):
                 part_dict[name].show_line()
         elif show == SHOW_ONE:

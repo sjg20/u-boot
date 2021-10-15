@@ -73,7 +73,9 @@ class Part:
         pass
 
     def show_line(self):
-        print('%15s  %s' % (self.name, self.get_detail()))
+        # Drop the Part_ prefix from the clas name
+        print('%15s  %10s  %s' % (self.name, self.__class__.__name__[5:],
+                                  self.get_detail()))
 
     def show(self):
         print('Name: %s' % self.name)
