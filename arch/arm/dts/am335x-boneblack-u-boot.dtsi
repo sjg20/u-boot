@@ -81,6 +81,20 @@
 
 &prcm {
 	u-boot,dm-spl;
+	per-cm@0 {
+		u-boot,dm-spl;
+	};
+	wkup-cm@400 {
+		u-boot,dm-spl;
+	};
+};
+
+&l4_wkup_clkctrl {
+	u-boot,dm-spl;
+};
+
+&l3_clkctrl {
+	u-boot,dm-spl;
 };
 
 &prcm_clocks {

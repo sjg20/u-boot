@@ -86,3 +86,4 @@ CONFIG_USB_ETHER=y
 CONFIG_LZO=y
 CONFIG_OF_STDOUT_VIA_ALIAS=y
 CONFIG_OF_SPL_REMOVE_PROPS="pinctrl-0 pinctrl-names interrupt-parent interrupts"
+CONFIG_SPL_OF_TRANSLATE=y
