@@ -45,6 +45,9 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 	bool auto_seq = true;
 	void *ptr;
 
+	if (ofnode_valid(node))
+		printf("%s\n", ofnode_get_name(node));
+
 	if (CONFIG_IS_ENABLED(OF_PLATDATA_NO_BIND))
 		return -ENOSYS;
 
