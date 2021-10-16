@@ -134,7 +134,7 @@ static int h_cmp_bootdev(const void *v1, const void *v2)
  *	uclass, -ENOENT if no bootdev for that media has the sequence number
  *	(e.g. 2)
  */
-static int find_bootdev_by_target(char *target, struct udevice **devp)
+static int find_bootdev_by_target(const char *target, struct udevice **devp)
 {
 	struct udevice *media;
 	struct uclass *uc;
@@ -142,8 +142,7 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
 	int seq, len;
 
 	seq = trailing_strtoln_len(target, NULL, &len);
-	target[len] = '\0';
-	id = uclass_get_by_name(target);
+	id = uclass_get_by_name_len(target, len);
 	if (id == UCLASS_INVALID) {
 		log_warning("Unknown uclass '%s' in boot_targets\n", target);
 		return -EINVAL;
@@ -187,7 +186,7 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
 static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 {
 	struct udevice *bootstd, *dev = *devp, **order;
-	char **target;
+	const char **target;
 	int upto, i;
 	int count;
 	int ret;

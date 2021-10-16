@@ -377,7 +377,7 @@ int dev_read_string_count(const struct udevice *dev, const char *propname);
  *	-ENOENT if no such property
  */
 int dev_read_string_list(const struct udevice *dev, const char *propname,
-			 char ***listp);
+			 char const ***listp);
 
 /**
  * dev_read_phandle_with_args() - Find a node pointed by phandle in a list
