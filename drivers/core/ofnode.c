@@ -476,7 +476,7 @@ int ofnode_read_string_list(ofnode node, const char *property,
 
 	for (i = 0; i < count; i++)
 		ofnode_read_string_index(node, property, i, &prop[i]);
-	prop[i] = NULL;
+	prop[count] = NULL;
 	*listp = prop;
 
 	return count;

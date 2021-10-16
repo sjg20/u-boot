@@ -26,8 +26,8 @@ struct sandbox_mmc_plat {
 #define SIZE_MULTIPLE		((1 << (MMC_CMULT + 2)) * MMC_BL_LEN)
 
 struct sandbox_mmc_priv {
-	int csize;	/* CSIZE value to report */
 	char *buf;
+	int csize;	/* CSIZE value to report */
 	int size;
 };
 
@@ -193,7 +193,9 @@ static int sandbox_mmc_remove(struct udevice *dev)
 	struct sandbox_mmc_plat *plat = dev_get_plat(dev);
 	struct sandbox_mmc_priv *priv = dev_get_priv(dev);
 
-	if (!plat->fname)
+	if (plat->fname)
+		os_unmap(priv->buf, priv->size);
+	else
 		free(priv->buf);
 
 	return 0;

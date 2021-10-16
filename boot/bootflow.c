@@ -218,6 +218,7 @@ static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 		if (!ret)
 			order[upto++] = dev;
 	}
+	log_debug("Found %d bootdevs\n", count);
 	if (upto != count)
 		log_warning("Expected %d bootdevs, found %d using aliases\n",
 			    count, upto);
@@ -237,7 +238,6 @@ static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 			}
 		}
 		count = i;
-		free(target);
 		if (!count) {
 			free(order);
 			return log_msg_ret("targ", -ENOMEM);
