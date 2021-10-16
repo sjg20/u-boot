@@ -616,7 +616,8 @@ int ofnode_read_string_count(ofnode node, const char *property);
  * in the string list. If the property does not exist, it returns {NULL}.
  *
  * The data is allocated and the caller is reponsible for freeing the return
- * value.
+ * value (the list of string pointers). The strings themselves may not be
+ * changed as they point directly into the devicetree property.
  *
  * @node: node to check
  * @listp: returns an allocated, NULL-terminated list of strings if the return
@@ -626,7 +627,7 @@ int ofnode_read_string_count(ofnode node, const char *property);
  * @return: NULL-terminated list of strings (NULL if no property or empty)
  */
 int ofnode_read_string_list(ofnode node, const char *property,
-			    char *const **listp);
+			    const char ***listp);
 
 /**
  * ofnode_parse_phandle_with_args() - Find a node pointed by phandle in a list

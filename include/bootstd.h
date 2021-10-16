@@ -15,8 +15,8 @@
  * @order: Order to use for bootdevs, e.g. "mmc2", "mmc1"; NULL if none
  */
 struct bootstd_priv {
-	char const **prefixes;
-	char const **order;
+	const char **prefixes;
+	const char **order;
 };
 
 const char **bootstd_get_order(struct udevice *dev);

@@ -457,7 +457,7 @@ int ofnode_read_string_count(ofnode node, const char *property)
 }
 
 int ofnode_read_string_list(ofnode node, const char *property,
-			    char *const **listp)
+			    const char ***listp)
 {
 	const char **prop;
 	int count;

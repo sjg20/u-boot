@@ -367,7 +367,8 @@ int dev_read_string_count(const struct udevice *dev, const char *propname);
  * in the string list. If the property does not exist, it returns {NULL}.
  *
  * The data is allocated and the caller is reponsible for freeing the return
- * value.
+ * value (the list of string pointers). The strings themselves may not be
+ * changed as they point directly into the devicetree property.
  *
  * @dev: device to examine
  * @propname: name of the property containing the string list
@@ -377,7 +378,7 @@ int dev_read_string_count(const struct udevice *dev, const char *propname);
  *	-ENOENT if no such property
  */
 int dev_read_string_list(const struct udevice *dev, const char *propname,
-			 char const ***listp);
+			 const char ***listp);
 
 /**
  * dev_read_phandle_with_args() - Find a node pointed by phandle in a list
