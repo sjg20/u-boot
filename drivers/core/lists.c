@@ -92,7 +92,6 @@ static int bind_drivers_pass(struct udevice *parent, bool pre_reloc_only)
 				par = parent_drt->dev;
 			}
 		}
-		printf("entry %s\n", info->name);
 		ret = device_bind_by_name(par, pre_reloc_only, entry, &dev);
 		if (!ret) {
 			if (CONFIG_IS_ENABLED(OF_PLATDATA))

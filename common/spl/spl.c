@@ -497,7 +497,6 @@ static int spl_common_init(bool setup_malloc)
 			return ret;
 		}
 	}
-	printf("%d\n", __LINE__);
 	if (CONFIG_IS_ENABLED(DM)) {
 		bootstage_start(BOOTSTAGE_ID_ACCUM_DM_SPL,
 				spl_phase() == PHASE_TPL ? "dm tpl" : "dm_spl");
@@ -509,7 +508,6 @@ static int spl_common_init(bool setup_malloc)
 			return ret;
 		}
 	}
-	printf("%d\n", __LINE__);
 
 	return 0;
 }

@@ -33,7 +33,6 @@ static int serial_check_stdout(const void *blob, struct udevice **devp)
 	int node = -1;
 	const char *str, *p, *name;
 	int namelen;
-	int ret;
 
 	/* Check for a chosen console */
 	str = fdtdec_get_chosen_prop(blob, "stdout-path");
@@ -58,12 +57,7 @@ static int serial_check_stdout(const void *blob, struct udevice **devp)
 
 	if (node < 0)
 		node = fdt_path_offset(blob, "console");
-	printf("node %d\n", node);
-
-	dm_dump_all();
-	ret = uclass_get_device_by_of_offset(UCLASS_SERIAL, node, devp);
-	printf("err %d\n", ret);
-	if (!ret)
+	if (!uclass_get_device_by_of_offset(UCLASS_SERIAL, node, devp))
 		return 0;
 
 	/*
