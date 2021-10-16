@@ -9,6 +9,7 @@
 #include <common.h>
 #include <bootstd.h>
 #include <dm.h>
+#include <malloc.h>
 #include <dm/read.h>
 
 static int bootstd_of_to_plat(struct udevice *dev)
@@ -32,9 +33,11 @@ static int bootstd_remove(struct udevice *dev)
 
 	free(priv->prefixes);
 	free(priv->order);
+
+	return 0;
 }
 
-char *const *bootstd_get_order(struct udevice *dev)
+char **bootstd_get_order(struct udevice *dev)
 {
 	struct bootstd_priv *priv = dev_get_priv(dev);
 

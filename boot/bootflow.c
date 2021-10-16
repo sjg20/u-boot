@@ -187,7 +187,7 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
 static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 {
 	struct udevice *bootstd, *dev = *devp, **order;
-	char *const *targets;
+	char **target;
 	int upto, i;
 	int count;
 	int ret;
@@ -231,14 +231,14 @@ static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 			if (!ret) {
 				if (i == count) {
 					log_warning("Expected at most %d bootdevs, but overflowed with boot_target '%s'\n",
-						    count, target);
+						    count, target[i]);
 					break;
 				}
 				order[i++] = dev;
 			}
 		}
 		count = i;
-		free(str);
+		free(target);
 		if (!count) {
 			free(order);
 			return log_msg_ret("targ", -ENOMEM);
