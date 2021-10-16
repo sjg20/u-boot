@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <bootstd.h>
 #include <dm.h>
 #include <bootdev.h>
 #include <bootflow.h>
@@ -16,6 +17,19 @@
 /* Declare a new bootdev test */
 #define BOOTDEV_TEST(_name, _flags) \
 		UNIT_TEST(_name, _flags, bootdev_test)
+
+/* Drop the boot order so that all bootdevs are used in their alias order */
+static int drop_boot_order(struct unit_test_state *uts)
+{
+	struct bootstd_priv *priv;
+	struct udevice *bootstd;
+
+	ut_assertok(uclass_first_device_err(UCLASS_BOOTSTD, &bootstd));
+	priv = dev_get_priv(bootstd);
+	priv->order = NULL;
+
+	return 0;
+}
 
 /* Check 'bootdev list' command */
 static int bootdev_test_cmd_list(struct unit_test_state *uts)
@@ -99,6 +113,8 @@ BOOTDEV_TEST(bootdev_test_cmd_bootflow, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check 'bootflow scan/list' commands using all bootdevs */
 static int bootdev_test_cmd_bootflow_glob(struct unit_test_state *uts)
 {
+	ut_assertok(drop_boot_order(uts));
+
 	console_record_reset_enable();
 	ut_assertok(run_command("bootflow scan -l", 0));
 	ut_assert_nextline("Scanning for bootflows in all bootdevs");
@@ -129,6 +145,8 @@ BOOTDEV_TEST(bootdev_test_cmd_bootflow_glob, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check 'bootflow scan -e' */
 static int bootdev_test_cmd_bootflow_scan_e(struct unit_test_state *uts)
 {
+	ut_assertok(drop_boot_order(uts));
+
 	console_record_reset_enable();
 	ut_assertok(env_set("boot_targets", ""));
 	ut_assertok(run_command("bootflow scan -ale", 0));
@@ -264,7 +282,8 @@ static int bootdev_test_order(struct unit_test_state *uts)
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
-	ut_assertok(env_set("boot_targets", ""));
+	ut_assertok(drop_boot_order(uts));
+
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
 	ut_asserteq(3, iter.num_devs);
 	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
