@@ -129,7 +129,7 @@ class Part_uart(Part):
             'symlink': self._symlink,
             }
         out = '''# {name}
-ACTION=="add" \\
+ACTION=="add|bind" \\
 , KERNEL=="ttyUSB*" \\
 , SUBSYSTEM=="tty" \\
 , KERNELS=="{kernel_phys_port}" \\
