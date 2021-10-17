@@ -87,6 +87,7 @@ void bootflow_iter_init(struct bootflow_iter *iter, int flags)
 void bootflow_iter_uninit(struct bootflow_iter *iter)
 {
 	free(iter->dev_order);
+	free(iter->method_order);
 }
 
 static void bootflow_iter_set_dev(struct bootflow_iter *iter,
@@ -136,7 +137,8 @@ static int h_cmp_bootdev(const void *v1, const void *v2)
  * @return 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
  *	on other error
  */
-static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
+static int setup_bootdev_order(struct bootflow_iter *iter,
+			       struct udevice **devp)
 {
 	struct udevice *bootstd, *dev = *devp, **order;
 	const char *const *labels;
@@ -214,6 +216,67 @@ static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 }
 
 /**
+ * setup_bootmeth_order() - Set up the ordering of bootmeths to scan
+ *
+ * This sets up the ordering information in @iter, based on the selected
+ * ordering of the bootmethds in bootdev_state->bootmeth_order. If there is no
+ * ordering there, then all bootmethods are added
+ *
+ * @iter: Iterator to update with the order
+ * @return 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
+ *	on other error
+ */
+static int setup_bootmeth_order(struct bootflow_iter *iter)
+{
+	struct bootdev_state *state;
+	struct udevice **order;
+	int count;
+	int ret;
+
+	ret = bootdev_get_state(&state);
+	if (ret)
+		return ret;
+
+	/* Create an array large enough */
+	count = state->bootmeth_count ? state->bootmeth_count :
+		uclass_id_count(UCLASS_BOOTMETH);
+	if (!count)
+		return log_msg_ret("count", -ENOENT);
+
+	order = calloc(count, sizeof(struct udevice *));
+	if (!order)
+		return log_msg_ret("order", -ENOMEM);
+
+	/* If we have an ordering, copy it */
+	if (state->bootmeth_count) {
+		memcpy(order, state->bootmeth_order,
+		       count * sizeof(struct bootmeth *));
+	} else {
+		struct udevice *dev;
+		int i, upto;
+
+		/*
+		 * Get a list of bootmethods, in seq order (i.e. using aliases).
+		 * There may be gaps so try to count up high enough to find them
+		 * all.
+		 */
+		for (i = 0, upto = 0; upto < count && i < 20 + count * 2; i++) {
+			ret = uclass_get_device_by_seq(UCLASS_BOOTMETH, i,
+						       &dev);
+			if (!ret)
+				order[upto++] = dev;
+		}
+		count = upto;
+	}
+
+	iter->method_order = order;
+	iter->num_methods = count;
+	iter->cur_method = 0;
+
+	return 0;
+}
+
+/**
  * iter_incr() - Move to the next item (method, part, bootdev)
  *
  * @return 0 if OK, BF_NO_MORE_DEVICES if there are no more bootdevs
@@ -228,15 +291,17 @@ static int iter_incr(struct bootflow_iter *iter)
 
 	if (iter->err != BF_NO_MORE_PARTS && iter->err != BF_NO_MORE_METHODS) {
 		/* Get the next boothmethod */
-		ret = uclass_next_device_err(&iter->method);
-		if (!ret)
+		iter->method = iter->method_order[++iter->cur_method];
+
+		if (++iter->cur_method < iter->num_methods) {
+			iter->method = iter->method_order[iter->cur_method];
 			return 0;
+		}
 	}
 
 	/* No more bootmeths; start at the first one, and... */
-	ret = uclass_first_device_err(UCLASS_BOOTMETH, &iter->method);
-	if (ret)  /* should not happen, but just in case */
-		return BF_NO_MORE_DEVICES;
+	iter->cur_method = 0;
+	iter->method = iter->method_order[iter->cur_method];
 
 	if (iter->err != BF_NO_MORE_PARTS) {
 		/* ...select next partition  */
@@ -321,15 +386,17 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 
 	bootflow_iter_init(iter, flags);
 
-	ret = setup_order(iter, &dev);
+	ret = setup_bootdev_order(iter, &dev);
 	if (ret)
-		return log_msg_ret("order", -ENODEV);
+		return log_msg_ret("obdev", -ENODEV);
 	bootflow_iter_set_dev(iter, dev);
 
-	/* Find the first bootmeth (there must be at least one!) */
-	ret = uclass_first_device_err(UCLASS_BOOTMETH, &iter->method);
+	ret = setup_bootmeth_order(iter);
 	if (ret)
-		return log_msg_ret("meth", -ENODEV);
+		return log_msg_ret("obmeth", -ENODEV);
+
+	/* Find the first bootmeth (there must be at least one!) */
+	iter->method = iter->method_order[iter->cur_method];
 
 	ret = bootflow_check(iter, bflow);
 	if (ret) {

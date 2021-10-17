@@ -7,46 +7,123 @@
  */
 
 #include <common.h>
+#include <bootdev.h>
 #include <bootmeth.h>
 #include <command.h>
 #include <dm.h>
+#include <malloc.h>
 #include <dm/uclass-internal.h>
 
 static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])
 {
+	struct bootdev_state *state;
 	struct udevice *dev;
+	bool use_order;
+	bool all;
 	int ret;
 	int i;
 
-	printf("Seq  Name                Description\n");
-	printf("---  ------------------  ------------------\n");
-	ret = uclass_find_first_device(UCLASS_BOOTMETH, &dev);
-	for (i = 0; dev; i++) {
+	if (argc > 1 && *argv[1] == '-') {
+		all = strchr(argv[1], 'a');
+		argc--;
+		argv++;
+	}
+
+	ret = bootdev_get_state(&state);
+	if (ret)
+		return ret;
+
+	printf("Order  Seq  Name                Description\n");
+	printf("-----  ---  ------------------  ------------------\n");
+
+	use_order = state->bootmeth_count;
+	if (use_order)
+		dev = state->bootmeth_order[0];
+	else
+		ret = uclass_find_first_device(UCLASS_BOOTMETH, &dev);
+
+	for (i = 0; dev;) {
 		struct bootmeth_uc_plat *ucp = dev_get_uclass_plat(dev);
 
-		printf("%3x  %-19.19s %s\n", dev_seq(dev), dev->name,
+		printf("%5x  %3x  %-19.19s %s\n", i, dev_seq(dev), dev->name,
 		       ucp->desc);
-		ret = uclass_find_next_device(&dev);
+		i++;
+		if (use_order)
+			dev = state->bootmeth_order[i];
+		else
+			uclass_find_next_device(&dev);
 	}
-	printf("---  ------------------  ------------------\n");
+	printf("-----  ---  ------------------  ------------------\n");
 	printf("(%d bootmeth%s)\n", i, i != 1 ? "s" : "");
 
 	return 0;
 }
 
-static int do_bootmeth_allow(struct cmd_tbl *cmdtp, int flag, int argc,
+static int bootmeth_select_order(int argc, char *const argv[])
+{
+	struct bootdev_state *state;
+	struct udevice **order;
+	int count, ret, i;
+
+	ret = bootdev_get_state(&state);
+	if (ret)
+		return ret;
+
+	if (!argc) {
+		free(state->bootmeth_order);
+		state->bootmeth_order = NULL;
+		state->bootmeth_count = 0;
+		return 0;
+	}
+
+	/* Create an array large enough */
+	count = uclass_id_count(UCLASS_BOOTMETH);
+	if (!count)
+		return log_msg_ret("count", -ENOENT);
+
+	order = calloc(max(argc, count) + 1, sizeof(struct udevice *));
+	if (!order)
+		return log_msg_ret("order", -ENOMEM);
+
+	for (i = 0; i < argc; i++) {
+		struct udevice *dev;
+
+		ret = uclass_find_device_by_name(UCLASS_BOOTMETH, argv[i],
+						 &dev);
+		if (ret) {
+			printf("Unknown bootmeth '%s'\n", argv[i]);
+			free(order);
+			return ret;
+		}
+		order[i] = dev;
+	}
+	order[i] = NULL;
+	free(state->bootmeth_order);
+	state->bootmeth_order = order;
+	state->bootmeth_count = i;
+
+	return 0;
+}
+
+static int do_bootmeth_order(struct cmd_tbl *cmdtp, int flag, int argc,
 			     char *const argv[])
 {
+	int ret;
+
+	ret = bootmeth_select_order(argc - 1, argv + 1);
+	if (ret)
+		return CMD_RET_FAILURE;
+
 	return 0;
 }
 
 #ifdef CONFIG_SYS_LONGHELP
 static char bootmeth_help_text[] =
 	"list [-a]     - list available bootmeths (-a all)\n"
-	"bootmeth allow [<bd>]  - select bootmeths to be used for booting";
+	"bootmeth order [<bd> ...]  - select bootmeth order / subset to use";
 #endif
 
 U_BOOT_CMD_WITH_SUBCMDS(bootmeth, "Boot methods", bootmeth_help_text,
 	U_BOOT_SUBCMD_MKENT(list, 2, 1, do_bootmeth_list),
-	U_BOOT_SUBCMD_MKENT(allow, 2, 1, do_bootmeth_allow));
+	U_BOOT_SUBCMD_MKENT(order, CONFIG_SYS_MAXARGS, 1, do_bootmeth_order));

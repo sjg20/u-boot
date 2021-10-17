@@ -23,11 +23,15 @@ struct udevice;
  * @cur_bootdev: Currently selected bootdev (for commands)
  * @cur_bootflow: Currently selected bootflow (for commands)
  * @glob_head: Head for the global list of all bootdevs across all bootflows
+ * @bootmeth_count: Number of bootmeth devices in @bootmeth_order
+ * @bootmeth_order: List of bootmeth devices to use, in order, NULL-terminated
  */
 struct bootdev_state {
 	struct udevice *cur_bootdev;
 	struct bootflow *cur_bootflow;
 	struct list_head glob_head;
+	int bootmeth_count;
+	struct udevice **bootmeth_order;
 };
 
 /**

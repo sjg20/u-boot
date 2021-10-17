@@ -112,6 +112,9 @@ enum bootflow_flags_t {
  * @cur_dev: Current bootdev number, an index into @dev_order[]
  * @dev_order: List of bootdevs to scan, in order of priority. The scan starts
  *	with the first one on the list
+ * @num_methods: Number of bootmeth devices in @method_order
+ * @cur_method: Current method number, an index into @method_order
+ * @method_order: List of bootmeth devices to use, in order
  */
 struct bootflow_iter {
 	int flags;
@@ -123,6 +126,9 @@ struct bootflow_iter {
 	int num_devs;
 	int cur_dev;
 	struct udevice **dev_order;
+	int num_methods;
+	int cur_method;
+	struct udevice **method_order;
 };
 
 /**
