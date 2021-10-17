@@ -194,6 +194,23 @@ int bootdev_first_bootflow(struct udevice *dev, struct bootflow **bflowp);
  */
 int bootdev_next_bootflow(struct bootflow **bflowp);
 
+/**
+ * bootdev_find_by_label() - Look up a bootdev by label
+ *
+ * Each bootdev has a label which contains the media-uclass name and a number,
+ * e.g. 'mmc2'. This looks up the label and returns the associated bootdev
+ *
+ * The lookup is performed based on the media device's sequence number. So for
+ * 'mmc2' this looks for a device in UCLASS_MMC with a dev_seq() of 2.
+ *
+ * @label: Label to look up (e.g. "mmc1" or "mmc0")
+ * @devp: Returns the bootdev device found, or NULL if none (note it does not
+ *	return the media device, but its bootdev child)
+ * @return 0 if OK, -EINVAL if the uclass is not supported by this board,
+ *	-ENOENT if there is no device with that number
+ */
+int bootdev_find_by_label(const char *label, struct udevice **devp);
+
 #if CONFIG_IS_ENABLED(BOOTDEV)
 /**
  * bootdev_setup_for_dev() - Bind a new bootdev device

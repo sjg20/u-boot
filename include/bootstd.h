@@ -12,7 +12,8 @@
  *
  * @prefixes: NULL-terminated list of prefixes to use for bootflow filenames,
  *	e.g. "/", "/boot/"; NULL if none
- * @order: Order to use for bootdevs, e.g. "mmc2", "mmc1"; NULL if none
+ * @order: Order to use for bootdevs (or NULL if none), with each item being a
+ * 	bootdev label, e.g. "mmc2", "mmc1";
  */
 struct bootstd_priv {
 	const char **prefixes;
@@ -24,10 +25,11 @@ struct bootstd_priv {
  *
  * This reads the boot order, e.g. {"mmc0", "mmc2", NULL}
  *
- * The list is alloced by the bootstd driver so should not be freed.
+ * The list is alloced by the bootstd driver so should not be freed. That is the
+ * ready for all the const stuff in the function signature
  *
  * @return list of string points, terminated by NULL; or NULL if no boot order
  */
-const char **bootstd_get_order(struct udevice *dev);
+const char *const *const bootstd_get_order(struct udevice *dev);
 
 #endif

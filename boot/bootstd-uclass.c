@@ -37,7 +37,7 @@ static int bootstd_remove(struct udevice *dev)
 	return 0;
 }
 
-const char **bootstd_get_order(struct udevice *dev)
+const char *const *const bootstd_get_order(struct udevice *dev)
 {
 	struct bootstd_priv *priv = dev_get_priv(dev);
 

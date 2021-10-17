@@ -122,54 +122,6 @@ static int h_cmp_bootdev(const void *v1, const void *v2)
 }
 
 /**
- * find_bootdev_by_target() - Convert a target string to a bootdev device
- *
- * Looks up a target name to find the associated bootdev. For example, if the
- * target name is "mmc2", this will find a bootdev for an mmc device whose
- * sequence number is 2.
- *
- * @target: Target string to convert, e.g. "mmc2"
- * @devp: Returns bootdev device corresponding to that boot target
- * @return 0 if OK, -EINVAL if the target name (e.g. "mmc") does not refer to a
- *	uclass, -ENOENT if no bootdev for that media has the sequence number
- *	(e.g. 2)
- */
-static int find_bootdev_by_target(const char *target, struct udevice **devp)
-{
-	struct udevice *media;
-	struct uclass *uc;
-	enum uclass_id id;
-	int seq, len;
-
-	seq = trailing_strtoln_len(target, NULL, &len);
-	id = uclass_get_by_name_len(target, len);
-	if (id == UCLASS_INVALID) {
-		log_warning("Unknown uclass '%s' in boot_targets\n", target);
-		return -EINVAL;
-	}
-
-	/* Iterate through devices in the media uclass (e.g. UCLASS_MMC) */
-	uclass_id_foreach_dev(id, media, uc) {
-		struct udevice *bdev;
-		int ret;
-
-		if (dev_seq(media) != seq)
-			continue;
-
-		ret = device_find_first_child_by_uclass(media, UCLASS_BOOTDEV,
-							&bdev);
-		if (!ret) {
-			*devp = bdev;
-			return 0;
-		}
-	}
-	log_warning("Unknown seq %d for uclass '%s' in boot_targets\n",
-		    seq, target);
-
-	return -ENOENT;
-}
-
-/**
  * setup_order() - Set up the ordering of bootdevs to scan
  *
  * This sets up the ordering information in @iter, based on the priority of each
@@ -186,7 +138,7 @@ static int find_bootdev_by_target(const char *target, struct udevice **devp)
 static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 {
 	struct udevice *bootstd, *dev = *devp, **order;
-	const char **target;
+	const char *const *labels;
 	int upto, i;
 	int count;
 	int ret;
@@ -224,14 +176,14 @@ static int setup_order(struct bootflow_iter *iter, struct udevice **devp)
 			    count, upto);
 	count = upto;
 
-	target = bootstd_get_order(bootstd);
-	if (target) {
-		for (i = 0; target[i]; i++) {
-			ret = find_bootdev_by_target(target[i], &dev);
+	labels = bootstd_get_order(bootstd);
+	if (labels) {
+		for (i = 0; labels[i]; i++) {
+			ret = bootdev_find_by_label(labels[i], &dev);
 			if (!ret) {
 				if (i == count) {
 					log_warning("Expected at most %d bootdevs, but overflowed with boot_target '%s'\n",
-						    count, target[i]);
+						    count, labels[i]);
 					break;
 				}
 				order[i++] = dev;
