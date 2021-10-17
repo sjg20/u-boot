@@ -20,7 +20,7 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 	struct bootdev_state *state;
 	struct udevice *dev;
 	bool use_order;
-	bool all;
+	bool all = false;
 	int ret;
 	int i;
 
@@ -37,7 +37,11 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 	printf("Order  Seq  Name                Description\n");
 	printf("-----  ---  ------------------  ------------------\n");
 
-	use_order = state->bootmeth_count;
+	/*
+	 * Use the ordering if we have one, so long as we are not trying to list
+	 * all bootmethds
+	 */
+	use_order = state->bootmeth_count && !all;
 	if (use_order)
 		dev = state->bootmeth_order[0];
 	else
@@ -45,8 +49,28 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	for (i = 0; dev;) {
 		struct bootmeth_uc_plat *ucp = dev_get_uclass_plat(dev);
+		int order = i;
 
-		printf("%5x  %3x  %-19.19s %s\n", i, dev_seq(dev), dev->name,
+		/*
+		 * With the -a flag we may list bootdevs that are not in the
+		 * ordering. Find their place in the order
+		 */
+		if (all && state->bootmeth_count) {
+			int j;
+
+			/* Find the position of this bootmeth in the order */
+			order = -1;
+			for (j = 0; j < state->bootmeth_count; j++) {
+				if (state->bootmeth_order[j] == dev)
+					order = j;
+			}
+		}
+
+		if (order == -1)
+			printf("%5s", "-");
+		else
+			printf("%5x", order);
+		printf("  %3x  %-19.19s %s\n", dev_seq(dev), dev->name,
 		       ucp->desc);
 		i++;
 		if (use_order)

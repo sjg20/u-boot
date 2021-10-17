@@ -45,6 +45,28 @@ static int bootmeth_cmd_order(struct unit_test_state *uts)
 	ut_assert_nextline("(1 bootmeth)");
 	ut_assert_console_end();
 
+	/* Check the -a flag, efi should show as not in the order ("-") */
+	ut_assertok(run_command("bootmeth list -a", 0));
+	ut_assert_nextline("Order  Seq  Name                Description");
+	ut_assert_nextlinen("---");
+	ut_assert_nextline("    0    0  syslinux            Syslinux boot from a block device");
+	ut_assert_nextline("    -    1  efi                 EFI boot from a .efi file");
+	ut_assert_nextlinen("---");
+	ut_assert_nextline("(2 bootmeths)");
+	ut_assert_console_end();
+
+	/* Check the -a flag with the reverse order */
+	ut_assertok(run_command("bootmeth order efi syslinux", 0));
+	ut_assert_console_end();
+	ut_assertok(run_command("bootmeth list -a", 0));
+	ut_assert_nextline("Order  Seq  Name                Description");
+	ut_assert_nextlinen("---");
+	ut_assert_nextline("    1    0  syslinux            Syslinux boot from a block device");
+	ut_assert_nextline("    0    1  efi                 EFI boot from a .efi file");
+	ut_assert_nextlinen("---");
+	ut_assert_nextline("(2 bootmeths)");
+	ut_assert_console_end();
+
 	/* Now reset the order to empty, which should show all of them again */
 	ut_assertok(run_command("bootmeth order", 0));
 	ut_assert_console_end();
