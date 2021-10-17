@@ -43,7 +43,7 @@ static int do_bootmeth_allow(struct cmd_tbl *cmdtp, int flag, int argc,
 
 #ifdef CONFIG_SYS_LONGHELP
 static char bootmeth_help_text[] =
-	"list [-w]      - list all available bootmeths (-w only allowed)\n"
+	"list [-a]     - list available bootmeths (-a all)\n"
 	"bootmeth allow [<bd>]  - select bootmeths to be used for booting";
 #endif
 
