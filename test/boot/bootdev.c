@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
+ * Test for bootflow functions. All start with 'bootdev'
+ *
  * Copyright 2021 Google LLC
  * Written by Simon Glass <sjg@chromium.org>
  */
@@ -110,7 +112,7 @@ static int bootdev_test_cmd_select(struct unit_test_state *uts)
 BOOTDEV_TEST(bootdev_test_cmd_select, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow scan/list' commands */
-static int bootdev_test_cmd_bootflow(struct unit_test_state *uts)
+static int bootflow_cmd(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootdev select 1", 0));
@@ -135,10 +137,10 @@ static int bootdev_test_cmd_bootflow(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_cmd_bootflow, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTDEV_TEST(bootflow_cmd, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow scan' with a name / label / seq */
-static int bootdev_test_cmd_bootflow_label(struct unit_test_state *uts)
+static int bootflow_cmd_label(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootflow scan -l mmc1", 0));
@@ -158,10 +160,10 @@ static int bootdev_test_cmd_bootflow_label(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_cmd_bootflow_label, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTDEV_TEST(bootflow_cmd_label, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow scan/list' commands using all bootdevs */
-static int bootdev_test_cmd_bootflow_glob(struct unit_test_state *uts)
+static int bootflow_cmd_glob(struct unit_test_state *uts)
 {
 	ut_assertok(drop_boot_order(uts));
 
@@ -190,15 +192,14 @@ static int bootdev_test_cmd_bootflow_glob(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_cmd_bootflow_glob, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTDEV_TEST(bootflow_cmd_glob, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow scan -e' */
-static int bootdev_test_cmd_bootflow_scan_e(struct unit_test_state *uts)
+static int bootflow_cmd_scan_e(struct unit_test_state *uts)
 {
 	ut_assertok(drop_boot_order(uts));
 
 	console_record_reset_enable();
-	ut_assertok(env_set("boot_targets", ""));
 	ut_assertok(run_command("bootflow scan -ale", 0));
 	ut_assert_nextline("Scanning for bootflows in all bootdevs");
 	ut_assert_nextline("Seq  Method       State   Uclass    Part  Name                      Filename");
@@ -239,10 +240,10 @@ static int bootdev_test_cmd_bootflow_scan_e(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_cmd_bootflow_scan_e, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTDEV_TEST(bootflow_cmd_scan_e, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow info' */
-static int bootdev_test_cmd_bootflow_info(struct unit_test_state *uts)
+static int bootflow_cmd_info(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootdev select 1", 0));
@@ -277,10 +278,10 @@ static int bootdev_test_cmd_bootflow_info(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_cmd_bootflow_info, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTDEV_TEST(bootflow_cmd_info, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow scan -b' to boot the first available bootdev */
-static int bootdev_test_cmd_bootflow_scan_boot(struct unit_test_state *uts)
+static int bootflow_scan_boot(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootflow scan -b", 0));
@@ -297,11 +298,10 @@ static int bootdev_test_cmd_bootflow_scan_boot(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_cmd_bootflow_scan_boot,
-	     UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTDEV_TEST(bootflow_scan_boot, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow boot' to boot a selected bootflow */
-static int bootdev_test_cmd_bootflow_boot(struct unit_test_state *uts)
+static int bootflow_cmd_boot(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootdev select 1", 0));
@@ -324,7 +324,7 @@ static int bootdev_test_cmd_bootflow_boot(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_cmd_bootflow_boot, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTDEV_TEST(bootflow_cmd_boot, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check bootdev labels */
 static int bootdev_test_labels(struct unit_test_state *uts)
@@ -353,6 +353,12 @@ static int bootdev_test_order(struct unit_test_state *uts)
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
+	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
+	ut_asserteq(2, iter.num_devs);
+	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
+	ut_asserteq_str("mmc1.bootdev", iter.dev_order[1]->name);
+	bootflow_iter_uninit(&iter);
+
 	ut_assertok(drop_boot_order(uts));
 
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
@@ -380,36 +386,6 @@ static int bootdev_test_order(struct unit_test_state *uts)
 	return 0;
 }
 BOOTDEV_TEST(bootdev_test_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
-
-static int do_boot_targets(struct unit_test_state *uts)
-{
-	struct bootflow_iter iter;
-	struct bootflow bflow;
-
-	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
-	ut_asserteq(2, iter.num_devs);
-	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
-	ut_asserteq_str("mmc1.bootdev", iter.dev_order[1]->name);
-	bootflow_iter_uninit(&iter);
-
-	return 0;
-}
-
-/* Check bootdev ordering using "boot_targets" */
-static int bootdev_test_boot_targets(struct unit_test_state *uts)
-{
-	int ret;
-
-	/* Change the order using the 'boot_targets' env var */
-	ut_assertok(env_set("boot_targets", "mmc2 mmc1"));
-	ret = do_boot_targets(uts);
-	ut_assertok(env_set("boot_targets", ""));
-	ut_assertok(ret);
-
-	return 0;
-}
-BOOTDEV_TEST(bootdev_test_boot_targets, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
-
 
 int do_ut_bootdev(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {

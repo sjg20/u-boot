@@ -401,7 +401,7 @@ static char bootflow_help_text[] =
 	"bootflow boot                - boot current bootflow (or first available if none selected)";
 #endif
 
-U_BOOT_CMD_WITH_SUBCMDS(bootflow, "Bootflows", bootflow_help_text,
+U_BOOT_CMD_WITH_SUBCMDS(bootflow, "Boot flows", bootflow_help_text,
 	U_BOOT_SUBCMD_MKENT(scan, 3, 1, do_bootflow_scan),
 	U_BOOT_SUBCMD_MKENT(list, 2, 1, do_bootflow_list),
 	U_BOOT_SUBCMD_MKENT(select, 2, 1, do_bootflow_select),

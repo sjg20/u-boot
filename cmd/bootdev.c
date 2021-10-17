@@ -113,7 +113,7 @@ static char bootdev_help_text[] =
 	"bootdev info [-p]      - show information about a bootdev (-p to probe)";
 #endif
 
-U_BOOT_CMD_WITH_SUBCMDS(bootdev, "Bootdevices", bootdev_help_text,
+U_BOOT_CMD_WITH_SUBCMDS(bootdev, "Boot devices", bootdev_help_text,
 	U_BOOT_SUBCMD_MKENT(list, 2, 1, do_bootdev_list),
 	U_BOOT_SUBCMD_MKENT(select, 2, 1, do_bootdev_select),
 	U_BOOT_SUBCMD_MKENT(info, 2, 1, do_bootdev_info));

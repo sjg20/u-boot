@@ -72,4 +72,5 @@ UCLASS_DRIVER(bootmeth) = {
 	.id		= UCLASS_BOOTMETH,
 	.name		= "bootmeth",
 	.flags		= DM_UC_FLAG_SEQ_ALIAS,
+	.per_device_plat_auto	= sizeof(struct bootmeth_uc_plat),
 };

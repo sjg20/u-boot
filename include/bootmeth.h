@@ -11,6 +11,15 @@ struct bootflow;
 struct udevice;
 
 /**
+ * struct bootmeth_uc_plat - information the uclass keeps about each bootmeth
+ *
+ * @desc: A long description of the bootmeth
+ */
+struct bootmeth_uc_plat {
+	const char *desc;
+};
+
+/**
  * struct bootmeth_ops - Operations for the Platform Controller Hub
  *
  * Consider using ioctl() to add rarely used or driver-specific operations.

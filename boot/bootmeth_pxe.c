@@ -139,13 +139,22 @@ int distro_pxe_boot(struct udevice *dev, struct bootflow *bflow)
 	return 0;
 }
 
+static int distro_bootmeth_pxe_bind(struct udevice *dev)
+{
+	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
+
+	plat->desc = "PXE boot from a network device";
+
+	return 0;
+}
+
 static struct bootmeth_ops distro_bootmeth_pxe_ops = {
 	.read_bootflow	= distro_pxe_read_bootflow,
 	.read_file	= distro_pxe_read_file,
 	.boot		= distro_pxe_boot,
 };
 
-static const struct udevice_id distro_bootmeth_ids[] = {
+static const struct udevice_id distro_bootmeth_pxe_ids[] = {
 	{ .compatible = "u-boot,distro-pxe" },
 	{ }
 };
@@ -153,7 +162,8 @@ static const struct udevice_id distro_bootmeth_ids[] = {
 U_BOOT_DRIVER(distro_bootmeth_pxe) = {
 	.name		= "distro_bootmeth_pxe",
 	.id		= UCLASS_BOOTMETH,
-	.of_match	= distro_bootmeth_ids,
+	.of_match	= distro_bootmeth_pxe_ids,
 	.ops		= &distro_bootmeth_pxe_ops,
+	.bind		= distro_bootmeth_pxe_bind,
 	.priv_auto	= sizeof(struct pxe_context),
 };

@@ -137,6 +137,15 @@ int distro_boot(struct udevice *dev, struct bootflow *bflow)
 	return 0;
 }
 
+static int distro_bootmeth_bind(struct udevice *dev)
+{
+	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
+
+	plat->desc = "Syslinux boot from a block device";
+
+	return 0;
+}
+
 static struct bootmeth_ops distro_bootmeth_ops = {
 	.read_bootflow	= distro_read_bootflow,
 	.read_file	= distro_read_file,
@@ -153,4 +162,5 @@ U_BOOT_DRIVER(distro_bootmeth) = {
 	.id		= UCLASS_BOOTMETH,
 	.of_match	= distro_bootmeth_ids,
 	.ops		= &distro_bootmeth_ops,
+	.bind		= distro_bootmeth_bind,
 };

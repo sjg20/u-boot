@@ -221,6 +221,15 @@ int distro_efi_boot(struct udevice *dev, struct bootflow *bflow)
 	return 0;
 }
 
+static int distro_bootmeth_efi_bind(struct udevice *dev)
+{
+	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
+
+	plat->desc = "EFI boot from a .efi file";
+
+	return 0;
+}
+
 static struct bootmeth_ops distro_efi_bootmeth_ops = {
 	.read_bootflow	= distro_efi_read_bootflow,
 	.read_file	= distro_efi_read_file,
@@ -237,4 +246,5 @@ U_BOOT_DRIVER(efi_bootmeth) = {
 	.id		= UCLASS_BOOTMETH,
 	.of_match	= distro_efi_bootmeth_ids,
 	.ops		= &distro_efi_bootmeth_ops,
+	.bind		= distro_bootmeth_efi_bind,
 };

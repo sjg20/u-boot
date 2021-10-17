@@ -196,7 +196,7 @@ void bootdev_list(bool probe)
 			ret = uclass_find_next_device(&dev);
 	}
 	printf("---  ------  ------  --------  ------------------\n");
-	printf("(%d device%s)\n", i, i != 1 ? "s" : "");
+	printf("(%d bootdev%s)\n", i, i != 1 ? "s" : "");
 }
 
 int bootdev_setup_for_dev(struct udevice *parent, const char *drv_name)
@@ -247,23 +247,23 @@ int bootdev_unbind_dev(struct udevice *parent)
  * label name is "mmc2", this will find a bootdev for an mmc device whose
  * sequence number is 2.
  *
- * @target: Label string to convert, e.g. "mmc2"
- * @devp: Returns bootdev device corresponding to that boot target
- * @return 0 if OK, -EINVAL if the target name (e.g. "mmc") does not refer to a
+ * @label: Label string to convert, e.g. "mmc2"
+ * @devp: Returns bootdev device corresponding to that boot label
+ * @return 0 if OK, -EINVAL if the label name (e.g. "mmc") does not refer to a
  *	uclass, -ENOENT if no bootdev for that media has the sequence number
  *	(e.g. 2)
  */
-int bootdev_find_by_label(const char *target, struct udevice **devp)
+int bootdev_find_by_label(const char *label, struct udevice **devp)
 {
 	struct udevice *media;
 	struct uclass *uc;
 	enum uclass_id id;
 	int seq, len;
 
-	seq = trailing_strtoln_len(target, NULL, &len);
-	id = uclass_get_by_name_len(target, len);
+	seq = trailing_strtoln_len(label, NULL, &len);
+	id = uclass_get_by_name_len(label, len);
 	if (id == UCLASS_INVALID) {
-		log_warning("Unknown uclass '%s' in boot_targets\n", target);
+		log_warning("Unknown uclass '%s' in label\n", label);
 		return -EINVAL;
 	}
 
@@ -282,8 +282,7 @@ int bootdev_find_by_label(const char *target, struct udevice **devp)
 			return 0;
 		}
 	}
-	log_warning("Unknown seq %d for uclass '%s' in boot_targets\n",
-		    seq, target);
+	log_warning("Unknown seq %d for label '%s'\n", seq, label);
 
 	return -ENOENT;
 }
