@@ -287,3 +287,41 @@ int bootdev_find_by_label(const char *target, struct udevice **devp)
 
 	return -ENOENT;
 }
+
+int bootdev_find_by_any(const char *name, struct udevice **devp)
+{
+	struct udevice *dev;
+	int ret, seq;
+	char *endp;
+
+	seq = simple_strtol(name, &endp, 16);
+
+	/* Select by name, label or number */
+	if (*endp) {
+		ret = uclass_get_device_by_name(UCLASS_BOOTDEV, name, &dev);
+		if (ret == -ENODEV) {
+			ret = bootdev_find_by_label(name, &dev);
+			if (ret) {
+				printf("Cannot find bootdev '%s' (err=%d)\n",
+				       name, ret);
+				return ret;
+			}
+			ret = device_probe(dev);
+		}
+		if (ret) {
+			printf("Cannot probe bootdev '%s' (err=%d)\n", name,
+			       ret);
+			return ret;
+		}
+	} else {
+		ret = uclass_get_device_by_seq(UCLASS_BOOTDEV, seq, &dev);
+	}
+	if (ret) {
+		printf("Cannot find '%s' (err=%d)\n", name, ret);
+		return ret;
+	}
+
+	*devp = dev;
+
+	return 0;
+}

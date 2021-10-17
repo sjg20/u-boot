@@ -62,11 +62,17 @@ BOOTDEV_TEST(bootdev_test_cmd_list, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check 'bootdev select' and 'info' commands */
 static int bootdev_test_cmd_select(struct unit_test_state *uts)
 {
+	struct bootdev_state *state;
+
+	/* get access to the CLI's cur_bootdev */
+	ut_assertok(bootdev_get_state(&state));
+
 	console_record_reset_enable();
 	ut_asserteq(1, run_command("bootdev info", 0));
 	ut_assert_nextlinen("Please use");
 	ut_assert_console_end();
 
+	/* select by sequence */
 	ut_assertok(run_command("bootdev select 0", 0));
 	ut_assert_console_end();
 
@@ -76,6 +82,27 @@ static int bootdev_test_cmd_select(struct unit_test_state *uts)
 	ut_assert_nextline("Status:    Probed");
 	ut_assert_nextline("Uclass:    mmc");
 	ut_assert_nextline("Bootflows: 0 (0 valid)");
+	ut_assert_console_end();
+
+	/* select by bootdev name */
+	ut_assertok(run_command("bootdev select mmc1.bootdev", 0));
+	ut_assert_console_end();
+	ut_assertnonnull(state->cur_bootdev);
+	ut_asserteq_str("mmc1.bootdev", state->cur_bootdev->name);
+
+	/* select by bootdev label*/
+	ut_assertok(run_command("bootdev select mmc1", 0));
+	ut_assert_console_end();
+	ut_assertnonnull(state->cur_bootdev);
+	ut_asserteq_str("mmc1.bootdev", state->cur_bootdev->name);
+
+	/* deselect */
+	ut_assertok(run_command("bootdev select", 0));
+	ut_assert_console_end();
+	ut_assertnull(state->cur_bootdev);
+
+	ut_asserteq(1, run_command("bootdev info", 0));
+	ut_assert_nextlinen("Please use");
 	ut_assert_console_end();
 
 	return 0;
@@ -109,6 +136,29 @@ static int bootdev_test_cmd_bootflow(struct unit_test_state *uts)
 	return 0;
 }
 BOOTDEV_TEST(bootdev_test_cmd_bootflow, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+
+/* Check 'bootflow scan' with a name / label / seq */
+static int bootdev_test_cmd_bootflow_label(struct unit_test_state *uts)
+{
+	console_record_reset_enable();
+	ut_assertok(run_command("bootflow scan -l mmc1", 0));
+	ut_assert_nextline("Scanning for bootflows in bootdev 'mmc1.bootdev'");
+	ut_assert_skip_to_line("(1 bootflow, 1 valid)");
+	ut_assert_console_end();
+
+	ut_assertok(run_command("bootflow scan -l mmc0.bootdev", 0));
+	ut_assert_nextline("Scanning for bootflows in bootdev 'mmc0.bootdev'");
+	ut_assert_skip_to_line("(0 bootflows, 0 valid)");
+	ut_assert_console_end();
+
+	ut_assertok(run_command("bootflow scan -l 0", 0));
+	ut_assert_nextline("Scanning for bootflows in bootdev 'mmc2.bootdev'");
+	ut_assert_skip_to_line("(0 bootflows, 0 valid)");
+	ut_assert_console_end();
+
+	return 0;
+}
+BOOTDEV_TEST(bootdev_test_cmd_bootflow_label, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow scan/list' commands using all bootdevs */
 static int bootdev_test_cmd_bootflow_glob(struct unit_test_state *uts)

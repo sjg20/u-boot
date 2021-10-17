@@ -164,17 +164,26 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 	int ret, i;
 	int flags;
 
+	ret = bootdev_get_state(&state);
+	if (ret)
+		return CMD_RET_FAILURE;
+	dev = state->cur_bootdev;
+
 	if (argc > 1 && *argv[1] == '-') {
 		all = strchr(argv[1], 'a');
 		boot = strchr(argv[1], 'b');
 		errors = strchr(argv[1], 'e');
 		list = strchr(argv[1], 'l');
+		argc--;
+		argv++;
+	}
+	if (argc > 1) {
+		const char *label = argv[1];
+
+		if (bootdev_find_by_any(label, &dev))
+			return CMD_RET_FAILURE;
 	}
 
-	ret = bootdev_get_state(&state);
-	if (ret)
-		return CMD_RET_FAILURE;
-	dev = state->cur_bootdev;
 	state->cur_bootflow = NULL;
 
 	flags = 0;
@@ -385,15 +394,15 @@ static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 
 #ifdef CONFIG_SYS_LONGHELP
 static char bootflow_help_text[] =
-	"scan [-abel] - scan for valid bootflows (-l list, -a all, -e errors, -b boot)\n"
-	"bootflow list [-e]    - list scanned bootflows (-e errors)\n"
-	"bootflow select       - select a bootflow\n"
-	"bootflow info [-d]    - show info on current bootflow (-d dump bootflow)\n"
-	"bootflow boot         - boot current bootflow (or first available if none selected)";
+	"scan [-abel] [bdev] - scan for valid bootflows (-l list, -a all, -e errors, -b boot)\n"
+	"bootflow list [-e]           - list scanned bootflows (-e errors)\n"
+	"bootflow select              - select a bootflow\n"
+	"bootflow info [-d]           - show info on current bootflow (-d dump bootflow)\n"
+	"bootflow boot                - boot current bootflow (or first available if none selected)";
 #endif
 
 U_BOOT_CMD_WITH_SUBCMDS(bootflow, "Bootflows", bootflow_help_text,
-	U_BOOT_SUBCMD_MKENT(scan, 2, 1, do_bootflow_scan),
+	U_BOOT_SUBCMD_MKENT(scan, 3, 1, do_bootflow_scan),
 	U_BOOT_SUBCMD_MKENT(list, 2, 1, do_bootflow_list),
 	U_BOOT_SUBCMD_MKENT(select, 2, 1, do_bootflow_select),
 	U_BOOT_SUBCMD_MKENT(info, 2, 1, do_bootflow_info),

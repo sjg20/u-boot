@@ -211,6 +211,15 @@ int bootdev_next_bootflow(struct bootflow **bflowp);
  */
 int bootdev_find_by_label(const char *label, struct udevice **devp);
 
+/**
+ * bootdev_find_by_any() - Find a bootdev by name, label or sequence
+ *
+ * @name: name (e.g. "mmc2.bootdev"), label ("mmc2"), or sequence ("2") to find
+ * @devp: returns the device found, on success
+ * @return 0 if OK, -ve on error
+ */
+int bootdev_find_by_any(const char *name, struct udevice **devp);
+
 #if CONFIG_IS_ENABLED(BOOTDEV)
 /**
  * bootdev_setup_for_dev() - Bind a new bootdev device

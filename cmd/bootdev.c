@@ -47,9 +47,6 @@ static int do_bootdev_select(struct cmd_tbl *cmdtp, int flag, int argc,
 {
 	struct bootdev_state *state;
 	struct udevice *dev;
-	const char *name;
-	char *endp;
-	int seq;
 	int ret;
 
 	ret = bootdev_get_state(&state);
@@ -59,18 +56,9 @@ static int do_bootdev_select(struct cmd_tbl *cmdtp, int flag, int argc,
 		state->cur_bootdev = NULL;
 		return 0;
 	}
-	name = argv[1];
-	seq = simple_strtol(name, &endp, 16);
-
-	/* Select by name or number */
-	if (*endp)
-		ret = uclass_get_device_by_name(UCLASS_BOOTDEV, name, &dev);
-	else
-		ret = uclass_get_device_by_seq(UCLASS_BOOTDEV, seq, &dev);
-	if (ret) {
-		printf("Cannot find '%s' (err=%d)\n", name, ret);
+	if (bootdev_find_by_any(argv[1], &dev))
 		return CMD_RET_FAILURE;
-	}
+
 	state->cur_bootdev = dev;
 
 	return 0;
@@ -121,7 +109,7 @@ static int do_bootdev_info(struct cmd_tbl *cmdtp, int flag, int argc,
 #ifdef CONFIG_SYS_LONGHELP
 static char bootdev_help_text[] =
 	"list [-p]      - list all available bootdevs (-p to probe)\n"
-	"bootdev select <bm>    - select a bootdev by name\n"
+	"bootdev select <bd>    - select a bootdev by name | label | seq\n"
 	"bootdev info [-p]      - show information about a bootdev (-p to probe)";
 #endif
 
