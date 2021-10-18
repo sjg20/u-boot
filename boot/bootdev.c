@@ -222,6 +222,56 @@ int bootdev_setup_for_dev(struct udevice *parent, const char *drv_name)
 	return 0;
 }
 
+int bootdev_setup_sibling_blk(struct udevice *blk, const char *drv_name)
+{
+	struct udevice *parent, *dev;
+	char dev_name[50];
+	int ret;
+
+	snprintf(dev_name, sizeof(dev_name), "%s.%s", blk->name, "bootdev");
+
+	parent = dev_get_parent(blk);
+	ret = device_find_child_by_name(parent, dev_name, &dev);
+	if (ret) {
+		if (ret != -ENODEV) {
+			log_debug("Cannot access bootdev device\n");
+			return ret;
+		}
+
+		ret = device_bind_driver(parent, drv_name, dev_name, &dev);
+		if (ret)
+			return ret;
+		if (ret) {
+			log_debug("Cannot create bootdev device\n");
+			return ret;
+		}
+		device_set_name_alloced(dev);
+	}
+
+	return 0;
+}
+
+int bootdev_get_sibling_blk(struct udevice *dev, struct udevice **blkp)
+{
+	struct udevice *parent = dev_get_parent(dev);
+	struct udevice *blk;
+	int ret, len;
+	char *p;
+
+	/* This should always work if bootdev_setup_sibling_blk() was used */
+	p = strstr(dev->name, ".bootdev");
+	if (!p)
+		return log_msg_ret("str", -EINVAL);
+
+	len = p - dev->name;
+	ret = device_find_child_by_namelen(parent, dev->name, len, &dev);
+	if (ret)
+		return log_msg_ret("find", ret);
+	*blkp = blk;
+
+	return NULL;
+}
+
 int bootdev_unbind_dev(struct udevice *parent)
 {
 	struct udevice *dev;

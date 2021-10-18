@@ -116,9 +116,10 @@ static int bootdev_test_labels(struct unit_test_state *uts)
 }
 BOOTDEV_TEST(bootdev_test_labels, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
-/* Check bootdev ordering */
+/* Check bootdev ordering with the bootmeth-order property */
 static int bootdev_test_order(struct unit_test_state *uts)
 {
+// 	struct bootdev_uc_plat *ucp;
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
@@ -151,6 +152,9 @@ static int bootdev_test_order(struct unit_test_state *uts)
 	ut_asserteq_str("mmc0.bootdev", iter.dev_order[1]->name);
 	ut_asserteq_str("mmc1.bootdev", iter.dev_order[2]->name);
 	bootflow_iter_uninit(&iter);
+
+	/* adjust the priority */
+// 	 = dev_get_uclass_plat(dev);
 
 	return 0;
 }

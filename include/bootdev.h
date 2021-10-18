@@ -231,11 +231,37 @@ int bootdev_find_by_any(const char *name, struct udevice **devp);
  * Creates a bootdev device as a child of @parent. This should be called from
  * the driver's bind() method or its uclass' post_bind() method.
  *
+ * If a child bootdev already exists, this function does nothing
+ *
  * @parent: Parent device (e.g. MMC or Ethernet)
  * @drv_name: Name of bootdev driver to bind
  * @return 0 if OK, -ve on error
  */
 int bootdev_setup_for_dev(struct udevice *parent, const char *drv_name);
+
+/**
+ * bootdev_setup_for_blk() - Bind a new bootdev device for a blk device
+ *
+ * Creates a bootdev device as a sibling of @blk. This should be called from
+ * the driver's bind() method or its uclass' post_bind() method, at the same
+ * time as the bould device is bound
+ *
+ * If a device of the same name already exists, this function does nothing
+ *
+ * @parent: Parent device (e.g. MMC or Ethernet)
+ * @drv_name: Name of bootdev driver to bind
+ * @return 0 if OK, -ve on error
+ */
+int bootdev_setup_sibling_blk(struct udevice *blk, const char *drv_name);
+
+/**
+ * bootdev_get_sibling_blk() - Locate the block device for a bootdev
+ *
+ * @dev: bootdev to check
+ * @blkp: returns associated block device
+ * @return 0 if OK, -ve on error
+ */
+int bootdev_get_sibling_blk(struct udevice *dev, struct udevice **blkp);
 
 /**
  * bootdev_unbind_dev() - Unbind a bootdev device
@@ -251,6 +277,16 @@ int bootdev_unbind_dev(struct udevice *parent);
 #else
 static inline int bootdev_setup_for_dev(struct udevice *parent,
 					const char *drv_name)
+{
+	return 0;
+}
+
+int bootdev_setup_sibling_blk(struct udevice *blk, const char *drv_name)
+{
+	return 0;
+}
+
+static inline int bootdev_unbind_dev(struct udevice *parent)
 {
 	return 0;
 }
