@@ -38,7 +38,7 @@ static int usb_bootdev_bind(struct udevice *dev)
 {
 	struct bootdev_uc_plat *ucp = dev_get_uclass_plat(dev);
 
-	ucp->prio = BOOTDEVP_0_INTERNAL_FAST;
+	ucp->prio = BOOTDEVP_3_SCAN_SLOW;
 
 	return 0;
 }

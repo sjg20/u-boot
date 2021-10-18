@@ -119,7 +119,6 @@ BOOTDEV_TEST(bootdev_test_labels, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check bootdev ordering with the bootmeth-order property */
 static int bootdev_test_order(struct unit_test_state *uts)
 {
-// 	struct bootdev_uc_plat *ucp;
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
@@ -153,12 +152,33 @@ static int bootdev_test_order(struct unit_test_state *uts)
 	ut_asserteq_str("mmc1.bootdev", iter.dev_order[2]->name);
 	bootflow_iter_uninit(&iter);
 
+	return 0;
+}
+BOOTDEV_TEST(bootdev_test_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+
+/* Check bootdev ordering with the uclass priority */
+static int bootdev_test_prio(struct unit_test_state *uts)
+{
+	struct bootdev_uc_plat *ucp;
+	struct bootflow_iter iter;
+	struct bootflow bflow;
+
+	console_record_reset_enable();
+	ut_assertok(run_command("usb start", 0));
+	ut_assert_console_end();
+
+	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
+	ut_asserteq(2, iter.num_devs);
+	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
+	ut_asserteq_str("mmc1.bootdev", iter.dev_order[1]->name);
+	bootflow_iter_uninit(&iter);
+
 	/* adjust the priority */
 // 	 = dev_get_uclass_plat(dev);
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTDEV_TEST(bootdev_test_prio, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 int do_ut_bootdev(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
