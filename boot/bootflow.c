@@ -116,10 +116,17 @@ static int h_cmp_bootdev(const void *v1, const void *v2)
 	const struct udevice *dev2 = *(struct udevice **)v2;
 	const struct bootdev_uc_plat *ucp1 = dev_get_uclass_plat(dev1);
 	const struct bootdev_uc_plat *ucp2 = dev_get_uclass_plat(dev2);
+	int diff;
 
-	if (dev_seq(dev1) != dev_seq(dev2))
-		return dev_seq(dev1) - dev_seq(dev2);
-	return ucp1->prio - ucp2->prio;
+	/* Use priority first */
+	diff = ucp1->prio - ucp2->prio;
+	if (diff)
+		return diff;
+
+	/* Fall back to seq for devices of the same priority */
+	diff = dev_seq(dev1) - dev_seq(dev2);
+
+	return diff;
 }
 
 /**

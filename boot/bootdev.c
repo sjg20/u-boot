@@ -267,7 +267,7 @@ int bootdev_get_sibling_blk(struct udevice *dev, struct udevice **blkp)
 		return log_msg_ret("str", -EINVAL);
 
 	len = p - dev->name;
-	ret = device_find_child_by_namelen(parent, dev->name, len, &dev);
+	ret = device_find_child_by_namelen(parent, dev->name, len, &blk);
 	if (ret)
 		return log_msg_ret("find", ret);
 	*blkp = blk;
