@@ -911,7 +911,7 @@ static inline int dev_read_string_count(const struct udevice *dev,
 
 static inline int dev_read_string_list(const struct udevice *dev,
 				       const char *propname,
-				       char *const **listp)
+				       const char ***listp)
 {
 	return ofnode_read_string_list(dev_ofnode(dev), propname, listp);
 }

@@ -17,6 +17,9 @@
 #include <test/ut.h>
 #include "bootdev_common.h"
 
+/* Allow reseting the USB-started flag */
+extern char usb_started;
+
 /* Check 'bootdev list' command */
 static int bootdev_test_cmd_list(struct unit_test_state *uts)
 {
@@ -163,18 +166,30 @@ static int bootdev_test_prio(struct unit_test_state *uts)
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
-	console_record_reset_enable();
+	/* Start up USB which gives us three additional bootdevs */
+	usb_started = false;
 	ut_assertok(run_command("usb start", 0));
-	ut_assert_console_end();
 
+	ut_assertok(bootdev_test_drop_boot_order(uts));
+
+	/* 3 MMC and 3 USB bootdevs: MMC should come before USB */
+	console_record_reset_enable();
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
-	ut_asserteq(2, iter.num_devs);
+	ut_asserteq(6, iter.num_devs);
 	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
-	ut_asserteq_str("mmc1.bootdev", iter.dev_order[1]->name);
-	bootflow_iter_uninit(&iter);
+	ut_asserteq_str("usb_mass_storage.lun0.bootdev",
+			iter.dev_order[3]->name);
 
-	/* adjust the priority */
-// 	 = dev_get_uclass_plat(dev);
+	/* adjust the priority of the first USB bootdev to the highest */
+	ucp = dev_get_uclass_plat(iter.dev_order[3]);
+	ucp->prio = 1;
+
+	bootflow_iter_uninit(&iter);
+	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
+	ut_asserteq(6, iter.num_devs);
+	ut_asserteq_str("usb_mass_storage.lun0.bootdev",
+			iter.dev_order[0]->name);
+	ut_asserteq_str("mmc2.bootdev", iter.dev_order[1]->name);
 
 	return 0;
 }
