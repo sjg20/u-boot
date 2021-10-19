@@ -144,12 +144,16 @@ static int bootflow_run_boot(struct bootflow *bflow)
 	case -ENOSYS:
 		printf("Boot method '%s' not supported\n", bflow->method->name);
 		break;
+	case -ENOTSUPP:
+		printf("Boot method '%s' failed and will not be retried\n",
+		       bflow->method->name);
+		break;
 	default:
 		printf("Boot failed (err=%d)\n", ret);
 		break;
 	}
 
-	return 0;
+	return ret;
 }
 
 static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,

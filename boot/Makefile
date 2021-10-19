@@ -28,6 +28,7 @@ obj-$(CONFIG_$(SPL_TPL_)BOOTDEV) += bootmeth-uclass.o bootstd-uclass.o
 obj-$(CONFIG_$(SPL_TPL_)BOOTDEV_DISTRO) += bootmeth_distro.o
 obj-$(CONFIG_$(SPL_TPL_)BOOTDEV_DISTRO_PXE) += bootmeth_pxe.o
 obj-$(CONFIG_$(SPL_TPL_)BOOTDEV_EFILOADER) += bootmeth_efi.o
+obj-$(CONFIG_$(SPL_TPL_)CMD_BOOTEFI_BOOTMGR) += bootmeth_efi_mgr.o
 obj-$(CONFIG_$(SPL_TPL_)OF_LIBFDT) += image-fdt.o
 obj-$(CONFIG_$(SPL_TPL_)FIT_SIGNATURE) += fdt_region.o
 obj-$(CONFIG_$(SPL_TPL_)FIT) += image-fit.o

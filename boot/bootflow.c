@@ -476,6 +476,9 @@ int bootflow_boot(struct bootflow *bflow)
 		return log_msg_ret("load", -EPROTO);
 
 	ret = bootmeth_boot(bflow->method, bflow);
+	if (ret == -ENOTSUPP) {
+
+	}
 	if (ret)
 		return log_msg_ret("method", ret);
 
