@@ -363,10 +363,8 @@ static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 	bflow = state->cur_bootflow;
 	ret = bootflow_run_boot(NULL, bflow);
-	if (ret) {
-		printf("Boot failed (err %d)n", ret);
+	if (ret)
 		return CMD_RET_FAILURE;
-	}
 
 	return 0;
 }

@@ -204,8 +204,105 @@ static int bootflow_scan_boot(struct unit_test_state *uts)
 }
 BOOTDEV_TEST(bootflow_scan_boot, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
+/* Check iterating through available bootflows */
+static int bootflow_iter(struct unit_test_state *uts)
+{
+	struct bootflow_iter iter;
+	struct bootflow bflow;
+
+	bootdev_clear_glob();
+
+	/* The first device is mmc2.bootdev which has no media */
+	ut_asserteq(-EPROTONOSUPPORT,
+		    bootflow_scan_first(&iter, BOOTFLOWF_ALL, &bflow));
+	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(0, iter.cur_method);
+	ut_asserteq(0, iter.part);
+	ut_asserteq(0, iter.max_part);
+	ut_asserteq_str("syslinux", iter.method->name);
+	ut_asserteq(0, bflow.err);
+
+	/*
+	 * This shows MEDIA even though there is none, since int
+	 * bootdev_find_in_blk() we call part_get_info() which returns
+	 * -EPROTONOSUPPORT. Ideally it would return -EEOPNOTSUPP and we would
+	 * know.
+	 */
+	ut_asserteq(BOOTFLOWST_MEDIA, bflow.state);
+
+	ut_asserteq(-EPROTONOSUPPORT, bootflow_scan_next(&iter, &bflow));
+	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(1, iter.cur_method);
+	ut_asserteq(0, iter.part);
+	ut_asserteq(0, iter.max_part);
+	ut_asserteq_str("efi", iter.method->name);
+	ut_asserteq(0, bflow.err);
+	ut_asserteq(BOOTFLOWST_MEDIA, bflow.state);
+	bootflow_free(&bflow);
+
+	/* The next device is mmc1.bootdev - at first we use the whole device */
+	ut_asserteq(-ENOENT, bootflow_scan_next(&iter, &bflow));
+	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(0, iter.cur_method);
+	ut_asserteq(0, iter.part);
+	ut_asserteq(0x1e, iter.max_part);
+	ut_asserteq_str("syslinux", iter.method->name);
+	ut_asserteq(0, bflow.err);
+	ut_asserteq(BOOTFLOWST_MEDIA, bflow.state);
+	bootflow_free(&bflow);
+
+	ut_asserteq(-ENOENT, bootflow_scan_next(&iter, &bflow));
+	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(1, iter.cur_method);
+	ut_asserteq(0, iter.part);
+	ut_asserteq(0x1e, iter.max_part);
+	ut_asserteq_str("efi", iter.method->name);
+	ut_asserteq(0, bflow.err);
+	ut_asserteq(BOOTFLOWST_MEDIA, bflow.state);
+	bootflow_free(&bflow);
+
+	/* Then more to partition 1 where we find something */
+	ut_assertok(bootflow_scan_next(&iter, &bflow));
+	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(0, iter.cur_method);
+	ut_asserteq(1, iter.part);
+	ut_asserteq(0x1e, iter.max_part);
+	ut_asserteq_str("syslinux", iter.method->name);
+	ut_asserteq(0, bflow.err);
+	ut_asserteq(BOOTFLOWST_READY, bflow.state);
+	bootflow_free(&bflow);
+
+	ut_asserteq(-ENOENT, bootflow_scan_next(&iter, &bflow));
+	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(1, iter.cur_method);
+	ut_asserteq(1, iter.part);
+	ut_asserteq(0x1e, iter.max_part);
+	ut_asserteq_str("efi", iter.method->name);
+	ut_asserteq(0, bflow.err);
+	ut_asserteq(BOOTFLOWST_FS, bflow.state);
+	bootflow_free(&bflow);
+
+	/* Then more to partition 2 which doesn't exist */
+	ut_asserteq(-ENOENT, bootflow_scan_next(&iter, &bflow));
+	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(0, iter.cur_method);
+	ut_asserteq(2, iter.part);
+	ut_asserteq(0x1e, iter.max_part);
+	ut_asserteq_str("syslinux", iter.method->name);
+	ut_asserteq(0, bflow.err);
+	ut_asserteq(BOOTFLOWST_MEDIA, bflow.state);
+	bootflow_free(&bflow);
+
+	bootflow_iter_uninit(&iter);
+
+	ut_assert_console_end();
+
+	return 0;
+}
+BOOTDEV_TEST(bootflow_iter, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+
 /* Check disabling a bootmethod if it requests it */
-static int bootflow_scan_boot_disable(struct unit_test_state *uts)
+static int bootflow_iter_disable(struct unit_test_state *uts)
 {
 	struct udevice *bootstd, *dev;
 	struct bootflow_iter iter;
@@ -236,7 +333,7 @@ static int bootflow_scan_boot_disable(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootflow_scan_boot_disable, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTDEV_TEST(bootflow_iter_disable, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow boot' to boot a selected bootflow */
 static int bootflow_cmd_boot(struct unit_test_state *uts)
@@ -248,7 +345,7 @@ static int bootflow_cmd_boot(struct unit_test_state *uts)
 	ut_assert_console_end();
 	ut_assertok(run_command("bootflow select 0", 0));
 	ut_assert_console_end();
-	ut_assertok(run_command("bootflow boot", 0));
+	ut_asserteq(1, run_command("bootflow boot", 0));
 	ut_assert_nextline("** Booting bootflow 'mmc1.bootdev.part_1'");
 	ut_assert_nextline("Ignoring unknown command: ui");
 
