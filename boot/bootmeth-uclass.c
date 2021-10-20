@@ -8,6 +8,7 @@
 #include <bootmeth.h>
 #include <dm.h>
 #include <dm/device-internal.h>
+#include <dm/lists.h>
 #include <dm/uclass-internal.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -48,17 +49,25 @@ int dm_scan_other(bool pre_reloc_only)
 {
 	struct driver *drv = ll_entry_start(struct driver, driver);
 	const int n_ents = ll_entry_count(struct driver, driver);
-	struct udevice *dev;
+	struct udevice *dev, *bootstd;
 	int i, ret;
 
-	/* If there are any devices, skip */
-	uclass_find_first_device(UCLASS_BOOTMETH, &dev);
-	if (dev)
+	/*
+	 * If there is a bootstd device, skip, since we assume that the bootmeth
+	 * devices have been created correctly.
+	 */
+	uclass_find_first_device(UCLASS_BOOTSTD, &bootstd);
+	if (bootstd)
 		return 0;
+
+	ret = device_bind_driver(gd->dm_root, "bootstd_drv", "bootstd",
+				 &bootstd);
+	if (ret)
+		return log_msg_ret("bootstd", ret);
 
 	for (i = 0; i < n_ents; i++, drv++) {
 		if (drv->id == UCLASS_BOOTMETH) {
-			ret = device_bind(gd->dm_root, drv, drv->name, 0,
+			ret = device_bind(bootstd, drv, drv->name, 0,
 					  ofnode_null(), &dev);
 			if (ret)
 				return log_msg_ret("bind", ret);

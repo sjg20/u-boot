@@ -171,8 +171,10 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
 	int ret;
 
 	ret = uclass_first_device_err(UCLASS_BOOTSTD, &bootstd);
-	if (ret)
+	if (ret) {
+		log_err("Missing bootstd device\n");
 		return log_msg_ret("std", ret);
+	}
 
 	/* Handle scanning a single device */
 	if (dev) {
