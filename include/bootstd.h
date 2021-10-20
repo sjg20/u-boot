@@ -7,6 +7,8 @@
 #ifndef __bootstd_h
 #define __bootstd_h
 
+struct udevice;
+
 /**
  * struct bootstd_priv - priv data for the bootstd driver
  *

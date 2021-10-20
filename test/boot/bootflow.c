@@ -7,7 +7,10 @@
  */
 
 #include <common.h>
+#include <bootdev.h>
+#include <bootflow.h>
 #include <dm.h>
+#include <dm/lists.h>
 #include <test/suites.h>
 #include <test/ut.h>
 #include "bootdev_common.h"
@@ -200,6 +203,40 @@ static int bootflow_scan_boot(struct unit_test_state *uts)
 	return 0;
 }
 BOOTDEV_TEST(bootflow_scan_boot, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+
+/* Check disabling a bootmethod if it requests it */
+static int bootflow_scan_boot_disable(struct unit_test_state *uts)
+{
+	struct udevice *bootstd, *dev;
+	struct bootflow_iter iter;
+	struct bootflow bflow;
+	int i;
+
+	/* Add the EFI bootmgr driver */
+	ut_assertok(uclass_first_device_err(UCLASS_BOOTSTD, &bootstd));
+	ut_assertok(device_bind_driver(bootstd, "efi_mgr_bootmeth", "bootmgr",
+				       &dev));
+
+	bootdev_clear_glob();
+
+	/* Try to boot the bootmgr flow, which will fail */
+	console_record_reset_enable();
+	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
+	ut_asserteq(3, iter.num_methods);
+	ut_asserteq_str("bootmgr", iter.method->name);
+	ut_asserteq(-ENOTSUPP, bootflow_run_boot(&iter, &bflow));
+
+	ut_assert_skip_to_line("Boot method 'bootmgr' failed and will not be retried");
+	ut_assert_console_end();
+
+	/* Check that the bootmgr bootmeth has been removed */
+	ut_asserteq(2, iter.num_methods);
+	for (i = 0; i < iter.num_methods; i++)
+		ut_assert(strcmp("bootmgr", iter.method_order[i]->name));
+
+	return 0;
+}
+BOOTDEV_TEST(bootflow_scan_boot_disable, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow boot' to boot a selected bootflow */
 static int bootflow_cmd_boot(struct unit_test_state *uts)

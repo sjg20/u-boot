@@ -249,6 +249,16 @@ void bootflow_free(struct bootflow *bflow);
 int bootflow_boot(struct bootflow *bflow);
 
 /**
+ * bootflow_run_boot() - Try to boot a bootflow
+ *
+ * @iter: Current iteration (or NULL if none). Used to disable a bootmeth if the
+ *	boot returns -ENOTSUPP
+ * @bflow: Bootflow to boot
+ * @return result of trying to boot
+ */
+int bootflow_run_boot(struct bootflow_iter *iter, struct bootflow *bflow);
+
+/**
  * bootflow_state_get_name() - Get the name of a bootflow state
  *
  * @state: State to check

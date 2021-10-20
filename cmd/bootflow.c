@@ -130,47 +130,6 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
-/**
- * bootflow_run_boot() - Try to boot a bootflow
- *
- * @iter: Current iteration (or NULL if none). Used to disable a bootmeth if the
- *	boot returns -ENOTSUPP
- * @bflow: Bootflow to boot
- * @return result of trying to boot
- */
-static int bootflow_run_boot(struct bootflow_iter *iter, struct bootflow *bflow)
-{
-	int ret;
-
-	printf("** Booting bootflow '%s'\n", bflow->name);
-	ret = bootflow_boot(bflow);
-	switch (ret) {
-	case -EPROTO:
-		printf("Bootflow not loaded (state '%s')\n",
-		       bootflow_state_get_name(bflow->state));
-		break;
-	case -ENOSYS:
-		printf("Boot method '%s' not supported\n", bflow->method->name);
-		break;
-	case -ENOTSUPP:
-		/* Disable this bootflow for this iteration */
-		if (iter) {
-			ret = bootflow_iter_drop_bootmeth(iter, bflow->method);
-			if (!ret) {
-				printf("Boot method '%s' failed and will not be retried\n",
-				       bflow->method->name);
-			}
-		}
-
-		break;
-	default:
-		printf("Boot failed (err=%d)\n", ret);
-		break;
-	}
-
-	return ret;
-}
-
 static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])
 {

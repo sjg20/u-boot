@@ -503,3 +503,38 @@ int bootflow_boot(struct bootflow *bflow)
 
 	return log_msg_ret("end", -EFAULT);
 }
+
+int bootflow_run_boot(struct bootflow_iter *iter, struct bootflow *bflow)
+{
+	int ret;
+
+	printf("** Booting bootflow '%s'\n", bflow->name);
+	ret = bootflow_boot(bflow);
+	switch (ret) {
+	case -EPROTO:
+		printf("Bootflow not loaded (state '%s')\n",
+		       bootflow_state_get_name(bflow->state));
+		break;
+	case -ENOSYS:
+		printf("Boot method '%s' not supported\n", bflow->method->name);
+		break;
+	case -ENOTSUPP:
+		/* Disable this bootflow for this iteration */
+		if (iter) {
+			int ret2;
+
+			ret2 = bootflow_iter_drop_bootmeth(iter, bflow->method);
+			if (!ret2) {
+				printf("Boot method '%s' failed and will not be retried\n",
+				       bflow->method->name);
+			}
+		}
+
+		break;
+	default:
+		printf("Boot failed (err=%d)\n", ret);
+		break;
+	}
+
+	return ret;
+}
