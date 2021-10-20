@@ -9,6 +9,7 @@
 #include <bootdev.h>
 #include <bootflow.h>
 #include <bootmeth.h>
+#include <bootstd.h>
 #include <dm.h>
 #include <fs.h>
 #include <log.h>
@@ -30,12 +31,12 @@ enum {
 int bootdev_add_bootflow(struct bootflow *bflow)
 {
 	struct bootdev_uc_plat *ucp = dev_get_uclass_plat(bflow->dev);
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct bootflow *new;
 	int ret;
 
 	assert(bflow->dev);
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return ret;
 
@@ -44,7 +45,7 @@ int bootdev_add_bootflow(struct bootflow *bflow)
 		return log_msg_ret("bflow", -ENOMEM);
 	memcpy(new, bflow, sizeof(*bflow));
 
-	list_add_tail(&new->glob_node, &state->glob_head);
+	list_add_tail(&new->glob_node, &std->glob_head);
 	list_add_tail(&new->bm_node, &ucp->bootflow_head);
 
 	return 0;

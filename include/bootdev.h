@@ -11,28 +11,8 @@
 
 struct bootflow;
 struct bootflow_iter;
-struct bootdev_state;
+struct bootstd_priv;
 struct udevice;
-
-/**
- * struct bootdev_state - information about available bootflows, etc.
- *
- * This is attached to the bootdev uclass so there is only one of them. It
- * provides overall information about bootdevs and bootflows.
- *
- * @cur_bootdev: Currently selected bootdev (for commands)
- * @cur_bootflow: Currently selected bootflow (for commands)
- * @glob_head: Head for the global list of all bootdevs across all bootflows
- * @bootmeth_count: Number of bootmeth devices in @bootmeth_order
- * @bootmeth_order: List of bootmeth devices to use, in order, NULL-terminated
- */
-struct bootdev_state {
-	struct udevice *cur_bootdev;
-	struct bootflow *cur_bootflow;
-	struct list_head glob_head;
-	int bootmeth_count;
-	struct udevice **bootmeth_order;
-};
 
 /**
  * enum bootdev_prio_t - priority of each bootdev
@@ -136,15 +116,6 @@ int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
 void bootdev_list(bool probe);
 
 /**
- * bootdev_get_state() - Get the (single) state for the bootdev system
- *
- * The state holds a global list of all bootflows that have been found.
- *
- * @return 0 if OK, -ve if the uclass does not exist
- */
-int bootdev_get_state(struct bootdev_state **statep);
-
-/**
  * bootdev_clear_bootflows() - Clear bootflows from a bootdev
  *
  * Each bootdev maintains a list of discovered bootflows. This provides a
@@ -155,11 +126,11 @@ int bootdev_get_state(struct bootdev_state **statep);
 void bootdev_clear_bootflows(struct udevice *dev);
 
 /**
- * bootdev_clear_glob() - Clear the global list of bootflows
+ * bootstd_clear_glob() - Clear the global list of bootflows
  *
  * This removes all bootflows globally and across all bootdevs.
  */
-void bootdev_clear_glob(void);
+void bootstd_clear_glob(void);
 
 /**
  * bootdev_add_bootflow() - Add a bootflow to the bootdev's list

@@ -9,24 +9,25 @@
 #include <common.h>
 #include <bootdev.h>
 #include <bootflow.h>
+#include <bootstd.h>
 #include <command.h>
 #include <dm.h>
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
 
-static int bootdev_check_state(struct bootdev_state **statep)
+static int bootdev_check_state(struct bootstd_priv **stdp)
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	int ret;
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return ret;
-	if (!state->cur_bootdev) {
+	if (!std->cur_bootdev) {
 		printf("Please use 'bootdev select' first\n");
 		return -ENOENT;
 	}
-	*statep = state;
+	*stdp = std;
 
 	return 0;
 }
@@ -45,21 +46,21 @@ static int do_bootdev_list(struct cmd_tbl *cmdtp, int flag, int argc,
 static int do_bootdev_select(struct cmd_tbl *cmdtp, int flag, int argc,
 			     char *const argv[])
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct udevice *dev;
 	int ret;
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return CMD_RET_FAILURE;
 	if (argc < 2) {
-		state->cur_bootdev = NULL;
+		std->cur_bootdev = NULL;
 		return 0;
 	}
 	if (bootdev_find_by_any(argv[1], &dev))
 		return CMD_RET_FAILURE;
 
-	state->cur_bootdev = dev;
+	std->cur_bootdev = dev;
 
 	return 0;
 }
@@ -67,7 +68,7 @@ static int do_bootdev_select(struct cmd_tbl *cmdtp, int flag, int argc,
 static int do_bootdev_info(struct cmd_tbl *cmdtp, int flag, int argc,
 			   char *const argv[])
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *priv;
 	struct bootflow *bflow;
 	int ret, i, num_valid;
 	struct udevice *dev;
@@ -75,11 +76,11 @@ static int do_bootdev_info(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	probe = argc >= 2 && !strcmp(argv[1], "-p");
 
-	ret = bootdev_check_state(&state);
+	ret = bootdev_check_state(&priv);
 	if (ret)
 		return CMD_RET_FAILURE;
 
-	dev = state->cur_bootdev;
+	dev = priv->cur_bootdev;
 
 	/* Count the number of bootflows, including how many are valid*/
 	num_valid = 0;

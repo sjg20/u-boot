@@ -9,6 +9,7 @@
 #include <common.h>
 #include <bootdev.h>
 #include <bootflow.h>
+#include <bootstd.h>
 #include <command.h>
 #include <console.h>
 #include <dm.h>
@@ -90,7 +91,7 @@ static void show_footer(int count, int num_valid)
 static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct udevice *dev;
 	struct bootflow *bflow;
 	int num_valid = 0;
@@ -100,10 +101,10 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (argc > 1 && *argv[1] == '-')
 		errors = strchr(argv[1], 'e');
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return CMD_RET_FAILURE;
-	dev = state->cur_bootdev;
+	dev = std->cur_bootdev;
 
 	/* If we have a device, just list bootflows attached to that device */
 	if (dev) {
@@ -133,7 +134,7 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct bootflow_iter iter;
 	struct udevice *dev;
 	struct bootflow bflow;
@@ -142,10 +143,10 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 	int ret, i;
 	int flags;
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return CMD_RET_FAILURE;
-	dev = state->cur_bootdev;
+	dev = std->cur_bootdev;
 
 	if (argc > 1 && *argv[1] == '-') {
 		all = strchr(argv[1], 'a');
@@ -162,7 +163,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			return CMD_RET_FAILURE;
 	}
 
-	state->cur_bootflow = NULL;
+	std->cur_bootflow = NULL;
 
 	flags = 0;
 	if (list)
@@ -202,7 +203,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			printf("Scanning for bootflows in all bootdevs\n");
 			show_header();
 		}
-		bootdev_clear_glob();
+		bootstd_clear_glob();
 
 		for (i = 0,
 		     ret = bootflow_scan_first(&iter, flags, &bflow);
@@ -233,7 +234,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 static int do_bootflow_select(struct cmd_tbl *cmdtp, int flag, int argc,
 			      char *const argv[])
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct bootflow *bflow, *found;
 	struct udevice *dev;
 	const char *name;
@@ -241,15 +242,15 @@ static int do_bootflow_select(struct cmd_tbl *cmdtp, int flag, int argc,
 	int seq, i;
 	int ret;
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return CMD_RET_FAILURE;
 ;
 	if (argc < 2) {
-		state->cur_bootflow = NULL;
+		std->cur_bootflow = NULL;
 		return 0;
 	}
-	dev = state->cur_bootdev;
+	dev = std->cur_bootdev;
 
 	name = argv[1];
 	seq = simple_strtol(name, &endp, 16);
@@ -286,7 +287,7 @@ static int do_bootflow_select(struct cmd_tbl *cmdtp, int flag, int argc,
 		printf("(err=%d)\n", ret);
 		return CMD_RET_FAILURE;
 	}
-	state->cur_bootflow = found;
+	std->cur_bootflow = found;
 
 	return 0;
 }
@@ -294,7 +295,7 @@ static int do_bootflow_select(struct cmd_tbl *cmdtp, int flag, int argc,
 static int do_bootflow_info(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct bootflow *bflow;
 	bool dump = false;
 	int ret;
@@ -302,15 +303,15 @@ static int do_bootflow_info(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (argc > 1 && *argv[1] == '-')
 		dump = strchr(argv[1], 'd');
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return CMD_RET_FAILURE;
 
-	if (!state->cur_bootflow) {
+	if (!std->cur_bootflow) {
 		printf("No bootflow selected\n");
 		return CMD_RET_FAILURE;
 	}
-	bflow = state->cur_bootflow;
+	bflow = std->cur_bootflow;
 
 	printf("Name:      %s\n", bflow->name);
 	printf("Device:    %s\n", bflow->dev->name);
@@ -345,11 +346,11 @@ static int do_bootflow_info(struct cmd_tbl *cmdtp, int flag, int argc,
 static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct bootflow *bflow;
 	int ret;
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return CMD_RET_FAILURE;
 
@@ -357,11 +358,11 @@ static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 	 * Require a current bootflow. Users can use 'bootflow scan -b' to
 	 * automatically scan and boot, if needed.
 	 */
-	if (!state->cur_bootflow) {
+	if (!std->cur_bootflow) {
 		printf("No bootflow selected\n");
 		return CMD_RET_FAILURE;
 	}
-	bflow = state->cur_bootflow;
+	bflow = std->cur_bootflow;
 	ret = bootflow_run_boot(NULL, bflow);
 	if (ret)
 		return CMD_RET_FAILURE;

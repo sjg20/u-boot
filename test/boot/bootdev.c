@@ -51,10 +51,10 @@ BOOTDEV_TEST(bootdev_test_cmd_list, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check 'bootdev select' and 'info' commands */
 static int bootdev_test_cmd_select(struct unit_test_state *uts)
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 
 	/* get access to the CLI's cur_bootdev */
-	ut_assertok(bootdev_get_state(&state));
+	ut_assertok(bootstd_get_priv(&std));
 
 	console_record_reset_enable();
 	ut_asserteq(1, run_command("bootdev info", 0));
@@ -76,19 +76,19 @@ static int bootdev_test_cmd_select(struct unit_test_state *uts)
 	/* select by bootdev name */
 	ut_assertok(run_command("bootdev select mmc1.bootdev", 0));
 	ut_assert_console_end();
-	ut_assertnonnull(state->cur_bootdev);
-	ut_asserteq_str("mmc1.bootdev", state->cur_bootdev->name);
+	ut_assertnonnull(std->cur_bootdev);
+	ut_asserteq_str("mmc1.bootdev", std->cur_bootdev->name);
 
 	/* select by bootdev label*/
 	ut_assertok(run_command("bootdev select mmc1", 0));
 	ut_assert_console_end();
-	ut_assertnonnull(state->cur_bootdev);
-	ut_asserteq_str("mmc1.bootdev", state->cur_bootdev->name);
+	ut_assertnonnull(std->cur_bootdev);
+	ut_asserteq_str("mmc1.bootdev", std->cur_bootdev->name);
 
 	/* deselect */
 	ut_assertok(run_command("bootdev select", 0));
 	ut_assert_console_end();
-	ut_assertnull(state->cur_bootdev);
+	ut_assertnull(std->cur_bootdev);
 
 	ut_asserteq(1, run_command("bootdev info", 0));
 	ut_assert_nextlinen("Please use");

@@ -42,17 +42,17 @@ const char *bootflow_state_get_name(enum bootflow_state_t state)
 
 int bootflow_first_glob(struct bootflow **bflowp)
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	int ret;
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return ret;
 
-	if (list_empty(&state->glob_head))
+	if (list_empty(&std->glob_head))
 		return -ENOENT;
 
-	*bflowp = list_first_entry(&state->glob_head, struct bootflow,
+	*bflowp = list_first_entry(&std->glob_head, struct bootflow,
 				   glob_node);
 
 	return 0;
@@ -60,17 +60,17 @@ int bootflow_first_glob(struct bootflow **bflowp)
 
 int bootflow_next_glob(struct bootflow **bflowp)
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct bootflow *bflow = *bflowp;
 	int ret;
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return ret;
 
 	*bflowp = NULL;
 
-	if (list_is_last(&bflow->glob_node, &state->glob_head))
+	if (list_is_last(&bflow->glob_node, &std->glob_head))
 		return -ENOENT;
 
 	*bflowp = list_entry(bflow->glob_node.next, struct bootflow, glob_node);
@@ -245,7 +245,7 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
  * setup_bootmeth_order() - Set up the ordering of bootmeths to scan
  *
  * This sets up the ordering information in @iter, based on the selected
- * ordering of the bootmethds in bootdev_state->bootmeth_order. If there is no
+ * ordering of the bootmethds in bootstd_priv->bootmeth_order. If there is no
  * ordering there, then all bootmethods are added
  *
  * @iter: Iterator to update with the order
@@ -254,17 +254,17 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
  */
 static int setup_bootmeth_order(struct bootflow_iter *iter)
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct udevice **order;
 	int count;
 	int ret;
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return ret;
 
 	/* Create an array large enough */
-	count = state->bootmeth_count ? state->bootmeth_count :
+	count = std->bootmeth_count ? std->bootmeth_count :
 		uclass_id_count(UCLASS_BOOTMETH);
 	if (!count)
 		return log_msg_ret("count", -ENOENT);
@@ -274,8 +274,8 @@ static int setup_bootmeth_order(struct bootflow_iter *iter)
 		return log_msg_ret("order", -ENOMEM);
 
 	/* If we have an ordering, copy it */
-	if (state->bootmeth_count) {
-		memcpy(order, state->bootmeth_order,
+	if (std->bootmeth_count) {
+		memcpy(order, std->bootmeth_order,
 		       count * sizeof(struct bootmeth *));
 	} else {
 		struct udevice *dev;

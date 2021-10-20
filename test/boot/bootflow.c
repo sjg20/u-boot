@@ -210,7 +210,7 @@ static int bootflow_iter(struct unit_test_state *uts)
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
-	bootdev_clear_glob();
+	bootstd_clear_glob();
 
 	/* The first device is mmc2.bootdev which has no media */
 	ut_asserteq(-EPROTONOSUPPORT,
@@ -314,7 +314,7 @@ static int bootflow_iter_disable(struct unit_test_state *uts)
 	ut_assertok(device_bind_driver(bootstd, "efi_mgr_bootmeth", "bootmgr",
 				       &dev));
 
-	bootdev_clear_glob();
+	bootstd_clear_glob();
 
 	/* Try to boot the bootmgr flow, which will fail */
 	console_record_reset_enable();

@@ -9,6 +9,7 @@
 #include <common.h>
 #include <bootdev.h>
 #include <bootmeth.h>
+#include <bootstd.h>
 #include <command.h>
 #include <dm.h>
 #include <malloc.h>
@@ -17,7 +18,7 @@
 static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 			    char *const argv[])
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct udevice *dev;
 	bool use_order;
 	bool all = false;
@@ -30,7 +31,7 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 		argv++;
 	}
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return ret;
 
@@ -41,9 +42,9 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 	 * Use the ordering if we have one, so long as we are not trying to list
 	 * all bootmethds
 	 */
-	use_order = state->bootmeth_count && !all;
+	use_order = std->bootmeth_count && !all;
 	if (use_order)
-		dev = state->bootmeth_order[0];
+		dev = std->bootmeth_order[0];
 	else
 		ret = uclass_find_first_device(UCLASS_BOOTMETH, &dev);
 
@@ -55,13 +56,13 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 		 * With the -a flag we may list bootdevs that are not in the
 		 * ordering. Find their place in the order
 		 */
-		if (all && state->bootmeth_count) {
+		if (all && std->bootmeth_count) {
 			int j;
 
 			/* Find the position of this bootmeth in the order */
 			order = -1;
-			for (j = 0; j < state->bootmeth_count; j++) {
-				if (state->bootmeth_order[j] == dev)
+			for (j = 0; j < std->bootmeth_count; j++) {
+				if (std->bootmeth_order[j] == dev)
 					order = j;
 			}
 		}
@@ -74,7 +75,7 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 		       ucp->desc);
 		i++;
 		if (use_order)
-			dev = state->bootmeth_order[i];
+			dev = std->bootmeth_order[i];
 		else
 			uclass_find_next_device(&dev);
 	}
@@ -86,18 +87,18 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 
 static int bootmeth_select_order(int argc, char *const argv[])
 {
-	struct bootdev_state *state;
+	struct bootstd_priv *std;
 	struct udevice **order;
 	int count, ret, i;
 
-	ret = bootdev_get_state(&state);
+	ret = bootstd_get_priv(&std);
 	if (ret)
 		return ret;
 
 	if (!argc) {
-		free(state->bootmeth_order);
-		state->bootmeth_order = NULL;
-		state->bootmeth_count = 0;
+		free(std->bootmeth_order);
+		std->bootmeth_order = NULL;
+		std->bootmeth_count = 0;
 		return 0;
 	}
 
@@ -123,9 +124,9 @@ static int bootmeth_select_order(int argc, char *const argv[])
 		order[i] = dev;
 	}
 	order[i] = NULL;
-	free(state->bootmeth_order);
-	state->bootmeth_order = order;
-	state->bootmeth_count = i;
+	free(std->bootmeth_order);
+	std->bootmeth_order = order;
+	std->bootmeth_count = i;
 
 	return 0;
 }

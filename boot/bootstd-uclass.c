@@ -7,6 +7,7 @@
  */
 
 #include <common.h>
+#include <bootflow.h>
 #include <bootstd.h>
 #include <dm.h>
 #include <malloc.h>
@@ -27,21 +28,65 @@ static int bootstd_of_to_plat(struct udevice *dev)
 	return 0;
 }
 
+static void bootstd_clear_glob_(struct bootstd_priv *priv)
+{
+	while (!list_empty(&priv->glob_head)) {
+		struct bootflow *bflow;
+
+		bflow = list_first_entry(&priv->glob_head, struct bootflow,
+					 glob_node);
+		bootflow_remove(bflow);
+	}
+}
+
+void bootstd_clear_glob(void)
+{
+	struct bootstd_priv *std;
+
+	if (bootstd_get_priv(&std))
+		return;
+
+	bootstd_clear_glob_(std);
+}
+
 static int bootstd_remove(struct udevice *dev)
 {
 	struct bootstd_priv *priv = dev_get_priv(dev);
 
 	free(priv->prefixes);
 	free(priv->order);
+	bootstd_clear_glob_(priv);
 
 	return 0;
 }
 
 const char *const *const bootstd_get_order(struct udevice *dev)
 {
-	struct bootstd_priv *priv = dev_get_priv(dev);
+	struct bootstd_priv *std = dev_get_priv(dev);
 
-	return priv->order;
+	return std->order;
+}
+
+int bootstd_get_priv(struct bootstd_priv **stdp)
+{
+	struct udevice *dev;
+	int ret;
+
+	ret = uclass_first_device_err(UCLASS_BOOTSTD, &dev);
+	if (ret)
+		return ret;
+	*stdp = dev_get_priv(dev);
+
+	return 0;
+}
+
+static int bootstd_probe(struct udevice *dev)
+{
+	struct bootstd_priv *std = dev_get_priv(dev);
+
+	INIT_LIST_HEAD(&std->glob_head);
+
+	return 0;
 }
 
 static const struct udevice_id bootstd_ids[] = {
@@ -53,6 +98,7 @@ U_BOOT_DRIVER(bootstd_drv) = {
 	.id		= UCLASS_BOOTSTD,
 	.name		= "bootstd_drv",
 	.of_to_plat	= bootstd_of_to_plat,
+	.probe		= bootstd_probe,
 	.remove		= bootstd_remove,
 	.of_match	= bootstd_ids,
 	.priv_auto	= sizeof(struct bootstd_priv),
