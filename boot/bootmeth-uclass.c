@@ -66,7 +66,12 @@ int dm_scan_other(bool pre_reloc_only)
 		return log_msg_ret("bootstd", ret);
 
 	for (i = 0; i < n_ents; i++, drv++) {
-		if (drv->id == UCLASS_BOOTMETH) {
+		/*
+		 * Disable EFI Manager for now as no one uses it so it is
+		 * confusing
+		 */
+		if (drv->id == UCLASS_BOOTMETH &&
+		    strcmp("efi_mgr_bootmeth", drv->name)) {
 			ret = device_bind(bootstd, drv, drv->name, 0,
 					  ofnode_null(), &dev);
 			if (ret)

@@ -317,8 +317,6 @@ static int iter_incr(struct bootflow_iter *iter)
 
 	if (iter->err != BF_NO_MORE_PARTS && iter->err != BF_NO_MORE_METHODS) {
 		/* Get the next boothmethod */
-		iter->method = iter->method_order[++iter->cur_method];
-
 		if (++iter->cur_method < iter->num_methods) {
 			iter->method = iter->method_order[iter->cur_method];
 			return 0;
