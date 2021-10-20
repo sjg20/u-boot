@@ -149,6 +149,18 @@ void bootflow_iter_init(struct bootflow_iter *iter, int flags);
 void bootflow_iter_uninit(struct bootflow_iter *iter);
 
 /**
+ * bootflow_iter_drop_bootmeth() - Remove a bootmeth from an iterator
+ *
+ * Update the iterator so that the bootmeth will not be used again while this
+ * iterator is in use
+ *
+ * @iter: Iterator to update
+ * @bmeth: Boot method to remove
+ */
+int bootflow_iter_drop_bootmeth(struct bootflow_iter *iter,
+				const struct udevice *bmeth);
+
+/**
  * bootflow_scan_bootdev() - find the first bootflow in a bootdev
  *
  * If @flags includes BOOTFLOWF_ALL then bootflows with errors are returned too
@@ -230,7 +242,9 @@ void bootflow_free(struct bootflow *bflow);
  * @bflow: Bootflow to boot
  * @return -EPROTO if bootflow has not been loaded, -ENOSYS if the bootflow
  *	type is not supported, -EFAULT if the boot returned without an error
- *	when we are expecting it to boot
+ *	when we are expecting it to boot, -ENOTSUPP if trying method resulted in
+ *	finding out that is not actually supported for this boot and should not
+ *	be tried again unless something changes
  */
 int bootflow_boot(struct bootflow *bflow);
 

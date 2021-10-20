@@ -130,7 +130,15 @@ static int do_bootflow_list(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
-static int bootflow_run_boot(struct bootflow *bflow)
+/**
+ * bootflow_run_boot() - Try to boot a bootflow
+ *
+ * @iter: Current iteration (or NULL if none). Used to disable a bootmeth if the
+ *	boot returns -ENOTSUPP
+ * @bflow: Bootflow to boot
+ * @return result of trying to boot
+ */
+static int bootflow_run_boot(struct bootflow_iter *iter, struct bootflow *bflow)
 {
 	int ret;
 
@@ -145,8 +153,15 @@ static int bootflow_run_boot(struct bootflow *bflow)
 		printf("Boot method '%s' not supported\n", bflow->method->name);
 		break;
 	case -ENOTSUPP:
-		printf("Boot method '%s' failed and will not be retried\n",
-		       bflow->method->name);
+		/* Disable this bootflow for this iteration */
+		if (iter) {
+			ret = bootflow_iter_drop_bootmeth(iter, bflow->method);
+			if (!ret) {
+				printf("Boot method '%s' failed and will not be retried\n",
+				       bflow->method->name);
+			}
+		}
+
 		break;
 	default:
 		printf("Boot failed (err=%d)\n", ret);
@@ -221,7 +236,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			if (list)
 				show_bootflow(i, &bflow, errors);
 			if (boot && !bflow.err)
-				bootflow_run_boot(&bflow);
+				bootflow_run_boot(&iter, &bflow);
 		}
 	} else {
 		if (list) {
@@ -244,8 +259,9 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 			}
 			if (list)
 				show_bootflow(i, &bflow, errors);
-			if (boot && !bflow.err)
-				bootflow_run_boot(&bflow);
+			if (boot && !bflow.err) {
+				bootflow_run_boot(&iter, &bflow);
+			}
 		}
 	}
 	bootflow_iter_uninit(&iter);
@@ -387,7 +403,7 @@ static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 		return CMD_RET_FAILURE;
 	}
 	bflow = state->cur_bootflow;
-	ret = bootflow_run_boot(bflow);
+	ret = bootflow_run_boot(NULL, bflow);
 	if (ret) {
 		printf("Boot failed (err %d)n", ret);
 		return CMD_RET_FAILURE;

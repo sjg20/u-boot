@@ -90,6 +90,23 @@ void bootflow_iter_uninit(struct bootflow_iter *iter)
 	free(iter->method_order);
 }
 
+int bootflow_iter_drop_bootmeth(struct bootflow_iter *iter,
+				const struct udevice *bmeth)
+{
+	/* We only support disabling the current bootmeth */
+	if (bmeth != iter->method || iter->cur_method >= iter->num_methods ||
+	    iter->method_order[iter->cur_method] != bmeth)
+		return -EINVAL;
+
+	memmove(&iter->method_order[iter->cur_method],
+		&iter->method_order[iter->cur_method + 1],
+		(iter->num_methods - iter->cur_method - 1) * sizeof(void *));
+
+	iter->num_methods--;
+
+	return 0;
+}
+
 static void bootflow_iter_set_dev(struct bootflow_iter *iter,
 				  struct udevice *dev)
 {
@@ -476,12 +493,6 @@ int bootflow_boot(struct bootflow *bflow)
 		return log_msg_ret("load", -EPROTO);
 
 	ret = bootmeth_boot(bflow->method, bflow);
-	if (ret == -ENOTSUPP) {
-
-	}
-	if (ret)
-		return log_msg_ret("method", ret);
-
 	if (ret)
 		return log_msg_ret("boot", ret);
 

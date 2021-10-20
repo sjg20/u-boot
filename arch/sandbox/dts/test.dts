@@ -84,10 +84,6 @@
 		efi {
 			compatible = "u-boot,distro-efi";
 		};
-
-		bootmgr {
-			compatible = "u-boot,efi-bootmgr";
-		};
 	};
 
 	reboot-mode0 {

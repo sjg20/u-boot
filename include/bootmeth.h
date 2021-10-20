@@ -59,8 +59,9 @@ struct bootmeth_ops {
 	 * @bflow:	Bootflow to boot
 	 * @return does not return on success, since it should boot the
 	 *	Operating Systemn. Returns -EFAULT if that fails, -ENOTSUPP if
-	 *	this method is not actually supported and should be disabled for
-	 *	this boot, other -ve on other error
+	 *	trying method resulted in finding out that is not actually
+	 *	supported for this boot and should not be tried again unless
+	 *	something changes, other -ve on other error
 	 */
 	int (*boot)(struct udevice *dev, struct bootflow *bflow);
 };
