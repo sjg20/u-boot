@@ -150,7 +150,7 @@ static int h_cmp_bootdev(const void *v1, const void *v2)
  * setup_order() - Set up the ordering of bootdevs to scan
  *
  * This sets up the ordering information in @iter, based on the priority of each
- * bootdev and the bootmeth-order property in the bootstd node
+ * bootdev and the bootdev-order property in the bootstd node
  *
  * If a single device is requested, no ordering is needed
  *
@@ -205,7 +205,7 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
 			    count, upto);
 	count = upto;
 
-	labels = bootstd_get_order(bootstd);
+	labels = bootstd_get_bootdev_order(bootstd);
 	if (labels) {
 		upto = 0;
 		for (i = 0; labels[i]; i++) {

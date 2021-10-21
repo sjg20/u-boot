@@ -21,7 +21,7 @@ static int bootstd_of_to_plat(struct udevice *dev)
 	ret = dev_read_string_list(dev, "filename-prefixes", &priv->prefixes);
 	if (ret < 0 && ret != -EINVAL)
 		return log_msg_ret("fname", ret);
-	ret = dev_read_string_list(dev, "bootmeth-order", &priv->order);
+	ret = dev_read_string_list(dev, "bootdev-order", &priv->bootdev_order);
 	if (ret < 0 && ret != -EINVAL)
 		return log_msg_ret("order", ret);
 
@@ -54,17 +54,17 @@ static int bootstd_remove(struct udevice *dev)
 	struct bootstd_priv *priv = dev_get_priv(dev);
 
 	free(priv->prefixes);
-	free(priv->order);
+	free(priv->bootdev_order);
 	bootstd_clear_glob_(priv);
 
 	return 0;
 }
 
-const char *const *const bootstd_get_order(struct udevice *dev)
+const char *const *const bootstd_get_bootdev_order(struct udevice *dev)
 {
 	struct bootstd_priv *std = dev_get_priv(dev);
 
-	return std->order;
+	return std->bootdev_order;
 }
 
 const char *const *const bootstd_get_prefixes(struct udevice *dev)
@@ -97,7 +97,7 @@ static int bootstd_probe(struct udevice *dev)
 }
 
 static const struct udevice_id bootstd_ids[] = {
-	{ .compatible = "u-boot,boot-standard" },
+	{ .compatible = "u-boot,boot-std" },
 	{ }
 };
 

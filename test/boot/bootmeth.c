@@ -9,10 +9,10 @@
 #include <common.h>
 #include <test/suites.h>
 #include <test/ut.h>
-#include "bootdev_common.h"
+#include "bootstd_common.h"
 
 /* Check 'bootmeth list' command */
-static int bootmeth_cmd_list(struct unit_test_state *uts)
+static int bootstd_test_bootmeth_cmd_list(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootmeth list", 0));
@@ -26,10 +26,10 @@ static int bootmeth_cmd_list(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootmeth_cmd_list, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootstd_test_bootmeth_cmd_list, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootmeth order' command */
-static int bootmeth_cmd_order(struct unit_test_state *uts)
+static int bootstd_test_bootmeth_cmd_order(struct unit_test_state *uts)
 {
 	/* Select just one bootmethod */
 	console_record_reset_enable();
@@ -87,4 +87,4 @@ static int bootmeth_cmd_order(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootmeth_cmd_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootstd_test_bootmeth_cmd_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);

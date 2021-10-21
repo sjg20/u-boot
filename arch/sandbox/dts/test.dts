@@ -72,10 +72,10 @@
 	};
 
 	bootstd {
-		compatible = "u-boot,boot-standard";
+		compatible = "u-boot,boot-std";
 
 		filename-prefixes = "/", "/boot/";
-		bootmeth-order = "mmc2", "mmc1";
+		bootdev-order = "mmc2", "mmc1";
 
 		syslinux {
 			compatible = "u-boot,distro-syslinux";

@@ -222,7 +222,8 @@ int bootdev_setup_sibling_blk(struct udevice *blk, const char *drv_name);
  *
  * @dev: bootdev to check
  * @blkp: returns associated block device
- * @return 0 if OK, -ve on error
+ * @return 0 if OK, -EINVAL if @dev is not a bootdev device, other -ve on other
+ *	error
  */
 int bootdev_get_sibling_blk(struct udevice *dev, struct udevice **blkp);
 

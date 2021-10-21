@@ -2,4 +2,4 @@
 #
 # Copyright 2021 Google LLC
 
-obj-$(CONFIG_BOOTDEV) += bootdev.o bootdev_common.o bootflow.o bootmeth.o
+obj-$(CONFIG_BOOTDEV) += bootdev.o bootstd_common.o bootflow.o bootmeth.o

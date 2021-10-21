@@ -15,13 +15,13 @@
 #include <os.h>
 #include <test/suites.h>
 #include <test/ut.h>
-#include "bootdev_common.h"
+#include "bootstd_common.h"
 
 /* Allow reseting the USB-started flag */
 extern char usb_started;
 
 /* Check 'bootdev list' command */
-static int bootdev_test_cmd_list(struct unit_test_state *uts)
+static int bootstd_test_bootdev_cmd_list(struct unit_test_state *uts)
 {
 	int probed;
 
@@ -46,10 +46,10 @@ static int bootdev_test_cmd_list(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_cmd_list, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootstd_test_bootdev_cmd_list, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootdev select' and 'info' commands */
-static int bootdev_test_cmd_select(struct unit_test_state *uts)
+static int bootstd_test_bootdev_cmd_select(struct unit_test_state *uts)
 {
 	struct bootstd_priv *std;
 
@@ -96,10 +96,10 @@ static int bootdev_test_cmd_select(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_cmd_select, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootstd_test_bootdev_cmd_select, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check bootdev labels */
-static int bootdev_test_labels(struct unit_test_state *uts)
+static int bootstd_test_bootdev_labels(struct unit_test_state *uts)
 {
 	struct udevice *dev, *media;
 
@@ -117,10 +117,10 @@ static int bootdev_test_labels(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_labels, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootstd_test_bootdev_labels, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
-/* Check bootdev ordering with the bootmeth-order property */
-static int bootdev_test_order(struct unit_test_state *uts)
+/* Check bootdev ordering with the bootdev-order property */
+static int bootstd_test_bootdev_order(struct unit_test_state *uts)
 {
 	struct bootflow_iter iter;
 	struct bootflow bflow;
@@ -131,7 +131,7 @@ static int bootdev_test_order(struct unit_test_state *uts)
 	ut_asserteq_str("mmc1.bootdev", iter.dev_order[1]->name);
 	bootflow_iter_uninit(&iter);
 
-	ut_assertok(bootdev_test_drop_boot_order(uts));
+	ut_assertok(bootstd_test_drop_bootdev_order(uts));
 
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
 	ut_asserteq(3, iter.num_devs);
@@ -157,20 +157,21 @@ static int bootdev_test_order(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootstd_test_bootdev_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check bootdev ordering with the uclass priority */
-static int bootdev_test_prio(struct unit_test_state *uts)
+static int bootstd_test_bootdev_prio(struct unit_test_state *uts)
 {
 	struct bootdev_uc_plat *ucp;
 	struct bootflow_iter iter;
 	struct bootflow bflow;
+	struct udevice *blk;
 
 	/* Start up USB which gives us three additional bootdevs */
 	usb_started = false;
 	ut_assertok(run_command("usb start", 0));
 
-	ut_assertok(bootdev_test_drop_boot_order(uts));
+	ut_assertok(bootstd_test_drop_bootdev_order(uts));
 
 	/* 3 MMC and 3 USB bootdevs: MMC should come before USB */
 	console_record_reset_enable();
@@ -179,6 +180,9 @@ static int bootdev_test_prio(struct unit_test_state *uts)
 	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
 	ut_asserteq_str("usb_mass_storage.lun0.bootdev",
 			iter.dev_order[3]->name);
+
+	ut_assertok(bootdev_get_sibling_blk(iter.dev_order[3], &blk));
+	ut_asserteq_str("usb_mass_storage.lun0", blk->name);
 
 	/* adjust the priority of the first USB bootdev to the highest */
 	ucp = dev_get_uclass_plat(iter.dev_order[3]);
@@ -193,13 +197,4 @@ static int bootdev_test_prio(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTDEV_TEST(bootdev_test_prio, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
-
-int do_ut_bootdev(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
-{
-	struct unit_test *tests = UNIT_TEST_SUITE_START(bootdev_test);
-	const int n_ents = UNIT_TEST_SUITE_COUNT(bootdev_test);
-
-	return cmd_ut_category("bootdev", "bootdev_test_",
-			       tests, n_ents, argc, argv);
-}
+BOOTSTD_TEST(bootstd_test_bootdev_prio, UT_TESTF_DM | UT_TESTF_SCAN_FDT);

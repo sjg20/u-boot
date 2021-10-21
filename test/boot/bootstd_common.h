@@ -6,22 +6,22 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#ifndef __bootdev_test_h
-#define __bootdev_test_h
+#ifndef __bootstd_common_h
+#define __bootstd_common_h
 
 /* Declare a new bootdev test */
-#define BOOTDEV_TEST(_name, _flags) \
-		UNIT_TEST(_name, _flags, bootdev_test)
+#define BOOTSTD_TEST(_name, _flags) \
+		UNIT_TEST(_name, _flags, bootstd_test)
 
 struct unit_test_state;
 
 /**
- * bootdev_test_drop_boot_order() - Remove the existing boot order
+ * bootstd_test_drop_bootdev_order() - Remove the existing boot order
  *
  * Drop the boot order so that all bootdevs are used in their alias order
  *
  * @uts: Unit test state to use for ut_assert...() functions
  */
-int bootdev_test_drop_boot_order(struct unit_test_state *uts);
+int bootstd_test_drop_bootdev_order(struct unit_test_state *uts);
 
 #endif
