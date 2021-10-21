@@ -241,8 +241,8 @@ static const struct udevice_id distro_efi_bootmeth_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(efi_bootmeth) = {
-	.name		= "efi_bootmeth",
+U_BOOT_DRIVER(bootmeth_efi) = {
+	.name		= "bootmeth_efi",
 	.id		= UCLASS_BOOTMETH,
 	.of_match	= distro_efi_bootmeth_ids,
 	.ops		= &distro_efi_bootmeth_ops,

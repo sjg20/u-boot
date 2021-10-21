@@ -314,6 +314,7 @@ int bootdev_find_by_label(const char *label, struct udevice **devp)
 	enum uclass_id id;
 	int seq, len;
 
+	log_info("label=%s\n", label);
 	seq = trailing_strtoln_len(label, NULL, &len);
 	id = uclass_get_by_name_len(label, len);
 	if (id == UCLASS_INVALID) {
@@ -347,6 +348,7 @@ int bootdev_find_by_any(const char *name, struct udevice **devp)
 	int ret, seq;
 	char *endp;
 
+	log_info("name=%s\n", name);
 	seq = simple_strtol(name, &endp, 16);
 
 	/* Select by name, label or number */

@@ -10,6 +10,7 @@
 #include <bootdev.h>
 #include <bootflow.h>
 #include <bootmeth.h>
+#include <bootstd.h>
 #include <command.h>
 #include <distro.h>
 #include <dm.h>
@@ -41,10 +42,17 @@ static int disto_getfile(struct pxe_context *ctx, const char *file_path,
 int distro_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 {
 	struct blk_desc *desc = dev_get_uclass_plat(bflow->blk);
+	const char *const *prefixes;
+	struct udevice *bootstd;
 	loff_t size, bytes_read;
+	char fname[200];
 	ulong addr;
+	int ret, i;
 	char *buf;
-	int ret;
+
+	ret = uclass_first_device_err(UCLASS_BOOTSTD, &bootstd);
+	if (ret)
+		return log_msg_ret("std", ret);
 
 	/* We require a partition table */
 	if (!bflow->part)
@@ -53,9 +61,27 @@ int distro_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	bflow->fname = strdup(DISTRO_FNAME);
 	if (!bflow->fname)
 		return log_msg_ret("name", -ENOMEM);
-	ret = fs_size(bflow->fname, &size);
+
+	prefixes = bootstd_get_prefixes(bootstd);
+	if (prefixes) {
+		for (i = 0; prefixes[i]; i++) {
+			snprintf(fname, sizeof(fname), "%s%s", prefixes[i],
+				 DISTRO_FNAME);
+			ret = fs_size(fname, &size);
+			if (!ret)
+				break;
+		}
+	} else {
+		strcpy(fname, DISTRO_FNAME);
+		ret = fs_size(bflow->fname, &size);
+	}
 	if (ret)
 		return log_msg_ret("size", ret);
+
+	bflow->fname = strdup(fname);
+	if (!bflow->fname)
+		return log_msg_ret("name", -ENOMEM);
+
 	bflow->state = BOOTFLOWST_FILE;
 	bflow->size = size;
 	log_debug("   - distro file size %x\n", (uint)size);
@@ -157,8 +183,8 @@ static const struct udevice_id distro_bootmeth_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(distro_bootmeth) = {
-	.name		= "distro_bootmeth",
+U_BOOT_DRIVER(bootmeth_distro) = {
+	.name		= "bootmeth_distro",
 	.id		= UCLASS_BOOTMETH,
 	.of_match	= distro_bootmeth_ids,
 	.ops		= &distro_bootmeth_ops,

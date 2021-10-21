@@ -9,6 +9,7 @@
 #include <common.h>
 #include <bootdev.h>
 #include <bootflow.h>
+#include <bootstd.h>
 #include <dm.h>
 #include <dm/lists.h>
 #include <test/suites.h>

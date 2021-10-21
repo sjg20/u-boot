@@ -19,10 +19,10 @@ static int bootstd_of_to_plat(struct udevice *dev)
 	int ret;
 
 	ret = dev_read_string_list(dev, "filename-prefixes", &priv->prefixes);
-	if (ret < 0 && ret != -ENOENT)
+	if (ret < 0 && ret != -EINVAL)
 		return log_msg_ret("fname", ret);
 	ret = dev_read_string_list(dev, "bootmeth-order", &priv->order);
-	if (ret < 0 && ret != -ENOENT)
+	if (ret < 0 && ret != -EINVAL)
 		return log_msg_ret("order", ret);
 
 	return 0;
@@ -65,6 +65,13 @@ const char *const *const bootstd_get_order(struct udevice *dev)
 	struct bootstd_priv *std = dev_get_priv(dev);
 
 	return std->order;
+}
+
+const char *const *const bootstd_get_prefixes(struct udevice *dev)
+{
+	struct bootstd_priv *std = dev_get_priv(dev);
+
+	return std->prefixes;
 }
 
 int bootstd_get_priv(struct bootstd_priv **stdp)

@@ -72,8 +72,12 @@ int dm_scan_other(bool pre_reloc_only)
 		 */
 		if (drv->id == UCLASS_BOOTMETH &&
 		    strcmp("efi_mgr_bootmeth", drv->name)) {
-			ret = device_bind(bootstd, drv, drv->name, 0,
-					  ofnode_null(), &dev);
+			const char *name = drv->name;
+
+			if (!strncmp("bootmeth_", name, 9))
+				name += 9;
+			ret = device_bind(bootstd, drv, name, 0, ofnode_null(),
+					  &dev);
 			if (ret)
 				return log_msg_ret("bind", ret);
 		}

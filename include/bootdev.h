@@ -11,7 +11,6 @@
 
 struct bootflow;
 struct bootflow_iter;
-struct bootstd_priv;
 struct udevice;
 
 /**
@@ -124,13 +123,6 @@ void bootdev_list(bool probe);
  * @dev: bootdev device to update
  */
 void bootdev_clear_bootflows(struct udevice *dev);
-
-/**
- * bootstd_clear_glob() - Clear the global list of bootflows
- *
- * This removes all bootflows globally and across all bootdevs.
- */
-void bootstd_clear_glob(void);
 
 /**
  * bootdev_add_bootflow() - Add a bootflow to the bootdev's list

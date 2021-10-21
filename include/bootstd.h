@@ -23,7 +23,7 @@ struct udevice;
  * 	bootdev label, e.g. "mmc2", "mmc1";
  * @cur_bootdev: Currently selected bootdev (for commands)
  * @cur_bootflow: Currently selected bootflow (for commands)
- * @glob_head: Head for the global list of all bootdevs across all bootflows
+ * @glob_head: Head for the global list of all bootflows across all bootdevs
  * @bootmeth_count: Number of bootmeth devices in @bootmeth_order
  * @bootmeth_order: List of bootmeth devices to use, in order, NULL-terminated
  */
@@ -43,12 +43,23 @@ struct bootstd_priv {
  * This reads the boot order, e.g. {"mmc0", "mmc2", NULL}
  *
  * The list is alloced by the bootstd driver so should not be freed. That is the
- * ready for all the const stuff in the function signature
+ * reason for all the const stuff in the function signature
  *
  * @return list of string points, terminated by NULL; or NULL if no boot order
  */
 const char *const *const bootstd_get_order(struct udevice *dev);
 
+/**
+ * bootstd_get_prefixes() - Get the filename-prefixes list
+ *
+ * This reads the prefixes, e.g. {"/", "/bpot", NULL}
+ *
+ * The list is alloced by the bootstd driver so should not be freed. That is the
+ * reason for all the const stuff in the function signature
+ *
+ * @return list of string points, terminated by NULL; or NULL if no boot order
+ */
+const char *const *const bootstd_get_prefixes(struct udevice *dev);
 
 /**
  * bootstd_get_priv() - Get the (single) state for the bootstd system
@@ -58,5 +69,12 @@ const char *const *const bootstd_get_order(struct udevice *dev);
  * @return 0 if OK, -ve if the uclass does not exist
  */
 int bootstd_get_priv(struct bootstd_priv **stdp);
+
+/**
+ * bootstd_clear_glob() - Clear the global list of bootflows
+ *
+ * This removes all bootflows globally and across all bootdevs.
+ */
+void bootstd_clear_glob(void);
 
 #endif

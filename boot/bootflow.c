@@ -207,18 +207,19 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
 
 	labels = bootstd_get_order(bootstd);
 	if (labels) {
+		upto = 0;
 		for (i = 0; labels[i]; i++) {
 			ret = bootdev_find_by_label(labels[i], &dev);
 			if (!ret) {
-				if (i == count) {
+				if (upto == count) {
 					log_warning("Expected at most %d bootdevs, but overflowed with boot_target '%s'\n",
 						    count, labels[i]);
 					break;
 				}
-				order[i++] = dev;
+				order[upto++] = dev;
 			}
 		}
-		count = i;
+		count = upto;
 		if (!count) {
 			free(order);
 			return log_msg_ret("targ", -ENOMEM);

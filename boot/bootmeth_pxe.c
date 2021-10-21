@@ -159,8 +159,8 @@ static const struct udevice_id distro_bootmeth_pxe_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(distro_bootmeth_pxe) = {
-	.name		= "distro_bootmeth_pxe",
+U_BOOT_DRIVER(bootmeth_pxe) = {
+	.name		= "bootmeth_pxe",
 	.id		= UCLASS_BOOTMETH,
 	.of_match	= distro_bootmeth_pxe_ids,
 	.ops		= &distro_bootmeth_pxe_ops,
