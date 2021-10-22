@@ -64,16 +64,28 @@ int distro_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 
 	prefixes = bootstd_get_prefixes(bootstd);
 	if (prefixes) {
+		log_debug("Trying prefixes:\n");
 		for (i = 0; prefixes[i]; i++) {
 			snprintf(fname, sizeof(fname), "%s%s", prefixes[i],
 				 DISTRO_FNAME);
 			ret = fs_size(fname, &size);
+			log_debug("   %s - err=%d\n", fname, ret);
 			if (!ret)
 				break;
+
+			/*
+			 * Sadly FS closes the file after fs_size() so we must
+			 * redo this
+			 */
+			ret = fs_set_blk_dev_with_part(desc, bflow->part);
+			if (ret)
+				return log_msg_ret("set", ret);
 		}
+		log_debug("   done\n");
 	} else {
 		strcpy(fname, DISTRO_FNAME);
 		ret = fs_size(bflow->fname, &size);
+		log_debug("No prefixes: %s - err=%d", fname, ret);
 	}
 	if (ret)
 		return log_msg_ret("size", ret);

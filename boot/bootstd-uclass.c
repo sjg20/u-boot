@@ -10,6 +10,7 @@
 #include <bootflow.h>
 #include <bootstd.h>
 #include <dm.h>
+#include <log.h>
 #include <malloc.h>
 #include <dm/read.h>
 
@@ -18,12 +19,9 @@ static int bootstd_of_to_plat(struct udevice *dev)
 	struct bootstd_priv *priv = dev_get_priv(dev);
 	int ret;
 
+	/* Don't check errors since livetree and flattree are different */
 	ret = dev_read_string_list(dev, "filename-prefixes", &priv->prefixes);
-	if (ret < 0 && ret != -EINVAL)
-		return log_msg_ret("fname", ret);
-	ret = dev_read_string_list(dev, "bootdev-order", &priv->bootdev_order);
-	if (ret < 0 && ret != -EINVAL)
-		return log_msg_ret("order", ret);
+	dev_read_string_list(dev, "bootdev-order", &priv->bootdev_order);
 
 	return 0;
 }
@@ -80,6 +78,7 @@ int bootstd_get_priv(struct bootstd_priv **stdp)
 	int ret;
 
 	ret = uclass_first_device_err(UCLASS_BOOTSTD, &dev);
+	log_info("ret=%d\n", ret);
 	if (ret)
 		return ret;
 	*stdp = dev_get_priv(dev);

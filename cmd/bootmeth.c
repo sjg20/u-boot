@@ -32,8 +32,10 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 
 	ret = bootstd_get_priv(&std);
-	if (ret)
-		return ret;
+	if (ret) {
+		printf("Cannot get bootstd (err=%d)\n", ret);
+		return CMD_RET_FAILURE;
+	}
 
 	printf("Order  Seq  Name                Description\n");
 	printf("-----  ---  ------------------  ------------------\n");
@@ -137,8 +139,10 @@ static int do_bootmeth_order(struct cmd_tbl *cmdtp, int flag, int argc,
 	int ret;
 
 	ret = bootmeth_select_order(argc - 1, argv + 1);
-	if (ret)
+	if (ret) {
+		printf("Failed (err=%d)\n", ret);
 		return CMD_RET_FAILURE;
+        }
 
 	return 0;
 }
