@@ -252,7 +252,9 @@ def get_sorted_lines(build_dir, sym_path):
     lines.sort()
     return lines
 
-re_ut_test_list = re.compile(r'[^a-zA-Z0-9_]_u_boot_list_2_ut_(.*)_test_2_\1_test_(.*)\s*$')
+re_ut_test_all = re.compile(r'[^a-zA-Z0-9_]_u_boot_list_2_ut_(.*)_test_2_(.*)\s*$')
+#re_ut_test_list = re.compile(r'[^a-zA-Z0-9_]_u_boot_list_2_ut_(.*)_test_2_\1_test_(.*)\s*$')
+re_ut_test_list = re_ut_test_all
 def generate_ut_subtest(metafunc, fixture_name, sym_path):
     """Provide parametrization for a ut_subtest fixture.
 
@@ -269,7 +271,7 @@ def generate_ut_subtest(metafunc, fixture_name, sym_path):
     Returns:
         Nothing.
     """
-    lines = get_sorted_syms(console.config.build_dir, sym_path)
+    lines = get_sorted_lines(console.config.build_dir, sym_path)
     vals = []
     for l in lines:
         m = re_ut_test_list.search(l)
@@ -279,12 +281,13 @@ def generate_ut_subtest(metafunc, fixture_name, sym_path):
     ids = ['ut_' + s.replace(' ', '_') for s in vals]
     metafunc.parametrize(fixture_name, vals, ids=ids)
 
+# Similar to re_ut_test_list but without the requirement that the
 re_ut_test_all = re.compile(r'[^a-zA-Z0-9_]_u_boot_list_2_ut_(.*)_test_2_(.*)\s*$')
 
 def check_test_names(build_dir, sym_paths):
     bad_tests = collections.defaultdict(list)
     for sym_path in sym_paths:
-        lines = get_sorted_syms(build_dir, sym_path)
+        lines = get_sorted_lines(build_dir, sym_path)
         for l in lines:
             m = re_ut_test_list.search(l)
             if not m:
