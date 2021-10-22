@@ -21,7 +21,7 @@
 extern char usb_started;
 
 /* Check 'bootdev list' command */
-static int bootstd_test_bootdev_cmd_list(struct unit_test_state *uts)
+static int bootdev_test_cmd_list(struct unit_test_state *uts)
 {
 	int probed;
 
@@ -46,10 +46,10 @@ static int bootstd_test_bootdev_cmd_list(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootdev_cmd_list, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootdev_test_cmd_list, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootdev select' and 'info' commands */
-static int bootstd_test_bootdev_cmd_select(struct unit_test_state *uts)
+static int bootdev_test_cmd_select(struct unit_test_state *uts)
 {
 	struct bootstd_priv *std;
 
@@ -96,10 +96,10 @@ static int bootstd_test_bootdev_cmd_select(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootdev_cmd_select, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootdev_test_cmd_select, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check bootdev labels */
-static int bootstd_test_bootdev_labels(struct unit_test_state *uts)
+static int bootdev_test_labels(struct unit_test_state *uts)
 {
 	struct udevice *dev, *media;
 
@@ -117,10 +117,10 @@ static int bootstd_test_bootdev_labels(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootdev_labels, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootdev_test_labels, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check bootdev ordering with the bootdev-order property */
-static int bootstd_test_bootdev_order(struct unit_test_state *uts)
+static int bootdev_test_order(struct unit_test_state *uts)
 {
 	struct bootflow_iter iter;
 	struct bootflow bflow;
@@ -157,10 +157,10 @@ static int bootstd_test_bootdev_order(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootdev_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootdev_test_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check bootdev ordering with the uclass priority */
-static int bootstd_test_bootdev_prio(struct unit_test_state *uts)
+static int bootdev_test_prio(struct unit_test_state *uts)
 {
 	struct bootdev_uc_plat *ucp;
 	struct bootflow_iter iter;
@@ -197,4 +197,4 @@ static int bootstd_test_bootdev_prio(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootdev_prio, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootdev_test_prio, UT_TESTF_DM | UT_TESTF_SCAN_FDT);

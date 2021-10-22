@@ -17,7 +17,7 @@
 #include "bootstd_common.h"
 
 /* Check 'bootflow scan/list' commands */
-static int bootstd_test_bootflow_cmd(struct unit_test_state *uts)
+static int bootflow_cmd(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootdev select 1", 0));
@@ -42,10 +42,10 @@ static int bootstd_test_bootflow_cmd(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootflow_cmd, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootflow_cmd, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow scan' with a name / label / seq */
-static int bootstd_test_bootflow_cmd_label(struct unit_test_state *uts)
+static int bootflow_cmd_label(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootflow scan -l mmc1", 0));
@@ -65,10 +65,10 @@ static int bootstd_test_bootflow_cmd_label(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootflow_cmd_label, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootflow_cmd_label, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow scan/list' commands using all bootdevs */
-static int bootstd_test_bootflow_cmd_glob(struct unit_test_state *uts)
+static int bootflow_cmd_glob(struct unit_test_state *uts)
 {
 	ut_assertok(bootstd_test_drop_bootdev_order(uts));
 
@@ -97,10 +97,10 @@ static int bootstd_test_bootflow_cmd_glob(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootflow_cmd_glob, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootflow_cmd_glob, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow scan -e' */
-static int bootstd_test_bootflow_cmd_scan_e(struct unit_test_state *uts)
+static int bootflow_cmd_scan_e(struct unit_test_state *uts)
 {
 	ut_assertok(bootstd_test_drop_bootdev_order(uts));
 
@@ -145,10 +145,10 @@ static int bootstd_test_bootflow_cmd_scan_e(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootflow_cmd_scan_e, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootflow_cmd_scan_e, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow info' */
-static int bootstd_test_bootflow_cmd_info(struct unit_test_state *uts)
+static int bootflow_cmd_info(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootdev select 1", 0));
@@ -183,10 +183,10 @@ static int bootstd_test_bootflow_cmd_info(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootflow_cmd_info, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootflow_cmd_info, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow scan -b' to boot the first available bootdev */
-static int bootstd_test_bootflow_scan_boot(struct unit_test_state *uts)
+static int bootflow_scan_boot(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootflow scan -b", 0));
@@ -203,10 +203,10 @@ static int bootstd_test_bootflow_scan_boot(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootflow_scan_boot, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootflow_scan_boot, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check iterating through available bootflows */
-static int bootstd_test_bootflow_iter(struct unit_test_state *uts)
+static int bootflow_iter(struct unit_test_state *uts)
 {
 	struct bootflow_iter iter;
 	struct bootflow bflow;
@@ -300,10 +300,10 @@ static int bootstd_test_bootflow_iter(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootflow_iter, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootflow_iter, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check disabling a bootmethod if it requests it */
-static int bootstd_test_bootflow_iter_disable(struct unit_test_state *uts)
+static int bootflow_iter_disable(struct unit_test_state *uts)
 {
 	struct udevice *bootstd, *dev;
 	struct bootflow_iter iter;
@@ -334,10 +334,10 @@ static int bootstd_test_bootflow_iter_disable(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootflow_iter_disable, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootflow_iter_disable, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check 'bootflow boot' to boot a selected bootflow */
-static int bootstd_test_bootflow_test_cmd_boot(struct unit_test_state *uts)
+static int bootflow_cmd_boot(struct unit_test_state *uts)
 {
 	console_record_reset_enable();
 	ut_assertok(run_command("bootdev select 1", 0));
@@ -360,4 +360,4 @@ static int bootstd_test_bootflow_test_cmd_boot(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootstd_test_bootflow_test_cmd_boot, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootflow_cmd_boot, UT_TESTF_DM | UT_TESTF_SCAN_FDT);

@@ -208,8 +208,6 @@ def pytest_configure(config):
     ubconfig.gdbserver = gdbserver
     ubconfig.dtb = build_dir + '/arch/sandbox/dts/test.dtb'
 
-    check_test_names(build_dir, ['u-boot.sym', 'spl/u-boot-spl.sym'])
-
     env_vars = (
         'board_type',
         'board_identity',
@@ -229,32 +227,7 @@ def pytest_configure(config):
         import u_boot_console_exec_attach
         console = u_boot_console_exec_attach.ConsoleExecAttach(log, ubconfig)
 
-def get_sorted_lines(build_dir, sym_path):
-    """Get a sorted list of lines from a .sym file
-
-    Example line:
-        00000000002e7a80 g     O .u_boot_list   0000000000000020
-            _u_boot_list_2_ut_bloblist_test_2_bloblist_test_cmd_info
-
-    Args:
-        build_dir: Directory containing the build output
-        sym_path: Path to the symbol file to read
-
-    Returns:
-        List of lines, each a string, sorted (i.e. in address order)
-    """
-    fn = os.path.join(build_dir, sym_path)
-    try:
-        with open(fn, 'rt') as f:
-            lines = f.readlines()
-    except:
-        lines = []
-    lines.sort()
-    return lines
-
-re_ut_test_all = re.compile(r'[^a-zA-Z0-9_]_u_boot_list_2_ut_(.*)_test_2_(.*)\s*$')
-#re_ut_test_list = re.compile(r'[^a-zA-Z0-9_]_u_boot_list_2_ut_(.*)_test_2_\1_test_(.*)\s*$')
-re_ut_test_list = re_ut_test_all
+re_ut_test_list = re.compile(r'[^a-zA-Z0-9_]_u_boot_list_2_ut_(.*)_test_2_(.*)\s*$')
 def generate_ut_subtest(metafunc, fixture_name, sym_path):
     """Provide parametrization for a ut_subtest fixture.
 
@@ -271,31 +244,23 @@ def generate_ut_subtest(metafunc, fixture_name, sym_path):
     Returns:
         Nothing.
     """
-    lines = get_sorted_lines(console.config.build_dir, sym_path)
+    fn = console.config.build_dir + sym_path
+    try:
+        with open(fn, 'rt') as f:
+            lines = f.readlines()
+    except:
+        lines = []
+    lines.sort()
+
     vals = []
     for l in lines:
         m = re_ut_test_list.search(l)
-        if m:
-            vals.append(m.group(1) + ' ' + m.group(2))
+        if not m:
+            continue
+        vals.append(m.group(1) + ' ' + m.group(2))
 
     ids = ['ut_' + s.replace(' ', '_') for s in vals]
     metafunc.parametrize(fixture_name, vals, ids=ids)
-
-# Similar to re_ut_test_list but without the requirement that the
-re_ut_test_all = re.compile(r'[^a-zA-Z0-9_]_u_boot_list_2_ut_(.*)_test_2_(.*)\s*$')
-
-def check_test_names(build_dir, sym_paths):
-    bad_tests = collections.defaultdict(list)
-    for sym_path in sym_paths:
-        lines = get_sorted_lines(build_dir, sym_path)
-        for l in lines:
-            m = re_ut_test_list.search(l)
-            if not m:
-                all_m = re_ut_test_all.search(l)
-                if all_m:
-                    suite, func_name = all_m.groups()
-                    bad_tests[suite].append(func_name)
-    print('bad_tests', bad_tests)
 
 def generate_config(metafunc, fixture_name):
     """Provide parametrization for {env,brd}__ fixtures.
@@ -356,10 +321,10 @@ def pytest_generate_tests(metafunc):
     """
     for fn in metafunc.fixturenames:
         if fn == 'ut_subtest':
-            generate_ut_subtest(metafunc, fn, 'u-boot.sym')
+            generate_ut_subtest(metafunc, fn, '/u-boot.sym')
             continue
         if fn == 'ut_spl_subtest':
-            generate_ut_subtest(metafunc, fn, 'spl/u-boot-spl.sym')
+            generate_ut_subtest(metafunc, fn, '/spl/u-boot-spl.sym')
             continue
         generate_config(metafunc, fn)
 
