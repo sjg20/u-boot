@@ -119,6 +119,11 @@ int distro_efi_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	loff_t size;
 	int ret;
 
+	/* This only works on block devices */
+	ret = bootflow_uses_blk_dev(bflow);
+	if (ret)
+		return log_msg_ret("blk", ret);
+
 	/* We require a partition table */
 	if (!bflow->part)
 		return -ENOENT;

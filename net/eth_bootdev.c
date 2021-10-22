@@ -6,6 +6,8 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <bootdev.h>
 #include <bootflow.h>
@@ -13,6 +15,7 @@
 #include <bootmeth.h>
 #include <distro.h>
 #include <dm.h>
+#include <log.h>
 #include <net.h>
 
 static int eth_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
@@ -23,8 +26,9 @@ static int eth_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
 	int ret;
 
 	/* Must be an Ethernet device */
-	if (device_get_uclass_id(media_dev) != UCLASS_ETH)
-		return -ENOENT;
+	ret = bootflow_uses_network(dev);
+	if (ret)
+		return log_msg_ret(ret);
 
 	/*
 	 * Like distro boot, this assumes there is only one Ethernet device.
@@ -55,10 +59,15 @@ static int eth_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
 	 * This is not a real failure, since we don't actually care if the
 	 * boot file exists.
 	 */
+	log_debug("running dhcp\n");
 	run_command("dhcp", 0);
 	bflow->state = BOOTFLOWST_MEDIA;
 
+	/* See distro_pxe_read_bootflow() for the standard impl of this */
+	log_debug("dhcp complete - reading bootflow with method %s\n",
+		  bflow->method->name);
 	ret = bootmeth_read_bootflow(bflow->method, bflow);
+	log_debug("reading bootflow returned %d\n", ret);
 	if (ret)
 		return log_msg_ret("method", ret);
 

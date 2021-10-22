@@ -3,7 +3,8 @@
  * Copyright 2021 Google LLC
  * Written by Simon Glass <sjg@chromium.org>
  */
-
+#define LOG_DEBUG
+#
 #include <common.h>
 #include <bootdev.h>
 #include <bootflow.h>
@@ -367,7 +368,7 @@ static int iter_incr(struct bootflow_iter *iter)
 /**
  * bootflow_check() - Check if a bootflow can be obtained
  *
- * @iter: Provides part, method to get
+ * @iter: Provides part, bootmeth to use
  * @bflow: Bootflow to update on success
  * @return 0 if OK, -ENOSYS if there is no bootflow support on this device,
  *	BF_NO_MORE_PARTS if there are no more partitions on bootdev
@@ -538,4 +539,30 @@ int bootflow_run_boot(struct bootflow_iter *iter, struct bootflow *bflow)
 	}
 
 	return ret;
+}
+
+int bootflow_uses_blk_dev(struct bootflow *bflow)
+{
+	const struct udevice *media = dev_get_parent(bflow->dev);
+	enum uclass_id id = device_get_uclass_id(media);
+
+	log_debug("uclass %d: %s\n", id, uclass_get_name(id));
+	if (id != UCLASS_ETH)
+		return 0;
+
+	return -ENOTSUPP;
+
+}
+
+int bootflow_uses_network(struct bootflow *bflow)
+{
+	const struct udevice *media = dev_get_parent(bflow->dev);
+	enum uclass_id id = device_get_uclass_id(media);
+
+	log_debug("uclass %d: %s\n", id, uclass_get_name(id));
+	if (id == UCLASS_ETH)
+		return 0;
+
+	return -ENOTSUPP;
+
 }

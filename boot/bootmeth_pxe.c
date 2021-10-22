@@ -6,6 +6,8 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <bootdev.h>
 #include <bootflow.h>
@@ -14,6 +16,7 @@
 #include <distro.h>
 #include <dm.h>
 #include <fs.h>
+#include <log.h>
 #include <malloc.h>
 #include <mapmem.h>
 #include <mmc.h>
@@ -36,7 +39,7 @@ static int disto_pxe_getfile(struct pxe_context *ctx, const char *file_path,
 	return 0;
 }
 
-int distro_pxe_read_bootflow(struct udevice *dev, struct bootflow *bflow)
+static int distro_pxe_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 {
 	const char *addr_str;
 	char fname[200];
@@ -46,12 +49,19 @@ int distro_pxe_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	char *buf;
 	int ret;
 
+	/* This only works on network devices */
+	ret = bootflow_uses_network(bflow);
+	if (ret)
+		return log_msg_ret("blk", ret);
+
 	addr_str = env_get("pxefile_addr_r");
 	if (!addr_str)
 		return log_msg_ret("pxeb", -EPERM);
 	addr = simple_strtoul(addr_str, NULL, 16);
 
+	log_debug("calling pxe_get()\n");
 	ret = pxe_get(addr, &bootdir, &size);
+	log_debug("pxe_get() returned %d\n", ret);
 	if (ret)
 		return log_msg_ret("pxeb", ret);
 	bflow->size = size;
@@ -115,7 +125,7 @@ static int distro_pxe_read_file(struct udevice *dev, struct bootflow *bflow,
 	return 0;
 }
 
-int distro_pxe_boot(struct udevice *dev, struct bootflow *bflow)
+static int distro_pxe_boot(struct udevice *dev, struct bootflow *bflow)
 {
 	struct pxe_context *ctx = dev_get_priv(dev);
 	struct cmd_tbl cmdtp = {};	/* dummy */

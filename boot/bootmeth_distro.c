@@ -50,6 +50,11 @@ int distro_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	int ret, i;
 	char *buf;
 
+	/* This only works on block devices */
+	ret = bootflow_uses_blk_dev(bflow);
+	if (ret)
+		return log_msg_ret("blk", ret);
+
 	ret = uclass_first_device_err(UCLASS_BOOTSTD, &bootstd);
 	if (ret)
 		return log_msg_ret("std", ret);

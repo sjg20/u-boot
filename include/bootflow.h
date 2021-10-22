@@ -275,4 +275,23 @@ const char *bootflow_state_get_name(enum bootflow_state_t state);
  */
 void bootflow_remove(struct bootflow *bflow);
 
+/**
+ * bootflow_uses_blk_dev() - Check that a bootflow uses a block device
+ *
+ * This checks the bootdev in the bootflow to make sure it uses a block device
+ *
+ * @return 0 if OK, -ENOTSUPP if some other device is used (e.g. ethernet)
+ */
+int bootflow_uses_blk_dev(struct bootflow *bflow);
+
+/**
+ * bootflow_uses_network() - Check that a bootflow uses a network device
+ *
+ * This checks the bootdev in the bootflow to make sure it uses a a network
+ * device
+ *
+ * @return 0 if OK, -ENOTSUPP if some other device is used (e.g. MMC)
+ */
+int bootflow_uses_network(struct bootflow *bflow);
+
 #endif
