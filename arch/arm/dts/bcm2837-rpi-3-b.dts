@@ -31,16 +31,7 @@
 
 	bootstd {
 		compatible = "u-boot,boot-std";
-
 		filename-prefixes = "/", "/boot/";
-
-		syslinux {
-			compatible = "u-boot,distro-syslinux";
-		};
-
-		efi {
-			compatible = "u-boot,distro-efi";
-		};
 	};
 };
 

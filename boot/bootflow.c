@@ -3,8 +3,7 @@
  * Copyright 2021 Google LLC
  * Written by Simon Glass <sjg@chromium.org>
  */
-#define LOG_DEBUG
-#
+
 #include <common.h>
 #include <bootdev.h>
 #include <bootflow.h>
@@ -541,9 +540,9 @@ int bootflow_run_boot(struct bootflow_iter *iter, struct bootflow *bflow)
 	return ret;
 }
 
-int bootflow_uses_blk_dev(const struct bootflow *bflow)
+int bootflow_iter_uses_blk_dev(const struct bootflow_iter *iter)
 {
-	const struct udevice *media = dev_get_parent(bflow->dev);
+	const struct udevice *media = dev_get_parent(iter->dev);
 	enum uclass_id id = device_get_uclass_id(media);
 
 	log_debug("uclass %d: %s\n", id, uclass_get_name(id));
@@ -551,12 +550,11 @@ int bootflow_uses_blk_dev(const struct bootflow *bflow)
 		return 0;
 
 	return -ENOTSUPP;
-
 }
 
-int bootflow_uses_network(const struct bootflow *bflow)
+int bootflow_iter_uses_network(const struct bootflow_iter *iter)
 {
-	const struct udevice *media = dev_get_parent(bflow->dev);
+	const struct udevice *media = dev_get_parent(iter->dev);
 	enum uclass_id id = device_get_uclass_id(media);
 
 	log_debug("uclass %d: %s\n", id, uclass_get_name(id));

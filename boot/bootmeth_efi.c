@@ -112,12 +112,12 @@ static int efiload_read_file(struct blk_desc *desc, struct bootflow *bflow)
 	return 0;
 }
 
-static int distro_efi_check(struct udevice *dev, const struct bootflow *bflow)
+static int distro_efi_check(struct udevice *dev, struct bootflow_iter *iter)
 {
 	int ret;
 
 	/* This only works on block devices */
-	ret = bootflow_uses_blk_dev(bflow);
+	ret = bootflow_iter_uses_blk_dev(iter);
 	if (ret)
 		return log_msg_ret("blk", ret);
 
@@ -130,11 +130,6 @@ static int distro_efi_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	char fname[sizeof(EFI_DIRNAME) + 16];
 	loff_t size;
 	int ret;
-
-	/* This only works on block devices */
-	ret = bootflow_uses_blk_dev(bflow);
-	if (ret)
-		return log_msg_ret("blk", ret);
 
 	/* We require a partition table */
 	if (!bflow->part)

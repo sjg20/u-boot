@@ -13,14 +13,14 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-int bootmeth_check(struct udevice *dev, const struct bootflow *bflow)
+int bootmeth_check(struct udevice *dev, struct bootflow_iter *iter)
 {
 	const struct bootmeth_ops *ops = bootmeth_get_ops(dev);
 
 	if (!ops->check)
 		return 0;
 
-	return ops->check(dev, bflow);
+	return ops->check(dev, iter);
 }
 
 int bootmeth_read_bootflow(struct udevice *dev, struct bootflow *bflow)
@@ -62,18 +62,19 @@ int dm_scan_other(bool pre_reloc_only)
 	struct udevice *dev, *bootstd;
 	int i, ret;
 
-	/*
-	 * If there is a bootstd device, skip, since we assume that the bootmeth
-	 * devices have been created correctly.
-	 */
+	/* Create a bootstd device if needed */
 	uclass_find_first_device(UCLASS_BOOTSTD, &bootstd);
-	if (bootstd)
-		return 0;
+	if (!bootstd) {
+		ret = device_bind_driver(gd->dm_root, "bootstd_drv", "bootstd",
+					 &bootstd);
+		if (ret)
+			return log_msg_ret("bootstd", ret);
+	}
 
-	ret = device_bind_driver(gd->dm_root, "bootstd_drv", "bootstd",
-				 &bootstd);
-	if (ret)
-		return log_msg_ret("bootstd", ret);
+	/* If there are no bootmeth devices, create them */
+	uclass_find_first_device(UCLASS_BOOTMETH, &dev);
+	if (dev)
+		return 0;
 
 	for (i = 0; i < n_ents; i++, drv++) {
 		/*

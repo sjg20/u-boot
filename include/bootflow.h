@@ -73,12 +73,16 @@ struct bootflow {
  * @BOOTFLOWF_SHOW: Show each bootdev before scanning it
  * @BOOTFLOWF_ALL: Return bootflows with errors as well
  * @BOOTFLOWF_SINGLE_DEV: Just scan one bootmeth
+ * @BOOTFLOWF_EFI_BOOTMGR_DONE: Indicates that the EFI boot manager has been
+ *	used once (during iteration). There is no point in doing it again since
+ *	it works outside the standard boot iteration mechanism
  */
 enum bootflow_flags_t {
-	BOOTFLOWF_FIXED		= 1 << 0,
-	BOOTFLOWF_SHOW		= 1 << 1,
-	BOOTFLOWF_ALL		= 1 << 2,
-	BOOTFLOWF_SINGLE_DEV	= 1 << 3,
+	BOOTFLOWF_FIXED			= 1 << 0,
+	BOOTFLOWF_SHOW			= 1 << 1,
+	BOOTFLOWF_ALL			= 1 << 2,
+	BOOTFLOWF_SINGLE_DEV		= 1 << 3,
+	BOOTFLOWF_EFI_BOOTMGR_DONE	= 1 << 4,
 };
 
 /**
@@ -276,22 +280,22 @@ const char *bootflow_state_get_name(enum bootflow_state_t state);
 void bootflow_remove(struct bootflow *bflow);
 
 /**
- * bootflow_uses_blk_dev() - Check that a bootflow uses a block device
+ * bootflow_iter_uses_blk_dev() - Check that a bootflow uses a block device
  *
  * This checks the bootdev in the bootflow to make sure it uses a block device
  *
  * @return 0 if OK, -ENOTSUPP if some other device is used (e.g. ethernet)
  */
-int bootflow_uses_blk_dev(const struct bootflow *bflow);
+int bootflow_iter_uses_blk_dev(const struct bootflow_iter *iter);
 
 /**
- * bootflow_uses_network() - Check that a bootflow uses a network device
+ * bootflow_iter_uses_network() - Check that a bootflow uses a network device
  *
  * This checks the bootdev in the bootflow to make sure it uses a a network
  * device
  *
  * @return 0 if OK, -ENOTSUPP if some other device is used (e.g. MMC)
  */
-int bootflow_uses_network(const struct bootflow *bflow);
+int bootflow_iter_uses_network(const struct bootflow_iter *iter);
 
 #endif

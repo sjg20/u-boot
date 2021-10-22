@@ -39,10 +39,12 @@ static int disto_pxe_getfile(struct pxe_context *ctx, const char *file_path,
 	return 0;
 }
 
-static int distro_pxe_check(struct udevice *dev, const struct bootflow *bflow)
+static int distro_pxe_check(struct udevice *dev, struct bootflow_iter *iter)
 {
+	int ret;
+
 	/* This only works on network devices */
-	ret = bootflow_uses_network(bflow);
+	ret = bootflow_iter_uses_network(iter);
 	if (ret)
 		return log_msg_ret("net", ret);
 
@@ -58,7 +60,6 @@ static int distro_pxe_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	ulong size;
 	char *buf;
 	int ret;
-
 
 	addr_str = env_get("pxefile_addr_r");
 	if (!addr_str)

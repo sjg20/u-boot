@@ -13,7 +13,27 @@
 #include <command.h>
 #include <dm.h>
 
-int efi_mgr_read_bootflow(struct udevice *dev, struct bootflow *bflow)
+static int efi_mgr_check(struct udevice *dev, struct bootflow_iter *iter)
+{
+	int ret;
+
+	if (iter->flags & BOOTFLOWF_EFI_BOOTMGR_DONE)
+		return -ENOTSUPP;
+
+	/*
+	 * Only allow this on block devices, just to limit the number of times
+	 * it is tried. In fact, it scans all devices and is a law unto itself.
+	 */
+	ret = bootflow_iter_uses_blk_dev(iter);
+	if (ret)
+		return log_msg_ret("blk", ret);
+
+	iter->flags |= BOOTFLOWF_EFI_BOOTMGR_DONE;
+
+	return 0;
+}
+
+static int efi_mgr_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 {
 	/*
 	 * Just assume there is something to boot since we don't have any way
@@ -32,7 +52,7 @@ static int efi_mgr_read_file(struct udevice *dev, struct bootflow *bflow,
 	return -ENOSYS;
 }
 
-int efi_mgr_boot(struct udevice *dev, struct bootflow *bflow)
+static int efi_mgr_boot(struct udevice *dev, struct bootflow *bflow)
 {
 	int ret;
 
@@ -58,6 +78,7 @@ static int bootmeth_efi_mgr_bind(struct udevice *dev)
 }
 
 static struct bootmeth_ops efi_mgr_bootmeth_ops = {
+	.check		= efi_mgr_check,
 	.read_bootflow	= efi_mgr_read_bootflow,
 	.read_file	= efi_mgr_read_file,
 	.boot		= efi_mgr_boot,
@@ -68,8 +89,9 @@ static const struct udevice_id efi_mgr_bootmeth_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(bootmeth_efi_mgr) = {
-	.name		= "bootmeth_efi_mgr",
+/* Name this so it comes last */
+U_BOOT_DRIVER(bootmeth_zefi_mgr) = {
+	.name		= "bootmeth_zefi_mgr",
 	.id		= UCLASS_BOOTMETH,
 	.of_match	= efi_mgr_bootmeth_ids,
 	.ops		= &efi_mgr_bootmeth_ops,

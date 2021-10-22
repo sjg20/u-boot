@@ -294,7 +294,7 @@ config BOOTDEV_DISTRO
 
 	  This provides a way to try out bootdev on an existing boot flow.
 
-config BOOTDEV_PXE
+config BOOTDEV_DISTRO_PXE
 	bool "Bootdev support for distro boot over network"
 	depends on BOOTDEV && CMD_PXE && NET && DM_ETH
 	default y

@@ -53,7 +53,8 @@ struct bootdev_ops {
 	 *
 	 * @dev:	Bootflow device to check
 	 * @iter:	Provides current dev, part, method to get. Should update
-	 *	max_part if there is a partition table
+	 *	max_part if there is a partition table. Should update state,
+	 *	subdir, fname, buf, size according to progress
 	 * @bflow:	Updated bootflow if found
 	 * @return 0 if OK, -ESHUTDOWN if there are no more bootflows on this
 	 *	device, -ENOSYS if this device doesn't support bootflows,
