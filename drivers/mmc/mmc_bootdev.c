@@ -48,9 +48,15 @@ struct bootdev_ops mmc_bootdev_ops = {
 	.get_bootflow	= mmc_get_bootflow,
 };
 
+static const struct udevice_id mmc_bootdev_ids[] = {
+	{ .compatible = "u-boot,bootdev-mmc" },
+	{ }
+};
+
 U_BOOT_DRIVER(mmc_bootdev) = {
 	.name		= "mmc_bootdev",
 	.id		= UCLASS_BOOTDEV,
 	.ops		= &mmc_bootdev_ops,
 	.bind		= mmc_bootdev_bind,
+	.of_match	= mmc_bootdev_ids,
 };

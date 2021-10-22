@@ -78,7 +78,6 @@ int bootstd_get_priv(struct bootstd_priv **stdp)
 	int ret;
 
 	ret = uclass_first_device_err(UCLASS_BOOTSTD, &dev);
-	log_info("ret=%d\n", ret);
 	if (ret)
 		return ret;
 	*stdp = dev_get_priv(dev);

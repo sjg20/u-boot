@@ -47,9 +47,15 @@ struct bootdev_ops usb_bootdev_ops = {
 	.get_bootflow	= usb_get_bootflow,
 };
 
+static const struct udevice_id usb_bootdev_ids[] = {
+	{ .compatible = "u-boot,bootdev-usb" },
+	{ }
+};
+
 U_BOOT_DRIVER(usb_bootdev) = {
 	.name		= "usb_bootdev",
 	.id		= UCLASS_BOOTDEV,
 	.ops		= &usb_bootdev_ops,
 	.bind		= usb_bootdev_bind,
+	.of_match	= usb_bootdev_ids,
 };

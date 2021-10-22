@@ -78,9 +78,15 @@ struct bootdev_ops eth_bootdev_ops = {
 	.get_bootflow	= eth_get_bootflow,
 };
 
+static const struct udevice_id eth_bootdev_ids[] = {
+	{ .compatible = "u-boot,bootdev-eth" },
+	{ }
+};
+
 U_BOOT_DRIVER(eth_bootdev) = {
 	.name		= "eth_bootdev",
 	.id		= UCLASS_BOOTDEV,
 	.ops		= &eth_bootdev_ops,
 	.bind		= eth_bootdev_bind,
+	.of_match	= eth_bootdev_ids,
 };
