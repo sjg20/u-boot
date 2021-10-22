@@ -161,7 +161,6 @@ static int bootflow_cmd_info(struct unit_test_state *uts)
 	ut_assert_nextline("Name:      mmc1.bootdev.part_1");
 	ut_assert_nextline("Device:    mmc1.bootdev");
 	ut_assert_nextline("Block dev: mmc1.blk");
-	ut_assert_nextline("Sequence:  0");
 	ut_assert_nextline("Method:    syslinux");
 	ut_assert_nextline("State:     ready");
 	ut_assert_nextline("Partition: 1");

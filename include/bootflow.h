@@ -38,7 +38,6 @@ enum bootflow_state_t {
  * @dev: Bootdevice device which produced this bootflow
  * @blk: Block device which contains this bootflow, NULL if this is a network
  *	device
- * @seq: Sequence number of bootflow within its bootdev
  * @part: Partition number (0 for whole device)
  * @method: Bootmethod device used to perform the boot and read files
  * @name: Name of bootflow (allocated)
@@ -54,7 +53,6 @@ struct bootflow {
 	struct list_head glob_node;
 	struct udevice *dev;
 	struct udevice *blk;
-	int seq;
 	int part;
 	struct udevice *method;
 	char *name;
