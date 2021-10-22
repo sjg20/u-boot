@@ -264,7 +264,7 @@ static int do_bootflow_select(struct cmd_tbl *cmdtp, int flag, int argc,
 		for (ret = bootdev_first_bootflow(dev, &bflow), i = 0;
 		     !ret;
 		     ret = bootdev_next_bootflow(&bflow), i++) {
-			if (*endp ? !strcmp(bflow->name, name) : i == seq) {
+			if (*endp ? !strcmp(bflow->name, name) : (i == seq)) {
 				found = bflow;
 				break;
 			}
@@ -273,7 +273,7 @@ static int do_bootflow_select(struct cmd_tbl *cmdtp, int flag, int argc,
 		for (ret = bootflow_first_glob(&bflow), i = 0;
 		     !ret;
 		     ret = bootflow_next_glob(&bflow), i++) {
-			if (*endp ? !strcmp(bflow->name, name) : i == seq) {
+			if (*endp ? !strcmp(bflow->name, name) : (i == seq)) {
 				found = bflow;
 				break;
 			}
