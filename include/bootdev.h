@@ -184,7 +184,7 @@ int bootdev_find_by_label(const char *label, struct udevice **devp);
  */
 int bootdev_find_by_any(const char *name, struct udevice **devp);
 
-#if CONFIG_IS_ENABLED(BOOTDEV)
+#if CONFIG_IS_ENABLED(BOOTSTD)
 /**
  * bootdev_setup_for_dev() - Bind a new bootdev device
  *

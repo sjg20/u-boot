@@ -274,39 +274,52 @@ endif # SPL
 
 endif # FIT
 
-config BOOTDEV
-	bool "Bootdev support"
+config BOOTSTD
+	bool "Standard boot support"
 	default y
 	help
-	  A bootdev is a standard way of locating something to boot,
-	  typically an Operating System such as Linux. Enable this to support
-	  iterating through available bootdevs to find a bootflow suitable
-	  for booting.
+	  U-Boot supports a standard way of locating something to boot,
+	  typically an Operating System such as Linux, provided by a distro such
+	  as Arch Linux or Debian. Enable this to support iterating through
+	  available bootdevs and using bootmeths to find bootflows suitable for
+	  booting.
+
+	  Standard boot is not a standard way of booting, just a framework
+	  within U-Boot for supporting all the different ways that exist.
+
+	  Terminology:
+
+	    - bootdev - a device which can hold a distro (e.g. MMC)
+	    - bootmeth - a method to scan a bootdev to find bootflows (owned by
+	        U-Boot)
+	    - bootflow - a description of how to boot (owned by the distro)
+
+if BOOTSTD
 
 config BOOTDEV_DISTRO
 	bool "Bootdev support for distro boot"
-	depends on BOOTDEV && CMD_PXE
+	depends on CMD_PXE
 	default y
 	help
 	  Enables support for distro boot using bootdevs. This makes the
 	  bootdevs look for a 'extlinux/extlinux.conf' on each filesystem
 	  they scan.
 
-	  This provides a way to try out bootdev on an existing boot flow.
+	  This provides a way to try out standard boot on an existing boot flow.
 
 config BOOTDEV_DISTRO_PXE
 	bool "Bootdev support for distro boot over network"
-	depends on BOOTDEV && CMD_PXE && NET && DM_ETH
+	depends on CMD_PXE && NET && DM_ETH
 	default y
 	help
 	  Enables support for distro boot using bootdevs. This makes the
 	  bootdevs look for a 'extlinux/extlinux.conf' on the tftp server.
 
-	  This provides a way to try out bootdev on an existing boot flow.
+	  This provides a way to try out standard boot on an existing boot flow.
 
 config BOOTDEV_EFILOADER
 	bool "Bootdev support for EFI boot"
-	depends on BOOTDEV && CMD_BOOTEFI
+	depends on CMD_BOOTEFI
 	default y
 	help
 	  Enables support for EFI boot using bootdevs. This makes the
@@ -323,7 +336,9 @@ config BOOTDEV_EFILOADER
 	     riscv32   - RISC-V 32-bit
 	     riscv64   - RISC-V 64-bit
 
-	  This provides a way to try out bootdev on an existing boot flow.
+	  This provides a way to try out standard boot on an existing boot flow.
+
+endif
 
 config LEGACY_IMAGE_FORMAT
 	bool "Enable support for the legacy image format"
