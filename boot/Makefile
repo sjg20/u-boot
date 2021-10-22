@@ -25,6 +25,7 @@ obj-$(CONFIG_ANDROID_BOOT_IMAGE) += image-android.o image-android-dt.o
 obj-$(CONFIG_$(SPL_TPL_)BOOTSTD) += bootdev-uclass.o system_bootdev.o
 obj-$(CONFIG_$(SPL_TPL_)BOOTSTD) += bootflow.o
 obj-$(CONFIG_$(SPL_TPL_)BOOTSTD) += bootmeth-uclass.o bootstd-uclass.o
+obj-$(CONFIG_$(SPL_TPL_)BOOTMETH_SANDBOX) += bootmeth_sandbox.o
 obj-$(CONFIG_$(SPL_TPL_)BOOTDEV_DISTRO) += bootmeth_distro.o
 obj-$(CONFIG_$(SPL_TPL_)BOOTDEV_DISTRO_PXE) += bootmeth_pxe.o
 obj-$(CONFIG_$(SPL_TPL_)BOOTDEV_EFILOADER) += bootmeth_efi.o

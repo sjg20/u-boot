@@ -338,6 +338,10 @@ config BOOTDEV_EFILOADER
 
 	  This provides a way to try out standard boot on an existing boot flow.
 
+config BOOTMETH_SANDBOX
+	def_bool y
+	depends on SANDBOX
+
 endif
 
 config LEGACY_IMAGE_FORMAT

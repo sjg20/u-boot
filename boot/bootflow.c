@@ -546,7 +546,7 @@ int bootflow_iter_uses_blk_dev(const struct bootflow_iter *iter)
 	enum uclass_id id = device_get_uclass_id(media);
 
 	log_debug("uclass %d: %s\n", id, uclass_get_name(id));
-	if (id != UCLASS_ETH)
+	if (id != UCLASS_ETH && id != UCLASS_BOOTSTD)
 		return 0;
 
 	return -ENOTSUPP;

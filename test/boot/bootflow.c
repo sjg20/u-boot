@@ -302,6 +302,35 @@ static int bootflow_iter(struct unit_test_state *uts)
 }
 BOOTSTD_TEST(bootflow_iter, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
+/* Check using the system bootdev */
+static int bootflow_system(struct unit_test_state *uts)
+{
+	struct udevice *bootstd, *dev;
+
+	/* Add the EFI bootmgr driver */
+	ut_assertok(uclass_first_device_err(UCLASS_BOOTSTD, &bootstd));
+	ut_assertok(device_bind_driver(bootstd, "bootmeth_efi_mgr", "bootmgr",
+				       &dev));
+
+	/* Add the system bootdev that it uses */
+	ut_assertok(device_bind_driver(bootstd, "system_bootdev",
+				       "system-bootdev", &dev));
+
+	ut_assertok(bootstd_test_drop_bootdev_order(uts));
+
+	/* We should get a single 'bootmgr' method right at the end */
+	bootstd_clear_glob();
+	console_record_reset_enable();
+	ut_assertok(run_command("bootflow scan -l", 0));
+	ut_assert_skip_to_line("  1  bootmgr      ready   bootstd      0  <NULL>                    <NULL>");
+	ut_assert_nextline("No more bootdevs");
+	ut_assert_skip_to_line("(2 bootflows, 2 valid)");
+	ut_assert_console_end();
+
+	return 0;
+}
+BOOTSTD_TEST(bootflow_system, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+
 /* Check disabling a bootmethod if it requests it */
 static int bootflow_iter_disable(struct unit_test_state *uts)
 {
@@ -312,26 +341,32 @@ static int bootflow_iter_disable(struct unit_test_state *uts)
 
 	/* Add the EFI bootmgr driver */
 	ut_assertok(uclass_first_device_err(UCLASS_BOOTSTD, &bootstd));
-	ut_assertok(device_bind_driver(bootstd, "bootmeth_efi_mgr", "bootmgr",
+	ut_assertok(device_bind_driver(bootstd, "bootmeth_sandbox", "sandbox",
 				       &dev));
 
+	/* Add the system bootdev that it uses */
+	ut_assertok(device_bind_driver(bootstd, "system_bootdev",
+				       "system-bootdev", &dev));
+
+	ut_assertok(bootstd_test_drop_bootdev_order(uts));
+
 	bootstd_clear_glob();
-	run_command("bootflow scan -l", 0);
+	ut_assertok(run_command("bootflow scan -lb", 0));
 
 	/* Try to boot the bootmgr flow, which will fail */
 	console_record_reset_enable();
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
 	ut_asserteq(3, iter.num_methods);
-	ut_asserteq_str("bootmgr", iter.method->name);
+	ut_asserteq_str("sandbox", iter.method->name);
 	ut_asserteq(-ENOTSUPP, bootflow_run_boot(&iter, &bflow));
 
-	ut_assert_skip_to_line("Boot method 'bootmgr' failed and will not be retried");
+	ut_assert_skip_to_line("Boot method 'sandbox' failed and will not be retried");
 	ut_assert_console_end();
 
-	/* Check that the bootmgr bootmeth has been removed */
+	/* Check that the sandbox bootmeth has been removed */
 	ut_asserteq(2, iter.num_methods);
 	for (i = 0; i < iter.num_methods; i++)
-		ut_assert(strcmp("bootmgr", iter.method_order[i]->name));
+		ut_assert(strcmp("sandbox", iter.method_order[i]->name));
 
 	return 0;
 }

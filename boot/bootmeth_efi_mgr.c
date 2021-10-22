@@ -22,13 +22,6 @@ static int efi_mgr_check(struct udevice *dev, struct bootflow_iter *iter)
 	if (ret)
 		return log_msg_ret("net", ret);
 
-	/*
-	 * Only allow this on block devices, just to limit the number of times
-	 * it is tried. In fact, it scans all devices and is a law unto itself.
-	 */
-	ret = bootflow_iter_uses_blk_dev(iter);
-	if (ret)
-		return log_msg_ret("blk", ret);
 	return 0;
 }
 
@@ -58,13 +51,7 @@ static int efi_mgr_boot(struct udevice *dev, struct bootflow *bflow)
 	/* Booting is handled by the 'bootefi bootmgr' command */
 	ret = run_command("bootefi bootmgr", 0);
 
-	/*
-	 * If this returns then the boot failed. ALl available options were
-	 * presumably tried so there is no point in using this bootmeth again
-	 */
-	log_warning("EFI bootmgr did not boot: disabling this boot method\n");
-
-	return -ENOTSUPP;
+	return 0;
 }
 
 static int bootmeth_efi_mgr_bind(struct udevice *dev)
