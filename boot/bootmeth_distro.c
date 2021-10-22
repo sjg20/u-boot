@@ -39,6 +39,18 @@ static int disto_getfile(struct pxe_context *ctx, const char *file_path,
 	return 0;
 }
 
+static int distro_check(struct udevice *dev, const struct bootflow *bflow)
+{
+	int ret;
+
+	/* This only works on block devices */
+	ret = bootflow_uses_blk_dev(bflow);
+	if (ret)
+		return log_msg_ret("blk", ret);
+
+	return 0;
+}
+
 int distro_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 {
 	struct blk_desc *desc = dev_get_uclass_plat(bflow->blk);
@@ -49,11 +61,6 @@ int distro_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	ulong addr;
 	int ret, i;
 	char *buf;
-
-	/* This only works on block devices */
-	ret = bootflow_uses_blk_dev(bflow);
-	if (ret)
-		return log_msg_ret("blk", ret);
 
 	ret = uclass_first_device_err(UCLASS_BOOTSTD, &bootstd);
 	if (ret)
@@ -190,6 +197,7 @@ static int distro_bootmeth_bind(struct udevice *dev)
 }
 
 static struct bootmeth_ops distro_bootmeth_ops = {
+	.check		= distro_check,
 	.read_bootflow	= distro_read_bootflow,
 	.read_file	= distro_read_file,
 	.boot		= distro_boot,

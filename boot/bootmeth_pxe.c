@@ -39,6 +39,16 @@ static int disto_pxe_getfile(struct pxe_context *ctx, const char *file_path,
 	return 0;
 }
 
+static int distro_pxe_check(struct udevice *dev, const struct bootflow *bflow)
+{
+	/* This only works on network devices */
+	ret = bootflow_uses_network(bflow);
+	if (ret)
+		return log_msg_ret("net", ret);
+
+	return 0;
+}
+
 static int distro_pxe_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 {
 	const char *addr_str;
@@ -49,10 +59,6 @@ static int distro_pxe_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	char *buf;
 	int ret;
 
-	/* This only works on network devices */
-	ret = bootflow_uses_network(bflow);
-	if (ret)
-		return log_msg_ret("blk", ret);
 
 	addr_str = env_get("pxefile_addr_r");
 	if (!addr_str)
@@ -159,6 +165,7 @@ static int distro_bootmeth_pxe_bind(struct udevice *dev)
 }
 
 static struct bootmeth_ops distro_bootmeth_pxe_ops = {
+	.check		= distro_pxe_check,
 	.read_bootflow	= distro_pxe_read_bootflow,
 	.read_file	= distro_pxe_read_file,
 	.boot		= distro_pxe_boot,

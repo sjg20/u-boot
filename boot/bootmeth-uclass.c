@@ -13,6 +13,16 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+int bootmeth_check(struct udevice *dev, const struct bootflow *bflow)
+{
+	const struct bootmeth_ops *ops = bootmeth_get_ops(dev);
+
+	if (!ops->check)
+		return 0;
+
+	return ops->check(dev, bflow);
+}
+
 int bootmeth_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 {
 	const struct bootmeth_ops *ops = bootmeth_get_ops(dev);

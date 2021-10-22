@@ -19,12 +19,23 @@ struct bootmeth_uc_plat {
 	const char *desc;
 };
 
-/**
- * struct bootmeth_ops - Operations for the Platform Controller Hub
- *
- * Consider using ioctl() to add rarely used or driver-specific operations.
- */
+/** struct bootmeth_ops - Operations for boot methods */
 struct bootmeth_ops {
+	/**
+	 * check_supported() - check if a bootmeth supports this bootflow
+	 *
+	 * This is optional. If not provided, the bootdev is assumed to be
+	 * supported
+	 *
+	 * The bootmeth can check the bootdev (e.g. to make sure it is a
+	 * network device) or the partition information.
+	 *
+	 * @dev:	Bootmethod device to check against
+	 * @bflow:	On entry, provides bootdev, hwpart, part
+	 * @return 0 if OK, -ENOTSUPP if this bootdev is not supported
+	 */
+	int (*check)(struct udevice *dev, const struct bootflow *bflow);
+
 	/**
 	 * read_bootflow() - read a bootflow for a device
 	 *
@@ -67,6 +78,18 @@ struct bootmeth_ops {
 };
 
 #define bootmeth_get_ops(dev)  ((struct bootmeth_ops *)(dev)->driver->ops)
+
+/**
+ * check_supported() - check if a bootmeth supports this bootflow
+ *
+ * The bootmeth can check the bootdev (e.g. to make sure it is a
+ * network device) or the partition information.
+ *
+ * @dev:	Bootmethod device to check against
+ * @bflow:	On entry, provides bootdev, hwpart, part
+ * @return 0 if OK, -ENOTSUPP if this bootdev is not supported
+ */
+int bootmeth_check(struct udevice *dev, const struct bootflow *bflow);
 
 /**
  * bootmeth_read_bootflow() - set up a bootflow for a device

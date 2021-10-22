@@ -282,7 +282,7 @@ void bootflow_remove(struct bootflow *bflow);
  *
  * @return 0 if OK, -ENOTSUPP if some other device is used (e.g. ethernet)
  */
-int bootflow_uses_blk_dev(struct bootflow *bflow);
+int bootflow_uses_blk_dev(const struct bootflow *bflow);
 
 /**
  * bootflow_uses_network() - Check that a bootflow uses a network device
@@ -292,6 +292,6 @@ int bootflow_uses_blk_dev(struct bootflow *bflow);
  *
  * @return 0 if OK, -ENOTSUPP if some other device is used (e.g. MMC)
  */
-int bootflow_uses_network(struct bootflow *bflow);
+int bootflow_uses_network(const struct bootflow *bflow);
 
 #endif

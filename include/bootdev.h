@@ -46,11 +46,7 @@ struct bootdev_uc_plat {
 	enum bootdev_prio_t prio;
 };
 
-/**
- * struct bootdev_ops - Operations for the bootdev uclass
- *
- * Consider using ioctl() to add rarely used or driver-specific operations.
- */
+/** struct bootdev_ops - Operations for the bootdev uclass */
 struct bootdev_ops {
 	/**
 	 * get_bootflow() - get a bootflow

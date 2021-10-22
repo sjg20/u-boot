@@ -26,9 +26,9 @@ static int eth_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
 	int ret;
 
 	/* Must be an Ethernet device */
-	ret = bootflow_uses_network(dev);
+	ret = bootflow_uses_network(bflow);
 	if (ret)
-		return log_msg_ret(ret);
+		return log_msg_ret("net", ret);
 
 	/*
 	 * Like distro boot, this assumes there is only one Ethernet device.
