@@ -291,11 +291,21 @@ int bootflow_iter_uses_blk_dev(const struct bootflow_iter *iter);
 /**
  * bootflow_iter_uses_network() - Check that a bootflow uses a network device
  *
- * This checks the bootdev in the bootflow to make sure it uses a a network
+ * This checks the bootdev in the bootflow to make sure it uses a network
  * device
  *
  * @return 0 if OK, -ENOTSUPP if some other device is used (e.g. MMC)
  */
 int bootflow_iter_uses_network(const struct bootflow_iter *iter);
+
+/**
+ * bootflow_iter_uses_system() - Check that a bootflow uses the bootstd device
+ *
+ * This checks the bootdev in the bootflow to make sure it uses the bootstd
+ * device
+ *
+ * @return 0 if OK, -ENOTSUPP if some other device is used (e.g. MMC)
+ */
+int bootflow_iter_uses_system(const struct bootflow_iter *iter);
 
 #endif

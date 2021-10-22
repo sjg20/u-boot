@@ -332,7 +332,8 @@ int bootdev_find_by_label(const char *label, struct udevice **devp)
 		struct udevice *bdev;
 		int ret;
 
-		if (dev_seq(media) != seq)
+		/* if there is no seq, match anything */
+		if (seq != -1 && dev_seq(media) != seq)
 			continue;
 
 		ret = device_find_first_child_by_uclass(media, UCLASS_BOOTDEV,

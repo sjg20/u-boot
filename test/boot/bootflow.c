@@ -312,10 +312,11 @@ static int bootflow_iter_disable(struct unit_test_state *uts)
 
 	/* Add the EFI bootmgr driver */
 	ut_assertok(uclass_first_device_err(UCLASS_BOOTSTD, &bootstd));
-	ut_assertok(device_bind_driver(bootstd, "bootmeth_zefi_mgr", "bootmgr",
+	ut_assertok(device_bind_driver(bootstd, "bootmeth_efi_mgr", "bootmgr",
 				       &dev));
 
 	bootstd_clear_glob();
+	run_command("bootflow scan -l", 0);
 
 	/* Try to boot the bootmgr flow, which will fail */
 	console_record_reset_enable();

@@ -17,8 +17,10 @@ static int efi_mgr_check(struct udevice *dev, struct bootflow_iter *iter)
 {
 	int ret;
 
-	if (iter->flags & BOOTFLOWF_EFI_BOOTMGR_DONE)
-		return -ENOTSUPP;
+	/* Must be an bootstd device */
+	ret = bootflow_iter_uses_system(iter);
+	if (ret)
+		return log_msg_ret("net", ret);
 
 	/*
 	 * Only allow this on block devices, just to limit the number of times
@@ -27,9 +29,6 @@ static int efi_mgr_check(struct udevice *dev, struct bootflow_iter *iter)
 	ret = bootflow_iter_uses_blk_dev(iter);
 	if (ret)
 		return log_msg_ret("blk", ret);
-
-	iter->flags |= BOOTFLOWF_EFI_BOOTMGR_DONE;
-
 	return 0;
 }
 
@@ -89,9 +88,8 @@ static const struct udevice_id efi_mgr_bootmeth_ids[] = {
 	{ }
 };
 
-/* Name this so it comes last */
 U_BOOT_DRIVER(bootmeth_zefi_mgr) = {
-	.name		= "bootmeth_zefi_mgr",
+	.name		= "bootmeth_efi_mgr",
 	.id		= UCLASS_BOOTMETH,
 	.of_match	= efi_mgr_bootmeth_ids,
 	.ops		= &efi_mgr_bootmeth_ops,

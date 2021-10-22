@@ -7,9 +7,6 @@
 #include <common.h>
 #include <bootmeth.h>
 #include <dm.h>
-#include <dm/device-internal.h>
-#include <dm/lists.h>
-#include <dm/uclass-internal.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -52,49 +49,6 @@ int bootmeth_read_file(struct udevice *dev, struct bootflow *bflow,
 		return -ENOSYS;
 
 	return ops->read_file(dev, bflow, file_path, addr, sizep);
-}
-
-/* For now, bind the boormethod device if none are found in the devicetree */
-int dm_scan_other(bool pre_reloc_only)
-{
-	struct driver *drv = ll_entry_start(struct driver, driver);
-	const int n_ents = ll_entry_count(struct driver, driver);
-	struct udevice *dev, *bootstd;
-	int i, ret;
-
-	/* Create a bootstd device if needed */
-	uclass_find_first_device(UCLASS_BOOTSTD, &bootstd);
-	if (!bootstd) {
-		ret = device_bind_driver(gd->dm_root, "bootstd_drv", "bootstd",
-					 &bootstd);
-		if (ret)
-			return log_msg_ret("bootstd", ret);
-	}
-
-	/* If there are no bootmeth devices, create them */
-	uclass_find_first_device(UCLASS_BOOTMETH, &dev);
-	if (dev)
-		return 0;
-
-	for (i = 0; i < n_ents; i++, drv++) {
-		/*
-		 * Disable EFI Manager for now as no one uses it so it is
-		 * confusing
-		 */
-		if (drv->id == UCLASS_BOOTMETH &&
-		    strcmp("efi_mgr_bootmeth", drv->name)) {
-			const char *name = drv->name;
-
-			if (!strncmp("bootmeth_", name, 9))
-				name += 9;
-			ret = device_bind(bootstd, drv, name, 0, ofnode_null(),
-					  &dev);
-			if (ret)
-				return log_msg_ret("bind", ret);
-		}
-	}
-
-	return 0;
 }
 
 UCLASS_DRIVER(bootmeth) = {

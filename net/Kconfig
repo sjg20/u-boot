@@ -16,7 +16,7 @@ config PROT_UDP
 
 config BOOTDEV_ETH
 	bool "Enable bootdev for ethernet"
-	depends on BOOTDEV
+	depends on BOOTSTD
 	default y
 	help
 	  Provide a bootdev for ethernet so that is it possible to boot

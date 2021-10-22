@@ -75,7 +75,7 @@
 		compatible = "u-boot,boot-std";
 
 		filename-prefixes = "/", "/boot/";
-		bootdev-order = "mmc2", "mmc1";
+		bootdev-order = "mmc2", "mmc1", "bootstd";
 
 		syslinux {
 			compatible = "u-boot,distro-syslinux";
@@ -83,6 +83,10 @@
 
 		efi {
 			compatible = "u-boot,distro-efi";
+		};
+
+		system-bootdev {
+			compatible = "u-boot,bootdev-system";
 		};
 	};
 
