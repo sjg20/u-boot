@@ -315,7 +315,7 @@ Bootmeth drivers are provided for:
 Command interface
 -----------------
 
-Two commands are available:
+Three commands are available:
 
 `bootdev`
     Allows listing of available bootdevs, selecting a particular one and
@@ -354,6 +354,77 @@ file     File was found and its size detected, but it could not be read. This
 ready    File was loaded and is ready for use. In this state the bootflow is
          ready to be booted.
 =======  =======================================================================
+
+
+Theory of operation
+-------------------
+
+This describes how standard boot progresses through to booting an operating
+system.
+
+Tp start. all the necessary devices are set up. This includes bootstd, which
+provides the top-level `struct bootstd_priv` containing optional configuration
+information. It is also holds the various lists used while scanning.
+
+Bootdevs are also required, to provide access to the media to use. This is not
+useful by itself: bootmeths are needed to provide the means of scanning those
+bootdevs. So, all up, we need a single bootstd device, one or more bootdev
+devices and one or more bootmeth devices.
+
+Once these are ready, the iteration can begin. Iteration is the process of
+looking through the bootdevs and their partitions (for block devices) one by one
+to find bootflows.
+
+Iteration is kicked off using `bootflow_scan_first()`, which calls
+`bootflow_scan_bootdev()`.
+
+The iterator is set up with `bootflow_iter_init()`. This simple creates an empty
+one with the given flags. Flags are used to control whether the each iteration
+is displayed, whether to return iterations even if they did not result in a
+valid bootflow, whether to iterate through just a single bootdev, etc.
+
+Then the ordering of bootdevs is determined, by `setup_bootdev_order()`. By
+default, the bootdevs are used in their sequence order, as determined by the
+`/aliaeses` node, or failing that their order in the devicetree. But if there is
+a bootdev-order property in the bootstd node, then this is used instead. In
+any case, the iterator ends up with a dev_order array containing the bootdevs
+that are going to be used, with `num_devs` set to the number of bootdevs and
+`cur_dev` starting at 0.
+
+Next, the ordering ot bootdevs is determined, by `setup_bootmeth_order(). By
+default the ordering is by sequence number, i.e. the `/aliases` node, or failing
+that the ordeer in the devicetree. But the `bootmeth order` command can be used
+to set up an ordering. If that has been done, the ordering is in
+`struct bootstd_priv`, so that ordering is simply copied into the iterator.
+Either way, the `method_order` array it set up, along with `num_methods`. Then
+`cur_method` is set to 0.
+
+At this point the iterator is ready to use, with the first bootdev and bootmeth
+selected. All the other fields are 0. This means that the current partition is
+0, which is taken to mean the whole device, since partition numbers start at 1.
+It also means that `max_part` is 0, meaning that the maximum partition number
+we know about is 0, meaning that as far as we know, there is no partition table
+on this bootdev.
+
+With the iterator read, bootflow_scan_bootdev() checks whether the current
+settings produce a valid bootflow. This is handled by `bootflow_check()`, which
+either returns 0 (if it got something) or an error if not (more on that later).
+If the `BOOTFLOWF_ALL`` iterator flag is set, even errors are returned as
+incomplete bootflows, but normally an error results in moving onto the next
+iteration.
+
+The `bootflow_scan_next()` function handles moving onto the next iteration and
+checking it. In fact it sits in a loop doing that repeatedly until it finds
+something it wants to return.
+
+The actual 'moving on' part is implemented in `iter_incr()`. This is a very
+simple function. It increments the first counter. If that hits its maximum, it
+sets it to zero and increments the second counter. You can think of all the
+counters as a number:
+
+   bootdev     part       method
+
+So what happens inside of `bootflow_check()`?
 
 
 Tests
