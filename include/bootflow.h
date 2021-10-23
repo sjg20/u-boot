@@ -65,7 +65,7 @@ struct bootflow {
 };
 
 /**
- * enum bootflow_flags_t - flags for the bootflow
+ * enum bootflow_flags_t - flags for the bootflow iterator
  *
  * @BOOTFLOWF_FIXED: Only used fixed/internal media
  * @BOOTFLOWF_SHOW: Show each bootdev before scanning it
@@ -104,7 +104,6 @@ enum bootflow_flags_t {
  *	partition table
  * @err: Error obtained from checking the last iteration. This is used to skip
  *	forward (e.g. to skip the current partition because it is not valid)
- *	-ENOTTY: try next partition
  *	-ESHUTDOWN: try next bootdev
  * @num_devs: Number of bootdevs in @dev_order
  * @cur_dev: Current bootdev number, an index into @dev_order[]

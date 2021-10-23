@@ -420,11 +420,71 @@ something it wants to return.
 The actual 'moving on' part is implemented in `iter_incr()`. This is a very
 simple function. It increments the first counter. If that hits its maximum, it
 sets it to zero and increments the second counter. You can think of all the
-counters as a number:
+counters as a number with three digits which increment in order, with the
+least-sigificant digit on the right.
 
+   ========    =======    =======
    bootdev     part       method
+   ========    =======    =======
+   0           0          0
+   0           0          1
+   0           0          2
+   0           1          0
+   0           1          1
+   0           1          1
+   1           0          0
+   1           0          1
+   ========    =======    =======
 
-So what happens inside of `bootflow_check()`?
+The maximum value for `method` is `num_methods - 1` so when it exceeds that, it
+goes back to 0 and the next `part` is considered. The maximum value for that is
+`max_part`, which is initially zero for all bootdevs. If we find a partition
+table on that bootdev, it can be updated during the iteration to a higher
+value - see `bootdev_find_in_blk()` for that, described later. If that exceeds
+its maximum, then the next bootdev is used. In this way, iter_incr() works its
+way through all possibilities each time it is called.
+
+Note also the `err` field in `struct bootflow_iter`. This is normally 0 and has
+no effect. But if it has an error, it is a signal to the iterator as to what
+to do when called. It can force moving to the next partition, for bootdev, for
+example. The special values `BF_NO_MORE_PARTS` and `BF_NO_MORE_DEVICES` handle
+this. When `iter_incr` sees `BF_NO_MORE_PARTS` it knows that it should
+immediately move to the next bootdev. When it sees `BF_NO_MORE_DEVICES` it
+knows that there is nothing more it can do. The caller of `iter_incr` is
+responsible for updating the `err` field, based on the return value it sees.
+
+The above describes the iteration process at a high level. It is basically a
+very simple increment function with a checker called `bootflow_check()` that
+checks the result of each iteration generated, to determine whether it can
+produce a bootflow.
+
+So what happens inside of `bootflow_check()`? It simply calls the uclass
+method `bootdev_get_bootflow()` to ask the bootdev to return a bootflow. It
+passes the iterator to the bootdev method, so it knows what we are talking
+about. At first, the bootflow is set up in the state `BOOTFLOWST_BASE`, with
+just the `method` and `dev` intiialised. But the bootdev may fill in more,
+updating the start, depending on what it finds.
+
+Based on what the bootdev responds with, `bootflow_check()` either
+returns a valid bootflow, or a partial one with an error. A partial bootflow
+is one that has some fields set up, but did not reach the `BOOTFLOWST_READY`
+state. If the `BOOTFLOWF_ALL` iterator flag is set, then all bootflows are
+returned, even partial ones. This can help with debugging.
+
+So at this point you can see that total control over whether a bootflow can
+be generated from a particular iteration, or not, rests with the bootdev.
+Each one can adopt its own approach. Let us consider the MMC bootdev. In that
+case the call to `bootdev_get_bootflow()` ends up in `mmc_get_bootflow()`. It
+locates the parent device of the bootdev, i.e. the `UCLASS_MMC` device itself,
+then finds the block device associated with it. It then calls the helper
+function `bootdev_find_in_blk()` to do all the work. This is common with just
+about any bootdev that is based on a media device.
+
+The `bootdev_find_in_blk()` helper is implemented in the bootdev uclass. It
+tries
+
+
+bootdev_find_in_blk
 
 
 Tests
