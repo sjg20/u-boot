@@ -25,6 +25,5 @@
 			offset = <CONFIG_SPL_PAD_TO>;
 		};
 	};
-#endif
 };
 #endif
