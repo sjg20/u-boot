@@ -366,6 +366,7 @@ sdwires:
     serial: 202001064005
     symlink: sdwire4
     hub-port: *hubb_9
+    block-symlink: sdcard2
 
   sdwire5: &sdwire5
     serial: sdwireda10
@@ -1003,6 +1004,7 @@ duts:
         target: jetson-tk1
         toolchain: armv7-a
 
+  # For some reason the SDwire does not work with this board
   puma:
     desc: Theobroma Systems Puma RK3399
     console: *ttyusb_port6
@@ -1015,7 +1017,7 @@ duts:
     builds:
       puma:
         target: puma-rk3399
-        toolchain: armv7-a
+        toolchain: aarch64
 
   salmon:
     desc: Snapper MX6
