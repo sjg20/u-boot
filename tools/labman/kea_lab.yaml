@@ -900,6 +900,24 @@ duts:
         target: chromebook_samus
         toolchain: i386
 
+  samus_tpl:
+    desc: Chromebook Pixel 2 (TPL)
+    console: *servo_samus
+    bootdev: *em100_samus
+    power: *dli_second_port3
+    reset: *servo_samus
+    username: root
+    password: test0000
+    flash:
+      method: em100
+    blobs:
+      dest: board/google/chromebook_samus
+      src: /vid/software/devel/samus/bin/*.bin
+    builds:
+      samus:
+        target: chromebook_samus_tpl
+        toolchain: i386
+
   nyan-big:
     desc: Asus Chromebook
     console: *servo_samus
