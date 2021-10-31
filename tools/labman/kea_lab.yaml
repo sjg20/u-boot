@@ -1182,7 +1182,7 @@ duts:
     bootdev: *sdwire14
     reset: *usbrelay2_port1
     flash:
-      method: rockchip3399_tpl
+      method: rockchip
     blobs:
       dest: .
       src: /vid/software/devel/rk3399/bl31.elf
