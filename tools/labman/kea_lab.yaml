@@ -479,6 +479,12 @@ servos:
     port: 9905
     hub-port: *hube_2
 
+  svsnow: &servo_snow
+    board: daisy
+    serial: 911416-00558
+    port: 9906
+    hub-port: *hubd_1
+
 ykushs:
   ykush0: &ykush0
     serial: YK17698
@@ -536,6 +542,12 @@ imxusbs:
     hub-port: *hubd_3
     symlink: usbdev-snappermx6
     loadaddr: 0x908000
+
+samsungusbs:
+  samsungusb0: &snow_send
+    hub-port: *hubd_4
+    symlink: usbdev-snow
+    loadaddr: 0x02021400
 
 sunxiusbs:
   sunxi-usb0: &opi_pc_send
@@ -1261,4 +1273,21 @@ duts:
     builds:
       salmon:
         target: am335x_boneblack_vboot
+        toolchain: armv7-a
+
+  snow:
+    desc: Chromebook Snow
+    console: *servo_snow
+    power: *dli_second_port7
+    recovery: *servo_snow
+    reset: *servo_snow
+    send:
+      device: *snow_send
+      method: samsung
+    network:
+      method: ethernet
+      mac-address: none
+    builds:
+      snow:
+        target: snow
         toolchain: armv7-a

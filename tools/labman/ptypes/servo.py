@@ -278,6 +278,8 @@ class Part_servo(Part):
             return None
         elif prop == 'reset':
             return 'self.servo_reset()'
+        elif prop == 'setrecovery':
+            return 'self.servo_recovery()'
         elif prop == 'baseclass':
             return 'Servo'
         elif prop == 'get_uart':
