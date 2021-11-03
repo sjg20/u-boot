@@ -49,7 +49,7 @@ class Part_imxusb(Part_usbboot):
         raise ValueError('%s: %s' % (str(self), msg))
 
     def imx(self, *in_args):
-        """Perform an operation with the tegrarcm tool
+        """Perform an operation with the imx tool
 
         Args:
             in_args: Arguments to pass to the tool

@@ -164,4 +164,15 @@ class Part:
         return None
 
     def get_code(self, prop, prop_list, partref):
+        """Get the code to generate for a particular action on a part
+
+        Args:
+            prop: Property to emit, eg. 'poweron', 'reset'
+            prop_list: List of all properties that are still to be emitted after
+                this one
+            partref: Partref to emit
+
+        Returns:
+            string: Code containing the code line to emit
+        """
         return None

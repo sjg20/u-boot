@@ -208,33 +208,62 @@ class Part_dut(Part, Power):
     def non_none(self, *partrefs):
         return [partref.obj for partref in partrefs if partref]
 
-    def add_sequence(self, vals, prop_list, *partrefs, indent=8, template=None,
+    def add_sequence(self, vals, actions, *partrefs, indent=8, template=None,
                      var=None, add_comma=False):
+        """Add a code sequence to the output
+
+        Calls get_code(action) for a group of actions to create the code used
+        to perform these actions.
+
+        Parts which emit code should have a get_code() method. See
+        part.get_code()
+
+        Args:
+            vals: dict of values, like 'username', 'desc'. This is used to
+                provide format arguments to template. On exit it is updated
+                to replace the
+            actions: List of actions to emit, each a string
+            partrefs: Parts to use for the output
+            indent: Indentation to use in the output (number of spaces)
+            template: Code template, a format string containing {action}
+                strings, where 'action' is the action to take. Code is generated
+                to cause that action, so {poweron} will cause the power to go
+                on
+            var: Action to emit
+            add_comma" Add a comma after each line that is output
+        """
         if var is None:
-            var = prop_list[0]
+            var = actions[0]
         calls = []
-        for seq, prop in enumerate(prop_list):
+        for seq, prop in enumerate(actions):
             pcalls = []
             allow_dup = False #prop == 'delay'
             for partref in partrefs:
                 if partref:
-                    call = partref.obj.get_code(prop, prop_list[seq + 1:],
+                    call = partref.obj.get_code(prop, actions[seq + 1:],
                                                 partref)
                     if call and (allow_dup or call not in pcalls):
                         pcalls.append(call)
             calls += pcalls
+
+        # If nothing was generated, udpate the template to avoid generating
+        # empty lines
         if not calls:
             if template:
+                # remove lines containing {var} so there are no blank lines
+                # in the output
                 regex = re.compile('{%s}' % var)
                 for seq, line in enumerate(template):
                     if regex.search(line):
                         template.pop(seq)
                         break
             else:
+                # No template, so output 'pass' to keep Python happy, in case
+                # this is the only output for this method
                 calls.append('pass')
-        out = ''
-        if len(prop_list) == 1:
+        if len(actions) == 1:
             calls = sorted(calls)
+        out = ''
         for seq, call in enumerate(calls):
             out += '%s%s%s' % ('\n' + ' ' * indent if seq else '', call,
                                ',' if add_comma else '')
