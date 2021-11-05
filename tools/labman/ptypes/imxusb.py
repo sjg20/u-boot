@@ -31,14 +31,13 @@ class Part_imxusb(Part_usbboot):
             yam (dict): Yaml definition
         """
         super().load(yam)
-        self.bct = yam.get('bct')
 
     def __str__(self):
         """Convert the object into a string for presentation to the user"""
         return 'imx %s' % self.name
 
     def raise_self(self, msg):
-        """Raise an error related to this Tegra RCM connection
+        """Raise an error related to this Freescale USB connection
 
         Args:
             msg (str): Message to report
@@ -66,13 +65,6 @@ class Part_imxusb(Part_usbboot):
         if result.return_code:
             self.raise_self("Failed to run '%s'" % ' '.join(args))
         return result.stderr
-
-    def get_py_class_vars(self, part_ref):
-        out = super().get_py_class_vars(part_ref)
-        out.update({
-            #'tegra_bct': self.bct,
-            })
-        return out
 
     def emit_udev(self):
         result = super().emit_udev()

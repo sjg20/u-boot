@@ -1,4 +1,3 @@
-
 # Kea lab
 
 name: kea
@@ -294,6 +293,28 @@ dlis:
       port8: &dli_second_port8
         port-number: 8
 
+  dli2: &dli_fourth
+    hostname: 192.168.4.27
+    user: admin
+    password: 1234
+    ports:
+      port1: &dli_fourth_port1
+        port-number: 1
+      port2: &dli_fourth_port2
+        port-number: 2
+      port3: &dli_fourth_port3
+        port-number: 3
+      port4: &dli_fourth_port4
+        port-number: 4
+      port5: &dli_fourth_port5
+        port-number: 5
+      port6: &dli_fourth_port6
+        port-number: 6
+      port7: &dli_fourth_port7
+        port-number: 7
+      port8: &dli_fourth_port8
+        port-number: 8
+
 em100s:
   em100-0: &em100_minnowmax
     hub-port: *hubb_5
@@ -336,6 +357,12 @@ em100s:
     symlink: em100_coral
     serial: DP033694
     chip: w25q128fw
+
+  em100-7: &em100_kevin
+    hub-port: *hubd_5
+    symlink: em100_kevin
+    serial: DP137244
+    chip: gd25lq64
 
 sdwires:
   sdwire0: &sdwire0
@@ -487,6 +514,12 @@ servos:
     port: 9906
     hub-port: *hubd_1
 
+  svkevin: &servo_kevin
+    board: kevin
+    serial: 911416-00627
+    port: 9907
+    hub-port: *hubd_7
+
 ykushs:
   ykush0: &ykush0
     serial: YK17698
@@ -528,12 +561,6 @@ ykushs:
       port3: &ykush2_port3
         port-number: 3
 
-intelusbs:
-  intelusb0: &intel_usb0
-    hub-port: *ykush2_port1
-    symlink: usbdev-edison
-    retries: 1
-
 at91usbs:
   at91-usb0: &sn9260_send
     hub-port: *hube_13
@@ -544,6 +571,18 @@ imxusbs:
     hub-port: *hubd_3
     symlink: usbdev-snappermx6
     loadaddr: 0x908000
+
+intelusbs:
+  intelusb0: &intel_usb0
+    hub-port: *ykush2_port1
+    symlink: usbdev-edison
+    retries: 1
+
+rockchipusbs:
+  rockchipusb0: &kevin_send
+    hub-port: *hubd_8
+    symlink: usbdev-kevin
+    loadaddr: 0x02021400
 
 samsungusbs:
   samsungusb0: &snow_send
@@ -1293,3 +1332,23 @@ duts:
       snow:
         target: snow
         toolchain: armv7-a
+
+  kevin:
+    desc: Chromebook Kevin
+    console: *servo_kevin
+    bootdev: *em100_kevin
+    power: *dli_fourth_port1
+    recovery: *servo_kevin
+    reset: *servo_kevin
+    flash:
+      method: em100
+    send:
+      device: *kevin_send
+      method: rockchip
+    network:
+      method: ethernet
+      mac-address: none
+    builds:
+      snow:
+        target: chromebook_kevin
+        toolchain: aarch64

@@ -7,6 +7,7 @@
 
 import glob
 import os
+import socket
 
 from lab import Lab
 
@@ -28,7 +29,7 @@ def Labman(args, lab=None):
             lab = Lab()
             test_lab = lab
         lab.read(lab_fname)
-        if not remote:
+        if not remote and lab._host != socket.gethostname():
             remote = lab._host
 
     if args.single_threaded:

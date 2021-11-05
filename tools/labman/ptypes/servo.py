@@ -89,7 +89,7 @@ class ServoComms(object):
         done = False
         for wait in range(30):
             if self.proc.poll():
-                out = self.proc.communicate(gtimeout=1)
+                out = self.proc.communicate(timeout=100)
                 raise ValueError("servod died: '%s'" % out[1])
             if os.path.exists(self.info_file):
                 done = True

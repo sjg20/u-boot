@@ -9,7 +9,7 @@ import collections
 from labman.ptypes.usbboot import Part_usbboot
 from labman import work
 
-class Part_samsungusb(Part_usbboot):
+class Part_rockchipusb(Part_usbboot):
     """A Samsung exynos connection
 
     This allows downloading software to the DUT oevr USB using the boot ROM
@@ -19,8 +19,8 @@ class Part_samsungusb(Part_usbboot):
     """
     def __init__(self):
         super().__init__()
-        self.vendor = 0x04e8
-        self.product = 0x1234
+        self.vendor = 0x2207
+        self.product = 0x330c
         self.recovery_method = self.Method.RECOVERY_RESET
 
     def load(self, yam):
@@ -33,7 +33,7 @@ class Part_samsungusb(Part_usbboot):
 
     def __str__(self):
         """Convert the object into a string for presentation to the user"""
-        return 'samsung %s' % self.name
+        return 'rockchip %s' % self.name
 
     def raise_self(self, msg):
         """Raise an error related to this Samsung connection
