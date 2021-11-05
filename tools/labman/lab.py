@@ -64,6 +64,7 @@ class Lab:
         if not self._name:
             self.raise_self('Missing name')
         self._desc = yam.get('desc')
+        self._host = yam.get('host')
         self._parts = Parts(self)
         self._parts.scan_ptypes()
         self._parts.load_all(yam)

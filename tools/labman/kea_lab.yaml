@@ -1,6 +1,7 @@
 # Kea lab
 
 name: kea
+host: kea
 
 hubs:
   huba: &huba
