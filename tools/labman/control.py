@@ -5,24 +5,37 @@
 # Main control for labman
 #
 
+import glob
+import os
+
 from lab import Lab
+
+OUR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Used to access the lab for testing
 test_lab = None
 
 def Labman(args, lab=None):
-    if args.lab:
+    lab_fname = args.lab
+    remote = args.remote
+    if not args.lab:
+        labs = glob.glob('*.yaml') + glob.glob(os.path.join(OUR_PATH, '*.yaml'))
+        if len(labs) == 1:
+            lab_fname = labs[0]
+    if lab_fname:
         if not lab:
             global test_lab
             lab = Lab()
             test_lab = lab
-        lab.read(args.lab)
+        lab.read(lab_fname)
+        if not remote:
+            remote = lab._host
 
     if args.single_threaded:
         lab.set_num_threads(0)
 
-    if args.remote:
-        lab.set_remote(args.remote)
+    if remote:
+        lab.set_remote(remote)
 
     lab.setup_state_dir()
 
