@@ -2,6 +2,7 @@
 /*
  * Copyright (c) 2013, Google Inc.
  */
+#define DEBUG
 
 #include "mkimage.h"
 #include <stdlib.h>

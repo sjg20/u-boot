@@ -1025,7 +1025,7 @@ int fit_cipher_data(const char *keydir, void *keydest, void *fit,
  * fit_add_verification_data() - add verification data to FIT image nodes
  *
  * @keydir:	Directory containing keys
- * @kwydest:	FDT blob to write public key information to
+ * @kwydest:	FDT blob to write public key information to (NULL if none)
  * @fit:	Pointer to the FIT format image header
  * @comment:	Comment to add to signature nodes
  * @require_keys: Mark all keys as 'required'
@@ -1121,6 +1121,43 @@ int fit_check_ramdisk(const void *fit, int os_noffset,
 
 int calculate_hash(const void *data, int data_len, const char *algo,
 			uint8_t *value, int *value_len);
+
+/**
+ * fdt_add_verif_data() - add verification data to an FDT blob
+ *
+ * @keydir:	Directory containing keys
+ * @keyfile:	Filename containing .key file
+ * @kwydest:	FDT blob to write public key information to (NULL if none)
+ * @fit:	Pointer to the FIT format image header
+ * @key_name:	Name of key used to sign (used for node name and .crt file)
+ * @comment:	Comment to add to signature nodes
+ * @require_keys: Mark all keys as 'required'
+ * @engine_id:	Engine to use for signing
+ * @cmdname:	Command name used when reporting errors
+ *
+ * Adds hash values for all component images in the FIT blob.
+ * Hashes are calculated for all component images which have hash subnodes
+ * with algorithm property set to one of the supported hash algorithms.
+ *
+ * Also add signatures if signature nodes are present.
+ *
+ * returns
+ *     0, on success
+ *     libfdt error code, on failure
+ */
+int fdt_add_verif_data(const char *keydir, const char *keyfile, void *keydest,
+		       void *blob, const char *key_name, const char *comment,
+		       bool require_keys, const char *engine_id,
+		       const char *cmdname);
+
+struct strlist {
+	int count;
+	char **strings;
+};
+
+void strlist_init(struct strlist *list);
+void strlist_free(struct strlist *list);
+int strlist_add(struct strlist *list, const char *str);
 
 /*
  * At present we only support signing on the host, and verification on the

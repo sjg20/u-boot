@@ -39,4 +39,6 @@ int mmap_fdt(const char *cmdname, const char *fname, size_t size_inc,
 	     void **blobp, struct stat *sbuf, bool delete_on_error,
 	     bool read_only);
 
+int copyfile(const char *src, const char *dst);
+
 #endif /* _FIT_COMMON_H_ */

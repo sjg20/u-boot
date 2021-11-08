@@ -1,0 +1,12 @@
+g/dts-v1/;
+
+/ {
+    model = "Google Snow";
+    chosen {
+        bootargs = "console=tty1";
+        stdout-path = "serial3:115200n8";
+    };
+    aliases {
+        i2c0 = "/i2c@12C60000";
+    };
+};
