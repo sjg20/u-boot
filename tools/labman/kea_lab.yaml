@@ -471,6 +471,12 @@ sdwires:
     mount-uuid: CC94-AA32
     mount-point: bbb_boot
 
+  sdwire17: &sdwire17
+    serial: da63
+    symlink: sdwire17
+    hub-port: *hubf_6
+    block-symlink: sdcard11
+
 servos:
   svsamus: &servo_samus
     board: samus
@@ -612,6 +618,11 @@ sunxiusbs:
     symlink: usbdev-opi_pc2
     loadaddr: 0x4a000000
 
+  sunxi-usb4: &pinea64_send
+    hub-port: *hubf_5
+    symlink: usbdev-pinea64
+    loadaddr: 0x4a000000
+
 tegrarcms:
   tegra-usb0: &jetson_tk1_send
     hub-port: *huba_13
@@ -718,6 +729,10 @@ uarts:
     type: usb-uart
     symlink: ttyusb_port21
     hub-port: *hubf_2
+  usbport22: &ttyusb_port22
+    type: usb-uart
+    symlink: ttyusb_port22
+    hub-port: *hubf_4
   portserver1: &portserver1
     type: portserver
     host: 192.168.4.23
@@ -1351,4 +1366,23 @@ duts:
     builds:
       snow:
         target: chromebook_kevin
+        toolchain: aarch64
+
+  # Does not seem to boot from uSD anymore
+  pine64:
+    desc: Pine A64 Plus 2GB
+    console: *ttyusb_port22
+    bootdev: *sdwire17
+    reset: *usbrelay2_port4
+    flash:
+      method: sunxi
+    send:
+      method: sunxi
+      device: *pinea64_send
+    blobs:
+      dest: .
+      src: /vid/software/devel/pine/bl31.bin
+    builds:
+      salmon:
+        target: pine64-lts
         toolchain: aarch64
