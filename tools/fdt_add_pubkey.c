@@ -50,10 +50,11 @@ static void process_args(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
 	struct image_sign_info info;
-	int destfd, ret;
+	int signode, keynode, ret;
 	void *dest_blob = NULL;
 	struct stat dest_sbuf;
 	size_t size_inc = 0;
+	int destfd = -1;
 
 	cmdname = argv[0];
 
@@ -71,20 +72,41 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	while (1) {
+	do {
+		if (destfd >= 0) {
+			munmap(dest_blob, dest_sbuf.st_size);
+			close(destfd);
+
+			fprintf(stderr, ".dtb too small, increasing size by 1024 bytes\n");
+			size_inc = 1024;
+		}
+
 		destfd = mmap_fdt(cmdname, keydest, size_inc, &dest_blob, &dest_sbuf, false, false);
 		if (destfd < 0)
 			exit(EXIT_FAILURE);
 
 		ret = info.crypto->add_verify_data(&info, dest_blob);
-
-		munmap(dest_blob, dest_sbuf.st_size);
-		close(destfd);
-		if (!ret || ret != -ENOSPC)
+		if (ret == -ENOSPC)
+			continue;
+		else if (ret)
 			break;
-		fprintf(stderr, ".dtb too small, increasing size by 1024 bytes\n");
-		size_inc = 1024;
-	}
+
+		signode = fdt_path_offset(dest_blob, "/signature");
+		if (signode < 0) {
+			fprintf(stderr, "%s: /signature node not found?!\n",
+				cmdname);
+			exit(EXIT_FAILURE);
+		}
+
+		keynode = fdt_first_subnode(dest_blob, signode);
+		if (keynode < 0) {
+			fprintf(stderr, "%s: /signature/<key> node not found?!\n",
+				cmdname);
+			exit(EXIT_FAILURE);
+		}
+
+		ret = fdt_appendprop(dest_blob, keynode, "u-boot,dm-spl", NULL, 0);
+	} while (ret == -ENOSPC);
 
 	if (ret) {
 		fprintf(stderr, "%s: Cannot add public key to FIT blob: %s\n",
@@ -94,4 +116,3 @@ int main(int argc, char *argv[])
 
 	exit(EXIT_SUCCESS);
 }
-
