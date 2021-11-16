@@ -8,6 +8,8 @@
 #ifndef __ASM_TEST_H
 #define __ASM_TEST_H
 
+#include <video.h>
+
 /* The sandbox driver always permits an I2C device with this address */
 #define SANDBOX_I2C_TEST_ADDR		0x59
 
@@ -284,5 +286,16 @@ void sandbox_cros_ec_set_test_flags(struct udevice *dev, uint flags);
  * @return 0 if OK, -ENOSPC if the PWM number is invalid
  */
 int sandbox_cros_ec_get_pwm_duty(struct udevice *dev, uint index, uint *duty);
+
+/**
+ * sandbox_video_set_bpp() - Set the depth of the sandbox display
+ *
+ * This updates the depth value and adjusts a few other settings accordingly.
+ * It must be called before the display is probed.
+ *
+ * @dev: Device to adjust
+ * @l2bpp: depth to set
+ */
+void sandbox_video_set_bpp(struct udevice *dev, enum video_log2_bpp l2bpp);
 
 #endif
