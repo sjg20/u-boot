@@ -152,13 +152,38 @@ toc_entry_t toc_entries[] = {
             }
         self.assertEqual(expected_names, names)
 
-        # Check generating the file
-        tools.WriteFile(src_file, '', binary=False)
+        # Check generating the file when changes are needed
+        tools.WriteFile(src_file, '''
+
+# This is taken from tbbr_config.c in ARM Trusted Firmware
+FIP_TYPE_LIST = [
+    # ToC Entry UUIDs
+    FipType('scp-fwu-cfg', 'SCP Firmware Updater Configuration FWU SCP_BL2U',
+            [0x65, 0x92, 0x27, 0x03, 0x2f, 0x74, 0xe6, 0x44,
+             0x8d, 0xff, 0x57, 0x9a, 0xc1, 0xff, 0x06, 0x10]),
+    ] # end
+blah blah
+                        ''', binary=False)
         with test_util.capture_sys_output() as (stdout, stderr):
             fip_util.main(args, src_file)
         self.assertIn('Needs update', stdout.getvalue())
 
-        fname
+        # Check generating the file when no changes are needed
+        tools.WriteFile(src_file, '''
+# This is taken from tbbr_config.c in ARM Trusted Firmware
+FIP_TYPE_LIST = [
+    # ToC Entry UUIDs
+    FipType('scp-fwu-cfg', 'SCP Firmware Updater Configuration FWU SCP_BL2U',
+            [0x65, 0x92, 0x27, 0x03, 0x2f, 0x74, 0xe6, 0x44,
+             0x8d, 0xff, 0x57, 0x9a, 0xc1, 0xff, 0x06, 0x10]),
+    FipType('ap-fwu-cfg', 'AP Firmware Updater Configuration BL2U',
+            [0x60, 0xb3, 0xeb, 0x37, 0xc1, 0xe5, 0xea, 0x41,
+             0x9d, 0xf3, 0x19, 0xed, 0xa1, 0x1f, 0x68, 0x01]),
+    ] # end
+blah blah''', binary=False)
+        with test_util.capture_sys_output() as (stdout, stderr):
+            fip_util.main(args, src_file)
+        self.assertIn('is up-to-date', stdout.getvalue())
 
 
 if __name__ == '__main__':
