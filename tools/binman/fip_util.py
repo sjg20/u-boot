@@ -30,9 +30,10 @@ import sys
 
 # Bring in the patman and dtoc libraries (but don't override the first path
 # in PYTHONPATH)
-OUR_FILE = os.path.realpath(__file__)
-OUR_PATH = os.path.dirname(OUR_FILE)
-sys.path.insert(2, os.path.join(OUR_PATH, '..'))
+if __name__ == "__main__":
+    OUR_FILE = os.path.realpath(__file__)
+    OUR_PATH = os.path.dirname(OUR_FILE)
+    sys.path.insert(2, os.path.join(OUR_PATH, '..'))
 
 # pylint: disable=C0413
 from patman import tools
@@ -509,8 +510,11 @@ def parse_atf_source(srcdir, dstfile):
         print('Needs update, try:\n\tmeld %s %s' % (dstfile, OUR_FILE))
 
 
-def main():
+def main(argv):
     """Main program for this tool
+
+    Args:
+        argv (list): List of str command-line arguments
 
     Returns:
         int: 0 (exit code)
@@ -527,7 +531,7 @@ directory''')
     parser.add_argument(
         '-s', '--src', type=str, default='.',
         help='Directory containing the arm-trusted-firmware source')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if not args.debug:
         sys.tracebacklimit = 0
@@ -537,4 +541,4 @@ directory''')
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
