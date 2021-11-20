@@ -8,7 +8,7 @@
 from collections import OrderedDict
 
 from binman.entry import Entry
-from binman.fip_util import fip_types, FipWriter
+from binman.fip_util import FIP_TYPES, FipWriter
 from dtoc import fdt_util
 
 class Entry_atf_fip(Entry):
@@ -26,7 +26,7 @@ class Entry_atf_fip(Entry):
         """Read the subnodes to find out what should go in this CBFS"""
         for node in self._node.subnodes:
             fip_type = None
-            if node.name in fip_types:
+            if node.name in FIP_TYPES:
                 fip_type = node.name
                 etype = 'blob-ext'
             entry = Entry.Create(self, node, etype)
