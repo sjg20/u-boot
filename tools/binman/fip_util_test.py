@@ -43,6 +43,10 @@ class TestFip(unittest.TestCase):
         except ValueError:
             cls.have_fiptool = False
 
+        cls.src_file = os.path.join(cls._indir, 'orig.py')
+        cls.outname = tools.GetOutputFilename('out.py')
+        cls.args = ['-D', '-s', cls._indir, '-o', cls.outname]
+
     @classmethod
     def tearDownClass(cls):
         """Remove the temporary input directory and its contents"""
@@ -51,22 +55,18 @@ class TestFip(unittest.TestCase):
         cls._indir = None
         tools.FinaliseOutputDir()
 
-    # pylint: disable=R0914
-    def test_parse_atf_source(self):
+    def test_no_readme(self):
         """Check parsing of the ATF source code"""
-        # no readme.txt
-        src_file = os.path.join(self._indir, 'orig.py')
-        fname = tools.GetOutputFilename('out.py')
-        args = ['-D', '-s', self._indir, '-o', fname]
         with self.assertRaises(Exception) as err:
-            fip_util.main(args, src_file)
+            fip_util.main(self.args, self.src_file)
         self.assertIn('Expected file', str(err.exception))
 
+    def test_rest(self):
         # Invalid header for readme.txt
         readme = os.path.join(self._indir, 'readme.rst')
         tools.WriteFile(readme, 'blah', binary=False)
         with self.assertRaises(Exception) as err:
-            fip_util.main(args, src_file)
+            fip_util.main(self.args, self.src_file)
         self.assertIn('does not start with', str(err.exception))
 
         # No firmware_image_package.h
@@ -74,7 +74,7 @@ class TestFip(unittest.TestCase):
         tools.WriteFile(readme, 'Trusted Firmware-A\n==================',
                         binary=False)
         with self.assertRaises(Exception) as err:
-            fip_util.main(args, src_file)
+            fip_util.main(self.args, self.src_file)
         self.assertIn('No such file or directory', str(err.exception))
 
         # Invalid format for firmware_image_package.h
@@ -83,7 +83,7 @@ class TestFip(unittest.TestCase):
         os.makedirs(macro_dir)
         tools.WriteFile(macro_fname, 'blah', binary=False)
         with self.assertRaises(Exception) as err:
-            fip_util.main(args, src_file)
+            fip_util.main(self.args, self.src_file)
         self.assertIn('Cannot parse file', str(err.exception))
 
         # Check parsing the header file
@@ -111,7 +111,7 @@ class TestFip(unittest.TestCase):
 
         # Still need the .c file
         with self.assertRaises(Exception) as err:
-            fip_util.main(args, src_file)
+            fip_util.main(self.args, self.src_file)
         self.assertIn('tbbr_config.c', str(err.exception))
 
         # Check invalid format for C file
@@ -120,7 +120,7 @@ class TestFip(unittest.TestCase):
         os.makedirs(name_dir)
         tools.WriteFile(name_fname, 'blah', binary=False)
         with self.assertRaises(Exception) as err:
-            fip_util.main(args, src_file)
+            fip_util.main(self.args, self.src_file)
         self.assertIn('Cannot parse file', str(err.exception))
 
         # Check parsing the C file
@@ -153,7 +153,7 @@ toc_entry_t toc_entries[] = {
         self.assertEqual(expected_names, names)
 
         # Check generating the file when changes are needed
-        tools.WriteFile(src_file, '''
+        tools.WriteFile(self.src_file, '''
 
 # This is taken from tbbr_config.c in ARM Trusted Firmware
 FIP_TYPE_LIST = [
@@ -165,11 +165,11 @@ FIP_TYPE_LIST = [
 blah blah
                         ''', binary=False)
         with test_util.capture_sys_output() as (stdout, _):
-            fip_util.main(args, src_file)
+            fip_util.main(self.args, self.src_file)
         self.assertIn('Needs update', stdout.getvalue())
 
         # Check generating the file when no changes are needed
-        tools.WriteFile(src_file, '''
+        tools.WriteFile(self.src_file, '''
 # This is taken from tbbr_config.c in ARM Trusted Firmware
 FIP_TYPE_LIST = [
     # ToC Entry UUIDs
@@ -182,7 +182,7 @@ FIP_TYPE_LIST = [
     ] # end
 blah blah''', binary=False)
         with test_util.capture_sys_output() as (stdout, _):
-            fip_util.main(args, src_file)
+            fip_util.main(self.args, self.src_file)
         self.assertIn('is up-to-date', stdout.getvalue())
 
 
