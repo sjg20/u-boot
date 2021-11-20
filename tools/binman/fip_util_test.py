@@ -27,32 +27,30 @@ import fip_util
 class TestFip(unittest.TestCase):
     """Test of fip_util classes"""
     #pylint: disable=W0212
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         # Create a temporary directory for test files
-        cls._indir = tempfile.mkdtemp(prefix='fip_util.')
-        tools.SetInputDirs([cls._indir])
+        self._indir = tempfile.mkdtemp(prefix='fip_util.')
+        tools.SetInputDirs([self._indir])
 
         # Set up a temporary output directory, used by the tools library when
         # compressing files
         tools.PrepareOutputDir(None)
 
-        cls.have_fiptool = True
+        self.have_fiptool = True
         try:
             tools.Run('which', 'fiptool2')
         except ValueError:
-            cls.have_fiptool = False
+            self.have_fiptool = False
 
-        cls.src_file = os.path.join(cls._indir, 'orig.py')
-        cls.outname = tools.GetOutputFilename('out.py')
-        cls.args = ['-D', '-s', cls._indir, '-o', cls.outname]
+        self.src_file = os.path.join(self._indir, 'orig.py')
+        self.outname = tools.GetOutputFilename('out.py')
+        self.args = ['-D', '-s', self._indir, '-o', self.outname]
 
-    @classmethod
-    def tearDownClass(cls):
+    def tearDown(self):
         """Remove the temporary input directory and its contents"""
-        if cls._indir:
-            shutil.rmtree(cls._indir)
-        cls._indir = None
+        if self._indir:
+            shutil.rmtree(self._indir)
+        self._indir = None
         tools.FinaliseOutputDir()
 
     def test_no_readme(self):
@@ -61,14 +59,14 @@ class TestFip(unittest.TestCase):
             fip_util.main(self.args, self.src_file)
         self.assertIn('Expected file', str(err.exception))
 
-    def test_rest(self):
-        # Invalid header for readme.txt
+    def test_invalid_readme(self):
         readme = os.path.join(self._indir, 'readme.rst')
         tools.WriteFile(readme, 'blah', binary=False)
         with self.assertRaises(Exception) as err:
             fip_util.main(self.args, self.src_file)
         self.assertIn('does not start with', str(err.exception))
 
+    def test_rest(self):
         # No firmware_image_package.h
         readme = os.path.join(self._indir, 'readme.rst')
         tools.WriteFile(readme, 'Trusted Firmware-A\n==================',
