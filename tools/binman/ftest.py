@@ -4696,6 +4696,23 @@ class TestFunctional(unittest.TestCase):
         self.assertEqual(ATF_BL2U_DATA, fent.data)
         self.assertEqual(True, fent.valid)
 
+    def testFipOther(self):
+        """Basic FIP with something that isn't a external blob"""
+        data = self._DoReadFile('204_fip_other.dts')
+        hdr, fents = fip_util.decode_fip(data)
+
+        self.assertEqual(2, len(fents))
+        fent = fents[1]
+        self.assertEqual('rot-cert', fent.fip_type)
+        self.assertEqual(b'aa', fent.data)
+
+    def testFipNoType(self):
+        """FIP with an entry of an unknown type"""
+        with self.assertRaises(ValueError) as e:
+            self._DoReadFile('205_fip_no_type.dts')
+        self.assertIn("Must provide a fip-type (node name 'u-boot' is not a known FIP type)",
+                      str(e.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

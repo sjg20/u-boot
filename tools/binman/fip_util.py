@@ -33,8 +33,7 @@ OUR_PATH = os.path.dirname(OUR_FILE)
 
 # Bring in the patman and dtoc libraries (but don't override the first path
 # in PYTHONPATH)
-if __name__ == "__main__":
-    sys.path.insert(2, os.path.join(OUR_PATH, '..'))
+sys.path.insert(2, os.path.join(OUR_PATH, '..'))
 
 # pylint: disable=C0413
 from patman import tools
@@ -536,4 +535,4 @@ directory''')
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:], OUR_FILE))
+    sys.exit(main(sys.argv[1:], OUR_FILE))  # pragma: no cover

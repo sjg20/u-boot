@@ -26,10 +26,18 @@ class Entry_atf_fip(Entry):
         """Read the subnodes to find out what should go in this CBFS"""
         for node in self._node.subnodes:
             fip_type = None
+            etype = None
             if node.name in FIP_TYPES:
                 fip_type = node.name
                 etype = 'blob-ext'
+
             entry = Entry.Create(self, node, etype)
+            if not fip_type:
+                fip_type = fdt_util.GetString(node, 'fip-type')
+                if not fip_type:
+                    self.Raise("Must provide a fip-type (node name '%s' is not a known FIP type)" %
+                               node.name)
+
             entry._fip_type = fip_type
             entry._fip_flags = fdt_util.GetInt64(node, 'fip-flags', 0)
             entry.ReadNode()

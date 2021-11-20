@@ -9,10 +9,12 @@ This tests a few features of fip_util which are not covered by binman's ftest.py
 """
 
 import os
+import pytest
 import shutil
 import sys
 import tempfile
 import unittest
+import unittest.mock
 
 # Bring in the patman and dtoc libraries (but don't override the first path
 # in PYTHONPATH)
@@ -24,6 +26,7 @@ from patman import test_util
 from patman import tools
 import fip_util
 
+# pylint: disable=R0902
 class TestFip(unittest.TestCase):
     """Test of fip_util classes"""
     #pylint: disable=W0212
@@ -49,6 +52,8 @@ class TestFip(unittest.TestCase):
         self.macro_dir = os.path.join(self._indir, 'include/tools_share')
         self.macro_fname = os.path.join(self.macro_dir,
                                         'firmware_image_package.h')
+        self.name_dir = os.path.join(self._indir, 'tools/fiptool')
+        self.name_fname = os.path.join(self.name_dir, 'tbbr_config.c')
 
     macro_contents = '''
 
@@ -59,6 +64,36 @@ class TestFip(unittest.TestCase):
 	{{0x60, 0xb3, 0xeb, 0x37}, {0xc1, 0xe5}, {0xea, 0x41}, 0x9d, 0xf3, {0x19, 0xed, 0xa1, 0x1f, 0x68, 0x01} }
 
 '''
+
+    name_contents = '''
+
+toc_entry_t toc_entries[] = {
+	{
+		.name = "SCP Firmware Updater Configuration FWU SCP_BL2U",
+		.uuid = UUID_TRUSTED_UPDATE_FIRMWARE_SCP_BL2U,
+		.cmdline_name = "scp-fwu-cfg"
+	},
+	{
+		.name = "AP Firmware Updater Configuration BL2U",
+		.uuid = UUID_TRUSTED_UPDATE_FIRMWARE_BL2U,
+		.cmdline_name = "ap-fwu-cfg"
+	},
+'''
+
+    def setup_readme(self):
+        """Set up the readme.txt file"""
+        tools.WriteFile(self.readme, 'Trusted Firmware-A\n==================',
+                        binary=False)
+
+    def setup_macro(self, data=macro_contents):
+        """Set up the tbbr_config.c file"""
+        os.makedirs(self.macro_dir)
+        tools.WriteFile(self.macro_fname, data, binary=False)
+
+    def setup_name(self, data=name_contents):
+        """Set up the firmware_image_package.h file"""
+        os.makedirs(self.name_dir)
+        tools.WriteFile(self.name_fname, data, binary=False)
 
     def tearDown(self):
         """Remove the temporary input directory and its contents"""
@@ -79,14 +114,6 @@ class TestFip(unittest.TestCase):
         with self.assertRaises(Exception) as err:
             fip_util.main(self.args, self.src_file)
         self.assertIn('does not start with', str(err.exception))
-
-    def setup_readme(self):
-        tools.WriteFile(self.readme, 'Trusted Firmware-A\n==================',
-                        binary=False)
-
-    def setup_macro(self, data=macro_contents):
-        os.makedirs(self.macro_dir)
-        tools.WriteFile(self.macro_fname, data, binary=False)
 
     def test_no_fip_h(self):
         """Check handling of missing firmware_image_package.h"""
@@ -121,8 +148,8 @@ class TestFip(unittest.TestCase):
             }
         self.assertEqual(expected_macros, macros)
 
-    def test_rest(self):
-        """Check parsing of the ATF source code"""
+    def test_missing_tbbr_c(self):
+        """Check handlinh of missing tbbr_config.c"""
         self.setup_readme()
         self.setup_macro()
 
@@ -131,30 +158,41 @@ class TestFip(unittest.TestCase):
             fip_util.main(self.args, self.src_file)
         self.assertIn('tbbr_config.c', str(err.exception))
 
+    def test_invalid_tbbr_c(self):
+        """Check failure to parse tbbr_config.c"""
+        self.setup_readme()
+        self.setup_macro()
         # Check invalid format for C file
-        name_dir = os.path.join(self._indir, 'tools/fiptool')
-        name_fname = os.path.join(name_dir, 'tbbr_config.c')
-        os.makedirs(name_dir)
-        tools.WriteFile(name_fname, 'blah', binary=False)
+        self.setup_name('blah')
         with self.assertRaises(Exception) as err:
             fip_util.main(self.args, self.src_file)
         self.assertIn('Cannot parse file', str(err.exception))
 
-        # Check parsing the C file
-        tools.WriteFile(name_fname, '''
+    def test_inconsistent_tbbr_c(self):
+        """Check tbbr_config.c in a format we don't expect"""
+        self.setup_readme()
+        # This is missing a hex value
+        self.setup_macro('''
 
-toc_entry_t toc_entries[] = {
-	{
-		.name = "SCP Firmware Updater Configuration FWU SCP_BL2U",
-		.uuid = UUID_TRUSTED_UPDATE_FIRMWARE_SCP_BL2U,
-		.cmdline_name = "scp-fwu-cfg"
-	},
-	{
-		.name = "AP Firmware Updater Configuration BL2U",
-		.uuid = UUID_TRUSTED_UPDATE_FIRMWARE_BL2U,
-		.cmdline_name = "ap-fwu-cfg"
-	},
-''', binary=False)
+/* ToC Entry UUIDs */
+#define UUID_TRUSTED_UPDATE_FIRMWARE_SCP_BL2U \\
+	{{0x65, 0x92, 0x27,}, {0x2f, 0x74}, {0xe6, 0x44}, 0x8d, 0xff, {0x57, 0x9a, 0xc1, 0xff, 0x06, 0x10} }
+#define UUID_TRUSTED_UPDATE_FIRMWARE_BL2U \\
+	{{0x60, 0xb3, 0xeb, 0x37}, {0xc1, 0xe5}, {0xea, 0x41}, 0x9d, 0xf3, {0x19, 0xed, 0xa1, 0x1f, 0x68, 0x01} }
+
+''')
+        # Check invalid format for C file
+        self.setup_name('blah')
+        with self.assertRaises(Exception) as err:
+            fip_util.main(self.args, self.src_file)
+        self.assertIn('Cannot parse UUID line 5', str(err.exception))
+
+    def test_parse_tbbr_c(self):
+        """Check parsing tbbr_config.c"""
+        self.setup_readme()
+        self.setup_macro()
+        self.setup_name()
+
         names = fip_util.parse_names(self._indir)
 
         expected_names = {
@@ -168,6 +206,29 @@ toc_entry_t toc_entries[] = {
                 'ap-fwu-cfg'),
             }
         self.assertEqual(expected_names, names)
+
+    def test_uuid_not_in_tbbr_config_c(self):
+        self.setup_readme()
+        self.setup_macro(self.macro_contents + '''
+#define UUID_TRUSTED_OS_FW_KEY_CERT \\
+	{{0x94,  0x77, 0xd6, 0x03}, {0xfb, 0x60}, {0xe4, 0x11}, 0x85, 0xdd, {0xb7, 0x10, 0x5b, 0x8c, 0xee, 0x04} }
+
+''')
+        self.setup_name()
+
+        macros = fip_util.parse_macros(self._indir)
+        names = fip_util.parse_names(self._indir)
+        with test_util.capture_sys_output() as (stdout, _):
+            output = fip_util.create_code_output(macros, names)
+        self.assertIn(
+            "UUID 'UUID_TRUSTED_OS_FW_KEY_CERT' is not mentioned in tbbr_config.c file",
+            stdout.getvalue())
+
+    def test_changes(self):
+        """Check handling of a source file that does/doesn't need changes"""
+        self.setup_readme()
+        self.setup_macro()
+        self.setup_name()
 
         # Check generating the file when changes are needed
         tools.WriteFile(self.src_file, '''
@@ -201,6 +262,18 @@ blah blah''', binary=False)
         with test_util.capture_sys_output() as (stdout, _):
             fip_util.main(self.args, self.src_file)
         self.assertIn('is up-to-date', stdout.getvalue())
+
+    def test_no_debug(self):
+        """Test running without the -D flag"""
+        self.setup_readme()
+        self.setup_macro()
+        self.setup_name()
+
+        args = self.args.copy()
+        args.remove('-D')
+        tools.WriteFile(self.src_file, '', binary=False)
+        with test_util.capture_sys_output() as (stdout, _):
+            fip_util.main(args, self.src_file)
 
 
 if __name__ == '__main__':
