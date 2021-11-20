@@ -34,6 +34,7 @@ OUR_FILE = os.path.realpath(__file__)
 OUR_PATH = os.path.dirname(OUR_FILE)
 sys.path.insert(2, os.path.join(OUR_PATH, '..'))
 
+# pylint: disable=C0413
 from patman import tools
 
 # The TOC header, at the start of the FIP
@@ -60,10 +61,18 @@ ENTRY_NAMES = (
     'flags',
 )
 
+# Use a class so we can convert the bytes, making the table more readable
+# pylint: disable=R0903
 class FipType:
     """A FIP entry type that we understand"""
     def __init__(self, name, desc, uuid_bytes):
-        """Create up a new type"""
+        """Create up a new type
+
+        Args:
+            name (str): Short name for the type
+            desc (str): Longer description for the type
+            uuid_bytes (bytes): List of 16 bytes for the UUID
+        """
         self.name = name
         self.desc = desc
         self.uuid = bytes(uuid_bytes)
@@ -176,21 +185,31 @@ def align_int(val, align):
     """Align a value up to the given alignment
 
     Args:
-        val: Integer value to align
-        align: Integer alignment value (e.g. 4 to align to 4-byte boundary)
+        val (int): Integer value to align
+        align (int): Integer alignment value (e.g. 4 to align to 4-byte boundary)
 
     Returns:
-        integer value aligned to the required boundary, rounding up if necessary
+        int: value aligned to the required boundary, rounding up if necessary
     """
     return int((val + align - 1) / align) * align
 
+# pylint: disable=R0903
 class FipHeader:
+    """Class to represent a FIP header"""
     def __init__(self, name, serial, flags):
+        """Set up a new header object
+
+        Args:
+            name (str): Name, i.e. HEADER_MAGIC
+            serial (str): Serial value, i.e. HEADER_SERIAL
+            flags (int64): Flags value
+        """
         self.name = name
         self.serial = serial
         self.flags = flags
 
 
+# pylint: disable=R0903
 class FipEntry:
     """Class to represent a single FIP entry
 
@@ -215,6 +234,17 @@ class FipEntry:
 
     @classmethod
     def from_type(cls, fip_type, data, flags):
+        """Create a FipEntry from a type name
+
+        Args:
+            cls (class): This class
+            fip_type (str): Name of the type to create
+            data (bytes): Contents of entry
+            flags (int64): Flags value
+
+        Returns:
+            FipEntry: Created 241
+        """
         fent = FipEntry(FIP_TYPES[fip_type].uuid, None, len(data), flags)
         fent.fip_type = fip_type
         fent.data = data
@@ -225,7 +255,7 @@ def decode_fip(data):
     """Decode a FIP into a header and list of FIP entries
 
     Args:
-        data: Data block containing the FMAP
+        data (bytes): Data block containing the FMAP
 
     Returns:
         Tuple:
@@ -253,7 +283,7 @@ class FipWriter:
     Usage is something like:
 
         fip = FipWriter(size)
-        fip.add_file('scp-fwu-cfg', tools.ReadFile('something.bin'))
+        fip.add_entry('scp-fwu-cfg', tools.ReadFile('something.bin'))
         ...
         data = cbw.get_data()
 
@@ -281,12 +311,12 @@ class FipWriter:
         Thhis builds the FIP with headers and all required FIP entries.
 
         Returns:
-            'bytes' type containing the data
+            bytes: data resulting from building the FIP
         """
-        fd = io.BytesIO()
+        buf = io.BytesIO()
         hdr = struct.pack(HEADER_FORMAT, HEADER_MAGIC, HEADER_SERIAL,
                           self._flags)
-        fd.write(hdr)
+        buf.write(hdr)
 
         # Calculate the position fo the first entry
         offset = len(hdr)
@@ -302,21 +332,21 @@ class FipWriter:
         for fent in self._fip_entries:
             hdr = struct.pack(ENTRY_FORMAT, fent.uuid, fent.offset, fent.size,
                               fent.flags)
-            fd.write(hdr)
+            buf.write(hdr)
 
         # Write out the entries
         for fent in self._fip_entries:
-            fd.seek(fent.offset)
-            fd.write(fent.data)
+            buf.seek(fent.offset)
+            buf.write(fent.data)
 
-        return fd.getvalue()
+        return buf.getvalue()
 
 
 def parse_macros(srcdir):
     """parse_macros: Parse the firmware_image_package.h file
 
     Args:
-        srcdir: 'arm-trusted-firmware' source directory
+        srcdir (str): 'arm-trusted-firmware' source directory
 
     Returns:
         dict:
@@ -325,6 +355,9 @@ def parse_macros(srcdir):
                 file comment comment, e.g. 'ToC Entry UUIDs'
                 macro name, e.g. 'UUID_TRUSTED_FWU_CERT'
                 uuid as bytes(16)
+
+    Raises:
+        ValueError: a line cannot be parsed
     """
     re_uuid = re.compile('0x[0-9a-fA-F]{2}')
     re_comment = re.compile(r'^/\* (.*) \*/$')
@@ -334,19 +367,20 @@ def parse_macros(srcdir):
     comment = None
     for linenum, line in enumerate(data.splitlines()):
         if line.startswith('/*'):
-            m = re_comment.match(line)
-            if m:
-                comment = m.group(1)
+            mat = re_comment.match(line)
+            if mat:
+                comment = mat.group(1)
         else:
             # Example: #define UUID_TOS_FW_CONFIG \
             if 'UUID' in line:
                 macro = line.split()[1]
             elif '{{' in line:
-                m = re_uuid.findall(line)
-                if not m or len(m) != 16:
-                    raise ValueError('%s: Cannot parse UUID line %d: Got matches: %s' %
-                                     (ttbr_fname, linenum + 1, m))
-                uuid = bytes([int(val, 16) for val in m])
+                mat = re_uuid.findall(line)
+                if not mat or len(mat) != 16:
+                    raise ValueError(
+                        '%s: Cannot parse UUID line %d: Got matches: %s' %
+                        (fname, linenum + 1, mat))
+                uuid = bytes([int(val, 16) for val in mat])
                 macros[macro] = comment, macro, uuid
     return macros
 
@@ -355,7 +389,7 @@ def parse_names(srcdir):
     """parse_names: Parse the tbbr_config.c file
 
     Args:
-        srcdir: 'arm-trusted-firmware' source directory
+        srcdir (str): 'arm-trusted-firmware' source directory
 
     Returns:
         tuple: list of entries, each
@@ -363,6 +397,9 @@ def parse_names(srcdir):
                 Description of entry, e.g. 'Non-Trusted Firmware BL33'
                 UUID macro, e.g. 'UUID_NON_TRUSTED_FIRMWARE_BL33'
                 Name of entry, e.g. 'nt-fw'
+
+    Raises:
+        ValueError: the file cannot be parsed
     """
     # Extract the .name, .uuid and .cmdline_name values
     re_data = re.compile(r'\.name = "([^"]*)",\s*\.uuid = (UUID_\w*),\s*\.cmdline_name = "([^"]+)"',
@@ -376,10 +413,10 @@ def parse_names(srcdir):
     #       .uuid = UUID_SECURE_PAYLOAD_BL32_EXTRA2,
     #       .cmdline_name = "tos-fw-extra2"
     #   },
-    m = re_data.findall(data)
-    if not m:
-        raise ValueError('%s: Cannot parse file' % ttbr_fname)
-    names = {uuid: (desc, uuid, name) for desc, uuid, name in m}
+    mat = re_data.findall(data)
+    if not mat:
+        raise ValueError('%s: Cannot parse file' % fname)
+    names = {uuid: (desc, uuid, name) for desc, uuid, name in mat}
     return names
 
 
@@ -387,21 +424,21 @@ def create_code_output(macros, names):
     """create_code_output() - Create the new version of this Python file
 
     Args:
-        macros: dict of macros:
-            key: UUID macro name, e.g. 'UUID_TRUSTED_FWU_CERT'
+        macros (dict):
+            key (str): UUID macro name, e.g. 'UUID_TRUSTED_FWU_CERT'
             value: list:
                 file comment comment, e.g. 'ToC Entry UUIDs'
                 macro name, e.g. 'UUID_TRUSTED_FWU_CERT'
                 uuid as bytes(16)
 
-        names: list of entries, each
+        names (dict): list of entries, each
             tuple: entry information
                 Description of entry, e.g. 'Non-Trusted Firmware BL33'
                 UUID macro, e.g. 'UUID_NON_TRUSTED_FIRMWARE_BL33'
                 Name of entry, e.g. 'nt-fw'
 
     Returns:
-        Table of FipType() entries as a string
+        str: Table of FipType() entries
     """
     def _to_hex_list(data):
         """Convert bytes into C code
@@ -409,8 +446,8 @@ def create_code_output(macros, names):
         Args:
             bytes to convert
 
-        Returns
-            String in the format '0x12, 0x34, 0x56...'
+        Returns:
+            str: in the format '0x12, 0x34, 0x56...'
         """
         # Use 0x instead of %# since the latter ignores the 0 modifier in
         # Python 3.8.10
@@ -439,9 +476,13 @@ def parse_atf_source(srcdir, dstfile):
     """parse_atf_source(): Parse the ATF source tree and update this file
 
     Args:
-        srcdir: Path to 'arm-trusted-firmware' directory. Get this from:
+        srcdir (str): Path to 'arm-trusted-firmware' directory. Get this from:
             https://github.com/ARM-software/arm-trusted-firmware.git
-        dstfile: File to write new code to, if an update is needed
+        dstfile (str): File to write new code to, if an update is needed
+
+    Raises:
+        ValueError: srcdir readme.rst is missing or the first first line does
+            not match what is expected
     """
     # We expect a readme file
     readme_fname = os.path.join(srcdir, 'readme.rst')
@@ -459,8 +500,8 @@ def parse_atf_source(srcdir, dstfile):
     output = create_code_output(macros, names)
     orig = tools.ReadFile(OUR_FILE, binary=False)
     re_fip_list = re.compile(r'(.*FIP_TYPE_LIST = \[).*?(    ] # end.*)', re.S)
-    m = re_fip_list.match(orig)
-    new_code = m.group(1) + '\n' + output + m.group(2)
+    mat = re_fip_list.match(orig)
+    new_code = mat.group(1) + '\n' + output + mat.group(2)
     if new_code == orig:
         print("Existing code in '%s' is up-to-date" % OUR_FILE)
     else:
@@ -468,11 +509,15 @@ def parse_atf_source(srcdir, dstfile):
         print('Needs update, try:\n\tmeld %s %s' % (dstfile, OUR_FILE))
 
 
-if __name__ == "__main__":
-    epilog = '''Creates an updated version of this code, with a table of
-FIP-entry types parsed from the arm-trusted-firmware source directory'''
+def main():
+    """Main program for this tool
 
-    parser = ArgumentParser(epilog=epilog)
+    Returns:
+        int: 0 (exit code)
+    """
+    parser = ArgumentParser(epilog='''Creates an updated version of this code,
+with a table of FIP-entry types parsed from the arm-trusted-firmware source
+directory''')
     parser.add_argument(
         '-D', '--debug', action='store_true',
         help='Enabling debugging (provides a full traceback on error)')
@@ -487,5 +532,9 @@ FIP-entry types parsed from the arm-trusted-firmware source directory'''
     if not args.debug:
         sys.tracebacklimit = 0
 
-    ret_code = parse_atf_source(args.src, args.outfile)
-    sys.exit(ret_code)
+    parse_atf_source(args.src, args.outfile)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
