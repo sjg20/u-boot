@@ -46,6 +46,19 @@ class TestFip(unittest.TestCase):
         self.outname = tools.GetOutputFilename('out.py')
         self.args = ['-D', '-s', self._indir, '-o', self.outname]
         self.readme = os.path.join(self._indir, 'readme.rst')
+        self.macro_dir = os.path.join(self._indir, 'include/tools_share')
+        self.macro_fname = os.path.join(self.macro_dir,
+                                        'firmware_image_package.h')
+
+    macro_contents = '''
+
+/* ToC Entry UUIDs */
+#define UUID_TRUSTED_UPDATE_FIRMWARE_SCP_BL2U \\
+	{{0x65, 0x92, 0x27, 0x03}, {0x2f, 0x74}, {0xe6, 0x44}, 0x8d, 0xff, {0x57, 0x9a, 0xc1, 0xff, 0x06, 0x10} }
+#define UUID_TRUSTED_UPDATE_FIRMWARE_BL2U \\
+	{{0x60, 0xb3, 0xeb, 0x37}, {0xc1, 0xe5}, {0xea, 0x41}, 0x9d, 0xf3, {0x19, 0xed, 0xa1, 0x1f, 0x68, 0x01} }
+
+'''
 
     def tearDown(self):
         """Remove the temporary input directory and its contents"""
@@ -71,6 +84,10 @@ class TestFip(unittest.TestCase):
         tools.WriteFile(self.readme, 'Trusted Firmware-A\n==================',
                         binary=False)
 
+    def setup_macro(self, data=macro_contents):
+        os.makedirs(self.macro_dir)
+        tools.WriteFile(self.macro_fname, data, binary=False)
+
     def test_no_fip_h(self):
         """Check handling of missing firmware_image_package.h"""
         self.setup_readme()
@@ -78,28 +95,19 @@ class TestFip(unittest.TestCase):
             fip_util.main(self.args, self.src_file)
         self.assertIn('No such file or directory', str(err.exception))
 
-    def test_rest(self):
-        """Check parsing of the ATF source code"""
+    def test_invalid_fip_h(self):
+        """Check failure to parse firmware_image_package.h"""
         self.setup_readme()
-        # Invalid format for firmware_image_package.h
-        macro_dir = os.path.join(self._indir, 'include/tools_share')
-        macro_fname = os.path.join(macro_dir, 'firmware_image_package.h')
-        os.makedirs(macro_dir)
-        tools.WriteFile(macro_fname, 'blah', binary=False)
+        self.setup_macro('blah')
         with self.assertRaises(Exception) as err:
             fip_util.main(self.args, self.src_file)
         self.assertIn('Cannot parse file', str(err.exception))
 
+    def test_parse_fip_h(self):
+        """Check parsing of firmware_image_package.h"""
+        self.setup_readme()
         # Check parsing the header file
-        tools.WriteFile(macro_fname, '''
-
-/* ToC Entry UUIDs */
-#define UUID_TRUSTED_UPDATE_FIRMWARE_SCP_BL2U \\
-	{{0x65, 0x92, 0x27, 0x03}, {0x2f, 0x74}, {0xe6, 0x44}, 0x8d, 0xff, {0x57, 0x9a, 0xc1, 0xff, 0x06, 0x10} }
-#define UUID_TRUSTED_UPDATE_FIRMWARE_BL2U \\
-	{{0x60, 0xb3, 0xeb, 0x37}, {0xc1, 0xe5}, {0xea, 0x41}, 0x9d, 0xf3, {0x19, 0xed, 0xa1, 0x1f, 0x68, 0x01} }
-
-''', binary=False)
+        self.setup_macro()
         macros = fip_util.parse_macros(self._indir)
         expected_macros = {
             'UUID_TRUSTED_UPDATE_FIRMWARE_SCP_BL2U':
@@ -112,6 +120,11 @@ class TestFip(unittest.TestCase):
                         0x9d, 0xf3, 0x19, 0xed, 0xa1, 0x1f, 0x68, 0x01])),
             }
         self.assertEqual(expected_macros, macros)
+
+    def test_rest(self):
+        """Check parsing of the ATF source code"""
+        self.setup_readme()
+        self.setup_macro()
 
         # Still need the .c file
         with self.assertRaises(Exception) as err:
