@@ -23,6 +23,7 @@ from binman import cmdline
 from binman import control
 from binman import elf
 from binman import elf_test
+from binman import fip_util
 from binman import fmap_util
 from binman import state
 from dtoc import fdt
@@ -4664,7 +4665,7 @@ class TestFunctional(unittest.TestCase):
     def testFip(self):
         """Basic test of generation of an ARM Firmware Image Package (FIP)"""
         data = self._DoReadFile('203_fip.dts')
-        #fhdr, fentries = fmap_util.DecodeFmap(data[32:])
+        fhdr, fentries = fip_util.decode_fip(data)
         #expected = (U_BOOT_DATA + tools.GetBytes(ord('!'), 12) +
                     #U_BOOT_DATA + tools.GetBytes(ord('a'), 12))
 

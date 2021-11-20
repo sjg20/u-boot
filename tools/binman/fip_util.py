@@ -145,48 +145,11 @@ def align_int(val, align):
     """
     return int((val + align - 1) / align) * align
 
-def NameToFip(name):
-    if type(name) == bytes:
-        name = name.decode('utf-8')
-    return name.replace('\0', '').replace('-', '_').upper()
-
-def ConvertName(field_names, fields):
-    """Convert a name to something flashrom likes
-
-    Flashrom requires upper case, underscores instead of hyphens. We remove any
-    null characters as well. This updates the 'name' value in fields.
-
-    Args:
-        field_names: List of field names for this struct
-        fields: Dict:
-            key: Field name
-            value: value of that field (string for the ones we support)
-    """
-    name_index = field_names.index('name')
-    fields[name_index] = tools.ToBytes(NameToFip(fields[name_index]))
-
-def DecodeFip(data):
-    """Decode a flashmap into a header and list of areas
-
-    Args:
-        data: Data block containing the FMAP
-
-    Returns:
-        Tuple:
-            header: FipHeader object
-            List of FipArea objects
-    """
-    fields = list(struct.unpack(FMAP_HEADER_FORMAT, data[:FMAP_HEADER_LEN]))
-    ConvertName(FMAP_HEADER_NAMES, fields)
-    header = FipHeader(*fields)
-    areas = []
-    data = data[FMAP_HEADER_LEN:]
-    for area in range(header.nareas):
-        fields = list(struct.unpack(FMAP_AREA_FORMAT, data[:FMAP_AREA_LEN]))
-        ConvertName(FMAP_AREA_NAMES, fields)
-        areas.append(FipArea(*fields))
-        data = data[FMAP_AREA_LEN:]
-    return header, areas
+class FipHeader:
+    def __init__(self, magic, serial, flags):
+        self.magic = magic
+        self.serial = serial
+        self.flags = flags
 
 
 class FipEntry:
@@ -196,12 +159,46 @@ class FipEntry:
     Use the get_data() method to obtain the raw output for writing to the FIP
     file.
     """
-    def __init__(self, fip_type, data, flags):
-        self.fip_type = fip_type
-        self.uuid = fip_types[fip_type].uuid
-        self.data = data
-        self.size = len(data)
+    def __init__(self, uuid, offset, size, flags):
+        self.uuid = uuid
+        self.offset = offset
+        self.size = size
         self.flags = flags
+        self.fip_type = None
+        self.data = None
+        self.valid = uuid != tools.GetBytes(0, UUID_LEN)
+
+    @classmethod
+    def from_type(cls, fip_type, data, flags):
+        fent = FipEntry(fip_types[fip_type].uuid, None, len(data), flags)
+        fent.fip_type = fip_type
+        fent.data = data
+        return fent
+
+
+def decode_fip(data):
+    """Decode a FIP into a header and list of FIP entries
+
+    Args:
+        data: Data block containing the FMAP
+
+    Returns:
+        Tuple:
+            header: FipHeader object
+            List of FipArea objects
+    """
+    fields = list(struct.unpack(HEADER_FORMAT, data[:HEADER_LEN]))
+    header = FipHeader(*fields)
+    fents = []
+    pos = HEADER_LEN
+    while True:
+        fields = list(struct.unpack(ENTRY_FORMAT, data[pos:pos + ENTRY_SIZE]))
+        fent = FipEntry(*fields)
+        if not fent.valid:
+            break
+        fents.append(fent)
+        pos += ENTRY_SIZE
+    return header, fents
 
 
 class FipWriter:
@@ -221,7 +218,7 @@ class FipWriter:
         self._align = align
 
     def add_file(self, fip_type, data, flags):
-        fent = FipEntry(fip_type, data, flags)
+        fent = FipEntry.from_type(fip_type, data, flags)
         self._fip_entries.append(fent)
 
     def _align_to(self, fd, align):
