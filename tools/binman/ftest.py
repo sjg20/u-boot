@@ -4661,6 +4661,13 @@ class TestFunctional(unittest.TestCase):
             str(e.exception),
             "Not enough space in '.*u_boot_binman_embed_sm' for data length.*")
 
+    def testFip(self):
+        """Basic test of generation of an ARM Firmware Image Package (FIP)"""
+        data = self._DoReadFile('203_fip.dts')
+        #fhdr, fentries = fmap_util.DecodeFmap(data[32:])
+        #expected = (U_BOOT_DATA + tools.GetBytes(ord('!'), 12) +
+                    #U_BOOT_DATA + tools.GetBytes(ord('a'), 12))
+
 
 if __name__ == "__main__":
     unittest.main()
