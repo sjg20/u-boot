@@ -183,18 +183,6 @@ FIP_TYPE_LIST = [
 FIP_TYPES = {ftype.name: ftype for ftype in FIP_TYPE_LIST}
 
 
-def align_int(val, align):
-    """Align a value up to the given alignment
-
-    Args:
-        val (int): Integer value to align
-        align (int): Integer alignment value (e.g. 4 to align to 4-byte boundary)
-
-    Returns:
-        int: value aligned to the required boundary, rounding up if necessary
-    """
-    return int((val + align - 1) / align) * align
-
 # pylint: disable=R0903
 class FipHeader:
     """Class to represent a FIP header"""
@@ -306,6 +294,7 @@ class FipWriter:
         """
         fent = FipEntry.from_type(fip_type, data, flags)
         self._fip_entries.append(fent)
+        return fent
 
     def get_data(self):
         """Obtain the full contents of the FIP

@@ -51,10 +51,10 @@ class TestFip(unittest.TestCase):
         cls._indir = None
         tools.FinaliseOutputDir()
 
+    # pylint: disable=R0914
     def test_parse_atf_source(self):
         """Check parsing of the ATF source code"""
         # no readme.txt
-        self.maxDiff = None
         src_file = os.path.join(self._indir, 'orig.py')
         fname = tools.GetOutputFilename('out.py')
         args = ['-D', '-s', self._indir, '-o', fname]
@@ -143,8 +143,8 @@ toc_entry_t toc_entries[] = {
         expected_names = {
             'UUID_TRUSTED_UPDATE_FIRMWARE_SCP_BL2U': (
                 'SCP Firmware Updater Configuration FWU SCP_BL2U',
-                 'UUID_TRUSTED_UPDATE_FIRMWARE_SCP_BL2U',
-                 'scp-fwu-cfg'),
+                'UUID_TRUSTED_UPDATE_FIRMWARE_SCP_BL2U',
+                'scp-fwu-cfg'),
             'UUID_TRUSTED_UPDATE_FIRMWARE_BL2U': (
                 'AP Firmware Updater Configuration BL2U',
                 'UUID_TRUSTED_UPDATE_FIRMWARE_BL2U',
@@ -164,7 +164,7 @@ FIP_TYPE_LIST = [
     ] # end
 blah blah
                         ''', binary=False)
-        with test_util.capture_sys_output() as (stdout, stderr):
+        with test_util.capture_sys_output() as (stdout, _):
             fip_util.main(args, src_file)
         self.assertIn('Needs update', stdout.getvalue())
 
@@ -181,7 +181,7 @@ FIP_TYPE_LIST = [
              0x9d, 0xf3, 0x19, 0xed, 0xa1, 0x1f, 0x68, 0x01]),
     ] # end
 blah blah''', binary=False)
-        with test_util.capture_sys_output() as (stdout, stderr):
+        with test_util.capture_sys_output() as (stdout, _):
             fip_util.main(args, src_file)
         self.assertIn('is up-to-date', stdout.getvalue())
 
