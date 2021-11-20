@@ -28,11 +28,12 @@ import re
 import struct
 import sys
 
+OUR_FILE = os.path.realpath(__file__)
+OUR_PATH = os.path.dirname(OUR_FILE)
+
 # Bring in the patman and dtoc libraries (but don't override the first path
 # in PYTHONPATH)
 if __name__ == "__main__":
-    OUR_FILE = os.path.realpath(__file__)
-    OUR_PATH = os.path.dirname(OUR_FILE)
     sys.path.insert(2, os.path.join(OUR_PATH, '..'))
 
 # pylint: disable=C0413
@@ -383,6 +384,8 @@ def parse_macros(srcdir):
                         (fname, linenum + 1, mat))
                 uuid = bytes([int(val, 16) for val in mat])
                 macros[macro] = comment, macro, uuid
+    if not macros:
+        raise ValueError('%s: Cannot parse file' % fname)
     return macros
 
 
@@ -393,7 +396,8 @@ def parse_names(srcdir):
         srcdir (str): 'arm-trusted-firmware' source directory
 
     Returns:
-        tuple: list of entries, each
+        tuple: dict of entries:
+            key: UUID macro, e.g. 'UUID_NON_TRUSTED_FIRMWARE_BL33'
             tuple: entry information
                 Description of entry, e.g. 'Non-Trusted Firmware BL33'
                 UUID macro, e.g. 'UUID_NON_TRUSTED_FIRMWARE_BL33'
@@ -473,13 +477,14 @@ def create_code_output(macros, names):
     return out
 
 
-def parse_atf_source(srcdir, dstfile):
+def parse_atf_source(srcdir, dstfile, oldfile):
     """parse_atf_source(): Parse the ATF source tree and update this file
 
     Args:
         srcdir (str): Path to 'arm-trusted-firmware' directory. Get this from:
             https://github.com/ARM-software/arm-trusted-firmware.git
         dstfile (str): File to write new code to, if an update is needed
+        oldfile (str): Python source file to compare against
 
     Raises:
         ValueError: srcdir readme.rst is missing or the first first line does
@@ -499,22 +504,23 @@ def parse_atf_source(srcdir, dstfile):
     macros = parse_macros(srcdir)
     names = parse_names(srcdir)
     output = create_code_output(macros, names)
-    orig = tools.ReadFile(OUR_FILE, binary=False)
+    orig = tools.ReadFile(oldfile, binary=False)
     re_fip_list = re.compile(r'(.*FIP_TYPE_LIST = \[).*?(    ] # end.*)', re.S)
     mat = re_fip_list.match(orig)
-    new_code = mat.group(1) + '\n' + output + mat.group(2)
+    new_code = mat.group(1) + '\n' + output + mat.group(2) if mat else output
     if new_code == orig:
-        print("Existing code in '%s' is up-to-date" % OUR_FILE)
+        print("Existing code in '%s' is up-to-date" % oldfile)
     else:
         tools.WriteFile(dstfile, new_code, binary=False)
-        print('Needs update, try:\n\tmeld %s %s' % (dstfile, OUR_FILE))
+        print('Needs update, try:\n\tmeld %s %s' % (dstfile, oldfile))
 
 
-def main(argv):
+def main(argv, oldfile):
     """Main program for this tool
 
     Args:
         argv (list): List of str command-line arguments
+        oldfile (str): Python source file to compare against
 
     Returns:
         int: 0 (exit code)
@@ -536,9 +542,9 @@ directory''')
     if not args.debug:
         sys.tracebacklimit = 0
 
-    parse_atf_source(args.src, args.outfile)
+    parse_atf_source(args.src, args.outfile, oldfile)
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main(sys.argv[1:], OUR_FILE))
