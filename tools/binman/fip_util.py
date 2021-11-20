@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0+
 # Copyright 2021 Google LLC
 # Written by Simon Glass <sjg@chromium.org>
@@ -13,8 +14,18 @@ firmware image where something can be found.
 [1] https://chromium.googlesource.com/chromiumos/third_party/flashmap/+/refs/heads/master/lib/fmap.h
 """
 
+from argparse import ArgumentParser
 import io
+import os
+import re
 import struct
+import sys
+
+# Bring in the patman and dtoc libraries (but don't override the first path
+# in PYTHONPATH)
+our_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(2, os.path.join(our_path, '..'))
+
 
 from patman import tools
 
@@ -279,3 +290,60 @@ class FipWriter:
             fd.write(fent.data)
 
         return fd.getvalue()
+
+
+def parse_uuids(srcdir):
+    re_uuid = re.compile('0x[0-9a-fA-F]{2}')
+    re_comment = re.compile(r'^(.*)$')
+    ttbr_fname = os.path.join(srcdir,
+                              'include/tools_share/firmware_image_package.h')
+    ttbr = tools.ReadFile(ttbr_fname, binary=False)
+    macros = {}
+    comment = None
+    for linenum, line in enumerate(ttbr.splitlines()):
+        if line.startswith('/*'):
+            comment = re_comment.match(line)
+            print('c', comment.groups())
+        else:
+            # Example: #define UUID_TOS_FW_CONFIG \
+            if 'UUID' in line:
+                macro = line.split()[1]
+            elif '{{' in line:
+                m = re_uuid.findall(line)
+                if not m or len(m) != 16:
+                    raise ValueError('%s: Cannot parse UUID line %d: Got matches: %s' %
+                                     (ttbr_fname, linenum + 1, m))
+                uuid = bytes([int(val, 16) for val in m])
+                macros[macro] = comment, uuid
+    return macros
+
+
+def parse_uids(srcdir):
+    # We expect a readme file
+    readme_fname = os.path.join(srcdir, 'readme.rst')
+    if not os.path.exists(readme_fname):
+        raise ValueError("Expected file '%s' - try using -s to specify the arm-trusted-firmware directory" %
+                         readme_fname)
+    readme = tools.ReadFile(readme_fname, binary=False)
+    first_line = 'Trusted Firmware-A'
+    if readme.splitlines()[0] != first_line:
+        raise ValueError("'%s' does not start with '%s'" %
+                         (readme_fname, first_line))
+    macros = parse_uuids(srcdir)
+    #print('macros', macros)
+
+if __name__ == "__main__":
+    epilog = '''fip_util.py: Create table of FIP-entry types'''
+
+    parser = ArgumentParser(epilog=epilog)
+    parser.add_argument('-D', '--debug', action='store_true',
+        help='Enabling debugging (provides a full traceback on error)')
+    parser.add_argument('-s', '--src-dir', type=str, default='.',
+        help='Directory containing the arm-trusted-firmware source')
+    args = parser.parse_args()
+
+    if not args.debug:
+        sys.tracebacklimit = 0
+
+    ret_code = parse_uids(args.src_dir)
+    sys.exit(ret_code)
