@@ -63,7 +63,7 @@ ENTRY_NAMES = (
 class FipType:
     """A FIP entry type that we understand"""
     def __init__(self, name, desc, uuid_bytes):
-        """Create up a new type
+        """Create up a new type"""
         self.name = name
         self.desc = desc
         self.uuid = bytes(uuid_bytes)
@@ -264,25 +264,16 @@ class FipWriter:
         self._flags = flags
         self._align = align
 
-    def add_file(self, fip_type, data, flags):
-        fent = FipEntry.from_type(fip_type, data, flags)
-        self._fip_entries.append(fent)
-
-    def _align_to(self, fd, align):
-        """Write out pad bytes until a given alignment is reached
-
-        This only aligns if the resulting output would not reach the end of the
-        CBFS, since we want to leave the last 4 bytes for the master-header
-        pointer.
+    def add_entry(self, fip_type, data, flags):
+        """Add a new entry to the FIP
 
         Args:
-            fd: File objext to write to
-            align: Alignment to require (e.g. 4 means pad to next 4-byte
-                boundary)
+            fip_type (str): Type to add, e.g. 'tos-fw-config'
+            data (bytes): Contents of entry
+            flags (int64): Entry flags
         """
-        offset = align_int(fd.tell(), align)
-        if offset < self._size:
-            self._skip_to(fd, offset)
+        fent = FipEntry.from_type(fip_type, data, flags)
+        self._fip_entries.append(fent)
 
     def get_data(self):
         """Obtain the full contents of the FIP

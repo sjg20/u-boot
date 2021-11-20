@@ -44,9 +44,9 @@ class Entry_atf_fip(Entry):
             if entry != skip and not entry.ObtainContents():
                 return False
             data = entry.GetData()
-            fipf = fip.add_file(entry._fip_type, entry.data, entry._fip_flags)
-            if fipf:
-                entry._fip_file = fipf
+            fent = fip.add_entry(entry._fip_type, entry.data, entry._fip_flags)
+            if fent:
+                entry._fip_entry = fent
         data = fip.get_data()
         self.SetContents(data)
         return True
