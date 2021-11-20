@@ -45,6 +45,7 @@ class TestFip(unittest.TestCase):
         self.src_file = os.path.join(self._indir, 'orig.py')
         self.outname = tools.GetOutputFilename('out.py')
         self.args = ['-D', '-s', self._indir, '-o', self.outname]
+        self.readme = os.path.join(self._indir, 'readme.rst')
 
     def tearDown(self):
         """Remove the temporary input directory and its contents"""
@@ -54,27 +55,32 @@ class TestFip(unittest.TestCase):
         tools.FinaliseOutputDir()
 
     def test_no_readme(self):
-        """Check parsing of the ATF source code"""
+        """Test handling of a missing readme.rst"""
         with self.assertRaises(Exception) as err:
             fip_util.main(self.args, self.src_file)
         self.assertIn('Expected file', str(err.exception))
 
     def test_invalid_readme(self):
-        readme = os.path.join(self._indir, 'readme.rst')
-        tools.WriteFile(readme, 'blah', binary=False)
+        """Test that an invalid readme.rst is detected"""
+        tools.WriteFile(self.readme, 'blah', binary=False)
         with self.assertRaises(Exception) as err:
             fip_util.main(self.args, self.src_file)
         self.assertIn('does not start with', str(err.exception))
 
-    def test_rest(self):
-        # No firmware_image_package.h
-        readme = os.path.join(self._indir, 'readme.rst')
-        tools.WriteFile(readme, 'Trusted Firmware-A\n==================',
+    def setup_readme(self):
+        tools.WriteFile(self.readme, 'Trusted Firmware-A\n==================',
                         binary=False)
+
+    def test_no_fip_h(self):
+        """Check handling of missing firmware_image_package.h"""
+        self.setup_readme()
         with self.assertRaises(Exception) as err:
             fip_util.main(self.args, self.src_file)
         self.assertIn('No such file or directory', str(err.exception))
 
+    def test_rest(self):
+        """Check parsing of the ATF source code"""
+        self.setup_readme()
         # Invalid format for firmware_image_package.h
         macro_dir = os.path.join(self._indir, 'include/tools_share')
         macro_fname = os.path.join(macro_dir, 'firmware_image_package.h')
