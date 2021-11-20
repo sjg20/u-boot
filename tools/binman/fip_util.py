@@ -34,19 +34,18 @@ OUR_FILE = os.path.realpath(__file__)
 OUR_PATH = os.path.dirname(OUR_FILE)
 sys.path.insert(2, os.path.join(OUR_PATH, '..'))
 
-
 from patman import tools
 
 # The TOC header, at the start of the FIP
-HEADER_FORMAT   = '<IIQ'
-HEADER_LEN      = 0x10
-HEADER_MAGIC    = 0xaA640001
-HEADER_SERIAL   = 0x12345678
+HEADER_FORMAT = '<IIQ'
+HEADER_LEN = 0x10
+HEADER_MAGIC = 0xaA640001
+HEADER_SERIAL = 0x12345678
 
 # The entry header (a table of these comes after the TOC header)
-UUID_LEN        = 16
-ENTRY_FORMAT    = '<%dsQQQ' % UUID_LEN
-ENTRY_SIZE      = 0x28
+UUID_LEN = 16
+ENTRY_FORMAT = '<%dsQQQ' % UUID_LEN
+ENTRY_SIZE = 0x28
 
 HEADER_NAMES = (
     'name',
@@ -62,7 +61,9 @@ ENTRY_NAMES = (
 )
 
 class FipType:
+    """A FIP entry type that we understand"""
     def __init__(self, name, desc, uuid_bytes):
+        """Create up a new type
         self.name = name
         self.desc = desc
         self.uuid = bytes(uuid_bytes)
@@ -373,7 +374,7 @@ def parse_names(srcdir):
                 Name of entry, e.g. 'nt-fw'
     """
     # Extract the .name, .uuid and .cmdline_name values
-    re_data = re.compile('\.name = "([^"]*)",\s*\.uuid = (UUID_\w*),\s*\.cmdline_name = "([^"]+)"',
+    re_data = re.compile(r'\.name = "([^"]*)",\s*\.uuid = (UUID_\w*),\s*\.cmdline_name = "([^"]+)"',
                          re.S)
     fname = os.path.join(srcdir, 'tools/fiptool/tbbr_config.c')
     data = tools.ReadFile(fname, binary=False)
@@ -454,8 +455,9 @@ def parse_atf_source(srcdir, dstfile):
     # We expect a readme file
     readme_fname = os.path.join(srcdir, 'readme.rst')
     if not os.path.exists(readme_fname):
-        raise ValueError("Expected file '%s' - try using -s to specify the arm-trusted-firmware directory" %
-                         readme_fname)
+        raise ValueError(
+            "Expected file '%s' - try using -s to specify the arm-trusted-firmware directory" %
+            readme_fname)
     readme = tools.ReadFile(readme_fname, binary=False)
     first_line = 'Trusted Firmware-A'
     if readme.splitlines()[0] != first_line:
@@ -465,7 +467,7 @@ def parse_atf_source(srcdir, dstfile):
     names = parse_names(srcdir)
     output = create_code_output(macros, names)
     orig = tools.ReadFile(OUR_FILE, binary=False)
-    re_fip_list = re.compile('(.*FIP_TYPE_LIST = \[).*?(    ] # end.*)', re.S)
+    re_fip_list = re.compile(r'(.*FIP_TYPE_LIST = \[).*?(    ] # end.*)', re.S)
     m = re_fip_list.match(orig)
     new_code = m.group(1) + '\n' + output + m.group(2)
     if new_code == orig:
@@ -480,11 +482,14 @@ if __name__ == "__main__":
 FIP-entry types parsed from the arm-trusted-firmware source directory'''
 
     parser = ArgumentParser(epilog=epilog)
-    parser.add_argument('-D', '--debug', action='store_true',
+    parser.add_argument(
+        '-D', '--debug', action='store_true',
         help='Enabling debugging (provides a full traceback on error)')
-    parser.add_argument('-o', '--outfile', type=str, default='fip_util.py.out',
+    parser.add_argument(
+        '-o', '--outfile', type=str, default='fip_util.py.out',
         help='Output file to write new fip_util.py file to')
-    parser.add_argument('-s', '--src', type=str, default='.',
+    parser.add_argument(
+        '-s', '--src', type=str, default='.',
         help='Directory containing the arm-trusted-firmware source')
     args = parser.parse_args()
 
