@@ -23,7 +23,6 @@ HEADER_FORMAT   = '<IIQ'
 HEADER_LEN      = 0x10
 HEADER_MAGIC    = 0xaA640001
 HEADER_SERIAL   = 0x12345678
-HEADER_FLAGS    = 0
 
 # The entry header (a table of these comes after the TOC header)
 UUID_LEN        = 16
@@ -146,8 +145,8 @@ def align_int(val, align):
     return int((val + align - 1) / align) * align
 
 class FipHeader:
-    def __init__(self, magic, serial, flags):
-        self.magic = magic
+    def __init__(self, name, serial, flags):
+        self.name = name
         self.serial = serial
         self.flags = flags
 
@@ -167,6 +166,12 @@ class FipEntry:
         self.fip_type = None
         self.data = None
         self.valid = uuid != tools.GetBytes(0, UUID_LEN)
+        if self.valid:
+            # Look up the friendly name
+            matches = {val for (key, val) in fip_types.items()
+                       if val.uuid == uuid}
+            if len(matches) == 1:
+                self.fip_type = matches.pop().name
 
     @classmethod
     def from_type(cls, fip_type, data, flags):
@@ -196,6 +201,7 @@ def decode_fip(data):
         fent = FipEntry(*fields)
         if not fent.valid:
             break
+        fent.data = data[fent.offset:fent.offset + fent.size]
         fents.append(fent)
         pos += ENTRY_SIZE
     return header, fents
@@ -213,8 +219,9 @@ class FipWriter:
 
     Attributes:
     """
-    def __init__(self, align):
+    def __init__(self, flags, align):
         self._fip_entries = []
+        self._flags = flags
         self._align = align
 
     def add_file(self, fip_type, data, flags):
@@ -247,7 +254,7 @@ class FipWriter:
         """
         fd = io.BytesIO()
         hdr = struct.pack(HEADER_FORMAT, HEADER_MAGIC, HEADER_SERIAL,
-                          HEADER_FLAGS)
+                          self._flags)
         fd.write(hdr)
 
         # Calculate the position fo the first entry

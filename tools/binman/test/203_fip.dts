@@ -7,8 +7,14 @@
 
 	binman {
 		atf-fip {
+			fip-hdr-flags = /bits/ 64 <0x123>;
 			soc-fw {
+				fip-flags = /bits/ 64 <0x123456789abcdef>;
 				filename = "bl31.bin";
+			};
+
+			scp-fwu-cfg {
+				filename = "bl2u.bin";
 			};
 		};
 	};

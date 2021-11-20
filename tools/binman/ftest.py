@@ -77,6 +77,7 @@ FSP_M_DATA            = b'fsp_m'
 FSP_S_DATA            = b'fsp_s'
 FSP_T_DATA            = b'fsp_t'
 ATF_BL31_DATA         = b'bl31'
+ATF_BL2U_DATA         = b'bl2u'
 OPENSBI_DATA          = b'opensbi'
 SCP_DATA              = b'scp'
 TEST_FDT1_DATA        = b'fdt1'
@@ -180,6 +181,7 @@ class TestFunctional(unittest.TestCase):
         TestFunctional._MakeInputFile('compress', COMPRESS_DATA)
         TestFunctional._MakeInputFile('compress_big', COMPRESS_DATA_BIG)
         TestFunctional._MakeInputFile('bl31.bin', ATF_BL31_DATA)
+        TestFunctional._MakeInputFile('bl2u.bin', ATF_BL2U_DATA)
         TestFunctional._MakeInputFile('fw_dynamic.bin', OPENSBI_DATA)
         TestFunctional._MakeInputFile('scp.bin', SCP_DATA)
 
@@ -4665,9 +4667,34 @@ class TestFunctional(unittest.TestCase):
     def testFip(self):
         """Basic test of generation of an ARM Firmware Image Package (FIP)"""
         data = self._DoReadFile('203_fip.dts')
-        fhdr, fentries = fip_util.decode_fip(data)
-        #expected = (U_BOOT_DATA + tools.GetBytes(ord('!'), 12) +
-                    #U_BOOT_DATA + tools.GetBytes(ord('a'), 12))
+        hdr, fents = fip_util.decode_fip(data)
+        self.assertEqual(fip_util.HEADER_MAGIC, hdr.name)
+        self.assertEqual(fip_util.HEADER_SERIAL, hdr.serial)
+        self.assertEqual(0x123, hdr.flags)
+
+        self.assertEqual(2, len(fents))
+
+        fent = fents[0]
+        self.assertEqual(
+            bytes([0x47,  0xd4, 0x08, 0x6d, 0x4c, 0xfe, 0x98, 0x46,
+                  0x9b, 0x95, 0x29, 0x50, 0xcb, 0xbd, 0x5a, 0x0]), fent.uuid)
+        self.assertEqual('soc-fw', fent.fip_type)
+        self.assertEqual(0x88, fent.offset)
+        self.assertEqual(len(ATF_BL31_DATA), fent.size)
+        self.assertEqual(0x123456789abcdef, fent.flags)
+        self.assertEqual(ATF_BL31_DATA, fent.data)
+        self.assertEqual(True, fent.valid)
+
+        fent = fents[1]
+        self.assertEqual(
+            bytes([0x65, 0x92, 0x27, 0x03, 0x2f, 0x74, 0xe6, 0x44,
+             0x8d, 0xff, 0x57, 0x9a, 0xc1, 0xff, 0x06, 0x10]), fent.uuid)
+        self.assertEqual('scp-fwu-cfg', fent.fip_type)
+        self.assertEqual(0x8c, fent.offset)
+        self.assertEqual(len(ATF_BL31_DATA), fent.size)
+        self.assertEqual(0, fent.flags)
+        self.assertEqual(ATF_BL2U_DATA, fent.data)
+        self.assertEqual(True, fent.valid)
 
 
 if __name__ == "__main__":

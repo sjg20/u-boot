@@ -17,6 +17,7 @@ class Entry_atf_fip(Entry):
     def __init__(self, section, etype, node):
         super().__init__(section, etype, node)
         self.align_default = None
+        self._fip_flags = fdt_util.GetInt64(node, 'fip-hdr-flags', 0)
         self._fip_align = fdt_util.GetInt(node, 'fip-align', 1)
         self._fip_entries = OrderedDict()
         self._ReadSubnodes()
@@ -30,19 +31,20 @@ class Entry_atf_fip(Entry):
                 etype = 'blob-ext'
             entry = Entry.Create(self, node, etype)
             entry._fip_type = fip_type
+            entry._fip_flags = fdt_util.GetInt64(node, 'fip-flags', 0)
             entry.ReadNode()
             entry._fip_name = node.name
             self._fip_entries[entry._fip_name] = entry
 
     def ObtainContents(self, skip=None):
-        fip = FipWriter(self._fip_align)
+        fip = FipWriter(self._fip_flags, self._fip_align)
         for entry in self._fip_entries.values():
             # First get the input data and put it in a file. If not available,
             # try later.
             if entry != skip and not entry.ObtainContents():
                 return False
             data = entry.GetData()
-            fipf = fip.add_file(entry._fip_type, entry.data, 0)
+            fipf = fip.add_file(entry._fip_type, entry.data, entry._fip_flags)
             if fipf:
                 entry._fip_file = fipf
         data = fip.get_data()
