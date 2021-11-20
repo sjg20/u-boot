@@ -12,6 +12,12 @@ It consists of a header and a table of entries, each pointing to a place in the
 firmware image where something can be found.
 
 [1] https://chromium.googlesource.com/chromiumos/third_party/flashmap/+/refs/heads/master/lib/fmap.h
+
+If ATF updates, run this program to update the FIT_TYPE_LIST.
+
+ARM Trusted Firmware is available at:
+
+https://github.com/ARM-software/arm-trusted-firmware.git
 """
 
 from argparse import ArgumentParser
@@ -314,8 +320,8 @@ class FipWriter:
         return fd.getvalue()
 
 
-def parse_uuids(srcdir):
-    """parse_uuids: Parse the firmware_image_package.h file
+def parse_macros(srcdir):
+    """parse_macros: Parse the firmware_image_package.h file
 
     Args:
         srcdir: 'arm-trusted-firmware' source directory
@@ -360,7 +366,7 @@ def parse_names(srcdir):
         srcdir: 'arm-trusted-firmware' source directory
 
     Returns:
-        tuple: list of entries
+        tuple: list of entries, each
             tuple: entry information
                 Description of entry, e.g. 'Non-Trusted Firmware BL33'
                 UUID macro, e.g. 'UUID_NON_TRUSTED_FIRMWARE_BL33'
@@ -386,6 +392,25 @@ def parse_names(srcdir):
 
 
 def create_code_output(macros, names):
+    """create_code_output() - Create the new version of this Python file
+
+    Args:
+        macros: dict of macros:
+            key: UUID macro name, e.g. 'UUID_TRUSTED_FWU_CERT'
+            value: list:
+                file comment comment, e.g. 'ToC Entry UUIDs'
+                macro name, e.g. 'UUID_TRUSTED_FWU_CERT'
+                uuid as bytes(16)
+
+        names: list of entries, each
+            tuple: entry information
+                Description of entry, e.g. 'Non-Trusted Firmware BL33'
+                UUID macro, e.g. 'UUID_NON_TRUSTED_FIRMWARE_BL33'
+                Name of entry, e.g. 'nt-fw'
+
+    Returns:
+        Table of FipType() entries as a string
+    """
     def _to_hex_list(data):
         """Convert bytes into C code
 
@@ -417,7 +442,15 @@ def create_code_output(macros, names):
 """ % (name, desc, _to_hex_list(uuid[:8]), _to_hex_list(uuid[8:]))
     return out
 
+
 def parse_atf_source(srcdir, dstfile):
+    """parse_atf_source(): Parse the ATF source tree and update this file
+
+    Args:
+        srcdir: Path to 'arm-trusted-firmware' directory. Get this from:
+            https://github.com/ARM-software/arm-trusted-firmware.git
+        dstfile: File to write new code to, if an update is needed
+    """
     # We expect a readme file
     readme_fname = os.path.join(srcdir, 'readme.rst')
     if not os.path.exists(readme_fname):
@@ -428,18 +461,23 @@ def parse_atf_source(srcdir, dstfile):
     if readme.splitlines()[0] != first_line:
         raise ValueError("'%s' does not start with '%s'" %
                          (readme_fname, first_line))
-    macros = parse_uuids(srcdir)
+    macros = parse_macros(srcdir)
     names = parse_names(srcdir)
     output = create_code_output(macros, names)
     orig = tools.ReadFile(OUR_FILE, binary=False)
     re_fip_list = re.compile('(.*FIP_TYPE_LIST = \[).*?(    ] # end.*)', re.S)
     m = re_fip_list.match(orig)
     new_code = m.group(1) + '\n' + output + m.group(2)
-    tools.WriteFile(dstfile, new_code, binary=False)
+    if new_code == orig:
+        print("Existing code in '%s' is up-to-date" % OUR_FILE)
+    else:
+        tools.WriteFile(dstfile, new_code, binary=False)
+        print('Needs update, try:\n\tmeld %s %s' % (dstfile, OUR_FILE))
 
 
 if __name__ == "__main__":
-    epilog = '''fip_util.py: Create table of FIP-entry types'''
+    epilog = '''Creates an updated version of this code, with a table of
+FIP-entry types parsed from the arm-trusted-firmware source directory'''
 
     parser = ArgumentParser(epilog=epilog)
     parser.add_argument('-D', '--debug', action='store_true',
