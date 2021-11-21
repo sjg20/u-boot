@@ -36,6 +36,7 @@ OUR_PATH = os.path.dirname(OUR_FILE)
 sys.path.insert(2, os.path.join(OUR_PATH, '..'))
 
 # pylint: disable=C0413
+from patman import command
 from patman import tools
 
 # The TOC header, at the start of the FIP
@@ -61,6 +62,9 @@ ENTRY_NAMES = (
     'size',
     'flags',
 )
+
+# Set to True to enable output from running fiptool for debugging
+VERBOSE = False
 
 # Use a class so we can convert the bytes, making the table more readable
 # pylint: disable=R0903
@@ -539,6 +543,31 @@ directory''')
 
     parse_atf_source(args.src, args.outfile, oldfile)
     return 0
+
+
+def fiptool(fname, *fip_args, **kwargs):
+    """Run fiptool with provided arguments
+
+    If the tool fails then this function raises an exception and prints out the
+    output and stderr.
+
+    Args:
+        fname: Filename of CBFS
+        *fip_args: List of arguments to pass to fiptool
+
+    Returns:
+        CommandResult object containing the results
+    """
+    args = ['fiptool', fname] + list(fip_args)
+    if kwargs.get('base') is not None:
+        args += ['-b', '%#x' % kwargs['base']]
+    result = command.RunPipe([args], capture=not VERBOSE,
+                             capture_stderr=not VERBOSE, raise_on_error=False)
+    if result.return_code:
+        print(result.stderr, file=sys.stderr)
+        raise Exception("Failed to run (error %d): '%s'" %
+                        (result.return_code, ' '.join(args)))
+    return result
 
 
 if __name__ == "__main__":

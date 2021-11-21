@@ -26,6 +26,12 @@ from patman import test_util
 from patman import tools
 import fip_util
 
+HAVE_FIPTOOL = True
+try:
+    tools.Run('which', 'fiptool')
+except ValueError:
+    HAVE_FIPTOOL = False
+
 # pylint: disable=R0902
 class TestFip(unittest.TestCase):
     """Test of fip_util classes"""
@@ -38,12 +44,6 @@ class TestFip(unittest.TestCase):
         # Set up a temporary output directory, used by the tools library when
         # compressing files
         tools.PrepareOutputDir(None)
-
-        self.have_fiptool = True
-        try:
-            tools.Run('which', 'fiptool2')
-        except ValueError:
-            self.have_fiptool = False
 
         self.src_file = os.path.join(self._indir, 'orig.py')
         self.outname = tools.GetOutputFilename('out.py')
@@ -274,6 +274,23 @@ blah blah''', binary=False)
         tools.WriteFile(self.src_file, '', binary=False)
         with test_util.capture_sys_output() as (stdout, _):
             fip_util.main(args, self.src_file)
+
+    @unittest.skipIf(not HAVE_FIPTOOL, 'reason')
+    def test_fiptool_list(self):
+        fwu = b'my data'
+        tb_fw = b'some more data'
+        fip = fip_util.FipWriter(0x123, 0x10)
+        fip.add_entry('fwu', fwu, 0x456)
+        fip.add_entry('tb-fw', tb_fw, 0)
+        data = fip.get_data()
+        fname = tools.GetOutputFilename('data.fip')
+        tools.WriteFile(fname, data)
+        result = fip_util.fiptool('info', fname)
+        self.assertEqual(
+            '''Firmware Updater NS_BL2U: offset=0x90, size=0x7, cmdline="--fwu"
+Trusted Boot Firmware BL2: offset=0xA0, size=0xE, cmdline="--tb-fw"
+''',
+            result.stdout)
 
 
 if __name__ == '__main__':
