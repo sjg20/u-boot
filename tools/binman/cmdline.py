@@ -5,7 +5,89 @@
 # Command-line parser for binman
 #
 
+import argparse
 from argparse import ArgumentParser
+import os
+import re
+import sys
+
+OUR_PATH = os.path.dirname(os.path.realpath(__file__))
+BASEDIR = os.path.dirname(os.path.dirname(os.path.abspath(OUR_PATH)))
+
+# Decodes a Makefile assignment line into key and value (and plus for +=)
+RE_KEY_VALUE = re.compile('(?P<key>\w+) *(?P<plus>[+])?= *(?P<value>.*)$')
+
+
+def ParseMakefile(fname):
+    """Parse a Makefile to obtain its variables.
+
+    This collects variable assigments of the form:
+
+        VAR = value
+        VAR += more
+
+    It does not pick out := assignments, as these are not needed here. It does
+    handle line continuation.
+
+    Returns a dict:
+        key: Variable name (e.g. 'VAR')
+        value: Variable value (e.g. 'value more')
+    """
+    makevars = {}
+    with open(fname) as fd:
+        prev_text = ''  # Continuation text from previous line(s)
+        for line in fd.read().splitlines():
+          if line and line[-1] == '\\':  # Deal with line continuation
+            prev_text += line[:-1]
+            continue
+          elif prev_text:
+            line = prev_text + line
+            prev_text = ''  # Continuation is now used up
+          m = RE_KEY_VALUE.match(line)
+          if m:
+            value = m.group('value') or ''
+            key = m.group('key')
+
+            # Appending to a variable inserts a space beforehand
+            if 'plus' in m.groupdict() and key in makevars:
+              makevars[key] += ' ' + value
+            else:
+              makevars[key] = value
+    return makevars
+
+
+class BinmanVersion(argparse.Action):
+    """Handles the -V option to binman
+
+    This reads the version information from a file called 'version' in the same
+    directory as this file.
+
+    If not present it assumes this is running from the U-Boot tree and collects
+    the version from the Makefile.
+
+    The format of the version information is three VAR = VALUE lines, for
+    example:
+
+        VERSION = 2022
+        PATCHLEVEL = 01
+        EXTRAVERSION = -rc2
+    """
+    def __init__(self, nargs=0, **kwargs):
+        super().__init__(nargs=nargs, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        formatter = parser._get_formatter()
+        makefile = os.path.join(OUR_PATH, 'version')
+        if not os.path.exists(makefile):
+            makefile = os.path.join(BASEDIR, 'Makefile')
+        if os.path.exists('makefile'):
+            makevars = ParseMakefile(makefile)
+            parser._print_message('Binman v%s.%s%s\n' %
+                                  (makevars['VERSION'], makevars['PATCHLEVEL'],
+                                   makevars['EXTRAVERSION']), sys.stdout)
+        else:
+            parser._print_message('Binman (no version)\n')
+        parser.exit()
 
 def ParseArgs(argv):
     """Parse the binman command-line arguments
@@ -39,6 +121,7 @@ controlled by a description in the board device tree.'''
     parser.add_argument('-v', '--verbosity', default=1,
         type=int, help='Control verbosity: 0=silent, 1=warnings, 2=notices, '
         '3=info, 4=detail, 5=debug')
+    parser.add_argument('-V', '--version', nargs=0, action=BinmanVersion)
 
     subparsers = parser.add_subparsers(dest='cmd')
     subparsers.required = True
