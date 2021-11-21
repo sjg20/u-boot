@@ -58,7 +58,7 @@ HEADER_NAMES = (
 
 ENTRY_NAMES = (
     'uuid',
-    'offset_addr',
+    'offset',
     'size',
     'flags',
 )
@@ -341,6 +341,25 @@ class FipWriter:
             buf.write(fent.data)
 
         return buf.getvalue()
+
+
+class FipReader(object):
+    """Class to handle reading a Firmware Image Package (FIP)
+
+    Usage is something like:
+        cbfs = cbfs_util.CbfsReader(data)
+        cfile = cbfs.files['u-boot']
+        self.WriteFile('u-boot.bin', cfile.data)
+    """
+    def __init__(self, data, read=True):
+        self.fents = collections.OrderedDict()
+        self.data = data
+        if read:
+            self.read()
+
+    def read(self):
+        """Read all the files in the CBFS and add them to self.files"""
+        self.header, self.fents = decode_fip(self.data)
 
 
 def parse_macros(srcdir):

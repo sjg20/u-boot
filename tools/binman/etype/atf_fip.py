@@ -8,22 +8,27 @@
 from collections import OrderedDict
 
 from binman.entry import Entry
-from binman.fip_util import FIP_TYPES, FipWriter, UUID_LEN
+from binman.fip_util import FIP_TYPES, FipReader, FipWriter, UUID_LEN
 from dtoc import fdt_util
 
 class Entry_atf_fip(Entry):
     """ARM Trusted Firmware Firmware Image Package (FIP)
     """
     def __init__(self, section, etype, node):
+        # Put this here to allow entry-docs and help to work without libfdt
+        global state
+        from binman import state
+
         super().__init__(section, etype, node)
         self.align_default = None
         self._fip_flags = fdt_util.GetInt64(node, 'fip-hdr-flags', 0)
         self._fip_align = fdt_util.GetInt(node, 'fip-align', 1)
         self._fip_entries = OrderedDict()
         self._ReadSubnodes()
+        self.reader = None
 
     def _ReadSubnodes(self):
-        """Read the subnodes to find out what should go in this CBFS"""
+        """Read the subnodes to find out what should go in this FIP"""
         for node in self._node.subnodes:
             fip_type = None
             etype = None
@@ -59,4 +64,60 @@ class Entry_atf_fip(Entry):
                 entry._fip_entry = fent
         data = fip.get_data()
         self.SetContents(data)
+        return True
+
+    def SetImagePos(self, image_pos):
+        """Override this function to set all the entry properties from FIP
+
+        We can only do this once image_pos is known
+
+        Args:
+            image_pos: Position of this entry in the image
+        """
+        super().SetImagePos(image_pos)
+
+        # Now update the entries with info from the FIP entries
+        for entry in self._fip_entries.values():
+            fent = entry._fip_entry
+            entry.size = fent.size
+            entry.offset = fent.offset
+            entry.image_pos = self.image_pos + entry.offset
+
+    def AddMissingProperties(self, have_image_pos):
+        super().AddMissingProperties(have_image_pos)
+        for entry in self._fip_entries.values():
+            entry.AddMissingProperties(have_image_pos)
+
+    def SetCalculatedProperties(self):
+        """Set the value of device-tree properties calculated by binman"""
+        super().SetCalculatedProperties()
+        for entry in self._fip_entries.values():
+            state.SetInt(entry._node, 'offset', entry.offset)
+            state.SetInt(entry._node, 'size', entry.size)
+            state.SetInt(entry._node, 'image-pos', entry.image_pos)
+
+    def ListEntries(self, entries, indent):
+        """Override this method to list all files in the section"""
+        super().ListEntries(entries, indent)
+        for entry in self._fip_entries.values():
+            entry.ListEntries(entries, indent + 1)
+
+    def GetEntries(self):
+        return self._fip_entries
+
+    def ReadData(self, decomp=True):
+        data = super().ReadData(True)
+        return data
+
+    def ReadChildData(self, child, decomp=True):
+        if not self.reader:
+            self.fip_data = super().ReadData(True)
+            self.reader = FipReader(self.fip_data)
+        reader = self.reader
+        #print('child', child, child.offset, child.size, len(self.fip_data))
+        #fent = reader.fents.get(child.name)
+        return self.fip_data[child.offset:child.offset + child.size]
+
+    def WriteChildData(self, child):
+        self.ObtainContents(skip=child)
         return True

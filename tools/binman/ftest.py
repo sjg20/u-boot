@@ -4737,6 +4737,38 @@ class TestFunctional(unittest.TestCase):
             fent.uuid)
         self.assertEqual(U_BOOT_DATA, fent.data)
 
+    def testFipLs(self):
+        """Test listing a FIP"""
+        data = self._DoReadFileRealDtb('207_fip_ls.dts')
+        hdr, fents = fip_util.decode_fip(data)
+
+        try:
+            tmpdir, updated_fname = self._SetupImageInTmpdir()
+            with test_util.capture_sys_output() as (stdout, stderr):
+                self._DoBinman('ls', '-i', updated_fname)
+        finally:
+            shutil.rmtree(tmpdir)
+        lines = stdout.getvalue().splitlines()
+        expected = [
+'Name          Image-pos  Size  Entry-type  Offset  Uncomp-size',
+'----------------------------------------------------------------',
+'main-section          0   2d3  section          0',
+'  atf-fip             0    90  atf-fip          0',
+'    soc-fw           88     4  blob-ext        88',
+'    u-boot           8c     4  u-boot          8c',
+'  fdtmap             90   243  fdtmap          90',
+]
+        self.assertEqual(expected, lines)
+
+    def testFipExtractOneEntry(self):
+        """Test extracting a single entry fron an FIP"""
+        self._DoReadFileRealDtb('207_fip_ls.dts')
+        image_fname = tools.GetOutputFilename('image.bin')
+        fname = os.path.join(self._indir, 'output.extact')
+        control.ExtractEntries(image_fname, fname, None, ['atf-fip/u-boot'])
+        data = tools.ReadFile(fname)
+        self.assertEqual(U_BOOT_DATA, data)
+
 
 if __name__ == "__main__":
     unittest.main()
