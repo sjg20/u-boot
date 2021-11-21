@@ -222,19 +222,26 @@ class FipEntry:
                 self.fip_type = matches.pop().name
 
     @classmethod
-    def from_type(cls, fip_type, data, flags):
+    def from_type(cls, fip_type_or_uuid, data, flags):
         """Create a FipEntry from a type name
 
         Args:
             cls (class): This class
-            fip_type (str): Name of the type to create
+            fip_type_or_uuid (str or bytes): Name of the type to create, or
+                bytes(16) uuid
             data (bytes): Contents of entry
             flags (int64): Flags value
 
         Returns:
             FipEntry: Created 241
         """
-        fent = FipEntry(FIP_TYPES[fip_type].uuid, None, len(data), flags)
+        if isinstance(fip_type_or_uuid, str):
+            fip_type = fip_type_or_uuid
+            uuid = FIP_TYPES[fip_type].uuid
+        else:
+            uuid = fip_type_or_uuid
+            fip_type = None
+        fent = FipEntry(uuid, None, len(data), flags)
         fent.fip_type = fip_type
         fent.data = data
         return fent

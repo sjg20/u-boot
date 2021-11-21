@@ -8,7 +8,7 @@
 from collections import OrderedDict
 
 from binman.entry import Entry
-from binman.fip_util import FIP_TYPES, FipWriter
+from binman.fip_util import FIP_TYPES, FipWriter, UUID_LEN
 from dtoc import fdt_util
 
 class Entry_atf_fip(Entry):
@@ -32,7 +32,8 @@ class Entry_atf_fip(Entry):
                 etype = 'blob-ext'
 
             entry = Entry.Create(self, node, etype)
-            if not fip_type:
+            entry.fip_uuid = fdt_util.GetBytes(node, 'fip-uuid', UUID_LEN)
+            if not fip_type and not entry.fip_uuid:
                 fip_type = fdt_util.GetString(node, 'fip-type')
                 if not fip_type:
                     self.Raise("Must provide a fip-type (node name '%s' is not a known FIP type)" %
@@ -52,7 +53,8 @@ class Entry_atf_fip(Entry):
             if entry != skip and not entry.ObtainContents():
                 return False
             data = entry.GetData()
-            fent = fip.add_entry(entry._fip_type, entry.data, entry._fip_flags)
+            fent = fip.add_entry(entry._fip_type or entry.fip_uuid, entry.data,
+                                 entry._fip_flags)
             if fent:
                 entry._fip_entry = fent
         data = fip.get_data()

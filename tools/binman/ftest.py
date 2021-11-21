@@ -4706,12 +4706,36 @@ class TestFunctional(unittest.TestCase):
         self.assertEqual('rot-cert', fent.fip_type)
         self.assertEqual(b'aa', fent.data)
 
+    def testFipOther(self):
+        """Basic FIP with something that isn't a external blob"""
+        data = self._DoReadFile('204_fip_other.dts')
+        hdr, fents = fip_util.decode_fip(data)
+
+        self.assertEqual(2, len(fents))
+        fent = fents[1]
+        self.assertEqual('rot-cert', fent.fip_type)
+        self.assertEqual(b'aa', fent.data)
+
     def testFipNoType(self):
         """FIP with an entry of an unknown type"""
         with self.assertRaises(ValueError) as e:
             self._DoReadFile('205_fip_no_type.dts')
         self.assertIn("Must provide a fip-type (node name 'u-boot' is not a known FIP type)",
                       str(e.exception))
+
+    def testFipUuid(self):
+        """Basic FIP with a manual uuid"""
+        data = self._DoReadFile('206_fip_uuid.dts')
+        hdr, fents = fip_util.decode_fip(data)
+
+        self.assertEqual(2, len(fents))
+        fent = fents[1]
+        self.assertEqual(None, fent.fip_type)
+        self.assertEqual(
+            bytes([0xfc, 0x65, 0x13, 0x92, 0x4a, 0x5b, 0x11, 0xec,
+                   0x94, 0x35, 0xff, 0x2d, 0x1c, 0xfc, 0x79, 0x9c]),
+            fent.uuid)
+        self.assertEqual(U_BOOT_DATA, fent.data)
 
 
 if __name__ == "__main__":
