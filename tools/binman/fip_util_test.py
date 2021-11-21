@@ -275,22 +275,83 @@ blah blah''', binary=False)
         with test_util.capture_sys_output() as (stdout, _):
             fip_util.main(args, self.src_file)
 
-    @unittest.skipIf(not HAVE_FIPTOOL, 'reason')
+    @unittest.skipIf(not HAVE_FIPTOOL, 'no fiptool')
     def test_fiptool_list(self):
+        """Create a FIP and check that fiptool can read it"""
+        self.maxDiff = None
         fwu = b'my data'
         tb_fw = b'some more data'
+        other_fw = b'even more'
         fip = fip_util.FipWriter(0x123, 0x10)
         fip.add_entry('fwu', fwu, 0x456)
         fip.add_entry('tb-fw', tb_fw, 0)
+        fip.add_entry(bytes(range(16)), tb_fw, 0)
         data = fip.get_data()
         fname = tools.GetOutputFilename('data.fip')
         tools.WriteFile(fname, data)
         result = fip_util.fiptool('info', fname)
         self.assertEqual(
-            '''Firmware Updater NS_BL2U: offset=0x90, size=0x7, cmdline="--fwu"
-Trusted Boot Firmware BL2: offset=0xA0, size=0xE, cmdline="--tb-fw"
+            '''Firmware Updater NS_BL2U: offset=0xB0, size=0x7, cmdline="--fwu"
+Trusted Boot Firmware BL2: offset=0xC0, size=0xE, cmdline="--tb-fw"
+00010203-0405-0607-0809-0A0B0C0D0E0F: offset=0xD0, size=0xE, cmdline="--blob"
 ''',
             result.stdout)
+
+    @unittest.skipIf(not HAVE_FIPTOOL, 'no fiptool')
+    def test_fiptool_create(self):
+        """Create a FIP with fiptool and check that fip_util can read it"""
+        fwu = os.path.join(self._indir, 'fwu')
+        fwu_data = b'my data'
+        tools.WriteFile(fwu, fwu_data)
+
+        tb_fw = os.path.join(self._indir, 'tb_fw')
+        tb_fw_data = b'some more data'
+        tools.WriteFile(tb_fw, tb_fw_data)
+
+        other_fw = os.path.join(self._indir, 'other_fw')
+        other_fw_data = b'even more'
+        tools.WriteFile(other_fw, other_fw_data)
+
+        fname = tools.GetOutputFilename('data.fip')
+        uuid = 'e3b78d9e-4a64-11ec-b45c-fba2b9b49788'
+        fip_util.fiptool('create', '--align', '8', '--plat-toc-flags', '0x123',
+                         '--fwu', fwu,
+                         '--tb-fw', tb_fw,
+                         '--blob', 'uuid=%s,file=%s' % (uuid, other_fw),
+                          fname)
+
+        header, fents = fip_util.decode_fip(tools.ReadFile(fname))
+        self.assertEqual(0x123 << 32, header.flags)
+        self.assertEqual(fip_util.HEADER_MAGIC, header.name)
+        self.assertEqual(fip_util.HEADER_SERIAL, header.serial)
+
+        self.assertEqual(3, len(fents))
+        fent = fents[0]
+        self.assertEqual(
+            bytes([0x4f, 0x51, 0x1d, 0x11, 0x2b, 0xe5, 0x4e, 0x49,
+                   0xb4, 0xc5, 0x83, 0xc2, 0xf7, 0x15, 0x84, 0x0a]), fent.uuid)
+        self.assertEqual(0xb0, fent.offset)
+        self.assertEqual(len(fwu_data), fent.size)
+        self.assertEqual(0, fent.flags)
+        self.assertEqual(fwu_data, fent.data)
+
+        fent = fents[1]
+        self.assertEqual(
+            bytes([0x5f, 0xf9, 0xec, 0x0b, 0x4d, 0x22, 0x3e, 0x4d,
+             0xa5, 0x44, 0xc3, 0x9d, 0x81, 0xc7, 0x3f, 0x0a]), fent.uuid)
+        self.assertEqual(0xb8, fent.offset)
+        self.assertEqual(len(tb_fw_data), fent.size)
+        self.assertEqual(0, fent.flags)
+        self.assertEqual(tb_fw_data, fent.data)
+
+        fent = fents[2]
+        self.assertEqual(
+            bytes([0xe3, 0xb7, 0x8d, 0x9e, 0x4a, 0x64, 0x11, 0xec,
+                   0xb4, 0x5c, 0xfb, 0xa2, 0xb9, 0xb4, 0x97, 0x88]), fent.uuid)
+        self.assertEqual(0xc8, fent.offset)
+        self.assertEqual(len(other_fw_data), fent.size)
+        self.assertEqual(0, fent.flags)
+        self.assertEqual(other_fw_data, fent.data)
 
 
 if __name__ == '__main__':
