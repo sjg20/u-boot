@@ -8,6 +8,30 @@ binaries. It is fairly easy to create new bintools. Just add a new file to the
 
 
 
+Bintool: aml_encrypt_g12a: Handles the 'aml_encrypt_g12a' tool
+--------------------------------------------------------------
+
+This bintool supports running `aml_encrypt_g12a` to support creation of
+Amlogic images in binman.
+
+aml_encrypt_g12a provides a way to package firmware for Amlogic devices.
+
+It is also possible to fetch a binary version of the tool.
+
+
+
+Bintool: aml_encrypt_g12b: Handles the 'aml_encrypt_g12b' tool
+--------------------------------------------------------------
+
+This bintool supports running `aml_encrypt_g12b` to support creation of
+Amlogic images in binman.
+
+aml_encrypt_g12b provides a way to package firmware for Amlogic devices.
+
+It is also possible to fetch a binary version of the tool.
+
+
+
 Bintool: cbfstool: Coreboot filesystem (CBFS) tool
 --------------------------------------------------
 

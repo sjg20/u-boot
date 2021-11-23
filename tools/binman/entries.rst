@@ -11,6 +11,144 @@ features to produce new behaviours.
 
 
 
+Entry: aml-encrypt: Amlogic encryption support
+----------------------------------------------
+
+Some Amlogic chips use encryption with various firmware binaries. This
+entry supports running one of the tools to generate the required data
+formats.
+
+Available parameters are:
+
+aml-algo
+    Algorithm to use, either "g12a" or "g12b"
+
+aml-op
+    Operation to perform, one of "bootmk", "bl2sig", "bl3sig", "bl30sig"
+
+aml-level
+    Level, typically "v3"
+
+aml-compress
+    Optional compression type, e.g. "lz4"
+
+aml-type
+    Binary type to process, one of "bl30", "bl31", "bl32"
+
+The data to pass to the tool for processing is defined by an 'aml-input'
+property (for a single file) or subnode (for more flexibility). The subnode
+can be any entry type, including a section.
+
+For cases where multiple inputs are provided to one invocation of the tool,
+these are named, again using subnodes, corresponding to the tool flags.
+Available inputs are acs, bl2, bl30, sbl301, bl31, bl33 and aml-ddrfw. The
+last one is a bit different, in that it takes the form of a blob-ext-list,
+i.e. it has a 'filenames' property with a list of the DDR firmware binaries.
+
+Here is an example::
+
+    /* run --bootmk on all the included inputs */
+    aml-encrypt {
+        missing-msg = "aml-encrypt";
+        aml-algo = "g12a";
+        aml-op = "bootmk";
+        aml-level = "v3";
+
+        /* produce a bl2, containing signed bl2 binaries */
+        bl2 {
+            type = "aml-encrypt";
+            aml-algo = "g12a";
+            aml-op = "bl2sig";
+
+            /* sign the binary contaiing bl2 and acs */
+            aml-input {
+                type = "section";
+                bl2 {
+                    type = "blob-ext";
+                    size = <0xe000>;
+                    filename = "bl2.bin";
+                };
+                acs {
+                    type = "blob-ext";
+                    size = <0x1000>;
+                    filename = "acs.bin";
+                };
+            };
+        };
+
+        /* produce a bl30, containing signed bl30 binaries */
+        bl30 {
+            type = "aml-encrypt";
+            aml-algo = "g12a";
+            aml-op = "bl3sig";
+            aml-level = "v3";
+            aml-type = "bl30";
+
+            /* sign the binary contaiing bl30 and bl301 */
+            aml-input {
+                type = "aml-encrypt";
+                aml-algo = "g12a";
+                aml-op = "bl30sig";
+                aml-level = "v3";
+
+                /*
+                 * put bl30 and bl301 together, with
+                 * the necessary paddiung
+                 */
+                aml-input {
+                    type = "section";
+                    bl30 {
+                        type = "blob-ext";
+                        size = <0xa000>;
+                        filename = "bl30.bin";
+                    };
+                    bl301 {
+                        type = "blob-ext";
+                        size = <0x3400>;
+                        filename = "bl301.bin";
+                    };
+                };
+            };
+        };
+
+        /* sign the bl31 binary */
+        bl31 {
+            type = "aml-encrypt";
+            aml-algo = "g12a";
+            aml-op = "bl3sig";
+            aml-input = "bl31.img";
+            aml-level = "v3";
+            aml-type = "bl31";
+        };
+
+        /* sign the bl33 binary (which is U-Boot) */
+        bl33 {
+            type = "aml-encrypt";
+            aml-algo = "g12a";
+            aml-op = "bl3sig";
+            aml-compress = "lz4";
+            aml-level = "v3";
+            aml-type = "bl33";
+
+            aml-input {
+                type = "u-boot";
+            };
+        };
+
+        /* add the various DDR blobs */
+        aml-ddrfw {
+            missing-msg = "aml-ddrfw";
+            type = "blob-ext-list";
+            filenames = "ddr4_1d.fw", "ddr4_2d.fw",
+                "ddr3_1d.fw", "piei.fw",
+                "lpddr4_1d.fw", "lpddr4_2d.fw",
+                "diag_lpddr4.fw", "aml_ddr.fw",
+                "lpddr3_1d.fw";
+        };
+    };
+
+
+
 Entry: atf-bl31: ARM Trusted Firmware (ATF) BL31 blob
 -----------------------------------------------------
 

@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: GPL-2.0+
+
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	binman {
+		size = <0x300>;
+		atf-bl31 {
+			filename = "bl31.bin";
+		};
+		scp {
+			filename = "scp.bin";
+		};
+		fdtmap {
+		};
+		image-header {
+			location = "end";
+		};
+	};
+};
