@@ -4952,6 +4952,9 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         # There should be a U-Boot after the final FIP
         self.assertEqual(U_BOOT_DATA, data[-4:])
 
+    def testAmlEncrypt(self):
+        self._DoTestFile('213_aml_encrypt.dts', allow_missing=True)
+
 
 if __name__ == "__main__":
     unittest.main()
