@@ -33,3 +33,9 @@ k3-rti-wdt-firmware:
 If CONFIG_WDT_K3_RTI_LOAD_FW is enabled, a firmware image is needed for
 the R5F core(s) to trigger the system reset. One possible source is
 https://github.com/siemens/k3-rti-wdt.
+
+aml-encrypt:
+Some AML messages
+
+aml-ddrfw
+Amlogic DDR firmware files are missing
