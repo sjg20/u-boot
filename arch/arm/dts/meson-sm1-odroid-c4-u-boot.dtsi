@@ -6,6 +6,113 @@
 
 #include "meson-sm1-u-boot.dtsi"
 
+/{
+	binman {
+		/* run --bootmk on all the included inputs */
+		aml-encrypt {
+			missing-msg = "aml-encrypt";
+			aml-algo = "g12a";
+			aml-op = "bootmk";
+			aml-level = "v3";
+
+			/* produce a bl2, containing signed bl2 binaries */
+			bl2 {
+				type = "aml-encrypt";
+				aml-algo = "g12a";
+				aml-op = "bl2sig";
+
+				/* sign the binary contaiing bl2 and acs */
+				aml-input {
+					type = "section";
+					bl2 {
+						type = "blob-ext";
+						size = <0xe000>;
+						filename = "bl2.bin";
+					};
+					acs {
+						type = "blob-ext";
+						size = <0x1000>;
+						filename = "acs.bin";
+					};
+				};
+			};
+
+			/* produce a bl30, containing signed bl30 binaries */
+			bl30 {
+				type = "aml-encrypt";
+				aml-algo = "g12a";
+				aml-op = "bl3sig";
+				aml-level = "v3";
+				aml-type = "bl30";
+
+				/* sign the binary contaiing bl30 and bl301 */
+				aml-input {
+					type = "aml-encrypt";
+					aml-algo = "g12a";
+					aml-op = "bl30sig";
+					aml-level = "v3";
+
+					/*
+					 * put bl30 and bl301 together, with
+					 * the necessary paddiung
+					 */
+					aml-input {
+						type = "section";
+						bl30 {
+							type = "blob-ext";
+							size = <0xa000>;
+							filename = "bl30.bin";
+						};
+						bl301 {
+							type = "blob-ext";
+							size = <0x3400>;
+							filename = "bl301.bin";
+						};
+					};
+				};
+			};
+
+			/* sign the bl31 binary */
+			bl31 {
+				type = "aml-encrypt";
+				aml-algo = "g12a";
+				aml-op = "bl3sig";
+				aml-input = "bl31.img";
+				aml-level = "v3";
+				aml-type = "bl31";
+			};
+
+			/* sign the bl33 binary (which is U-Boot) */
+			bl33 {
+				type = "aml-encrypt";
+				aml-algo = "g12a";
+				aml-op = "bl3sig";
+				aml-compress = "lz4";
+				aml-level = "v3";
+				aml-type = "bl33";
+
+				aml-input {
+					type = "u-boot";
+				};
+			};
+
+			/* add the various DDR blobs */
+			aml-ddrfw {
+				missing-msg = "aml-ddrfw";
+				type = "blob-ext-list";
+				filenames = "ddr4_1d.fw", "ddr4_2d.fw",
+					"ddr3_1d.fw", "piei.fw",
+					"lpddr4_1d.fw", "lpddr4_2d.fw",
+					"diag_lpddr4.fw", "aml_ddr.fw",
+					"lpddr3_1d.fw";
+			};
+		};
+
+		fdtmap {
+		};
+	};
+};
+
 &ethmac {
 	snps,reset-gpio = <&gpio GPIOZ_15 (GPIO_ACTIVE_LOW | GPIO_OPEN_DRAIN)>;
 	snps,reset-delays-us = <0 10000 1000000>;

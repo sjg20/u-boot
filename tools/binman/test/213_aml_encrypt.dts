@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: GPL-2.0+
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	binman {
+		aml-encrypt {
+			missing-msg = "aml-encrypt";
+			aml-algo = "g12a";
+			aml-op = "bootmk";
+			aml-level = "v3";
+
+			aml-bl2 {
+				filename = "bl2.n.bin.sig";
+			};
+			aml-bl30 {
+				filename = "bl30_new.bin.enc";
+			};
+			aml-bl31 {
+				filename = "bl31.img.enc";
+			};
+			aml-bl33 {
+				filename = "bl33.bin.enc";
+			};
+			aml-ddrfw {
+				missing-msg = "aml-ddrfw";
+				type = "blob-ext-list";
+				filenames = "ddr4_1d.fw", "ddr4_2d.fw",
+					"ddr3_1d.fw", "piei.fw",
+					"lpddr4_1d.fw", "lpddr4_2d.fw",
+					"diag_lpddr4.fw", "aml_ddr.fw",
+					"lpddr3_1d.fw";
+			};
+		};
+	};
+};
