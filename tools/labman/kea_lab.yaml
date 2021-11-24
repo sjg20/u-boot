@@ -477,6 +477,12 @@ sdwires:
     hub-port: *hubf_6
     block-symlink: sdcard11
 
+  sdwire18: &sdwire18
+    serial: da64
+    symlink: sdwire18
+    hub-port: *hubf_8
+    block-symlink: sdcard12
+
 servos:
   svsamus: &servo_samus
     board: samus
@@ -733,6 +739,10 @@ uarts:
     type: usb-uart
     symlink: ttyusb_port22
     hub-port: *hubf_4
+  usbport23: &ttyusb_port23
+    type: usb-uart
+    symlink: ttyusb_port23
+    hub-port: *hubf_7
   portserver1: &portserver1
     type: portserver
     host: 192.168.4.23
@@ -1369,6 +1379,7 @@ duts:
         toolchain: aarch64
 
   # Does not seem to boot from uSD anymore
+  # Replaced Nov21 with a different one which does
   pine64:
     desc: Pine A64 Plus 2GB
     console: *ttyusb_port22
@@ -1385,4 +1396,19 @@ duts:
     builds:
       salmon:
         target: pine64-lts
+        toolchain: aarch64
+
+  c4:
+    desc: Hardkernel Odroid-C4
+    console: *ttyusb_port23
+    bootdev: *sdwire18
+    power: *dli_fourth_port5
+    flash:
+      method: amlogic
+    blobs:
+      dest: .
+      src: /vid/software/devel/amlogic/bin/*
+    builds:
+      salmon:
+        target: odroid-c4
         toolchain: aarch64
