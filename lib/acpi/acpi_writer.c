@@ -67,6 +67,12 @@ ulong write_acpi_tables(ulong start_addr)
 	log_debug("ACPI: Writing ACPI tables at %lx\n", start_addr);
 
 	acpi_reset_items();
+	ctx->base = start;
+	ctx->current = start;
+
+	/* Align ACPI tables to 16 byte */
+	acpi_align(ctx);
+	gd_set_acpi_start(map_to_sysmem(ctx->current));
 
 	ret = acpi_write_all(ctx);
 	if (ret) {

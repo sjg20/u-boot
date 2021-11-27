@@ -255,13 +255,6 @@ static void acpi_write_xsdt(struct acpi_xsdt *xsdt)
 
 void acpi_setup_base_tables(struct acpi_ctx *ctx, void *start)
 {
-	ctx->base = start;
-	ctx->current = start;
-
-	/* Align ACPI tables to 16 byte */
-	acpi_align(ctx);
-	gd_set_acpi_start(map_to_sysmem(ctx->current));
-
 	/* We need at least an RSDP and an RSDT Table */
 	ctx->rsdp = ctx->current;
 	acpi_inc_align(ctx, sizeof(struct acpi_rsdp));
