@@ -27,6 +27,8 @@
 
 #if !defined(__ACPI__)
 
+#include <linker_lists.h>
+
 struct nhlt;
 struct udevice;
 
@@ -63,6 +65,48 @@ struct acpi_ctx {
 	char *len_stack[ACPIGEN_LENSTACK_SIZE];
 	int ltop;
 };
+
+/**
+ * enum acpi_writer_flags_t - flags to use for the ACPI writers
+ */
+enum acpi_writer_flags_t {
+	ACPIWF_ALIGN64_,
+};
+
+struct acpi_writer;
+
+/**
+ * acpi_writer_func() - Function that can write an ACPI table
+ *
+ * @ctx: ACPI context to use for writing
+ * @entry: Linker-list entry for this writer
+ * @return 0 if OK, -ve on error
+ */
+typedef int (*acpi_writer_func)(struct acpi_ctx *ctx,
+				const struct acpi_writer *entry);
+
+/**
+ * struct acpi_writer - an ACPI table that can be written
+ *
+ * @name: Name of the writer
+ * @table: Table name that is generated (e.g. "DSDT")
+ * @h_write: Writer function
+ */
+struct acpi_writer {
+	const char *name;
+	const char *table;
+	acpi_writer_func h_write;
+	int flags;
+};
+
+/* Declare a new ACPI table writer */
+#define ACPI_WRITER(_name, _table, _write, _flags)					\
+	ll_entry_declare(struct acpi_writer, _name, acpi_writer) = {	\
+		.name = #_name,						\
+		.table = _table,					\
+		.h_write = _write,					\
+		.flags = _flags,					\
+	}
 
 /**
  * struct acpi_ops - ACPI operations supported by driver model
