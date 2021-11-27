@@ -515,3 +515,24 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 
 	return 0;
 }
+
+#include <acpi/acpi_table.h>
+/*
+ * IASL compiles the dsdt entries and writes the hex values
+ * to a C array AmlCode[] (see dsdt.c).
+ */
+extern const unsigned char AmlCode[];
+
+ulong write_acpi_tables(ulong start_addr)
+{
+	const int thl = sizeof(struct acpi_table_header);
+	struct acpi_table_header *dsdt = 0;
+	struct acpi_ctx *ctx = 0;
+
+	/* Put the table header first */
+	memcpy(dsdt, &AmlCode, thl);
+	acpi_inc(ctx, thl);
+	log_debug("DSDT starts at %p, hdr ends at %p\n", dsdt, ctx->current);
+
+	return 0;
+}

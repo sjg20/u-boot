@@ -435,11 +435,19 @@ CFLAGS_REMOVE_efi_freestanding.o := $(LTO_CFLAGS)
 ASL_TMP = $(patsubst %.c,%.asl.tmp,$@)
 
 quiet_cmd_acpi_c_asl= ASL     $<
+ifneq ($(CONFIG_ACPI_PREPROCESS),)
 cmd_acpi_c_asl=         \
 	$(CPP) -x assembler-with-cpp -D__ASSEMBLY__ -D__ACPI__ \
 		-P $(UBOOTINCLUDE) -o $(ASL_TMP) $< && \
-	iasl -p $@ -tc $(ASL_TMP) $(if $(KBUILD_VERBOSE:1=), >/dev/null) && \
+	iasl -p $@ -I $(srctree)/board/$(BOARDDIR) -tc $(ASL_TMP) \
+		$(if $(KBUILD_VERBOSE:1=), >/dev/null) && \
 	mv $(patsubst %.c,%.hex,$@) $@
+else
+cmd_acpi_c_asl=         \
+	iasl -p $@ -I $(srctree)/board/$(BOARDDIR) -tc $< \
+		$(if $(KBUILD_VERBOSE:1=), >/dev/null) && \
+	mv $(patsubst %.c,%.hex,$@) $@
+endif
 
 $(obj)/dsdt.c:    $(src)/dsdt.asl
 	$(call cmd,acpi_c_asl)
