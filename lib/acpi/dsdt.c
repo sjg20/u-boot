@@ -10,7 +10,6 @@
 #include <common.h>
 #include <acpi/acpi_table.h>
 #include <dm/acpi.h>
-#include <mapmem.h>
 #include <tables_csum.h>
 
 /*
