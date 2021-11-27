@@ -42,7 +42,11 @@ int acpi_write_all(struct acpi_ctx *ctx)
 		}
 		if (ret)
 			return log_msg_ret("write", ret);
-		acpi_align(ctx);
+
+		if (entry->flags & ACPIWF_ALIGN64)
+			acpi_align64(ctx);
+		else
+			acpi_align(ctx);
 	}
 
 	return 0;

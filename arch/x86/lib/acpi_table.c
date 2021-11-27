@@ -503,8 +503,8 @@ static int acpi_create_ssdt(struct acpi_ctx *ctx,
 /*
  * QEMU's version of write_acpi_tables is defined in drivers/misc/qfw.c
  */
-int write_acpi_tables_x86(struct acpi_ctx *ctx,
-			  const struct acpi_writer *entry)
+static int write_acpi_tables_x86(struct acpi_ctx *ctx,
+				 const struct acpi_writer *entry)
 {
 	const int thl = sizeof(struct acpi_table_header);
 	struct acpi_facs *facs;
@@ -520,8 +520,6 @@ int write_acpi_tables_x86(struct acpi_ctx *ctx,
 	ulong addr;
 	int ret;
 	int i;
-
-	acpi_setup_base_tables(ctx, ctx->current);
 
 	debug("ACPI:    * FACS\n");
 	facs = ctx->current;

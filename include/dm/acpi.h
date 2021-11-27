@@ -68,9 +68,11 @@ struct acpi_ctx {
 
 /**
  * enum acpi_writer_flags_t - flags to use for the ACPI writers
+ *
+ * ACPIWF_ALIGN64 - align to 64 bytes after writing this one (default is 16)
  */
 enum acpi_writer_flags_t {
-	ACPIWF_ALIGN64_,
+	ACPIWF_ALIGN64	= 1 << 0,
 };
 
 struct acpi_writer;
