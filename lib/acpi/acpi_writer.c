@@ -67,6 +67,11 @@ int acpi_write_all(struct acpi_ctx *ctx)
 			acpi_align64(ctx);
 		else
 			acpi_align(ctx);
+
+		/* Add the item to the internal list */
+		ret = acpi_add_other_item(ctx, entry, start);
+		if (ret)
+			return log_msg_ret("add", ret);
 	}
 
 	return 0;
