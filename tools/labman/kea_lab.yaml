@@ -483,6 +483,14 @@ sdwires:
     hub-port: *hubf_8
     block-symlink: sdcard12
 
+  sdwire19: &sdwire19
+    serial: da65
+    symlink: sdwire18
+    hub-port: *hubf_10
+    block-symlink: sdcard13
+    mount-uuid: 6B58-81F8
+    mount-point: rpi4_boot
+
 servos:
   svsamus: &servo_samus
     board: samus
@@ -743,6 +751,10 @@ uarts:
     type: usb-uart
     symlink: ttyusb_port23
     hub-port: *hubf_7
+  usbport24: &ttyusb_port24
+    type: usb-uart
+    symlink: ttyusb_port24
+    hub-port: *hubf_9
   portserver1: &portserver1
     type: portserver
     host: 192.168.4.23
@@ -1411,4 +1423,19 @@ duts:
     builds:
       salmon:
         target: odroid-c4
+        toolchain: aarch64
+
+  rpi4:
+    desc: Raspberry Pi 4 Ubuntu
+    console: *ttyusb_port24
+    bootdev: *sdwire19
+    reset: *usbrelay3_port5
+    flash:
+      method: rpi4
+    prompt: U-Boot>
+    username: pi
+    password: raspberry
+    builds:
+      64-bit:
+        target: rpi_4
         toolchain: aarch64
