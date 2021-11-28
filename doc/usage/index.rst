@@ -19,6 +19,7 @@ Shell commands
 .. toctree::
    :maxdepth: 1
 
+   acpi
    addrmap
    askenv
    base
