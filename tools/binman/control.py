@@ -500,7 +500,8 @@ def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt, use_expanded):
 
 
 def ProcessImage(image, update_fdt, write_map, get_contents=True,
-                 allow_resize=True, allow_missing=False):
+                 allow_resize=True, allow_missing=False,
+                 allow_fake_blobs=False):
     """Perform all steps for this image, including checking and # writing it.
 
     This means that errors found with a later image will be reported after
@@ -516,12 +517,14 @@ def ProcessImage(image, update_fdt, write_map, get_contents=True,
         allow_resize: True to allow entries to change size (this does a re-pack
             of the entries), False to raise an exception
         allow_missing: Allow blob_ext objects to be missing
+        allow_fake_blobs: Allow blob_ext objects to be faked with dummy files
 
     Returns:
         True if one or more external blobs are missing, False if all are present
     """
     if get_contents:
         image.SetAllowMissing(allow_missing)
+        image.SetAllowFakeBlob(allow_fake_blobs)
         image.GetEntryContents()
     image.GetEntryOffsets()
 
@@ -657,13 +660,15 @@ def Binman(args):
 
             images = PrepareImagesAndDtbs(dtb_fname, args.image,
                                           args.update_fdt, use_expanded)
+
             if args.test_section_timeout:
                 # Set the first image to timeout, used in testThreadTimeout()
                 images[list(images.keys())[0]].test_section_timeout = True
             missing = False
             for image in images.values():
                 missing |= ProcessImage(image, args.update_fdt, args.map,
-                                        allow_missing=args.allow_missing)
+                                        allow_missing=args.allow_missing,
+                                        allow_fake_blobs=args.fake_ext_blobs)
 
             # Write the updated FDTs to our output files
             for dtb_item in state.GetAllFdts():

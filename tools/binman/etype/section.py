@@ -799,6 +799,15 @@ class Entry_section(Entry):
         for entry in self._entries.values():
             entry.SetAllowMissing(allow_missing)
 
+    def SetAllowFakeBlob(self, allow_fake):
+        """Set whether a section allows to create a fake blob
+
+        Args:
+            allow_fake_blob: True if allowed, False if not allowed
+        """
+        for entry in self._entries.values():
+            entry.SetAllowFakeBlob(allow_fake)
+
     def CheckMissing(self, missing_list):
         """Check if any entries in this section have missing external blobs
 
