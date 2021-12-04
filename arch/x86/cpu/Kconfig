@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: GPL-2.0+
+
+# platform-specific options below
+source "arch/x86/cpu/apollolake/Kconfig"
+source "arch/x86/cpu/baytrail/Kconfig"
+source "arch/x86/cpu/braswell/Kconfig"
+source "arch/x86/cpu/broadwell/Kconfig"
+source "arch/x86/cpu/coreboot/Kconfig"
+source "arch/x86/cpu/efi/Kconfig"
+source "arch/x86/cpu/ivybridge/Kconfig"
+source "arch/x86/cpu/qemu/Kconfig"
+source "arch/x86/cpu/quark/Kconfig"
+source "arch/x86/cpu/queensbay/Kconfig"
+source "arch/x86/cpu/slimbootloader/Kconfig"
+source "arch/x86/cpu/tangier/Kconfig"

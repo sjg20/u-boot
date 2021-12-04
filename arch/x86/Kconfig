@@ -105,19 +105,8 @@ source "board/emulation/Kconfig"
 source "board/google/Kconfig"
 source "board/intel/Kconfig"
 
-# platform-specific options below
-source "arch/x86/cpu/apollolake/Kconfig"
-source "arch/x86/cpu/baytrail/Kconfig"
-source "arch/x86/cpu/braswell/Kconfig"
-source "arch/x86/cpu/broadwell/Kconfig"
-source "arch/x86/cpu/coreboot/Kconfig"
-source "arch/x86/cpu/ivybridge/Kconfig"
-source "arch/x86/cpu/efi/Kconfig"
-source "arch/x86/cpu/qemu/Kconfig"
-source "arch/x86/cpu/quark/Kconfig"
-source "arch/x86/cpu/queensbay/Kconfig"
-source "arch/x86/cpu/slimbootloader/Kconfig"
-source "arch/x86/cpu/tangier/Kconfig"
+# include platform-specific options
+source "arch/x86/cpu/Kconfig"
 
 # architecture-specific options below
 
