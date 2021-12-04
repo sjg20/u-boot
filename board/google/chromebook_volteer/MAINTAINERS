@@ -1,0 +1,6 @@
+CHROMEBOOK_VOLTEER_BOARD
+M:	Simon Glass <sjg@chromium.org>
+S:	Maintained
+F:	board/google/chromebook_volteer/
+F:	include/configs/chromebook_volteer.h
+F:	configs/chromebook_volteer_defconfig
