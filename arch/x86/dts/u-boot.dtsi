@@ -11,6 +11,9 @@
 		multiple-images;
 		rom: rom {
 		};
+
+		volteer: volteer {
+		};
 	};
 };
 
@@ -176,6 +179,29 @@
 #endif
 	image-header {
 		location = "end";
+	};
+};
+#endif
+
+#ifdef CONFIG_TARGET_CHROMEBOOK_VOLTEER
+&volteer {
+	size = <0x2000000>;
+	end-at-4gb;
+	sort-by-offset;
+	pad-byte = <0xff>;
+
+	intel-descriptor {
+		offset = <0xfe000000>;
+		filename = "/vid/software/devel/volteer/rom/SI_DESC";
+	};
+	intel-me {
+		filename = "/vid/software/devel/volteer/rom/SI_ME";
+	};
+	fdtmap {
+	};
+	blob {
+		offset = <0xffff4000>;
+		filename = "bootblock";
 	};
 };
 #endif
