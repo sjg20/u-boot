@@ -239,3 +239,55 @@ const struct pmc_to_gpio_route *soc_pmc_gpio_routes(size_t *num)
 	*num = ARRAY_SIZE(routes);
 	return routes;
 }
+
+static int tgl_pinctrl_of_to_plat(struct udevice *dev)
+{
+	struct p2sb_child_plat *pplat;
+	const struct pad_community *comm = NULL;
+	int i;
+
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
+	struct tgl_gpio_plat *plat = dev_get_plat(dev);
+	int ret;
+
+	/*
+	 * It would be nice to do this in the bind() method, but with
+	 * of-platdata binding happens in the order that DM finds things in the
+	 * linker list (i.e. alphabetical order by driver name). So the GPIO
+	 * device may well be bound before its parent (p2sb), and this call
+	 * will fail if p2sb is not bound yet.
+	 */
+	ret = p2sb_set_port_id(dev, plat->dtplat.intel_p2sb_port_id);
+	if (ret)
+		return log_msg_ret("Could not set port id", ret);
+#endif
+	/* Attach this device to its community structure */
+	pplat = dev_get_parent_plat(dev);
+	for (i = 0; i < ARRAY_SIZE(tgl_communities); i++) {
+		if (tgl_communities[i].port == pplat->pid)
+			comm = &tgl_communities[i];
+	}
+
+	return intel_pinctrl_of_to_plat(dev, comm, 2);
+}
+
+#if CONFIG_IS_ENABLED(OF_REAL)
+static const struct udevice_id tgl_gpio_ids[] = {
+	{ .compatible = "intel,tgl-pinctrl"},
+	{ }
+};
+#endif
+
+U_BOOT_DRIVER(intel_tgl_pinctrl) = {
+	.name		= "intel_tgl_pinctrl",
+	.id		= UCLASS_PINCTRL,
+	.of_match	= of_match_ptr(tgl_gpio_ids),
+	.probe		= intel_pinctrl_probe,
+	.ops		= &intel_pinctrl_ops,
+#if CONFIG_IS_ENABLED(OF_REAL)
+	.bind		= dm_scan_fdt_dev,
+#endif
+	.of_to_plat = tgl_pinctrl_of_to_plat,
+	.priv_auto	= sizeof(struct intel_pinctrl_priv),
+	.plat_auto	= sizeof(struct tgl_gpio_plat),
+};

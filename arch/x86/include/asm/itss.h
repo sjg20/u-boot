@@ -47,7 +47,7 @@
 struct itss_plat {
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
 	/* Put this first since driver model will copy the data here */
-	struct dtd_intel_itss dtplat;
+// 	struct dtd_intel_itss dtplat;
 #endif
 };
 

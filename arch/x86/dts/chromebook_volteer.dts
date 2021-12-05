@@ -22,20 +22,17 @@
 #include <dt-bindings/interrupt-controller/x86-irq.h>
 #include <asm/e820.h>
 #include <asm/intel_pinctrl_defs.h>
-#include <asm/arch-apollolake/cpu.h>
-#include <asm/arch-apollolake/gpe.h>
-#include <asm/arch-apollolake/gpio.h>
-#include <asm/arch-apollolake/iomap.h>
-#include <asm/arch-apollolake/pm.h>
+#include <asm/arch-tigerlake/gpio.h>
+#include <asm/arch-tigerlake/iomap.h>
 #include <dt-bindings/clock/intel-clock.h>
-#include <asm/arch-apollolake/fsp/fsp_m_upd.h>
-#include <asm/arch-apollolake/fsp/fsp_s_upd.h>
 #include <dt-bindings/sound/nhlt.h>
+#include <asm/arch-tigerlake/pcr_ids.h>
 
 / {
 	model = "Google Coral";
 	compatible = "google,coral", "intel,apollolake";
 
+#if 0
 	aliases {
 		cros-ec0 = &cros_ec;
 		fsp = &fsp_s;
@@ -169,6 +166,7 @@
 	keyboard {
 		intel,duplicate-por;
 	};
+#endif
 
 	pci {
 		compatible = "pci-x86";
@@ -179,7 +177,7 @@
 			0x42000000 0x0 0xb0000000 0xb0000000 0 0x10000000
 			0x01000000 0x0 0x1000 0x1000 0 0xefff>;
 		u-boot,skip-auto-config-until-reloc;
-
+#if 0
 		host_bridge: host-bridge@0,0 {
 			u-boot,dm-pre-reloc;
 			reg = <0x00000000 0 0 0 0>;
@@ -204,7 +202,7 @@
 				intel,dmic-channels = <4>;
 			};
 		};
-
+#endif
 		punit@0,1 {
 			u-boot,dm-pre-proper;
 			u-boot,dm-spl;
@@ -217,15 +215,15 @@
 			reg = <0x00001000 0 0 0 0>;
 			compatible = "fsp-fb";
 		};
-
+#
 		p2sb: p2sb@d,0 {
 			u-boot,dm-pre-reloc;
 			reg = <0x02006810 0 0 0 0>;
 			compatible = "intel,p2sb";
-			early-regs = <IOMAP_P2SB_BAR 0x100000>;
+			early-regs = <IOMAP_P2SB_BAR IOMAP_P2SB_SIZE>;
 			pci,no-autoconfig;
 
-			gpio-0 {
+			pinctrl-0 {
 				compatible = "intel,tgl-pinctrl";
 				u-boot,dm-pre-reloc;
 				intel,p2sb-port-id = <PID_GPIOCOM0>;
@@ -240,13 +238,13 @@
 				};
 			};
 
-			gpio-1 {
+			pinctrl-1 {
 				compatible = "intel,tgl-pinctrl";
 				u-boot,dm-pre-reloc;
 				intel,p2sb-port-id = <PID_GPIOCOM1>;
 				intel,p2sb-cpu-id = <PID_CPU_GPIOCOM1>;
 				acpi,path = "\\_SB.PCI0.GPIO";
-				gpio_0: gpio-0 {
+				gpio_1: gpio-1 {
 					compatible = "intel,gpio";
 					u-boot,dm-pre-reloc;
 					gpio-controller;
@@ -255,12 +253,12 @@
 				};
 			};
 
-			gpio-2 {
+			pinctrl-2 {
 				compatible = "intel,tgl-pinctrl";
 				u-boot,dm-pre-reloc;
 				intel,p2sb-port-id = <PID_GPIOCOM2>;
 				acpi,path = "\\_SB.PCI0.GPIO";
-				gpio_0: gpio-0 {
+				gpio_2: gpio-2 {
 					compatible = "intel,gpio";
 					u-boot,dm-pre-reloc;
 					gpio-controller;
@@ -271,13 +269,13 @@
 
 			/* No gpio-3 */
 
-			gpio-4 {
+			pinctrl-4 {
 				compatible = "intel,tgl-pinctrl";
 				u-boot,dm-pre-reloc;
 				intel,p2sb-port-id = <PID_GPIOCOM4>;
 				intel,p2sb-cpu-id = <PID_CPU_GPIOCOM4>;
 				acpi,path = "\\_SB.PCI0.GPIO";
-				gpio_0: gpio-0 {
+				gpio_4: gpio-4 {
 					compatible = "intel,gpio";
 					u-boot,dm-pre-reloc;
 					gpio-controller;
@@ -286,13 +284,13 @@
 				};
 			};
 
-			gpio-5 {
+			pinctrl-5 {
 				compatible = "intel,tgl-pinctrl";
 				u-boot,dm-pre-reloc;
 				intel,p2sb-port-id = <PID_GPIOCOM5>;
 				intel,p2sb-cpu-id = <PID_CPU_GPIOCOM5>;
 				acpi,path = "\\_SB.PCI0.GPIO";
-				gpio_0: gpio-0 {
+				gpio_5: gpio-5 {
 					compatible = "intel,gpio";
 					u-boot,dm-pre-reloc;
 					gpio-controller;
@@ -300,7 +298,7 @@
 					linux-name = "GPP_CPU_VBPIO";
 				};
 			};
-
+#if 0
 			itss {
 				u-boot,dm-pre-reloc;
 				compatible = "intel,itss";
@@ -315,8 +313,9 @@
 					PMC_GPE_N_63_32 GPIO_GPE_N_63_32
 					PMC_GPE_W_31_0 GPIO_GPE_W_31_0>;
 			};
+#endif
 		};
-
+#if 0
 		pmc@d,1 {
 			u-boot,dm-pre-reloc;
 			reg = <0x6900 0 0 0 0>;
@@ -648,10 +647,12 @@
 				};
 			};
 		};
+#endif
 	};
 
 };
 
+#if 0
 &host_bridge {
 	/*
 	 * PL1 override 12000 mW: the energy calculation is wrong with the
@@ -1272,3 +1273,4 @@
 	#size-cells = <0>;
 	u-boot,dm-pre-proper;
 };
+#endif

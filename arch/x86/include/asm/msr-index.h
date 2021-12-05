@@ -174,6 +174,7 @@
 #define MSR_LBR_TOS			0x000001c9
 #define MSR_IA32_PLATFORM_DCA_CAP	0x1f8
 #define MSR_POWER_CTL			0x000001fc
+#define MSR_EVICT_CTL			0x2e0
 #define MSR_LBR_NHM_FROM		0x00000680
 #define MSR_LBR_NHM_TO			0x000006c0
 #define MSR_LBR_CORE_FROM		0x00000040
@@ -300,6 +301,16 @@
 #define MSR_CPU_THERM_CFG2		0x00000674
 #define MSR_CPU_THERM_SENS_CFG		0x00000675
 
+/* Intel Cache-As-RAM MSRs */
+#define IA32_L3_PROTECTED_WAYS		0xc85
+#define IA32_SF_QOS_INFO		0xc87
+#define  IA32_SF_WAY_COUNT_MASK		0x3f
+#define IA32_PQR_ASSOC			0xc8f
+/* MSR bits 33:32 encode slot number 0-3 */
+#define  IA32_PQR_ASSOC_MASK		(1 << 0 | 1 << 1)
+#define IA32_L3_MASK_1			0xc91
+#define IA32_L3_MASK_2			0xc92
+
 #define MSR_AMD64_MC0_MASK		0xc0010044
 
 #define MSR_IA32_MCx_CTL(x)		(MSR_IA32_MC0_CTL + 4*(x))
@@ -317,6 +328,9 @@
 #define MSR_P6_PERFCTR1			0x000000c2
 #define MSR_P6_EVNTSEL0			0x00000186
 #define MSR_P6_EVNTSEL1			0x00000187
+
+#define IA32_CR_SF_QOS_MASK_1		0x1891
+#define IA32_CR_SF_QOS_MASK_2		0x1892
 
 #define MSR_KNC_PERFCTR0               0x00000020
 #define MSR_KNC_PERFCTR1               0x00000021

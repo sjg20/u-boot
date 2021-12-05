@@ -8,15 +8,12 @@
 #ifndef _ASM_ARCH_GPIO_DEFS_H_
 #define _ASM_ARCH_GPIO_DEFS_H_
 
-#ifndef __ACPI__
-#include <stddef.h>
-#endif
 #include <asm/arch/gpio_soc_defs.h>
 
 #define GPIO_NUM_PAD_CFG_REGS   4 /* DW0, DW1, DW2, DW3 */
 
 #define NUM_GPIO_COMx_GPI_REGS(n)	\
-		(ALIGN_UP((n), GPIO_MAX_NUM_PER_GROUP) / GPIO_MAX_NUM_PER_GROUP)
+		(ALIGN((n), GPIO_MAX_NUM_PER_GROUP) / GPIO_MAX_NUM_PER_GROUP)
 
 #define NUM_GPIO_COM0_GPI_REGS NUM_GPIO_COMx_GPI_REGS(NUM_GPIO_COM0_PADS)
 #define NUM_GPIO_COM1_GPI_REGS NUM_GPIO_COMx_GPI_REGS(NUM_GPIO_COM1_PADS)

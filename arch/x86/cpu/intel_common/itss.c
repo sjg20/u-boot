@@ -163,6 +163,7 @@ static int itss_bind(struct udevice *dev)
 
 static int itss_of_to_plat(struct udevice *dev)
 {
+#ifndef CONFIG_TARGET_CHROMEBOOK_VOLTEER
 	struct itss_priv *priv = dev_get_priv(dev);
 	int ret;
 
@@ -199,6 +200,7 @@ static int itss_of_to_plat(struct udevice *dev)
 	if (ret)
 		return log_msg_ret("Cannot read pmc-routes", ret);
 	priv->route_count = size / sizeof(struct pmc_route);
+#endif
 #endif
 
 	return 0;

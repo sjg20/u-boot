@@ -17,6 +17,7 @@
 	};
 };
 
+#ifndef CONFIG_TARGET_CHROMEBOOK_VOLTEER
 #ifdef CONFIG_ROM_SIZE
 &rom {
 	filename = "u-boot.rom";
@@ -182,6 +183,7 @@
 	};
 };
 #endif
+#endif /* CONFIG_TARGET_CHROMEBOOK_VOLTEER */
 
 #ifdef CONFIG_TARGET_CHROMEBOOK_VOLTEER
 &volteer {

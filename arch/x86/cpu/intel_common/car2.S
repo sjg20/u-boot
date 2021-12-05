@@ -124,7 +124,7 @@ clear_var_mtrr:
 	wrmsr
 
 	/* Configure the MTRR mask for the size region */
-	mov	$MTRR_PHYS_MASK(0), %ecx
+	mov	$MTRR_PHYS_MASK_MSR(0), %ecx
 	mov	$CONFIG_DCACHE_RAM_SIZE, %eax	/* size mask */
 	dec	%eax
 	not	%eax
@@ -407,7 +407,7 @@ find_llc_subleaf:
 set_eviction_mask:
 	mov	%ebx, %edi /* back up number of ways */
 	mov	%eax, %esi /* back up the non-eviction mask */
-#if CONFIG(CAR_HAS_SF_MASKS)
+#ifdef CONFIG_CAR_HAS_SF_MASKS
 	mov	%edx, %eax /* restore data_ways in eax */
 	/*
 	 * Calculate SF masks 2:
@@ -415,7 +415,7 @@ set_eviction_mask:
 	 * 2. Program MSR 0x1892 Non-Eviction Mask #2
 	 *    IA32_CR_SF_QOS_MASK_2 = ((1 << data_ways) - 1)
 	 */
-#if CONFIG(SF_MASK_2WAYS_PER_BIT)
+#ifdef CONFIG_SF_MASK_2WAYS_PER_BIT
 	cmp	$0x01, %eax /* Skip Step 1 if data_ways = 1 */
 	jz	program_sf2
 	movl	$0x01, %ecx /* Step 1 */
@@ -441,7 +441,7 @@ program_sf2:
 	mov	$IA32_SF_QOS_INFO, %ecx
 	rdmsr
 	and	$IA32_SF_WAY_COUNT_MASK, %eax /* Step 1 */
-#if CONFIG(SF_MASK_2WAYS_PER_BIT)
+#ifdef CONFIG_SF_MASK_2WAYS_PER_BIT
 	/* Assumption: skip checking SFWayCnt = 1 i.e. 1 way LLC (which is not practical) */
 	movl	$0x01, %ecx /* Step 2 */
 	shr	%cl, %eax
@@ -456,7 +456,7 @@ program_sf2:
 	movl	$IA32_CR_SF_QOS_MASK_1, %ecx
 	wrmsr
 #endif
-#if CONFIG(CAR_HAS_L3_PROTECTED_WAYS)
+#ifdef CONFIG_CAR_HAS_L3_PROTECTED_WAYS
 	/* Set MSR 0xC85 L3_Protected_ways = ((1 << data ways) - 1) */
 	mov	%esi, %eax
 	xorl	%edx, %edx
@@ -503,7 +503,7 @@ program_sf2:
 	movl	$IA32_PQR_ASSOC, %ecx
 	xorl	%eax, %eax
 	xorl	%edx, %edx
-#if CONFIG(COS_MAPPED_TO_MSB)
+#ifdef CONFIG_COS_MAPPED_TO_MSB
 	movl	$0x02, %edx
 #else
 	movl	$0x02, %eax
@@ -519,7 +519,7 @@ program_sf2:
 	movl	$IA32_PQR_ASSOC, %ecx
 	xorl	%eax, %eax
 	xorl	%edx, %edx
-#if CONFIG(COS_MAPPED_TO_MSB)
+#ifdef CONFIG_COS_MAPPED_TO_MSB
 	movl	$0x01, %edx
 #else
 	movl	$0x01, %eax

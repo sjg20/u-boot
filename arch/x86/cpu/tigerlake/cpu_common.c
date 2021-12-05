@@ -14,3 +14,8 @@
 void board_debug_uart_init(void)
 {
 }
+
+int arch_fsp_init_r(void)
+{
+	return 0;
+}

@@ -71,12 +71,11 @@ config INTEL_CAR_CQOS
 #
 config CACHE_QOS_SIZE_PER_BIT
 	hex
-	depends on INTEL_CAR_CQOS
+	depends on INTEL_APOLLOLAKE && INTEL_CAR_CQOS
 	default 0x20000 # 128 KB
 
 config INTEL_CAR_NEM_ENHANCED
 	bool
-	default n
 	help
 	  A current limitation of NEM (Non-Evict mode) is that code and data sizes
 	  are derived from the requirement to not write out any modified cache line.

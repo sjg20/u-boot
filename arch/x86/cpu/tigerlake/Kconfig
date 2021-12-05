@@ -115,4 +115,10 @@ config VBT_ADDR
 	# TODO
 	default 0xff3f1000
 
+config PCR_BASE_ADDRESS
+	hex
+	default 0xfd000000
+	help
+	  This option allows you to select MMIO Base Address of sideband bus.
+
 endif

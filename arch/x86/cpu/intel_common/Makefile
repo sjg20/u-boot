@@ -15,7 +15,7 @@ ifndef CONFIG_SPL_BUILD
 obj-$(CONFIG_INTEL_GMA_ACPI) += intel_opregion.o
 endif
 
-ifdef CONFIG_INTEL_CAR_CQOS
+ifneq ($(CONFIG_INTEL_CAR_CQOS)$(CONFIG_INTEL_CAR_NEM_ENHANCED),)
 obj-$(CONFIG_TPL_BUILD) += car2.o
 ifndef CONFIG_SPL_BUILD
 obj-y += car2_uninit.o
