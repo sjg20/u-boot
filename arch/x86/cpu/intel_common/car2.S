@@ -16,6 +16,23 @@
 
 #define IS_POWER_OF_2(x)	(!((x) & ((x) - 1)))
 
+/*
+ * macro: clear_car
+ * Clears the region between CONFIG_DCACHE_RAM_BASE and
+ * CONFIG_DCACHE_RAM_BASE + CONFIG_DCACHE_RAM_SIZE to populate
+ * cachelines.
+ * Clobbers %eax, %ecx, %edi.
+ */
+.macro clear_car
+	/* Clear the cache memory region. This will also fill up the cache */
+	movl	$CONFIG_DCACHE_RAM_BASE, %edi
+	movl	$CONFIG_DCACHE_RAM_SIZE, %ecx
+	shr	$0x02, %ecx
+	xor	%eax, %eax
+	cld
+	rep	stosl
+.endm
+
 .global car_init
 car_init:
 	post_code(POST_CAR_START)
@@ -52,7 +69,7 @@ clear_fixed_mtrr:
 
 	post_code(POST_CAR_MTRR)
 
-	/* Figure put how many MTRRs we have, and clear them out */
+	/* Figure out how many MTRRs we have, and clear them out */
 	mov	$MTRR_CAP_MSR, %ecx
 	rdmsr
 	movzb	%al, %ebx		/* Number of variable MTRRs */
@@ -196,13 +213,7 @@ car_nem:
 
 	post_code(0x26)
 
-	/* Clear the cache memory region. This will also fill up the cache */
-	movl	$CONFIG_DCACHE_RAM_BASE, %edi
-	movl	$CONFIG_DCACHE_RAM_SIZE, %ecx
-	shr	$0x02, %ecx
-	xor	%eax, %eax
-	cld
-	rep	stosl
+	clear_car
 
 	post_code(0x27)
 
