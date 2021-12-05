@@ -491,6 +491,13 @@ sdwires:
     mount-uuid: 6B58-81F8
     mount-point: rpi4_boot
 
+  sdwire20: &sdwire20
+    serial: da66
+    symlink: sdwire20
+    hub-port: *hubf_13
+    mount-uuid: C839-E506
+    mount-point: rpi0_b_boot
+
 servos:
   svsamus: &servo_samus
     board: samus
@@ -755,6 +762,10 @@ uarts:
     type: usb-uart
     symlink: ttyusb_port24
     hub-port: *hubf_9
+  usbport25: &ttyusb_port25
+    type: usb-uart
+    symlink: ttyusb_port25
+    hub-port: *hubf_12
   portserver1: &portserver1
     type: portserver
     host: 192.168.4.23
@@ -1198,7 +1209,7 @@ duts:
         target: Bananapi
         toolchain: armv7-a
 
-  rpi_2:
+  rpi2:
     desc: Raspberry Pi 2
     console: *ttyusb_port1
     bootdev: *sdwire12
@@ -1440,3 +1451,19 @@ duts:
       64-bit:
         target: rpi_4
         toolchain: aarch64
+
+  rpi0:
+    desc: Raspberry Pi 0 RaspiOS Bullseye Lite
+    console: *ttyusb_port25
+    bootdev: *sdwire20
+    power: *ykush2_port3
+    flash:
+      method: rpi
+    prompt: U-Boot>
+    username: pi
+    password: raspberry
+    builds:
+      32-bit:
+        default: yes
+        target: rpi_0_w
+        toolchain: armv7-a
