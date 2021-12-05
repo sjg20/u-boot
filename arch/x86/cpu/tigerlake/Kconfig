@@ -9,6 +9,8 @@ config INTEL_TIGERLAKE
 	select HAVE_FSP
 	select ARCH_MISC_INIT
 	select USE_CAR
+	select INTEL_CAR_NEM_ENHANCED
+	select CAR_HAS_SF_MASKS
 	select INTEL_SOC
 	select INTEL_PMC
 	select TPL_X86_TSC_TIMER_NATIVE

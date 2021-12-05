@@ -353,54 +353,146 @@ find_llc_subleaf:
 	jnz	find_llc_subleaf
 
 	/*
-	 * Set MSR 0xC91 IA32_L3_MASK_! = 0xE/0xFE/0xFFE/0xFFFE
-	 * for 4/8/16 way of LLC
-	*/
+	 * Calculate the total LLC size
+	 * (Line_Size + 1) * (Sets + 1) * (Partitions + 1) * (Ways + 1)
+	 * (EBX[11:0] + 1) * (ECX + 1) * (EBX[21:12] + 1) * EBX[31:22] + 1)
+	 */
+
+	mov	%ebx, %eax
+	and	$0xFFF, %eax
+	inc	%eax
+	inc	%ecx
+	mul	%ecx
+	mov	%eax, %ecx
+	mov	%ebx, %eax
+	shr	$12, %eax
+	and	$0x3FF, %eax
+	inc	%eax
+	mul	%ecx
 	shr	$22, %ebx
 	inc	%ebx
-	/* Calculate n-way associativity of LLC */
-	mov	%bl, %cl
+	mov	%ebx, %edx
+	mul	%ebx /* eax now holds total LLC size */
 
 	/*
-	 * Maximizing RO cacheability while locking in the CAR to a
-	 * single way since that particular way won't be victim candidate
-	 * for evictions.
-	 * This has been done after programing LLC_WAY_MASK_1 MSR
-	 * with desired LLC way as mentioned below.
-	 *
-	 * Hence create Code and Data Size as per request
-	 * Code Size (RO) : Up to 16M
-	 * Data Size (RW) : Up to 256K
+	 * The number of the ways that we want to protect from eviction
+	 * can be calculated as RW data stack size / way size where way
+	 * size is Total LLC size / Total number of LLC ways.
+	 */
+	div	%ebx /* way size */
+	mov	%eax, %ecx
+
+	/*
+	 * Check if way size if bigger than the cache ram size.
+	 * Then we need to allocate just one way for non-eviction
+	 * of RW data.
 	 */
 	movl	$0x01, %eax
+	mov	%eax, %edx /* back up data_ways in edx */
+	cmp	$CONFIG_DCACHE_RAM_SIZE, %ecx
+	jnc	set_eviction_mask
+
 	/*
-	 * LLC Ways -> LLC_WAY_MASK_1:
-	 *  4: 0x000E
-	 *  8: 0x00FE
-	 * 12: 0x0FFE
-	 * 16: 0xFFFE
-	 *
-	 * These MSRs contain one bit per each way of LLC
+	 * RW data size / way size is equal to number of
+	 * ways to be configured for non-eviction
+	 */
+	mov	$CONFIG_DCACHE_RAM_SIZE, %eax
+	div	%ecx
+	mov	%eax, %edx /* back up data_ways in edx */
+	mov	%eax, %ecx
+	movl	$0x01, %eax
+	shl	%cl, %eax
+	subl	$0x01, %eax
+
+set_eviction_mask:
+	mov	%ebx, %edi /* back up number of ways */
+	mov	%eax, %esi /* back up the non-eviction mask */
+#if CONFIG(CAR_HAS_SF_MASKS)
+	mov	%edx, %eax /* restore data_ways in eax */
+	/*
+	 * Calculate SF masks 2:
+	 * 1. if CONFIG_SF_MASK_2WAYS_PER_BIT: data_ways = data_ways / 2
+	 * 2. Program MSR 0x1892 Non-Eviction Mask #2
+	 *    IA32_CR_SF_QOS_MASK_2 = ((1 << data_ways) - 1)
+	 */
+#if CONFIG(SF_MASK_2WAYS_PER_BIT)
+	cmp	$0x01, %eax /* Skip Step 1 if data_ways = 1 */
+	jz	program_sf2
+	movl	$0x01, %ecx /* Step 1 */
+	shr	%cl, %eax
+#endif
+	/* Step 2 */
+	mov	%eax, %ecx
+	movl	$0x01, %eax
+	shl	%cl, %eax
+	subl	$0x01, %eax
+program_sf2:
+	mov	%eax, %ebx /* back up IA32_CR_SF_QOS_MASK_2 in ebx */
+	xorl	%edx, %edx
+	mov	$IA32_CR_SF_QOS_MASK_2, %ecx
+	wrmsr
+
+	/*
+	 * Calculate the SF Mask 1:
+	 * 1. Calculate SFWayCnt = IA32_SF_QOS_INFO & Bit [5:0]
+	 * 2. if CONFIG_SF_MASK_2WAYS_PER_BIT: SFWayCnt = SFWayCnt / 2
+	 * 3. Set SF_MASK_1 = ((1 << SFWayCnt) - 1) - IA32_CR_SF_QOS_MASK_2
+	 */
+	mov	$IA32_SF_QOS_INFO, %ecx
+	rdmsr
+	and	$IA32_SF_WAY_COUNT_MASK, %eax /* Step 1 */
+#if CONFIG(SF_MASK_2WAYS_PER_BIT)
+	/* Assumption: skip checking SFWayCnt = 1 i.e. 1 way LLC (which is not practical) */
+	movl	$0x01, %ecx /* Step 2 */
+	shr	%cl, %eax
+#endif
+	/* Step 3 */
+	mov	%eax, %ecx
+	movl	$0x01, %eax
+	shl	%cl, %eax
+	subl	$0x01, %eax
+	sub	%ebx, %eax
+	xorl	%edx, %edx
+	movl	$IA32_CR_SF_QOS_MASK_1, %ecx
+	wrmsr
+#endif
+#if CONFIG(CAR_HAS_L3_PROTECTED_WAYS)
+	/* Set MSR 0xC85 L3_Protected_ways = ((1 << data ways) - 1) */
+	mov	%esi, %eax
+	xorl	%edx, %edx
+	mov	$IA32_L3_PROTECTED_WAYS, %ecx
+	wrmsr
+#endif
+	/*
+	 * Program MSR 0xC91 IA32_L3_MASK_1
+	 * This MSR contain one bit per each way of LLC
 	 * - If this bit is '0' - the way is protected from eviction
 	 * - If this bit is '1' - the way is not protected from eviction
 	 */
+	mov	$0x1, %eax
+	mov	%edi, %ecx
 	shl	%cl, %eax
-	subl	$0x02, %eax
-	movl	$MSR_IA32_L3_MASK_1, %ecx
+	subl	$0x01, %eax
+	mov	%eax, %ecx
+	mov	%esi, %eax
+
+	xor	$~0, %eax	/* invert 32 bits */
+	and	%ecx, %eax
+	movl	$IA32_L3_MASK_1, %ecx
 	xorl	%edx, %edx
 	wrmsr
 	/*
-	 * Set MSR 0xC92 IA32_L3_MASK_2 = 0x1
-	 *
-	 * For SKL SOC, data size remains 256K consistently.
-	 * Hence, creating 1-way associative cache for Data
-	*/
-	mov	$MSR_IA32_L3_MASK_2, %ecx
-	mov	$0x01, %eax
+	 * Program MSR 0xC92 IA32_L3_MASK_2
+	 * This MSR contain one bit per each way of LLC
+	 * - If this bit is '0' - the way is protected from eviction
+	 * - If this bit is '1' - the way is not protected from eviction
+	 */
+	mov	%esi, %eax
+	movl	$IA32_L3_MASK_2, %ecx
 	xorl	%edx, %edx
 	wrmsr
 	/*
-	 * Set MSR_IA32_PQR_ASSOC = 0x02
+	 * Set IA32_PQR_ASSOC
 	 *
 	 * Possible values:
 	 * 0: Default value, no way mask should be applied
@@ -408,25 +500,30 @@ find_llc_subleaf:
 	 * 2: Apply way mask 2 to LLC
 	 * 3: Shouldn't be use in NEM Mode
 	 */
-	movl	$MSR_IA32_PQR_ASSOC, %ecx
-	movl	$0x02, %eax
+	movl	$IA32_PQR_ASSOC, %ecx
+	xorl	%eax, %eax
 	xorl	%edx, %edx
+#if CONFIG(COS_MAPPED_TO_MSB)
+	movl	$0x02, %edx
+#else
+	movl	$0x02, %eax
+#endif
 	wrmsr
 
-	movl	$CONFIG_DCACHE_RAM_BASE, %edi
-	movl	$CONFIG_DCACHE_RAM_SIZE, %ecx
-	shr	$0x02, %ecx
-	xor	%eax, %eax
-	cld
-	rep	stosl
+	clear_car
+
 	/*
-	 * Set MSR_IA32_PQR_ASSOC = 0x01
+	 * Set IA32_PQR_ASSOC
 	 * At this stage we apply LLC_WAY_MASK_1 to the cache.
-	 * i.e. way 0 is protected from eviction.
 	*/
-	movl	$MSR_IA32_PQR_ASSOC, %ecx
-	movl	$0x01, %eax
+	movl	$IA32_PQR_ASSOC, %ecx
+	xorl	%eax, %eax
 	xorl	%edx, %edx
+#if CONFIG(COS_MAPPED_TO_MSB)
+	movl	$0x01, %edx
+#else
+	movl	$0x01, %eax
+#endif
 	wrmsr
 
 	post_code(0x27)

@@ -74,4 +74,38 @@ config CACHE_QOS_SIZE_PER_BIT
 	depends on INTEL_CAR_CQOS
 	default 0x20000 # 128 KB
 
+config INTEL_CAR_NEM_ENHANCED
+	bool
+	default n
+	help
+	  A current limitation of NEM (Non-Evict mode) is that code and data sizes
+	  are derived from the requirement to not write out any modified cache line.
+	  With NEM, if there is no physical memory behind the cached area,
+	  the modified data will be lost and NEM results will be inconsistent.
+	  ENHANCED NEM guarantees that modified data is always
+	  kept in cache while clean data is replaced.
+
+config CAR_HAS_SF_MASKS
+	bool
+	depends on INTEL_CAR_NEM_ENHANCED
+	help
+	  In the case of non-inclusive cache architecture Snoop Filter MSR
+	  IA32_L3_SF_MASK_x programming is required along with the data ways.
+	  This is applicable for TGL and beyond.
+
+config SF_MASK_2WAYS_PER_BIT
+	bool
+	depends on INTEL_CAR_NEM_ENHANCED
+	help
+	  In the case of non-inclusive cache architecture when two ways in
+	  the SF mask are controlled by one bit of the SF QoS register.
+	  This is applicable for TGL alone.
+
+config COS_MAPPED_TO_MSB
+	bool
+	depends on INTEL_CAR_NEM_ENHANCED
+	help
+	  On TGL and JSL platform the class of service configuration
+	  is mapped to MSB of MSR IA32_PQR_ASSOC.
+
 endif # INTEL_SOC
