@@ -711,20 +711,6 @@ config ROM_TABLE_SIZE
 	hex
 	default 0x10000
 
-config HAVE_ITSS
-	bool "Enable ITSS"
-	help
-	  Select this to include the driver for the Interrupt Timer
-	  Subsystem (ITSS) which is found on several Intel devices.
-
-config HAVE_P2SB
-	bool "Enable P2SB"
-	depends on P2SB
-	help
-	  Select this to include the driver for the Primary to
-	  Sideband Bridge (P2SB) which is found on several Intel
-	  devices.
-
 menu "System tables"
 	depends on !EFI && !SYS_COREBOOT
 
@@ -904,22 +890,6 @@ config HIGH_TABLE_SIZE
 	  Increse it if the default size does not fit the board's needs.
 	  This is most likely due to a large ACPI DSDT table is used.
 
-config INTEL_CAR_CQOS
-	bool "Support Intel Cache Quality of Service"
-	help
-	  Cache Quality of Service allows more fine-grained control of cache
-	  usage. As result, it is possible to set up a portion of L2 cache for
-	  CAR and use the remainder for actual caching.
-
-#
-# Each bit in QOS mask controls this many bytes. This is calculated as:
-# (CACHE_WAYS / CACHE_BITS_PER_MASK) * CACHE_LINE_SIZE * CACHE_SETS
-#
-config CACHE_QOS_SIZE_PER_BIT
-	hex
-	depends on INTEL_CAR_CQOS
-	default 0x20000 # 128 KB
-
 config X86_OFFSET_U_BOOT
 	hex "Offset of U-Boot in ROM image"
 	depends on HAVE_SYS_TEXT_BASE
@@ -980,52 +950,6 @@ config PCIEX_LENGTH_128MB
 
 config PCIEX_LENGTH_64MB
 	bool
-
-config INTEL_SOC
-	bool
-	help
-	  This is enabled on Intel SoCs that can support various advanced
-	  features such as power management (requiring asm/arch/pm.h), system
-	  agent (asm/arch/systemagent.h) and an I/O map for ACPI
-	  (asm/arch/iomap.h).
-
-	  This cannot be selected in a defconfig file. It must be enabled by a
-	  'select' in the SoC's Kconfig.
-
-if INTEL_SOC
-
-config INTEL_ACPIGEN
-	bool "Support ACPI table generation for Intel SoCs"
-	depends on ACPIGEN
-	help
-	  This option adds some functions used for programmatic generation of
-	  ACPI tables on Intel SoCs. This provides features for writing CPU
-	  information such as P states and T stages. Also included is a way
-	  to create a GNVS table and set it up.
-
-config INTEL_GMA_ACPI
-	bool "Generate ACPI table for Intel GMA graphics"
-	help
-	  The Intel GMA graphics driver in Linux expects an ACPI table
-	  which describes the layout of the registers and the display
-	  connected to the device. Enable this option to create this
-	  table so that graphics works correctly.
-
-config INTEL_GENERIC_WIFI
-	bool "Enable generation of ACPI tables for Intel WiFi"
-	help
-	  Select this option to provide code to a build generic WiFi ACPI table
-	  for Intel WiFi devices. This is not a WiFi driver and offers no
-	  network functionality. It is only here to generate the ACPI tables
-	  required by Linux.
-
-config INTEL_GMA_SWSMISCI
-	bool
-	help
-	  Select this option for Atom-based platforms which use the SWSMISCI
-	  register (0xe0) rather than the SWSCI register (0xe8).
-
-endif # INTEL_SOC
 
 config COREBOOT_SYSINFO
 	bool "Support reading coreboot sysinfo"
