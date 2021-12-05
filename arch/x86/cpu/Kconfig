@@ -13,5 +13,6 @@ source "arch/x86/cpu/quark/Kconfig"
 source "arch/x86/cpu/queensbay/Kconfig"
 source "arch/x86/cpu/slimbootloader/Kconfig"
 source "arch/x86/cpu/tangier/Kconfig"
+source "arch/x86/cpu/tigerlake/Kconfig"
 
 source "arch/x86/cpu/intel_common/Kconfig"

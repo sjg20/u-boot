@@ -21,6 +21,7 @@
 
 int fsp_silicon_init(bool s3wake, bool use_spi_flash)
 {
+#ifndef CONFIG_TARGET_CHROMEBOOK_VOLTEER
 	struct fsps_upd upd, *fsp_upd;
 	fsp_silicon_init_func func;
 	struct fsp_header *hdr;
@@ -55,6 +56,6 @@ int fsp_silicon_init(bool s3wake, bool use_spi_flash)
 	if (ret)
 		return log_msg_ret("Silicon init fail\n", ret);
 	log_debug("done\n");
-
+#endif
 	return 0;
 }

@@ -19,6 +19,7 @@
 #include <asm/arch/fsp/fsp_configs.h>
 #include <asm/arch/fsp/fsp_m_upd.h>
 
+#ifndef CONFIG_TARGET_CHROMEBOOK_VOLTEER
 static int prepare_mrc_cache_type(enum mrc_type_t type,
 				  struct mrc_data_container **cachep)
 {
@@ -38,9 +39,11 @@ static int prepare_mrc_cache_type(enum mrc_type_t type,
 
 	return 0;
 }
+#endif
 
 int prepare_mrc_cache(struct fspm_upd *upd)
 {
+#ifndef CONFIG_TARGET_CHROMEBOOK_VOLTEER
 	struct mrc_data_container *cache;
 	int ret;
 
@@ -53,12 +56,13 @@ int prepare_mrc_cache(struct fspm_upd *upd)
 	if (ret)
 		return log_msg_ret("Cannot get var cache", ret);
 	upd->config.variable_nvs_buffer_ptr = cache->data;
-
+#endif
 	return 0;
 }
 
 int fsp_memory_init(bool s3wake, bool use_spi_flash)
 {
+#ifndef CONFIG_TARGET_CHROMEBOOK_VOLTEER
 	struct fspm_upd upd, *fsp_upd;
 	fsp_memory_init_func func;
 	struct binman_entry entry;
@@ -110,6 +114,6 @@ int fsp_memory_init(bool s3wake, bool use_spi_flash)
 	ret = fspm_done(dev);
 	if (ret)
 		return log_msg_ret("fsm_done\n", ret);
-
+#endif
 	return 0;
 }

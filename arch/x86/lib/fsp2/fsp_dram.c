@@ -69,9 +69,11 @@ int dram_init(void)
 		gd->ram_size = ho->ram_size;
 		handoff_load_dram_banks(ho);
 #endif
+#ifndef CONFIG_TARGET_CHROMEBOOK_VOLTEER
 		ret = arch_fsps_preinit();
 		if (ret)
 			return log_msg_ret("fsp_s_preinit", ret);
+#endif
 	}
 
 	return 0;

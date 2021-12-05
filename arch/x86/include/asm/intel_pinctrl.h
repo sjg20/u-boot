@@ -92,6 +92,12 @@ struct pad_group {
 	int acpi_pad_base;
 };
 
+/* A range of consecutive virtual-wire entries in a community */
+struct vw_entries {
+	uint first_pad;
+	uint last_pad;
+};
+
 /**
  * struct pad_community - community of pads
  *
@@ -128,13 +134,31 @@ struct pad_community {
 	u16 gpi_int_en_reg_0;
 	u16 gpi_smi_sts_reg_0;
 	u16 gpi_smi_en_reg_0;
+	uint16_t	gpi_nmi_sts_reg_0; /* offset to GPI NMI STS Reg 0 */
+	uint16_t	gpi_nmi_en_reg_0; /* offset to GPI NMI EN Reg 0 */
 	u16 pad_cfg_base;
 	u8 gpi_status_offset;
 	u8 port;
+	uint8_t		cpu_port; /* CPU Port ID */
 	const struct reset_mapping *reset_map;
 	size_t num_reset_vals;
 	const struct pad_group *groups;
 	size_t num_groups;
+	unsigned int	vw_base;
+	/*
+	 * Note: The entries must be in the same order here as the order in
+	 * which they map to VW indexes (beginning with VW base)
+	 */
+	const struct vw_entries	*vw_entries;
+	size_t		num_vw_entries;
+};
+
+/*
+ * Structure provides the pmc to gpio group mapping
+ */
+struct pmc_to_gpio_route {
+	int	pmc;
+	int	gpio;
 };
 
 /**

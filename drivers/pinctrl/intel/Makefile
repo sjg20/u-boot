@@ -4,3 +4,4 @@
 
 obj-y += pinctrl.o
 obj-$(CONFIG_PINCTRL_INTEL_APL) += pinctrl_apl.o
+obj-$(CONFIG_PINCTRL_INTEL_TGL) += pinctrl_tgl.o
