@@ -388,12 +388,13 @@ iteration is displayed, whether to return iterations even if they did not result
 in a valid bootflow, whether to iterate through just a single bootdev, etc.
 
 Then the ordering of bootdevs is determined, by `setup_bootdev_order()`. By
-default, the bootdevs are used in their sequence order, as determined by the
-`/aliases` node, or failing that their order in the devicetree. But if there is
-a `bootdev-order` property in the bootstd node, then this is used instead. In
-any case, the iterator ends up with a `dev_order` array containing the bootdevs
-that are going to be used, with `num_devs` set to the number of bootdevs and
-`cur_dev` starting at 0.
+default, the bootdevs are used in the order specified by the `boot_targets`
+environment variable. If that is missing then their sequence order is used,
+as determined by the `/aliases` node, or failing that their order in the
+devicetree. For BOOTSTD_FULL, if there is a `bootdev-order` property in the
+bootstd node, then this is used as a final fallback. In any case, the iterator
+ends up with a `dev_order` array containing the bootdevs that are going to be
+used, with `num_devs` set to the number of bootdevs and `cur_dev` starting at 0.
 
 Next, the ordering of bootdevs is determined, by `setup_bootmeth_order()`. By
 default the ordering is again by sequence number, i.e. the `/aliases` node, or

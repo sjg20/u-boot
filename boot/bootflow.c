@@ -200,6 +200,18 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
 	return -ENOENT;
 }
 
+/**
+ * build_order() - Build the ordered list of bootdevs to use
+ *
+ * This builds an ordered list of devices by one of three methods:
+ * - using the boot_targets environment variable, if non-empty
+ * - using the bootdev-order devicetree property, if present
+ * - sorted by priority, then sequence number
+ *
+ * @bootstd: BOOTSTD device to use
+ * @order: Bootdevs listed in in default order
+ * @max_count: Number of entries in @order
+ */
 static int build_order(struct udevice *bootstd, struct udevice **order,
 		       int max_count)
 {
@@ -210,7 +222,8 @@ static int build_order(struct udevice *bootstd, struct udevice **order,
 	int i, ret, count;
 
 	targets = env_get("boot_targets");
-	labels = bootstd_get_bootdev_order(bootstd);
+	labels = IS_ENABLED(CONFIG_BOOTSTD_FULL) ?
+		bootstd_get_bootdev_order(bootstd) : NULL;
 	if (targets) {
 		char *target;
 		char *str;
@@ -253,8 +266,8 @@ static int build_order(struct udevice *bootstd, struct udevice **order,
 		count = upto;
 	} else {
 		/* sort them into priorty order */
+		count = max_count;
 		qsort(order, count, sizeof(struct udevice *), h_cmp_bootdev);
-		return 0;
 	}
 
 	if (overflow_target) {
@@ -267,7 +280,7 @@ static int build_order(struct udevice *bootstd, struct udevice **order,
 		return log_msg_ret("targ", -ENOMEM);
 	}
 
-	return 0;
+	return count;
 }
 
 /**
@@ -326,9 +339,10 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
 	if (upto != count)
 		log_debug("Expected %d bootdevs, found %d using aliases\n",
 			  count, upto);
-	count = upto;
 
-	build_order(bootstd, order, count);
+	count = build_order(bootstd, order, upto);
+	if (count < 0)
+		return log_msg_ret("build", count);
 
 	iter->dev_order = order;
 	iter->num_devs = count;
@@ -376,7 +390,7 @@ static int setup_bootmeth_order(struct bootflow_iter *iter)
 		return log_msg_ret("order", -ENOMEM);
 
 	/* If we have an ordering, copy it */
-	if (std->bootmeth_count) {
+	if (IS_ENABLED(CONFIG_BOOTSTD_FULL) && std->bootmeth_count) {
 		memcpy(order, std->bootmeth_order,
 		       count * sizeof(struct bootmeth *));
 	} else {
@@ -612,7 +626,7 @@ int bootflow_run_boot(struct bootflow_iter *iter, struct bootflow *bflow)
 
 	printf("** Booting bootflow '%s'\n", bflow->name);
 	ret = bootflow_boot(bflow);
-	if (!IS_ENABLED(CONFIG_CMD_BOOTFLOW_FULL)) {
+	if (!IS_ENABLED(CONFIG_BOOTSTD_FULL)) {
 		printf("Boot failed (err=%d)\n", ret);
 		return ret;
 	}

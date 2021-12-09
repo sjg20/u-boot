@@ -197,7 +197,7 @@ config CMD_BOOTM
 config CMD_BOOTDEV
 	bool "bootdev"
 	depends on BOOTSTD
-	default y if SANDBOX
+	default y if BOOTSTD_FULL
 	help
 	  Support listing available bootdevs (boot devices) which can provide an
 	  OS to boot, as well as showing information about a particular one.
@@ -215,7 +215,7 @@ config CMD_BOOTFLOW
 config CMD_BOOTFLOW_FULL
 	bool "bootflow - extract subcommands"
 	depends on BOOTSTD
-	default y if SANDBOX
+	default y if BOOTSTD_FULL
 	help
 	  Add the ability to list the available bootflows, select one and obtain
 	  information about it.
@@ -225,7 +225,7 @@ config CMD_BOOTFLOW_FULL
 config CMD_BOOTMETH
 	bool "bootmeth"
 	depends on BOOTSTD
-	default y if SANDBOX
+	default y if BOOTSTD_FULL
 	help
 	  Support listing available bootmethds (methods used to boot an
 	  Operating System), as well as selecting the order that the bootmeths

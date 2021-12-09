@@ -302,6 +302,19 @@ config BOOTSTD
 	        U-Boot)
 	    - bootflow - a description of how to boot (owned by the distro)
 
+config BOOTSTD_FULL
+	bool "Enhanced features for standard boot"
+	default y if SANDBOX
+	help
+	  This enables various useful features for standard boot, which are not
+	  essential for operation:
+
+	  - bootdev, bootmeth commands
+	  - extra features in the bootflow command
+	  - support for selecting the ordering of bootmeths ("bootmeth order")
+	  - support for selecting the ordering of bootdevs using the devicetree
+	    as well as the "boot_targets" environment variable
+
 if BOOTSTD
 
 config BOOTMETH_DISTRO

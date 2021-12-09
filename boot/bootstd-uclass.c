@@ -26,7 +26,9 @@ static int bootstd_of_to_plat(struct udevice *dev)
 
 	/* Don't check errors since livetree and flattree are different */
 	ret = dev_read_string_list(dev, "filename-prefixes", &priv->prefixes);
-	dev_read_string_list(dev, "bootdev-order", &priv->bootdev_order);
+	if (IS_ENABLED(CONFIG_BOOTSTD_FULL))
+		dev_read_string_list(dev, "bootdev-order",
+				     &priv->bootdev_order);
 
 	return 0;
 }
