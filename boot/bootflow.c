@@ -200,6 +200,76 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
 	return -ENOENT;
 }
 
+static int build_order(struct udevice *bootstd, struct udevice **order,
+		       int max_count)
+{
+	const char *overflow_target = NULL;
+	const char *const *labels;
+	struct udevice *dev;
+	const char *targets;
+	int i, ret, count;
+
+	targets = env_get("boot_targets");
+	labels = bootstd_get_bootdev_order(bootstd);
+	if (targets) {
+		char *target;
+		char *str;
+
+		/* make a copy of the string, since strok() will change it */
+		str = strdup(targets);
+		if (!str)
+			return log_msg_ret("dup", -ENOMEM);
+		for (i = 0, target = strtok(str, " "); target;
+		     target = strtok(NULL, " ")) {
+			ret = find_bootdev_by_target(target, &dev);
+			if (!ret) {
+				if (i == max_count) {
+					overflow_target = target;
+					break;
+				}
+				order[i++] = dev;
+			}
+		}
+		count = i;
+		free(str);
+		if (!count) {
+			free(order);
+			return log_msg_ret("targ", -ENOMEM);
+		}
+	} else if (labels) {
+		int upto;
+
+		upto = 0;
+		for (i = 0; labels[i]; i++) {
+			ret = bootdev_find_by_label(labels[i], &dev);
+			if (!ret) {
+				if (upto == max_count) {
+					overflow_target = labels[i];
+					break;
+				}
+				order[upto++] = dev;
+			}
+		}
+		count = upto;
+	} else {
+		/* sort them into priorty order */
+		qsort(order, count, sizeof(struct udevice *), h_cmp_bootdev);
+		return 0;
+	}
+
+	if (overflow_target) {
+		log_warning("Expected at most %d bootdevs, but overflowed with boot_target '%s'\n",
+			    max_count, overflow_target);
+	}
+
+	if (!count) {
+		free(order);
+		return log_msg_ret("targ", -ENOMEM);
+	}
+
+	return 0;
+}
+
 /**
  * setup_order() - Set up the ordering of bootdevs to scan
  *
@@ -219,8 +289,6 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
 			       struct udevice **devp)
 {
 	struct udevice *bootstd, *dev = *devp, **order;
-	const char *const *labels;
-	const char *targets;
 	int upto, i;
 	int count;
 	int ret;
@@ -260,56 +328,7 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
 			  count, upto);
 	count = upto;
 
-	targets = env_get("boot_targets");
-	labels = bootstd_get_bootdev_order(bootstd);
-	if (targets) {
-		char *target;
-		char *str;
-
-		/* make a copy of the string, since strok() will change it */
-		str = strdup(targets);
-		if (!str)
-			return log_msg_ret("dup", -ENOMEM);
-		for (i = 0, target = strtok(str, " "); target;
-		     target = strtok(NULL, " ")) {
-			ret = find_bootdev_by_target(target, &dev);
-			if (!ret) {
-				if (i == count) {
-					log_warning("Expected at most %d bootdevs, but overflowed with boot_target '%s'\n",
-						    count, target);
-					break;
-				}
-				order[i++] = dev;
-			}
-		}
-		count = i;
-		free(str);
-		if (!count) {
-			free(order);
-			return log_msg_ret("targ", -ENOMEM);
-		}
-	} else if (labels) {
-		upto = 0;
-		for (i = 0; labels[i]; i++) {
-			ret = bootdev_find_by_label(labels[i], &dev);
-			if (!ret) {
-				if (upto == count) {
-					log_debug("Expected at most %d bootdevs, but overflowed with boot_target '%s'\n",
-						  count, labels[i]);
-					break;
-				}
-				order[upto++] = dev;
-			}
-		}
-		count = upto;
-		if (!count) {
-			free(order);
-			return log_msg_ret("targ", -ENOMEM);
-		}
-	} else {
-		/* sort them into priorty order */
-		qsort(order, count, sizeof(struct udevice *), h_cmp_bootdev);
-	}
+	build_order(bootstd, order, count);
 
 	iter->dev_order = order;
 	iter->num_devs = count;
