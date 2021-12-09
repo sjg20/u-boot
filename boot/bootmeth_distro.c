@@ -191,7 +191,8 @@ static int distro_bootmeth_bind(struct udevice *dev)
 {
 	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
 
-	plat->desc = "Syslinux boot from a block device";
+	plat->desc = IS_ENABLED(CONFIG_CMD_BOOTFLOW_FULL) ?
+		"Syslinux boot from a block device" : "syslinux";
 
 	return 0;
 }

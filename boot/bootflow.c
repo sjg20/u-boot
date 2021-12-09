@@ -206,8 +206,8 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
 	}
 	log_debug("Found %d bootdevs\n", count);
 	if (upto != count)
-		log_warning("Expected %d bootdevs, found %d using aliases\n",
-			    count, upto);
+		log_debug("Expected %d bootdevs, found %d using aliases\n",
+			  count, upto);
 	count = upto;
 
 	labels = bootstd_get_bootdev_order(bootstd);
@@ -217,8 +217,8 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
 			ret = bootdev_find_by_label(labels[i], &dev);
 			if (!ret) {
 				if (upto == count) {
-					log_warning("Expected at most %d bootdevs, but overflowed with boot_target '%s'\n",
-						    count, labels[i]);
+					log_debug("Expected at most %d bootdevs, but overflowed with boot_target '%s'\n",
+						  count, labels[i]);
 					break;
 				}
 				order[upto++] = dev;
@@ -516,6 +516,11 @@ int bootflow_run_boot(struct bootflow_iter *iter, struct bootflow *bflow)
 
 	printf("** Booting bootflow '%s'\n", bflow->name);
 	ret = bootflow_boot(bflow);
+	if (!IS_ENABLED(CONFIG_CMD_BOOTFLOW_FULL)) {
+		printf("Boot failed (err=%d)\n", ret);
+		return ret;
+	}
+
 	switch (ret) {
 	case -EPROTO:
 		printf("Bootflow not loaded (state '%s')\n",

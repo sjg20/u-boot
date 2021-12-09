@@ -237,7 +237,8 @@ static int distro_bootmeth_efi_bind(struct udevice *dev)
 {
 	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
 
-	plat->desc = "EFI boot from a .efi file";
+	plat->desc = IS_ENABLED(CONFIG_CMD_BOOTFLOW_FULL) ?
+		"EFI boot from a .efi file" : "EFI";
 
 	return 0;
 }

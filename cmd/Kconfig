@@ -194,20 +194,44 @@ config CMD_BOOTM
 	help
 	  Boot an application image from the memory.
 
-config CMD_BOOTSTD
-	bool "bootdev, bootflow, bootmeth"
+config CMD_BOOTDEV
+	bool "bootdev"
+	depends on BOOTSTD
+	default y if SANDBOX
+	help
+	  Support listing available bootdevs (boot devices) which can provide an
+	  OS to boot, as well as showing information about a particular one.
+
+	  This command is not necessary for bootstd to work.
+
+config CMD_BOOTFLOW
+	bool "bootflow"
 	depends on BOOTSTD
 	default y
 	help
-	  Support working with standard boot, including listing available
-	  bootdevs and showing information about a particular one. It also
-	  allows scanning for bootflows available with the bootdev.
+	  Support scanning for bootflows available with the bootdevs. The
+	  bootflows can optionally be booted.
 
-	  This enables the following commands:
+config CMD_BOOTFLOW_FULL
+	bool "bootflow - extract subcommands"
+	depends on BOOTSTD
+	default y if SANDBOX
+	help
+	  Add the ability to list the available bootflows, select one and obtain
+	  information about it.
 
-	     bootdev
-	     bootflow
-	     bootmeth
+	  This command is not necessary for bootstd to work.
+
+config CMD_BOOTMETH
+	bool "bootmeth"
+	depends on BOOTSTD
+	default y if SANDBOX
+	help
+	  Support listing available bootmethds (methods used to boot an
+	  Operating System), as well as selecting the order that the bootmeths
+	  are used.
+
+	  This command is not necessary for bootstd to work.
 
 config BOOTM_EFI
 	bool "Support booting UEFI FIT images"
