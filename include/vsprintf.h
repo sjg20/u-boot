@@ -99,7 +99,7 @@ long long simple_strtoll(const char *cp, char **endp, unsigned int base);
  * For example, "abc123" would return 123.
  *
  * @str:	String to exxamine
- * @return training number if found, else -1
+ * @return trailing number if found, else -1
  */
 long trailing_strtol(const char *str);
 
@@ -114,7 +114,7 @@ long trailing_strtol(const char *str);
  * @str:	String to exxamine
  * @end:	Pointer to end of string to examine, or NULL to use the
  *		whole string
- * @return training number if found, else -1
+ * @return trailing number if found, else -1
  */
 long trailing_strtoln(const char *str, const char *end);
 
