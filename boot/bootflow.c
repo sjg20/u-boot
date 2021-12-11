@@ -12,9 +12,7 @@
 #include <bootmeth.h>
 #include <bootstd.h>
 #include <dm.h>
-#include <env.h>
 #include <malloc.h>
-#include <sort.h>
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
 
@@ -22,8 +20,6 @@
 enum {
 	BF_NO_MORE_PARTS	= -ESHUTDOWN,
 	BF_NO_MORE_DEVICES	= -ENODEV,
-
-	BOOT_TARGETS_MAX_LEN	= 100,
 };
 
 /**
@@ -127,237 +123,6 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
 		else
 			printf("No more bootdevs\n");
 	}
-}
-
-/**
- * h_cmp_bootdev() - Compare two bootdevs to find out which should go first
- *
- * @v1: struct udevice * of first bootdev device
- * @v2: struct udevice * of second bootdev device
- * @return sort order (<0 if dev1 < dev2, ==0 if equal, >0 if dev1 > dev2)
- */
-static int h_cmp_bootdev(const void *v1, const void *v2)
-{
-	const struct udevice *dev1 = *(struct udevice **)v1;
-	const struct udevice *dev2 = *(struct udevice **)v2;
-	const struct bootdev_uc_plat *ucp1 = dev_get_uclass_plat(dev1);
-	const struct bootdev_uc_plat *ucp2 = dev_get_uclass_plat(dev2);
-	int diff;
-
-	/* Use priority first */
-	diff = ucp1->prio - ucp2->prio;
-	if (diff)
-		return diff;
-
-	/* Fall back to seq for devices of the same priority */
-	diff = dev_seq(dev1) - dev_seq(dev2);
-
-	return diff;
-}
-
-/**
- * find_bootdev_by_target() - Convert a target string to a bootdev device
- *
- * Looks up a target name to find the associated bootdev. For example, if the
- * target name is "mmc2", this will find a bootdev for an mmc device whose
- * sequence number is 2.
- *
- * @target: Target string to convert, e.g. "mmc2"
- * @devp: Returns bootdev device corresponding to that boot target
- * @return 0 if OK, -EINVAL if the target name (e.g. "mmc") does not refer to a
- *	uclass, -ENOENT if no bootdev for that media has the sequence number
- *	(e.g. 2)
- */
-static int find_bootdev_by_target(char *target, struct udevice **devp)
-{
-	struct udevice *media;
-	struct uclass *uc;
-	enum uclass_id id;
-	const char *end;
-	int seq;
-
-	seq = trailing_strtoln_end(target, NULL, &end);
-	id = uclass_get_by_name_len(target, end - target);
-	if (id == UCLASS_INVALID) {
-		log_warning("Unknown uclass '%s' in boot_targets\n", target);
-		return -EINVAL;
-	}
-
-	/* Iterate through devices in the media uclass (e.g. UCLASS_MMC) */
-	uclass_id_foreach_dev(id, media, uc) {
-		struct udevice *bdev;
-		int ret;
-
-		if (dev_seq(media) != seq)
-			continue;
-
-		ret = device_find_first_child_by_uclass(media, UCLASS_BOOTDEV,
-							&bdev);
-		if (!ret) {
-			*devp = bdev;
-			return 0;
-		}
-	}
-	log_warning("Unknown seq %d for uclass '%s' in boot_targets\n",
-		    seq, target);
-
-	return -ENOENT;
-}
-
-/**
- * build_order() - Build the ordered list of bootdevs to use
- *
- * This builds an ordered list of devices by one of three methods:
- * - using the boot_targets environment variable, if non-empty
- * - using the bootdev-order devicetree property, if present
- * - sorted by priority and sequence number
- *
- * @bootstd: BOOTSTD device to use
- * @order: Bootdevs listed in in default order
- * @max_count: Number of entries in @order
- * @return number of bootdevs found in the ordering, or -E2BIG if the
- * boot_targets string is too long, or -EXDEV if the ordering produced 0 results
- */
-static int build_order(struct udevice *bootstd, struct udevice **order,
-		       int max_count)
-{
-	const char *overflow_target = NULL;
-	const char *const *labels;
-	struct udevice *dev;
-	const char *targets;
-	int i, ret, count;
-
-	targets = env_get("boot_targets");
-	labels = IS_ENABLED(CONFIG_BOOTSTD_FULL) ?
-		bootstd_get_bootdev_order(bootstd) : NULL;
-	if (targets) {
-		char str[BOOT_TARGETS_MAX_LEN];
-		char *target;
-		int len;
-
-		if (len >= BOOT_TARGETS_MAX_LEN)
-			return log_msg_ret("len", -E2BIG);
-
-		/* make a copy of the string, since strok() will change it */
-		strcpy(str, targets);
-		for (i = 0, target = strtok(str, " "); target;
-		     target = strtok(NULL, " ")) {
-			ret = find_bootdev_by_target(target, &dev);
-			if (!ret) {
-				if (i == max_count) {
-					overflow_target = target;
-					break;
-				}
-				order[i++] = dev;
-			}
-		}
-		count = i;
-	} else if (labels) {
-		int upto;
-
-		upto = 0;
-		for (i = 0; labels[i]; i++) {
-			ret = bootdev_find_by_label(labels[i], &dev);
-			if (!ret) {
-				if (upto == max_count) {
-					overflow_target = labels[i];
-					break;
-				}
-				order[upto++] = dev;
-			}
-		}
-		count = upto;
-	} else {
-		/* sort them into priorty order */
-		count = max_count;
-		qsort(order, count, sizeof(struct udevice *), h_cmp_bootdev);
-	}
-
-	if (overflow_target) {
-		log_warning("Expected at most %d bootdevs, but overflowed with boot_target '%s'\n",
-			    max_count, overflow_target);
-	}
-
-	if (!count)
-		return log_msg_ret("targ", -EXDEV);
-
-	return count;
-}
-
-/**
- * setup_order() - Set up the ordering of bootdevs to scan
- *
- * This sets up the ordering information in @iter, based on the priority of each
- * bootdev and the bootdev-order property in the bootstd node
- *
- * If a single device is requested, no ordering is needed
- *
- * @iter: Iterator to update with the order
- * @devp: On entry, *devp is NULL to scan all, otherwise this is the (single)
- *	device to scan. Returns the first device to use, which is the passed-in
- *	@devp if it was non-NULL
- * @return 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
- *	on other error
- */
-static int setup_bootdev_order(struct bootflow_iter *iter,
-			       struct udevice **devp)
-{
-	struct udevice *bootstd, *dev = *devp, **order;
-	int upto, i;
-	int count;
-	int ret;
-
-	ret = uclass_first_device_err(UCLASS_BOOTSTD, &bootstd);
-	if (ret) {
-		log_err("Missing bootstd device\n");
-		return log_msg_ret("std", ret);
-	}
-
-	/* Handle scanning a single device */
-	if (dev) {
-		iter->flags |= BOOTFLOWF_SINGLE_DEV;
-		return 0;
-	}
-
-	count = uclass_id_count(UCLASS_BOOTDEV);
-	if (!count)
-		return log_msg_ret("count", -ENOENT);
-
-	order = calloc(count, sizeof(struct udevice *));
-	if (!order)
-		return log_msg_ret("order", -ENOMEM);
-
-	/*
-	 * Get a list of bootdevs, in seq order (i.e. using aliases). There may
-	 * be gaps so try to count up high enough to find them all.
-	 */
-	for (i = 0, upto = 0; upto < count && i < 20 + count * 2; i++) {
-		ret = uclass_find_device_by_seq(UCLASS_BOOTDEV, i, &dev);
-		if (!ret)
-			order[upto++] = dev;
-	}
-	log_debug("Found %d bootdevs\n", count);
-	if (upto != count)
-		log_debug("Expected %d bootdevs, found %d using aliases\n",
-			  count, upto);
-
-	count = build_order(bootstd, order, upto);
-	if (count < 0) {
-		free(order);
-		return log_msg_ret("build", count);
-	}
-
-	iter->dev_order = order;
-	iter->num_devs = count;
-	iter->cur_dev = 0;
-
-	dev = *order;
-	ret = device_probe(dev);
-	if (ret)
-		return log_msg_ret("probe", ret);
-	*devp = dev;
-
-	return 0;
 }
 
 /**
@@ -529,7 +294,7 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 
 	bootflow_iter_init(iter, flags);
 
-	ret = setup_bootdev_order(iter, &dev);
+	ret = bootdev_setup_order(iter, &dev);
 	if (ret)
 		return log_msg_ret("obdev", -ENODEV);
 	bootflow_iter_set_dev(iter, dev);

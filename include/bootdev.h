@@ -185,6 +185,23 @@ int bootdev_find_by_label(const char *label, struct udevice **devp);
  */
 int bootdev_find_by_any(const char *name, struct udevice **devp);
 
+/**
+ * bootdev_setup_order() - Set up the ordering of bootdevs to scan
+ *
+ * This sets up the ordering information in @iter, based on the priority of each
+ * bootdev and the bootdev-order property in the bootstd node
+ *
+ * If a single device is requested, no ordering is needed
+ *
+ * @iter: Iterator to update with the order
+ * @devp: On entry, *devp is NULL to scan all, otherwise this is the (single)
+ *	device to scan. Returns the first device to use, which is the passed-in
+ *	@devp if it was non-NULL
+ * @return 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
+ *	on other error
+ */
+int bootdev_setup_order(struct bootflow_iter *iter, struct udevice **devp);
+
 #if CONFIG_IS_ENABLED(BOOTSTD)
 /**
  * bootdev_setup_for_dev() - Bind a new bootdev device
