@@ -125,12 +125,35 @@ static int bootdev_test_order(struct unit_test_state *uts)
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
+	/*
+	 * First try the order set by the bootdev-order property
+	 * Like all sandbox unit tests this relies on the devicetree setting up
+	 * the required devices:
+	 *
+	 * mmc0 - nothing connected
+	 * mmc1 - connected to mmc1.img file
+	 * mmc2 - nothing connected
+	 */
+	ut_assertok(env_set("boot_targets", NULL));
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
 	ut_asserteq(2, iter.num_devs);
 	ut_asserteq_str("mmc2.bootdev", iter.dev_order[0]->name);
 	ut_asserteq_str("mmc1.bootdev", iter.dev_order[1]->name);
 	bootflow_iter_uninit(&iter);
 
+	/* Use the environment variable to override it */
+	ut_assertok(env_set("boot_targets", "mmc1 mmc2"));
+	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
+	ut_asserteq(2, iter.num_devs);
+	ut_asserteq_str("mmc1.bootdev", iter.dev_order[0]->name);
+	ut_asserteq_str("mmc2.bootdev", iter.dev_order[1]->name);
+	bootflow_iter_uninit(&iter);
+
+	/*
+	 * Now drop both orderings, to check the default (prioriy/sequence)
+	 * ordering
+	 */
+	ut_assertok(env_set("boot_targets", NULL));
 	ut_assertok(bootstd_test_drop_bootdev_order(uts));
 
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));

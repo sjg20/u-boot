@@ -4,6 +4,8 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_CATEGORY LOGC_BOOT
+
 #include <common.h>
 #include <bootdev.h>
 #include <bootflow.h>
@@ -20,6 +22,8 @@
 enum {
 	BF_NO_MORE_PARTS	= -ESHUTDOWN,
 	BF_NO_MORE_DEVICES	= -ENODEV,
+
+	BOOT_TARGETS_MAX_LEN	= 100,
 };
 
 /**
@@ -206,11 +210,13 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
  * This builds an ordered list of devices by one of three methods:
  * - using the boot_targets environment variable, if non-empty
  * - using the bootdev-order devicetree property, if present
- * - sorted by priority, then sequence number
+ * - sorted by priority and sequence number
  *
  * @bootstd: BOOTSTD device to use
  * @order: Bootdevs listed in in default order
  * @max_count: Number of entries in @order
+ * @return number of bootdevs found in the ordering, or -E2BIG if the
+ * boot_targets string is too long, or -EXDEV if the ordering produced 0 results
  */
 static int build_order(struct udevice *bootstd, struct udevice **order,
 		       int max_count)
@@ -225,13 +231,15 @@ static int build_order(struct udevice *bootstd, struct udevice **order,
 	labels = IS_ENABLED(CONFIG_BOOTSTD_FULL) ?
 		bootstd_get_bootdev_order(bootstd) : NULL;
 	if (targets) {
+		char str[BOOT_TARGETS_MAX_LEN];
 		char *target;
-		char *str;
+		int len;
+
+		if (len >= BOOT_TARGETS_MAX_LEN)
+			return log_msg_ret("len", -E2BIG);
 
 		/* make a copy of the string, since strok() will change it */
-		str = strdup(targets);
-		if (!str)
-			return log_msg_ret("dup", -ENOMEM);
+		strcpy(str, targets);
 		for (i = 0, target = strtok(str, " "); target;
 		     target = strtok(NULL, " ")) {
 			ret = find_bootdev_by_target(target, &dev);
@@ -244,11 +252,6 @@ static int build_order(struct udevice *bootstd, struct udevice **order,
 			}
 		}
 		count = i;
-		free(str);
-		if (!count) {
-			free(order);
-			return log_msg_ret("targ", -ENOMEM);
-		}
 	} else if (labels) {
 		int upto;
 
@@ -275,10 +278,8 @@ static int build_order(struct udevice *bootstd, struct udevice **order,
 			    max_count, overflow_target);
 	}
 
-	if (!count) {
-		free(order);
-		return log_msg_ret("targ", -ENOMEM);
-	}
+	if (!count)
+		return log_msg_ret("targ", -EXDEV);
 
 	return count;
 }
@@ -341,8 +342,10 @@ static int setup_bootdev_order(struct bootflow_iter *iter,
 			  count, upto);
 
 	count = build_order(bootstd, order, upto);
-	if (count < 0)
+	if (count < 0) {
+		free(order);
 		return log_msg_ret("build", count);
+	}
 
 	iter->dev_order = order;
 	iter->num_devs = count;
@@ -474,7 +477,7 @@ static int iter_incr(struct bootflow_iter *iter)
 
 	/* if there are no more bootdevs, give up */
 	if (ret)
-		return log_msg_ret("next", BF_NO_MORE_DEVICES);
+		return log_msg_ret("incr", BF_NO_MORE_DEVICES);
 
 	return 0;
 }
@@ -556,7 +559,13 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 int bootflow_scan_first(struct bootflow_iter *iter, int flags,
 			struct bootflow *bflow)
 {
-	return bootflow_scan_bootdev(NULL, iter, flags, bflow);
+	int ret;
+
+	ret = bootflow_scan_bootdev(NULL, iter, flags, bflow);
+	if (ret)
+		return log_msg_ret("start", ret);
+
+	return 0;
 }
 
 int bootflow_scan_next(struct bootflow_iter *iter, struct bootflow *bflow)
