@@ -145,7 +145,8 @@ bootmeths are tried on each bootdev. If the variable is empty, the default
 ordering is used, based on the bootmeth sequence numbers, which can be
 controlled by aliases.
 
-The :doc:`../usage/bootmeth` operates in the same way as setting this variable.
+The :ref:`usage/bootmeth:bootmeth command` (`bootmeth order`) operates in the
+same way as setting this variable.
 
 
 Bootdev uclass

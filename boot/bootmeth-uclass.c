@@ -144,10 +144,10 @@ int bootmeth_set_order(const char *order_str)
 	if (!order)
 		return log_msg_ret("order", -ENOMEM);
 
-	for (i = 0, s = order_str; *s && i < count; s = p + (*p == ','), i++) {
+	for (i = 0, s = order_str; *s && i < count; s = p + (*p == ' '), i++) {
 		struct udevice *dev;
 
-		p = strchrnul(s, ',');
+		p = strchrnul(s, ' ');
 		len = p - s;
 		ret = uclass_find_device_by_namelen(UCLASS_BOOTMETH, s, len,
 						    &dev);

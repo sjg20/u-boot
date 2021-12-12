@@ -59,7 +59,7 @@ static int bootmeth_cmd_order(struct unit_test_state *uts)
 	ut_assert_console_end();
 
 	/* Check the -a flag with the reverse order */
-	ut_assertok(run_command("bootmeth order efi,syslinux", 0));
+	ut_assertok(run_command("bootmeth order \"efi syslinux\"", 0));
 	ut_assert_console_end();
 	ut_assertok(run_command("bootmeth list -a", 0));
 	ut_assert_nextline("Order  Seq  Name                Description");
@@ -78,7 +78,7 @@ static int bootmeth_cmd_order(struct unit_test_state *uts)
 	ut_assert_skip_to_line("(2 bootmeths)");
 
 	/* Try reverse order */
-	ut_assertok(run_command("bootmeth order efi,syslinux", 0));
+	ut_assertok(run_command("bootmeth order \"efi syslinux\"", 0));
 	ut_assert_console_end();
 	ut_assertok(run_command("bootmeth list", 0));
 	ut_assert_nextline("Order  Seq  Name                Description");
@@ -88,7 +88,7 @@ static int bootmeth_cmd_order(struct unit_test_state *uts)
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("(2 bootmeths)");
 	ut_assertnonnull(env_get("bootmeths"));
-	ut_asserteq_str("efi,syslinux", env_get("bootmeths"));
+	ut_asserteq_str("efi syslinux", env_get("bootmeths"));
 	ut_assert_console_end();
 
 	return 0;
@@ -104,7 +104,7 @@ static int bootmeth_env(struct unit_test_state *uts)
 
 	/* Select just one bootmethod */
 	console_record_reset_enable();
-	ut_assertok(run_command("setenv bootmeths syslinux", 0));
+	ut_assertok(env_set("bootmeths", "syslinux"));
 	ut_asserteq(1, std->bootmeth_count);
 
 	/* Select an invalid bootmethod */
@@ -113,7 +113,7 @@ static int bootmeth_env(struct unit_test_state *uts)
 	ut_assert_nextlinen("## Error inserting");
 	ut_assert_console_end();
 
-	ut_assertok(run_command("setenv bootmeths efi,syslinux", 0));
+	ut_assertok(env_set("bootmeths", "efi syslinux"));
 	ut_asserteq(2, std->bootmeth_count);
 	ut_assert_console_end();
 

@@ -8,8 +8,8 @@ Synopis
 
 ::
 
-    bootmeth list [-a]       - list selected bootmeths (-a for all)
-    bootmeth order [<bm>...] - select the order of bootmeths\n"
+    bootmeth list [-a]          - list selected bootmeths (-a for all)
+    bootmeth order "[<bm> ...]" - select the order of bootmeths\n"
 
 
 Description
@@ -31,7 +31,7 @@ scanning bootdevs, each bootmeth is tried in turn to see if it can find a valid
 bootflow. You can use this command to adjust the order or even to omit some
 boomeths.
 
-The arguments are a list of bootmeths to use, by name.
+The argument is a quoted list of bootmeths to use, by name.
 
 
 bootmeth list
@@ -84,7 +84,7 @@ This shows listing bootmeths. All are present and in the normal order::
 
 Now the order is changed, to include only two of them::
 
-    => bootmeth order sandbox distro
+    => bootmeth order "sandbox distro"
     => bootmeth list
     Order  Seq  Name                Description
     -----  ---  ------------------  ------------------
