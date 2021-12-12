@@ -328,7 +328,7 @@ int bootdev_find_by_label(const char *label, struct udevice **devp)
 	seq = trailing_strtoln_end(label, NULL, &end);
 	id = uclass_get_by_namelen(label, end - label);
 	if (id == UCLASS_INVALID) {
-		log_warning("Unknown uclass '%s' in label\n", label);
+		log_warning("Unknown bootdev '%s' in label\n", label);
 		return -EINVAL;
 	}
 
