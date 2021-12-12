@@ -326,7 +326,7 @@ int bootdev_find_by_label(const char *label, struct udevice **devp)
 	int seq;
 
 	seq = trailing_strtoln_end(label, NULL, &end);
-	id = uclass_get_by_name_len(label, end - label);
+	id = uclass_get_by_namelen(label, end - label);
 	if (id == UCLASS_INVALID) {
 		log_warning("Unknown uclass '%s' in label\n", label);
 		return -EINVAL;
@@ -467,7 +467,7 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
 	int seq;
 
 	seq = trailing_strtoln_end(target, NULL, &end);
-	id = uclass_get_by_name_len(target, end - target);
+	id = uclass_get_by_namelen(target, end - target);
 	if (id == UCLASS_INVALID) {
 		log_warning("Unknown uclass '%s' in boot_targets\n", target);
 		return -EINVAL;

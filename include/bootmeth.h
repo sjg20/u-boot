@@ -153,4 +153,17 @@ int bootmeth_read_file(struct udevice *dev, struct bootflow *bflow,
  */
 int bootmeth_boot(struct udevice *dev, struct bootflow *bflow);
 
+/**
+ * bootmeth_set_order() - Set the bootmeth order
+ *
+ * This selects the ordering to use for bootmeths
+ *
+ * @order_str: String containing the ordering. This is a comma-separate list of
+ * bootmeth-device names, e.g. "syslinux,efi". If empty then a default ordering
+ * is used, based on the sequence number of devices (i.e. using aliases)
+ * @return 0 if OK, -ENODEV if an unknown bootmeth is mentioned, -ENOMEM if
+ * out of memory, -ENOENT if there are no bootmeth devices
+ */
+int bootmeth_set_order(const char *order_str);
+
 #endif
