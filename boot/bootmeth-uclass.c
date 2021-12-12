@@ -4,6 +4,8 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_CATEGORY UCLASS_BOOTSTD
+
 #include <common.h>
 #include <bootflow.h>
 #include <bootmeth.h>

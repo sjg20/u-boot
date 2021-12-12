@@ -4,7 +4,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_CATEGORY LOGC_BOOT
+#define LOG_CATEGORY UCLASS_BOOTSTD
 
 #include <common.h>
 #include <bootdev.h>

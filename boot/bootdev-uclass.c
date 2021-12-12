@@ -4,6 +4,9 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_CATEGORY UCLASS_BOOTSTD
+#define LOG_DEBUG
+
 #include <common.h>
 #include <dm.h>
 #include <bootdev.h>
@@ -328,7 +331,7 @@ int bootdev_find_by_label(const char *label, struct udevice **devp)
 	seq = trailing_strtoln_end(label, NULL, &end);
 	id = uclass_get_by_namelen(label, end - label);
 	if (id == UCLASS_INVALID) {
-		log_warning("Unknown bootdev '%s' in label\n", label);
+		log_warning("Unknown uclass '%s' in label\n", label);
 		return -EINVAL;
 	}
 
@@ -468,6 +471,7 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
 
 	seq = trailing_strtoln_end(target, NULL, &end);
 	id = uclass_get_by_namelen(target, end - target);
+	log_debug("target=%s, seq=%d, id=%d\n", target, seq, id);
 	if (id == UCLASS_INVALID) {
 		log_warning("Unknown uclass '%s' in boot_targets\n", target);
 		return -EINVAL;
@@ -478,6 +482,7 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
 		struct udevice *bdev;
 		int ret;
 
+		log_debug("trying '%s', seq=%d\n", media->name, dev_seq(media));
 		if (dev_seq(media) != seq)
 			continue;
 
@@ -487,9 +492,10 @@ static int find_bootdev_by_target(char *target, struct udevice **devp)
 			*devp = bdev;
 			return 0;
 		}
+		log_debug("- failed, err=%d\n", ret);
 	}
-	log_warning("Unknown seq %d for uclass '%s' in boot_targets\n",
-		    seq, target);
+	log_warning("Unknown seq %d for target '%s' (uclass '%s') in boot_targets\n",
+		    seq, target, uc->uc_drv->name);
 
 	return -ENOENT;
 }

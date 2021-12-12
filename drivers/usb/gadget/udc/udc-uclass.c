@@ -61,6 +61,6 @@ int usb_gadget_handle_interrupts(int index)
 
 UCLASS_DRIVER(usb_gadget_generic) = {
 	.id		= UCLASS_USB_GADGET_GENERIC,
-	.name		= "usb",
+	.name		= "usb_gadget",
 	.flags		= DM_UC_FLAG_SEQ_ALIAS,
 };
