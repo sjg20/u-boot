@@ -21,6 +21,8 @@ the order in which they are used.
 See :doc:`../develop/bootstd` for more information.
 
 
+.. _bootmeth_order:
+
 bootmeth order
 ~~~~~~~~~~~~~~
 

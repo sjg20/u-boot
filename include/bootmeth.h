@@ -154,6 +154,19 @@ int bootmeth_read_file(struct udevice *dev, struct bootflow *bflow,
 int bootmeth_boot(struct udevice *dev, struct bootflow *bflow);
 
 /**
+ * bootmeth_setup_iter_order() - Set up the ordering of bootmeths to scan
+ *
+ * This sets up the ordering information in @iter, based on the selected
+ * ordering of the bootmethds in bootstd_priv->bootmeth_order. If there is no
+ * ordering there, then all bootmethods are added
+ *
+ * @iter: Iterator to update with the order
+ * @return 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
+ *	on other error
+ */
+int bootmeth_setup_iter_order(struct bootflow_iter *iter);
+
+/**
  * bootmeth_set_order() - Set the bootmeth order
  *
  * This selects the ordering to use for bootmeths

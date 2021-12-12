@@ -574,7 +574,7 @@ static int build_order(struct udevice *bootstd, struct udevice **order,
 	return count;
 }
 
-int bootdev_setup_order(struct bootflow_iter *iter, struct udevice **devp)
+int bootdev_setup_iter_order(struct bootflow_iter *iter, struct udevice **devp)
 {
 	struct udevice *bootstd, *dev = *devp, **order;
 	int upto, i;

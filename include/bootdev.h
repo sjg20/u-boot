@@ -186,7 +186,7 @@ int bootdev_find_by_label(const char *label, struct udevice **devp);
 int bootdev_find_by_any(const char *name, struct udevice **devp);
 
 /**
- * bootdev_setup_order() - Set up the ordering of bootdevs to scan
+ * bootdev_setup_iter_order() - Set up the ordering of bootdevs to scan
  *
  * This sets up the ordering information in @iter, based on the priority of each
  * bootdev and the bootdev-order property in the bootstd node
@@ -200,7 +200,7 @@ int bootdev_find_by_any(const char *name, struct udevice **devp);
  * @return 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
  *	on other error
  */
-int bootdev_setup_order(struct bootflow_iter *iter, struct udevice **devp);
+int bootdev_setup_iter_order(struct bootflow_iter *iter, struct udevice **devp);
 
 #if CONFIG_IS_ENABLED(BOOTSTD)
 /**

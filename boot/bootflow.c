@@ -126,67 +126,6 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
 }
 
 /**
- * setup_bootmeth_order() - Set up the ordering of bootmeths to scan
- *
- * This sets up the ordering information in @iter, based on the selected
- * ordering of the bootmethds in bootstd_priv->bootmeth_order. If there is no
- * ordering there, then all bootmethods are added
- *
- * @iter: Iterator to update with the order
- * @return 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
- *	on other error
- */
-static int setup_bootmeth_order(struct bootflow_iter *iter)
-{
-	struct bootstd_priv *std;
-	struct udevice **order;
-	int count;
-	int ret;
-
-	ret = bootstd_get_priv(&std);
-	if (ret)
-		return ret;
-
-	/* Create an array large enough */
-	count = std->bootmeth_count ? std->bootmeth_count :
-		uclass_id_count(UCLASS_BOOTMETH);
-	if (!count)
-		return log_msg_ret("count", -ENOENT);
-
-	order = calloc(count, sizeof(struct udevice *));
-	if (!order)
-		return log_msg_ret("order", -ENOMEM);
-
-	/* If we have an ordering, copy it */
-	if (IS_ENABLED(CONFIG_BOOTSTD_FULL) && std->bootmeth_count) {
-		memcpy(order, std->bootmeth_order,
-		       count * sizeof(struct bootmeth *));
-	} else {
-		struct udevice *dev;
-		int i, upto;
-
-		/*
-		 * Get a list of bootmethods, in seq order (i.e. using aliases).
-		 * There may be gaps so try to count up high enough to find them
-		 * all.
-		 */
-		for (i = 0, upto = 0; upto < count && i < 20 + count * 2; i++) {
-			ret = uclass_get_device_by_seq(UCLASS_BOOTMETH, i,
-						       &dev);
-			if (!ret)
-				order[upto++] = dev;
-		}
-		count = upto;
-	}
-
-	iter->method_order = order;
-	iter->num_methods = count;
-	iter->cur_method = 0;
-
-	return 0;
-}
-
-/**
  * iter_incr() - Move to the next item (method, part, bootdev)
  *
  * @return 0 if OK, BF_NO_MORE_DEVICES if there are no more bootdevs
@@ -294,12 +233,12 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 
 	bootflow_iter_init(iter, flags);
 
-	ret = bootdev_setup_order(iter, &dev);
+	ret = bootdev_setup_iter_order(iter, &dev);
 	if (ret)
 		return log_msg_ret("obdev", -ENODEV);
 	bootflow_iter_set_dev(iter, dev);
 
-	ret = setup_bootmeth_order(iter);
+	ret = bootmeth_setup_iter_order(iter);
 	if (ret)
 		return log_msg_ret("obmeth", -ENODEV);
 

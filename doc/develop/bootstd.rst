@@ -113,6 +113,41 @@ which scans for available bootflows, optionally listing each find it finds (-l)
 and trying to boot it (-b).
 
 
+Controlling ordering
+--------------------
+
+Several options are available to control the ordering of boot scanning:
+
+
+boot_targets
+~~~~~~~~~~~~
+
+This environment variable can be used to control the list of bootdevs searched
+and their ordering, for example::
+
+   setenv boot_targets "mmc0 mmc1 usb pxe"
+
+Entries may be removed or re-ordered in this list to affect the boot order. If
+the variable is empty, the default ordering is used, based on the priority of
+bootdevs and their sequence numbers.
+
+
+bootmeths
+~~~~~~~~~
+
+This environment variable can be used to control the list of bootmeths used and
+their ordering for example::
+
+   setenv bootmeths "syslinux efi"
+
+Entries may be removed or re-ordered in this list to affect the order the
+bootmeths are tried on each bootdev. If the variable is empty, the default
+ordering is used, based on the bootmeth sequence numbers, which can be
+controlled by aliases.
+
+The :doc:`../usage/bootmeth` operates in the same way as setting this variable.
+
+
 Bootdev uclass
 --------------
 
@@ -387,22 +422,23 @@ empty one with the given flags. Flags are used to control whether each
 iteration is displayed, whether to return iterations even if they did not result
 in a valid bootflow, whether to iterate through just a single bootdev, etc.
 
-Then the ordering of bootdevs is determined, by `setup_bootdev_order()`. By
+Then the ordering of bootdevs is determined, by `bootdev_setup_iter_order()`. By
 default, the bootdevs are used in the order specified by the `boot_targets`
-environment variable. If that is missing then their sequence order is used,
-as determined by the `/aliases` node, or failing that their order in the
-devicetree. For BOOTSTD_FULL, if there is a `bootdev-order` property in the
-bootstd node, then this is used as a final fallback. In any case, the iterator
-ends up with a `dev_order` array containing the bootdevs that are going to be
-used, with `num_devs` set to the number of bootdevs and `cur_dev` starting at 0.
+environment variable (e.g. "mmc2 mmc0 usb"). If that is missing then their
+sequence order is used, as determined by the `/aliases` node, or failing that
+their order in the devicetree. For BOOTSTD_FULL, if there is a `bootdev-order`
+property in the bootstd node, then this is used as a final fallback. In any
+case, the iterator ends up with a `dev_order` array containing the bootdevs that
+are going to be used, with `num_devs` set to the number of bootdevs and
+`cur_dev` starting at 0.
 
-Next, the ordering of bootdevs is determined, by `setup_bootmeth_order()`. By
-default the ordering is again by sequence number, i.e. the `/aliases` node, or
-failing that the order in the devicetree. But the `bootmeth order` command can
-be used to set up an ordering. If that has been done, the ordering is in
-`struct bootstd_priv`, so that ordering is simply copied into the iterator.
-Either way, the `method_order` array it set up, along with `num_methods`. Then
-`cur_method` is set to 0.
+Next, the ordering of bootdevs is determined, by `bootmeth_setup_iter_order()`.
+By default the ordering is again by sequence number, i.e. the `/aliases` node,
+or failing that the order in the devicetree. But the `bootmeth order` command
+or `bootmeths` environment variable can be used to set up an ordering. If that
+has been done, the ordering is in `struct bootstd_priv`, so that ordering is
+simply copied into the iterator. Either way, the `method_order` array it set up,
+along with `num_methods`. Then `cur_method` is set to 0.
 
 At this point the iterator is ready to use, with the first bootdev and bootmeth
 selected. All the other fields are 0. This means that the current partition is

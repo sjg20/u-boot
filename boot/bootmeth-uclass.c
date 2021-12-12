@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <bootflow.h>
 #include <bootmeth.h>
 #include <bootstd.h>
 #include <dm.h>
@@ -53,6 +54,67 @@ int bootmeth_read_file(struct udevice *dev, struct bootflow *bflow,
 		return -ENOSYS;
 
 	return ops->read_file(dev, bflow, file_path, addr, sizep);
+}
+
+/**
+ * bootmeth_setup_iter_order() - Set up the ordering of bootmeths to scan
+ *
+ * This sets up the ordering information in @iter, based on the selected
+ * ordering of the bootmethds in bootstd_priv->bootmeth_order. If there is no
+ * ordering there, then all bootmethods are added
+ *
+ * @iter: Iterator to update with the order
+ * @return 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
+ *	on other error
+ */
+int bootmeth_setup_iter_order(struct bootflow_iter *iter)
+{
+	struct bootstd_priv *std;
+	struct udevice **order;
+	int count;
+	int ret;
+
+	ret = bootstd_get_priv(&std);
+	if (ret)
+		return ret;
+
+	/* Create an array large enough */
+	count = std->bootmeth_count ? std->bootmeth_count :
+		uclass_id_count(UCLASS_BOOTMETH);
+	if (!count)
+		return log_msg_ret("count", -ENOENT);
+
+	order = calloc(count, sizeof(struct udevice *));
+	if (!order)
+		return log_msg_ret("order", -ENOMEM);
+
+	/* If we have an ordering, copy it */
+	if (IS_ENABLED(CONFIG_BOOTSTD_FULL) && std->bootmeth_count) {
+		memcpy(order, std->bootmeth_order,
+		       count * sizeof(struct bootmeth *));
+	} else {
+		struct udevice *dev;
+		int i, upto;
+
+		/*
+		 * Get a list of bootmethods, in seq order (i.e. using aliases).
+		 * There may be gaps so try to count up high enough to find them
+		 * all.
+		 */
+		for (i = 0, upto = 0; upto < count && i < 20 + count * 2; i++) {
+			ret = uclass_get_device_by_seq(UCLASS_BOOTMETH, i,
+						       &dev);
+			if (!ret)
+				order[upto++] = dev;
+		}
+		count = upto;
+	}
+
+	iter->method_order = order;
+	iter->num_methods = count;
+	iter->cur_method = 0;
+
+	return 0;
 }
 
 int bootmeth_set_order(const char *order_str)
