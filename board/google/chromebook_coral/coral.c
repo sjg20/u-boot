@@ -10,6 +10,7 @@
 #include <command.h>
 #include <cros_ec.h>
 #include <dm.h>
+#include <event.h>
 #include <init.h>
 #include <log.h>
 #include <sysinfo.h>
@@ -32,7 +33,7 @@ struct cros_gpio_info {
 	int flags;
 };
 
-int misc_init_f(void)
+static int coral_check_ll_boot(void *ctx, struct event *event)
 {
 	if (!ll_boot_init()) {
 		printf("Running as secondary loader");
@@ -55,6 +56,7 @@ int misc_init_f(void)
 
 	return 0;
 }
+EVENT_SPY(EVT_MISC_INIT_F, coral_check_ll_boot);
 
 int arch_misc_init(void)
 {
