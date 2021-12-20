@@ -17,6 +17,7 @@
 #include <syscon.h>
 #include <asm/cpu.h>
 #include <asm/cpu_common.h>
+#include <asm/fsp2/fsp_api.h>
 #include <asm/global_data.h>
 #include <asm/mrccache.h>
 #include <asm/mtrr.h>
@@ -26,11 +27,6 @@
 #include <asm-generic/sections.h>
 
 DECLARE_GLOBAL_DATA_PTR;
-
-__weak int arch_cpu_init_dm(void)
-{
-	return 0;
-}
 
 #ifdef CONFIG_TPL
 
@@ -89,7 +85,7 @@ static int x86_spl_init(void)
 		return ret;
 	}
 #ifndef CONFIG_TPL
-	ret = arch_cpu_init_dm();
+	ret = fsp_setup_pinctrl(NULL, NULL);
 	if (ret) {
 		debug("%s: arch_cpu_init_dm() failed\n", __func__);
 		return ret;
