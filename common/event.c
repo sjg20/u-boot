@@ -8,6 +8,7 @@
  */
 
 #define LOG_CATEGORY	LOGC_EVENT
+#define LOG_DEBUG
 
 #include <common.h>
 #include <event.h>
