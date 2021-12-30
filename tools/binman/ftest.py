@@ -195,13 +195,7 @@ class TestFunctional(unittest.TestCase):
 
         TestFunctional._MakeInputFile('env.txt', ENV_DATA)
 
-        # Travis-CI may have an old lz4
-        cls.have_lz4 = True
-        try:
-            tools.Run('lz4', '--no-frame-crc', '-c',
-                      os.path.join(cls._indir, 'u-boot.bin'), binary=True)
-        except:
-            cls.have_lz4 = False
+        cls.have_lz4 = comp_util.HAVE_LZ4
 
     @classmethod
     def tearDownClass(cls):
@@ -4974,6 +4968,10 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
                              allow_fake_blobs=True)
         err = stderr.getvalue()
         self.assertRegex(err, "Image 'main-section'.*faked.*: blob-ext-list")
+
+    def testFetchTool(self):
+        args = ['tool', '--fetch', 'aml_encrypt_g12a']
+        self._DoBinman(*args)
 
 
 if __name__ == "__main__":
