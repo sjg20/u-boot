@@ -312,7 +312,8 @@ class TestFunctional(unittest.TestCase):
                     entry_args=None, images=None, use_real_dtb=False,
                     use_expanded=False, verbosity=None, allow_missing=False,
                     extra_indirs=None, threads=None,
-                    test_section_timeout=False, update_fdt_in_elf=None):
+                    test_section_timeout=False, update_fdt_in_elf=None,
+                    allow_fake_blobs=False):
         """Run binman with a given test file
 
         Args:
@@ -372,6 +373,8 @@ class TestFunctional(unittest.TestCase):
                 args.append('-a%s=%s' % (arg, value))
         if allow_missing:
             args.append('-M')
+        if allow_fake_blobs:
+            args.append('--fake-ext-blobs')
         if update_fdt_in_elf:
             args += ['--update-fdt-in-elf', update_fdt_in_elf]
         if images:
@@ -4953,7 +4956,8 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertEqual(U_BOOT_DATA, data[-4:])
 
     def testAmlEncrypt(self):
-        self._DoTestFile('213_aml_encrypt.dts', allow_missing=True)
+        self._DoTestFile('213_aml_encrypt.dts', allow_missing=True,
+                         allow_fake_blobs=True)
 
 
 if __name__ == "__main__":

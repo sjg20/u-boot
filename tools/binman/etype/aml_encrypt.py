@@ -34,9 +34,6 @@ class Entry_aml_encrypt(Entry_section):
         self._aml_input = fdt_util.GetString(self._node, 'aml-input')
         self._aml_compress = fdt_util.GetString(self._node, 'aml-compress')
         self._aml_type = fdt_util.GetString(self._node, 'aml-type')
-        #self._aml_ddrfw = {}
-        #for i in range(1, DDR_FW_COUNT + 1):
-            #self._aml_ddrfw[i] = fdt_util.GetString(self._node, f'aml-ddrfw{i}')
         self.ReadEntries()
 
     def ReadEntries(self):
@@ -98,7 +95,7 @@ class Entry_aml_encrypt(Entry_section):
             return b''
 
         tout.Debug(f"Node '{self._node.path}': running: %s" % ' '.join(args))
-        tools.Run(*args)
+        out = tools.Run(*args, allow_tool_missing=True)
 
         # If an input file (or subnode!) is providing the input, the tools
         # writes to the requested output file. Otherwise it uses the output file
@@ -108,11 +105,11 @@ class Entry_aml_encrypt(Entry_section):
             real_outfile = output_fname
         else:
             real_outfile = f'{output_fname}.sd.bin'
-        data = tools.ReadFile(real_outfile)
+        if out is not None:
+            data = tools.ReadFile(real_outfile)
+        else:
+            data = tools.GetBytes(0, 1024)
         return data
-
-    def SetAllowMissing(self, allow_missing):
-        self.allow_missing = allow_missing
 
     def SetImagePos(self, image_pos):
         Entry.SetImagePos(self, image_pos)

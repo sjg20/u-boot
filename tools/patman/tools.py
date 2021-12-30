@@ -334,6 +334,7 @@ def Run(name, *args, **kwargs):
         binary = kwargs.get('binary')
         for_host = kwargs.get('for_host', False)
         for_target = kwargs.get('for_target', not for_host)
+        allow_tool_missing = kwargs.get('allow_tool_missing')
         env = None
         if tool_search_paths:
             env = dict(os.environ)
@@ -353,8 +354,11 @@ def Run(name, *args, **kwargs):
                (result.return_code,' '.join(all_args),
                 result.stderr))
         return result.stdout
-    except:
+    except ValueError:
         if env and not PathHasFile(env['PATH'], name):
+            if allow_tool_missing:
+                print('missing tool', name)
+                return None
             msg = "Please install tool '%s'" % name
             package = packages.get(name)
             if package:
