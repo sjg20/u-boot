@@ -7,7 +7,13 @@ This defines the common functionality for all bintools, including running
 the tool.
 """
 
+import glob
 import importlib
+import os
+
+from patman import tools
+
+BINMAN_DIR = os.path.dirname(os.path.realpath(__file__))
 
 modules = {}
 
@@ -62,3 +68,22 @@ class Bintool:
         # Call its constructor to get the object we want.
         obj = cls(name)
         return obj
+
+    @staticmethod
+    def list_all():
+        files = glob.glob(os.path.join(BINMAN_DIR, 'btool/*'))
+        print('%-20s  %-10s  %-25s  %s' % ('Name', 'Status', 'Description',
+                                           'Path'))
+        print('%-20s  %-10s  %-25s  %s' % ('-' * 20, '-' * 10, '-' * 25, '-' * 30))
+        for fname in files:
+            name = os.path.splitext(os.path.basename(fname))[0]
+            module = Bintool.create(name)
+            print('%-20s  %-10s  %-25s  %s' %
+                  (module.toolname, module.get_status(), module.desc,
+                   module.get_path() or '(not found)'))
+
+    def get_status(self):
+        return 'ready'
+
+    def get_path(self):
+        return tools.tool_find(self.name)

@@ -11,6 +11,7 @@ class Bintoolmkimage(bintool.Bintool):
     def __init__(self, name):
         super().__init__(name)
         self.toolname = 'mkimage'
+        self.desc = 'Generate image for U-Boot'
 
     def run(self, reset_timestamp=False, output_fname=None, external=False,
             pad=None):

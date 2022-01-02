@@ -313,6 +313,18 @@ def GetTargetCompileTool(name, cross_compile=None):
         target_name = name
     return target_name, extra_args
 
+def tool_find(name):
+    name = os.path.expanduser(name)  # Expand paths containing ~
+    paths = []
+    pathvar = os.environ.get('PATH')
+    if pathvar:
+        paths = pathvar.split(':')
+    paths += tool_search_paths
+    for path in paths:
+        fname = os.path.join(path, name)
+        if os.path.exists(fname):
+            return fname
+
 def Run(name, *args, **kwargs):
     """Run a tool with some arguments
 

@@ -301,5 +301,6 @@ class Entry_fit(Entry):
         for section in self._fit_sections.values():
             section.SetAllowMissing(allow_missing)
 
-    def AddBintools(self, tools):
-        self.mkimage = self.AddBintool(tools, 'mkimage')
+    @classmethod
+    def AddBintools(cls, tools):
+        cls.mkimage = self.AddBintool(tools, 'mkimage')

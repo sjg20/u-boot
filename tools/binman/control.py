@@ -14,6 +14,7 @@ import re
 import sys
 from patman import tools
 
+from binman import bintool
 from binman import cbfs_util
 from binman import elf
 from patman import command
@@ -599,7 +600,7 @@ def Binman(args):
     from binman.image import Image
     from binman import state
 
-    if args.cmd in ['ls', 'extract', 'replace']:
+    if args.cmd in ['ls', 'extract', 'replace', 'tool']:
         try:
             tout.Init(args.verbosity)
             tools.PrepareOutputDir(None)
@@ -614,6 +615,10 @@ def Binman(args):
                 ReplaceEntries(args.image, args.filename, args.indir, args.paths,
                                do_compress=not args.compressed,
                                allow_resize=not args.fix_size, write_map=args.map)
+
+            if args.cmd == 'tool':
+                tools.SetToolPaths(args.toolpath)
+                bintool.Bintool.list_all()
         except:
             raise
         finally:
