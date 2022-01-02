@@ -487,6 +487,7 @@ def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt, use_expanded):
     # without changing the device-tree size, thus ensuring that our
     # entry offsets remain the same.
     for image in images.values():
+        image.CollectBintools()
         image.ExpandEntries()
         if update_fdt:
             image.AddMissingProperties(True)

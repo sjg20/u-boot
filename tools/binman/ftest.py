@@ -4959,6 +4959,10 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self._DoTestFile('213_aml_encrypt.dts', allow_missing=True,
                          allow_fake_blobs=True)
 
+    def testFetchTool(self):
+        args = ['tool', '--fetch', 'aml_encrypt_g12a']
+        self._DoBinman(*args)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -119,3 +119,7 @@ class Entry_aml_encrypt(Entry_section):
 
     def CheckEntries(self):
         Entry.CheckEntries(self)
+
+    def AddBintools(self, tools):
+        self.AddBintool(tools, 'aml_encrypt_g12a')
+        self.AddBintool(tools, 'aml_encrypt_g12b')
