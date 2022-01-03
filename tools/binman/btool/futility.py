@@ -4,6 +4,7 @@
 """Bintool implementation for futility
 
 futility (flash utility) is a tool for working with Chromium OS flash images.
+This implements just the features used by Binman.
 
 Documentation is at:
    https://chromium.googlesource.com/chromiumos/platform/vboot/+/refs/heads/main/_vboot_reference/README
@@ -95,14 +96,15 @@ class Bintoolfutility(bintool.Bintool):
         Returns:
             str: Tool output
         """
-        args = ['gbb_utility']
-        args.append('-s')
-        args.append(f'--hwid={hwid}')
-        args.append(f'--rootkey={rootkey}')
-        args.append(f'--recoverykey={recoverykey}')
-        args.append(f'--flags={flags}')
-        args.append(f'--bmpfv={bmpfv}')
-        args.append(fname)
+        args = ['gbb_utility'
+            '-s',
+            f'--hwid={hwid}',
+            f'--rootkey={rootkey}',
+            f'--recoverykey={recoverykey}',
+            f'--flags={flags}',
+            f'--bmpfv={bmpfv}',
+            fname
+            ]
         return self.run_cmd(*args)
 
     def sign_firmware(self, vblock, keyblock, signprivate, version, firmware,
