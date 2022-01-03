@@ -618,7 +618,10 @@ def Binman(args):
 
             if args.cmd == 'tool':
                 tools.SetToolPaths(args.toolpath)
-                bintool.Bintool.list_all()
+                if args.list:
+                    bintool.Bintool.list_all()
+                if args.fetch:
+                    bintool.Bintool.fetch_list(args.bintools)
         except:
             raise
         finally:

@@ -14,6 +14,7 @@ import os
 from patman import tools
 
 BINMAN_DIR = os.path.dirname(os.path.realpath(__file__))
+FORMAT = '%-20.20s %-10.10s %-8.8s %-25.25s  %s'
 
 modules = {}
 
@@ -69,21 +70,35 @@ class Bintool:
         obj = cls(name)
         return obj
 
+    def show(self):
+        print(FORMAT % (self.toolname, self.get_status(), self.version(),
+                        self.desc, self.get_path() or '(not found)'))
+
     @staticmethod
     def list_all():
         files = glob.glob(os.path.join(BINMAN_DIR, 'btool/*'))
-        print('%-20s  %-10s  %-25s  %s' % ('Name', 'Status', 'Description',
-                                           'Path'))
-        print('%-20s  %-10s  %-25s  %s' % ('-' * 20, '-' * 10, '-' * 25, '-' * 30))
+        print(FORMAT % ('Name', 'Status', 'Version', 'Description', 'Path'))
+        print(FORMAT % ('-' * 20, '-' * 10, '-' * 7, '-' * 25, '-' * 30))
         for fname in files:
             name = os.path.splitext(os.path.basename(fname))[0]
-            module = Bintool.create(name)
-            print('%-20s  %-10s  %-25s  %s' %
-                  (module.toolname, module.get_status(), module.desc,
-                   module.get_path() or '(not found)'))
+            btool = Bintool.create(name)
+            btool.show()
 
     def get_status(self):
-        return 'ready'
+        return 'OK' if self.get_path() else 'missing'
 
     def get_path(self):
         return tools.tool_find(self.name)
+
+    @staticmethod
+    def fetch_list(name_list):
+        for name in name_list:
+            print('Fetch: %s' % name)
+            btool = Bintool.create(name)
+            btool.fetch()
+
+    def fetch(self):
+        print(f"No method to fetch bintool '{self.name}'")
+
+    def version(self):
+        return 'unknown'

@@ -3,6 +3,8 @@
 #
 """Bintool implementation for mkimage"""
 
+import re
+
 from binman import bintool
 from patman import tools
 
@@ -14,7 +16,7 @@ class Bintoolmkimage(bintool.Bintool):
         self.desc = 'Generate image for U-Boot'
 
     def run(self, reset_timestamp=False, output_fname=None, external=False,
-            pad=None):
+            pad=None, version=False):
         """Run mkimage
 
         Args:
@@ -25,6 +27,7 @@ class Bintoolmkimage(bintool.Bintool):
             pad: Bytes to use for padding the FIT devicetree output. This allows
                 other things to be easily added later, if required, such as
                 signatures
+            version: True to get the mkimage version
         """
         args = []
         if external:
@@ -35,4 +38,15 @@ class Bintoolmkimage(bintool.Bintool):
             args.append('-t')
         if output_fname:
             args += ['-F', output_fname]
-        tools.Run(self.toolname, *args)
+        if version:
+            args.append('-V')
+        return tools.Run(self.toolname, *args)
+
+    def fetch(self):
+        print("Build U-Boot to get tools/mkimage or sudo apt install u-boot-tools")
+        return None
+
+    def version(self):
+        out = self.run(version=True).strip()
+        m_version = re.match(r'mkimage version (.*)', out)
+        return m_version.group(1) if m_version else out
