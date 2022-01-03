@@ -14,7 +14,7 @@ import os
 from patman import tools
 
 BINMAN_DIR = os.path.dirname(os.path.realpath(__file__))
-FORMAT = '%-20.20s %-10.10s %-8.8s %-25.25s  %s'
+FORMAT = '%-15.15s %-12.12s %-25.25s  %s'
 
 modules = {}
 
@@ -71,14 +71,18 @@ class Bintool:
         return obj
 
     def show(self):
-        print(FORMAT % (self.toolname, self.get_status(), self.version(),
-                        self.desc, self.get_path() or '(not found)'))
+        if self.get_status() == 'OK':
+            version = self.version()
+        else:
+            version = '-'
+        print(FORMAT % (self.toolname, version, self.desc,
+                        self.get_path() or '(not found)'))
 
     @staticmethod
     def list_all():
         files = glob.glob(os.path.join(BINMAN_DIR, 'btool/*'))
-        print(FORMAT % ('Name', 'Status', 'Version', 'Description', 'Path'))
-        print(FORMAT % ('-' * 20, '-' * 10, '-' * 7, '-' * 25, '-' * 30))
+        print(FORMAT % ('Name', 'Version', 'Description', 'Path'))
+        print(FORMAT % ('-' * 15,'-' * 12, '-' * 25, '-' * 30))
         for fname in files:
             name = os.path.splitext(os.path.basename(fname))[0]
             btool = Bintool.create(name)
