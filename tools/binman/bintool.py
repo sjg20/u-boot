@@ -14,7 +14,7 @@ import os
 from patman import tools
 
 BINMAN_DIR = os.path.dirname(os.path.realpath(__file__))
-FORMAT = '%-15.15s %-12.12s %-25.25s  %s'
+FORMAT = '%-15.15s %-12.12s %-26.26s %s'
 
 modules = {}
 
@@ -106,3 +106,6 @@ class Bintool:
 
     def version(self):
         return 'unknown'
+
+    def run_cmd(self, *args):
+        return tools.Run(self.toolname, *args)
