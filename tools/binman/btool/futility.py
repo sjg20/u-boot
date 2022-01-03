@@ -52,7 +52,6 @@ The following commands are built-in:
 """
 
 from binman import bintool
-from patman import tools
 
 class Bintoolfutility(bintool.Bintool):
     """Handles the 'futility' tool"""
@@ -61,50 +60,79 @@ class Bintoolfutility(bintool.Bintool):
         self.toolname = 'futility'
         self.desc = 'Chromium OS firmware utility'
 
-    def run(self, cmd, vblock=None, keyblock=None, signprivate=None,
-            version=None, fw=None, kernelkey=None, flags=None, sizes=None,
-            fname=None, hwid=None, rootkey=None, recoverykey=None, bmpfv=None):
-        args = []
-        args.append(cmd)
-        if cmd == 'version':
-            pass
-        elif cmd == 'vbutil_firmware':
-            if vblock:
-                args += ['--vblock', vblock]
-            if keyblock:
-                args += ['--keyblock', keyblock]
-            if signprivate:
-                args += ['--signprivate', signprivate]
-            if version:
-                args += ['--version', version]
-            if fw:
-                args += ['--fw', fw]
-            if kernelkey:
-                args += ['--kernelkey', kernelkey]
-            if flags:
-                args += ['--flags', flags]
-        elif cmd == 'gbb_utility':
-            if sizes:
-                args.append('-c')
-                args.append(','.join(['%#x' % size for size in sizes]))
-            else:
-                args.append('-s')
-                if hwid:
-                    args.append(f'--hwid={hwid}')
-                if rootkey:
-                    args.append(f'--rootkey={rootkey}')
-                if recoverykey:
-                    args.append(f'--recoverykey={rootkey}')
-                if flags:
-                    args.append(f'--flags={flags}')
-                if bmpfv:
-                    args.append(f'--bmpfv={bmpfv}')
-            if fname:
-                args.append(fname)
-        else:
-            self.do_raise('Invalid command')
+    def gbb_create(self, fname, sizes):
+        """Create a new Google Binary Block
+
+        Args:
+            fname (str): Filename to write to
+            sizes (list of int): Sizes of each regions:
+               hwid_size, rootkey_size, bmpfv_size, recoverykey_size
+
+        Returns:
+            str: Tool output
+        """
+        args = [
+            'gbb_utility',
+            '-c',
+            ','.join(['%#x' % size for size in sizes]),
+            fname
+            ]
+        return self.run_cmd(*args)
+
+    # pylint: disable=R0913
+    def gbb_set(self, fname, hwid, rootkey, recoverykey, flags, bmpfv):
+        """Set the parameters in a Google Binary Block
+
+        Args:
+            fname (str): Filename to update
+            hwid (str): Hardware ID to use
+            rootkey (str): Filename of root key, e.g. 'root_key.vbpubk'
+            recoverykey (str): Filename of recovery key,
+                e.g. 'recovery_key.vbpubk'
+            flags (int): GBB flags to use
+            bmpfv (str): Filename of firmware bitmaps (bmpblk file)
+
+        Returns:
+            str: Tool output
+        """
+        args = ['gbb_utility']
+        args.append('-s')
+        args.append(f'--hwid={hwid}')
+        args.append(f'--rootkey={rootkey}')
+        args.append(f'--recoverykey={recoverykey}')
+        args.append(f'--flags={flags}')
+        args.append(f'--bmpfv={bmpfv}')
+        args.append(fname)
+        return self.run_cmd(*args)
+
+    def sign_firmware(self, vblock, keyblock, signprivate, version, firmware,
+                      kernelkey, flags):
+        """Sign firmware to create a vblock file
+
+        Args:
+            vblock (str): Filename to write the vblock too
+            keyblock (str): Filename of keyblock file
+            signprivate (str): Filename of private key
+            version (int): Version number
+            firmware (str): Filename of firmware binary to sign
+            kernelkey (str): Filename of kernel key
+            flags (int): Preamble flags
+
+        Returns:
+            str: Tool output
+        """
+        args = [
+            'vbutil_firmware',
+            '--vblock', vblock,
+            '--keyblock', keyblock,
+            '--signprivate', signprivate,
+            '--version', version,
+            '--fw', firmware,
+            '--kernelkey', kernelkey,
+            '--flags', flags
+            ]
         return self.run_cmd(*args)
 
     def version(self):
-        out = self.run('version').strip()
+        out = self.run_cmd('version').strip()
         return out

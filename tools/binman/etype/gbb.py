@@ -79,18 +79,15 @@ class Entry_gbb(Entry):
             self.Raise('GBB is too small (minimum 0x2180 bytes)')
         keydir = tools.GetInputFilename(self.keydir)
 
-        stdout = self.futility.run(
-            'gbb_utility',
-            sizes=[0x100, 0x1000, bmpfv_size, 0x1000],
-            fname=fname)
-        stdout = self.futility.run(
-            'gbb_utility',
+        stdout = self.futility.gbb_create(
+            fname, [0x100, 0x1000, bmpfv_size, 0x1000])
+        stdout = self.futility.gbb_set(
+            fname,
             hwid=self.hardware_id,
             rootkey='%s/root_key.vbpubk' % keydir,
             recoverykey='%s/recovery_key.vbpubk' % keydir,
             flags=self.gbb_flags,
-            bmpfv=tools.GetInputFilename(self.bmpblk),
-            fname=fname)
+            bmpfv=tools.GetInputFilename(self.bmpblk))
 
         self.SetContents(tools.ReadFile(fname))
         return True

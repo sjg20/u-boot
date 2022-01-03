@@ -69,13 +69,12 @@ class Entry_vblock(Entry_collection):
         input_fname = tools.GetOutputFilename('input.%s' % uniq)
         tools.WriteFile(input_fname, input_data)
         prefix = self.keydir + '/'
-        stdout = self.futility.run(
-            'vbutil_firmware',
+        stdout = self.futility.sign_firmware(
             vblock=output_fname,
             keyblock=prefix + self.keyblock,
             signprivate=prefix + self.signprivate,
             version=f'{self.version,}',
-            fw=input_fname,
+            firmware=input_fname,
             kernelkey=prefix + self.kernelkey,
             flags=f'{self.preamble_flags}')
         return tools.ReadFile(output_fname)
