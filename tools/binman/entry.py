@@ -1044,6 +1044,7 @@ features to produce new behaviours.
         """
         pass
 
+    @classmethod
     def AddBintool(self, tools, name):
         """Add a new bintool to the tools used by this etype
 

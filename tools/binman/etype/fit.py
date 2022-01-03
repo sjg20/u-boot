@@ -303,4 +303,4 @@ class Entry_fit(Entry):
 
     @classmethod
     def AddBintools(cls, tools):
-        cls.mkimage = self.AddBintool(tools, 'mkimage')
+        cls.mkimage = cls.AddBintool(tools, 'mkimage')

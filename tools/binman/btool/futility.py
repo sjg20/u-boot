@@ -59,12 +59,30 @@ class Bintoolfutility(bintool.Bintool):
         self.toolname = 'futility'
         self.desc = 'Chromium OS firmware utility'
 
-    def run(self, version=False):
+    def run(self, get_version=False, vblock=None, keyblock=None,
+            signprivate=None, version=None, fw=None, kernelkey=None,
+            flags=None):
         args = []
-        if version:
+        if get_version:
             args.append('version')
+        else:
+            args.append('vbutil_firmware')
+            if vblock:
+                args += ['--vblock', vblock]
+            if keyblock:
+                args += ['--keyblock', keyblock]
+            if signprivate:
+                args += ['--signprivate', signprivate]
+            if version:
+                args += ['--version', version]
+            if fw:
+                args += ['--fw', fw]
+            if kernelkey:
+                args += ['--kernelkey', kernelkey]
+            if flags:
+                args += ['--flags', flags]
         return self.run_cmd(*args)
 
     def version(self):
-        out = self.run(version=True).strip()
+        out = self.run(get_version=True).strip()
         return out
