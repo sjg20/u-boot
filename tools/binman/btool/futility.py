@@ -5,9 +5,11 @@
 
 futility (flash utility) is a tool for working with Chromium OS flash images.
 
-Documentation is at: https://chromium.googlesource.com/chromiumos/platform/vboot/+/refs/heads/main/_vboot_reference/README
+Documentation is at:
+   https://chromium.googlesource.com/chromiumos/platform/vboot/+/refs/heads/main/_vboot_reference/README
 
-Source code: https://chromium.googlesource.com/chromiumos/platform/vboot/+/refs/heads/master/_vboot_reference/futility
+Source code:
+   https://chromium.googlesource.com/chromiumos/platform/vboot/+/refs/heads/master/_vboot_reference/futility
 
 Here is the help:
 Usage: futility [options] COMMAND [args...]

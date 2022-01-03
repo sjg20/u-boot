@@ -32,35 +32,54 @@ COMMANDs:
  add [-r image,regions] -f FILE -n NAME -t TYPE [-A hash] \
         [-c compression] [-b base-address | -a alignment] \
         [-p padding size] [-y|--xip if TYPE is FSP]       \
-        [-j topswap-size] (Intel CPUs only) [--ibb]           Add a component
-                                                             -j valid size: 0x10000 0x20000 0x40000 0x80000 0x100000
+        [-j topswap-size] (Intel CPUs only) [--ibb]
+        Add a component
+        -j valid size: 0x10000 0x20000 0x40000 0x80000 0x100000
  add-payload [-r image,regions] -f FILE -n NAME [-A hash] \
         [-c compression] [-b base-address] \
-        (linux specific: [-C cmdline] [-I initrd])           Add a payload to the ROM
+        (linux specific: [-C cmdline] [-I initrd])
+        Add a payload to the ROM
  add-stage [-r image,regions] -f FILE -n NAME [-A hash] \
         [-c compression] [-b base] [-S section-to-ignore] \
-        [-a alignment] [-y|--xip] [-P page-size] [--ibb]     Add a stage to the ROM
+        [-a alignment] [-y|--xip] [-P page-size] [--ibb]
+        Add a stage to the ROM
  add-flat-binary [-r image,regions] -f FILE -n NAME \
         [-A hash] -l load-address -e entry-point \
-        [-c compression] [-b base]                           Add a 32bit flat mode binary
- add-int [-r image,regions] -i INTEGER -n NAME [-b base]     Add a raw 64-bit integer value
+        [-c compression] [-b base]
+        Add a 32bit flat mode binary
+ add-int [-r image,regions] -i INTEGER -n NAME [-b base]
+ Add a raw 64-bit integer value
  add-master-header [-r image,regions] \
-        [-j topswap-size] (Intel CPUs only)                  Add a legacy CBFS master header
- remove [-r image,regions] -n NAME                           Remove a component
- compact -r image,regions                                    Defragment CBFS image.
- copy -r image,regions -R source-region                      Create a copy (duplicate) cbfs instance in fmap
+        [-j topswap-size] (Intel CPUs only)
+        Add a legacy CBFS master header
+ remove [-r image,regions] -n NAME
+ Remove a component
+ compact -r image,regions
+ Defragment CBFS image.
+ copy -r image,regions -R source-region
+ Create a copy (duplicate) cbfs instance in fmap
  create -m ARCH -s size [-b bootblock offset] \
-        [-o CBFS offset] [-H header offset] [-B bootblock]   Create a legacy ROM file with CBFS master header*
- create -M flashmap [-r list,of,regions,containing,cbfses]   Create a new-style partitioned firmware image
+        [-o CBFS offset] [-H header offset] [-B bootblock]
+        Create a legacy ROM file with CBFS master header*
+ create -M flashmap [-r list,of,regions,containing,cbfses]
+ Create a new-style partitioned firmware image
  locate [-r image,regions] -f FILE -n NAME [-P page-size] \
-        [-a align] [-T]                                      Find a place for a file of that size
- layout [-w]                                                 List mutable (or, with -w, readable) image regions
- print [-r image,regions]                                    Show the contents of the ROM
- extract [-r image,regions] [-m ARCH] -n NAME -f FILE [-U]   Extracts a file from ROM
- write [-F] -r image,regions -f file [-u | -d] [-i int]      Write file into same-size [or larger] raw region
- read [-r fmap-region] -f file                               Extract raw region contents into binary file
- truncate [-r fmap-region]                                   Truncate CBFS and print new size on stdout
- expand [-r fmap-region]                                     Expand CBFS to span entire region
+        [-a align] [-T]
+        Find a place for a file of that size
+ layout [-w]
+ List mutable (or, with -w, readable) image regions
+ print [-r image,regions]
+ Show the contents of the ROM
+ extract [-r image,regions] [-m ARCH] -n NAME -f FILE [-U]
+ Extracts a file from ROM
+ write [-F] -r image,regions -f file [-u | -d] [-i int]
+ Write file into same-size [or larger] raw region
+ read [-r fmap-region] -f file
+ Extract raw region contents into binary file
+ truncate [-r fmap-region]
+ Truncate CBFS and print new size on stdout
+ expand [-r fmap-region]
+ Expand CBFS to span entire region
 OFFSETs:
   Numbers accompanying -b, -H, and -o switches* may be provided
   in two possible formats: if their value is greater than
@@ -96,7 +115,6 @@ run() method at present.
 """
 
 from binman import bintool
-from patman import tools
 
 class Bintoolcbfstool(bintool.Bintool):
     """Handles the 'cbfstool' tool"""

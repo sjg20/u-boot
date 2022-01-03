@@ -6,7 +6,6 @@
 import re
 
 from binman import bintool
-from patman import tools
 
 class Bintoolmkimage(bintool.Bintool):
     """Handles the 'mkimage' tool"""
@@ -15,6 +14,7 @@ class Bintoolmkimage(bintool.Bintool):
         self.toolname = 'mkimage'
         self.desc = 'Generate image for U-Boot'
 
+    # pylint: disable=R0913
     def run(self, reset_timestamp=False, output_fname=None, external=False,
             pad=None, version=False):
         """Run mkimage
@@ -44,7 +44,6 @@ class Bintoolmkimage(bintool.Bintool):
 
     def fetch(self):
         print("Build U-Boot to get tools/mkimage or sudo apt install u-boot-tools")
-        return None
 
     def version(self):
         out = self.run(version=True).strip()
