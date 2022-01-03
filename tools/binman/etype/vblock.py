@@ -69,20 +69,8 @@ class Entry_vblock(Entry_collection):
         input_fname = tools.GetOutputFilename('input.%s' % uniq)
         tools.WriteFile(input_fname, input_data)
         prefix = self.keydir + '/'
-        #args = [
-            #'vbutil_firmware',
-            #'--vblock', output_fname,
-            #'--keyblock', prefix + self.keyblock,
-            #'--signprivate', prefix + self.signprivate,
-            #'--version', '%d' % self.version,
-            #'--fv', input_fname,
-            #'--kernelkey', prefix + self.kernelkey,
-            #'--flags', '%d' % self.preamble_flags,
-        #]
-        #out.Notice("Sign '%s' into %s" % (', '.join(self.value), self.label))
-        #stdout = tools.Run('futility', *args)
-        #return tools.ReadFile(output_fname)
-        return self.futility.run(
+        stdout = self.futility.run(
+            'vbutil_firmware',
             vblock=output_fname,
             keyblock=prefix + self.keyblock,
             signprivate=prefix + self.signprivate,
@@ -90,6 +78,7 @@ class Entry_vblock(Entry_collection):
             fw=input_fname,
             kernelkey=prefix + self.kernelkey,
             flags=f'{self.preamble_flags}')
+        return tools.ReadFile(output_fname)
 
     def ObtainContents(self):
         data = self.GetVblock(False)
@@ -103,6 +92,5 @@ class Entry_vblock(Entry_collection):
         data = self.GetVblock(True)
         return self.ProcessContentsUpdate(data)
 
-    @classmethod
-    def AddBintools(cls, tools):
-        cls.futility = cls.AddBintool(tools, 'futility')
+    def AddBintools(self, tools):
+        self.futility = self.AddBintool(tools, 'futility')

@@ -77,20 +77,23 @@ class Entry_gbb(Entry):
         bmpfv_size = gbb_size - 0x2180
         if bmpfv_size < 0:
             self.Raise('GBB is too small (minimum 0x2180 bytes)')
-        sizes = [0x100, 0x1000, bmpfv_size, 0x1000]
-        sizes = ['%#x' % size for size in sizes]
         keydir = tools.GetInputFilename(self.keydir)
-        gbb_set_command = [
-            'gbb_utility', '-s',
-            '--hwid=%s' % self.hardware_id,
-            '--rootkey=%s/root_key.vbpubk' % keydir,
-            '--recoverykey=%s/recovery_key.vbpubk' % keydir,
-            '--flags=%d' % self.gbb_flags,
-            '--bmpfv=%s' % tools.GetInputFilename(self.bmpblk),
-            fname]
 
-        tools.Run('futility', 'gbb_utility', '-c', ','.join(sizes), fname)
-        tools.Run('futility', *gbb_set_command)
+        stdout = self.futility.run(
+            'gbb_utility',
+            sizes=[0x100, 0x1000, bmpfv_size, 0x1000],
+            fname=fname)
+        stdout = self.futility.run(
+            'gbb_utility',
+            hwid=self.hardware_id,
+            rootkey='%s/root_key.vbpubk' % keydir,
+            recoverykey='%s/recovery_key.vbpubk' % keydir,
+            flags=self.gbb_flags,
+            bmpfv=tools.GetInputFilename(self.bmpblk),
+            fname=fname)
 
         self.SetContents(tools.ReadFile(fname))
         return True
+
+    def AddBintools(self, tools):
+        self.futility = self.AddBintool(tools, 'futility')

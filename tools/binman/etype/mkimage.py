@@ -51,7 +51,7 @@ class Entry_mkimage(Entry):
         input_fname = tools.GetOutputFilename('mkimage.%s' % uniq)
         tools.WriteFile(input_fname, data)
         output_fname = tools.GetOutputFilename('mkimage-out.%s' % uniq)
-        tools.Run('mkimage', '-d', input_fname, *self._args, output_fname)
+        self.mkimage.run_cmd('-d', input_fname, *self._args, output_fname)
         self.SetContents(tools.ReadFile(output_fname))
         return True
 
@@ -70,3 +70,6 @@ class Entry_mkimage(Entry):
         """
         for entry in self._mkimage_entries.values():
             entry.SetAllowFakeBlob(allow_fake)
+
+    def AddBintools(self, tools):
+        self.mkimage = self.AddBintool(tools, 'mkimage')

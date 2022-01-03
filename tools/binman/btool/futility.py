@@ -59,14 +59,14 @@ class Bintoolfutility(bintool.Bintool):
         self.toolname = 'futility'
         self.desc = 'Chromium OS firmware utility'
 
-    def run(self, get_version=False, vblock=None, keyblock=None,
-            signprivate=None, version=None, fw=None, kernelkey=None,
-            flags=None):
+    def run(self, cmd, vblock=None, keyblock=None, signprivate=None,
+            version=None, fw=None, kernelkey=None, flags=None, sizes=None,
+            fname=None, hwid=None, rootkey=None, recoverykey=None, bmpfv=None):
         args = []
-        if get_version:
-            args.append('version')
-        else:
-            args.append('vbutil_firmware')
+        args.append(cmd)
+        if cmd == 'version':
+            pass
+        elif cmd == 'vbutil_firmware':
             if vblock:
                 args += ['--vblock', vblock]
             if keyblock:
@@ -81,8 +81,28 @@ class Bintoolfutility(bintool.Bintool):
                 args += ['--kernelkey', kernelkey]
             if flags:
                 args += ['--flags', flags]
+        elif cmd == 'gbb_utility':
+            if sizes:
+                args.append('-c')
+                args.append(','.join(['%#x' % size for size in sizes]))
+            else:
+                args.append('-s')
+                if hwid:
+                    args.append(f'--hwid={hwid}')
+                if rootkey:
+                    args.append(f'--rootkey={rootkey}')
+                if recoverykey:
+                    args.append(f'--recoverykey={rootkey}')
+                if flags:
+                    args.append(f'--flags={flags}')
+                if bmpfv:
+                    args.append(f'--bmpfv={bmpfv}')
+            if fname:
+                args.append(fname)
+        else:
+            self.do_raise('Invalid command')
         return self.run_cmd(*args)
 
     def version(self):
-        out = self.run(get_version=True).strip()
+        out = self.run('version').strip()
         return out
