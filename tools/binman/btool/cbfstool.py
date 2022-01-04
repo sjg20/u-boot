@@ -158,5 +158,13 @@ class Bintoolcbfstool(bintool.Bintool):
                 '-f', fname,
                 '-c', compress or 'none']
         if base:
-            args += ['-b', '{base:#x}']
+            args += ['-b', f'{base:#x}']
+        return self.run_cmd(*args)
+
+    def fail(self):
+        """Run cbfstool with invalid arguments to check it reports failure
+
+        This is really just a sanity check
+        """
+        args = ['missing-file', 'bad-command']
         return self.run_cmd(*args)

@@ -46,12 +46,8 @@ class TestCbfs(unittest.TestCase):
         # compressing files
         tools.PrepareOutputDir(None)
 
-        cls.have_cbfstool = True
-        try:
-            tools.Run('which', 'cbfstool')
-        except:
-            cls.have_cbfstool = False
         cls.cbfstool = bintool.Bintool.create('cbfstool')
+        cls.have_cbfstool = cls.cbfstool.is_present()
 
         cls.have_lz4 = True
         try:
@@ -225,18 +221,9 @@ class TestCbfs(unittest.TestCase):
         """Test failure to run cbfstool"""
         if not self.have_cbfstool:
             self.skipTest('No cbfstool available')
-        try:
-            # In verbose mode this test fails since stderr is not captured. Fix
-            # this by turning off verbosity.
-            old_verbose = cbfs_util.VERBOSE
-            cbfs_util.VERBOSE = False
-            with test_util.capture_sys_output() as (_stdout, stderr):
-                with self.assertRaises(Exception) as e:
-                    cbfs_util.cbfstool('missing-file', 'bad-command')
-        finally:
-            cbfs_util.VERBOSE = old_verbose
-        self.assertIn('Unknown command', stderr.getvalue())
-        self.assertIn('Failed to run', str(e.exception))
+        with self.assertRaises(ValueError) as exc:
+            out = self.cbfstool.fail()
+        self.assertIn('Unknown command', str(exc.exception))
 
     def test_cbfs_raw(self):
         """Test base handling of a Coreboot Filesystem (CBFS)"""

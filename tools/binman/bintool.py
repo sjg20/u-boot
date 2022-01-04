@@ -71,7 +71,7 @@ class Bintool:
         return obj
 
     def show(self):
-        if self.get_status() == 'OK':
+        if self.is_present():
             version = self.version()
         else:
             version = '-'
@@ -88,8 +88,8 @@ class Bintool:
             btool = Bintool.create(name)
             btool.show()
 
-    def get_status(self):
-        return 'OK' if self.get_path() else 'missing'
+    def is_present(self):
+        return bool(self.get_path())
 
     def get_path(self):
         return tools.tool_find(self.name)
