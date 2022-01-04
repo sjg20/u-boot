@@ -10,9 +10,7 @@ from binman import bintool
 class Bintoolmkimage(bintool.Bintool):
     """Handles the 'mkimage' tool"""
     def __init__(self, name):
-        super().__init__(name)
-        self.toolname = 'mkimage'
-        self.desc = 'Generate image for U-Boot'
+        super().__init__(name, 'Generate image for U-Boot')
 
     # pylint: disable=R0913
     def run(self, reset_timestamp=False, output_fname=None, external=False,

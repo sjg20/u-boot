@@ -23,8 +23,9 @@ class Bintool:
 
     This is the base class for all bintools
     """
-    def __init__(self, name):
+    def __init__(self, name, desc):
         self.name = name
+        self.desc = desc
 
     @staticmethod
     def find_bintool_class(btype):
@@ -65,21 +66,25 @@ class Bintool:
             A new object of the correct type (a subclass of Binutil)
         """
         cls = Bintool.find_bintool_class(name)
+        if isinstance(cls, tuple):
+            raise ValueError("Cannot import bintool module '%s': %s" % cls)
 
         # Call its constructor to get the object we want.
         obj = cls(name)
         return obj
 
     def show(self):
+        """Show a line of information about a bintool"""
         if self.is_present():
             version = self.version()
         else:
             version = '-'
-        print(FORMAT % (self.toolname, version, self.desc,
+        print(FORMAT % (self.name, version, self.desc,
                         self.get_path() or '(not found)'))
 
     @staticmethod
     def list_all():
+        """List all the bintools known to binman"""
         files = glob.glob(os.path.join(BINMAN_DIR, 'btool/*'))
         print(FORMAT % ('Name', 'Version', 'Description', 'Path'))
         print(FORMAT % ('-' * 15,'-' * 12, '-' * 25, '-' * 30))
@@ -89,13 +94,23 @@ class Bintool:
             btool.show()
 
     def is_present(self):
+        """Check if a bintool is available on the system
+
+        Returns:
+            bool: True if available, False if not
+        """
         return bool(self.get_path())
 
     def get_path(self):
+        """Get the path of a bintool
+
+        Returns:
+            str: Path to the tool, if available, else None
+        """
         return tools.tool_find(self.name)
 
     @staticmethod
-    def fetch_list(name_list):
+    def fetch_tools(name_list):
         for name in name_list:
             print('Fetch: %s' % name)
             btool = Bintool.create(name)
@@ -108,4 +123,4 @@ class Bintool:
         return 'unknown'
 
     def run_cmd(self, *args):
-        return tools.Run(self.toolname, *args)
+        return tools.Run(self.name, *args)

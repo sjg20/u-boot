@@ -118,9 +118,7 @@ from binman import bintool
 class Bintoolcbfstool(bintool.Bintool):
     """Handles the 'cbfstool' tool"""
     def __init__(self, name):
-        super().__init__(name)
-        self.toolname = 'cbfstool'
-        self.desc = 'Manipulate CBFS files'
+        super().__init__(name, 'Manipulate CBFS files')
 
     def create_new(self, cbfs_fname, size, arch='x86'):
         """Create a new CBFS
@@ -159,6 +157,24 @@ class Bintoolcbfstool(bintool.Bintool):
                 '-c', compress or 'none']
         if base:
             args += ['-b', f'{base:#x}']
+        return self.run_cmd(*args)
+
+    def add_stage(self, cbfs_fname, name, fname):
+        """Add a stage file to the CBFS
+
+        Args:
+            cbfs_fname (str): Filename of CBFS to create
+            name (str): Name to use inside the CBFS
+            fname (str): Filename of file to add
+
+        Returns:
+            str: Tool output
+        """
+        args = [cbfs_fname,
+                'add-stage',
+                '-n', name,
+                '-f', fname
+            ]
         return self.run_cmd(*args)
 
     def fail(self):

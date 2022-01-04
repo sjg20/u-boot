@@ -57,9 +57,7 @@ from binman import bintool
 class Bintoolfutility(bintool.Bintool):
     """Handles the 'futility' tool"""
     def __init__(self, name):
-        super().__init__(name)
-        self.toolname = 'futility'
-        self.desc = 'Chromium OS firmware utility'
+        super().__init__(name, 'Chromium OS firmware utility')
 
     def gbb_create(self, fname, sizes):
         """Create a new Google Binary Block

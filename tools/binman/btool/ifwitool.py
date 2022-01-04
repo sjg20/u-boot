@@ -61,9 +61,7 @@ from binman import bintool
 class Bintoolifwitool(bintool.Bintool):
     """Handles the 'ifwitool' tool"""
     def __init__(self, name):
-        super().__init__(name)
-        self.toolname = 'ifwitool'
-        self.desc = 'Manipulate IFWI files'
+        super().__init__(name, 'Manipulate Intel IFWI files')
 
     def create_ifwi(self, intel_fit, ifwi_file):
         """Create a new IFWI file, using an existing Intel FIT binary

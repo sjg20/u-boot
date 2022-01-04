@@ -621,7 +621,7 @@ def Binman(args):
                 if args.list:
                     bintool.Bintool.list_all()
                 if args.fetch:
-                    bintool.Bintool.fetch_list(args.bintools)
+                    bintool.Bintool.fetch_tools(args.bintools)
         except:
             raise
         finally:

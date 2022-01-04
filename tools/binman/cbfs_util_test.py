@@ -504,10 +504,8 @@ class TestCbfs(unittest.TestCase):
         # Compare against what cbfstool creates
         if self.have_cbfstool:
             cbfs_fname = os.path.join(self._indir, 'test.cbfs')
-            cbfs_util.cbfstool(cbfs_fname, 'create', '-m', 'x86', '-s',
-                               '%#x' % size)
-            cbfs_util.cbfstool(cbfs_fname, 'add-stage', '-n', 'u-boot',
-                               '-f', elf_fname)
+            self.cbfstool.create_new(cbfs_fname, size)
+            self.cbfstool.add_stage(cbfs_fname, 'u-boot', elf_fname)
             self._compare_expected_cbfs(data, cbfs_fname)
 
     def test_cbfs_raw_compress(self):
