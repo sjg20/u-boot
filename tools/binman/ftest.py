@@ -18,6 +18,7 @@ import sys
 import tempfile
 import unittest
 
+from binman import bintool
 from binman import cbfs_util
 from binman import cmdline
 from binman import control
@@ -2311,8 +2312,8 @@ class TestFunctional(unittest.TestCase):
         # We expect to find the TPL wil in subpart IBBP entry IBBL
         image_fname = tools.GetOutputFilename('image.bin')
         tpl_fname = tools.GetOutputFilename('tpl.out')
-        tools.RunIfwiTool(image_fname, tools.CMD_EXTRACT, fname=tpl_fname,
-                          subpart='IBBP', entry_name='IBBL')
+        ifwitool = bintool.Bintool.create('ifwitool')
+        ifwitool.extract(image_fname, 'IBBP', 'IBBL', tpl_fname)
 
         tpl_data = tools.ReadFile(tpl_fname)
         self.assertEqual(U_BOOT_TPL_DATA, tpl_data[:len(U_BOOT_TPL_DATA)])
