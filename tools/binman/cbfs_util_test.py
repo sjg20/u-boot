@@ -175,7 +175,7 @@ class TestCbfs(unittest.TestCase):
         if not self.have_cbfstool or not self.have_lz4:
             return None
         cbfs_fname = os.path.join(self._indir, 'test.cbfs')
-        self.cbfstool.create(cbfs_fname, size, arch)
+        self.cbfstool.create_new(cbfs_fname, size, arch)
         if base:
             base = [(1 << 32) - size + b for b in base]
         self.cbfstool.add_raw(

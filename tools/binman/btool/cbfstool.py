@@ -110,8 +110,7 @@ TYPEs:
 
 
 Since binman has a native implementation of CBFS (see cbfs_util.py), we don't
-actually need this tool, except for sanity checks in the tests. There is no
-run() method at present.
+actually need this tool, except for sanity checks in the tests.
 """
 
 from binman import bintool
@@ -123,7 +122,7 @@ class Bintoolcbfstool(bintool.Bintool):
         self.toolname = 'cbfstool'
         self.desc = 'Manipulate CBFS files'
 
-    def create(self, cbfs_fname, size, arch='x86'):
+    def create_new(self, cbfs_fname, size, arch='x86'):
         """Create a new CBFS
 
         Args:
@@ -137,6 +136,7 @@ class Bintoolcbfstool(bintool.Bintool):
         args = [cbfs_fname, 'create', '-s', f'{size:#x}', '-m', arch]
         return self.run_cmd(*args)
 
+    # pylint: disable=R0913
     def add_raw(self, cbfs_fname, name, fname, compress=None, base=None):
         """Add a raw file to the CBFS
 
@@ -154,7 +154,7 @@ class Bintoolcbfstool(bintool.Bintool):
         args = [cbfs_fname,
                 'add',
                 '-n', name,
-                '-t' 'raw',
+                '-t', 'raw',
                 '-f', fname,
                 '-c', compress or 'none']
         if base:

@@ -91,6 +91,7 @@ class Bintoolifwitool(bintool.Bintool):
         args = [ifwi_file, 'delete', '-n', subpart]
         return self.run_cmd(*args)
 
+    # pylint: disable=R0913
     def add_subpart(self, ifwi_file, subpart, entry_name, infile,
                     replace=False):
         """Add or replace a subpart within the IFWI file
@@ -133,34 +134,3 @@ class Bintoolifwitool(bintool.Bintool):
             '-f', outfile,
             ]
         return self.run_cmd(*args)
-
-'''
-IFWITOOL_CMDS = {
-    CMD_CREATE: 'create',
-    CMD_DELETE: 'delete',
-    CMD_ADD: 'add',
-    CMD_REPLACE: 'replace',
-    CMD_EXTRACT: 'extract',
-    }
-
-def RunIfwiTool(ifwi_file, cmd, fname=None, subpart=None, entry_name=None):
-    """Run ifwitool with the given arguments:
-
-    Args:
-        ifwi_file: IFWI file to operation on
-        cmd: Command to execute (CMD_...)
-        fname: Filename of file to add/replace/extract/create (None for
-            CMD_DELETE)
-        subpart: Name of sub-partition to operation on (None for CMD_CREATE)
-        entry_name: Name of directory entry to operate on, or None if none
-    """
-    args = ['ifwitool', ifwi_file]
-    args.append(IFWITOOL_CMDS[cmd])
-    if fname:
-        args += ['-f', fname]
-    if subpart:
-        args += ['-n', subpart]
-    if entry_name:
-        args += ['-d', '-e', entry_name]
-    Run(*args)
-'''
