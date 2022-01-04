@@ -620,8 +620,11 @@ def Binman(args):
                 tools.SetToolPaths(args.toolpath)
                 if args.list:
                     bintool.Bintool.list_all()
-                if args.fetch:
-                    bintool.Bintool.fetch_tools(args.bintools)
+                elif args.fetch:
+                    bintool.Bintool.fetch_tools(bintool.FETCH_ANY,
+                                                args.bintools)
+                else:
+                    raise ValueError("Invalid argments to 'tool' subcommand")
         except:
             raise
         finally:

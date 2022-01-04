@@ -9,7 +9,9 @@ the tool.
 
 import glob
 import importlib
+import multiprocessing
 import os
+import tempfile
 
 from patman import tools
 
@@ -17,6 +19,14 @@ BINMAN_DIR = os.path.dirname(os.path.realpath(__file__))
 FORMAT = '%-15.15s %-12.12s %-26.26s %s'
 
 modules = {}
+
+FETCH_ANY, FETCH_BIN, FETCH_BUILD = range(3)
+
+FETCH_NAMES = {
+    FETCH_ANY: 'any method',
+    FETCH_BIN: 'binary download',
+    FETCH_BUILD: 'build from source'
+    }
 
 class Bintool:
     """Tool which operates on binaries to help produce entry contents
@@ -110,13 +120,29 @@ class Bintool:
         return tools.tool_find(self.name)
 
     @staticmethod
-    def fetch_tools(name_list):
+    def fetch_tools(method, name_list):
         for name in name_list:
             print('Fetch: %s' % name)
             btool = Bintool.create(name)
-            btool.fetch()
+            if method == FETCH_ANY:
+                for try_method in FETCH_BIN, FETCH_BUILD:
+                    print(f'- trying method: {FETCH_NAMES[try_method]}')
+                    fname = btool.fetch(try_method)
+                    if fname:
+                        break
+            else:
+                fname = btool.fetch(method)
+            if fname:
+                dest = os.path.join(os.getenv('HOME'), 'bin', name)
+                print(f"- writing to '{dest}'")
+                tools.Run('mv', fname, dest)
+            else:
+                if method == FETCH_ANY:
+                    print('- failed to fetch with all methods')
+                else:
+                    print(f"- method '{FETCH_NAMES[method]}' is not supported")
 
-    def fetch(self):
+    def fetch(self, method):
         print(f"No method to fetch bintool '{self.name}'")
 
     def version(self):
@@ -124,3 +150,18 @@ class Bintool:
 
     def run_cmd(self, *args):
         return tools.Run(self.name, *args)
+
+    def build_from_git(self, git_repo, make_target, bintool_path):
+        """Build a tool from a git repo
+        """
+        tmpdir = tempfile.mkdtemp(prefix='binmanf.')
+        print(f"- clone git repo '{git_repo}' to '{tmpdir}'")
+        tools.Run('git', 'clone', '--depth', '1', git_repo, tmpdir)
+        print(f"- build target '{make_target}'")
+        tools.Run('make', '-C', tmpdir, '-j', f'{multiprocessing.cpu_count()}',
+                  make_target)
+        fname = os.path.join(tmpdir, bintool_path)
+        if not os.path.exists(fname):
+            print(f"- File '{fname}' was not produced")
+            return None
+        return fname

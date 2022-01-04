@@ -21,3 +21,16 @@ class Bintoolfiptool(bintool.Bintool):
     """Handles the 'fiptool' tool"""
     def __init__(self, name):
         super().__init__(name, 'Manipulate ATF FIP files')
+
+    def fetch(self, method):
+        if method != bintool.FETCH_BUILD:
+            return None
+        result = self.build_from_git(
+            'https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git',
+            'fiptool',
+            'tools/fiptool/fiptool')
+        return result
+
+    def version(self):
+        out = self.run_cmd('version').strip()
+        return out
