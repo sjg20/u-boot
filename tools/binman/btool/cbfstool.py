@@ -184,3 +184,10 @@ class Bintoolcbfstool(bintool.Bintool):
         """
         args = ['missing-file', 'bad-command']
         return self.run_cmd(*args)
+
+    def fetch(self, method):
+        if method != bintool.FETCH_BIN:
+            return None
+        tmpdir, fname = self.fetch_from_url(
+            'https://drive.google.com/uc?export=download&id=1c39YI9QtpByGQ4V0UNNQtGqttEzS-eFV')
+        return result, tmpdir

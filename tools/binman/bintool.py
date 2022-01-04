@@ -11,6 +11,7 @@ import glob
 import importlib
 import multiprocessing
 import os
+import shutil
 import tempfile
 
 from patman import tools
@@ -127,15 +128,18 @@ class Bintool:
             if method == FETCH_ANY:
                 for try_method in FETCH_BIN, FETCH_BUILD:
                     print(f'- trying method: {FETCH_NAMES[try_method]}')
-                    fname = btool.fetch(try_method)
-                    if fname:
+                    result = btool.fetch(try_method)
+                    if result:
                         break
             else:
-                fname = btool.fetch(method)
-            if fname:
+                result = btool.fetch(method)
+            if result:
+                fname, tmpdir = result
                 dest = os.path.join(os.getenv('HOME'), 'bin', name)
                 print(f"- writing to '{dest}'")
                 tools.Run('mv', fname, dest)
+                if tmpdir:
+                    shutil.rmtree(tmpdir)
             else:
                 if method == FETCH_ANY:
                     print('- failed to fetch with all methods')
@@ -164,4 +168,8 @@ class Bintool:
         if not os.path.exists(fname):
             print(f"- File '{fname}' was not produced")
             return None
-        return fname
+        return fname, tmpdir
+
+    def fetch_from_url(self, url):
+        fname, tmpdir = tools.Download(url)
+        return fname, tmpdir
