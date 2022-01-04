@@ -29,7 +29,7 @@ class Bintoolfiptool(bintool.Bintool):
             'https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git',
             'fiptool',
             'tools/fiptool/fiptool')
-        return result, tmpdir
+        return fname, tmpdir
 
     def version(self):
         out = self.run_cmd('version').strip()

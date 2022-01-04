@@ -172,4 +172,5 @@ class Bintool:
 
     def fetch_from_url(self, url):
         fname, tmpdir = tools.Download(url)
+        tools.Run('chmod', 'a+x', fname)
         return fname, tmpdir

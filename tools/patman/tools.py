@@ -583,7 +583,7 @@ def PrintFullHelp(fname):
         pager = ['more']
     command.Run(*pager, fname)
 
-def c(url, tmpdir_pattern='.patman'):
+def Download(url, tmpdir_pattern='.patman'):
     """Download a file to a temporary directory
 
     Args:

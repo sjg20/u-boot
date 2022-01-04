@@ -188,6 +188,6 @@ class Bintoolcbfstool(bintool.Bintool):
     def fetch(self, method):
         if method != bintool.FETCH_BIN:
             return None
-        tmpdir, fname = self.fetch_from_url(
-            'https://drive.google.com/uc?export=download&id=1c39YI9QtpByGQ4V0UNNQtGqttEzS-eFV')
-        return result, tmpdir
+        fname, tmpdir = self.fetch_from_url(
+            'https://drive.google.com/uc?export=download&id=1IOnE0Qvy97d-0WOCwF64xBGpKSY2sMtJ')
+        return fname, tmpdir
