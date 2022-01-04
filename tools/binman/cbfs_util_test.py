@@ -16,6 +16,7 @@ import struct
 import tempfile
 import unittest
 
+from binman import bintool
 from binman import cbfs_util
 from binman.cbfs_util import CbfsWriter
 from binman import elf
@@ -50,6 +51,7 @@ class TestCbfs(unittest.TestCase):
             tools.Run('which', 'cbfstool')
         except:
             cls.have_cbfstool = False
+        cls.cbfstool = bintool.Bintool.create('cbfstool')
 
         cls.have_lz4 = True
         try:
@@ -177,19 +179,19 @@ class TestCbfs(unittest.TestCase):
         if not self.have_cbfstool or not self.have_lz4:
             return None
         cbfs_fname = os.path.join(self._indir, 'test.cbfs')
-        cbfs_util.cbfstool(cbfs_fname, 'create', '-m', arch, '-s', '%#x' % size)
+        self.cbfstool.create(cbfs_fname, size, arch)
         if base:
             base = [(1 << 32) - size + b for b in base]
-        cbfs_util.cbfstool(cbfs_fname, 'add', '-n', 'u-boot', '-t', 'raw',
-                           '-c', compress and compress[0] or 'none',
-                           '-f', tools.GetInputFilename(
-                               compress and 'compress' or 'u-boot.bin'),
-                           base=base[0] if base else None)
-        cbfs_util.cbfstool(cbfs_fname, 'add', '-n', 'u-boot-dtb', '-t', 'raw',
-                           '-c', compress and compress[1] or 'none',
-                           '-f', tools.GetInputFilename(
-                               compress and 'compress' or 'u-boot.dtb'),
-                           base=base[1] if base else None)
+        self.cbfstool.add_raw(
+            cbfs_fname, 'u-boot',
+            tools.GetInputFilename(compress and 'compress' or 'u-boot.bin'),
+            compress[0] if compress else None,
+            base[0] if base else None)
+        self.cbfstool.add_raw(
+            cbfs_fname, 'u-boot-dtb',
+            tools.GetInputFilename(compress and 'compress' or 'u-boot.dtb'),
+            compress[1] if compress else None,
+            base[1] if base else None)
         return cbfs_fname
 
     def _compare_expected_cbfs(self, data, cbfstool_fname):

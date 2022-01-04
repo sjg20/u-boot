@@ -122,3 +122,41 @@ class Bintoolcbfstool(bintool.Bintool):
         super().__init__(name)
         self.toolname = 'cbfstool'
         self.desc = 'Manipulate CBFS files'
+
+    def create(self, cbfs_fname, size, arch='x86'):
+        """Create a new CBFS
+
+        Args:
+            cbfs_fname (str): Filename of CBFS to create
+            size (int): Size of CBFS in bytes
+            arch (str): Architecture for which this CBFS is intended
+
+        Returns:
+            str: Tool output
+        """
+        args = [cbfs_fname, 'create', '-s', f'{size:#x}', '-m', arch]
+        return self.run_cmd(*args)
+
+    def add_raw(self, cbfs_fname, name, fname, compress=None, base=None):
+        """Add a raw file to the CBFS
+
+        Args:
+            cbfs_fname (str): Filename of CBFS to create
+            name (str): Name to use inside the CBFS
+            fname (str): Filename of file to add
+            compress (str): Compression to use (cbfs_util.COMPRESS_NAMES) or
+                None for None
+            base (int): Address to place the file, or None for anywhere
+
+        Returns:
+            str: Tool output
+        """
+        args = [cbfs_fname,
+                'add',
+                '-n', name,
+                '-t' 'raw',
+                '-f', fname,
+                '-c', compress or 'none']
+        if base:
+            args += ['-b', '{base:#x}']
+        return self.run_cmd(*args)
