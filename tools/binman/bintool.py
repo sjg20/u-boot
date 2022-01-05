@@ -131,17 +131,23 @@ class Bintool:
     @staticmethod
     def fetch_tools(method, names_to_fetch):
         col = terminal.Color()
-        if len(names_to_fetch) == 1 and names_to_fetch[0] == 'all':
+        skip_present = False
+        name_list = names_to_fetch
+        if len(names_to_fetch) == 1 and names_to_fetch[0] in ['all', 'missing']:
             name_list = Bintool.get_tool_list()
+            if names_to_fetch[0] == 'missing':
+                skip_present = True
             print(col.Color(col.YELLOW,
                             'Fetching tools: %s' % ' '.join(name_list)))
-        else:
-            name_list = names_to_fetch
-        fetched = 0
-        fail = 0
+        fetched = []
+        fail = []
+        present = []
         for name in name_list:
-            print(col.Color(col.YELLOW, 'Fetch: %s' % name))
             btool = Bintool.create(name)
+            if skip_present and btool.is_present():
+                present.append(name)
+                continue
+            print(col.Color(col.YELLOW, 'Fetch: %s' % name))
             if method == FETCH_ANY:
                 for try_method in FETCH_BIN, FETCH_BUILD:
                     print(f'- trying method: {FETCH_NAMES[try_method]}')
@@ -162,7 +168,7 @@ class Bintool:
             else:
                 result = btool.fetch(method)
             if result:
-                fetched += 1
+                fetched.append(name)
                 if result != True:
                     fname, tmpdir = result
                     dest = os.path.join(os.getenv('HOME'), 'bin', name)
@@ -171,14 +177,23 @@ class Bintool:
                     if tmpdir:
                         shutil.rmtree(tmpdir)
             elif not result:
-                fail += 1
+                fail.append(name)
                 if method == FETCH_ANY:
                     print('- failed to fetch with all methods')
                 else:
                     print(f"- method '{FETCH_NAMES[method]}' is not supported")
-        if names_to_fetch[0] == 'all':
-            print(col.Color(col.RED if fail else col.GREEN,
-                            f'Tools fetched: {fetched}, failures {fail}'))
+        if len(name_list) > 1:
+            if skip_present:
+                print(col.Color(col.GREEN,
+                                f'Already present: {len(present):2}: %s' %
+                                ' '.join(present)))
+            print(col.Color(col.GREEN,
+                            f'Tools fetched:   {len(fetched):2}: %s' %
+                            ' '.join(fetched)))
+            if fail:
+                print(col.Color(col.RED,
+                                f'Failures:        {len(fail):2}: %s' %
+                                ' '.join(fail)))
 
     def fetch(self, method):
         print(f"No method to fetch bintool '{self.name}'")
