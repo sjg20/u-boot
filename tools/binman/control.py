@@ -621,6 +621,9 @@ def Binman(args):
                 if args.list:
                     bintool.Bintool.list_all()
                 elif args.fetch:
+                    if not args.bintools:
+                        raise ValueError(
+                            "Please specify bintools to fetch or 'all'")
                     bintool.Bintool.fetch_tools(bintool.FETCH_ANY,
                                                 args.bintools)
                 else:

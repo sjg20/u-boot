@@ -40,8 +40,8 @@ class Bintoolmkimage(bintool.Bintool):
             args.append('-V')
         return self.run_cmd(*args)
 
-    def fetch(self):
-        print("Build U-Boot to get tools/mkimage or sudo apt install u-boot-tools")
+    def fetch(self, method):
+        return self.apt_install('u-boot-tools')
 
     def version(self):
         out = self.run(version=True).strip()

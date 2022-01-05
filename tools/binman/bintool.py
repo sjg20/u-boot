@@ -14,6 +14,7 @@ import os
 import shutil
 import tempfile
 
+from patman import terminal
 from patman import tools
 
 BINMAN_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -94,13 +95,19 @@ class Bintool:
                         self.get_path() or '(not found)'))
 
     @staticmethod
+    def get_tool_list():
+        files = glob.glob(os.path.join(BINMAN_DIR, 'btool/*'))
+        names = [os.path.splitext(os.path.basename(fname))[0]
+                 for fname in files]
+        return sorted(names)
+
+    @staticmethod
     def list_all():
         """List all the bintools known to binman"""
-        files = glob.glob(os.path.join(BINMAN_DIR, 'btool/*'))
+        names = Bintool.get_tool_list()
         print(FORMAT % ('Name', 'Version', 'Description', 'Path'))
         print(FORMAT % ('-' * 15,'-' * 12, '-' * 25, '-' * 30))
-        for fname in files:
-            name = os.path.splitext(os.path.basename(fname))[0]
+        for name in names:
             btool = Bintool.create(name)
             btool.show()
 
@@ -121,9 +128,18 @@ class Bintool:
         return tools.tool_find(self.name)
 
     @staticmethod
-    def fetch_tools(method, name_list):
+    def fetch_tools(method, names_to_fetch):
+        col = terminal.Color()
+        if len(names_to_fetch) == 1 and names_to_fetch[0] == 'all':
+            name_list = Bintool.get_tool_list()
+            print(col.Color(col.YELLOW,
+                            'Fetching tools: %s' % ' '.join(name_list)))
+        else:
+            name_list = names_to_fetch
+        fetched = 0
+        fail = 0
         for name in name_list:
-            print('Fetch: %s' % name)
+            print(col.Color(col.YELLOW, 'Fetch: %s' % name))
             btool = Bintool.create(name)
             if method == FETCH_ANY:
                 for try_method in FETCH_BIN, FETCH_BUILD:
@@ -134,17 +150,23 @@ class Bintool:
             else:
                 result = btool.fetch(method)
             if result:
-                fname, tmpdir = result
-                dest = os.path.join(os.getenv('HOME'), 'bin', name)
-                print(f"- writing to '{dest}'")
-                tools.Run('mv', fname, dest)
-                if tmpdir:
-                    shutil.rmtree(tmpdir)
-            else:
+                fetched += 1
+                if result != True:
+                    fname, tmpdir = result
+                    dest = os.path.join(os.getenv('HOME'), 'bin', name)
+                    print(f"- writing to '{dest}'")
+                    tools.Run('mv', fname, dest)
+                    if tmpdir:
+                        shutil.rmtree(tmpdir)
+            elif not result:
+                fail += 1
                 if method == FETCH_ANY:
                     print('- failed to fetch with all methods')
                 else:
                     print(f"- method '{FETCH_NAMES[method]}' is not supported")
+        if names_to_fetch[0] == 'all':
+            print(col.Color(col.RED if fail else col.GREEN,
+                            f'Tools fetched: {fetched}, failures {fail}'))
 
     def fetch(self, method):
         print(f"No method to fetch bintool '{self.name}'")
@@ -174,3 +196,13 @@ class Bintool:
         fname, tmpdir = tools.Download(url)
         tools.Run('chmod', 'a+x', fname)
         return fname, tmpdir
+
+    def fetch_from_drive(self, drive_id):
+        url = f'https://drive.google.com/uc?export=download&id={drive_id}'
+        return self.fetch_from_url(url)
+
+    def apt_install(self, package):
+        args = ['sudo', 'apt', 'install', '-y', package]
+        print('- %s' % ' '.join(args))
+        tools.Run(*args)
+        return True

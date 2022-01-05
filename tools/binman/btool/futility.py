@@ -136,3 +136,10 @@ class Bintoolfutility(bintool.Bintool):
     def version(self):
         out = self.run_cmd('version').strip()
         return out
+
+    def fetch(self, method):
+        if method != bintool.FETCH_BIN:
+            return None
+        fname, tmpdir = self.fetch_from_drive(
+            '1hdsInzsE4aJbmBeJ663kYgjOQyW1I-E0')
+        return fname, tmpdir

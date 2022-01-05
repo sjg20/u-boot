@@ -594,7 +594,7 @@ def Download(url, tmpdir_pattern='.patman'):
             Full path to the downloaded archive file in that directory,
                 or None if there was an error while downloading
     """
-    print('Downloading: %s' % url)
+    print('- downloading: %s' % url)
     leaf = url.split('/')[-1]
     tmpdir = tempfile.mkdtemp(tmpdir_pattern)
     response = urllib.request.urlopen(url)
@@ -620,6 +620,8 @@ def Download(url, tmpdir_pattern='.patman'):
         status = status + chr(8) * (len(status) + 1)
         print(status, end=' ')
         sys.stdout.flush()
+    print('\r', end='')
+    sys.stdout.flush()
     fd.close()
     if done != size:
         print('Error, failed to download')
