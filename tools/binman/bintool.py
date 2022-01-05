@@ -13,6 +13,7 @@ import multiprocessing
 import os
 import shutil
 import tempfile
+import urllib.error
 
 from patman import terminal
 from patman import tools
@@ -144,7 +145,18 @@ class Bintool:
             if method == FETCH_ANY:
                 for try_method in FETCH_BIN, FETCH_BUILD:
                     print(f'- trying method: {FETCH_NAMES[try_method]}')
-                    result = btool.fetch(try_method)
+                    result = None
+                    try:
+                        result = btool.fetch(try_method)
+                    except urllib.error.URLError as uerr:
+                        if isinstance(uerr.reason, str):
+                            message = uerr.reason
+                        else:
+                            message = uerr.reason.exception
+                        print(col.Color(col.RED, f'- {message}'))
+
+                    except Exception as exc:
+                        print(f'Exception: {exc}')
                     if result:
                         break
             else:

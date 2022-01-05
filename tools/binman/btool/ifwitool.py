@@ -136,6 +136,7 @@ class Bintoolifwitool(bintool.Bintool):
     def fetch(self, method):
         if method != bintool.FETCH_BIN:
             return None
+        print(1/0)
         fname, tmpdir = self.fetch_from_drive(
             '18JDghOxlt2Hcc5jv51O1t6uNVHQ0XKJS')
         return fname, tmpdir
