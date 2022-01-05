@@ -314,6 +314,28 @@ def GetTargetCompileTool(name, cross_compile=None):
         target_name = name
     return target_name, extra_args
 
+def tool_find(name):
+    """Search the current path for a tool
+
+    This uses both PATH and any value from SetToolPaths() to search for a tool
+
+    Args:
+        name (str): Name of tool to locate
+
+    Returns:
+        str: Full path to tool if found, else None
+    """
+    name = os.path.expanduser(name)  # Expand paths containing ~
+    paths = []
+    pathvar = os.environ.get('PATH')
+    if pathvar:
+        paths = pathvar.split(':')
+    paths += tool_search_paths
+    for path in paths:
+        fname = os.path.join(path, name)
+        if os.path.exists(fname):
+            return fname
+
 def Run(name, *args, **kwargs):
     """Run a tool with some arguments
 
