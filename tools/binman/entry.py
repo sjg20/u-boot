@@ -9,6 +9,7 @@ import importlib
 import os
 import sys
 
+from binman import bintool
 from dtoc import fdt_util
 from patman import tools
 from patman.tools import ToHex, ToHexSize
@@ -104,6 +105,7 @@ class Entry(object):
         self.external = False
         self.allow_missing = False
         self.allow_fake = False
+        self.bintools = {}
 
     @staticmethod
     def FindEntryClass(etype, expanded):
@@ -1045,3 +1047,22 @@ features to produce new behaviours.
                 value: Help text
         """
         pass
+
+    def AddBintools(self, tools):
+        """Add the bintools used by this entry type
+
+        Args:
+            tools (dict of Bintool):
+        """
+        pass
+
+    @classmethod
+    def AddBintool(self, tools, name):
+        """Add a new bintool to the tools used by this etype
+
+        Args:
+            name: Name of the tool
+        """
+        btool = bintool.Bintool.create(name)
+        tools[name] = btool
+        return btool
