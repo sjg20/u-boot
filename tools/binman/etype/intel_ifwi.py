@@ -59,15 +59,15 @@ class Entry_intel_ifwi(Entry_blob_ext):
         if self._convert_fit:
             inname = self._pathname
             outname = tools.GetOutputFilename('ifwi.bin')
-            tools.RunIfwiTool(inname, tools.CMD_CREATE, outname)
+            self.ifwitool.create_ifwi(inname, outname)
             self._filename = 'ifwi.bin'
             self._pathname = outname
         else:
             # Provide a different code path here to ensure we have test coverage
             outname = self._pathname
 
-        # Delete OBBP if it is there, then add the required new items.
-        tools.RunIfwiTool(outname, tools.CMD_DELETE, subpart='OBBP')
+        # Delete OBBP if it is there, then add the required new items
+        self.ifwitool.delete_subpart(outname, 'OBBP')
 
         for entry in self._ifwi_entries.values():
             # First get the input data and put it in a file
@@ -76,9 +76,9 @@ class Entry_intel_ifwi(Entry_blob_ext):
             input_fname = tools.GetOutputFilename('input.%s' % uniq)
             tools.WriteFile(input_fname, data)
 
-            tools.RunIfwiTool(outname,
-                tools.CMD_REPLACE if entry._ifwi_replace else tools.CMD_ADD,
-                input_fname, entry._ifwi_subpart, entry._ifwi_entry_name)
+            self.ifwitool.add_subpart(
+                outname, entry._ifwi_subpart, entry._ifwi_entry_name,
+                input_fname, entry._ifwi_replace)
 
         self.ReadBlobContents()
         return True
@@ -132,3 +132,6 @@ class Entry_intel_ifwi(Entry_blob_ext):
         if not self.missing:
             for entry in self._ifwi_entries.values():
                 entry.WriteSymbols(self)
+
+    def AddBintools(self, tools):
+        self.ifwitool = self.AddBintool(tools, 'ifwitool')
