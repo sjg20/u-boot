@@ -37,13 +37,18 @@ class Entry_blob(Entry):
         super().__init__(section, etype, node)
         self._filename = fdt_util.GetString(self._node, 'filename', self.etype)
 
-    def ObtainContents(self):
-        if self.allow_fake and not pathlib.Path(self._filename).is_file():
-            with open(self._filename, "wb") as out:
+    def CheckFakeBlob(self, fname):
+        if self.allow_fake and not pathlib.Path(fname).is_file():
+            outfname = tools.GetOutputFilename(fname)
+            with open(outfname, "wb") as out:
                 out.truncate(1024)
             self.faked = True
+            return outfname
+        return fname
 
+    def ObtainContents(self):
         self._filename = self.GetDefaultFilename()
+        self._filename = self.CheckFakeBlob(self._filename)
         self._pathname = tools.GetInputFilename(self._filename,
             self.external and self.section.GetAllowMissing())
         # Allow the file to be missing
