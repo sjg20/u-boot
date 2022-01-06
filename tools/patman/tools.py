@@ -357,6 +357,7 @@ def Run(name, *args, **kwargs):
         for_host = kwargs.get('for_host', False)
         for_target = kwargs.get('for_target', not for_host)
         allow_tool_missing = kwargs.get('allow_tool_missing')
+        raise_on_error = kwargs.get('raise_on_error', True)
         env = None
         if tool_search_paths:
             env = dict(os.environ)
@@ -372,9 +373,11 @@ def Run(name, *args, **kwargs):
         result = command.RunPipe([all_args], capture=True, capture_stderr=True,
                                  env=env, raise_on_error=False, binary=binary)
         if result.return_code:
-            raise ValueError("Error %d running '%s': %s" %
-               (result.return_code,' '.join(all_args),
-                result.stderr))
+            if raise_on_error:
+                raise ValueError("Error %d running '%s': %s" %
+                (result.return_code,' '.join(all_args),
+                    result.stderr))
+            return result.stderr
         return result.stdout
     except ValueError:
         if env and not PathHasFile(env['PATH'], name):
