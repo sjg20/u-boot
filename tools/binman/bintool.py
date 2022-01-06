@@ -39,6 +39,8 @@ FETCH_NAMES = {
 # Status of tool fetching
 FETCHED, FAIL, PRESENT, STATUS_COUNT = range(4)
 
+DOWNLOAD_DESTDIR = os.path.join(os.getenv('HOME'), 'bin')
+
 class Bintool:
     """Tool which operates on binaries to help produce entry contents
 
@@ -181,7 +183,7 @@ class Bintool:
             return FAIL
         if result is not True:
             fname, tmpdir = result
-            dest = os.path.join(os.getenv('HOME'), 'bin', name)
+            dest = os.path.join(DOWNLOAD_DESTDIR, name)
             print(f"- writing to '{dest}'")
             tools.Run('mv', fname, dest)
             if tmpdir:

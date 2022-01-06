@@ -17,6 +17,7 @@ import struct
 import sys
 import tempfile
 import unittest
+import unittest.mock
 
 from binman import bintool
 from binman import cbfs_util
@@ -4970,8 +4971,25 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertRegex(err, "Image 'main-section'.*faked.*: blob-ext-list")
 
     def testFetchTool(self):
-        args = ['tool', '--fetch', 'aml_encrypt_g12a']
-        self._DoBinman(*args)
+        def fake_download(url):
+            tools.WriteFile(fname, expected)
+            return fname, dirname
+
+        expected = b'this is a test'
+        dirname = os.path.join(self._indir, 'download_dir')
+        os.mkdir(dirname)
+        fname = os.path.join(dirname, 'downloaded')
+        destdir = os.path.join(self._indir, 'dest_dir')
+        os.mkdir(destdir)
+        dest_fname = os.path.join(destdir, 'aml_encrypt_g12a')
+        with unittest.mock.patch.object(bintool, 'DOWNLOAD_DESTDIR', destdir):
+            with unittest.mock.patch.object(tools, 'Download',
+                                            side_effect=fake_download):
+                args = ['tool', '--fetch', 'aml_encrypt_g12a']
+                self._DoBinman(*args)
+        self.assertTrue(os.path.exists(dest_fname))
+        data = tools.ReadFile(dest_fname)
+        self.assertEqual(expected, data)
 
     def testAmlEncrypt(self):
         with test_util.capture_sys_output() as (stdout, stderr):
