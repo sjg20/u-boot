@@ -4981,7 +4981,6 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertRegex(
             err,
             "Image '.*' has faked external blobs and is non-functional: .*")
-        os.remove('binman_faking_test_blob')
 
 
 if __name__ == "__main__":
