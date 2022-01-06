@@ -1014,7 +1014,7 @@ features to produce new behaviours.
         self.uncomp_data = indata
         if self.compress != 'none':
             self.uncomp_size = len(indata)
-        data = comp_util.Compress(indata, self.compress)
+        data = comp_util.compress(indata, self.compress)
         return data
 
     @classmethod
