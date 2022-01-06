@@ -524,8 +524,8 @@ static int fit_extract_data(struct image_tool_params *params, const char *fname)
 	/* Check if an offset for the external data was set. */
 	if (params->external_offset > 0) {
 		if (params->external_offset < new_size) {
-			debug("External offset %x overlaps FIT length %x\n",
-			      params->external_offset, new_size);
+			printf("External offset %x overlaps FIT length %x\n",
+                               params->external_offset, new_size);
 			ret = -EINVAL;
 			goto err;
 		}

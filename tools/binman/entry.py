@@ -7,6 +7,7 @@
 from collections import namedtuple
 import importlib
 import os
+import pathlib
 import sys
 
 from binman import bintool
@@ -974,6 +975,25 @@ features to produce new behaviours.
         """
         if self.missing:
             missing_list.append(self)
+
+    def check_fake_blob(self, fname):
+        """If the file is missing and the entry allows fake blobs, fake it
+
+        Sets self.faked to True if faked
+
+        Args:
+            fname (str): Filename to check
+
+        Returns:
+            fname (str): Filename of faked file
+        """
+        if self.allow_fake and not pathlib.Path(fname).is_file():
+            outfname = tools.GetOutputFilename(fname)
+            with open(outfname, "wb") as out:
+                out.truncate(1024)
+            self.faked = True
+            return outfname
+        return fname
 
     def CheckFakedBlobs(self, faked_blobs_list):
         """Check if any entries in this section have faked external blobs

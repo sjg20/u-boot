@@ -17,6 +17,8 @@ import struct
 import sys
 import tempfile
 import unittest
+import unittest.mock
+import urllib.error
 
 from binman import bintool
 from binman import cbfs_util
@@ -4969,9 +4971,44 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         err = stderr.getvalue()
         self.assertRegex(err, "Image 'main-section'.*faked.*: blob-ext-list")
 
-    def testFetchTool(self):
-        args = ['tool', '--fetch', 'aml_encrypt_g12a']
-        self._DoBinman(*args)
+    def testListBintools(self):
+        args = ['tool', '--list']
+        with test_util.capture_sys_output() as (stdout, _):
+            self._DoBinman(*args)
+        out = stdout.getvalue().splitlines()
+        self.assertTrue(len(out) >= 2)
+
+    def testFetchBintools(self):
+        def fail_download(url):
+            """Take the tools.Download() function by raising an exception"""
+            raise urllib.error.URLError('my error')
+
+        args = ['tool']
+        with self.assertRaises(ValueError) as e:
+            self._DoBinman(*args)
+        self.assertIn("Invalid arguments to 'tool' subcommand",
+                      str(e.exception))
+
+        args = ['tool', '--fetch']
+        with self.assertRaises(ValueError) as e:
+            self._DoBinman(*args)
+        self.assertIn('Please specify bintools to fetch', str(e.exception))
+
+        args = ['tool', '--fetch', '_testing']
+        with unittest.mock.patch.object(tools, 'Download',
+                                        side_effect=fail_download):
+            with test_util.capture_sys_output() as (stdout, _):
+                self._DoBinman(*args)
+        self.assertIn('failed to fetch with all methods', stdout.getvalue())
+
+    def testInvalidCompress(self):
+        with self.assertRaises(ValueError) as e:
+            comp_util.compress(b'', 'invalid')
+        self.assertIn("Unknown algorithm 'invalid'", str(e.exception))
+
+        with self.assertRaises(ValueError) as e:
+            comp_util.decompress(b'1234', 'invalid')
+        self.assertIn("Unknown algorithm 'invalid'", str(e.exception))
 
     def testAmlEncrypt(self):
         with test_util.capture_sys_output() as (_, stderr):

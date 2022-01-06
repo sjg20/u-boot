@@ -329,7 +329,8 @@ def tool_find(name):
     pathvar = os.environ.get('PATH')
     if pathvar:
         paths = pathvar.split(':')
-    paths += tool_search_paths
+    if tool_search_paths:
+        paths += tool_search_paths
     for path in paths:
         fname = os.path.join(path, name)
         if os.path.exists(fname):
@@ -376,7 +377,7 @@ def run_result(name, *args, **kwargs):
             if raise_on_error:
                 raise ValueError("Error %d running '%s': %s" %
                 (result.return_code,' '.join(all_args),
-                    result.stderr))
+                    result.stderr or result.stdout))
         return result
     except ValueError:
         if env and not PathHasFile(env['PATH'], name):

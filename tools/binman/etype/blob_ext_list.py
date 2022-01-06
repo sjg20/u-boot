@@ -37,7 +37,7 @@ class Entry_blob_ext_list(Entry_blob):
         missing = False
         pathnames = []
         for fname in self._filenames:
-            fname = self.CheckFakeBlob(fname)
+            fname = self.check_fake_blob(fname)
             pathname = tools.GetInputFilename(
                 fname, self.external and self.section.GetAllowMissing())
             # Allow the file to be missing

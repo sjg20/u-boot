@@ -635,7 +635,7 @@ def Binman(args):
                     bintool.Bintool.fetch_tools(bintool.FETCH_ANY,
                                                 args.bintools)
                 else:
-                    raise ValueError("Invalid argments to 'tool' subcommand")
+                    raise ValueError("Invalid arguments to 'tool' subcommand")
         except:
             raise
         finally:
