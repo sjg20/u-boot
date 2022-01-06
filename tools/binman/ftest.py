@@ -4974,7 +4974,13 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self._DoBinman(*args)
 
     def testAmlEncrypt(self):
-        self._DoTestFile('213_aml_encrypt.dts', allow_missing=True)
+        with test_util.capture_sys_output() as (_, stderr):
+            self._DoTestFile('213_aml_encrypt.dts', allow_missing=True,
+                                allow_fake_blobs=True)
+        err = stderr.getvalue()
+        self.assertRegex(
+            err,
+            "Image '.*' has faked external blobs and is non-functional: .*")
 
 
 if __name__ == "__main__":

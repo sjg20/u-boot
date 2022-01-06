@@ -335,7 +335,7 @@ def tool_find(name):
         if os.path.exists(fname):
             return fname
 
-def Run(name, *args, **kwargs):
+def run_result(name, *args, **kwargs):
     """Run a tool with some arguments
 
     This runs a 'tool', which is a program used by binman to process files and
@@ -377,8 +377,7 @@ def Run(name, *args, **kwargs):
                 raise ValueError("Error %d running '%s': %s" %
                 (result.return_code,' '.join(all_args),
                     result.stderr))
-            return result.stderr
-        return result.stdout
+        return result
     except ValueError:
         if env and not PathHasFile(env['PATH'], name):
             if allow_tool_missing:
@@ -390,6 +389,27 @@ def Run(name, *args, **kwargs):
                  msg += " (e.g. from package '%s')" % package
             raise ValueError(msg)
         raise
+
+def Run(name, *args, **kwargs):
+    """Run a tool with some arguments
+
+    This runs a 'tool', which is a program used by binman to process files and
+    perhaps produce some output. Tools can be located on the PATH or in a
+    search path.
+
+    Args:
+        name: Command name to run
+        args: Arguments to the tool
+        for_host: True to resolve the command to the version for the host
+        for_target: False to run the command as-is, without resolving it
+                   to the version for the compile target
+
+    Returns:
+        CommandResult object
+    """
+    result = run_result(name, *args, **kwargs)
+    if result is not None:
+        return result.stdout
 
 def Filename(fname):
     """Resolve a file path to an absolute path.

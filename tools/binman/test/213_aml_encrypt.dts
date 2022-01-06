@@ -11,6 +11,8 @@
 			aml-algo = "g12a";
 			aml-op = "bootmk";
 			aml-level = "v3";
+			aml-compress = "lz4";
+			aml-type = "bl30";
 
 			aml-bl2 {
 				filename = "bl2.n.bin.sig";
@@ -22,7 +24,8 @@
 				filename = "bl31.img.enc";
 			};
 			aml-bl33 {
-				filename = "bl33.bin.enc";
+				type = "_testing";
+				return-contents-later;
 			};
 			aml-ddrfw {
 				missing-msg = "aml-ddrfw";
@@ -34,5 +37,15 @@
 					"lpddr3_1d.fw";
 			};
 		};
+
+		bl31 {
+			type = "aml-encrypt";
+			aml-algo = "g12a";
+			aml-op = "bl3sig";
+			aml-input = "bl31.img";
+			aml-level = "v3";
+			aml-type = "bl31";
+		};
+
 	};
 };
