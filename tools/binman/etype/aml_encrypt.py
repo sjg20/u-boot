@@ -25,6 +25,8 @@ class Entry_aml_encrypt(Entry_section):
         self._aml_algo = None
         self._aml_op = None
         self._aml_level = None
+        self.g12a = None
+        self.g12b = None
 
     def ReadNode(self):
         super().ReadNode()
@@ -34,9 +36,6 @@ class Entry_aml_encrypt(Entry_section):
         self._aml_input = fdt_util.GetString(self._node, 'aml-input')
         self._aml_compress = fdt_util.GetString(self._node, 'aml-compress')
         self._aml_type = fdt_util.GetString(self._node, 'aml-type')
-        #self._aml_ddrfw = {}
-        #for i in range(1, DDR_FW_COUNT + 1):
-            #self._aml_ddrfw[i] = fdt_util.GetString(self._node, f'aml-ddrfw{i}')
         self.ReadEntries()
 
     def ReadEntries(self):
@@ -52,10 +51,7 @@ class Entry_aml_encrypt(Entry_section):
     def BuildSectionData(self, required):
         uniq = self.GetUniqueName()
         output_fname = tools.GetOutputFilename('aml-out.%s' % uniq)
-        args = [f'aml_encrypt_{self._aml_algo}',
-            f'--{self._aml_op}',
-            '--output', output_fname
-            ]
+        args = [f'--{self._aml_op}', '--output', output_fname]
         if self._aml_level:
             args += ['--level', f'{self._aml_level}']
         if self._aml_compress:
@@ -98,7 +94,9 @@ class Entry_aml_encrypt(Entry_section):
             return b''
 
         tout.Debug(f"Node '{self._node.path}': running: %s" % ' '.join(args))
-        tools.Run(*args)
+        to_run = self.g12a if self._aml_algo == 'g12a' else self.g12b
+
+        out = to_run.run_cmd(*args)
 
         # If an input file (or subnode!) is providing the input, the tools
         # writes to the requested output file. Otherwise it uses the output file
@@ -108,11 +106,11 @@ class Entry_aml_encrypt(Entry_section):
             real_outfile = output_fname
         else:
             real_outfile = f'{output_fname}.sd.bin'
-        data = tools.ReadFile(real_outfile)
+        if out is not None:
+            data = tools.ReadFile(real_outfile)
+        else:
+            data = tools.GetBytes(0, 1024)
         return data
-
-    def SetAllowMissing(self, allow_missing):
-        self.allow_missing = allow_missing
 
     def SetImagePos(self, image_pos):
         Entry.SetImagePos(self, image_pos)
@@ -122,3 +120,7 @@ class Entry_aml_encrypt(Entry_section):
 
     def CheckEntries(self):
         Entry.CheckEntries(self)
+
+    def AddBintools(self, tools):
+        self.g12a = self.AddBintool(tools, 'aml_encrypt_g12a')
+        self.g12b = self.AddBintool(tools, 'aml_encrypt_g12b')

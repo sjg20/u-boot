@@ -45,7 +45,8 @@ class Bintoollzma_alone(bintool.Bintool):
         super().__init__(name, 'lzma_alone compression')
 
     def version(self):
-        lines = self.run_cmd('', raise_on_error=False).strip().splitlines()
+        out = self.run_cmd_result('', raise_on_error=False).stderr.strip()
+        lines = out.splitlines()
         if not lines:
             return super().version()
         out = lines[0]
