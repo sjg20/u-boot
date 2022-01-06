@@ -10,6 +10,7 @@ import os
 import sys
 
 from binman import bintool
+from binman import comp_util
 from dtoc import fdt_util
 from patman import tools
 from patman.tools import ToHex, ToHexSize
@@ -1013,7 +1014,7 @@ features to produce new behaviours.
         self.uncomp_data = indata
         if self.compress != 'none':
             self.uncomp_size = len(indata)
-        data = tools.Compress(indata, self.compress)
+        data = comp_util.Compress(indata, self.compress)
         return data
 
     @classmethod
