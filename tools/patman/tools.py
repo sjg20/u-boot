@@ -329,7 +329,8 @@ def tool_find(name):
     pathvar = os.environ.get('PATH')
     if pathvar:
         paths = pathvar.split(':')
-    paths += tool_search_paths
+    if tool_search_paths:
+        paths += tool_search_paths
     for path in paths:
         fname = os.path.join(path, name)
         if os.path.exists(fname):

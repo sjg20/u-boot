@@ -4970,7 +4970,14 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         err = stderr.getvalue()
         self.assertRegex(err, "Image 'main-section'.*faked.*: blob-ext-list")
 
-    def testFetchTool(self):
+    def testListBintools(self):
+        args = ['tool', '--list']
+        with test_util.capture_sys_output() as (stdout, _):
+            self._DoBinman(*args)
+        out = stdout.getvalue().splitlines()
+        self.assertTrue(len(out) >= 2)
+
+    def testFetchBintool(self):
         def fake_download(url):
             tools.WriteFile(fname, expected)
             return fname, dirname
