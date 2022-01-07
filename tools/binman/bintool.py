@@ -115,6 +115,7 @@ class Bintool:
         files = glob.glob(os.path.join(BINMAN_DIR, 'btool/*'))
         names = [os.path.splitext(os.path.basename(fname))[0]
                  for fname in files]
+        names = [name for name in names if name[0] != '_']
         return sorted(names)
 
     @staticmethod
@@ -143,12 +144,10 @@ class Bintool:
         """
         return tools.tool_find(self.name)
 
-    @staticmethod
-    def fetch_tool(name, method, col, skip_present):
+    def fetch_tool(self, method, col, skip_present):
         """Fetch a single tool
 
         Args:
-            name (str): Name of tool to fetch, e.g. 'futility'
             method (FETCH_...): Method to use
             col (terminal.Color): Color terminal object
             skip_present (boo;): Skip fetching if it is already present
@@ -156,34 +155,34 @@ class Bintool:
         Returns:
             int: Result of fetch either FETCHED, FAIL, PRESENT
         """
-        btool = Bintool.create(name)
-        if skip_present and btool.is_present():
+        def try_fetch(meth):
+            res = None
+            try:
+                res = self.fetch(meth)
+            except urllib.error.URLError as uerr:
+                message = uerr.reason
+                print(col.Color(col.RED, f'- {message}'))
+
+            except ValueError as exc:
+                print(f'Exception: {exc}')
+            return res
+
+        if skip_present and self.is_present():
             return PRESENT
-        print(col.Color(col.YELLOW, 'Fetch: %s' % name))
+        print(col.Color(col.YELLOW, 'Fetch: %s' % self.name))
         if method == FETCH_ANY:
             for try_method in FETCH_BIN, FETCH_BUILD:
                 print(f'- trying method: {FETCH_NAMES[try_method]}')
-                result = None
-                try:
-                    result = btool.fetch(try_method)
-                except urllib.error.URLError as uerr:
-                    if isinstance(uerr.reason, str):
-                        message = uerr.reason
-                    else:
-                        message = uerr.reason.exception
-                    print(col.Color(col.RED, f'- {message}'))
-
-                except ValueError as exc:
-                    print(f'Exception: {exc}')
+                result = try_fetch(try_method)
                 if result:
                     break
         else:
-            result = btool.fetch(method)
+            result = try_fetch(method)
         if not result:
             return FAIL
         if result is not True:
             fname, tmpdir = result
-            dest = os.path.join(DOWNLOAD_DESTDIR, name)
+            dest = os.path.join(DOWNLOAD_DESTDIR, self.name)
             print(f"- writing to '{dest}'")
             tools.Run('mv', fname, dest)
             if tmpdir:
@@ -219,7 +218,8 @@ class Bintool:
                             'Fetching tools:      %s' % ' '.join(name_list)))
         status = collections.defaultdict(list)
         for name in name_list:
-            result = Bintool.fetch_tool(name, method, col, skip_present)
+            btool = Bintool.create(name)
+            result = btool.fetch_tool(method, col, skip_present)
             status[result].append(name)
             if result == FAIL:
                 if method == FETCH_ANY:
