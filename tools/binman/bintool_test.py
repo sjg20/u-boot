@@ -24,13 +24,13 @@ class TestBintool(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create a temporary directory for test files
-        cls._indir = tempfile.mkdtemp(prefix='cbfs_util.')
+        cls._indir = tempfile.mkdtemp(prefix='bintool.')
 
     @classmethod
     def tearDownClass(cls):
         """Remove the temporary input directory and its contents"""
-        if cls._indir:
-            shutil.rmtree(cls._indir)
+        #if cls._indir:
+            #shutil.rmtree(cls._indir)
         cls._indir = None
 
     def test_missing_btype(self):
@@ -72,6 +72,7 @@ class TestBintool(unittest.TestCase):
     def test_fetch_url_err(self):
         """Test an error while fetching a tool from a URL"""
         def fail_download(url):
+            """Take the tools.Download() function by raising an exception"""
             raise urllib.error.URLError('my error')
 
         btest = Bintool.create('_testing')
@@ -98,6 +99,7 @@ class TestBintool(unittest.TestCase):
     def test_fetch_method(self):
         """Test fetching using a particular method"""
         def fail_download(url):
+            """Take the tools.Download() function by raising an exception"""
             raise urllib.error.URLError('my error')
 
         btest = Bintool.create('_testing')
@@ -111,6 +113,7 @@ class TestBintool(unittest.TestCase):
     def test_fetch_pass_fail(self):
         """Test fetching multiple tools with some passing and some failing"""
         def handle_download(url):
+            """Take the tools.Download() function by writing a file"""
             if self.seq:
                 raise urllib.error.URLError('not found')
             self.seq += 1
@@ -145,6 +148,10 @@ class TestBintool(unittest.TestCase):
 
     def check_fetch_all(self, method):
         def fake_fetch(method, col, skip_present):
+            """Fakes the Binutils.fetch() function
+
+            Returns FETCHED and FAIL on alternate calls
+            """
             self.seq += 1
             result = bintool.FETCHED if self.seq & 1 else bintool.FAIL
             self.count[result] += 1
@@ -204,6 +211,38 @@ class TestBintool(unittest.TestCase):
         present = [line for line in lines if 'Already present:' in line].pop()
         self.assertIn(f'{num_tools - 1}: ', fetched)
         self.assertIn(f'1: ', present)
+
+    def check_build_method(self, write_file):
+        def fake_run(*cmd):
+            if cmd[0] == 'make':
+                # See Bintool.build_from_git()
+                tmpdir = cmd[2]
+                self.fname = os.path.join(tmpdir, 'pathname')
+                if write_file:
+                    tools.WriteFile(self.fname, b'hello')
+
+        btest = Bintool.create('_testing')
+        col = terminal.Color()
+        self.fname = None
+        with unittest.mock.patch.object(bintool, 'DOWNLOAD_DESTDIR',
+                                        self._indir):
+            with unittest.mock.patch.object(tools, 'Run', side_effect=fake_run):
+                with test_util.capture_sys_output() as (stdout, _):
+                    btest.fetch_tool(bintool.FETCH_BUILD, col, False)
+        fname = os.path.join(self._indir, '_testing')
+        return fname if write_file else self.fname, stdout.getvalue()
+
+    def test_build_method(self):
+        """Test fetching using the build method"""
+        fname, stdout = self.check_build_method(write_file=True)
+        self.assertTrue(os.path.exists(fname))
+        self.assertIn(f"writing to '{fname}", stdout)
+
+    def test_build_method_fail(self):
+        """Test fetching using the build method when no file is produced"""
+        fname, stdout = self.check_build_method(write_file=False)
+        self.assertFalse(os.path.exists(fname))
+        self.assertIn(f"File '{fname}' was not produced", stdout)
 
 
 if __name__ == "__main__":

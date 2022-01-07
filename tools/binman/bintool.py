@@ -184,7 +184,7 @@ class Bintool:
             fname, tmpdir = result
             dest = os.path.join(DOWNLOAD_DESTDIR, self.name)
             print(f"- writing to '{dest}'")
-            tools.Run('mv', fname, dest)
+            shutil.move(fname, dest)
             if tmpdir:
                 shutil.rmtree(tmpdir)
         return FETCHED

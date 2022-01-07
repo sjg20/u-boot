@@ -67,11 +67,11 @@ class Bintoolfiptool(bintool.Bintool):
     def fetch(self, method):
         if method != bintool.FETCH_BUILD:
             return None
-        fname, tmpdir = self.build_from_git(
+        result = self.build_from_git(
             'https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git',
             'fiptool',
             'tools/fiptool/fiptool')
-        return fname, tmpdir
+        return result
 
     def version(self):
         out = self.run_cmd('version').strip()

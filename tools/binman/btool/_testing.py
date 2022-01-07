@@ -20,7 +20,8 @@ class Bintool_testing(bintool.Bintool):
         return '123'
 
     def fetch(self, method):
-        if method != bintool.FETCH_BIN:
-            return None
-        fname, tmpdir = self.fetch_from_drive('junk')
-        return fname, tmpdir
+        if method == bintool.FETCH_BIN:
+            return self.fetch_from_drive('junk')
+            return fname, tmpdir
+        elif method == bintool.FETCH_BUILD:
+            return self.build_from_git('url', 'target', 'pathname')
