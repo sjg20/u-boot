@@ -12,6 +12,8 @@ class Bintool_testing(bintool.Bintool):
     def __init__(self, name):
         super().__init__(name, 'testing')
         self.present = False
+        self.install = False
+        self.disable = False
 
     def is_present(self):
         return self.present
@@ -20,8 +22,11 @@ class Bintool_testing(bintool.Bintool):
         return '123'
 
     def fetch(self, method):
+        if self.disable:
+            return super().fetch(method)
         if method == bintool.FETCH_BIN:
+            if self.install:
+                return self.apt_install('package')
             return self.fetch_from_drive('junk')
-            return fname, tmpdir
         elif method == bintool.FETCH_BUILD:
             return self.build_from_git('url', 'target', 'pathname')

@@ -69,32 +69,41 @@ class TestBintool(unittest.TestCase):
         self.assertEqual(bintool.PRESENT,
                          btest.fetch_tool(bintool.FETCH_ANY, col, True))
 
+    def check_fetch_url(self, fake_download, method):
+        """Check the output from fetching a tool
+
+        Args:
+            fake_download (function): Function to call instead of
+                tools.Download()
+            method (bintool.FETCH_...: Fetch method to use
+
+        Returns:
+            str: Contents of stdout
+        """
+        btest = Bintool.create('_testing')
+        col = terminal.Color()
+        with unittest.mock.patch.object(tools, 'Download',
+                                        side_effect=fake_download):
+            with test_util.capture_sys_output() as (stdout, _):
+                btest.fetch_tool(method, col, False)
+        return stdout.getvalue()
+
     def test_fetch_url_err(self):
         """Test an error while fetching a tool from a URL"""
         def fail_download(url):
             """Take the tools.Download() function by raising an exception"""
             raise urllib.error.URLError('my error')
 
-        btest = Bintool.create('_testing')
-        col = terminal.Color()
-        with unittest.mock.patch.object(tools, 'Download',
-                                        side_effect=fail_download):
-            with test_util.capture_sys_output() as (stdout, _):
-                btest.fetch_tool(bintool.FETCH_ANY, col, False)
-        self.assertIn('my error', stdout.getvalue())
+        stdout = self.check_fetch_url(fail_download, bintool.FETCH_ANY)
+        self.assertIn('my error', stdout)
 
     def test_fetch_url_exception(self):
         """Test an exception while fetching a tool from a URL"""
         def cause_exc(url):
             raise ValueError('exc error')
 
-        btest = Bintool.create('_testing')
-        col = terminal.Color()
-        with unittest.mock.patch.object(tools, 'Download',
-                                        side_effect=cause_exc):
-            with test_util.capture_sys_output() as (stdout, _):
-                btest.fetch_tool(bintool.FETCH_ANY, col, False)
-        self.assertIn('exc error', stdout.getvalue())
+        stdout = self.check_fetch_url(cause_exc, bintool.FETCH_ANY)
+        self.assertIn('exc error', stdout)
 
     def test_fetch_method(self):
         """Test fetching using a particular method"""
@@ -102,13 +111,8 @@ class TestBintool(unittest.TestCase):
             """Take the tools.Download() function by raising an exception"""
             raise urllib.error.URLError('my error')
 
-        btest = Bintool.create('_testing')
-        col = terminal.Color()
-        with unittest.mock.patch.object(tools, 'Download',
-                                        side_effect=fail_download):
-            with test_util.capture_sys_output() as (stdout, _):
-                btest.fetch_tool(bintool.FETCH_BIN, col, False)
-        self.assertIn('my error', stdout.getvalue())
+        stdout = self.check_fetch_url(fail_download, bintool.FETCH_BIN)
+        self.assertIn('my error', stdout)
 
     def test_fetch_pass_fail(self):
         """Test fetching multiple tools with some passing and some failing"""
@@ -213,6 +217,17 @@ class TestBintool(unittest.TestCase):
         self.assertIn(f'1: ', present)
 
     def check_build_method(self, write_file):
+        """Check the output from fetching using the BUILD method
+
+        Args:
+            write_file (bool): True to write the output file when 'make' is
+                called
+
+        Returns:
+            tuple:
+                str: Filename of written file (or missing 'make' output)
+                str: Contents of stdout
+        """
         def fake_run(*cmd):
             if cmd[0] == 'make':
                 # See Bintool.build_from_git()
@@ -243,6 +258,25 @@ class TestBintool(unittest.TestCase):
         fname, stdout = self.check_build_method(write_file=False)
         self.assertFalse(os.path.exists(fname))
         self.assertIn(f"File '{fname}' was not produced", stdout)
+
+    def test_install(self):
+        """Test fetching using the install method"""
+        btest = Bintool.create('_testing')
+        btest.install = True
+        col = terminal.Color()
+        with unittest.mock.patch.object(tools, 'Run', return_value=None):
+            with test_util.capture_sys_output() as (stdout, _):
+                result = btest.fetch_tool(bintool.FETCH_BIN, col, False)
+        self.assertEqual(bintool.FETCHED, result)
+
+    def test_no_fetch(self):
+        """Test fetching when there is no method"""
+        btest = Bintool.create('_testing')
+        btest.disable = True
+        col = terminal.Color()
+        with test_util.capture_sys_output() as (stdout, _):
+            result = btest.fetch_tool(bintool.FETCH_BIN, col, False)
+        self.assertEqual(bintool.FAIL, result)
 
 
 if __name__ == "__main__":

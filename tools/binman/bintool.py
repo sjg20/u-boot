@@ -364,8 +364,10 @@ class Bintool:
                 str: Filename of fetched file to copy to a suitable directory
                 str: Name of temp directory to remove, or None
             or True if the file was fetched and already installed
+            or False if no fetch() implementation is available
         """
         print(f"No method to fetch bintool '{self.name}'")
+        return False
 
     # pylint: disable=R0201
     def version(self):
