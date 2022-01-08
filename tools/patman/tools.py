@@ -313,6 +313,58 @@ def GetTargetCompileTool(name, cross_compile=None):
         target_name = name
     return target_name, extra_args
 
+def run_result(name, *args, **kwargs):
+    """Run a tool with some arguments
+
+    This runs a 'tool', which is a program used by binman to process files and
+    perhaps produce some output. Tools can be located on the PATH or in a
+    search path.
+
+    Args:
+        name: Command name to run
+        args: Arguments to the tool
+        for_host: True to resolve the command to the version for the host
+        for_target: False to run the command as-is, without resolving it
+                   to the version for the compile target
+        raise_on_error: Raise an error if the command fails (True by default)
+
+    Returns:
+        CommandResult object
+    """
+    try:
+        binary = kwargs.get('binary')
+        for_host = kwargs.get('for_host', False)
+        for_target = kwargs.get('for_target', not for_host)
+        raise_on_error = kwargs.get('raise_on_error', True)
+        env = None
+        if tool_search_paths:
+            env = dict(os.environ)
+            env['PATH'] = ':'.join(tool_search_paths) + ':' + env['PATH']
+        if for_target:
+            name, extra_args = GetTargetCompileTool(name)
+            args = tuple(extra_args) + args
+        elif for_host:
+            name, extra_args = GetHostCompileTool(name)
+            args = tuple(extra_args) + args
+        name = os.path.expanduser(name)  # Expand paths containing ~
+        all_args = (name,) + args
+        result = command.RunPipe([all_args], capture=True, capture_stderr=True,
+                                 env=env, raise_on_error=False, binary=binary)
+        if result.return_code:
+            if raise_on_error:
+                raise ValueError("Error %d running '%s': %s" %
+                (result.return_code,' '.join(all_args),
+                    result.stderr or result.stdout))
+        return result
+    except ValueError:
+        if env and not PathHasFile(env['PATH'], name):
+            msg = "Please install tool '%s'" % name
+            package = packages.get(name)
+            if package:
+                 msg += " (e.g. from package '%s')" % package
+            raise ValueError(msg)
+        raise
+
 def Run(name, *args, **kwargs):
     """Run a tool with some arguments
 
@@ -330,37 +382,9 @@ def Run(name, *args, **kwargs):
     Returns:
         CommandResult object
     """
-    try:
-        binary = kwargs.get('binary')
-        for_host = kwargs.get('for_host', False)
-        for_target = kwargs.get('for_target', not for_host)
-        env = None
-        if tool_search_paths:
-            env = dict(os.environ)
-            env['PATH'] = ':'.join(tool_search_paths) + ':' + env['PATH']
-        if for_target:
-            name, extra_args = GetTargetCompileTool(name)
-            args = tuple(extra_args) + args
-        elif for_host:
-            name, extra_args = GetHostCompileTool(name)
-            args = tuple(extra_args) + args
-        name = os.path.expanduser(name)  # Expand paths containing ~
-        all_args = (name,) + args
-        result = command.RunPipe([all_args], capture=True, capture_stderr=True,
-                                 env=env, raise_on_error=False, binary=binary)
-        if result.return_code:
-            raise ValueError("Error %d running '%s': %s" %
-               (result.return_code,' '.join(all_args),
-                result.stderr))
+    result = run_result(name, *args, **kwargs)
+    if result is not None:
         return result.stdout
-    except:
-        if env and not PathHasFile(env['PATH'], name):
-            msg = "Please install tool '%s'" % name
-            package = packages.get(name)
-            if package:
-                 msg += " (e.g. from package '%s')" % package
-            raise ValueError(msg)
-        raise
 
 def Filename(fname):
     """Resolve a file path to an absolute path.
