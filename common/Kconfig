@@ -817,6 +817,16 @@ config SPL_BLOBLIST_ALLOC
 
 endchoice
 
+config SPL_BLOBLIST_ADDR
+	hex "Address of bloblist in SPL"
+	depends on BLOBLIST_FIXED
+	default BLOBLIST_ADDR
+	help
+	  Sets the address of the bloblist, set up by the first part of U-Boot
+	  which runs. Subsequent U-Boot phases typically use the same address.
+
+	  This is not used if BLOBLIST_ALLOC is selected.
+
 endif # SPL_BLOBLIST
 
 if TPL_BLOBLIST

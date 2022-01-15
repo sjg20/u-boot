@@ -130,7 +130,8 @@ class BuilderThread(threading.Thread):
                 **kwargs)
 
     def RunCommit(self, commit_upto, brd, work_dir, do_config, config_only,
-                  force_build, force_build_failures, work_in_output):
+                  force_build, force_build_failures, work_in_output,
+                  adjust_cfg):
         """Build a particular commit.
 
         If the build is already done, and we are not forcing a build, we skip
@@ -147,6 +148,8 @@ class BuilderThread(threading.Thread):
                 failure
             work_in_output: Use the output directory as the work directory and
                 don't write to a separate output directory.
+            adjust_cfg: List of changes to make to .config file before building.
+                Each is either X to enable X, or
 
         Returns:
             tuple containing:
