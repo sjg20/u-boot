@@ -9,20 +9,40 @@ import re
 
 from patman import tools
 
-def adjust_cfg_lines(lines, adjust_cfg):
-    re_line = re.compile(r'CONFIG_([A-Z0-9_]+)=(.*)')
-    out_lines = []
-    for line in lines:
-        out_line = line
-        m_line = re_line.match(line)
-        opt, val = m_line.groups()
-        adj = adjust_cfg.get(opt)
-        print('adj', adj)
-        if adj:
-            if adj[0] == '~':
-                out_line = f'# CONFIG_{opt} is not set'
+RE_LINE = re.compile(r'(# )?CONFIG_([A-Z0-9_]+)(=(.*)| is not set)')
 
+def make_cfg_line(opt, adj):
+    if adj[0] == '~':
+        return f'# CONFIG_{opt} is not set'
+    else:
+        return f'CONFIG_{opt}=1'
+
+def adjust_cfg_line(line, adjust_cfg, done=None):
+    out_line = line
+    m_line = RE_LINE.match(line)
+    comment, opt, right, val = m_line.groups()
+    adj = adjust_cfg.get(opt)
+    #print('adj', adj, right, val)
+    if adj:
+        out_line = make_cfg_line(opt, adj)
+        if done is not None:
+            done.add(opt)
+
+    return out_line
+
+def adjust_cfg_lines(lines, adjust_cfg):
+    out_lines = []
+    done = set()
+    for line in lines:
+        out_line = adjust_cfg_line(line, adjust_cfg, done)
         out_lines.append(out_line)
+
+    for opt, val in adjust_cfg.items():
+        if opt not in done:
+            adj = adjust_cfg.get(opt)
+            out_line = make_cfg_line(opt, adj)
+            out_lines.append(out_line)
+
     return out_lines
 
 def adjust_cfg_file(fname, adjust_cfg):

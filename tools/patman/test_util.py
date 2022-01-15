@@ -174,6 +174,8 @@ def RunTestSuites(result, debug, verbosity, test_preserve_dirs, processes,
     suite = unittest.TestSuite()
     loader = unittest.TestLoader()
     for module in test_class_list:
+        if isinstance(module, str):
+            continue
         # Test the test module about our arguments, if it is interested
         if hasattr(module, 'setup_test_args'):
             setup_test_args = getattr(module, 'setup_test_args')

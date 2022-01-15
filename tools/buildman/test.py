@@ -626,9 +626,42 @@ class TestBuild(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_adjust_cfg(self):
+        """check various adjustments of config"""
+        # nop: enabling an enabled CONFIG
+        self.assertEqual(
+            'CONFIG_FRED=1',
+            cfgutil.adjust_cfg_line('CONFIG_FRED=1', {'FRED':'FRED'}))
+
+        # Disabling a CONFIG
+        self.assertEqual(
+            '# CONFIG_FRED is not set',
+            cfgutil.adjust_cfg_line('CONFIG_FRED=1' , {'FRED':'~FRED'}))
+
+        # Enabling a disabled CONFIG
+        self.assertEqual(
+            'CONFIG_FRED=1',
+            cfgutil.adjust_cfg_line(
+                '# CONFIG_FRED is not set', {'FRED':'FRED'}))
+
+        # nop: disabling a disabled CONFIG
+        self.assertEqual(
+            '# CONFIG_FRED is not set',
+            cfgutil.adjust_cfg_line(
+                '# CONFIG_FRED is not set', {'FRED':'~FRED'}))
+
+        # nop: use the adjust_cfg_lines() function
+        self.assertEqual(
+            ['CONFIG_FRED=1'],
+            cfgutil.adjust_cfg_lines(['CONFIG_FRED=1'], {'FRED':'FRED'}))
         self.assertEqual(
             ['# CONFIG_FRED is not set'],
             cfgutil.adjust_cfg_lines(['CONFIG_FRED=1'], {'FRED':'~FRED'}))
+
+        # Enabling a CONFIG that doesn't exit
+        self.assertEqual(
+            ['CONFIG_FRED=1'],
+            cfgutil.adjust_cfg_lines(
+                [], {'FRED':'FRED'}))
 
 
 if __name__ == "__main__":

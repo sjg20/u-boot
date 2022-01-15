@@ -55,7 +55,7 @@ options, args = cmdline.ParseArgs()
 
 # Run our meagre tests
 if options.test:
-    RunTests(options.skip_net_tests, options.verbose, False, args)
+    RunTests(options.skip_net_tests, options.verbose, options.debug, args)
 
 # Build selected commits for selected boards
 else:
