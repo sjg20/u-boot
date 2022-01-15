@@ -62,6 +62,8 @@ void main_loop(void)
 		cli_secure_boot_cmd(s);
 
 	autoboot_command(s);
+	printf("FRED %d\n", IS_ENABLED(CONFIG_FRED));
+	printf("CONFIG_CMDLINE %d\n", IS_ENABLED(CONFIG_CMDLINE));
 
 	cli_loop();
 	panic("No CLI available");
