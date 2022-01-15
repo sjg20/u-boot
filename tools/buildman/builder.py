@@ -250,7 +250,7 @@ class Builder:
                  mrproper=False, per_board_out_dir=False,
                  config_only=False, squash_config_y=False,
                  warnings_as_errors=False, work_in_output=False,
-                 test_thread_exceptions=False):
+                 test_thread_exceptions=False, adjust_cfg=None):
         """Create a new Builder object
 
         Args:
@@ -315,6 +315,7 @@ class Builder:
         self.squash_config_y = squash_config_y
         self.config_filenames = BASE_CONFIG_FILENAMES
         self.work_in_output = work_in_output
+        self.adjust_cfg = adjust_cfg or []
         if not self.squash_config_y:
             self.config_filenames += EXTRA_CONFIG_FILENAMES
         self._terminated = False
@@ -1747,6 +1748,7 @@ class Builder:
             job.commits = commits
             job.keep_outputs = keep_outputs
             job.work_in_output = self.work_in_output
+            job.adjust_cfg = self.adjust_cfg
             job.step = self._step
             if self.num_threads:
                 self.queue.put(job)

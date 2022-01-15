@@ -12,6 +12,7 @@ import unittest
 from buildman import board
 from buildman import bsettings
 from buildman import builder
+from buildman import cfgutil
 from buildman import control
 from buildman import toolchain
 from patman import commit
@@ -623,6 +624,12 @@ class TestBuild(unittest.TestCase):
         result = set(build._GetOutputSpaceRemovals())
         expected = set([os.path.join(base_dir, f) for f in to_remove])
         self.assertEqual(expected, result)
+
+    def test_adjust_cfg(self):
+        self.assertEqual(
+            ['# CONFIG_FRED is not set'],
+            cfgutil.adjust_cfg_lines(['CONFIG_FRED=1'], {'FRED':'~FRED'}))
+
 
 if __name__ == "__main__":
     unittest.main()

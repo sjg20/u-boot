@@ -4,6 +4,7 @@
 #
 
 from contextlib import contextmanager
+import doctest
 import glob
 import multiprocessing
 import os
@@ -156,9 +157,10 @@ def RunTestSuites(result, debug, verbosity, test_preserve_dirs, processes,
         toolpath: List of paths to use for tools
         test_class_list: List of test classes to run
     """
-    for module in []:
-        suite = doctest.DocTestSuite(module)
-        suite.run(result)
+    for module in test_class_list:
+        if isinstance(module, str):
+            suite = doctest.DocTestSuite(module)
+            suite.run(result)
 
     sys.argv = [sys.argv[0]]
     if debug:
