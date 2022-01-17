@@ -1,16 +1,21 @@
-if TARGET_QEMU_ARM_32BIT || TARGET_QEMU_ARM_64BIT
-
-config SYS_TEXT_BASE
-	default 0x00000000
+if ARCH_QEMU
 
 config BOARD_SPECIFIC_OPTIONS # dummy
 	def_bool y
 	select CMD_QFW
 	select QFW_MMIO
+	select SUPPORT_SPL
 	imply VIRTIO_MMIO
 	imply VIRTIO_PCI
 	imply VIRTIO_NET
 	imply VIRTIO_BLK
+
+endif
+
+if TARGET_QEMU_ARM_32BIT || TARGET_QEMU_ARM_64BIT
+
+config SYS_TEXT_BASE
+	default 0x00000000
 
 endif
 
@@ -20,4 +25,14 @@ config BOARD_SPECIFIC_OPTIONS
 	imply SET_DFU_ALT_INFO
 
 source "board/emulation/common/Kconfig"
+endif
+
+if TARGET_QEMU_ARM_32BIT_SPL
+
+config SPL_TEXT_BASE
+	default 0x00000000
+
+config SYS_TEXT_BASE
+	default 0x00010000
+
 endif
