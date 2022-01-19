@@ -1342,7 +1342,24 @@ as set in stone, so Binman will ensure it doesn't change. Without this feature,
 repacking an entry might cause it to disobey the original constraints provided
 when it was created.
 
- Repacking an image involves
+
+Signing FIT container with private key in an image
+---------------------------
+
+You can sign FIT container with private key in your image.
+For example::
+
+    $ binman sign -i image.bin -k privatekey -a sha256,rsa4096 fit
+
+binman will extract FIT container, sign and replace it immediately.
+
+If you want to sign and replace FIT container in place::
+
+    $ binman sign -i image.bin -k privatekey -a sha256,rsa4096 -f fit.fit fit
+
+which will sign FIT container with private key and replace it immediately
+inside your image.
+
 
 .. _`BinmanLogging`:
 
