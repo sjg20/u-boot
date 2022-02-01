@@ -6,17 +6,20 @@
 #
 
 from collections import defaultdict, OrderedDict
+import io
 import libfdt
 
 from binman.entry import Entry, EntryArg
+from binman import elf
 from dtoc import fdt_util
 from dtoc.fdt import Fdt
 from patman import tools
 
 # Supported operations, with the fit,operation property
-OP_GEN_FDT_NODES = range(1)
+OP_GEN_FDT_NODES, OP_SPLIT_ELF = range(2)
 OPERATIONS = {
     'gen-fdt-nodes': OP_GEN_FDT_NODES,
+    'split-elf': OP_SPLIT_ELF,
     }
 
 class Entry_fit(Entry):
@@ -155,6 +158,12 @@ class Entry_fit(Entry):
                                                                   str)])[0]
         self.mkimage = None
 
+        # List of generated split-elf nodes, each a None
+        self._loadables = []
+
+        # /configurations/xxx node used as a template
+        self._config_node = None
+
     def ReadNode(self):
         self.ReadEntries()
         super().ReadNode()
@@ -213,19 +222,21 @@ class Entry_fit(Entry):
                 in_images: True if this is inside the 'images' node, so that
                     'data' properties should be generated
             """
+            if depth == 1 and not in_images:
+                self._config_node = subnode
             if self._fdts:
                 # Generate nodes for each FDT
                 for seq, fdt_fname in enumerate(self._fdts):
-                    node_name = subnode.name[1:].replace('SEQ',
-                                                         str(seq + 1))
+                    node_name = subnode.name[1:].replace('SEQ', str(seq + 1))
                     fname = tools.GetInputFilename(fdt_fname + '.dtb')
                     with fsw.add_node(node_name):
                         for pname, prop in subnode.props.items():
-                            val = prop.bytes.replace(
-                                b'NAME', tools.ToBytes(fdt_fname))
-                            val = val.replace(
-                                b'SEQ', tools.ToBytes(str(seq + 1)))
-                            fsw.property(pname, val)
+                            if not pname.startswith('fit,'):
+                                val = prop.bytes.replace(
+                                    b'NAME', tools.ToBytes(fdt_fname))
+                                val = val.replace(
+                                    b'SEQ', tools.ToBytes(str(seq + 1)))
+                                fsw.property(pname, val)
 
                         # Add data for 'images' nodes (but not 'config')
                         if depth == 1 and in_images:
@@ -239,7 +250,18 @@ class Entry_fit(Entry):
                     else:
                         self.Raise("Generator node requires 'fit,fdt-list' property")
 
-        def _scan_node(subnode, depth, in_images):
+        def _scan_split_elf(subnode, rel_path):
+            #data, input_fname, uniq = self.collect_contents_to_file(
+            entry = Entry.Create(self.section, subnode, etype='section')
+            entry.ReadNode()
+            self._fit_sections[rel_path] = entry
+
+            # Add this as a dummy node so we know the required position in the
+            # output FIT. It is replaced later in _BuildInput().
+            with fsw.add_node(subnode.name):
+                pass
+
+        def _scan_node(subnode, depth, in_images, rel_path):
             """Generate nodes from a template
 
             This creates one node for each member of self._fdts using the
@@ -253,10 +275,14 @@ class Entry_fit(Entry):
                 depth: Current node depth (0 is the base 'fit' node)
                 in_images: True if this is inside the 'images' node, so that
                     'data' properties should be generated
+                rel_path (str): Path of subnode relative to the toplevel 'fit'
+                    node
             """
             oper = self._get_operation(subnode)
             if oper == OP_GEN_FDT_NODES:
                 _scan_gen_fdt_nodes(subnode, depth, in_images)
+            elif oper == OP_SPLIT_ELF:
+                _scan_split_elf(subnode, rel_path)
 
         def _AddNode(base_node, depth, node):
             """Add a node to the FIT
@@ -296,7 +322,8 @@ class Entry_fit(Entry):
                     # fsw.add_node() or _AddNode() for it.
                     pass
                 elif self.GetImage().generate and subnode.name.startswith('@'):
-                    _scan_node(subnode, depth, in_images)
+                    _scan_node(subnode, depth, in_images,
+                               f'{rel_path}/{subnode.name}')
                 else:
                     with fsw.add_node(subnode.name):
                         _AddNode(base_node, depth + 1, subnode)
@@ -345,6 +372,41 @@ class Entry_fit(Entry):
 
         return True
 
+    def _add_split_elf(self, orig_node, node, data, missing):
+        """Add nodes for the ELF file, one per group of contiguous segments
+
+        The existing placeholder node is replaced
+
+        Args:
+            orig_node (Node): Template node from the binman defintion
+            node (Node): Node to replace (in the FIT being built)
+            data (bytes): ELF-format data to process (may be empty)
+        """
+        # If any pieces are missing, skip this. The missing entries will show
+        # an error
+        if not missing:
+            try:
+                segments, entry = elf.read_segments(data)
+            except ValueError as exc:
+                self.Raise(f'Failed to read ELF file for {orig_node.path}: {str(exc)}')
+            parent = node.parent
+            for (seq, start, data) in segments:
+                node_name = orig_node.name[1:].replace('SEQ', str(seq + 1))
+                subnode = parent.AddSubnode(node_name) #, before=node)
+                self._loadables.append(subnode)
+                for pname, prop in orig_node.props.items():
+                    if not pname.startswith('fit,'):
+                        subnode.AddData(pname, prop.bytes)
+                    elif pname == 'fit,load':
+                        subnode.AddInt('load', start)
+                    elif pname == 'fit,entry' and not seq:
+                        subnode.AddInt('entry', entry)
+                    elif pname == 'fit,data':
+                        subnode.AddData('data', data)
+
+        # Delete the template node as it has served its purpose
+        node.Delete()
+
     def _BuildInput(self, fdt):
         """Finish the FIT by adding the 'data' properties to it
 
@@ -355,13 +417,36 @@ class Entry_fit(Entry):
             New fdt contents (bytes)
         """
         for path, section in self._fit_sections.items():
-            node = fdt.GetNode(path)
             # Entry_section.ObtainContents() either returns True or
             # raises an exception.
             section.ObtainContents()
             section.Pack(0)
             data = section.GetData()
-            node.AddData('data', data)
+            missing_list = []
+            section.CheckMissing(missing_list)
+
+            node = fdt.GetNode(path)
+            oper = self._get_operation(section._node)
+            if oper == OP_GEN_FDT_NODES:
+                node.AddData('data', data)
+            elif oper == OP_SPLIT_ELF:
+                self._add_split_elf(section._node, node, data,
+                                    bool(missing_list))
+
+        # Set up the 'firmware' and 'loadables' properties in all
+        # 'configurations' nodes, but only if we are generating FDTs. Note that
+        # self._config_node is set in _scan_gen_fdt_nodes()
+        node = fdt.GetNode('/configurations')
+        if self._config_node:
+            for subnode in node.subnodes:
+                for pname, prop in self._config_node.props.items():
+                    if pname == 'fit,loadables':
+                        subnode.AddStringList(
+                            'loadables',
+                            [node.name for node in self._loadables])
+                    elif pname.startswith('fit,'):
+                        self.Raise(
+                            f"Unknown directive in '{subnode.path}': '{pname}'")
 
         fdt.Sync(auto_resize=True)
         data = fdt.GetContents()

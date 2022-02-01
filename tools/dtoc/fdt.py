@@ -536,18 +536,22 @@ class Node:
         """
         return self.AddData(prop_name, struct.pack('>I', val))
 
-    def AddSubnode(self, name):
+    def AddSubnode(self, name, before=None):
         """Add a new subnode to the node
 
         Args:
             name: name of node to add
+            before: Node to add before (does not work!)
 
         Returns:
             New subnode that was created
         """
         path = self.path + '/' + name
         subnode = Node(self._fdt, self, None, name, path)
-        self.subnodes.append(subnode)
+        if before:
+            self.subnodes.insert(self.subnodes.index(before), subnode)
+        else:
+            self.subnodes.append(subnode)
         return subnode
 
     def Delete(self):
