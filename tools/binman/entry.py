@@ -1108,3 +1108,31 @@ features to produce new behaviours.
         btool = bintool.Bintool.create(name)
         tools[name] = btool
         return btool
+
+    def collect_contents_to_file(self, entries, prefix):
+        """Put the contents of a list of entries into a file
+
+        Args:
+            entries (list of Entry): Entries to collect
+            prefix (str): Filename prefix of file to write to
+
+        If any entry does not have contents yet, this function returns False
+        for the data.
+
+        Returns:
+            Tuple:
+                bytes: Concatenated data from all the entries (or False)
+                str: Filename of file written (or False if no data)
+                str: Unique portion of filename (or False if no data)
+        """
+        data = b''
+        for entry in entries:
+            # First get the input data and put it in a file. If not available,
+            # try later.
+            if not entry.ObtainContents():
+                return False, False, False
+            data += entry.GetData()
+        uniq = self.GetUniqueName()
+        fname = tools.GetOutputFilename(f'{prefix}.{uniq}')
+        tools.WriteFile(fname, data)
+        return data, fname, uniq
