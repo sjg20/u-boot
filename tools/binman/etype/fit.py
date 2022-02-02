@@ -13,6 +13,12 @@ from dtoc import fdt_util
 from dtoc.fdt import Fdt
 from patman import tools
 
+# Supported operations, with the fit,operation property
+OP_GEN_FDT_NODES = range(1)
+OPERATIONS = {
+    'gen-fdt-nodes': OP_GEN_FDT_NODES,
+    }
+
 class Entry_fit(Entry):
     """Flat Image Tree (FIT)
 
@@ -83,6 +89,19 @@ class Entry_fit(Entry):
     This tells binman to create nodes config-1 and config-2, i.e. a config for
     each of your two files.
 
+    More generally you can add an operation to an '@' node to indicate which
+    operation is required:
+
+            @fdt-SEQ {
+                fit,operation = "gen-fdt-nodes";
+                ...
+            };
+
+    Available operations are::
+
+    gen-fdt-nodes
+       Generate FDT nodes as above
+
     Available substitutions for '@' nodes are:
 
     SEQ:
@@ -140,6 +159,15 @@ class Entry_fit(Entry):
         self.ReadEntries()
         super().ReadNode()
 
+    def _get_operation(self, subnode):
+        oper_name = subnode.props.get('fit,operation')
+        if not oper_name:
+            return OP_GEN_FDT_NODES
+        oper = OPERATIONS.get(oper_name.value)
+        if not oper:
+            self.Raise(f"Unknown operation '{oper_name}'")
+        return oper
+
     def ReadEntries(self):
         def _process_prop(pname, prop):
             """Process special properties
@@ -170,8 +198,8 @@ class Entry_fit(Entry):
                     return
             fsw.property(pname, prop.bytes)
 
-        def _generate_node(subnode, depth, in_images):
-            """Generate nodes from a template
+        def _scan_gen_fdt_nodes(subnode, depth, in_images):
+            """Generate FDT nodes
 
             This creates one node for each member of self._fdts using the
             provided template. If a property value contains 'NAME' it is
@@ -211,6 +239,25 @@ class Entry_fit(Entry):
                     else:
                         self.Raise("Generator node requires 'fit,fdt-list' property")
 
+        def _scan_node(subnode, depth, in_images):
+            """Generate nodes from a template
+
+            This creates one node for each member of self._fdts using the
+            provided template. If a property value contains 'NAME' it is
+            replaced with the filename of the FDT. If a property value contains
+            SEQ it is replaced with the node sequence number, where 1 is the
+            first.
+
+            Args:
+                subnode (None): Generator node to process
+                depth: Current node depth (0 is the base 'fit' node)
+                in_images: True if this is inside the 'images' node, so that
+                    'data' properties should be generated
+            """
+            oper = self._get_operation(subnode)
+            if oper == OP_GEN_FDT_NODES:
+                _scan_gen_fdt_nodes(subnode, depth, in_images)
+
         def _AddNode(base_node, depth, node):
             """Add a node to the FIT
 
@@ -249,7 +296,7 @@ class Entry_fit(Entry):
                     # fsw.add_node() or _AddNode() for it.
                     pass
                 elif self.GetImage().generate and subnode.name.startswith('@'):
-                    _generate_node(subnode, depth, in_images)
+                    _scan_node(subnode, depth, in_images)
                 else:
                     with fsw.add_node(subnode.name):
                         _AddNode(base_node, depth + 1, subnode)
