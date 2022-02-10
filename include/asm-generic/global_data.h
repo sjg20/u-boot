@@ -467,6 +467,12 @@ struct global_data {
 	 */
 	char *smbios_version;
 #endif
+#if CONFIG_IS_ENABLED(EVENT)
+	/**
+	 * @event_state: List of event notifications
+	 */
+	struct event_state *event_state;
+#endif
 };
 #ifndef DO_DEPS_ONLY
 static_assert(sizeof(struct global_data) == GD_SIZE);

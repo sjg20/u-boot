@@ -492,6 +492,17 @@ config DISPLAY_BOARDINFO_LATE
 
 menu "Start-up hooks"
 
+config EVENT
+	bool "General-purpose event-handling mechanism"
+	default y if SANDBOX
+	help
+	  This enables sending and processing of events, to allow interested
+	  parties to be alerted when something happens. This is an attempt to
+	  step the flow of weak functions, hooks, functions in board_f.c
+	  and board_r.c and the Kconfig options below.
+
+	  See doc/develop/event.rst for more information.
+
 config ARCH_EARLY_INIT_R
 	bool "Call arch-specific init soon after relocation"
 	help
