@@ -253,6 +253,17 @@ void part_set_generic_name(const struct blk_desc *dev_desc,
 	int part_num, char *name);
 
 extern const struct block_drvr block_drvr[];
+
+struct udevice;
+/**
+ * part_create_block_devices - Create block devices for disk partitions
+ *
+ * Create UCLASS_PARTITION udevices for each of disk partitions in @parent
+ *
+ * @blk_dev:	Whole disk device
+ */
+int part_create_block_devices(struct udevice *blk_dev);
+
 #else
 static inline struct blk_desc *blk_get_dev(const char *ifname, int dev)
 { return NULL; }
