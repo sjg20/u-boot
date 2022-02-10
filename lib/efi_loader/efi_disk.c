@@ -603,6 +603,7 @@ static int efi_disk_probe(void *ctx, struct event *event)
 {
 	struct udevice *dev;
 	enum uclass_id id;
+	struct blk_desc *desc;
 	struct udevice *child;
 	int ret;
 
@@ -616,9 +617,16 @@ static int efi_disk_probe(void *ctx, struct event *event)
 		return 0;
 	}
 
-	ret = efi_disk_create_raw(dev);
-	if (ret)
-		return -1;
+	/*
+	 * avoid creating duplicated objects now that efi_driver
+	 * has already created an efi_disk at this moment.
+	 */
+	desc = dev_get_uclass_plat(dev);
+	if (desc->if_type != IF_TYPE_EFI_LOADER) {
+		ret = efi_disk_create_raw(dev);
+		if (ret)
+			return -1;
+	}
 
 	device_foreach_child(child, dev) {
 		ret = efi_disk_create_part(child);
@@ -642,13 +650,17 @@ static int efi_disk_probe(void *ctx, struct event *event)
 static int efi_disk_delete_raw(struct udevice *dev)
 {
 	efi_handle_t handle;
+	struct blk_desc *desc;
 	struct efi_disk_obj *diskobj;
 
 	if (dev_tag_get_ptr(dev, DM_TAG_EFI, (void **)&handle))
 		return -1;
 
-	diskobj = container_of(handle, struct efi_disk_obj, header);
-	efi_free_pool(diskobj->dp);
+	desc = dev_get_uclass_plat(dev);
+	if (desc->if_type != IF_TYPE_EFI_LOADER) {
+		diskobj = container_of(handle, struct efi_disk_obj, header);
+		efi_free_pool(diskobj->dp);
+	}
 
 	efi_delete_handle(handle);
 	dev_tag_del(dev, DM_TAG_EFI);
