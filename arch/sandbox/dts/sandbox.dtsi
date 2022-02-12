@@ -16,6 +16,10 @@
 		#sound-dai-cells = <1>;
 	};
 
+	bootdev {
+		compatible = "sandbox,bootdev-host";
+	};
+
 	buttons {
 		compatible = "gpio-keys";
 
