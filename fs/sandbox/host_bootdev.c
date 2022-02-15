@@ -8,11 +8,35 @@
 
 #include <common.h>
 #include <bootdev.h>
+#include <bootflow.h>
+#include <bootmeth.h>
 #include <dm.h>
+#include <fs.h>
 
 static int host_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
 			     struct bootflow *bflow)
 {
+	int ret;
+
+	if (iter->part)
+		return log_msg_ret("max", -ESHUTDOWN);
+
+	bflow->name = strdup(dev->name);
+	if (!bflow->name)
+		return log_msg_ret("name", -ENOMEM);
+
+	ret = bootmeth_check(bflow->method, iter);
+	if (ret)
+		return log_msg_ret("check", ret);
+
+	bflow->state = BOOTFLOWST_MEDIA;
+
+	fs_set_type(FS_TYPE_SANDBOX);
+
+	ret = bootmeth_read_bootflow(bflow->method, bflow);
+	if (ret)
+		return log_msg_ret("method", ret);
+
 	printf("get\n");
 
 	return 0;

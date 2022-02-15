@@ -5,6 +5,7 @@
  */
 
 #define LOG_CATEGORY UCLASS_BOOTSTD
+#define LOG_DEBUG
 
 #include <common.h>
 #include <blk.h>
@@ -190,9 +191,13 @@ int bootmeth_try_file(struct bootflow *bflow, struct blk_desc *desc,
 	log_debug("   %s - err=%d\n", path, ret);
 
 	/* Sadly FS closes the file after fs_size() so we must redo this */
-	ret2 = fs_set_blk_dev_with_part(desc, bflow->part);
-	if (ret2)
-		return log_msg_ret("set", ret2);
+	if (desc) {
+		ret2 = fs_set_blk_dev_with_part(desc, bflow->part);
+		if (ret2)
+			return log_msg_ret("set", ret2);
+	} else {
+		fs_set_type(FS_TYPE_SANDBOX);
+	}
 	if (ret)
 		return log_msg_ret("size", ret);
 

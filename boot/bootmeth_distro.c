@@ -55,7 +55,7 @@ static int distro_check(struct udevice *dev, struct bootflow_iter *iter)
 
 static int distro_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 {
-	struct blk_desc *desc = dev_get_uclass_plat(bflow->blk);
+	struct blk_desc *desc;
 	const char *const *prefixes;
 	struct udevice *bootstd;
 	const char *prefix;
@@ -66,12 +66,13 @@ static int distro_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	if (ret)
 		return log_msg_ret("std", ret);
 
-	/* We require a partition table */
-	if (!bflow->part)
+	/* If a block device, we require a partition table */
+	if (bflow->blk && !bflow->part)
 		return -ENOENT;
 
 	prefixes = bootstd_get_prefixes(bootstd);
 	i = 0;
+	desc = bflow->blk ? dev_get_uclass_plat(bflow->blk) : NULL;
 	do {
 		prefix = prefixes ? prefixes[i] : NULL;
 

@@ -16,8 +16,13 @@
 		#sound-dai-cells = <1>;
 	};
 
-	bootdev {
+	host-fs {
 		compatible = "sandbox,bootdev-host";
+	};
+
+	bootstd {
+		compatible = "u-boot,boot-std";
+		filename-prefixes = "./";
 	};
 
 	buttons {

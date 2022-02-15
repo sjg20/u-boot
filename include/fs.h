@@ -55,6 +55,8 @@ int do_ext2load(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[]);
  */
 int fs_set_blk_dev(const char *ifname, const char *dev_part_str, int fstype);
 
+void fs_set_type(int type);
+
 /*
  * fs_set_blk_dev_with_part - Set current block device + partition
  *
