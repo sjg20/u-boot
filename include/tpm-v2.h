@@ -419,6 +419,50 @@ enum {
 	HR_NV_INDEX		= TPM_HT_NV_INDEX << HR_SHIFT,
 };
 
+/*
+ * Operations specific to the Cr50 TPM used on Chromium OS and Android devices
+ *
+ * FIXME: below is not enough to differentiate between vendors commands
+ * of numerous devices. However, the current tpm2 APIs aren't very amenable
+ * to extending generically because the marshaling code is assuming all
+ * knowledge of all commands.
+ */
+#define TPM2_CC_VENDOR_BIT_MASK			0x20000000
+
+#define TPM2_CR50_VENDOR_COMMAND		(TPM2_CC_VENDOR_BIT_MASK | 0)
+#define TPM2_CR50_SUB_CMD_IMMEDIATE_RESET	19
+#define TPM2_CR50_SUB_CMD_NVMEM_ENABLE_COMMITS	21
+#define TPM2_CR50_SUB_CMD_REPORT_TPM_STATE	23
+#define TPM2_CR50_SUB_CMD_TURN_UPDATE_ON	24
+#define TPM2_CR50_SUB_CMD_GET_REC_BTN		29
+#define TPM2_CR50_SUB_CMD_TPM_MODE		40
+#define TPM2_CR50_SUB_CMD_GET_BOOT_MODE		52
+#define TPM2_CR50_SUB_CMD_RESET_EC		53
+
+/* Cr50 vendor-specific error codes. */
+#define VENDOR_RC_ERR              0x00000500
+enum cr50_vendor_rc {
+	VENDOR_RC_INTERNAL_ERROR	= (VENDOR_RC_ERR | 6),
+	VENDOR_RC_NO_SUCH_SUBCOMMAND	= (VENDOR_RC_ERR | 8),
+	VENDOR_RC_NO_SUCH_COMMAND	= (VENDOR_RC_ERR | 127),
+};
+
+enum cr50_tpm_mode {
+	/*
+	 * Default state: TPM is enabled, and may be set to either
+	 * TPM_MODE_ENABLED or TPM_MODE_DISABLED.
+	 */
+	TPM_MODE_ENABLED_TENTATIVE = 0,
+
+	/* TPM is enabled, and mode may not be changed. */
+	TPM_MODE_ENABLED = 1,
+
+	/* TPM is disabled, and mode may not be changed. */
+	TPM_MODE_DISABLED = 2,
+
+	TPM_MODE_INVALID,
+};
+
 /**
  * Issue a TPM2_Startup command.
  *
@@ -657,5 +701,15 @@ u32 tpm2_disable_platform_hierarchy(struct udevice *dev);
  */
 u32 tpm2_submit_command(struct udevice *dev, const u8 *sendbuf,
 			u8 *recvbuf, size_t *recv_size);
+
+/**
+ * tpm_cr50_report_state() - Report the Cr50 internal state
+ *
+ * @dev:	TPM device
+ * @recvbuf:	Buffer to save the response to
+ * @recv_size:	Pointer to the size of the response buffer
+ * Return: result of the operation
+ */
+u32 tpm2_cr50_report_state(struct udevice *dev, u8 *recvbuf, size_t *recv_size);
 
 #endif /* __TPM_V2_H */

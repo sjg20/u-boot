@@ -675,3 +675,27 @@ u32 tpm2_submit_command(struct udevice *dev, const u8 *sendbuf,
 {
 	return tpm_sendrecv_command(dev, sendbuf, recvbuf, recv_size);
 }
+
+u32 tpm2_cr50_report_state(struct udevice *dev, u8 *recvbuf, size_t *recv_size)
+{
+	u8 command_v2[COMMAND_BUFFER_SIZE] = {
+		/* header 10 bytes */
+		tpm_u16(TPM2_ST_NO_SESSIONS),		/* TAG */
+		tpm_u32(10 + 2),			/* Length */
+		tpm_u32(TPM2_CR50_VENDOR_COMMAND),	/* Command code */
+
+		tpm_u16(TPM2_CR50_SUB_CMD_REPORT_TPM_STATE),
+	};
+	int ret;
+
+	ret = tpm_sendrecv_command(dev, command_v2, recvbuf, recv_size);
+	log_debug("ret=%s, %x\n", dev->name, ret);
+	if (ret)
+		return ret;
+	if (*recv_size < 12)
+		return -ENODATA;
+	*recv_size -= 12;
+	memcpy(recvbuf, recvbuf + 12, *recv_size);
+
+	return 0;
+}
