@@ -2,7 +2,7 @@
 
 # Grab our configured image.  The source for this is found at:
 # https://source.denx.de/u-boot/gitlab-ci-runner
-image: trini/u-boot-gitlab-ci-runner:focal-20220302-15Mar2022
+image: sjg20/ubuntu-26feb22
 
 # We run some tests in different order, to catch some failures quicker.
 stages:
@@ -236,6 +236,23 @@ Run pylint:
     - pylint --version
     - export PYTHONPATH="${UBOOT_TRAVIS_BUILD_DIR}/scripts/dtc/pylibfdt"
     - make pylint_err
+
+Build vboot:
+  stage: testsuites
+  script:
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ap-firmware/vboot_reference.git
+    - UB=/tmp/b/chromeos_sandbox
+    - IMG=/uboot/chromiumos_test_image.bin
+    - PATH=$PATH:/uboot
+    - pwd
+    - ls -l
+    - ls -la /uboot
+    - VBOOT_SOURCE=$(pwd)/vboot_reference ./tools/buildman/buildman
+        chromeos_sandbox -o ${UB} -w
+    - rm -f image.bin; ln -s $UB/image.bin
+    - rm -f state.dtb
+    - $UB/tpl/u-boot-tpl -d $UB/u-boot.dtb.out -L6
+        -c "host bind 0 $IMG; host info; vboot go auto" -w -s state.dtb -r -n -m $UB/ram
 
 # Test sandbox with test.py
 sandbox test.py:
