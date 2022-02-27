@@ -140,13 +140,19 @@ u32 tpm_write_lock(struct udevice *dev, u32 index)
 }
 
 u32 tpm_pcr_extend(struct udevice *dev, u32 index, const void *in_digest,
-		   void *out_digest)
+		   uint size, void *out_digest, const char *name)
 {
-	if (tpm_is_v1(dev))
+	if (tpm_is_v1(dev)) {
+		if (size != PCR_DIGEST_LENGTH || !out_digest)
+			return -EINVAL;
 		return tpm1_extend(dev, index, in_digest, out_digest);
-	else if (tpm_is_v2(dev))
+	} else if (tpm_is_v2(dev)) {
+		if (size != TPM2_SHA256_DIGEST_SIZE)
+			return -EINVAL;
 		return tpm2_pcr_extend(dev, index, TPM2_ALG_SHA256, in_digest,
 				       TPM2_DIGEST_LEN);
+		/* @name is ignored as we do not support measured boot */
+	}
 	else
 		return -ENOSYS;
 }
