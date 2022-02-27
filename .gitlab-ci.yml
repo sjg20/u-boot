@@ -2,7 +2,7 @@
 
 # Grab our configured image.  The source for this is found at:
 # https://source.denx.de/u-boot/gitlab-ci-runner
-image: trini/u-boot-gitlab-ci-runner:focal-20220113-03Feb2022
+image: sjg20/ubuntu-26feb22
 
 # We run some tests in different order, to catch some failures quicker.
 stages:
@@ -214,6 +214,23 @@ Run tests for Nokia RX-51 (aka N900):
   script:
     - export PATH=/opt/gcc-11.1.0-nolibc/arm-linux-gnueabi/bin:$PATH;
       test/nokia_rx51_test.sh
+
+Build vboot:
+  stage: testsuites
+  script:
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ap-firmware/vboot_reference.git
+    - UB=/tmp/b/chromeos_sandbox
+    - IMG=/uboot/chromiumos_test_image.bin
+    - PATH=$PATH:/uboot
+    - pwd
+    - ls -l
+    - ls -la /uboot
+    - VBOOT_SOURCE=$(pwd)/vboot_reference ./tools/buildman/buildman
+        chromeos_sandbox -o ${UB} -w
+    - rm -f image.bin; ln -s $UB/image.bin
+    - rm -f state.dtb
+    - $UB/tpl/u-boot-tpl -d $UB/u-boot.dtb.out -L6
+        -c "host bind 0 $IMG; host info; vboot go auto" -w -s state.dtb -r -n -m $UB/ram
 
 # Test sandbox with test.py
 sandbox test.py:
