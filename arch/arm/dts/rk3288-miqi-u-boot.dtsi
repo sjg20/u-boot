@@ -8,7 +8,7 @@
 	leds {
 		u-boot,dm-pre-reloc;
 
-		work {
+		work_led: led-0 {
 			u-boot,dm-pre-reloc;
 		};
 	};
