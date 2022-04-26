@@ -828,3 +828,21 @@ class Entry_fit(Entry_section):
         # missing
         for entry in self._priv_entries.values():
             entry.CheckMissing(missing_list)
+
+    def UpdateSignatures(self, privatekey_fname, algo, input_fname):
+        uniq = self.GetUniqueName()
+        output_fname = tools.get_output_filename('%s.fit' % uniq)
+        tools.write_file(output_fname, self.GetData())
+        args = [ '-G', privatekey_fname, '-r', '-o', algo, '-F' ]
+        if input_fname:
+            data = input_fname
+        else:
+            data = output_fname
+        args.append(data)
+
+        if self.mkimage.run_cmd(*args) is None:
+            # Bintool is missing; just use empty data as the output
+            self.record_missing_bintool(self.mkimage)
+            return
+
+        self.WriteData(data)

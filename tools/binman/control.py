@@ -20,6 +20,7 @@ from patman import command
 from binman import elf
 from binman import entry
 from patman import tout
+from patman import tools
 
 # These are imported if needed since they import libfdt
 state = None
@@ -445,6 +446,29 @@ def ReplaceEntries(image_fname, input_fname, indir, entry_paths,
     AfterReplace(image, allow_resize=allow_resize, write_map=write_map)
     return image
 
+def SignEntries(image_fname, input_fname, privatekey_fname, algo, entry_paths):
+    """Sign and replace the data from one or more entries from input files
+
+    Args:
+        image_fname: Image filename to process
+        input_fname: Single input filename to use if replacing one file, None
+            otherwise
+        algo: Hashing algorithm
+        privatekey_fname: Private key filename
+
+    """
+    image_fname = os.path.abspath(image_fname)
+    image = Image.FromFile(image_fname)
+    image.CollectBintools()
+    state.PrepareFromLoadedData(image)
+    image.LoadData()
+
+    for entry_path in entry_paths:
+        entry = image.FindEntryPath(entry_path)
+        entry.UpdateSignatures(privatekey_fname, algo, input_fname)
+
+    ProcessImage(image, update_fdt=True, write_map=False,
+                 get_contents=False, allow_resize=True)
 
 def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt, use_expanded):
     """Prepare the images to be processed and select the device tree
@@ -650,7 +674,7 @@ def Binman(args):
     from binman.image import Image
     from binman import state
 
-    if args.cmd in ['ls', 'extract', 'replace', 'tool']:
+    if args.cmd in ['ls', 'extract', 'replace', 'tool', 'sign']:
         try:
             tout.init(args.verbosity)
             tools.prepare_output_dir(None)
@@ -665,6 +689,9 @@ def Binman(args):
                 ReplaceEntries(args.image, args.filename, args.indir, args.paths,
                                do_compress=not args.compressed,
                                allow_resize=not args.fix_size, write_map=args.map)
+
+            if args.cmd == 'sign':
+                SignEntries(args.image, args.file, args.key, args.algo, args.paths)
 
             if args.cmd == 'tool':
                 tools.set_tool_paths(args.toolpath)
