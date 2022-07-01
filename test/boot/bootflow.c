@@ -114,21 +114,23 @@ static int bootflow_cmd_scan_e(struct unit_test_state *uts)
 	ut_assert_nextline("     ** No partition found, err=-93");
 	ut_assert_nextline("  1  efi          media   mmc          0  mmc2.bootdev.whole        <NULL>");
 	ut_assert_nextline("     ** No partition found, err=-93");
+	ut_assert_nextline("  2  firmware0    media   mmc          0  mmc2.bootdev.whole        <NULL>");
+	ut_assert_nextline("     ** No partition found, err=-93");
 
 	ut_assert_nextline("Scanning bootdev 'mmc1.bootdev':");
-	ut_assert_nextline("  2  syslinux     media   mmc          0  mmc1.bootdev.whole        <NULL>");
+	ut_assert_nextline("  3  syslinux     media   mmc          0  mmc1.bootdev.whole        <NULL>");
 	ut_assert_nextline("     ** No partition found, err=-2");
-	ut_assert_nextline("  3  efi          media   mmc          0  mmc1.bootdev.whole        <NULL>");
+	ut_assert_nextline("  4  efi          media   mmc          0  mmc1.bootdev.whole        <NULL>");
 	ut_assert_nextline("     ** No partition found, err=-2");
-	ut_assert_nextline("  4  syslinux     ready   mmc          1  mmc1.bootdev.part_1       /extlinux/extlinux.conf");
-	ut_assert_nextline("  5  efi          fs      mmc          1  mmc1.bootdev.part_1       efi/boot/bootsbox.efi");
+	ut_assert_nextline("  5  syslinux     ready   mmc          1  mmc1.bootdev.part_1       /extlinux/extlinux.conf");
+	ut_assert_nextline("  6  efi          fs      mmc          1  mmc1.bootdev.part_1       efi/boot/bootsbox.efi");
 
 	ut_assert_skip_to_line("Scanning bootdev 'mmc0.bootdev':");
-	ut_assert_skip_to_line(" 3f  efi          media   mmc          0  mmc0.bootdev.whole        <NULL>");
+	ut_assert_skip_to_line(" 5d  firmware0    media   mmc          0  mmc0.bootdev.whole        <NULL>");
 	ut_assert_nextline("     ** No partition found, err=-93");
 	ut_assert_nextline("No more bootdevs");
 	ut_assert_nextlinen("---");
-	ut_assert_nextline("(64 bootflows, 1 valid)");
+	ut_assert_nextline("(94 bootflows, 1 valid)");
 	ut_assert_console_end();
 
 	ut_assertok(run_command("bootflow list", 0));
@@ -137,10 +139,10 @@ static int bootflow_cmd_scan_e(struct unit_test_state *uts)
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("  0  syslinux     media   mmc          0  mmc2.bootdev.whole        <NULL>");
 	ut_assert_nextline("  1  efi          media   mmc          0  mmc2.bootdev.whole        <NULL>");
-	ut_assert_skip_to_line("  4  syslinux     ready   mmc          1  mmc1.bootdev.part_1       /extlinux/extlinux.conf");
-	ut_assert_skip_to_line(" 3f  efi          media   mmc          0  mmc0.bootdev.whole        <NULL>");
+	ut_assert_skip_to_line("  5  syslinux     ready   mmc          1  mmc1.bootdev.part_1       /extlinux/extlinux.conf");
+	ut_assert_skip_to_line(" 5d  firmware0    media   mmc          0  mmc0.bootdev.whole        <NULL>");
 	ut_assert_nextlinen("---");
-	ut_assert_nextline("(64 bootflows, 1 valid)");
+	ut_assert_nextline("(94 bootflows, 1 valid)");
 	ut_assert_console_end();
 
 	return 0;
@@ -216,7 +218,7 @@ static int bootflow_iter(struct unit_test_state *uts)
 	/* The first device is mmc2.bootdev which has no media */
 	ut_asserteq(-EPROTONOSUPPORT,
 		    bootflow_scan_first(&iter, BOOTFLOWF_ALL, &bflow));
-	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(3, iter.num_methods);
 	ut_asserteq(0, iter.cur_method);
 	ut_asserteq(0, iter.part);
 	ut_asserteq(0, iter.max_part);
@@ -224,7 +226,7 @@ static int bootflow_iter(struct unit_test_state *uts)
 	ut_asserteq(0, bflow.err);
 
 	/*
-	 * This shows MEDIA even though there is none, since int
+	 * This shows MEDIA even though there is none, since in
 	 * bootdev_find_in_blk() we call part_get_info() which returns
 	 * -EPROTONOSUPPORT. Ideally it would return -EEOPNOTSUPP and we would
 	 * know.
@@ -232,7 +234,7 @@ static int bootflow_iter(struct unit_test_state *uts)
 	ut_asserteq(BOOTFLOWST_MEDIA, bflow.state);
 
 	ut_asserteq(-EPROTONOSUPPORT, bootflow_scan_next(&iter, &bflow));
-	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(3, iter.num_methods);
 	ut_asserteq(1, iter.cur_method);
 	ut_asserteq(0, iter.part);
 	ut_asserteq(0, iter.max_part);
@@ -241,9 +243,20 @@ static int bootflow_iter(struct unit_test_state *uts)
 	ut_asserteq(BOOTFLOWST_MEDIA, bflow.state);
 	bootflow_free(&bflow);
 
+	/* Now we have the VBE bootmeth */
+	ut_asserteq(-EPROTONOSUPPORT, bootflow_scan_next(&iter, &bflow));
+	ut_asserteq(3, iter.num_methods);
+	ut_asserteq(2, iter.cur_method);
+	ut_asserteq(0, iter.part);
+	ut_asserteq(0, iter.max_part);
+	ut_asserteq_str("firmware0", iter.method->name);
+	ut_asserteq(0, bflow.err);
+	ut_asserteq(BOOTFLOWST_MEDIA, bflow.state);
+	bootflow_free(&bflow);
+
 	/* The next device is mmc1.bootdev - at first we use the whole device */
 	ut_asserteq(-ENOENT, bootflow_scan_next(&iter, &bflow));
-	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(3, iter.num_methods);
 	ut_asserteq(0, iter.cur_method);
 	ut_asserteq(0, iter.part);
 	ut_asserteq(0x1e, iter.max_part);
@@ -253,7 +266,7 @@ static int bootflow_iter(struct unit_test_state *uts)
 	bootflow_free(&bflow);
 
 	ut_asserteq(-ENOENT, bootflow_scan_next(&iter, &bflow));
-	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(3, iter.num_methods);
 	ut_asserteq(1, iter.cur_method);
 	ut_asserteq(0, iter.part);
 	ut_asserteq(0x1e, iter.max_part);
@@ -262,9 +275,9 @@ static int bootflow_iter(struct unit_test_state *uts)
 	ut_asserteq(BOOTFLOWST_MEDIA, bflow.state);
 	bootflow_free(&bflow);
 
-	/* Then more to partition 1 where we find something */
+	/* Then move to partition 1 where we find something */
 	ut_assertok(bootflow_scan_next(&iter, &bflow));
-	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(3, iter.num_methods);
 	ut_asserteq(0, iter.cur_method);
 	ut_asserteq(1, iter.part);
 	ut_asserteq(0x1e, iter.max_part);
@@ -274,7 +287,7 @@ static int bootflow_iter(struct unit_test_state *uts)
 	bootflow_free(&bflow);
 
 	ut_asserteq(-ENOENT, bootflow_scan_next(&iter, &bflow));
-	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(3, iter.num_methods);
 	ut_asserteq(1, iter.cur_method);
 	ut_asserteq(1, iter.part);
 	ut_asserteq(0x1e, iter.max_part);
@@ -285,7 +298,7 @@ static int bootflow_iter(struct unit_test_state *uts)
 
 	/* Then more to partition 2 which doesn't exist */
 	ut_asserteq(-ENOENT, bootflow_scan_next(&iter, &bflow));
-	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(3, iter.num_methods);
 	ut_asserteq(0, iter.cur_method);
 	ut_asserteq(2, iter.part);
 	ut_asserteq(0x1e, iter.max_part);
@@ -356,7 +369,7 @@ static int bootflow_iter_disable(struct unit_test_state *uts)
 	/* Try to boot the bootmgr flow, which will fail */
 	console_record_reset_enable();
 	ut_assertok(bootflow_scan_first(&iter, 0, &bflow));
-	ut_asserteq(3, iter.num_methods);
+	ut_asserteq(4, iter.num_methods);
 	ut_asserteq_str("sandbox", iter.method->name);
 	ut_asserteq(-ENOTSUPP, bootflow_run_boot(&iter, &bflow));
 
@@ -364,7 +377,7 @@ static int bootflow_iter_disable(struct unit_test_state *uts)
 	ut_assert_console_end();
 
 	/* Check that the sandbox bootmeth has been removed */
-	ut_asserteq(2, iter.num_methods);
+	ut_asserteq(3, iter.num_methods);
 	for (i = 0; i < iter.num_methods; i++)
 		ut_assert(strcmp("sandbox", iter.method_order[i]->name));
 
