@@ -114,6 +114,8 @@ static int bootflow_cmd_scan_e(struct unit_test_state *uts)
 	ut_assert_nextline("     ** No partition found, err=-93");
 	ut_assert_nextline("  1  efi          media   mmc          0  mmc2.bootdev.whole        <NULL>");
 	ut_assert_nextline("     ** No partition found, err=-93");
+	ut_assert_nextline("  2  firmware0    media   mmc          0  mmc2.bootdev.whole        <NULL>");
+	ut_assert_nextline("     ** No partition found, err=-93");
 
 	ut_assert_nextline("Scanning bootdev 'mmc1.bootdev':");
 	ut_assert_nextline("  2  syslinux     media   mmc          0  mmc1.bootdev.whole        <NULL>");
