@@ -23,7 +23,7 @@ static int bootmeth_cmd_list(struct unit_test_state *uts)
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("    0    0  syslinux            Syslinux boot from a block device");
 	ut_assert_nextline("    1    1  efi                 EFI boot from an .efi file");
-	ut_assert_nextline("    2    2  firmware0           VBE simple");
+	ut_assert_nextline(" glob    2  firmware0           VBE simple");
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("(3 bootmeths)");
 	ut_assert_console_end();
@@ -57,7 +57,7 @@ static int bootmeth_cmd_order(struct unit_test_state *uts)
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("    0    0  syslinux            Syslinux boot from a block device");
 	ut_assert_nextline("    -    1  efi                 EFI boot from an .efi file");
-	ut_assert_nextline("    -    2  firmware0           VBE simple");
+	ut_assert_nextline(" glob    2  firmware0           VBE simple");
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("(3 bootmeths)");
 	ut_assert_console_end();
@@ -70,7 +70,7 @@ static int bootmeth_cmd_order(struct unit_test_state *uts)
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("    1    0  syslinux            Syslinux boot from a block device");
 	ut_assert_nextline("    0    1  efi                 EFI boot from an .efi file");
-	ut_assert_nextline("    -    2  firmware0           VBE simple");
+	ut_assert_nextline(" glob    2  firmware0           VBE simple");
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("(3 bootmeths)");
 	ut_assert_console_end();

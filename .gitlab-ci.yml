@@ -242,12 +242,6 @@ sandbox test.py:
     TEST_PY_BD: "sandbox"
   <<: *buildman_and_testpy_dfn
 
-sandbox with clang test.py:
-  variables:
-    TEST_PY_BD: "sandbox"
-    OVERRIDE: "-O clang-13"
-  <<: *buildman_and_testpy_dfn
-
 sandbox_spl test.py:
   variables:
     TEST_PY_BD: "sandbox_spl"

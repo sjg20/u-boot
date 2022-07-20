@@ -281,6 +281,7 @@ static int bootmeth_vbe_simple_bind(struct udevice *dev)
 
 	plat->desc = IS_ENABLED(CONFIG_BOOTSTD_FULL) ?
 		"VBE simple" : "vbe-simple";
+	plat->flags = BOOTMETHF_AUTOSEL;
 
 	return 0;
 }

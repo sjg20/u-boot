@@ -13,12 +13,23 @@ struct bootflow_iter;
 struct udevice;
 
 /**
+ * enum bootmeth_flags - Flags for bootmeths
+ *
+ * @BOOTMETHF_AUTOSEL: bootmeth handles bootdev selection automatically
+ */
+enum bootmeth_flags {
+	BOOTMETHF_AUTOSEL	= BIT(0),
+};
+
+/**
  * struct bootmeth_uc_plat - information the uclass keeps about each bootmeth
  *
  * @desc: A long description of the bootmeth
+ * @flags: Flags for this bootmeth (enum bootmeth_flags)
  */
 struct bootmeth_uc_plat {
 	const char *desc;
+	int flags;
 };
 
 /** struct bootmeth_ops - Operations for boot methods */

@@ -117,10 +117,15 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter)
 		 * all.
 		 */
 		for (i = 0, upto = 0; upto < count && i < 20 + count * 2; i++) {
+			struct bootmeth_uc_plat *ucp;
+
 			ret = uclass_get_device_by_seq(UCLASS_BOOTMETH, i,
 						       &dev);
-			if (!ret)
-				order[upto++] = dev;
+			if (!ret) {
+				ucp = dev_get_uclass_plat(dev);
+				if (!(ucp->flags & BOOTMETHF_AUTOSEL))
+					order[upto++] = dev;
+			}
 		}
 		count = upto;
 	}
@@ -162,6 +167,7 @@ int bootmeth_set_order(const char *order_str)
 		return log_msg_ret("order", -ENOMEM);
 
 	for (i = 0, s = order_str; *s && i < count; s = p + (*p == ' '), i++) {
+		struct bootmeth_uc_plat *ucp;
 		struct udevice *dev;
 
 		p = strchrnul(s, ' ');
@@ -173,7 +179,9 @@ int bootmeth_set_order(const char *order_str)
 			free(order);
 			return ret;
 		}
-		order[i] = dev;
+		ucp = dev_get_uclass_plat(dev);
+		if (!(ucp->flags & BOOTMETHF_AUTOSEL))
+			order[i] = dev;
 	}
 	order[i] = NULL;
 	free(std->bootmeth_order);
