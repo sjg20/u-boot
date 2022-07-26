@@ -100,13 +100,13 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 		struct udevice *dev;
 		int i, upto, pass;
 
-		for (pass = 0; pass < 2; pass++) {
+		for (pass = !include_global, upto = 0; pass < 2; pass++) {
 			/*
 			* Get a list of bootmethods, in seq order (i.e. using aliases).
 			* There may be gaps so try to count up high enough to find them
 			* all.
 			*/
-			for (i = 0, upto = 0; upto < count && i < 20 + count * 2; i++) {
+			for (i = 0; upto < count && i < 20 + count * 2; i++) {
 				struct bootmeth_uc_plat *ucp;
 				bool is_global;
 

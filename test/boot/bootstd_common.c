@@ -25,6 +25,15 @@ int bootstd_test_drop_bootdev_order(struct unit_test_state *uts)
 	return 0;
 }
 
+int bootstd_test_drop_system_bootdev(struct unit_test_state *uts)
+{
+	struct udevice *dev;
+
+	ut_assertok(uclass_first_device_err(UCLASS_BOOTDEV, &dev));
+
+	return 0;
+}
+
 int do_ut_bootstd(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	struct unit_test *tests = UNIT_TEST_SUITE_START(bootstd_test);

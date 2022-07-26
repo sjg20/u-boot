@@ -305,24 +305,13 @@ BOOTSTD_TEST(bootflow_iter, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check using the system bootdev */
 static int bootflow_system(struct unit_test_state *uts)
 {
-	struct udevice *bootstd, *dev;
-
-	/* Add the EFI bootmgr driver */
-	ut_assertok(uclass_first_device_err(UCLASS_BOOTSTD, &bootstd));
-// 	ut_assertok(device_bind_driver(bootstd, "bootmeth_efi_mgr", "bootmgr",
-// 				       &dev));
-
-	/* Add the system bootdev that it uses */
-// 	ut_assertok(device_bind_driver(bootstd, "system_bootdev",
-// 				       "system-bootdev", &dev));
-
 	ut_assertok(bootstd_test_drop_bootdev_order(uts));
 
 	/* We should get a single 'bootmgr' method right at the end */
 	bootstd_clear_glob();
 	console_record_reset_enable();
 	ut_assertok(run_command("bootflow scan -lg", 0));
-	ut_assert_skip_to_line("  1  bootmgr      ready   bootstd      0  <NULL>                    <NULL>");
+	ut_assert_skip_to_line("  1  efi-mgr      ready   bootstd      0  <NULL>                    <NULL>");
 	ut_assert_nextline("No more bootdevs");
 	ut_assert_skip_to_line("(2 bootflows, 2 valid)");
 	ut_assert_console_end();
