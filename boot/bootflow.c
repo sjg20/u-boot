@@ -238,7 +238,7 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 		return log_msg_ret("obdev", -ENODEV);
 	bootflow_iter_set_dev(iter, dev);
 
-	ret = bootmeth_setup_iter_order(iter);
+	ret = bootmeth_setup_iter_order(iter, iter->flags & BOOTFLOWF_GLOBAL);
 	if (ret)
 		return log_msg_ret("obmeth", -ENODEV);
 

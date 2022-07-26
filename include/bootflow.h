@@ -77,12 +77,14 @@ struct bootflow {
  * @BOOTFLOWF_SHOW: Show each bootdev before scanning it
  * @BOOTFLOWF_ALL: Return bootflows with errors as well
  * @BOOTFLOWF_SINGLE_DEV: Just scan one bootmeth
+ * @BOOTFLOWF_GLOBAL: Scan global bootmeths first
  */
 enum bootflow_flags_t {
 	BOOTFLOWF_FIXED		= 1 << 0,
 	BOOTFLOWF_SHOW		= 1 << 1,
 	BOOTFLOWF_ALL		= 1 << 2,
 	BOOTFLOWF_SINGLE_DEV	= 1 << 3,
+	BOOTFLOWF_GLOBAL	= 1 << 4,
 };
 
 /**

@@ -71,18 +71,7 @@ int bootmeth_read_file(struct udevice *dev, struct bootflow *bflow,
 	return ops->read_file(dev, bflow, file_path, addr, sizep);
 }
 
-/**
- * bootmeth_setup_iter_order() - Set up the ordering of bootmeths to scan
- *
- * This sets up the ordering information in @iter, based on the selected
- * ordering of the bootmethds in bootstd_priv->bootmeth_order. If there is no
- * ordering there, then all bootmethods are added
- *
- * @iter: Iterator to update with the order
- * Return: 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
- *	on other error
- */
-int bootmeth_setup_iter_order(struct bootflow_iter *iter)
+int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 {
 	struct bootstd_priv *std;
 	struct udevice **order;
@@ -109,22 +98,27 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter)
 		       count * sizeof(struct bootmeth *));
 	} else {
 		struct udevice *dev;
-		int i, upto;
+		int i, upto, pass;
 
-		/*
-		 * Get a list of bootmethods, in seq order (i.e. using aliases).
-		 * There may be gaps so try to count up high enough to find them
-		 * all.
-		 */
-		for (i = 0, upto = 0; upto < count && i < 20 + count * 2; i++) {
-			struct bootmeth_uc_plat *ucp;
+		for (pass = 0; pass < 2; pass++) {
+			/*
+			* Get a list of bootmethods, in seq order (i.e. using aliases).
+			* There may be gaps so try to count up high enough to find them
+			* all.
+			*/
+			for (i = 0, upto = 0; upto < count && i < 20 + count * 2; i++) {
+				struct bootmeth_uc_plat *ucp;
+				bool is_global;
 
-			ret = uclass_get_device_by_seq(UCLASS_BOOTMETH, i,
-						       &dev);
-			if (!ret) {
-				ucp = dev_get_uclass_plat(dev);
-				if (!(ucp->flags & BOOTMETHF_AUTOSEL))
-					order[upto++] = dev;
+				ret = uclass_get_device_by_seq(UCLASS_BOOTMETH, i,
+							&dev);
+				if (!ret) {
+					ucp = dev_get_uclass_plat(dev);
+					is_global = ucp->flags &
+						BOOTMETHF_GLOBAL;
+					if (pass ? !is_global : is_global)
+						order[upto++] = dev;
+				}
 			}
 		}
 		count = upto;
@@ -180,7 +174,7 @@ int bootmeth_set_order(const char *order_str)
 			return ret;
 		}
 		ucp = dev_get_uclass_plat(dev);
-		if (!(ucp->flags & BOOTMETHF_AUTOSEL))
+		if (!(ucp->flags & BOOTMETHF_GLOBAL))
 			order[i] = dev;
 	}
 	order[i] = NULL;

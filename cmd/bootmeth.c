@@ -69,8 +69,8 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 			}
 		}
 
-		if (ucp->flags & BOOTMETHF_AUTOSEL)
-			printf("%5s", "glob");
+		if (ucp->flags & BOOTMETHF_GLOBAL)
+			printf("%5s", "auto");
 		else if (order == -1)
 			printf("%5s", "-");
 		else

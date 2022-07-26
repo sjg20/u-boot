@@ -61,6 +61,7 @@ static int bootmeth_efi_mgr_bind(struct udevice *dev)
 	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
 
 	plat->desc = "EFI bootmgr flow";
+	plat->flags = BOOTMETHF_GLOBAL;
 
 	return 0;
 }
