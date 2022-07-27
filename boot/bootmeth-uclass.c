@@ -102,16 +102,16 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 
 		for (pass = !include_global, upto = 0; pass < 2; pass++) {
 			/*
-			* Get a list of bootmethods, in seq order (i.e. using aliases).
-			* There may be gaps so try to count up high enough to find them
-			* all.
+			* Get a list of bootmethods, in seq order (i.e. using
+			* aliases). There may be gaps so try to count up high
+			* enough to find them all.
 			*/
 			for (i = 0; upto < count && i < 20 + count * 2; i++) {
 				struct bootmeth_uc_plat *ucp;
 				bool is_global;
 
-				ret = uclass_get_device_by_seq(UCLASS_BOOTMETH, i,
-							&dev);
+				ret = uclass_get_device_by_seq(UCLASS_BOOTMETH,
+							       i, &dev);
 				if (!ret) {
 					ucp = dev_get_uclass_plat(dev);
 					is_global = ucp->flags &

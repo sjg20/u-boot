@@ -90,14 +90,6 @@
 		efi {
 			compatible = "u-boot,distro-efi";
 		};
-
-		efi-mgr {
-			compatible = "u-boot,efi-bootmgr";
-		};
-
-		system-bootdev {
-			compatible = "u-boot,bootdev-system";
-		};
 	};
 
 	fuzzing-engine {
@@ -1690,6 +1682,10 @@
 			reg = <0 0x10>;
 			compatible = "sandbox,regmap_test";
 		};
+	};
+
+	system-bootdev {
+		compatible = "u-boot,bootdev-system";
 	};
 };
 

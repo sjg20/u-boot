@@ -127,6 +127,13 @@ int dm_scan_other(bool pre_reloc_only)
 			return log_msg_ret("bootstd", ret);
 	}
 
+	if (IS_ENABLED(CONFIG_CMD_BOOTEFI_BOOTMGR)) {
+		ret = device_bind_driver(bootstd, "bootmeth_efi_mgr", "efi-mgr",
+					 &dev);
+		if (ret)
+			return log_msg_ret("efi", ret);
+	}
+
 	/* If there are no bootmeth devices, create them */
 	uclass_find_first_device(UCLASS_BOOTMETH, &dev);
 	if (dev)
@@ -150,10 +157,6 @@ int dm_scan_other(bool pre_reloc_only)
 				 &dev);
 	if (ret)
 		return log_msg_ret("sys", ret);
-
-	ret = device_bind_driver(bootstd, "bootmeth_efi_mgr", "bootmgr", &dev);
-	if (ret)
-		return log_msg_ret("efi", ret);
 
 	return 0;
 }

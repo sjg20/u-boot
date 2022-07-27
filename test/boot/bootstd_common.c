@@ -9,6 +9,7 @@
 #include <common.h>
 #include <bootstd.h>
 #include <dm.h>
+#include <dm/device-internal.h>
 #include <test/suites.h>
 #include <test/ut.h>
 #include "bootstd_common.h"
@@ -29,7 +30,10 @@ int bootstd_test_drop_system_bootdev(struct unit_test_state *uts)
 {
 	struct udevice *dev;
 
-	ut_assertok(uclass_first_device_err(UCLASS_BOOTDEV, &dev));
+	ut_assertok(uclass_get_device_by_name(UCLASS_BOOTDEV, "system-bootdev",
+					      &dev));
+	ut_assertok(device_remove(dev, 0));
+	ut_assertok(device_unbind(dev));
 
 	return 0;
 }
