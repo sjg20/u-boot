@@ -1683,10 +1683,6 @@
 			compatible = "sandbox,regmap_test";
 		};
 	};
-
-	system-bootdev {
-		compatible = "u-boot,bootdev-system";
-	};
 };
 
 #include "sandbox_pmic.dtsi"

@@ -24,6 +24,4 @@ struct unit_test_state;
  */
 int bootstd_test_drop_bootdev_order(struct unit_test_state *uts);
 
-int bootstd_test_drop_system_bootdev(struct unit_test_state *uts);
-
 #endif

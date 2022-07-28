@@ -25,8 +25,6 @@ static int bootdev_test_cmd_list(struct unit_test_state *uts)
 {
 	int probed;
 
-	ut_assertok(bootstd_test_drop_system_bootdev(uts));
-
 	console_record_reset_enable();
 	for (probed = 0; probed < 2; probed++) {
 		int probe_ch = probed ? '+' : ' ';
@@ -127,8 +125,6 @@ static int bootdev_test_order(struct unit_test_state *uts)
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 
-	ut_assertok(bootstd_test_drop_system_bootdev(uts));
-
 	/*
 	 * First try the order set by the bootdev-order property
 	 * Like all sandbox unit tests this relies on the devicetree setting up
@@ -193,8 +189,6 @@ static int bootdev_test_prio(struct unit_test_state *uts)
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 	struct udevice *blk;
-
-	ut_assertok(bootstd_test_drop_system_bootdev(uts));
 
 	/* Start up USB which gives us three additional bootdevs */
 	usb_started = false;

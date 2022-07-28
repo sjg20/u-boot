@@ -17,8 +17,6 @@
 /* Check 'bootmeth list' command */
 static int bootmeth_cmd_list(struct unit_test_state *uts)
 {
-	ut_assertok(bootstd_test_drop_system_bootdev(uts));
-
 	console_record_reset_enable();
 	ut_assertok(run_command("bootmeth list", 0));
 	ut_assert_nextline("Order  Seq  Name                Description");
@@ -37,8 +35,6 @@ BOOTSTD_TEST(bootmeth_cmd_list, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check 'bootmeth order' command */
 static int bootmeth_cmd_order(struct unit_test_state *uts)
 {
-	ut_assertok(bootstd_test_drop_system_bootdev(uts));
-
 	/* Select just one bootmethod */
 	console_record_reset_enable();
 	ut_assertok(run_command("bootmeth order syslinux", 0));
