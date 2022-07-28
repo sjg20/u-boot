@@ -118,7 +118,7 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
 	iter->dev = dev;
 	if ((iter->flags & (BOOTFLOWF_SHOW | BOOTFLOWF_SINGLE_DEV)) ==
 	    BOOTFLOWF_SHOW) {
-		if (iter->flags & BOOTFLOWF_IS_GLOBAL)
+		if (iter->flags & BOOTFLOWF_GLOBAL_FIRST)
 			printf("Scanning global bootmeth '%s':\n",
 			       iter->method->name);
 		else if (dev)
@@ -135,17 +135,17 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
  */
 static int iter_incr(struct bootflow_iter *iter)
 {
+	bool global = iter->flags & BOOTFLOWF_GLOBAL_FIRST;
 	struct udevice *dev;
 	int ret;
 
-	iter->flags &= ~BOOTFLOWF_IS_GLOBAL;
 	if (iter->err == BF_NO_MORE_DEVICES)
 		return BF_NO_MORE_DEVICES;
 	if (iter->err != BF_NO_MORE_PARTS) {
 		/* Get the next boothmethod */
 		if (++iter->cur_method < iter->num_methods) {
 			iter->method = iter->method_order[iter->cur_method];
-			iter->flags |= BOOTFLOWF_IS_GLOBAL;
+			printf("next %s\n", iter->method->name);
 			return 0;
 		}
 
@@ -153,13 +153,15 @@ static int iter_incr(struct bootflow_iter *iter)
 		 * If we have finished scanning the global bootmeths, start the
 		 * normal bootdev scan
 		 */
-		if (iter->flags & BOOTFLOWF_GLOBAL_FIRST) {
+		if (global) {
+			printf("done\n");
 			iter->flags &= ~BOOTFLOWF_GLOBAL_FIRST;
 			iter->num_methods = iter->first_glob_method;
 			iter->cur_method = 0;
 			if (iter->cur_method < iter->num_methods) {
 				iter->method = iter->method_order[
 					iter->cur_method];
+				printf("final %s\n", iter->method->name);
 				return 0;
 			}
 		}
