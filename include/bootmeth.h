@@ -280,4 +280,6 @@ int bootmeth_alloc_file(struct bootflow *bflow, uint size_limit, uint align);
 int bootmeth_common_read_file(struct udevice *dev, struct bootflow *bflow,
 			      const char *file_path, ulong addr, ulong *sizep);
 
+int bootmeth_get_bootflow(struct udevice *dev, struct bootflow *bflow);
+
 #endif

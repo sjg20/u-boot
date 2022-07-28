@@ -69,8 +69,8 @@ static void show_bootflow(int index, struct bootflow *bflow, bool errors)
 {
 	printf("%3x  %-11s  %-6s  %-9.9s %4x  %-25.25s %s\n", index,
 	       bflow->method->name, bootflow_state_get_name(bflow->state),
-	       dev_get_uclass_name(dev_get_parent(bflow->dev)), bflow->part,
-	       bflow->name, bflow->fname);
+	       bflow->dev ? dev_get_uclass_name(dev_get_parent(bflow->dev)) :
+	       "(none)", bflow->part, bflow->name, bflow->fname);
 	if (errors)
 		report_bootflow_err(bflow, bflow->err);
 }
@@ -140,7 +140,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (all)
 		flags |= BOOTFLOWF_ALL;
 	if (global)
-		flags |= BOOTFLOWF_GLOBAL;
+		flags |= BOOTFLOWF_GLOBAL_FIRST;
 
 	/*
 	 * If we have a device, just scan for bootflows attached to that device

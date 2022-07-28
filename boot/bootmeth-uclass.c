@@ -71,6 +71,21 @@ int bootmeth_read_file(struct udevice *dev, struct bootflow *bflow,
 	return ops->read_file(dev, bflow, file_path, addr, sizep);
 }
 
+
+int bootmeth_get_bootflow(struct udevice *dev, struct bootflow *bflow)
+{
+	const struct bootmeth_ops *ops = bootmeth_get_ops(dev);
+
+	if (!ops->read_bootflow)
+		return -ENOSYS;
+	memset(bflow, '\0', sizeof(*bflow));
+	bflow->dev = NULL;
+	bflow->method = dev;
+	bflow->state = BOOTFLOWST_BASE;
+
+	return ops->read_bootflow(dev, bflow);
+}
+
 int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 {
 	struct bootstd_priv *std;
@@ -94,13 +109,21 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 
 	/* If we have an ordering, copy it */
 	if (IS_ENABLED(CONFIG_BOOTSTD_FULL) && std->bootmeth_count) {
+		printf("using bootmeth_order\n");
 		memcpy(order, std->bootmeth_order,
 		       count * sizeof(struct bootmeth *));
 	} else {
 		struct udevice *dev;
 		int i, upto, pass;
 
-		for (pass = !include_global, upto = 0; pass < 2; pass++) {
+		/*
+		 * Do two passes, one to find the normal bootmeths and another
+		 * to find the global ones, if required, The global ones go at
+		 * the end.
+		 */
+		for (pass = 0, upto = 0; pass < 1 + include_global; pass++) {
+			if (pass)
+				iter->first_glob_method = upto;
 			/*
 			* Get a list of bootmethods, in seq order (i.e. using
 			* aliases). There may be gaps so try to count up high
@@ -116,7 +139,7 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 					ucp = dev_get_uclass_plat(dev);
 					is_global = ucp->flags &
 						BOOTMETHF_GLOBAL;
-					if (pass ? !is_global : is_global)
+					if (pass ? is_global : !is_global)
 						order[upto++] = dev;
 				}
 			}
@@ -128,7 +151,7 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 
 	iter->method_order = order;
 	iter->num_methods = count;
-	iter->cur_method = 0;
+	iter->cur_method = include_global ? iter->first_glob_method : 0;
 
 	return 0;
 }

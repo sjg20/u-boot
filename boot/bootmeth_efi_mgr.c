@@ -29,13 +29,9 @@ static int efi_mgr_check(struct udevice *dev, struct bootflow_iter *iter)
 
 static int efi_mgr_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 {
-	/*
-	 * Just assume there is something to boot since we don't have any way
-	 * of knowing in advance
-	 */
-	bflow->state = BOOTFLOWST_READY;
+	/* To be implemented */
 
-	return 0;
+	return -EINVAL;
 }
 
 static int efi_mgr_read_file(struct udevice *dev, struct bootflow *bflow,

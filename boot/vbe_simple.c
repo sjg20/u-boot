@@ -10,6 +10,7 @@
 #include <log.h>
 #include <memalign.h>
 #include <part.h>
+#include <bootflow.h>
 #include <bootmeth.h>
 #include <dm.h>
 #include <mmc.h>
@@ -159,7 +160,8 @@ static int simple_read_state(struct udevice *dev, struct simple_state *state)
 	return 0;
 }
 
-static int simple_get_state_desc(struct udevice *dev, char *buf, int maxsize)
+static int vbe_simple_get_state_desc(struct udevice *dev, char *buf,
+				     int maxsize)
 {
 	struct simple_state state;
 	int ret;
@@ -177,8 +179,16 @@ static int simple_get_state_desc(struct udevice *dev, char *buf, int maxsize)
 	return 0;
 }
 
+static int vbe_simple_read_bootflow(struct udevice *dev, struct bootflow *bflow)
+{
+	/* To be implemented */
+
+	return -EINVAL;
+}
+
 static struct bootmeth_ops bootmeth_vbe_simple_ops = {
-	.get_state_desc	= simple_get_state_desc,
+	.get_state_desc	= vbe_simple_get_state_desc,
+	.read_bootflow	= vbe_simple_read_bootflow,
 	.read_file	= bootmeth_common_read_file,
 };
 

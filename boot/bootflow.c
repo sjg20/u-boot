@@ -118,7 +118,10 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
 	iter->dev = dev;
 	if ((iter->flags & (BOOTFLOWF_SHOW | BOOTFLOWF_SINGLE_DEV)) ==
 	    BOOTFLOWF_SHOW) {
-		if (dev)
+		if (iter->flags & BOOTFLOWF_IS_GLOBAL)
+			printf("Scanning global bootmeth '%s':\n",
+			       iter->method->name);
+		else if (dev)
 			printf("Scanning bootdev '%s':\n", dev->name);
 		else
 			printf("No more bootdevs\n");
@@ -135,14 +138,30 @@ static int iter_incr(struct bootflow_iter *iter)
 	struct udevice *dev;
 	int ret;
 
+	iter->flags &= ~BOOTFLOWF_IS_GLOBAL;
 	if (iter->err == BF_NO_MORE_DEVICES)
 		return BF_NO_MORE_DEVICES;
-
 	if (iter->err != BF_NO_MORE_PARTS) {
 		/* Get the next boothmethod */
 		if (++iter->cur_method < iter->num_methods) {
 			iter->method = iter->method_order[iter->cur_method];
+			iter->flags |= BOOTFLOWF_IS_GLOBAL;
 			return 0;
+		}
+
+		/*
+		 * If we have finished scanning the global bootmeths, start the
+		 * normal bootdev scan
+		 */
+		if (iter->flags & BOOTFLOWF_GLOBAL_FIRST) {
+			iter->flags &= ~BOOTFLOWF_GLOBAL_FIRST;
+			iter->num_methods = iter->first_glob_method;
+			iter->cur_method = 0;
+			if (iter->cur_method < iter->num_methods) {
+				iter->method = iter->method_order[
+					iter->cur_method];
+				return 0;
+			}
 		}
 	}
 
@@ -199,6 +218,15 @@ static int bootflow_check(struct bootflow_iter *iter, struct bootflow *bflow)
 	struct udevice *dev;
 	int ret;
 
+	if (!iter->dev) {
+		bootflow_iter_set_dev(iter, NULL);
+		ret = bootmeth_get_bootflow(iter->method, bflow);
+		if (ret)
+			return log_msg_ret("glob", ret);
+
+		return 0;
+	}
+
 	dev = iter->dev;
 	ret = bootdev_get_bootflow(dev, iter, bflow);
 
@@ -229,6 +257,7 @@ static int bootflow_check(struct bootflow_iter *iter, struct bootflow *bflow)
 int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 			  int flags, struct bootflow *bflow)
 {
+	bool global = flags & BOOTFLOWF_GLOBAL_FIRST;
 	int ret;
 
 	bootflow_iter_init(iter, flags);
@@ -236,14 +265,15 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 	ret = bootdev_setup_iter_order(iter, &dev);
 	if (ret)
 		return log_msg_ret("obdev", -ENODEV);
-	bootflow_iter_set_dev(iter, dev);
 
-	ret = bootmeth_setup_iter_order(iter, iter->flags & BOOTFLOWF_GLOBAL);
+	ret = bootmeth_setup_iter_order(iter, global);
 	if (ret)
 		return log_msg_ret("obmeth", -ENODEV);
 
 	/* Find the first bootmeth (there must be at least one!) */
 	iter->method = iter->method_order[iter->cur_method];
+	if (!global)
+		bootflow_iter_set_dev(iter, dev);
 
 	ret = bootflow_check(iter, bflow);
 	if (ret) {
@@ -278,6 +308,7 @@ int bootflow_scan_next(struct bootflow_iter *iter, struct bootflow *bflow)
 
 	do {
 		ret = iter_incr(iter);
+		printf("flags %x\n", iter->flags);
 		if (ret == BF_NO_MORE_DEVICES)
 			return log_msg_ret("done", ret);
 
