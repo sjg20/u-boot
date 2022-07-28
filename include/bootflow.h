@@ -78,6 +78,7 @@ struct bootflow {
  * @BOOTFLOWF_ALL: Return bootflows with errors as well
  * @BOOTFLOWF_SINGLE_DEV: Just scan one bootmeth
  * @BOOTFLOWF_GLOBAL_FIRST: Scan global bootmeths first
+ * @BOOTFLOWF_GLOBAL_DONE: Global bootmeths are completed
  */
 enum bootflow_flags_t {
 	BOOTFLOWF_FIXED		= 1 << 0,
@@ -85,6 +86,7 @@ enum bootflow_flags_t {
 	BOOTFLOWF_ALL		= 1 << 2,
 	BOOTFLOWF_SINGLE_DEV	= 1 << 3,
 	BOOTFLOWF_GLOBAL_FIRST	= 1 << 4,
+	BOOTFLOWF_GLOBAL_DONE	= 1 << 5,
 };
 
 /**

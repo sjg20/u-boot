@@ -118,11 +118,11 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
 	iter->dev = dev;
 	if ((iter->flags & (BOOTFLOWF_SHOW | BOOTFLOWF_SINGLE_DEV)) ==
 	    BOOTFLOWF_SHOW) {
-		if (iter->flags & BOOTFLOWF_GLOBAL_FIRST)
+		if (dev)
+			printf("Scanning bootdev '%s':\n", dev->name);
+		else if (iter->flags & BOOTFLOWF_GLOBAL_FIRST)
 			printf("Scanning global bootmeth '%s':\n",
 			       iter->method->name);
-		else if (dev)
-			printf("Scanning bootdev '%s':\n", dev->name);
 		else
 			printf("No more bootdevs\n");
 	}
@@ -135,9 +135,13 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
  */
 static int iter_incr(struct bootflow_iter *iter)
 {
-	bool global = iter->flags & BOOTFLOWF_GLOBAL_FIRST;
 	struct udevice *dev;
+	bool global;
 	int ret;
+
+	if (iter->flags & BOOTFLOWF_GLOBAL_DONE)
+		iter->flags &= ~BOOTFLOWF_GLOBAL_FIRST;
+	global  = iter->flags & BOOTFLOWF_GLOBAL_FIRST;
 
 	if (iter->err == BF_NO_MORE_DEVICES)
 		return BF_NO_MORE_DEVICES;
@@ -145,7 +149,6 @@ static int iter_incr(struct bootflow_iter *iter)
 		/* Get the next boothmethod */
 		if (++iter->cur_method < iter->num_methods) {
 			iter->method = iter->method_order[iter->cur_method];
-			printf("next %s\n", iter->method->name);
 			return 0;
 		}
 
@@ -154,14 +157,12 @@ static int iter_incr(struct bootflow_iter *iter)
 		 * normal bootdev scan
 		 */
 		if (global) {
-			printf("done\n");
-			iter->flags &= ~BOOTFLOWF_GLOBAL_FIRST;
+			iter->flags |= BOOTFLOWF_GLOBAL_DONE;
 			iter->num_methods = iter->first_glob_method;
 			iter->cur_method = 0;
 			if (iter->cur_method < iter->num_methods) {
 				iter->method = iter->method_order[
 					iter->cur_method];
-				printf("final %s\n", iter->method->name);
 				return 0;
 			}
 		}
@@ -220,7 +221,7 @@ static int bootflow_check(struct bootflow_iter *iter, struct bootflow *bflow)
 	struct udevice *dev;
 	int ret;
 
-	if (!iter->dev) {
+	if (iter->flags & BOOTFLOWF_GLOBAL_FIRST) {
 		bootflow_iter_set_dev(iter, NULL);
 		ret = bootmeth_get_bootflow(iter->method, bflow);
 		if (ret)
@@ -310,7 +311,6 @@ int bootflow_scan_next(struct bootflow_iter *iter, struct bootflow *bflow)
 
 	do {
 		ret = iter_incr(iter);
-		printf("flags %x\n", iter->flags);
 		if (ret == BF_NO_MORE_DEVICES)
 			return log_msg_ret("done", ret);
 
