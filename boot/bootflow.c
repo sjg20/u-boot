@@ -141,10 +141,6 @@ static int iter_incr(struct bootflow_iter *iter)
 	bool global;
 	int ret;
 
-	if (iter->flags & BOOTFLOWF_GLOBAL_DONE) {
-// 		iter->flags &= ~BOOTFLOWF_GLOBAL_FIRST;
-// 		printf("clear\n");
-	}
 	global = iter->flags & BOOTFLOWF_GLOBAL_FIRST;
 
 	if (iter->err == BF_NO_MORE_DEVICES)
@@ -152,7 +148,6 @@ static int iter_incr(struct bootflow_iter *iter)
 	if (iter->err != BF_NO_MORE_PARTS) {
 		/* Get the next boothmethod */
 		if (++iter->cur_method < iter->num_methods) {
-// 			printf("next\n");
 			iter->method = iter->method_order[iter->cur_method];
 			return 0;
 		}
@@ -162,16 +157,9 @@ static int iter_incr(struct bootflow_iter *iter)
 		 * normal bootdev scan
 		 */
 		if (global) {
-// 			iter->flags |= BOOTFLOWF_GLOBAL_DONE;
 			iter->flags &= ~BOOTFLOWF_GLOBAL_FIRST;
 			iter->num_methods = iter->first_glob_method;
 			iter->cur_method = 0;
-			printf("done global\n");
-// 			if (iter->cur_method < iter->num_methods) {
-// 				iter->method = iter->method_order[
-// 					iter->cur_method];
-// 				return 0;
-// 			}
 		}
 	}
 
