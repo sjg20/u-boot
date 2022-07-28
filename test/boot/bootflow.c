@@ -11,6 +11,7 @@
 #include <bootflow.h>
 #include <bootstd.h>
 #include <dm.h>
+#include <asm/test.h>
 #include <dm/lists.h>
 #include <test/suites.h>
 #include <test/ut.h>
@@ -307,7 +308,12 @@ BOOTSTD_TEST(bootflow_iter, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check using the system bootdev */
 static int bootflow_system(struct unit_test_state *uts)
 {
+	struct udevice *dev;
+
 	ut_assertok(bootstd_test_drop_bootdev_order(uts));
+	ut_assertok(uclass_get_device_by_name(UCLASS_BOOTMETH, "efi-mgr",
+					      &dev));
+	sandbox_set_fake_efi_mgr_dev(dev, true);
 
 	/* We should get a single 'bootmgr' method right at the end */
 	bootstd_clear_glob();

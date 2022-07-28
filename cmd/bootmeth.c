@@ -70,7 +70,7 @@ static int do_bootmeth_list(struct cmd_tbl *cmdtp, int flag, int argc,
 		}
 
 		if (ucp->flags & BOOTMETHF_GLOBAL)
-			printf("%5s", "auto");
+			printf("%5s", "glob");
 		else if (order == -1)
 			printf("%5s", "-");
 		else

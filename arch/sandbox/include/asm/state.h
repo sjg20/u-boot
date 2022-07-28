@@ -251,6 +251,8 @@ void state_set_skip_delays(bool skip_delays);
  */
 bool state_get_skip_delays(void);
 
+bool sandbox_get_fake_efi_mgr_dev(void);
+
 /**
  * state_reset_for_test() - Reset ready to re-run tests
  *

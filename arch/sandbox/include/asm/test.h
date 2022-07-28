@@ -304,4 +304,6 @@ int sandbox_cros_ec_get_pwm_duty(struct udevice *dev, uint index, uint *duty);
  */
 int sandbox_sdl_set_bpp(struct udevice *dev, enum video_log2_bpp l2bpp);
 
+void sandbox_set_fake_efi_mgr_dev(struct udevice *dev, bool fake_dev);
+
 #endif
