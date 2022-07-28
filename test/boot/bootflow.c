@@ -319,14 +319,15 @@ static int bootflow_system(struct unit_test_state *uts)
 	bootstd_clear_glob();
 	console_record_reset_enable();
 	ut_assertok(run_command("bootflow scan -lg", 0));
-	ut_assert_skip_to_line("  2  efi-mgr      ready   bootstd      0  <NULL>                    <NULL>");
-	ut_assert_nextline("No more bootdevs");
+	ut_assert_skip_to_line("  0  efi-mgr      ready   (none)       0  <NULL>                    <NULL>");
+	ut_assert_skip_to_line("No more bootdevs");
 	ut_assert_skip_to_line("(2 bootflows, 2 valid)");
 	ut_assert_console_end();
 
 	return 0;
 }
-BOOTSTD_TEST(bootflow_system, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootflow_system, UT_TESTF_DM | UT_TESTF_SCAN_PDATA |
+	     UT_TESTF_SCAN_FDT);
 
 /* Check disabling a bootmethod if it requests it */
 static int bootflow_iter_disable(struct unit_test_state *uts)

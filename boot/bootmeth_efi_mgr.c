@@ -47,8 +47,10 @@ static int efi_mgr_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 {
 	struct efi_mgr_priv *priv = dev_get_priv(dev);
 
-	if (priv->fake_dev)
+	if (priv->fake_dev) {
+		bflow->state = BOOTFLOWST_READY;
 		return 0;
+	}
 
 	/* To be implemented */
 
