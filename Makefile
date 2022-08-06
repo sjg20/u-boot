@@ -521,8 +521,8 @@ env_h := include/generated/environment.h
 
 no-dot-config-targets := clean clobber mrproper distclean \
 			 help %docs check% coccicheck \
-			 ubootversion backup tests check qcheck tcheck pylint \
-			 pylint_err
+			 ubootversion backup tests check pcheck qcheck tcheck \
+			 pylint pylint_err
 
 config-targets := 0
 mixed-targets  := 0
@@ -2358,6 +2358,7 @@ help:
 	@echo  'Test targets:'
 	@echo  ''
 	@echo  '  check           - Run all automated tests that use sandbox'
+	@echo  '  pcheck          - Run quick automated tests in parallel'
 	@echo  '  qcheck          - Run quick automated tests that use sandbox'
 	@echo  '  tcheck          - Run quick automated tests on tools'
 	@echo  '  pylint          - Run pylint on all Python files'
@@ -2402,6 +2403,9 @@ help:
 
 tests check:
 	$(srctree)/test/run
+
+pcheck:
+	$(srctree)/test/run parallel
 
 qcheck:
 	$(srctree)/test/run quick
