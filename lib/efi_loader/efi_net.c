@@ -924,7 +924,7 @@ efi_status_t efi_net_register(void)
 	netobj->net_mode.hwaddr_size = ARP_HLEN;
 	netobj->net_mode.media_header_size = ETHER_HDR_SIZE;
 	netobj->net_mode.max_packet_size = PKTSIZE;
-	netobj->net_mode.if_type = ARP_ETHER;
+	netobj->net_mode.uclass_id = ARP_ETHER;
 
 	netobj->pxe.revision = EFI_PXE_BASE_CODE_PROTOCOL_REVISION;
 	netobj->pxe.start = efi_pxe_base_code_start;

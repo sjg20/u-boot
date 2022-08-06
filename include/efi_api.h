@@ -622,7 +622,7 @@ struct efi_device_path_sata {
 struct efi_device_path_mac_addr {
 	struct efi_device_path dp;
 	struct efi_mac_addr mac;
-	u8 if_type;
+	u8 uclass_id;
 } __packed;
 
 struct efi_device_path_usb_class {
@@ -1410,7 +1410,7 @@ struct efi_simple_network_mode {
 	struct efi_mac_address current_address;
 	struct efi_mac_address broadcast_address;
 	struct efi_mac_address permanent_address;
-	u8 if_type;
+	u8 uclass_id;
 	u8 mac_changeable;
 	u8 multitx_supported;
 	u8 media_present_supported;

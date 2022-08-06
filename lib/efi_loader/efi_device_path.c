@@ -626,7 +626,7 @@ __maybe_unused static void *dp_fill(void *buf, struct udevice *dev)
 		/* We only support IPv4 */
 		memcpy(&dp->mac, &pdata->enetaddr, ARP_HLEN);
 		/* Ethernet */
-		dp->if_type = 1;
+		dp->uclass_id = 1;
 		return &dp[1];
 	}
 #endif

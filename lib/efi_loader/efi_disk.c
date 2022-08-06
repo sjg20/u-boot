@@ -378,7 +378,7 @@ static int efi_fs_exists(struct blk_desc *desc, int part)
  *
  * @parent:		parent handle
  * @dp_parent:		parent device path
- * @if_typename:	interface name for block device
+ * @uclass_idname:	interface name for block device
  * @desc:		internal block device
  * @dev_index:		device index for block device
  * @part_info:		partition info
@@ -389,7 +389,7 @@ static int efi_fs_exists(struct blk_desc *desc, int part)
 static efi_status_t efi_disk_add_dev(
 				efi_handle_t parent,
 				struct efi_device_path *dp_parent,
-				const char *if_typename,
+				const char *uclass_idname,
 				struct blk_desc *desc,
 				int dev_index,
 				struct disk_partition *part_info,
@@ -501,13 +501,13 @@ static efi_status_t efi_disk_add_dev(
 		  diskobj->media.last_block);
 
 	/* Store first EFI system partition */
-	if (part && !efi_system_partition.if_type) {
+	if (part && !efi_system_partition.uclass_id) {
 		if (part_info->bootable & PART_EFI_SYSTEM_PARTITION) {
-			efi_system_partition.if_type = desc->if_type;
+			efi_system_partition.uclass_id = desc->uclass_id;
 			efi_system_partition.devnum = desc->devnum;
 			efi_system_partition.part = part;
 			EFI_PRINT("EFI system partition: %s %x:%x\n",
-				  blk_get_if_type_name(desc->if_type),
+				  blk_get_uclass_name(desc->uclass_id),
 				  desc->devnum, part);
 		}
 	}
@@ -531,15 +531,15 @@ static int efi_disk_create_raw(struct udevice *dev)
 {
 	struct efi_disk_obj *disk;
 	struct blk_desc *desc;
-	const char *if_typename;
+	const char *uclass_idname;
 	int diskid;
 	efi_status_t ret;
 
 	desc = dev_get_uclass_plat(dev);
-	if_typename = blk_get_if_type_name(desc->if_type);
+	uclass_idname = blk_get_uclass_name(desc->uclass_id);
 	diskid = desc->devnum;
 
-	ret = efi_disk_add_dev(NULL, NULL, if_typename, desc,
+	ret = efi_disk_add_dev(NULL, NULL, uclass_idname, desc,
 			       diskid, NULL, 0, &disk);
 	if (ret != EFI_SUCCESS) {
 		if (ret == EFI_NOT_READY)
@@ -573,7 +573,7 @@ static int efi_disk_create_part(struct udevice *dev)
 {
 	efi_handle_t parent;
 	struct blk_desc *desc;
-	const char *if_typename;
+	const char *uclass_idname;
 	struct disk_part *part_data;
 	struct disk_partition *info;
 	unsigned int part;
@@ -587,7 +587,7 @@ static int efi_disk_create_part(struct udevice *dev)
 		return -1;
 
 	desc = dev_get_uclass_plat(dev_get_parent(dev));
-	if_typename = blk_get_if_type_name(desc->if_type);
+	uclass_idname = blk_get_uclass_name(desc->uclass_id);
 	diskid = desc->devnum;
 
 	part_data = dev_get_uclass_plat(dev);
@@ -599,7 +599,7 @@ static int efi_disk_create_part(struct udevice *dev)
 		return -1;
 	dp_parent = (struct efi_device_path *)handler->protocol_interface;
 
-	ret = efi_disk_add_dev(parent, dp_parent, if_typename, desc, diskid,
+	ret = efi_disk_add_dev(parent, dp_parent, uclass_idname, desc, diskid,
 			       info, part, &disk);
 	if (ret != EFI_SUCCESS) {
 		log_err("Adding partition for %s failed\n", dev->name);
@@ -647,7 +647,7 @@ static int efi_disk_probe(void *ctx, struct event *event)
 	 * has already created an efi_disk at this moment.
 	 */
 	desc = dev_get_uclass_plat(dev);
-	if (desc->if_type != UCLASS_EFI_LOADER) {
+	if (desc->uclass_id != UCLASS_EFI_LOADER) {
 		ret = efi_disk_create_raw(dev);
 		if (ret)
 			return -1;
@@ -682,7 +682,7 @@ static int efi_disk_delete_raw(struct udevice *dev)
 		return -1;
 
 	desc = dev_get_uclass_plat(dev);
-	if (desc->if_type != UCLASS_EFI_LOADER) {
+	if (desc->uclass_id != UCLASS_EFI_LOADER) {
 		diskobj = container_of(handle, struct efi_disk_obj, header);
 		efi_free_pool(diskobj->dp);
 	}
