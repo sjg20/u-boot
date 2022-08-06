@@ -156,12 +156,12 @@ static char *dp_msging(char *s, struct efi_device_path *dp)
 		struct efi_device_path_mac_addr *mdp =
 			(struct efi_device_path_mac_addr *)dp;
 
-		if (mdp->if_type <= 1)
+		if (mdp->uclass_id <= 1)
 			n = 6;
 		s += sprintf(s, "MAC(");
 		for (i = 0; i < n; ++i)
 			s += sprintf(s, "%02x", mdp->mac.addr[i]);
-		s += sprintf(s, ",%u)", mdp->if_type);
+		s += sprintf(s, ",%u)", mdp->uclass_id);
 
 		break;
 	}
