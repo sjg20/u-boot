@@ -41,6 +41,7 @@ struct scsi_emul_info {
 	enum scsi_cmd_phase phase;
 	int buff_used;
 	int read_len;
+	uint seek_pos;
 	int alloc_len;
 	uint transfer_len;
 };
@@ -65,5 +66,7 @@ struct scsi_emul_info {
  */
 int sb_scsi_emul_command(struct scsi_emul_info *info,
 			 const struct scsi_cmd *req, int len);
+
+void sb_scsi_emul_start(struct scsi_emul_info *info, int transfer_len);
 
 #endif

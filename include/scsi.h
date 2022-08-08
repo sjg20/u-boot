@@ -167,6 +167,11 @@ struct scsi_cmd {
 #define SCSI_WRITE_LONG	0x3F		/* Write Long (O) */
 #define SCSI_WRITE_SAME	0x41		/* Write Same (O) */
 
+enum {
+	SCSI_LUN	= 1,
+	SCSI_LUN_SHIFT	= 5,
+};
+
 enum scsi_cmd_phase {
 	SCSIPH_START,
 	SCSIPH_DATA,

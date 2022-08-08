@@ -1156,6 +1156,10 @@
 		backlight = <&backlight 0 100>;
 	};
 
+	scsi {
+		compatible = "sandbox,scsi";
+	};
+
 	smem@0 {
 		compatible = "sandbox,smem";
 	};
