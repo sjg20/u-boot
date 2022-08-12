@@ -40,7 +40,6 @@ const efi_guid_t efi_system_partition_guid = PARTITION_SYSTEM_GUID;
 struct efi_disk_obj {
 	struct efi_object header;
 	struct efi_block_io ops;
-	const char *ifname;
 	int dev_index;
 	struct efi_block_io_media media;
 	struct efi_device_path *dp;
@@ -475,7 +474,6 @@ static efi_status_t efi_disk_add_dev(
 			return ret;
 	}
 	diskobj->ops = block_io_disk_template;
-	diskobj->ifname = if_typename;
 	diskobj->dev_index = dev_index;
 
 	/* Fill in EFI IO Media info (for read/write callbacks) */
