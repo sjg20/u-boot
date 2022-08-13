@@ -37,7 +37,7 @@
 
 			gbb {
 				size = <0x3000>;
-				expand-size;
+				extend-size;
 				align = <0x1000>;
 			};
 			firmware-id {

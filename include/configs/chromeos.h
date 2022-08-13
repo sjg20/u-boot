@@ -54,14 +54,6 @@
 #endif
 
 /*
- * Enable this feature to embed crossystem data into device tree before booting
- * the kernel. We add quite a few things to the FDT, including a 16KB binary
- * blob.
- * #define CONFIG_OF_BOARD_SETUP
- */
-#define CONFIG_SYS_FDT_PAD	0x8000
-
-/*
  * This is the default kernel command line to a Chrome OS kernel. An ending
  * space character helps us concatenate more arguments.
  */

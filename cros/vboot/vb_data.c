@@ -8,6 +8,7 @@
 #define LOG_CATEGORY LOGC_VBOOT
 
 #include <common.h>
+#include <display_options.h>
 #include <cros/vboot.h>
 #include <u-boot/crc.h>
 

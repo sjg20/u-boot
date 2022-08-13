@@ -103,7 +103,7 @@
 			type = "gbb";
 			u-boot,dm-vpl;
 			size = <0x3000>;
-			expand-size;
+			extend-size;
 			align = <0x1000>;
 		};
 		locales {
