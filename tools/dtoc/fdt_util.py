@@ -191,7 +191,7 @@ def GetStringList(node, propname, default=None):
 def GetArgs(node, propname):
     prop = node.props.get(propname)
     if not prop:
-        raise ValueError(f"Node '{node.path}': Expected property '{propname}'")
+        return []
     if prop.bytes:
         value = GetStringList(node, propname)
     else:
