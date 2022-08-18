@@ -51,55 +51,56 @@
 };
 
 &binman {
-	 u-boot-spl-ddr {
-		filename = "u-boot-spl-ddr.bin";
-		pad-byte = <0xff>;
-		align-size = <4>;
-		align = <4>;
-
-		u-boot-spl {
-			align-end = <4>;
-		};
-
-		ddr-1d-imem-fw {
-			filename = "lpddr4_pmu_train_1d_imem_202006.bin";
-			type = "blob-ext";
-			align-end = <4>;
-		};
-
-		ddr-1d-dmem-fw {
-			filename = "lpddr4_pmu_train_1d_dmem_202006.bin";
-			type = "blob-ext";
-			align-end = <4>;
-		};
-
-		ddr-2d-imem-fw {
-			filename = "lpddr4_pmu_train_2d_imem_202006.bin";
-			type = "blob-ext";
-			align-end = <4>;
-		};
-
-		ddr-2d-dmem-fw {
-			filename = "lpddr4_pmu_train_2d_dmem_202006.bin";
-			type = "blob-ext";
-			align-end = <4>;
-		};
-	};
-
-	spl {
-		filename = "spl.bin";
+	flash-bin {
+		filename = "flash.bin";
+		pad-byte = <0x00>;
 
 		mkimage {
-			args = "-n spl/u-boot-spl.cfgout -T imx8mimage -e 0x920000";
+			image-type = "imx8mimage";
+			entry-point = <CONFIG_SPL_TEXT_BASE>;
+			data-to-imagename;
 
-			blob {
-				filename = "u-boot-spl-ddr.bin";
+			imx-cfg {
+				boot-from = "sd";
+				boot-addr = <CONFIG_SPL_TEXT_BASE>;
+				rom-version = <2>;
+
+				section {
+					align = <4>;
+					align-size = <4>;
+					pad-byte = <0xff>;
+
+					u-boot-spl {
+						align-end = <4>;	// FIXME
+						no-expanded;		// FIXME
+					};
+
+					ddr-1d-imem-fw {
+						filename = "lpddr4_pmu_train_1d_imem_202006.bin";
+						type = "blob-ext";
+						align-end = <4>;
+					};
+
+					ddr-1d-dmem-fw {
+						filename = "lpddr4_pmu_train_1d_dmem_202006.bin";
+						type = "blob-ext";
+						align-end = <4>;
+					};
+
+					ddr-2d-imem-fw {
+						filename = "lpddr4_pmu_train_2d_imem_202006.bin";
+						type = "blob-ext";
+						align-end = <4>;
+					};
+
+					ddr-2d-dmem-fw {
+						filename = "lpddr4_pmu_train_2d_dmem_202006.bin";
+						type = "blob-ext";
+						align-end = <4>;
+					};
+				};
 			};
 		};
-	};
-
-	itb {
-		filename = "u-boot.itb";
 
 		fit {
 			description = "Configuration to load ATF before U-Boot";
@@ -155,21 +156,6 @@
 					loadables = "atf";
 				};
 			};
-		};
-	};
-
-	imx-boot {
-		filename = "flash.bin";
-		pad-byte = <0x00>;
-
-		spl: blob-ext@1 {
-			filename = "spl.bin";
-			offset = <0x0>;
-		};
-
-		uboot: blob-ext@2 {
-			filename = "u-boot.itb";
-			offset = <0x58000>;
 		};
 	};
 };
