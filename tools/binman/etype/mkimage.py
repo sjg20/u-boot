@@ -108,6 +108,7 @@ class Entry_mkimage(Entry):
         if self._data_to_imagename and self._node.FindNode('imagename'):
             self.Raise('Cannot use both imagename node and data-to-imagename')
         self._entry_point = fdt_util.GetInt(self._node, 'entry-point')
+        self._image_type = fdt_util.GetString(self._node, 'image-type')
         self.ReadEntries()
 
     def ReadEntries(self):
@@ -141,6 +142,8 @@ class Entry_mkimage(Entry):
             args += ['-n', imagename_fname]
         if self._entry_point:
             args += ['-e', f'{self._entry_point:#x}']
+        if self._image_type:
+            args += ['-T', self._image_type]
         args += self._args + [output_fname]
         if self.mkimage.run_cmd(*args) is not None:
             self.SetContents(tools.read_file(output_fname))
