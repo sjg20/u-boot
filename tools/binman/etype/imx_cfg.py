@@ -33,6 +33,7 @@ class Entry_imx_cfg(Entry_section):
         self.ensure_props(['boot-from', 'boot-addr'])
         self.boot_from = fdt_util.GetString(self._node, 'boot-from')
         self.boot_addr = fdt_util.GetInt(self._node, 'boot-addr')
+        self.rom_version = fdt_util.GetInt(self._node, 'rom-version')
         self.ReadEntries()
 
     def ReadEntries(self):
@@ -47,6 +48,7 @@ class Entry_imx_cfg(Entry_section):
             self._entries.values(), 'input')
         output_fname = tools.get_output_filename('imx.cfg.%s' % uniq)
         with open(output_fname, 'w') as outf:
+            print('ROM_VERSION v%x' % self.rom_version, file=outf)
             print('BOOT_FROM %s' % self.boot_from, file=outf)
             print('LOADER %s %#x' % (input_fname, self.boot_addr), file=outf)
         data = tools.read_file(output_fname)
