@@ -27,10 +27,10 @@ class Entry_imx_cfg(Entry_section):
     def __init__(self, section, etype, node):
         super().__init__(section, etype, node)
         self._entries = OrderedDict()
+        self.required_props = ['boot-from', 'boot-addr']
 
     def ReadNode(self):
         super().ReadNode()
-        self.ensure_props(['boot-from', 'boot-addr'])
         self.boot_from = fdt_util.GetString(self._node, 'boot-from')
         self.boot_addr = fdt_util.GetInt(self._node, 'boot-addr')
         self.rom_version = fdt_util.GetInt(self._node, 'rom-version')
