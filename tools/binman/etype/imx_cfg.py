@@ -43,7 +43,8 @@ class Entry_imx_cfg(Entry_section):
             entry.ReadNode()
             self._entries[entry.name] = entry
 
-    def ObtainContents(self, fake_size=0):
+    def _build_input(self):
+        #def ObtainContents(self, fake_size=0):
         _, input_fname, uniq = self.collect_contents_to_file(
             self._entries.values(), 'input')
         output_fname = tools.get_output_filename('imx.cfg.%s' % uniq)
@@ -54,6 +55,10 @@ class Entry_imx_cfg(Entry_section):
         data = tools.read_file(output_fname)
         self.SetContents(data)
         return True
+
+    def BuildSectionData(self, required):
+        self._build_input()
+        return self.data
 
     '''
     def SetAllowMissing(self, allow_missing):
@@ -86,6 +91,7 @@ class Entry_imx_cfg(Entry_section):
         """
         for entry in self._entries.values():
             entry.CheckFakedBlobs(faked_blobs_list)
-    '''
+
     def BuildSectionData(self, required):
         return self.data
+    '''
