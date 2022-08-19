@@ -62,6 +62,8 @@
 			align-end = <4>;
 			type = "blob-ext";
 		};
+		fdtmap {
+		};
 	};
 
 	spl {

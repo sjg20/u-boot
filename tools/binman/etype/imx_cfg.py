@@ -55,6 +55,7 @@ class Entry_imx_cfg(Entry_section):
         self.SetContents(data)
         return True
 
+    '''
     def SetAllowMissing(self, allow_missing):
         """Set whether a section allows missing external blobs
 
@@ -85,6 +86,6 @@ class Entry_imx_cfg(Entry_section):
         """
         for entry in self._entries.values():
             entry.CheckFakedBlobs(faked_blobs_list)
-
+    '''
     def BuildSectionData(self, required):
         return self.data
