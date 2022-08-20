@@ -3681,6 +3681,7 @@ class TestFunctional(unittest.TestCase):
 
     def testMkimageMissing(self):
         """Test that binman still produces an image if mkimage is missing"""
+        self._SetupSplElf()
         with test_util.capture_sys_output() as (_, stderr):
             self._DoTestFile('156_mkimage.dts',
                              force_missing_bintools='mkimage')
@@ -4423,8 +4424,7 @@ class TestFunctional(unittest.TestCase):
             self._DoTestFile('185_compress_section.dts',
                              force_missing_bintools='lz4')
         err = stderr.getvalue()
-        self.assertRegex(err,
-                         "Image 'main-section'.*missing bintools.*: lz4")
+        self.assertRegex(err, "Image 'image'.*missing bintools.*: lz4")
 
     def testCompressExtra(self):
         """Test compression of a section with no fixed size"""
@@ -5749,6 +5749,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageImagename(self):
         """Test using mkimage with -n holding the data too"""
+        self._SetupSplElf()
         data = self._DoReadFile('235_mkimage_name.dts')
 
         # Check that the data appears in the file somewhere
@@ -5766,6 +5767,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageImage(self):
         """Test using mkimage with -n holding the data too"""
+        self._SetupSplElf()
         data = self._DoReadFile('236_mkimage_image.dts')
 
         # Check that the data appears in the file somewhere
