@@ -8,10 +8,11 @@
 from collections import OrderedDict
 
 from binman.entry import Entry
+from binman.etype.section import Entry_section
 from dtoc import fdt_util
 from patman import tools
 
-class Entry_mkimage(Entry):
+class Entry_mkimage(Entry_section):
     """Binary produced by mkimage
 
     Properties / Entry arguments:
