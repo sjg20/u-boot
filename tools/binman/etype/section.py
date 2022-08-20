@@ -811,7 +811,7 @@ class Entry_section(Entry):
             allow_missing: True if allowed, False if not allowed
         """
         self.allow_missing = allow_missing
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             entry.SetAllowMissing(allow_missing)
 
     def SetAllowFakeBlob(self, allow_fake):
@@ -821,7 +821,7 @@ class Entry_section(Entry):
             allow_fake_blob: True if allowed, False if not allowed
         """
         super().SetAllowFakeBlob(allow_fake)
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             entry.SetAllowFakeBlob(allow_fake)
 
     def CheckMissing(self, missing_list):
@@ -843,7 +843,7 @@ class Entry_section(Entry):
         Args:
             fake_blobs_list: List of Entry objects to be added to
         """
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             entry.CheckFakedBlobs(faked_blobs_list)
 
     def check_missing_bintools(self, missing_list):

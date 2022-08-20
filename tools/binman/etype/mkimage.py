@@ -167,42 +167,6 @@ class Entry_mkimage(Entry_section):
             entries['imagename'] = self._imagename
         return entries
 
-    def SetAllowMissing(self, allow_missing):
-        """Set whether a section allows missing external blobs
-
-        Args:
-            allow_missing: True if allowed, False if not allowed
-        """
-        self.allow_missing = allow_missing
-        for entry in self._entries.values():
-            entry.SetAllowMissing(allow_missing)
-        if self._imagename:
-            self._imagename.SetAllowMissing(allow_missing)
-
-    def SetAllowFakeBlob(self, allow_fake):
-        """Set whether the sub nodes allows to create a fake blob
-
-        Args:
-            allow_fake: True if allowed, False if not allowed
-        """
-        for entry in self._entries.values():
-            entry.SetAllowFakeBlob(allow_fake)
-        if self._imagename:
-            self._imagename.SetAllowFakeBlob(allow_fake)
-
-    def CheckFakedBlobs(self, faked_blobs_list):
-        """Check if any entries in this section have faked external blobs
-
-        If there are faked blobs, the entries are added to the list
-
-        Args:
-            faked_blobs_list: List of Entry objects to be added to
-        """
-        for entry in self._entries.values():
-            entry.CheckFakedBlobs(faked_blobs_list)
-        if self._imagename:
-            self._imagename.CheckFakedBlobs(faked_blobs_list)
-
     def AddBintools(self, btools):
         super().AddBintools(btools)
         self.mkimage = self.AddBintool(btools, 'mkimage')
