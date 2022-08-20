@@ -5902,7 +5902,8 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
     def testSectionLater(self):
         """Test sections containing data that is not immediately available"""
         data = self._DoReadFile('242_section_later.dts')
-        expected = U_BOOT_DATA + U_BOOT_DATA + b'aa' + U_BOOT_DATA + b'aa'
+        expected = (b'aa' + U_BOOT_DATA + U_BOOT_DATA + b'aa' + U_BOOT_DATA +
+                    b'aa')
         self.assertEqual(expected, data)
 
 
