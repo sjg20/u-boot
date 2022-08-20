@@ -43,22 +43,24 @@ class Entry_imx_cfg(Entry_section):
             entry.ReadNode()
             self._entries[entry.name] = entry
 
-    def _build_input(self):
+    def BuildSectionData(self, required):
         #def ObtainContents(self, fake_size=0):
-        _, input_fname, uniq = self.collect_contents_to_file(
+        data, input_fname, uniq = self.collect_contents_to_file(
             self._entries.values(), 'input')
+        if data is None:
+            if not required:
+                return None
+            return b''
         output_fname = tools.get_output_filename('imx.cfg.%s' % uniq)
         with open(output_fname, 'w') as outf:
             print('ROM_VERSION v%x' % self.rom_version, file=outf)
             print('BOOT_FROM %s' % self.boot_from, file=outf)
             print('LOADER %s %#x' % (input_fname, self.boot_addr), file=outf)
         data = tools.read_file(output_fname)
-        self.SetContents(data)
-        return True
+        return data
 
-    def BuildSectionData(self, required):
-        self._build_input()
-        return self.data
+    def CheckEntries(self):
+        pass
 
     '''
     def SetAllowMissing(self, allow_missing):
