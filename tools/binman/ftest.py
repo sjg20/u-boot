@@ -3673,6 +3673,7 @@ class TestFunctional(unittest.TestCase):
 
     def testMkimage(self):
         """Test using mkimage to build an image"""
+        self._SetupSplElf()
         data = self._DoReadFile('156_mkimage.dts')
 
         # Just check that the data appears in the file somewhere
@@ -5807,6 +5808,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageCollection(self):
         """Test using a collection referring to an entry in a mkimage entry"""
+        self._SetupSplElf()
         data = self._DoReadFile('240_mkimage_coll.dts')
         expect = U_BOOT_SPL_DATA + U_BOOT_DATA
         self.assertEqual(expect, data[:len(expect)])
@@ -5889,6 +5891,14 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
             self._DoTestFile('238_compress_dtb_zstd.dts')
         self.assertIn("Node '/binman/u-boot-dtb': The zstd compression "
                       "requires a length header", str(e.exception))
+
+    def testSectionUnknownContent(self):
+        """Test that trying to obtain unknown contents works as expected"""
+        with self.assertRaises(ValueError) as e:
+            self._DoReadFile('243_section_unknown_content.dts', True)
+        self.assertIn("Node '/binman/section@1': Internal error: Could not complete "
+                "processing of contents: remaining ["
+                "<binman.etype._testing.Entry__testing ", str(e.exception))
 
     def testMkimageSection(self):
         """Test using mkimage to build an image including a section"""

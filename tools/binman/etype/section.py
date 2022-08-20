@@ -502,7 +502,12 @@ class Entry_section(Entry):
                 return None
 
         Returns:
-            data from associated entry (as a string), or None if not found
+            tuple:
+                Entry object found
+                data from associated entry (as a string), or None if no data
+
+        Raises:
+            ValueError: Entry is not found
         """
         node = self._node.GetFdt().LookupPhandle(phandle)
         if not node:
@@ -510,7 +515,7 @@ class Entry_section(Entry):
         entry = self.FindEntryByNode(node)
         if not entry:
             source_entry.Raise("Cannot find entry for node '%s'" % node.name)
-        return entry.GetData(required)
+        return entry, entry.GetData(required)
 
     def LookupSymbol(self, sym_name, optional, msg, base_addr, entries=None):
         """Look up a symbol in an ELF file
@@ -641,7 +646,7 @@ class Entry_section(Entry):
                     next_todo.append(entry)
             return entry
 
-        todo = self._entries.values()
+        todo = self.GetEntries().values()
         for passnum in range(3):
             threads = state.GetThreads()
             next_todo = []

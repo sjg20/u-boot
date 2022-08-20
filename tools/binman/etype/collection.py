@@ -44,11 +44,11 @@ class Entry_collection(Entry):
         # Join up all the data
         self.Info('Getting contents, required=%s' % required)
         data = bytearray()
-        for entry_phandle in self.content:
-            entry_data = self.section.GetContentsByPhandle(entry_phandle, self,
-                                                           required)
+        for i, entry_phandle in enumerate(self.content):
+            entry, entry_data = self.section.GetContentsByPhandle(
+                entry_phandle, self, required)
             if not required and entry_data is None:
-                self.Info('Contents not available yet')
+                self.Info(f'Contents entry {entry.name} not available yet')
                 # Data not available yet
                 return None
             data += entry_data

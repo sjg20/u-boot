@@ -97,7 +97,6 @@ class Entry_mkimage(Entry_section):
     """
     def __init__(self, section, etype, node):
         super().__init__(section, etype, node)
-        self._mkimage_entries = OrderedDict()
         self._imagename = None
         self.align_default = None
 
@@ -110,7 +109,6 @@ class Entry_mkimage(Entry_section):
             self.Raise('Cannot use both imagename node and data-to-imagename')
         self._entry_point = fdt_util.GetInt(self._node, 'entry-point')
         self._image_type = fdt_util.GetString(self._node, 'image-type')
-        self.ReadEntries()
 
     def ReadEntries(self):
         """Read the subnodes to find out what should go in this image"""
@@ -120,13 +118,13 @@ class Entry_mkimage(Entry_section):
             if entry.name == 'imagename':
                 self._imagename = entry
             else:
-                self._mkimage_entries[entry.name] = entry
+                self._entries[entry.name] = entry
 
     def BuildSectionData(self, required):
         # Use a non-zero size for any fake files to keep mkimage happy
         # Note that testMkimageImagename() relies on this 'mkimage' parameter
         data, input_fname, uniq = self.collect_contents_to_file(
-            self._mkimage_entries.values(), 'mkimage', 1024)
+            self._entries.values(), 'mkimage', 1024)
         if data is None:
             if not required:
                 return None
@@ -154,7 +152,7 @@ class Entry_mkimage(Entry_section):
         if self._image_type:
             args += ['-T', self._image_type]
         args += self._args + [output_fname]
-        print('args', args)
+        #print('args', args)
         if self.mkimage.run_cmd(*args) is not None:
             data = tools.read_file(output_fname)
         else:
@@ -164,7 +162,7 @@ class Entry_mkimage(Entry_section):
 
     def GetEntries(self):
         # Make a copy so we don't change the original
-        entries = OrderedDict(self._mkimage_entries)
+        entries = OrderedDict(self._entries)
         if self._imagename:
             entries['imagename'] = self._imagename
         return entries
@@ -176,7 +174,7 @@ class Entry_mkimage(Entry_section):
             allow_missing: True if allowed, False if not allowed
         """
         self.allow_missing = allow_missing
-        for entry in self._mkimage_entries.values():
+        for entry in self._entries.values():
             entry.SetAllowMissing(allow_missing)
         if self._imagename:
             self._imagename.SetAllowMissing(allow_missing)
@@ -187,7 +185,7 @@ class Entry_mkimage(Entry_section):
         Args:
             allow_fake: True if allowed, False if not allowed
         """
-        for entry in self._mkimage_entries.values():
+        for entry in self._entries.values():
             entry.SetAllowFakeBlob(allow_fake)
         if self._imagename:
             self._imagename.SetAllowFakeBlob(allow_fake)
@@ -200,7 +198,7 @@ class Entry_mkimage(Entry_section):
         Args:
             faked_blobs_list: List of Entry objects to be added to
         """
-        for entry in self._mkimage_entries.values():
+        for entry in self._entries.values():
             entry.CheckFakedBlobs(faked_blobs_list)
         if self._imagename:
             self._imagename.CheckFakedBlobs(faked_blobs_list)
