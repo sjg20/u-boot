@@ -5890,6 +5890,15 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertIn("Node '/binman/u-boot-dtb': The zstd compression "
                       "requires a length header", str(e.exception))
 
+    def testMkimageSection(self):
+        """Test using mkimage to build an image including a section"""
+        data = self._DoReadFile('241_mkimage_section.dts')
+
+        # Build the filename that we expect to be placed in there
+        fname = os.path.join(tools.get_output_dir(), 'mkimage.mkimage')
+        expect = U_BOOT_IMG_DATA + b'\0' + BLOB_DATA
+        self.assertEqual(expect, tools.read_file(fname))
+
 
 if __name__ == "__main__":
     unittest.main()
