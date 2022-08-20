@@ -661,12 +661,16 @@ class Entry(object):
         """
         pass
 
-    def CheckEntries(self):
+    def CheckEntries(self, section_size=None):
         """Check that the entry offsets are correct
 
         This is used for entries which have extra offset requirements (other
         than having to be fully inside their section). Sub-classes can implement
         this function and raise if there is a problem.
+
+        Args:
+            section_size: Size of the containing section, or None to obtain this
+                from the section itself
         """
         pass
 
