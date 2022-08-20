@@ -127,13 +127,17 @@ class Entry_mkimage(Entry_section):
         # Note that testMkimageImagename() relies on this 'mkimage' parameter
         data, input_fname, uniq = self.collect_contents_to_file(
             self._mkimage_entries.values(), 'mkimage', 1024)
-        if not required and data is None:
-            return None
+        if data is None:
+            if not required:
+                return None
+            return b''
         if self._imagename:
             image_data, imagename_fname, _ = self.collect_contents_to_file(
                 [self._imagename], 'mkimage-n', 1024)
-            if not required and image_data is None:
-                return None
+            if image_data is None:
+                if not required:
+                    return None
+                return b''
 
         if not data:
             return b''
@@ -150,6 +154,7 @@ class Entry_mkimage(Entry_section):
         if self._image_type:
             args += ['-T', self._image_type]
         args += self._args + [output_fname]
+        print('args', args)
         if self.mkimage.run_cmd(*args) is not None:
             data = tools.read_file(output_fname)
         else:

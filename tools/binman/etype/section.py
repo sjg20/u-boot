@@ -303,10 +303,12 @@ class Entry_section(Entry):
         Returns:
             Contents of the section (bytes)
         """
+        #print('collect', self._node.path, required)
         section_data = bytearray()
 
         for entry in self._entries.values():
             entry_data = entry.GetData(required)
+            #print('   entry_data', entry_data)
 
             # This can happen when this section is referenced from a collection
             # earlier in the image description. See testCollectionSection().

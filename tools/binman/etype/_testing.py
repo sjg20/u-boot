@@ -111,6 +111,7 @@ class Entry__testing(Entry):
             return False
         if self.return_contents_later:
             self.return_contents_later = False
+            #print('   ', self._node.path, 'later')
             return False
         self.data = self.contents
         self.contents_size = len(self.data)
