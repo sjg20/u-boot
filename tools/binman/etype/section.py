@@ -209,7 +209,7 @@ class Entry_section(Entry):
 
     def GetFdts(self):
         fdts = {}
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             fdts.update(entry.GetFdts())
         return fdts
 
@@ -219,7 +219,7 @@ class Entry_section(Entry):
         Some entries need to adjust the device tree for their purposes. This
         may involve adding or deleting properties.
         """
-        todo = self._entries.values()
+        todo = self.GetEntries().values()
         for passnum in range(3):
             next_todo = []
             for entry in todo:
@@ -235,7 +235,7 @@ class Entry_section(Entry):
 
     def gen_entries(self):
         super().gen_entries()
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             entry.gen_entries()
 
     def AddMissingProperties(self, have_image_pos):
@@ -243,7 +243,7 @@ class Entry_section(Entry):
         super().AddMissingProperties(have_image_pos)
         if self.compress != 'none':
             have_image_pos = False
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             entry.AddMissingProperties(have_image_pos)
 
     def ObtainContents(self, fake_size=0, skip_entry=None):
@@ -306,6 +306,8 @@ class Entry_section(Entry):
         #print('collect', self._node.path, required)
         section_data = bytearray()
 
+        # Don't use self.GetEntries() here because entry types may have
+        # 'private' entries which don't contain data (e.g. Entry_mkimage)
         for entry in self._entries.values():
             entry_data = entry.GetData(required)
             #print('   entry_data', entry_data)
@@ -471,7 +473,7 @@ class Entry_section(Entry):
     def ProcessContents(self):
         sizes_ok_base = super(Entry_section, self).ProcessContents()
         sizes_ok = True
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             if not entry.ProcessContents():
                 sizes_ok = False
         return sizes_ok and sizes_ok_base
@@ -832,7 +834,7 @@ class Entry_section(Entry):
         Args:
             missing_list: List of Entry objects to be added to
         """
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             entry.CheckMissing(missing_list)
 
     def CheckFakedBlobs(self, faked_blobs_list):
@@ -855,7 +857,7 @@ class Entry_section(Entry):
             missing_list: List of Bintool objects to be added to
         """
         super().check_missing_bintools(missing_list)
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             entry.check_missing_bintools(missing_list)
 
     def _CollectEntries(self, entries, entries_by_name, add_entry):
@@ -905,10 +907,10 @@ class Entry_section(Entry):
             entry.Raise(f'Missing required properties/entry args: {missing}')
 
     def CheckAltFormats(self, alt_formats):
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             entry.CheckAltFormats(alt_formats)
 
     def AddBintools(self, btools):
         super().AddBintools(btools)
-        for entry in self._entries.values():
+        for entry in self.GetEntries().values():
             entry.AddBintools(btools)
