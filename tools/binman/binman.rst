@@ -822,7 +822,7 @@ A few special properties are provided for sections:
 
 read-only:
     Indicates that this section is read-only. This has no impact on binman's
-    operation, but his property can be read at run time.
+    operation, but this property can be read at run time.
 
 name-prefix:
     This string is prepended to all the names of the binaries in the

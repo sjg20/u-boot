@@ -122,18 +122,22 @@ class Entry_mkimage(Entry_section):
             else:
                 self._mkimage_entries[entry.name] = entry
 
-    def ObtainContents(self):
+    def BuildSectionData(self, required):
         # Use a non-zero size for any fake files to keep mkimage happy
         # Note that testMkimageImagename() relies on this 'mkimage' parameter
         data, input_fname, uniq = self.collect_contents_to_file(
             self._mkimage_entries.values(), 'mkimage', 1024)
-        if data is None:
-            return False
+        if not required and data is None:
+            return None
         if self._imagename:
             image_data, imagename_fname, _ = self.collect_contents_to_file(
                 [self._imagename], 'mkimage-n', 1024)
-            if image_data is None:
-                return False
+            if not required and image_data is None:
+                return None
+
+        if not data:
+            return b''
+
         output_fname = tools.get_output_filename('mkimage-out.%s' % uniq)
 
         args = ['-d', input_fname]
@@ -147,13 +151,11 @@ class Entry_mkimage(Entry_section):
             args += ['-T', self._image_type]
         args += self._args + [output_fname]
         if self.mkimage.run_cmd(*args) is not None:
-            self.SetContents(tools.read_file(output_fname))
+            data = tools.read_file(output_fname)
         else:
             # Bintool is missing; just use the input data as the output
             self.record_missing_bintool(self.mkimage)
-            self.SetContents(data)
-
-        return True
+        return data
 
     def GetEntries(self):
         # Make a copy so we don't change the original

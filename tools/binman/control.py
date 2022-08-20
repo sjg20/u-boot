@@ -527,7 +527,7 @@ def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt, use_expanded):
 def ProcessImage(image, update_fdt, write_map, get_contents=True,
                  allow_resize=True, allow_missing=False,
                  allow_fake_blobs=False):
-    """Perform all steps for this image, including checking and # writing it.
+    """Perform all steps for this image, including checking and writing it.
 
     This means that errors found with a later image will be reported after
     earlier images are already completed and written, but that does not seem

@@ -430,6 +430,18 @@ class Entry(object):
     def ObtainContents(self, skip_entry=None, fake_size=0):
         """Figure out the contents of an entry.
 
+        Normally this method should figure out the contents (e.g. load from a
+        file) and call SetContents() to set it up.
+
+        Missing contents (e.g. an external blob that does not exist), normally
+        result in returning False, with no contents set. Where
+        self.allow_missing is True, empty contents are produced instead, thus
+        returning True. If self.allow_fake is True, a fake file is created
+        and again this returns True.
+
+        Once this function returns true, self.data is set and GetData() will
+        return the data.
+
         Args:
             skip_entry (Entry): Entry to skip when obtaining section contents
             fake_size (int): Size of fake file to create if needed

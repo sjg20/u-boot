@@ -5899,6 +5899,12 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         expect = U_BOOT_IMG_DATA + b'\0' + BLOB_DATA
         self.assertEqual(expect, tools.read_file(fname))
 
+    def testSectionLater(self):
+        """Test sections containing data that is not immediately available"""
+        data = self._DoReadFile('242_section_later.dts')
+        expected = U_BOOT_DATA + U_BOOT_DATA + b'aa' + U_BOOT_DATA + b'aa'
+        self.assertEqual(expected, data)
+
 
 if __name__ == "__main__":
     unittest.main()
