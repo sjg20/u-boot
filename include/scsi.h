@@ -173,6 +173,32 @@ enum scsi_cmd_phase {
 	SCSIPH_STATUS,
 };
 
+struct scsi_inquiry_resp {
+	u8 type;
+	u8 flags;
+	u8 version;
+	u8 data_format;
+	u8 additional_len;
+	u8 spare[3];
+	char vendor[8];
+	char product[16];
+	char revision[4];
+};
+
+struct scsi_read_capacity_resp {
+	u32 last_block_addr;
+	u32 block_len;
+};
+
+struct __packed scsi_read10_req {
+	u8 cmd;
+	u8 lun_flags;
+	u32 lba;
+	u8 spare;
+	u16 xfer_len;
+	u8 spare2[3];
+};
+
 /**
  * struct scsi_plat - stores information about SCSI controller
  *
