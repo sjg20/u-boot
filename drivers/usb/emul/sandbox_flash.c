@@ -37,6 +37,7 @@ enum {
 /**
  * struct sandbox_flash_priv - private state for this driver
  *
+ * @eminfo:	emulator state
  * @error:	true if there is an error condition
  * @tag:	Tag value from last command
  * @fd:		File descriptor of backing file
