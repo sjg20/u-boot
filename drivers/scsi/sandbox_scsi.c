@@ -26,18 +26,18 @@ enum {
  * @fd: File descriptor of backing file
  */
 struct sandbox_scsi_priv {
-	struct scsi_emul_info eminfo;
 	int fd;
 };
 
 struct sandbox_scsi_plat {
+	struct scsi_emul_info eminfo;
 	const char *pathname;
 };
 
 static int sandbox_scsi_exec(struct udevice *dev, struct scsi_cmd *req)
 {
-	struct sandbox_scsi_priv *priv = dev_get_priv(dev);
-	struct scsi_emul_info *info = &priv->eminfo;
+	struct sandbox_scsi_plat *plat = dev_get_plat(dev);
+	struct scsi_emul_info *info = &plat->eminfo;
 	int ret;
 
 	ret = sb_scsi_emul_command(info, req, req->cmdlen);
@@ -58,11 +58,26 @@ static int sandbox_scsi_bus_reset(struct udevice *dev)
 
 static int sandbox_scsi_probe(struct udevice *dev)
 {
+	struct sandbox_scsi_priv *priv = dev_get_priv(dev);
+	struct sandbox_scsi_plat *plat = dev_get_plat(dev);
+	struct scsi_emul_info *info = &plat->eminfo;
+	int ret;
+
+	priv->fd = os_open(plat->pathname, OS_O_RDONLY);
+	if (priv->fd != -1) {
+		ret = os_get_filesize(plat->pathname, &info->file_size);
+		if (ret)
+			return log_msg_ret("sz", ret);
+	}
+
+	return 0;
+}
+
+static int sandbox_scsi_bind(struct udevice *dev)
+{
 	struct scsi_plat *scsi_plat = dev_get_uclass_plat(dev);
 	struct sandbox_scsi_plat *plat = dev_get_plat(dev);
-	struct sandbox_scsi_priv *priv = dev_get_priv(dev);
-	struct scsi_emul_info *info = &priv->eminfo;
-	int ret;
+	struct scsi_emul_info *info = &plat->eminfo;
 
 	scsi_plat->max_id = 2;
 	scsi_plat->max_lun = 3;
@@ -70,16 +85,20 @@ static int sandbox_scsi_probe(struct udevice *dev)
 
 	info->vendor = "SANDBOX";
 	info->product = "FAKE DISK";
-	info->block_size = SANDBOX_SCSI_BLOCK_LEN;
-	priv->fd = os_open(plat->pathname, OS_O_RDONLY);
-	if (priv->fd != -1) {
-		ret = os_get_filesize(plat->pathname, &info->file_size);
-		if (ret)
-			return log_msg_ret("sz", ret);
-	}
 	info->buff = malloc(SANDBOX_SCSI_BUF_SIZE);
 	if (!info->buff)
 		return log_ret(-ENOMEM);
+	info->block_size = SANDBOX_SCSI_BLOCK_LEN;
+
+	return 0;
+}
+
+static int sandbox_scsi_unbind(struct udevice *dev)
+{
+	struct sandbox_scsi_plat *plat = dev_get_plat(dev);
+	struct scsi_emul_info *info = &plat->eminfo;
+
+	free(info->buff);
 
 	return 0;
 }
@@ -109,6 +128,8 @@ U_BOOT_DRIVER(sandbox_scsi) = {
 	.ops		= &sandbox_scsi_ops,
 	.of_match	= sanbox_scsi_ids,
 	.of_to_plat	= sandbox_scsi_of_to_plat,
+	.bind		= sandbox_scsi_bind,
+	.unbind		= sandbox_scsi_unbind,
 	.probe		= sandbox_scsi_probe,
 	.plat_auto	= sizeof(struct sandbox_scsi_plat),
 	.priv_auto	= sizeof(struct sandbox_scsi_priv),
