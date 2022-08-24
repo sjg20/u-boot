@@ -10,6 +10,7 @@
  */
 
 #define LOG_CATEGORY UCLASS_SCSI
+#define LOG_DEBUG
 
 #include <common.h>
 #include <dm.h>
@@ -23,6 +24,7 @@ int sb_scsi_emul_command(struct scsi_emul_info *info,
 	int ret = 0;
 
 	info->buff_used = 0;
+	log_debug("emul %x\n", *req->cmd);
 	switch (*req->cmd) {
 	case SCSI_INQUIRY: {
 		struct scsi_inquiry_resp *resp = (void *)info->buff;
@@ -67,6 +69,7 @@ int sb_scsi_emul_command(struct scsi_emul_info *info,
 	}
 	if (ret >= 0)
 		info->phase = info->transfer_len ? SCSIPH_DATA : SCSIPH_STATUS;
+	log_debug("   - done %x: ret=%d\n", *req->cmd, ret);
 
 	return ret;
 }
