@@ -5819,6 +5819,22 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         expect = U_BOOT_SPL_DATA + U_BOOT_DATA
         self.assertEqual(expect, data[:len(expect)])
 
+    def testMkimageMultipleDataFiles(self):
+        """Test passing multiple files to mkimage in a mkimage entry"""
+        data = self._DoReadFile('241_mkimage_multiple_data_files.dts')
+        # Size of files are packed in their 4B big-endian format
+        expect = struct.pack('>I', len(U_BOOT_TPL_DATA))
+        expect += struct.pack('>I', len(U_BOOT_SPL_DATA))
+        # Size info is always followed by a 4B zero value.
+        expect += tools.get_bytes(0, 4)
+        expect += U_BOOT_TPL_DATA
+        # All but last files are 4B-aligned
+        align_pad = len(U_BOOT_TPL_DATA) % 4
+        if align_pad:
+            expect += tools.get_bytes(0, align_pad)
+        expect += U_BOOT_SPL_DATA
+        self.assertEqual(expect, data[-len(expect):])
+
     def testCompressDtbPrependInvalid(self):
         """Test that invalid header is detected"""
         with self.assertRaises(ValueError) as e:
