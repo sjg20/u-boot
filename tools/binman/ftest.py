@@ -5835,6 +5835,13 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         expect += U_BOOT_SPL_DATA
         self.assertEqual(expect, data[-len(expect):])
 
+    def testMkimageFilename(self):
+        """Test using mkimage to build a binary with a filename"""
+        retcode = self._DoTestFile('242_mkimage_filename.dts')
+        self.assertEqual(0, retcode)
+        fname = tools.get_output_filename('mkimage-test.bin')
+        self.assertTrue(os.path.exists(fname))
+
     def testCompressDtbPrependInvalid(self):
         """Test that invalid header is detected"""
         with self.assertRaises(ValueError) as e:
