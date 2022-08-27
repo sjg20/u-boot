@@ -73,10 +73,3 @@ int sb_scsi_emul_command(struct scsi_emul_info *info,
 
 	return ret;
 }
-
-void sb_scsi_emul_start(struct scsi_emul_info *info, int transfer_len)
-{
-	info->alloc_len = 0;
-	info->read_len = 0;
-	info->transfer_len = transfer_len;
-}

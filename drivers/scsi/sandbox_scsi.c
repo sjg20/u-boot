@@ -7,6 +7,10 @@
  * that CONFIG_SCSI can be enabled for sandbox.
  */
 
+
+#define LOG_CATEGORY UCLASS_SCSI
+#define LOG_DEBUG
+
 #include <common.h>
 #include <dm.h>
 #include <os.h>
@@ -37,13 +41,26 @@ struct sandbox_scsi_plat {
 static int sandbox_scsi_exec(struct udevice *dev, struct scsi_cmd *req)
 {
 	struct sandbox_scsi_plat *plat = dev_get_plat(dev);
+	struct sandbox_scsi_priv *priv = dev_get_priv(dev);
 	struct scsi_emul_info *info = &plat->eminfo;
 	int ret;
 
+	if (req->lun || req->target)
+		return -EIO;
 	ret = sb_scsi_emul_command(info, req, req->cmdlen);
-	if (ret) {
-		debug("SCSI command 0x%02x ret errno %d\n", req->cmd[0], ret);
+	if (ret < 0) {
+		log_debug("SCSI command 0x%02x ret errno %d\n", req->cmd[0],
+			  ret);
 		return ret;
+	} else if (ret == SCSI_EMUL_DO_READ && priv->fd != -1) {
+		log_debug("read\n");
+	} else if (!ret) {
+		req->pdata = info->buff;
+		info->phase = SCSIPH_STATUS;
+		log_debug("sending buf\n");
+	} else {
+		log_debug("error\n");
+		return -EIO;
 	}
 
 	return 0;
