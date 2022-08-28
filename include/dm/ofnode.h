@@ -541,6 +541,15 @@ int ofnode_get_path(ofnode node, char *buf, int buflen);
 ofnode ofnode_get_by_phandle(uint phandle);
 
 /**
+ * oftree_get_by_phandle() - get ofnode from phandle
+ *
+ * @tree:	tree to use
+ * @phandle:	phandle to look up
+ * Return: ofnode reference to the phandle
+ */
+ofnode oftree_get_by_phandle(oftree tree, uint phandle);
+
+/**
  * ofnode_read_size() - read the size of a property
  *
  * @node: node to check
