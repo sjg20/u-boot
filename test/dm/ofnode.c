@@ -584,7 +584,7 @@ static int dm_test_ofnode_livetree_writing(struct unit_test_state *uts)
 	return 0;
 }
 DM_TEST(dm_test_ofnode_livetree_writing,
-	UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT | UT_TESTF_LIVE_OR_FLAT);
+	UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
 
 static int dm_test_ofnode_u32(struct unit_test_state *uts)
 {
@@ -599,8 +599,7 @@ static int dm_test_ofnode_u32(struct unit_test_state *uts)
 
 	return 0;
 }
-DM_TEST(dm_test_ofnode_u32,
-	UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT | UT_TESTF_LIVE_OR_FLAT);
+DM_TEST(dm_test_ofnode_u32, UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
 
 static int dm_test_ofnode_add_subnode(struct unit_test_state *uts)
 {
@@ -669,5 +668,4 @@ static int dm_test_ofnode_add_subnode(struct unit_test_state *uts)
 
 	return 0;
 }
-DM_TEST(dm_test_ofnode_add_subnode,
-	UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT | UT_TESTF_LIVE_OR_FLAT);
+DM_TEST(dm_test_ofnode_add_subnode, UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
