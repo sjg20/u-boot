@@ -1276,7 +1276,7 @@ int ofnode_add_subnode(ofnode node, const char *name, ofnode *subnodep)
 		}
 		if (offset < 0)
 			return -EINVAL;
-		subnode = offset_to_ofnode(offset);
+		subnode = noffset_to_ofnode(node, offset);
 	}
 
 	*subnodep = subnode;
