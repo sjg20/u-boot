@@ -1273,7 +1273,7 @@ int ofnode_add_subnode(ofnode node, const char *name, ofnode *subnodep)
 					 ofnode_to_offset(node), name);
 		if (offset < 0)
 			return offset == -FDT_ERR_EXISTS ? -EEXIST : 0;
-		subnode = offset_to_ofnode(offset);
+		subnode = noffset_to_ofnode(node, offset);
 	}
 
 	*subnodep = subnode;
