@@ -931,3 +931,53 @@ int of_write_prop(struct device_node *np, const char *propname, int len,
 
 	return 0;
 }
+
+int of_add_subnode(struct device_node *parent, const char *name, int len,
+		   struct device_node **childp)
+{
+	struct device_node *child, *new, *last_sibling = NULL;
+	char *new_name, *full_name;
+	int parent_fnl;
+
+	__for_each_child_of_node(parent, child) {
+		if (!strncmp(child->name, name, len) && strlen(name) == len)
+			return -EEXIST;
+		last_sibling = child;
+	}
+
+	/* Property does not exist -> append new property */
+	new = calloc(1, sizeof(struct device_node));
+	if (!new)
+		return -ENOMEM;
+
+	new_name = malloc(len + 1);
+	if (!name) {
+		free(new);
+		return -ENOMEM;
+	}
+	strlcpy(new_name, name, len + 1);
+	new->name = new_name;
+
+	parent_fnl = parent->name ? strlen(parent->full_name) : 0;
+	full_name = calloc(1, parent_fnl + 1 + len + 1);
+	if (!full_name) {
+		free(new_name);
+		free(new);
+		return -ENOMEM;
+	}
+	strcpy(full_name, parent->full_name);
+	full_name[parent_fnl] = '/';
+	strlcpy(&full_name[parent_fnl + 1], name, len + 1);
+	new->full_name = full_name;
+
+	/* Add as last sibling of the parent */
+	if (last_sibling)
+		last_sibling->sibling = new;
+	if (!parent->child)
+		parent->child = new;
+	new->parent = parent;
+
+	*childp = new;
+
+	return 0;
+}

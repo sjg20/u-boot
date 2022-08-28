@@ -601,3 +601,20 @@ static int dm_test_ofnode_u32(struct unit_test_state *uts)
 }
 DM_TEST(dm_test_ofnode_u32,
 	UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT | UT_TESTF_LIVE_OR_FLAT);
+
+static int dm_test_ofnode_add_subnode(struct unit_test_state *uts)
+{
+	ofnode node, check, subnode;
+
+	node = ofnode_path("/lcd");
+	ut_assert(ofnode_valid(node));
+	ut_assertok(ofnode_add_subnode(node, "edmund", &subnode));
+	check = ofnode_path("/lcd/edmund");
+	ut_asserteq(check.of_offset, subnode.of_offset);
+
+	ut_asserteq(-EEXIST, ofnode_add_subnode(node, "edmund", &subnode));
+
+	return 0;
+}
+DM_TEST(dm_test_ofnode_add_subnode,
+	UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT | UT_TESTF_LIVE_OR_FLAT);

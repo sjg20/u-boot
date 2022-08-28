@@ -533,4 +533,16 @@ struct device_node *of_get_stdout(void);
 int of_write_prop(struct device_node *np, const char *propname, int len,
 		  const void *value);
 
+/**
+ * of_add_subnode() - add a new subnode to a node
+ *
+ * @node:	parent node to add to
+ * @name:	name of subnode
+ * @len:	length of name
+ * @subnodep:	returns pointer to new subnode
+ * Returns 0 if OK, -ve on error
+ */
+int of_add_subnode(struct device_node *node, const char *name, int len,
+		   struct device_node **subnodep);
+
 #endif
