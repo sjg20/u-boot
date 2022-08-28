@@ -239,6 +239,37 @@ static inline oftree oftree_default(void)
 }
 
 /**
+ * oftree_from_np() - Returns an oftree from a node pointer
+ *
+ * @root: Root node of the tree
+ * Returns: reference to the given node
+ */
+static inline oftree oftree_from_np(struct device_node *root)
+{
+	oftree tree;
+
+	tree.np = root;
+
+	return tree;
+}
+
+/**
+ * oftree_from_fdt() - Returns an oftree from a flat device tree pointer
+ *
+ * @fdt: Device tree to use
+ *
+ * Returns: reference to the given node
+ */
+static inline oftree oftree_from_fdt(void *fdt)
+{
+	oftree tree;
+
+	tree.fdt = fdt;
+
+	return tree;
+}
+
+/**
  * ofnode_name_eq() - Check if the node name is equivalent to a given name
  *                    ignoring the unit address
  *

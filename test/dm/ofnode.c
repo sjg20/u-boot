@@ -518,9 +518,9 @@ static int dm_test_ofnode_root(struct unit_test_state *uts)
 	ut_assertok(make_ofnode_fdt(uts, fdt, sizeof(fdt)));
 	if (of_live_active()) {
 		ut_assertok(unflatten_device_tree(fdt, &root));
-		tree.np = root;
+		tree = oftree_from_np(root);
 	} else {
-		tree.fdt = fdt;
+		tree = oftree_from_fdt(fdt);
 	}
 
 	/* Make sure they don't work on this new tree */
