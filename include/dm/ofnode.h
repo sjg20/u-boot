@@ -35,7 +35,7 @@ struct ofnode_phandle_args {
  * @node: Reference containing struct device_node * (possibly invalid)
  * Return: pointer to device node (can be NULL)
  */
-static inline const struct device_node *ofnode_to_np(ofnode node)
+static inline struct device_node *ofnode_to_np(ofnode node)
 {
 #ifdef OF_CHECKS
 	if (!of_live_active())
@@ -117,7 +117,7 @@ static inline ofnode offset_to_ofnode(int of_offset)
  * @np: Live node pointer (can be NULL)
  * Return: reference to the associated node pointer
  */
-static inline ofnode np_to_ofnode(const struct device_node *np)
+static inline ofnode np_to_ofnode(struct device_node *np)
 {
 	ofnode node;
 

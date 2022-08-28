@@ -206,7 +206,7 @@ ofnode ofnode_find_subnode(ofnode node, const char *subnode_name)
 	debug("%s: %s: ", __func__, subnode_name);
 
 	if (ofnode_is_np(node)) {
-		const struct device_node *np = ofnode_to_np(node);
+		struct device_node *np = ofnode_to_np(node);
 
 		for (np = np->child; np; np = np->sibling) {
 			if (!strcmp(subnode_name, np->name))
