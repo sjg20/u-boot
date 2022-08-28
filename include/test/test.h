@@ -20,6 +20,9 @@
  * @testdev: Test device
  * @force_fail_alloc: Force all memory allocs to fail
  * @skip_post_probe: Skip uclass post-probe processing
+ * @fdt_chksum: crc8 of the device tree contents
+ * @fdt_copy: Copy of the device tree
+ * @fdt_size: Size of the device-tree copy
  * @expect_str: Temporary string used to hold expected string value
  * @actual_str: Temporary string used to hold actual string value
  */
@@ -32,6 +35,9 @@ struct unit_test_state {
 	struct udevice *testdev;
 	int force_fail_alloc;
 	int skip_post_probe;
+	uint fdt_chksum;
+	void *fdt_copy;
+	uint fdt_size;
 	char expect_str[512];
 	char actual_str[512];
 };
