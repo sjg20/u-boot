@@ -27,13 +27,14 @@ struct ofnode_phandle_args {
 	uint32_t args[OF_MAX_PHANDLE_ARGS];
 };
 
+#if CONFIG_IS_ENABLED(OFNODE_MULTI_TREE)
 /**
  * oftree_reset() - reset the state of the oftree list
  *
  * Reset the oftree list so it can be started again. This should be called
  * once the control FDT is in place, but before the ofnode interface is used.
  */
-static inline void oftree_reset(void) {}
+void oftree_reset(void);
 
 /**
  * ofnode_to_fdt() - convert an ofnode to a flat DT pointer
@@ -43,16 +44,7 @@ static inline void oftree_reset(void) {}
  * @node: Reference containing offset (possibly invalid)
  * Return: DT offset (can be NULL)
  */
-static inline void *ofnode_to_fdt(ofnode node)
-{
-#ifdef OF_CHECKS
-	if (of_live_active())
-		return NULL;
-#endif
-
-	/* Use the control FDT by default */
-	return (void *)gd->fdt_blob;
-}
+__attribute_const__ void *ofnode_to_fdt(ofnode node);
 
 /**
  * ofnode_to_offset() - convert an ofnode to a flat DT offset
@@ -62,7 +54,22 @@ static inline void *ofnode_to_fdt(ofnode node)
  * @node: Reference containing offset (possibly invalid)
  * Return: DT offset (can be -1)
  */
-static inline int ofnode_to_offset(ofnode node)
+__attribute_const__ int ofnode_to_offset(ofnode node);
+
+#else /* !OFNODE_MULTI_TREE */
+static inline void oftree_reset(void) {}
+
+static inline void *ofnode_to_fdt(ofnode node)
+{
+#ifdef OF_CHECKS
+	if (of_live_active())
+		return NULL;
+#endif
+	/* Use the control FDT by default */
+	return (void *)gd->fdt_blob;
+}
+
+static inline __attribute_const__ int ofnode_to_offset(ofnode node)
 {
 #ifdef OF_CHECKS
 	if (of_live_active())
@@ -70,6 +77,7 @@ static inline int ofnode_to_offset(ofnode node)
 #endif
 	return node.of_offset;
 }
+#endif /* OFNODE_MULTI_TREE */
 
 /**
  * ofnode_to_np() - convert an ofnode to a live DT node pointer
@@ -138,6 +146,17 @@ static inline bool ofnode_valid(ofnode node)
 	else
 		return node.of_offset >= 0;
 }
+
+/**
+ * ofnode_lookup_fdt() - look up the FDT for a node
+ *
+ * Given a node this returns a pointer to the device tree containing that node.
+ * This can only be called when the flat tree is in use
+ *
+ * @node: Node to look up, may be ofnode_null()
+ * @return associated device tree, or gd->fdt_blob if @node is ofnode_null()
+ */
+void *ofnode_lookup_fdt(ofnode node);
 
 /**
  * oftree_lookup_fdt() - object the FDT pointer from an oftree

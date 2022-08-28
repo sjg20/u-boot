@@ -4,6 +4,8 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_CATEGORY	LOGC_DT
+
 #include <common.h>
 #include <dm.h>
 #include <fdtdec.h>
@@ -17,6 +19,126 @@
 #include <linux/err.h>
 #include <linux/ioport.h>
 #include <asm/global_data.h>
+
+DECLARE_GLOBAL_DATA_PTR;
+
+#if CONFIG_IS_ENABLED(OFNODE_MULTI_TREE)
+static void *oftree_list[CONFIG_OFNODE_MULTI_TREE_MAX];
+static int oftree_count;
+
+void oftree_reset(void)
+{
+	if (gd->flags & GD_FLG_RELOC) {
+		oftree_count = 0;
+		oftree_list[oftree_count++] = (void *)gd->fdt_blob;
+	}
+}
+
+static int oftree_find(const void *fdt)
+{
+	int i;
+
+	for (i = 0; i < oftree_count; i++) {
+		if (fdt == oftree_list[i])
+			return i;
+	}
+
+	return -1;
+}
+
+static ofnode oftree_ensure(void *fdt, const char *path)
+{
+	int offset, i;
+	ofnode node;
+
+	if (gd->flags & GD_FLG_RELOC) {
+		i = oftree_find(fdt);
+		if (i == -1) {
+			if (oftree_count == CONFIG_OFNODE_MULTI_TREE_MAX) {
+				log_warning("Too many registered device trees (max %d)\n",
+					    CONFIG_OFNODE_MULTI_TREE_MAX);
+				return ofnode_null();
+			}
+
+			/* register the new tree */
+			i = oftree_count++;
+			oftree_list[i] = fdt;
+			log_debug("oftree: registered tree %d: %p\n", i, fdt);
+		}
+	} else {
+		if (fdt != gd->fdt_blob) {
+			log_debug("Cannot only access control FDT before relocation\n");
+			return ofnode_null();
+		}
+	}
+
+	offset = fdt_path_offset(fdt, path);
+	if (offset < 0) {
+		log_debug("Unable to find path '%s' in tree %p\n", path, fdt);
+		return ofnode_null();
+	}
+
+	node.of_offset = OFTREE_NODE(i, offset);
+
+	return node;
+}
+
+void *ofnode_lookup_fdt(ofnode node)
+{
+	if (gd->flags & GD_FLG_RELOC) {
+		uint i = OFTREE_TREE_ID(node.of_offset);
+
+		if (i > oftree_count) {
+			log_debug("Invalid tree ID %x\n", i);
+			return NULL;
+		}
+
+		return oftree_list[i];
+	} else {
+		return (void *)gd->fdt_blob;
+	}
+}
+
+void *ofnode_to_fdt(ofnode node)
+{
+#ifdef OF_CHECKS
+	if (of_live_active())
+		return NULL;
+#endif
+	if (CONFIG_IS_ENABLED(OFNODE_MULTI_TREE) && ofnode_valid(node))
+		return ofnode_lookup_fdt(node);
+
+	/* Use the control FDT by default */
+	return (void *)gd->fdt_blob;
+}
+
+/**
+ * ofnode_to_offset() - convert an ofnode to a flat DT offset
+ *
+ * This cannot be called if the reference contains a node pointer.
+ *
+ * @node: Reference containing offset (possibly invalid)
+ * Return: DT offset (can be -1)
+ */
+int ofnode_to_offset(ofnode node)
+{
+#ifdef OF_CHECKS
+	if (of_live_active())
+		return -1;
+#endif
+	if (CONFIG_IS_ENABLED(OFNODE_MULTI_TREE) && node.of_offset >= 0)
+		return OFTREE_OFFSET(node.of_offset);
+
+	return node.of_offset;
+}
+
+#else /* !OFNODE_MULTI_TREE */
+
+static ofnode oftree_ensure(void *fdt, const char *path)
+{
+	return offset_to_ofnode(fdt_path_offset(fdt, path));
+}
+#endif /* OFNODE_MULTI_TREE */
 
 bool ofnode_name_eq(ofnode node, const char *name)
 {
@@ -575,7 +697,7 @@ ofnode ofnode_path_root(oftree tree, const char *path)
 	else if (*path != '/' && tree.fdt != gd->fdt_blob)
 		return ofnode_null();  /* Aliases only on control FDT */
 	else
-		return offset_to_ofnode(fdt_path_offset(tree.fdt, path));
+		return oftree_ensure(tree.fdt, path);
 }
 
 const void *ofnode_read_chosen_prop(const char *propname, int *sizep)
