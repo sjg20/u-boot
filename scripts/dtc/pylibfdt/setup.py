@@ -110,6 +110,7 @@ libfdt_module = Extension(
     sources = files,
     extra_compile_args = cflags,
     swig_opts = swig_opts,
+    define_macros=[('PY_SSIZE_T_CLEAN', None)],
 )
 
 setup(
