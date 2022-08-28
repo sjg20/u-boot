@@ -612,6 +612,9 @@ static int dm_test_ofnode_add_subnode(struct unit_test_state *uts)
 	check = ofnode_path("/lcd/edmund");
 	ut_asserteq(check.of_offset, subnode.of_offset);
 
+	/* write to the empty node */
+	ut_assertok(ofnode_write_string(subnode, "compatible", "sandbox,usb"));
+
 	ut_asserteq(-EEXIST, ofnode_add_subnode(node, "edmund", &subnode));
 
 	return 0;

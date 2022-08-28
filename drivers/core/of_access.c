@@ -909,9 +909,6 @@ int of_write_prop(struct device_node *np, const char *propname, int len,
 		pp_last = pp;
 	}
 
-	if (!pp_last)
-		return -ENOENT;
-
 	/* Property does not exist -> append new property */
 	new = malloc(sizeof(struct property));
 	if (!new)
@@ -927,7 +924,10 @@ int of_write_prop(struct device_node *np, const char *propname, int len,
 	new->length = len;
 	new->next = NULL;
 
-	pp_last->next = new;
+	if (pp_last)
+		pp_last->next = new;
+	else
+		np->properties = new;
 
 	return 0;
 }
