@@ -664,6 +664,9 @@ static int dm_test_ofnode_add_subnode(struct unit_test_state *uts)
 		malloc_disable_testing();
 	}
 
+	/* write to the empty node */
+	ut_assertok(ofnode_write_string(subnode, "compatible", "sandbox,usb"));
+
 	return 0;
 }
 DM_TEST(dm_test_ofnode_add_subnode,
