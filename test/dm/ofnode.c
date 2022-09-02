@@ -529,15 +529,15 @@ static int dm_test_ofnode_root(struct unit_test_state *uts)
 	}
 
 	/* Make sure they don't work on this new tree */
-	node = ofnode_path_root(tree, "mmc0");
+	node = oftree_path(tree, "mmc0");
 	ut_assert(!ofnode_valid(node));
 
 	/* It should appear in the new tree */
-	node = ofnode_path_root(tree, "/new-mmc");
+	node = oftree_path(tree, "/new-mmc");
 	ut_assert(ofnode_valid(node));
 
 	/* ...and not in the control FDT */
-	node = ofnode_path_root(oftree_default(), "/new-mmc");
+	node = oftree_path(oftree_default(), "/new-mmc");
 	ut_assert(!ofnode_valid(node));
 
 	free(root);
@@ -575,7 +575,8 @@ static int dm_test_ofnode_livetree_writing(struct unit_test_state *uts)
 	ut_asserteq_64(FDT_ADDR_T_NONE, dev_read_addr(dev));
 	/* reg = 0x42, size = 0x100 */
 	ut_assertok(ofnode_write_prop(node, "reg",
-				      "\x00\x00\x00\x42\x00\x00\x01\x00", 8));
+				      "\x00\x00\x00\x42\x00\x00\x01\x00", 8,
+				      false));
 	ut_asserteq(0x42, dev_read_addr(dev));
 
 	/* Test disabling devices */

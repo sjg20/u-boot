@@ -412,7 +412,7 @@ config OFNODE_MULTI_TREE
 	  This works fine with live tree (OF_LIVE), but with flat tree the
 	  offset provided in ofnode is only useful with the control FDT. This
 	  option adds a 'tree ID' to the offset, so that multiple trees can
-	  be used. Call ofnode_path_root() to register a new tree.
+	  be used. Call oftree_from_fdt() to register a new tree.
 
 config OFNODE_MULTI_TREE_MAX
 	int "Maximum number of FDTs"

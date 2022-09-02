@@ -56,6 +56,24 @@ __attribute_const__ void *ofnode_to_fdt(ofnode node);
  */
 __attribute_const__ int ofnode_to_offset(ofnode node);
 
+/**
+ * oftree_from_fdt() - Returns an oftree from a flat device tree pointer
+ *
+ * @fdt: Device tree to use
+ *
+ * Returns: reference to the given node
+ */
+oftree oftree_from_fdt(void *fdt);
+
+/**
+ * noffset_to_ofnode() - convert a DT offset to an ofnode
+ *
+ * @other_node: Node in the same tree to use as a reference
+ * @of_offset: DT offset (either valid, or -1)
+ * Return: reference to the associated DT offset
+ */
+ofnode noffset_to_ofnode(ofnode other_node, int of_offset);
+
 #else /* !OFNODE_MULTI_TREE */
 static inline void oftree_reset(void) {}
 
@@ -77,6 +95,28 @@ static inline __attribute_const__ int ofnode_to_offset(ofnode node)
 #endif
 	return node.of_offset;
 }
+
+static inline oftree oftree_from_fdt(void *fdt)
+{
+	oftree tree;
+
+	tree.fdt = fdt;
+
+	return tree;
+}
+
+static inline ofnode noffset_to_ofnode(ofnode other_node, int of_offset)
+{
+	ofnode node;
+
+	if (of_live_active())
+		node.np = NULL;
+	else
+		node.of_offset = of_offset;
+
+	return node;
+}
+
 #endif /* OFNODE_MULTI_TREE */
 
 /**
@@ -115,29 +155,10 @@ static inline struct device_node *ofnode_to_npw(ofnode node)
 }
 
 /**
- * noffset_to_ofnode() - convert a DT offset to an ofnode
- *
- * @other_node: Node in the same tree to use as a reference
- * @of_offset: DT offset (either valid, or -1)
- * Return: reference to the associated DT offset
- */
-static inline ofnode noffset_to_ofnode(ofnode other_node, int of_offset)
-{
-	ofnode node;
-
-	if (of_live_active())
-		node.np = NULL;
-	else
-		node.of_offset = of_offset;
-
-	return node;
-}
-
-/**
  * ofnode_valid() - check if an ofnode is valid
  *
  * @node: Reference containing offset (possibly invalid)
- * Return: true if the reference contains a valid ofnode, false if it is NULL
+ * Return: true if the reference contains a valid ofnode, false if not
  */
 static inline bool ofnode_valid(ofnode node)
 {
@@ -246,6 +267,38 @@ static inline bool ofnode_equal(ofnode ref1, ofnode ref2)
 }
 
 /**
+ * oftree_valid() - check if an oftree is valid
+ *
+ * @tree: Reference containing oftree
+ * Return: true if the reference contains a valid oftree, false if node
+ */
+static inline bool oftree_valid(oftree tree)
+{
+	if (of_live_active())
+		return tree.np;
+	else
+		return tree.fdt;
+}
+
+/**
+ * oftree_null() - Obtain a null oftree
+ *
+ * This returns an oftree which points to no tree. It works both with the flat
+ * tree and livetree.
+ */
+static inline oftree oftree_null(void)
+{
+	oftree tree;
+
+	if (of_live_active())
+		tree.np = NULL;
+	else
+		tree.fdt = NULL;
+
+	return tree;
+}
+
+/**
  * ofnode_null() - Obtain a null ofnode
  *
  * This returns an ofnode which points to no node. It works both with the flat
@@ -317,22 +370,6 @@ static inline oftree oftree_from_np(struct device_node *root)
 	oftree tree;
 
 	tree.np = root;
-
-	return tree;
-}
-
-/**
- * oftree_from_fdt() - Returns an oftree from a flat device tree pointer
- *
- * @fdt: Device tree to use
- *
- * Returns: reference to the given node
- */
-static inline oftree oftree_from_fdt(void *fdt)
-{
-	oftree tree;
-
-	tree.fdt = fdt;
 
 	return tree;
 }
@@ -820,13 +857,21 @@ int ofnode_count_phandle_with_args(ofnode node, const char *list_name,
 ofnode ofnode_path(const char *path);
 
 /**
- * ofnode_path_root() - find a node by full path from a root node
+ * oftree_path() - find a node by full path from a root node
  *
  * @tree: Device tree to use
  * @path: Full path to node, e.g. "/bus/spi@1"
  * Return: reference to the node found. Use ofnode_valid() to check if it exists
  */
-ofnode ofnode_path_root(oftree tree, const char *path);
+ofnode oftree_path(oftree tree, const char *path);
+
+/**
+ * oftree_root() - get the root node of a tree
+ *
+ * @tree: Device tree to use
+ * Return: reference to the root node
+ */
+ofnode oftree_root(oftree tree);
 
 /**
  * ofnode_read_chosen_prop() - get the value of a chosen property
@@ -1279,19 +1324,23 @@ int ofnode_device_is_compatible(ofnode node, const char *compat);
 /**
  * ofnode_write_prop() - Set a property of a ofnode
  *
- * Note that the value passed to the function is *not* allocated by the
- * function itself, but must be allocated by the caller if necessary. However
- * it does allocate memory for the property struct and name.
+ * Note that if @copy is false, the value passed to the function is *not*
+ * allocated by the function itself, but must be allocated by the caller if
+ * necessary. However it does allocate memory for the property struct and name.
  *
  * @node:	The node for whose property should be set
  * @propname:	The name of the property to set
  * @value:	The new value of the property (must be valid prior to calling
  *		the function)
  * @len:	The length of the new value of the property
+ * @copy: true to allocate memory for the value. This only has any effect with
+ *	live tree, since flat tree handles this automatically. It allows a
+ *	node's value to be written to the tree, without requiring that the
+ *	caller allocate it
  * Return: 0 if successful, -ve on error
  */
 int ofnode_write_prop(ofnode node, const char *propname, const void *value,
-		      int len);
+		      int len, bool copy);
 
 /**
  * ofnode_write_string() - Set a string property of a ofnode
@@ -1425,5 +1474,7 @@ static inline const char *ofnode_conf_read_str(const char *prop_name)
  * -ve on other error
  */
 int ofnode_add_subnode(ofnode parent, const char *name, ofnode *nodep);
+
+int ofnode_copy_props(ofnode src, ofnode dst);
 
 #endif

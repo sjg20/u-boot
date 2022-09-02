@@ -46,10 +46,10 @@ static int oftree_find(const void *fdt)
 	return -1;
 }
 
-static ofnode oftree_ensure(void *fdt, const char *path)
+static oftree oftree_ensure(void *fdt)
 {
-	int offset, i;
-	ofnode node;
+	int i;
+	oftree tree;
 
 	if (gd->flags & GD_FLG_RELOC) {
 		i = oftree_find(fdt);
@@ -57,30 +57,24 @@ static ofnode oftree_ensure(void *fdt, const char *path)
 			if (oftree_count == CONFIG_OFNODE_MULTI_TREE_MAX) {
 				log_warning("Too many registered device trees (max %d)\n",
 					    CONFIG_OFNODE_MULTI_TREE_MAX);
-				return ofnode_null();
+				return oftree_null();
 			}
 
 			/* register the new tree */
 			i = oftree_count++;
 			oftree_list[i] = fdt;
-			log_debug("oftree: registered tree %d: %p\n", i, fdt);
+			log_info("oftree: registered tree %d: %p\n", i, fdt);
 		}
 	} else {
 		if (fdt != gd->fdt_blob) {
 			log_debug("Cannot only access control FDT before relocation\n");
-			return ofnode_null();
+			return oftree_null();
 		}
 	}
 
-	offset = fdt_path_offset(fdt, path);
-	if (offset < 0) {
-		log_debug("Unable to find path '%s' in tree %p\n", path, fdt);
-		return ofnode_null();
-	}
+	tree.fdt = fdt;
 
-	node.of_offset = OFTREE_NODE(i, offset);
-
-	return node;
+	return tree;
 }
 
 void *ofnode_lookup_fdt(ofnode node)
@@ -132,12 +126,47 @@ int ofnode_to_offset(ofnode node)
 	return node.of_offset;
 }
 
+oftree oftree_from_fdt(void *fdt)
+{
+	oftree tree;
+
+	if (CONFIG_IS_ENABLED(OFNODE_MULTI_TREE))
+		return oftree_ensure(fdt);
+
+	tree.fdt = fdt;
+
+	return tree;
+}
+
+/**
+ * noffset_to_ofnode() - convert a DT offset to an ofnode
+ *
+ * @other_node: Node in the same tree to use as a reference
+ * @of_offset: DT offset (either valid, or -1)
+ * Return: reference to the associated DT offset
+ */
+ofnode noffset_to_ofnode(ofnode other_node, int of_offset)
+{
+	ofnode node;
+
+	if (of_live_active())
+		node.np = NULL;
+	else if (!CONFIG_IS_ENABLED(OFNODE_MULTI_TREE) || of_offset < 0)
+		node.of_offset = of_offset;
+	else
+		node.of_offset = OFTREE_MAKE_NODE(other_node.of_offset,
+						  of_offset);
+
+	return node;
+}
+
 #else /* !OFNODE_MULTI_TREE */
 
-static ofnode oftree_ensure(void *fdt, const char *path)
+static inline int oftree_find(const void *fdt)
 {
-	return offset_to_ofnode(fdt_path_offset(fdt, path));
+	return 0;
 }
+
 #endif /* OFNODE_MULTI_TREE */
 
 bool ofnode_name_eq(ofnode node, const char *name)
@@ -338,7 +367,7 @@ ofnode ofnode_find_subnode(ofnode node, const char *subnode_name)
 	} else {
 		int ooffset = fdt_subnode_offset(ofnode_to_fdt(node),
 				ofnode_to_offset(node), subnode_name);
-		subnode = offset_to_ofnode(ooffset);
+		subnode = noffset_to_ofnode(node, ooffset);
 	}
 	debug("%s\n", ofnode_valid(subnode) ?
 	      ofnode_get_name(subnode) : "<none>");
@@ -386,7 +415,7 @@ ofnode ofnode_first_subnode(ofnode node)
 	if (ofnode_is_np(node))
 		return np_to_ofnode(node.np->child);
 
-	return offset_to_ofnode(
+	return noffset_to_ofnode(node,
 		fdt_first_subnode(ofnode_to_fdt(node), ofnode_to_offset(node)));
 }
 
@@ -396,7 +425,7 @@ ofnode ofnode_next_subnode(ofnode node)
 	if (ofnode_is_np(node))
 		return np_to_ofnode(node.np->sibling);
 
-	return offset_to_ofnode(
+	return noffset_to_ofnode(node,
 		fdt_next_subnode(ofnode_to_fdt(node), ofnode_to_offset(node)));
 }
 #endif /* !DM_INLINE_OFNODE */
@@ -696,15 +725,51 @@ ofnode ofnode_path(const char *path)
 		return offset_to_ofnode(fdt_path_offset(gd->fdt_blob, path));
 }
 
-ofnode ofnode_path_root(oftree tree, const char *path)
+ofnode oftree_root(oftree tree)
 {
-	if (of_live_active())
+	if (of_live_active()) {
+		return np_to_ofnode(tree.np);
+	} else {
+		ofnode node;
+
+		if (CONFIG_IS_ENABLED(OFNODE_MULTI_TREE)) {
+			int tree_id = oftree_find(tree.fdt);
+
+			if (tree_id == -1)
+				node.of_offset = -1;
+			else
+				node.of_offset = OFTREE_NODE(tree_id, 0);
+		} else {
+			node.of_offset = 0;
+		}
+
+		return node;
+	}
+}
+
+ofnode oftree_path(oftree tree, const char *path)
+{
+	if (of_live_active()) {
 		return np_to_ofnode(of_find_node_opts_by_path(tree.np, path,
 							      NULL));
-	else if (*path != '/' && tree.fdt != gd->fdt_blob)
+	} else if (*path != '/' && tree.fdt != gd->fdt_blob) {
 		return ofnode_null();  /* Aliases only on control FDT */
-	else
-		return oftree_ensure(tree.fdt, path);
+	} else {
+		int offset = fdt_path_offset(tree.fdt, path);
+		ofnode node;
+
+		if (CONFIG_IS_ENABLED(OFNODE_MULTI_TREE)) {
+			int tree_id = oftree_find(tree.fdt);
+
+			if (tree_id == -1)
+				return ofnode_null();
+			node.of_offset = OFTREE_NODE(tree_id, offset);
+		} else {
+			node.of_offset = offset;
+		}
+
+		return node;
+	}
 }
 
 const void *ofnode_read_chosen_prop(const char *propname, int *sizep)
@@ -1249,15 +1314,26 @@ ofnode ofnode_by_prop_value(ofnode from, const char *propname,
 }
 
 int ofnode_write_prop(ofnode node, const char *propname, const void *value,
-		      int len)
+		      int len, bool copy)
 {
-	if (of_live_active())
-		return of_write_prop(ofnode_to_npw(node), propname, len, value);
-	else
+	if (of_live_active()) {
+		void *newval;
+		int ret;
+
+		if (copy) {
+			newval = malloc(len);
+			if (!newval)
+				return log_ret(-ENOMEM);
+			value = newval;
+		}
+		ret = of_write_prop(ofnode_to_npw(node), propname, len, value);
+		if (ret && copy)
+			free(newval);
+		return ret;
+	} else {
 		return fdt_setprop(ofnode_to_fdt(node), ofnode_to_offset(node),
 				   propname, value, len);
-
-	return 0;
+	}
 }
 
 int ofnode_write_string(ofnode node, const char *propname, const char *value)
@@ -1266,7 +1342,8 @@ int ofnode_write_string(ofnode node, const char *propname, const char *value)
 
 	debug("%s: %s = %s", __func__, propname, value);
 
-	return ofnode_write_prop(node, propname, value, strlen(value) + 1);
+	return ofnode_write_prop(node, propname, value, strlen(value) + 1,
+				 false);
 }
 
 int ofnode_write_u32(ofnode node, const char *propname, u32 value)
@@ -1281,7 +1358,7 @@ int ofnode_write_u32(ofnode node, const char *propname, u32 value)
 		return -ENOMEM;
 	*val = cpu_to_fdt32(value);
 
-	return ofnode_write_prop(node, propname, val, sizeof(value));
+	return ofnode_write_prop(node, propname, val, sizeof(value), false);
 }
 
 int ofnode_set_enabled(ofnode node, bool value)
@@ -1404,4 +1481,28 @@ int ofnode_add_subnode(ofnode node, const char *name, ofnode *subnodep)
 	*subnodep = subnode;
 
 	return ret;	/* 0 or -EEXIST */
+}
+
+int ofnode_copy_props(ofnode src, ofnode dst)
+{
+	struct ofprop prop;
+
+	ofnode_for_each_prop(prop, src) {
+		const char *name;
+		const char *val;
+		int len, ret;
+
+		val = ofprop_get_property(&prop, &name, &len);
+		if (!val) {
+			log_debug("Cannot read prop (err=%d)\n", len);
+			return log_msg_ret("get", -EINVAL);
+		}
+		ret = ofnode_write_prop(dst, name, val, len, false);
+		if (ret) {
+			log_debug("Cannot write prop (err=%d)\n", ret);
+			return log_msg_ret("wr", -EINVAL);
+		}
+	}
+
+	return 0;
 }
