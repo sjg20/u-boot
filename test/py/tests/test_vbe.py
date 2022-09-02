@@ -5,7 +5,11 @@
 
 import pytest
 
+<<<<<<< HEAD
 import fit_util
+=======
+import common
+>>>>>>> e36892f25bf (wip)
 
 # Define a base ITS which we can adjust using % and a dictionary
 base_its = '''
