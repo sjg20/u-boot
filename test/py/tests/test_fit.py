@@ -126,7 +126,6 @@ def test_fit(u_boot_console):
         Return:
             Temporary filename
         """
-
         return os.path.join(cons.config.build_dir, leaf)
 
     def filesize(fname):
@@ -150,32 +149,6 @@ def test_fit(u_boot_console):
         with open(fname, 'rb') as fd:
             return fd.read()
 
-    def make_dtb():
-        """Make a sample .dts file and compile it to a .dtb
-
-        Returns:
-            Filename of .dtb file created
-        """
-        src = make_fname('u-boot.dts')
-        dtb = make_fname('u-boot.dtb')
-        with open(src, 'w') as fd:
-            fd.write(base_fdt)
-        util.run_and_log(cons, ['dtc', src, '-O', 'dtb', '-o', dtb])
-        return dtb
-
-    def make_its(params):
-        """Make a sample .its file with parameters embedded
-
-        Args:
-            params: Dictionary containing parameters to embed in the %() strings
-        Returns:
-            Filename of .its file created
-        """
-        its = make_fname('test.its')
-        with open(its, 'w') as fd:
-            print(base_its % params, file=fd)
-        return its
-
     def make_fit(mkimage, params):
         """Make a sample .fit file ready for loading
 
@@ -189,27 +162,11 @@ def test_fit(u_boot_console):
             Filename of .fit file created
         """
         fit = make_fname('test.fit')
-        its = make_its(params)
+        its = make_its(cons, base_its, params)
         util.run_and_log(cons, [mkimage, '-f', its, fit])
         with open(make_fname('u-boot.dts'), 'w') as fd:
             fd.write(base_fdt)
         return fit
-
-    def make_kernel(filename, text):
-        """Make a sample kernel with test data
-
-        Args:
-            filename: the name of the file you want to create
-        Returns:
-            Full path and filename of the kernel it created
-        """
-        fname = make_fname(filename)
-        data = ''
-        for i in range(100):
-            data += 'this %s %d is unlikely to boot\n' % (text, i)
-        with open(fname, 'w') as fd:
-            print(data, file=fd)
-        return fname
 
     def make_ramdisk(filename, text):
         """Make a sample ramdisk with test data
