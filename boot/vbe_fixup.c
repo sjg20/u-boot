@@ -45,13 +45,12 @@ static int bootmeth_vbe_ft_fixup(void *ctx, struct event *event)
 	if (!ofnode_valid(dest_parent))
 		return log_msg_ret("dst", -EINVAL);
 
-	node = ofnode_first_subnode(parent);
 	ofnode_for_each_subnode(node, parent) {
 		const char *name = ofnode_get_name(node);
 		ofnode dest;
 		int ret;
 
-		log_info("processing node: %s\n", name);
+		log_debug("copy subnode: %s\n", name);
 		ret = ofnode_add_subnode(dest_parent, name, &dest);
 		if (ret && ret != -EEXIST)
 			return log_msg_ret("add", ret);

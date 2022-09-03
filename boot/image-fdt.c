@@ -670,7 +670,7 @@ int image_setup_libfdt(struct bootm_headers *images, void *blob,
 	if (CONFIG_IS_ENABLED(EVENT)) {
 		struct event_ft_fixup fixup;
 
-		fixup.tree = oftree_default();
+		fixup.tree = oftree_from_fdt(blob);
 		fixup.images = images;
 		printf("fixup!\n");
 		ret = event_notify(EVT_FT_FIXUP, &fixup, sizeof(fixup));
