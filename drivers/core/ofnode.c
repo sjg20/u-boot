@@ -162,10 +162,11 @@ ofnode noffset_to_ofnode(ofnode other_node, int of_offset)
 
 #else /* !OFNODE_MULTI_TREE */
 
-static ofnode oftree_ensure(void *fdt, const char *path)
+static inline int oftree_find(const void *fdt)
 {
-	return offset_to_ofnode(fdt_path_offset(fdt, path));
+	return 0;
 }
+
 #endif /* OFNODE_MULTI_TREE */
 
 bool ofnode_name_eq(ofnode node, const char *name)

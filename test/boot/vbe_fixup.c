@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Test for vbe-simple bootmeth. All start with 'vbe_simple'
+ * Test for VBE device tree fix-ups
  *
  * Copyright 2022 Google LLC
  * Written by Simon Glass <sjg@chromium.org>
