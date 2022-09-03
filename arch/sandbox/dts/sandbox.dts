@@ -21,6 +21,9 @@
 		spi0 = &spi;
 	};
 
+	binman {
+	};
+
 	memory {
 		reg = <0 CONFIG_SYS_SDRAM_SIZE>;
 	};

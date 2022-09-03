@@ -151,11 +151,11 @@ ofnode noffset_to_ofnode(ofnode other_node, int of_offset)
 
 	if (of_live_active())
 		node.np = NULL;
-	else if (CONFIG_IS_ENABLED(OFNODE_MULTI_TREE))
+	else if (!CONFIG_IS_ENABLED(OFNODE_MULTI_TREE) || of_offset < 0)
+		node.of_offset = of_offset;
+	else
 		node.of_offset = OFTREE_MAKE_NODE(other_node.of_offset,
 						  of_offset);
-	else
-		node.of_offset = of_offset;
 
 	return node;
 }

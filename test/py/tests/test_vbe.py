@@ -72,8 +72,8 @@ host load hostfs 0 %(fit_addr)x %(fit)s
 fdt addr %(fit_addr)x
 bootm start %(fit_addr)x
 bootm loados
-md %(fdt_addr)x
-host save hostfs 0 %(fdt_addr)x %(fdt_out)s %(fdt_size)x
+fdt print
+ut bootstd vbe_test_fixup
 '''
 
 @pytest.mark.boardspec('sandbox')
@@ -81,8 +81,7 @@ host save hostfs 0 %(fdt_addr)x %(fdt_out)s %(fdt_size)x
 def test_vbe(u_boot_console):
     cons = u_boot_console
     kernel = common.make_kernel(cons, 'vbe-kernel.bin', 'kernel')
-    control_dtb = common.make_dtb(cons, base_fdt)
-    fdt = common.make_fname(cons, 'u-boot.dtb')
+    fdt = common.make_dtb(cons, base_fdt, 'vbe-fdt')
     fdt_out = common.make_fname(cons, 'fdt-out.dtb')
 
     params = {
@@ -106,4 +105,4 @@ def test_vbe(u_boot_console):
     with cons.log.section('Kernel load'):
         output = cons.run_command_list(cmd.splitlines())
 
-    load fdt_out
+    #load fdt_out

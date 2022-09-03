@@ -2,7 +2,7 @@
 /*
  * Test for vbe-simple bootmeth. All start with 'vbe_simple'
  *
- * Copyright 2023 Google LLC
+ * Copyright 2022 Google LLC
  * Written by Simon Glass <sjg@chromium.org>
  */
 

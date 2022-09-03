@@ -67,14 +67,14 @@ def make_kernel(cons, filename, text):
         print(data, file=fd)
     return fname
 
-def make_dtb(cons, base_fdt):
+def make_dtb(cons, base_fdt, leaf):
     """Make a sample .dts file and compile it to a .dtb
 
     Returns:
         Filename of .dtb file created
     """
-    src = make_fname(cons, 'u-boot.dts')
-    dtb = make_fname(cons, 'u-boot.dtb')
+    src = make_fname(cons, f'{leaf}.dts')
+    dtb = make_fname(cons, f'{leaf}.dtb')
     with open(src, 'w') as fd:
         fd.write(base_fdt)
     util.run_and_log(cons, ['dtc', src, '-O', 'dtb', '-o', dtb])
