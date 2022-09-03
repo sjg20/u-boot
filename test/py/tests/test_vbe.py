@@ -26,12 +26,18 @@ base_its = '''
 
                 random {
                     compatible = "vbe,random-bytes";
-                    vbe,bytes = <0x20>;
-                    required;
+                    vbe,bytes = <0x40>;
+                    vbe,required;
                 };
-                aslr {
-                    compatible = "vbe,adlr";
+                aslr1 {
+                    compatible = "vbe,aslr-move";
                     vbe,align = <0x100000>;
+                };
+                aslr2 {
+                    compatible = "vbe,aslr-bytes";
+                };
+                wibble {
+                    compatible = "vbe,wibble";
                 };
             };
 

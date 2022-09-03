@@ -9,9 +9,121 @@
 #define LOG_CATEGORY LOGC_BOOT
 
 #include <common.h>
+#include <dm.h>
 #include <event.h>
 #include <image.h>
+#include <malloc.h>
+#include <rng.h>
 #include <dm/ofnode.h>
+
+#define VBE_PREFIX		"vbe,"
+#define VBE_PREFIX_LEN		(sizeof(VBE_PREFIX) - 1)
+#define VBE_ERR_STR_LEN		128
+#define VBE_MAX_RAND_SIZE	256
+
+struct vbe_result {
+	int errnum;
+	char err_str[VBE_ERR_STR_LEN];
+};
+
+typedef int (*vbe_req_func)(ofnode node, struct vbe_result *result);
+
+static int handle_random_req(ofnode node, int default_bytes,
+			     struct vbe_result *result)
+{
+	char buf[VBE_MAX_RAND_SIZE];
+	struct udevice *dev;
+	u32 size;
+	int ret;
+
+	if (ofnode_read_u32(node, "vbe,bytes", &size)) {
+		if (!default_bytes) {
+			snprintf(result->err_str, VBE_ERR_STR_LEN,
+				 "Missing vbe,bytes property");
+			return log_msg_ret("byt", -EINVAL);
+		}
+		size = default_bytes;
+	}
+	if (size > VBE_MAX_RAND_SIZE) {
+		snprintf(result->err_str, VBE_ERR_STR_LEN,
+			 "vbe,bytes %#x exceeds max size %#x", size,
+			 VBE_MAX_RAND_SIZE);
+		return log_msg_ret("siz", -E2BIG);
+	}
+	ret = uclass_first_device_check(UCLASS_RNG, &dev);
+	if (ret) {
+		snprintf(result->err_str, VBE_ERR_STR_LEN,
+			 "Cannot find random-number device (err=%d)", ret);
+		return log_msg_ret("wr", ret);
+	}
+	ret = dm_rng_read(dev, buf, size);
+	if (ret) {
+		snprintf(result->err_str, VBE_ERR_STR_LEN,
+			 "Failed to read random-number device (err=%d)", ret);
+		return log_msg_ret("rd", ret);
+	}
+	ret = ofnode_write_prop(node, "data", buf, size, true);
+	if (ret)
+		return log_msg_ret("wr", -EINVAL);
+
+	return 0;
+}
+
+static int vbe_req_random_bytes(ofnode node, struct vbe_result *result)
+{
+	return handle_random_req(node, 0, result);
+}
+
+static int vbe_req_aslr_move(ofnode node, struct vbe_result *result)
+{
+	return -ENOTSUPP;
+}
+
+static int vbe_req_aslr_bytes(ofnode node, struct vbe_result *result)
+{
+	return handle_random_req(node, 4, result);
+}
+
+static struct vbe_req {
+	const char *compat;
+	vbe_req_func func;
+} vbe_reqs[] = {
+	/* generate random data bytes for the OS */
+	{ "random-bytes", vbe_req_random_bytes },
+
+	/* address space layout randomization - move the OS in memory */
+	{ "aslr-move", vbe_req_aslr_move },
+
+	/* provide random data for address space layout randomization */
+	{ "aslr-bytes", vbe_req_aslr_bytes },
+};
+
+static int vbe_process_request(ofnode node, struct vbe_result *result)
+{
+	const char *compat, *req_name;
+	int i;
+
+	compat = ofnode_read_string(node, "compatible");
+	if (strlen(compat) <= VBE_PREFIX_LEN ||
+		strncmp(compat, VBE_PREFIX, VBE_PREFIX_LEN))
+		return -EINVAL;
+
+	req_name = compat + VBE_PREFIX_LEN; /* drop "vbe," prefix */
+	for (i = 0; i < ARRAY_SIZE(vbe_reqs); i++) {
+		if (!strcmp(vbe_reqs[i].compat, req_name)) {
+			int ret;
+
+			ret = vbe_reqs[i].func(node, result);
+			if (ret)
+				return log_msg_ret("req", ret);
+			return 0;
+		}
+	}
+	snprintf(result->err_str, VBE_ERR_STR_LEN, "Unknown request: %s",
+		 req_name);
+
+	return -ENOTSUPP;
+}
 
 /**
  * bootmeth_vbe_ft_fixup() - Process VBE OS requests and do device tree fixups
@@ -47,6 +159,7 @@ static int bootmeth_vbe_ft_fixup(void *ctx, struct event *event)
 
 	ofnode_for_each_subnode(node, parent) {
 		const char *name = ofnode_get_name(node);
+		struct vbe_result result;
 		ofnode dest;
 		int ret;
 
@@ -57,6 +170,42 @@ static int bootmeth_vbe_ft_fixup(void *ctx, struct event *event)
 		ret = ofnode_copy_props(node, dest);
 		if (ret)
 			return log_msg_ret("cp", ret);
+
+		*result.err_str = '\0';
+		ret = vbe_process_request(dest, &result);
+		if (ret) {
+			result.errnum = ret;
+			log_err("Failed to process VBE request %s (err=%d)\n",
+				ofnode_get_name(dest), ret);
+			if (*result.err_str) {
+				char *msg = strdup(result.err_str);
+
+				if (!msg)
+					return log_msg_ret("msg", -ENOMEM);
+				ret = ofnode_write_string(dest, "vbe,error",
+							  msg);
+				if (ret) {
+					free(msg);
+					return log_msg_ret("str", -ENOMEM);
+				}
+			}
+			if (result.errnum) {
+				ret = ofnode_write_u32(dest, "vbe,errnum",
+						       result.errnum);
+				if (ret)
+					return log_msg_ret("num", -ENOMEM);
+				if (result.errnum != -ENOTSUPP)
+					return log_msg_ret("pro",
+							   result.errnum);
+				if (result.errnum == -ENOTSUPP &&
+				    ofnode_read_bool(dest, "vbe,required")) {
+					log_err("Cannot handle required request: %s\n",
+						ofnode_get_name(dest));
+					return log_msg_ret("req",
+							   result.errnum);
+				}
+			}
+		}
 	}
 
 	return 0;
