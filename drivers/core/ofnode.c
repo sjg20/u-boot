@@ -718,7 +718,29 @@ ofnode ofnode_path(const char *path)
 		return offset_to_ofnode(fdt_path_offset(gd->fdt_blob, path));
 }
 
-ofnode ofnode_path_root(oftree tree, const char *path)
+ofnode oftree_root(oftree tree)
+{
+	if (of_live_active()) {
+		return np_to_ofnode(tree.np);
+	} else {
+		ofnode node;
+
+		if (CONFIG_IS_ENABLED(OFNODE_MULTI_TREE)) {
+			int tree_id = oftree_find(tree.fdt);
+
+			if (tree_id == -1)
+				node.of_offset = -1;
+			else
+				node.of_offset = OFTREE_NODE(tree_id, 0);
+		} else {
+			node.of_offset = 0;
+		}
+
+		return node;
+	}
+}
+
+ofnode oftree_path(oftree tree, const char *path)
 {
 	if (of_live_active()) {
 		return np_to_ofnode(of_find_node_opts_by_path(tree.np, path,

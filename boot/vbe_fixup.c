@@ -29,24 +29,21 @@ static int bootmeth_vbe_ft_fixup(void *ctx, struct event *event)
 	oftree fit;
 
 	/* Get the image node with requests in it */
-	log_info("fit=%p, noffset=%d\n", images->fit_hdr_os,
-		 images->fit_noffset_os);
+	log_idebug("fit=%p, noffset=%d\n", images->fit_hdr_os,
+		   images->fit_noffset_os);
 	fit = oftree_from_fdt(images->fit_hdr_os);
-	root = ofnode_path_root(fit, "/");
+	root = oftree_root(fit);
 	if (of_live_active()) {
 		log_warning("Cannot fix up live tree\n");
 		return 0;
 	}
-	printf("here\n");
 	if (!ofnode_valid(root))
 		return log_msg_ret("rt", -EINVAL);
 	parent = noffset_to_ofnode(root, images->fit_noffset_os);
 	if (!ofnode_valid(parent))
 		return log_msg_ret("img", -EINVAL);
-	printf("parent %s\n", ofnode_get_name(parent));
 
 	node = ofnode_first_subnode(parent);
-	printf("here2 %d %s\n", ofnode_valid(node), ofnode_get_name(node));
 	ofnode_for_each_subnode(node, parent) {
 		log_info("processing node: %s\n", ofnode_get_name(node));
 	}

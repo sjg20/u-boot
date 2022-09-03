@@ -29,7 +29,7 @@ static int vbe_test_fixup(struct unit_test_state *uts)
 	tree = oftree_from_fdt(working_fdt);
 	ut_assert(oftree_valid(tree));
 
-	chosen = ofnode_path_root(tree, "/chosen");
+	chosen = oftree_path(tree, "/chosen");
 	ut_assert(ofnode_valid(chosen));
 
 	node = ofnode_find_subnode(chosen, "random");

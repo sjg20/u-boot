@@ -843,13 +843,15 @@ int ofnode_count_phandle_with_args(ofnode node, const char *list_name,
 ofnode ofnode_path(const char *path);
 
 /**
- * ofnode_path_root() - find a node by full path from a root node
+ * oftree_path() - find a node by full path from a root node
  *
  * @tree: Device tree to use
  * @path: Full path to node, e.g. "/bus/spi@1"
  * Return: reference to the node found. Use ofnode_valid() to check if it exists
  */
-ofnode ofnode_path_root(oftree tree, const char *path);
+ofnode oftree_path(oftree tree, const char *path);
+
+ofnode oftree_root(oftree tree);
 
 /**
  * ofnode_read_chosen_prop() - get the value of a chosen property
