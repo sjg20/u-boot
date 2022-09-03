@@ -920,7 +920,7 @@ const void *ofnode_get_property(ofnode node, const char *propname, int *lenp)
 				   propname, lenp);
 }
 
-int ofnode_get_first_property(ofnode node, struct ofprop *prop)
+int ofnode_first_property(ofnode node, struct ofprop *prop)
 {
 	prop->node = node;
 
@@ -939,7 +939,7 @@ int ofnode_get_first_property(ofnode node, struct ofprop *prop)
 	return 0;
 }
 
-int ofnode_get_next_property(struct ofprop *prop)
+int ofnode_next_property(struct ofprop *prop)
 {
 	if (ofnode_is_np(prop->node)) {
 		prop->prop = of_get_next_property(ofnode_to_np(prop->node),
@@ -1316,15 +1316,26 @@ ofnode ofnode_by_prop_value(ofnode from, const char *propname,
 }
 
 int ofnode_write_prop(ofnode node, const char *propname, const void *value,
-		      int len)
+		      int len, bool copy)
 {
-	if (of_live_active())
-		return of_write_prop(ofnode_to_npw(node), propname, len, value);
-	else
+	if (of_live_active()) {
+		void *newval;
+		int ret;
+
+		if (copy) {
+			newval = malloc(len);
+			if (!newval)
+				return log_ret(-ENOMEM);
+			value = newval;
+		}
+		ret = of_write_prop(ofnode_to_npw(node), propname, len, value);
+		if (ret && copy)
+			free(newval);
+		return ret;
+	} else {
 		return fdt_setprop(ofnode_to_fdt(node), ofnode_to_offset(node),
 				   propname, value, len);
-
-	return 0;
+	}
 }
 
 int ofnode_write_string(ofnode node, const char *propname, const char *value)
@@ -1333,7 +1344,8 @@ int ofnode_write_string(ofnode node, const char *propname, const char *value)
 
 	debug("%s: %s = %s", __func__, propname, value);
 
-	return ofnode_write_prop(node, propname, value, strlen(value) + 1);
+	return ofnode_write_prop(node, propname, value, strlen(value) + 1,
+				 false);
 }
 
 int ofnode_write_u32(ofnode node, const char *propname, u32 value)
@@ -1348,7 +1360,7 @@ int ofnode_write_u32(ofnode node, const char *propname, u32 value)
 		return -ENOMEM;
 	*val = cpu_to_fdt32(value);
 
-	return ofnode_write_prop(node, propname, val, sizeof(value));
+	return ofnode_write_prop(node, propname, val, sizeof(value), false);
 }
 
 int ofnode_set_enabled(ofnode node, bool value)
@@ -1441,7 +1453,7 @@ phy_interface_t ofnode_read_phy_mode(ofnode node)
 int ofnode_add_subnode(ofnode node, const char *name, ofnode *subnodep)
 {
 	ofnode subnode;
-	int ret;
+	int ret = 0;
 
 	assert(ofnode_valid(node));
 
@@ -1450,20 +1462,49 @@ int ofnode_add_subnode(ofnode node, const char *name, ofnode *subnodep)
 
 		np = (struct device_node *)ofnode_to_np(node);
 		ret = of_add_subnode(np, name, strlen(name), &child);
-		if (ret)
+		if (ret && ret != -EEXIST)
 			return ret;
 		subnode = np_to_ofnode(child);
 	} else {
+		void *fdt = ofnode_to_fdt(node);
+		int poffset = ofnode_to_offset(node);
 		int offset;
 
-		offset = fdt_add_subnode(ofnode_to_fdt(node),
-					 ofnode_to_offset(node), name);
+		offset = fdt_add_subnode(fdt, poffset, name);
+		if (offset == -FDT_ERR_EXISTS) {
+			offset = fdt_subnode_offset(fdt, poffset, name);
+			ret = -EEXIST;
+		}
 		if (offset < 0)
-			return offset == -FDT_ERR_EXISTS ? -EEXIST : 0;
+			return -EINVAL;
 		subnode = noffset_to_ofnode(node, offset);
 	}
 
 	*subnodep = subnode;
+
+	return ret;	/* 0 or -EEXIST */
+}
+
+int ofnode_copy_props(ofnode src, ofnode dst)
+{
+	struct ofprop prop;
+
+	ofnode_for_each_prop(src, prop) {
+		const char *name;
+		const char *val;
+		int len, ret;
+
+		val = ofnode_get_property_by_prop(&prop, &name, &len);
+		if (!val) {
+			log_debug("Cannot read prop (err=%d)\n", len);
+			return log_msg_ret("get", -EINVAL);
+		}
+		ret = ofnode_write_prop(dst, name, val, len, false);
+		if (ret) {
+			log_debug("Cannot write prop (err=%d)\n", ret);
+			return log_msg_ret("wr", -EINVAL);
+		}
+	}
 
 	return 0;
 }

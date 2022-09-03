@@ -24,13 +24,12 @@ static int bootmeth_vbe_ft_fixup(void *ctx, struct event *event)
 {
 	const struct event_ft_fixup *fixup = &event->data.ft_fixup;
 	const struct bootm_headers *images = fixup->images;
-// 	oftree tree = fixup->tree;
-	ofnode parent, root, node;
+	ofnode parent, dest_parent, root, node;
 	oftree fit;
 
 	/* Get the image node with requests in it */
-	log_idebug("fit=%p, noffset=%d\n", images->fit_hdr_os,
-		   images->fit_noffset_os);
+	log_debug("fit=%p, noffset=%d\n", images->fit_hdr_os,
+		  images->fit_noffset_os);
 	fit = oftree_from_fdt(images->fit_hdr_os);
 	root = oftree_root(fit);
 	if (of_live_active()) {
@@ -42,10 +41,23 @@ static int bootmeth_vbe_ft_fixup(void *ctx, struct event *event)
 	parent = noffset_to_ofnode(root, images->fit_noffset_os);
 	if (!ofnode_valid(parent))
 		return log_msg_ret("img", -EINVAL);
+	dest_parent = oftree_path(fixup->tree, "/chosen");
+	if (!ofnode_valid(dest_parent))
+		return log_msg_ret("dst", -EINVAL);
 
 	node = ofnode_first_subnode(parent);
 	ofnode_for_each_subnode(node, parent) {
-		log_info("processing node: %s\n", ofnode_get_name(node));
+		const char *name = ofnode_get_name(node);
+		ofnode dest;
+		int ret;
+
+		log_info("processing node: %s\n", name);
+		ret = ofnode_add_subnode(dest_parent, name, &dest);
+		if (ret && ret != -EEXIST)
+			return log_msg_ret("add", ret);
+		ret = ofnode_copy_props(node, dest);
+		if (ret)
+			return log_msg_ret("cp", ret);
 	}
 
 	return 0;

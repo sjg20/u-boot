@@ -158,7 +158,7 @@ static inline struct device_node *ofnode_to_npw(ofnode node)
  * ofnode_valid() - check if an ofnode is valid
  *
  * @node: Reference containing offset (possibly invalid)
- * Return: true if the reference contains a valid ofnode, false if it is NULL
+ * Return: true if the reference contains a valid ofnode, false if not
  */
 static inline bool ofnode_valid(ofnode node)
 {
@@ -166,6 +166,20 @@ static inline bool ofnode_valid(ofnode node)
 		return node.np != NULL;
 	else
 		return node.of_offset >= 0;
+}
+
+/**
+ * ofprop_valid() - check if an ofprop is valid
+ *
+ * @prop: Pointer to ofprop to check
+ * Return: true if the reference contains a valid ofprop, false if not
+ */
+static inline bool ofprop_valid(struct ofprop *prop)
+{
+	if (of_live_active())
+		return prop->prop != NULL;
+	else
+		return prop->offset >= 0;
 }
 
 /**
@@ -851,6 +865,12 @@ ofnode ofnode_path(const char *path);
  */
 ofnode oftree_path(oftree tree, const char *path);
 
+/**
+ * oftree_root() - get the root node of a tree
+ *
+ * @tree: Device tree to use
+ * Return: reference to the root node
+ */
 ofnode oftree_root(oftree tree);
 
 /**
@@ -937,7 +957,7 @@ int ofnode_decode_display_timing(ofnode node, int index,
 const void *ofnode_get_property(ofnode node, const char *propname, int *lenp);
 
 /**
- * ofnode_get_first_property()- get the reference of the first property
+ * ofnode_first_property()- get the reference of the first property
  *
  * Get reference to the first property of the node, it is used to iterate
  * and read all the property with ofnode_get_property_by_prop().
@@ -946,10 +966,10 @@ const void *ofnode_get_property(ofnode node, const char *propname, int *lenp);
  * @prop: place to put argument reference
  * Return: 0 if OK, -ve on error. -FDT_ERR_NOTFOUND if not found
  */
-int ofnode_get_first_property(ofnode node, struct ofprop *prop);
+int ofnode_first_property(ofnode node, struct ofprop *prop);
 
 /**
- * ofnode_get_next_property() - get the reference of the next property
+ * ofnode_next_property() - get the reference of the next property
  *
  * Get reference to the next property of the node, it is used to iterate
  * and read all the property with ofnode_get_property_by_prop().
@@ -957,7 +977,30 @@ int ofnode_get_first_property(ofnode node, struct ofprop *prop);
  * @prop: reference of current argument and place to put reference of next one
  * Return: 0 if OK, -ve on error. -FDT_ERR_NOTFOUND if not found
  */
-int ofnode_get_next_property(struct ofprop *prop);
+int ofnode_next_property(struct ofprop *prop);
+
+/**
+ * ofnode_for_each_prop() - iterate over all properties of a node
+ *
+ * @node:       node (ofnode, lvalue)
+ *
+ * This is a wrapper around a for loop and is used like so::
+ *
+ *   ofnode node;
+ *   ofprop prop;
+ *   ofnode_for_each_prop(node, prop) {
+ *       Use prop
+ *       ...
+ *   }
+ *
+ * Note that this is implemented as a macro and @prop is used as
+ * iterator in the loop. The parent variable can be a constant or even a
+ * literal.
+ */
+#define ofnode_for_each_prop(node, prop) \
+	for (ofnode_first_property(node, &prop); \
+	     ofprop_valid(&prop); \
+	     ofnode_next_property(&prop))
 
 /**
  * ofnode_get_property_by_prop() - get a pointer to the value of a property
@@ -967,7 +1010,7 @@ int ofnode_get_next_property(struct ofprop *prop);
  * @prop: reference on property
  * @propname: If non-NULL, place to property name on success,
  * @lenp: If non-NULL, place to put length on success
- * Return: 0 if OK, -ve on error. -FDT_ERR_NOTFOUND if not found
+ * Return: pointer to property OK, -ve on error. -FDT_ERR_NOTFOUND if not found
  */
 const void *ofnode_get_property_by_prop(const struct ofprop *prop,
 					const char **propname, int *lenp);
@@ -1288,19 +1331,23 @@ int ofnode_device_is_compatible(ofnode node, const char *compat);
 /**
  * ofnode_write_prop() - Set a property of a ofnode
  *
- * Note that the value passed to the function is *not* allocated by the
- * function itself, but must be allocated by the caller if necessary. However
- * it does allocate memory for the property struct and name.
+ * Note that if @copy is false, the value passed to the function is *not*
+ * allocated by the function itself, but must be allocated by the caller if
+ * necessary. However it does allocate memory for the property struct and name.
  *
  * @node:	The node for whose property should be set
  * @propname:	The name of the property to set
  * @value:	The new value of the property (must be valid prior to calling
  *		the function)
  * @len:	The length of the new value of the property
+ * @copy: true to allocate memory for the value. This only has any effect with
+ *	live tree, since flat tree handles this automatically. It allows a
+ *	node's value to be written to the tree, without requiring that the
+ *	caller allocate it
  * Return: 0 if successful, -ve on error
  */
 int ofnode_write_prop(ofnode node, const char *propname, const void *value,
-		      int len);
+		      int len, bool copy);
 
 /**
  * ofnode_write_string() - Set a string property of a ofnode
@@ -1428,10 +1475,13 @@ static inline const char *ofnode_conf_read_str(const char *prop_name)
  *
  * @parent:	parent node to add to
  * @name:	name of subnode
- * @nodep:	returns pointer to new subnode
+ * @nodep:	returns pointer to new subnode (valid if the function returns 0
+ *	or -EEXIST)
  * Returns 0 if OK, -EEXIST if already exists, -ENOMEM if out of memory, other
  * -ve on other error
  */
 int ofnode_add_subnode(ofnode parent, const char *name, ofnode *nodep);
+
+int ofnode_copy_props(ofnode src, ofnode dst);
 
 #endif
