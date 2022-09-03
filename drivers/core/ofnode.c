@@ -718,7 +718,7 @@ const void *ofnode_get_property(ofnode node, const char *propname, int *lenp)
 				   propname, lenp);
 }
 
-int ofnode_get_first_property(ofnode node, struct ofprop *prop)
+int ofnode_first_property(ofnode node, struct ofprop *prop)
 {
 	prop->node = node;
 
@@ -737,7 +737,7 @@ int ofnode_get_first_property(ofnode node, struct ofprop *prop)
 	return 0;
 }
 
-int ofnode_get_next_property(struct ofprop *prop)
+int ofnode_next_property(struct ofprop *prop)
 {
 	if (ofnode_is_np(prop->node)) {
 		prop->prop = of_get_next_property(ofnode_to_np(prop->node),
