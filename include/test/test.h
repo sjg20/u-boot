@@ -47,7 +47,7 @@ enum {
 	/* do extra driver model init and uninit */
 	UT_TESTF_DM		= BIT(6),
 	/* live or flat device tree, but not both in the same executable */
-	UT_TESTF_LIVE_OR_FLAT	= BIT(4),
+	UT_TESTF_LIVE_OR_FLAT	= BIT(7),
 };
 
 /**
