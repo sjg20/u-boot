@@ -408,7 +408,7 @@ ofnode ofnode_first_subnode(ofnode node)
 	if (ofnode_is_np(node))
 		return np_to_ofnode(node.np->child);
 
-	return offset_to_ofnode(
+	return noffset_to_ofnode(node,
 		fdt_first_subnode(ofnode_to_fdt(node), ofnode_to_offset(node)));
 }
 
@@ -418,7 +418,7 @@ ofnode ofnode_next_subnode(ofnode node)
 	if (ofnode_is_np(node))
 		return np_to_ofnode(node.np->sibling);
 
-	return offset_to_ofnode(
+	return noffset_to_ofnode(node,
 		fdt_next_subnode(ofnode_to_fdt(node), ofnode_to_offset(node)));
 }
 #endif /* !DM_INLINE_OFNODE */
