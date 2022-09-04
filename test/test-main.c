@@ -313,6 +313,13 @@ static int test_pre_run(struct unit_test_state *uts, struct unit_test *test)
 	    (test->flags & UT_TESTF_SCAN_FDT))
 		ut_assertok(dm_extended_scan(false));
 
+	if (IS_ENABLED(CONFIG_SANDBOX) && !CONFIG_IS_ENABLED(OF_PLATDATA) &&
+	    (test->flags & UT_TESTF_SCAN_FDT))
+		ut_assertok(dm_extended_scan(false));
+
+	if (test->flags & UT_TESTF_OTHER_FDT)
+		ut_assertok(test_load_other_fdt(uts));
+
 	if (test->flags & UT_TESTF_CONSOLE_REC) {
 		int ret = console_record_reset_enable();
 
@@ -339,6 +346,11 @@ static int test_post_run(struct unit_test_state *uts, struct unit_test *test)
 	if (test->flags & UT_TESTF_DM)
 		ut_assertok(dm_test_post_run(uts));
 	ut_assertok(event_uninit());
+
+	if (test->flags & UT_TESTF_OTHER_FDT) {
+// 		test_unload_other_fdt();
+		// free unflattened tree
+	}
 
 	return 0;
 }
@@ -409,6 +421,9 @@ static int ut_run_test_live_flat(struct unit_test_state *uts,
 				 struct unit_test *test, const char *name)
 {
 	int runs;
+
+	if ((test->flags & UT_TESTF_OTHER_FDT) && !IS_ENABLED(CONFIG_SANDBOX))
+		return -EAGAIN;
 
 	/* Run with the live tree if possible */
 	runs = 0;

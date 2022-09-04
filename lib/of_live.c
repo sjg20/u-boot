@@ -7,6 +7,7 @@
  * Modifications for U-Boot
  * Copyright (c) 2017 Google, Inc
  */
+#define DEBUG
 
 #include <common.h>
 #include <log.h>

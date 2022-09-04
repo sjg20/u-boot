@@ -13,16 +13,32 @@
 #include <test/test.h>
 #include <test/ut.h>
 
+oftree oftree_get_other(struct unit_test_state *uts)
+{
+	oftree tree;
+
+	if (of_live_active())
+		tree = oftree_from_np(uts->of_other);
+	 else
+		tree = oftree_from_fdt(uts->other_fdt);
+
+	return tree;
+}
+
 static int dm_test_ofnode_compatible(struct unit_test_state *uts)
 {
 	ofnode root_node = ofnode_path("/");
+	oftree otree;
 
 	ut_assert(ofnode_valid(root_node));
 	ut_assert(ofnode_device_is_compatible(root_node, "sandbox"));
 
+	otree = oftree_get_other(uts);
+
 	return 0;
 }
-DM_TEST(dm_test_ofnode_compatible, UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
+DM_TEST(dm_test_ofnode_compatible,
+	UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT | UT_TESTF_OTHER_FDT);
 
 static int dm_test_ofnode_get_by_phandle(struct unit_test_state *uts)
 {

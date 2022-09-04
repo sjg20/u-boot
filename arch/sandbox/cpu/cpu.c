@@ -3,19 +3,24 @@
  * Copyright (c) 2011 The Chromium OS Authors.
  */
 
+#define LOG_CATEGORY	LOGC_SANDBOX
+
 #include <common.h>
 #include <bootstage.h>
 #include <cpu_func.h>
 #include <errno.h>
 #include <log.h>
-#include <asm/global_data.h>
-#include <linux/delay.h>
-#include <linux/libfdt.h>
+#include <of_live.h>
 #include <os.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/malloc.h>
 #include <asm/setjmp.h>
 #include <asm/state.h>
+#include <dm/ofnode.h>
+#include <linux/delay.h>
+#include <linux/libfdt.h>
+#include <test/test.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -372,4 +377,29 @@ ulong timer_get_boot_us(void)
 		base_count = count;
 
 	return (count - base_count) / 1000;
+}
+
+int sandbox_load_other_fdt(struct unit_test_state *uts)
+{
+	struct sandbox_state *state = state_get_current();
+	const char *path = "/arch/sandbox/dts/test.dtb";
+	char fname[256];
+	int ret;
+
+	snprintf("%s%s", sizeof(fname), state->argv[0], path);
+	ret = os_read_file(fname, &uts->other_fdt, &uts->other_fdt_size);
+	if (ret) {
+		log_err("Cannot read file '%s'\n", fname);
+		return ret;
+	}
+	uts->of_other = NULL;
+	if (of_live_active()) {
+		ret = unflatten_device_tree(uts->other_fdt, &uts->of_other);
+		if (ret) {
+			log_err("Cannot unflatten file '%s'\n", fname);
+			return ret;
+		}
+	}
+
+	return 0;
 }

@@ -11,6 +11,8 @@
 #include <video.h>
 #include <pci_ids.h>
 
+struct unit_test_state;
+
 /* The sandbox driver always permits an I2C device with this address */
 #define SANDBOX_I2C_TEST_ADDR		0x59
 
@@ -314,5 +316,7 @@ int sandbox_sdl_set_bpp(struct udevice *dev, enum video_log2_bpp l2bpp);
  * an error
  */
 void sandbox_set_fake_efi_mgr_dev(struct udevice *dev, bool fake_dev);
+
+int sandbox_load_other_fdt(struct unit_test_state *uts);
 
 #endif

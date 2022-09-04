@@ -4,11 +4,14 @@
  *  Przemyslaw Marczak  <p.marczak@samsung.com>
  */
 
+#define LOG_CATEGORY	UCLASS_PMIC
+
 #include <common.h>
 #include <fdtdec.h>
 #include <errno.h>
 #include <dm.h>
 #include <i2c.h>
+#include <log.h>
 #include <power/pmic.h>
 #include <power/regulator.h>
 #include <power/sandbox_pmic.h>
@@ -49,8 +52,7 @@ static int sandbox_pmic_read(struct udevice *dev, uint reg,
 static int sandbox_pmic_bind(struct udevice *dev)
 {
 	if (!pmic_bind_children(dev, dev_ofnode(dev), pmic_children_info))
-		pr_err("%s:%d PMIC: %s - no child found!", __func__, __LINE__,
-							  dev->name);
+		log_err("PMIC: %s - no child found!\n", dev->name);
 
 	/* Always return success for this device - allows for PMIC I/O */
 	return 0;
