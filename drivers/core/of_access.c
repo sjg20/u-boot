@@ -481,8 +481,6 @@ static void *of_find_property_value_of_size(const struct device_node *np,
 
 	if (!prop)
 		return ERR_PTR(-EINVAL);
-	if (!prop->value)
-		return ERR_PTR(-ENODATA);
 	if (len > prop->length)
 		return ERR_PTR(-EOVERFLOW);
 
