@@ -51,7 +51,7 @@ static oftree oftree_ensure(void *fdt)
 	oftree tree;
 	int i;
 
-	if (gd->flags & GD_FLG_RELOC) {
+	if (fdt && (gd->flags & GD_FLG_RELOC)) {
 		i = oftree_find(fdt);
 		if (i == -1) {
 			if (oftree_count == CONFIG_OFNODE_MULTI_TREE_MAX) {
