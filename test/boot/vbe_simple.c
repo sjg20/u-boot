@@ -90,6 +90,7 @@ static int vbe_simple_test_base(struct unit_test_state *uts)
 	 *
 	 * Two fix this we need image_setup_libfdt() is updated to use ofnode
 	 */
+	fixup.images = NULL;
 	ut_assertok(event_notify(EVT_FT_FIXUP, &fixup, sizeof(fixup)));
 
 	node = oftree_path(fixup.tree, "/chosen/fwupd/firmware0");

@@ -137,6 +137,8 @@ static int vbe_process_request(ofnode node, struct vbe_result *result)
 /**
  * bootmeth_vbe_ft_fixup() - Process VBE OS requests and do device tree fixups
  *
+ * If there are no images provided, this does nothing and returns 0.
+ *
  * @ctx: Context for event
  * @event: Event to process
  * @return 0 if OK, -ve on error
@@ -147,6 +149,9 @@ static int bootmeth_vbe_ft_fixup(void *ctx, struct event *event)
 	const struct bootm_headers *images = fixup->images;
 	ofnode parent, dest_parent, root, node;
 	oftree fit;
+
+	if (!images)
+		return 0;
 
 	/* Get the image node with requests in it */
 	log_debug("fit=%p, noffset=%d\n", images->fit_hdr_os,
