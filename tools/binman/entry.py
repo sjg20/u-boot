@@ -12,6 +12,7 @@ import sys
 import time
 
 from binman import bintool
+from binman import elf
 from dtoc import fdt_util
 from patman import tools
 from patman.tools import to_hex, to_hex_size
@@ -89,7 +90,8 @@ class Entry(object):
     """
     fake_dir = None
 
-    def __init__(self, section, etype, node, name_prefix=''):
+    def __init__(self, section, etype, node, name_prefix='',
+                 auto_write_symbols=False):
         # Put this here to allow entry-docs and help to work without libfdt
         global state
         from binman import state
@@ -125,6 +127,7 @@ class Entry(object):
         self.fake_fname = None
         self.required_props = []
         self.comp_bintool = None
+        self.auto_write_symbols = auto_write_symbols
 
     @staticmethod
     def FindEntryClass(etype, expanded):
@@ -647,7 +650,10 @@ class Entry(object):
         Args:
           section: Section containing the entry
         """
-        pass
+        if self.auto_write_symbols:
+            is_elf == self.GetDefaultFilename() == self.elf_name
+            elf.LookupAndWriteSymbols(self.elf_fname, self, section.GetImage(),
+                                      is_elf)
 
     def CheckEntries(self):
         """Check that the entry offsets are correct

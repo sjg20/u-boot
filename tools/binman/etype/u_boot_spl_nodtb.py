@@ -32,11 +32,8 @@ class Entry_u_boot_spl_nodtb(Entry_blob):
     binman uses that to look up symbols to write into the SPL binary.
     """
     def __init__(self, section, etype, node):
-        super().__init__(section, etype, node)
+        super().__init__(section, etype, node, auto_write_symbols=True)
         self.elf_fname = 'spl/u-boot-spl'
 
     def GetDefaultFilename(self):
         return 'spl/u-boot-spl-nodtb.bin'
-
-    def WriteSymbols(self, section):
-        elf.LookupAndWriteSymbols(self.elf_fname, self, section.GetImage())

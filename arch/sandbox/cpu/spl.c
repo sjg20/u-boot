@@ -54,8 +54,8 @@ u32 spl_boot_device(void)
 	return BOOT_DEVICE_BOARD;
 }
 
-static int spl_board_load_image(struct spl_image_info *spl_image,
-				struct spl_boot_device *bootdev)
+static int spl_board_load_file(struct spl_image_info *spl_image,
+			       struct spl_boot_device *bootdev)
 {
 	char fname[256];
 	int ret;
@@ -77,7 +77,35 @@ static int spl_board_load_image(struct spl_image_info *spl_image,
 
 	return 0;
 }
-SPL_LOAD_IMAGE_METHOD("sandbox", 9, BOOT_DEVICE_BOARD, spl_board_load_image);
+SPL_LOAD_IMAGE_METHOD("sandbox", 9, BOOT_DEVICE_BOARD, spl_board_load_file);
+
+static int load_from_image(struct spl_image_info *spl_image,
+			   struct spl_boot_device *bootdev)
+{
+	enum u_boot_phase next_phase;
+	ulong pos, size;
+	char fname[256];
+
+	if (!IS_ENABLED(CONFIG_SANDBOX_VPL))
+		return -ENOENT;
+
+	next_phase = spl_next_phase();
+	pos = spl_get_image_pos();
+	size = spl_get_image_pos();
+	log_info("Reading from pos %lx size %lx\n", pos, size);
+
+	/*
+	 * Set up spl_image to boot from jump_to_image_no_args(). Allocate this
+	 * outsdide the RAM buffer (i.e. don't use strdup()).
+	 */
+	spl_image->arg = os_malloc(strlen(fname) + 1);
+	if (!spl_image->arg)
+		return log_msg_ret("exec", -ENOMEM);
+	strcpy(spl_image->arg, fname);
+
+	return 0;
+}
+SPL_LOAD_IMAGE_METHOD("sandbox", 7, BOOT_DEVICE_BOARD, load_from_image);
 
 void spl_board_init(void)
 {

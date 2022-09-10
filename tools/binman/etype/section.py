@@ -562,7 +562,7 @@ class Entry_section(Entry):
                 for name in entries:
                     if name.startswith(root):
                         rest = name[len(root):]
-                        if rest in ['', '-img', '-nodtb']:
+                        if rest in ['', '-elf', '-img', '-nodtb']:
                             entry = entries[name]
         if not entry:
             err = ("%s: Entry '%s' not found in list (%s)" %

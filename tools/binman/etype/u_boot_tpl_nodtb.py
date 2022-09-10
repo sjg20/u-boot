@@ -32,11 +32,8 @@ class Entry_u_boot_tpl_nodtb(Entry_blob):
     binman uses that to look up symbols to write into the TPL binary.
     """
     def __init__(self, section, etype, node):
-        super().__init__(section, etype, node)
+        super().__init__(section, etype, node, auto_write_symbols=True)
         self.elf_fname = 'tpl/u-boot-tpl'
 
     def GetDefaultFilename(self):
         return 'tpl/u-boot-tpl-nodtb.bin'
-
-    def WriteSymbols(self, section):
-        elf.LookupAndWriteSymbols(self.elf_fname, self, section.GetImage())

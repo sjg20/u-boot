@@ -5965,6 +5965,18 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertIn('Expected __bss_size symbol in vpl/u-boot-vpl',
                       str(e.exception))
 
+    def testSymbolsElf(self):
+        """Test binman can assign symbols embedded in an ELF file"""
+        if not elf.ELF_TOOLS:
+            self.skipTest('Python elftools not available')
+        self._SetupSplElf('u_boot_binman_syms')
+        data = self._DoReadFileDtb('256_symbols_elf.dts', use_expanded=False)[0]
+        image_fname = tools.get_output_filename('image.bin')
+        syms = elf.GetSymbolFileOffset(image_fname, ['_binman_u_boot'])
+        for name, sym in syms.items():
+            msg = 'test'
+            val = elf.GetSymbolValue(sym, data, msg)
+            print('sym %s: %x %x' % (name, sym.offset, val))
 
 if __name__ == "__main__":
     unittest.main()

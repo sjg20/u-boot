@@ -188,7 +188,16 @@ def GetSymbolAddress(fname, sym_name):
         return None
     return sym.address
 
-def LookupAndWriteSymbols(elf_fname, entry, section):
+def GetPackString(sym, msg):
+    if sym.size == 4:
+        return '<I'
+    elif sym.size == 8:
+        return '<Q'
+    else:
+        raise ValueError('%s has size %d: only 4 and 8 are supported' %
+                         (msg, sym.size))
+
+def LookupAndWriteSymbols(elf_fname, entry, section, is_elf=False):
     """Replace all symbols in an entry with their correct values
 
     The entry contents is updated so that values for referenced symbols will be
@@ -203,6 +212,7 @@ def LookupAndWriteSymbols(elf_fname, entry, section):
         section: Section which can be used to lookup symbol values
     """
     fname = tools.get_input_filename(elf_fname)
+    print('is_elf', is_elf)
     syms = GetSymbols(fname, ['image', 'binman'])
     if not syms:
         return
@@ -218,14 +228,7 @@ def LookupAndWriteSymbols(elf_fname, entry, section):
                 raise ValueError('%s has offset %x (size %x) but the contents '
                                  'size is %x' % (entry.GetPath(), offset,
                                                  sym.size, entry.contents_size))
-            if sym.size == 4:
-                pack_string = '<I'
-            elif sym.size == 8:
-                pack_string = '<Q'
-            else:
-                raise ValueError('%s has size %d: only 4 and 8 are supported' %
-                                 (msg, sym.size))
-
+            pack_string = GetPackString(sym, msg)
             if name == '_binman_sym_magic':
                 value = BINMAN_SYM_MAGIC_VALUE
             else:
@@ -240,6 +243,11 @@ def LookupAndWriteSymbols(elf_fname, entry, section):
                        (msg, name, offset, value, len(value_bytes)))
             entry.data = (entry.data[:offset] + value_bytes +
                         entry.data[offset + sym.size:])
+
+def GetSymbolValue(sym, data, msg):
+    pack_string = GetPackString(sym, msg)
+    value = struct.unpack(pack_string, data[sym.offset:sym.offset +sym.size])
+    return value[0]
 
 def MakeElf(elf_fname, text, data):
     """Make an elf file with the given data in a single section
