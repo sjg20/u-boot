@@ -232,6 +232,7 @@ def LookupAndWriteSymbols(elf_fname, entry, section, is_elf=False):
     base = syms.get('__image_copy_start')
     if not base:
         return
+    base_addr = 0 if is_elf else base.address
     for name, sym in syms.items():
         if name.startswith('_binman'):
             msg = ("Section '%s': Symbol '%s'\n   in entry '%s'" %
@@ -255,7 +256,7 @@ def LookupAndWriteSymbols(elf_fname, entry, section, is_elf=False):
             else:
                 # Look up the symbol in our entry tables.
                 value = section.GetImage().LookupImageSymbol(name, sym.weak,
-                                                             msg, base.address)
+                                                             msg, base_addr)
             if value is None:
                 value = -1
                 pack_string = pack_string.lower()

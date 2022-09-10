@@ -5973,6 +5973,10 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         data = self._DoReadFileDtb('256_symbols_elf.dts', use_expanded=False)[0]
         image_fname = tools.get_output_filename('image.bin')
         syms = elf.GetSymbolFileOffset(image_fname, ['_binman_u_boot'])
+
+        image = control.images['image']
+        entries = image.GetEntries()
+
         re_name = re.compile('_binman_(u_boot_(.*))_prop_(.*)')
         for name, sym in syms.items():
             msg = 'test'
@@ -5980,7 +5984,15 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
             entry_m = re_name.match(name)
             if entry_m:
                 ename, prop = entry_m.group(1), entry_m.group(3)
-            print('sym %s: %s %s %x %x' % (name, ename, prop, sym.offset, val))
+            entry, entry_name, prop_name = image.LookupEntry(image._entries,
+                                                             name, msg)
+            if prop_name == 'offset':
+                expect_val = entry.offset
+            elif prop_name == 'image_pos':
+                expect_val = entry.image_pos
+            elif prop_name == 'size':
+                expect_val = entry.size
+            self.assertEqual(expect_val, val)
 
 if __name__ == "__main__":
     unittest.main()
