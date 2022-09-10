@@ -651,7 +651,8 @@ class Entry(object):
           section: Section containing the entry
         """
         if self.auto_write_symbols:
-            is_elf == self.GetDefaultFilename() == self.elf_name
+            # Check if we are writing symbols into an ELF file
+            is_elf = self.GetDefaultFilename() == self.elf_fname
             elf.LookupAndWriteSymbols(self.elf_fname, self, section.GetImage(),
                                       is_elf)
 

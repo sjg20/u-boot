@@ -212,8 +212,21 @@ def LookupAndWriteSymbols(elf_fname, entry, section, is_elf=False):
         section: Section which can be used to lookup symbol values
     """
     fname = tools.get_input_filename(elf_fname)
-    print('is_elf', is_elf)
     syms = GetSymbols(fname, ['image', 'binman'])
+    if is_elf:
+        if not ELF_TOOLS:
+            msg = ("Section '%s': entry '%s'" %
+                   (section.GetPath(), entry.GetPath()))
+            raise ValueError(f'{msg}: Cannot write symbols to an ELF file without Python elftools')
+        new_syms = {}
+        with open(fname, 'rb') as fd:
+            elf = ELFFile(fd)
+            for name, sym in syms.items():
+                offset = _GetFileOffset(elf, sym.address)
+                new_syms[name] = Symbol(sym.section, sym.address, sym.size,
+                                        sym.weak, offset)
+            syms = new_syms
+
     if not syms:
         return
     base = syms.get('__image_copy_start')
@@ -223,11 +236,19 @@ def LookupAndWriteSymbols(elf_fname, entry, section, is_elf=False):
         if name.startswith('_binman'):
             msg = ("Section '%s': Symbol '%s'\n   in entry '%s'" %
                    (section.GetPath(), name, entry.GetPath()))
-            offset = sym.address - base.address
-            if offset < 0 or offset + sym.size > entry.contents_size:
-                raise ValueError('%s has offset %x (size %x) but the contents '
-                                 'size is %x' % (entry.GetPath(), offset,
-                                                 sym.size, entry.contents_size))
+            if is_elf:
+                # For ELF files, use the file offset
+                offset = sym.offset
+            else:
+                # For blobs use the offset of the symbol, calculated by
+                # subtracting the base address which by definition is at the
+                # start
+                offset = sym.address - base.address
+                if offset < 0 or offset + sym.size > entry.contents_size:
+                    raise ValueError('%s has offset %x (size %x) but the contents '
+                                     'size is %x' % (entry.GetPath(), offset,
+                                                     sym.size,
+                                                     entry.contents_size))
             pack_string = GetPackString(sym, msg)
             if name == '_binman_sym_magic':
                 value = BINMAN_SYM_MAGIC_VALUE

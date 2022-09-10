@@ -5,7 +5,6 @@
 # Entry-type module for U-Boot SPL ELF image
 #
 
-from binman import elf
 from binman.entry import Entry
 from binman.etype.blob import Entry_blob
 
@@ -24,13 +23,3 @@ class Entry_u_boot_spl_elf(Entry_blob):
 
     def GetDefaultFilename(self):
         return 'spl/u-boot-spl'
-
-    def WriteSymbols(self, section):
-        """Write symbol values into binary files for access at run time
-
-        Args:
-          section: Section containing the entry
-        """
-        if self.auto_write_symbols:
-            elf.LookupAndWriteSymbols(self.elf_fname, self, section.GetImage())
-
