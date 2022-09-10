@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Devicetree file for VPL (Verifying Program Loader)
+ */
+
+&binman {
+	u-boot-tpl-elf {
+		no-expanded;
+	};
+	u-boot-vpl-elf {
+		no-expanded;
+	};
+	u-boot-spl-elf {
+		no-expanded;
+	};
+	u-boot-elf {
+		no-expanded;
+	};
+	fdtmap {
+	};
+};
