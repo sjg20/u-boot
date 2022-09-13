@@ -5969,30 +5969,40 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         """Test binman can assign symbols embedded in an ELF file"""
         if not elf.ELF_TOOLS:
             self.skipTest('Python elftools not available')
+        self._SetupTplElf('u_boot_binman_syms')
+        self._SetupVplElf('u_boot_binman_syms')
         self._SetupSplElf('u_boot_binman_syms')
         data = self._DoReadFileDtb('256_symbols_elf.dts', use_expanded=False)[0]
         image_fname = tools.get_output_filename('image.bin')
-        syms = elf.GetSymbolFileOffset(image_fname, ['_binman_u_boot'])
 
         image = control.images['image']
         entries = image.GetEntries()
 
-        re_name = re.compile('_binman_(u_boot_(.*))_prop_(.*)')
-        for name, sym in syms.items():
-            msg = 'test'
-            val = elf.GetSymbolValue(sym, data, msg)
-            entry_m = re_name.match(name)
-            if entry_m:
-                ename, prop = entry_m.group(1), entry_m.group(3)
-            entry, entry_name, prop_name = image.LookupEntry(image._entries,
-                                                             name, msg)
-            if prop_name == 'offset':
-                expect_val = entry.offset
-            elif prop_name == 'image_pos':
-                expect_val = entry.image_pos
-            elif prop_name == 'size':
-                expect_val = entry.size
-            self.assertEqual(expect_val, val)
+        for entry in entries.values():
+            # No symbols in u-boot and it has faked contents anyway
+            if entry.name == 'u-boot':
+                continue
+            edata = data[entry.image_pos:entry.image_pos + entry.size]
+            efname = tools.get_output_filename(f'edata-{entry.name}')
+            tools.write_file(efname, edata)
+
+            syms = elf.GetSymbolFileOffset(efname, ['_binman_u_boot'])
+            re_name = re.compile('_binman_(u_boot_(.*))_prop_(.*)')
+            for name, sym in syms.items():
+                msg = 'test'
+                val = elf.GetSymbolValue(sym, edata, msg)
+                entry_m = re_name.match(name)
+                if entry_m:
+                    ename, prop = entry_m.group(1), entry_m.group(3)
+                entry, entry_name, prop_name = image.LookupEntry(entries,
+                                                                 name, msg)
+                if prop_name == 'offset':
+                    expect_val = entry.offset
+                elif prop_name == 'image_pos':
+                    expect_val = entry.image_pos
+                elif prop_name == 'size':
+                    expect_val = entry.size
+                self.assertEqual(expect_val, val)
 
 if __name__ == "__main__":
     unittest.main()

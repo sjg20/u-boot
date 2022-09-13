@@ -15,5 +15,11 @@
 		u-boot-spl2 {
 			type = "u-boot-spl-elf";
 		};
+
+		u-boot-tpl-elf {
+		};
+
+		u-boot-vpl-elf {
+		};
 	};
 };

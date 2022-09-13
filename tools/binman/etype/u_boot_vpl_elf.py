@@ -18,7 +18,8 @@ class Entry_u_boot_vpl_elf(Entry_blob):
     be relocated to any address for execution.
     """
     def __init__(self, section, etype, node):
-        super().__init__(section, etype, node)
+        super().__init__(section, etype, node, auto_write_symbols=True)
+        self.elf_fname = 'vpl/u-boot-vpl'
 
     def GetDefaultFilename(self):
         return 'vpl/u-boot-vpl'
