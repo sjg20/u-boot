@@ -228,9 +228,11 @@ def LookupAndWriteSymbols(elf_fname, entry, section, is_elf=False):
             syms = new_syms
 
     if not syms:
+        tout.debug('LookupAndWriteSymbols: no syms')
         return
     base = syms.get('__image_copy_start')
-    if not base:
+    if not base and not is_elf:
+        tout.debug('LookupAndWriteSymbols: no base')
         return
     base_addr = 0 if is_elf else base.address
     for name, sym in syms.items():
