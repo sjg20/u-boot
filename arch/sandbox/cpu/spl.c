@@ -74,6 +74,7 @@ static int spl_board_load_file(struct spl_image_info *spl_image,
 	if (!spl_image->arg)
 		return log_msg_ret("exec", -ENOMEM);
 	strcpy(spl_image->arg, fname);
+	spl_image->flags = SPL_SANDBOXF_ARG_IS_FNAME;
 
 	return 0;
 }
@@ -98,13 +99,18 @@ static int load_from_image(struct spl_image_info *spl_image,
 	size = spl_get_image_pos();
 	log_debug("Reading from pos %lx size %lx\n", pos, size);
 
+	/*
+	 * Set up spl_image to boot from jump_to_image_no_args(). Allocate this
+	 * outsdide the RAM buffer (i.e. don't use strdup()).
+	 */
 	fname = state->prog_fname ? state->prog_fname : state->argv[0];
 	ret = os_read_file(fname, &buf, &full_size);
 	if (ret)
 		return log_msg_ret("rd", -ENOMEM);
-	ret = os_jump_to_image(buf + pos, size);
-	if (ret)
-		return log_msg_ret("jmp", -ENOMEM);
+	spl_image->flags = SPL_SANDBOXF_ARG_IS_BUF;
+	spl_image->arg = buf;
+	spl_image->offset = pos;
+	spl_image->size = size;
 
 	return 0;
 }
@@ -127,13 +133,30 @@ void spl_board_init(void)
 
 void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 {
-	const char *fname = spl_image->arg;
+	switch (spl_image->flags) {
+	case SPL_SANDBOXF_ARG_IS_FNAME: {
+		const char *fname = spl_image->arg;
 
-	if (fname) {
-		os_fd_restore();
-		os_spl_to_uboot(fname);
-	} else {
-		printf("No filename provided for U-Boot\n");
+		if (fname) {
+			os_fd_restore();
+			os_spl_to_uboot(fname);
+		} else {
+			log_err("No filename provided for U-Boot\n");
+		}
+		break;
+	}
+	case SPL_SANDBOXF_ARG_IS_BUF: {
+		int ret;
+
+		ret = os_jump_to_image(spl_image->arg + spl_image->offset,
+				       spl_image->size);
+		if (ret)
+			log_err("Failed to load image\n");
+		break;
+	}
+	default:
+		log_err("Invalid flags\n");
+		break;
 	}
 	hang();
 }
