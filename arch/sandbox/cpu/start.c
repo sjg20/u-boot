@@ -244,6 +244,16 @@ static int sandbox_cmdline_cb_jump(struct sandbox_state *state,
 }
 SANDBOX_CMDLINE_OPT_SHORT(jump, 'j', 1, "Jumped from previous U-Boot");
 
+static int sandbox_cmdline_cb_program(struct sandbox_state *state,
+				      const char *arg)
+{
+	/* Remember to delete this U-Boot image later */
+	state->prog_fname = arg;
+
+	return 0;
+}
+SANDBOX_CMDLINE_OPT_SHORT(program, 'p', 1, "U-Boot program name");
+
 static int sandbox_cmdline_cb_memory(struct sandbox_state *state,
 				     const char *arg)
 {

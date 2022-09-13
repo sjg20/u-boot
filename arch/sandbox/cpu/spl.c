@@ -82,9 +82,13 @@ SPL_LOAD_IMAGE_METHOD("sandbox", 9, BOOT_DEVICE_BOARD, spl_board_load_file);
 static int load_from_image(struct spl_image_info *spl_image,
 			   struct spl_boot_device *bootdev)
 {
+	struct sandbox_state *state = state_get_current();
 	enum u_boot_phase next_phase;
+	const char *fname;
 	ulong pos, size;
-	char fname[256];
+	int full_size;
+	void *buf;
+	int ret;
 
 	if (!IS_ENABLED(CONFIG_SANDBOX_VPL))
 		return -ENOENT;
@@ -92,16 +96,15 @@ static int load_from_image(struct spl_image_info *spl_image,
 	next_phase = spl_next_phase();
 	pos = spl_get_image_pos();
 	size = spl_get_image_pos();
-	log_info("Reading from pos %lx size %lx\n", pos, size);
+	log_debug("Reading from pos %lx size %lx\n", pos, size);
 
-	/*
-	 * Set up spl_image to boot from jump_to_image_no_args(). Allocate this
-	 * outsdide the RAM buffer (i.e. don't use strdup()).
-	 */
-	spl_image->arg = os_malloc(strlen(fname) + 1);
-	if (!spl_image->arg)
-		return log_msg_ret("exec", -ENOMEM);
-	strcpy(spl_image->arg, fname);
+	fname = state->prog_fname ? state->prog_fname : state->argv[0];
+	ret = os_read_file(fname, &buf, &full_size);
+	if (ret)
+		return log_msg_ret("rd", -ENOMEM);
+	ret = os_jump_to_image(buf + pos, size);
+	if (ret)
+		return log_msg_ret("jmp", -ENOMEM);
 
 	return 0;
 }
