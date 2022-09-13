@@ -880,4 +880,7 @@ void spl_perform_fixups(struct spl_image_info *spl_image);
 struct legacy_img_hdr *spl_get_load_buffer(ssize_t offset, size_t size);
 
 void spl_save_restore_data(void);
+
+const char *spl_version_string(void);
+
 #endif

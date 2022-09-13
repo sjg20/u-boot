@@ -101,7 +101,7 @@ static int load_from_image(struct spl_image_info *spl_image,
 
 	/*
 	 * Set up spl_image to boot from jump_to_image_no_args(). Allocate this
-	 * outsdide the RAM buffer (i.e. don't use strdup()).
+	 * outside the RAM buffer (i.e. don't use strdup()).
 	 */
 	fname = state->prog_fname ? state->prog_fname : state->argv[0];
 	ret = os_read_file(fname, &buf, &full_size);

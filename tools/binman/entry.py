@@ -650,7 +650,6 @@ class Entry(object):
         Args:
           section: Section containing the entry
         """
-        print('WriteSymbols', self.name, self.auto_write_symbols)
         if self.auto_write_symbols:
             # Check if we are writing symbols into an ELF file
             is_elf = self.GetDefaultFilename() == self.elf_fname

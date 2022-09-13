@@ -16,6 +16,7 @@
 #include <bootmeth.h>
 #include <dm.h>
 #include <mmc.h>
+#include <spl.h>
 #include <vbe.h>
 #include <version_string.h>
 #include <dm/device-internal.h>
@@ -209,9 +210,14 @@ int vbe_simple_fixup_node(ofnode node, struct simple_state *state)
 	ret = ofnode_write_u32(node, "cur-vernum", state->fw_vernum);
 	if (ret)
 		return log_msg_ret("num", ret);
-	ret = ofnode_write_string(node, "bootloader-version", version_string);
-	if (ret)
-		return log_msg_ret("bl", ret);
+
+	/* For SPL the version is added once we get to U-Boot proper */
+	if (!IS_ENABLED(CONFIG_SPL_BUILD)) {
+		ret = ofnode_write_string(node, "bootloader-version",
+					  version_string);
+		if (ret)
+			return log_msg_ret("bl", ret);
+	}
 
 	return 0;
 }
@@ -296,6 +302,19 @@ static int bootmeth_vbe_simple_bind(struct udevice *dev)
 
 	return 0;
 }
+
+static int simple_load_from_image(struct spl_image_info *spl_image,
+				  struct spl_boot_device *bootdev)
+{
+	if (!IS_ENABLED(CONFIG_VPL_BUILD))
+		return -ENOENT;
+
+	printf("simple\n");
+
+	return 0;
+}
+SPL_LOAD_IMAGE_METHOD("vbe_simple", 5, BOOT_DEVICE_BOARD,
+		      simple_load_from_image);
 
 #if CONFIG_IS_ENABLED(OF_REAL)
 static const struct udevice_id generic_simple_vbe_simple_ids[] = {
