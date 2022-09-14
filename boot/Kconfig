@@ -334,6 +334,16 @@ config BOOTSTD_FULL
 	  - support for selecting the ordering of bootdevs using the devicetree
 	    as well as the "boot_targets" environment variable
 
+config VPL_BOOTSTD
+	bool "Standard boot support in VPL"
+	depends on VPL && VPL_DM && VPL_OF_CONTROL && VPL_BLK
+	default y
+	help
+	  This enables standard boot in SPL. This is neeeded so that VBE
+	  (Verified Boot for Embedded) can be used, since it depends on standard
+	  boot. It is enabled by default since the main purpose of VPL is to
+	  handle the firmware part of VBE.
+
 if BOOTSTD
 
 config BOOTSTD_BOOTCOMMAND

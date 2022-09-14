@@ -322,10 +322,24 @@ static int bootmeth_vbe_simple_bind(struct udevice *dev)
 static int simple_load_from_image(struct spl_image_info *spl_image,
 				  struct spl_boot_device *bootdev)
 {
+	struct simple_priv *priv;
+	struct udevice *dev;
+	int ret;
+
 	if (!IS_ENABLED(CONFIG_VPL_BUILD))
 		return -ENOENT;
+	dm_dump_tree();
 
-	printf("simple\n");
+	vbe_find_first_device(&dev);
+	if (!dev)
+		return log_msg_ret("dev", -ENODEV);
+	ret = device_probe(dev);
+	if (ret)
+		return log_msg_ret("probe", ret);
+
+	priv = dev_get_priv(dev);
+	printf("simple %s\n", priv->storage);
+
 	return -ENOENT;
 
 	return 0;

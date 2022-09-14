@@ -228,6 +228,8 @@ static int bootmeth_vbe_ft_fixup(void *ctx, struct event *event)
 		}
 	}
 
+	/* TODO: copy in the fwupd node also */
+
 	return 0;
 }
 EVENT_SPY(EVT_FT_FIXUP, bootmeth_vbe_ft_fixup);
