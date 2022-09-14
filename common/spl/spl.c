@@ -720,16 +720,15 @@ void board_init_f(ulong dummy)
 }
 #endif
 
-void board_init_r(gd_t *dummy1, ulong dummy2)
+/**
+ * spl_init_r() - Set up SPL ready for use
+ *
+ * Calls all required init functions to get SPL up and running
+ *
+ * @return 0 if OK, -ve on error (meaning boot cannot proceed)
+ */
+static int spl_init_r(void)
 {
-	u32 spl_boot_list[] = {
-		BOOT_DEVICE_NONE,
-		BOOT_DEVICE_NONE,
-		BOOT_DEVICE_NONE,
-		BOOT_DEVICE_NONE,
-		BOOT_DEVICE_NONE,
-	};
-	struct spl_image_info spl_image;
 	int ret;
 
 	debug(">>" SPL_TPL_PROMPT "board_init_r()\n");
@@ -741,8 +740,9 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	gd->flags |= GD_FLG_FULL_MALLOC_INIT;
 #endif
 	if (!(gd->flags & GD_FLG_SPL_INIT)) {
-		if (spl_init())
-			hang();
+		ret = spl_init();
+		if (ret)
+			return log_msg_ret("init", ret);
 	}
 #if !defined(CONFIG_PPC) && !defined(CONFIG_ARCH_MX6)
 	/*
@@ -754,10 +754,9 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	if (CONFIG_IS_ENABLED(BLOBLIST)) {
 		ret = bloblist_init();
 		if (ret) {
-			debug("%s: Failed to set up bloblist: ret=%d\n",
-			      __func__, ret);
+			log_debug("Failed to set up bloblist: ret=%d\n", ret);
 			puts(SPL_TPL_PROMPT "Cannot set up bloblist\n");
-			hang();
+			return log_msg_ret("bl", ret);
 		}
 	}
 	if (CONFIG_IS_ENABLED(HANDOFF)) {
@@ -766,7 +765,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		ret = setup_spl_handoff();
 		if (ret) {
 			puts(SPL_TPL_PROMPT "Cannot set up SPL handoff\n");
-			hang();
+			return log_msg_ret("ho", ret);
 		}
 	}
 
@@ -794,6 +793,29 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		dm_get_mem(&mem);
 		dm_dump_mem(&mem);
 	}
+
+	return 0;
+}
+
+/**
+ * spl_boot() - Boot into the next U-Boot phase
+ *
+ * Figures out which boot device to use, loads the image and jumps to it
+ *
+ * This function does not return. If something goes wrong, it tries to print a
+ * message, then hangs.
+ */
+static void spl_boot(void)
+{
+	u32 spl_boot_list[] = {
+		BOOT_DEVICE_NONE,
+		BOOT_DEVICE_NONE,
+		BOOT_DEVICE_NONE,
+		BOOT_DEVICE_NONE,
+		BOOT_DEVICE_NONE,
+	};
+	struct spl_image_info spl_image;
+	int ret;
 
 	memset(&spl_image, '\0', sizeof(spl_image));
 #ifdef CONFIG_SYS_SPL_ARGS_ADDR
@@ -878,6 +900,18 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 
 	spl_board_prepare_for_boot();
 	jump_to_image_no_args(&spl_image);
+}
+
+void board_init_r(gd_t *dummy1, ulong dummy2)
+{
+	int ret;
+
+	ret = spl_init_r();
+	if (!ret)
+		spl_boot();
+
+	puts("SPL fail\n");
+	hang();
 }
 
 /*
