@@ -668,7 +668,7 @@ static inline bool spl_show_output(void)
 {
 	return CONFIG_IS_ENABLED(SERIAL) &&
 	    CONFIG_IS_ENABLED(LIBCOMMON_SUPPORT) &&
-	    !IS_ENABLED(CONFIG_SILENT_CONSOLE);
+	    !CONFIG_IS_ENABLED(SILENT_CONSOLE);
 }
 
 /**
