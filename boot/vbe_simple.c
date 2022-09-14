@@ -189,10 +189,26 @@ static int vbe_simple_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	return -EINVAL;
 }
 
+static int vbe_simple_read_file(struct udevice *dev, struct bootflow *bflow,
+				const char *file_path, ulong addr, ulong *sizep)
+{
+	int ret;
+
+	if (vbe_phase() == VBE_PHASE_OS) {
+		ret = bootmeth_common_read_file(dev, bflow, file_path, addr,
+						sizep);
+		if (ret)
+			return log_msg_ret("os", ret);
+	}
+
+	/* To be implemented */
+	return -EINVAL;
+}
+
 static struct bootmeth_ops bootmeth_vbe_simple_ops = {
 	.get_state_desc	= vbe_simple_get_state_desc,
 	.read_bootflow	= vbe_simple_read_bootflow,
-	.read_file	= bootmeth_common_read_file,
+	.read_file	= vbe_simple_read_file,
 };
 
 int vbe_simple_fixup_node(ofnode node, struct simple_state *state)
@@ -310,6 +326,7 @@ static int simple_load_from_image(struct spl_image_info *spl_image,
 		return -ENOENT;
 
 	printf("simple\n");
+	return -ENOENT;
 
 	return 0;
 }
