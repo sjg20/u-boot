@@ -660,6 +660,18 @@ static int spl_load_image(struct spl_image_info *spl_image,
 }
 
 /**
+ * spl_show_output() - Selects whether to show info output in SPL
+ *
+ * Returns: true if info output should be shown, false if not
+ */
+static inline bool spl_show_output(void)
+{
+	return CONFIG_IS_ENABLED(SERIAL) &&
+	    CONFIG_IS_ENABLED(LIBCOMMON_SUPPORT) &&
+	    !IS_ENABLED(CONFIG_SILENT_CONSOLE);
+}
+
+/**
  * boot_from_devices() - Try loading a booting U-Boot from a list of devices
  *
  * @spl_image: Place to put the image details if successful
@@ -682,9 +694,7 @@ static int boot_from_devices(struct spl_image_info *spl_image,
 		if (CONFIG_IS_ENABLED(SHOW_ERRORS))
 			ret = -ENXIO;
 		loader = spl_ll_find_loader(bootdev);
-		if (CONFIG_IS_ENABLED(SERIAL) &&
-		    CONFIG_IS_ENABLED(LIBCOMMON_SUPPORT) &&
-		    !IS_ENABLED(CONFIG_SILENT_CONSOLE)) {
+		if (spl_show_output()) {
 			if (loader)
 				printf("Trying to boot from %s\n",
 				       spl_loader_name(loader));
