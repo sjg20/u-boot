@@ -330,7 +330,7 @@ static int simple_load_from_image(struct spl_image_info *spl_image,
 
 	return 0;
 }
-SPL_LOAD_IMAGE_METHOD("vbe_simple", 5, BOOT_DEVICE_BOARD,
+SPL_LOAD_IMAGE_METHOD("vbe_simple", 5, BOOT_DEVICE_VBE,
 		      simple_load_from_image);
 
 #if CONFIG_IS_ENABLED(OF_REAL)
