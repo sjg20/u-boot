@@ -9,6 +9,7 @@
 #define LOG_CATEGORY LOGC_BOOT
 
 #include <common.h>
+#include <bootdev.h>
 #include <log.h>
 #include <memalign.h>
 #include <part.h>
@@ -323,22 +324,26 @@ static int simple_load_from_image(struct spl_image_info *spl_image,
 				  struct spl_boot_device *bootdev)
 {
 	struct simple_priv *priv;
-	struct udevice *dev;
+	struct udevice *vdev, *bdev;
 	int ret;
 
 	if (!IS_ENABLED(CONFIG_VPL_BUILD))
 		return -ENOENT;
-	dm_dump_tree();
 
-	vbe_find_first_device(&dev);
-	if (!dev)
-		return log_msg_ret("dev", -ENODEV);
-	ret = device_probe(dev);
+	vbe_find_first_device(&vdev);
+	if (!vdev)
+		return log_msg_ret("vd", -ENODEV);
+	log_debug("vbe dev %s\n", vdev->name);
+	ret = device_probe(vdev);
 	if (ret)
 		return log_msg_ret("probe", ret);
 
-	priv = dev_get_priv(dev);
-	printf("simple %s\n", priv->storage);
+	priv = dev_get_priv(vdev);
+	log_debug("simple %s\n", priv->storage);
+	ret = bootdev_find_by_label(priv->storage, &bdev);
+	if (ret)
+		return log_msg_ret("bd", ret);
+	log_debug("bootdev %s\n", bdev->name);
 
 	return -ENOENT;
 
