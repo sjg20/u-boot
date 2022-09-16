@@ -45,6 +45,15 @@ const char *bootflow_state_get_name(enum bootflow_state_t state)
 	return bootflow_state[state];
 }
 
+void bootflow_init(struct bootflow *bflow, struct udevice *bootdev,
+		   struct udevice *meth)
+{
+	memset(bflow, '\0', sizeof(*bflow));
+	bflow->dev = bootdev;
+	bflow->method = meth;
+	bflow->state = BOOTFLOWST_BASE;
+}
+
 int bootflow_first_glob(struct bootflow **bflowp)
 {
 	struct bootstd_priv *std;

@@ -6,6 +6,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_BOOT
 
 #include <common.h>
@@ -206,6 +207,48 @@ static int vbe_simple_read_file(struct udevice *dev, struct bootflow *bflow,
 	return -EINVAL;
 }
 
+static int vbe_simple_read_fw_bootflow(struct udevice *bdev,
+				       struct udevice *meth,
+				       struct bootflow *bflow)
+{
+	ALLOC_CACHE_ALIGN_BUFFER(u8, buf, MMC_MAX_BLOCK_LEN);
+	struct udevice *media = dev_get_parent(bdev);
+	struct simple_priv *priv = dev_get_priv(meth);
+	struct blk_desc *desc;
+	struct udevice *blk;
+	ulong offset, size;
+	int ret;
+
+	log_debug("media=%s\n", media->name);
+	ret = blk_get_from_parent(media, &blk);
+	if (ret)
+		return log_msg_ret("med", ret);
+	log_debug("blk=%s\n", blk->name);
+	desc = dev_get_uclass_plat(blk);
+
+	bootflow_init(bflow, bdev, meth);
+
+	offset = priv->area_start + priv->skip_offset;
+
+	/* read in one block to find the FIT size */
+	log_debug("read\n");
+	ret = blk_read(blk, offset / desc->blksz, 1, buf);
+	if (ret < 0)
+		return log_msg_ret("rd", ret);
+
+	log_debug("fdt\n");
+	ret = fdt_check_header(buf);
+	if (ret < 0)
+		return log_msg_ret("fdt", -EINVAL);
+	size = fdt_totalsize(buf);
+	if (size > priv->area_size)
+		return log_msg_ret("fdt", -E2BIG);
+	bflow->size = size;
+	log_debug("FIT size %lx\n", size);
+
+	return 0;
+}
+
 static struct bootmeth_ops bootmeth_vbe_simple_ops = {
 	.get_state_desc	= vbe_simple_get_state_desc,
 	.read_bootflow	= vbe_simple_read_bootflow,
@@ -323,8 +366,9 @@ static int bootmeth_vbe_simple_bind(struct udevice *dev)
 static int simple_load_from_image(struct spl_image_info *spl_image,
 				  struct spl_boot_device *bootdev)
 {
-	struct simple_priv *priv;
 	struct udevice *vdev, *bdev;
+	struct simple_priv *priv;
+	struct bootflow bflow;
 	int ret;
 
 	if (!IS_ENABLED(CONFIG_VPL_BUILD))
@@ -344,6 +388,13 @@ static int simple_load_from_image(struct spl_image_info *spl_image,
 	if (ret)
 		return log_msg_ret("bd", ret);
 	log_debug("bootdev %s\n", bdev->name);
+
+	ret = vbe_simple_read_fw_bootflow(bdev, vdev, &bflow);
+	log_debug("fw ret=%d\n", ret);
+	if (ret)
+		return log_msg_ret("rd", ret);
+
+	/* To be implemented */
 
 	return -ENOENT;
 
