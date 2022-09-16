@@ -11,13 +11,16 @@
 
 #include <common.h>
 #include <bootdev.h>
-#include <log.h>
-#include <memalign.h>
-#include <part.h>
 #include <bootflow.h>
+#include <bootstage.h>
 #include <bootmeth.h>
 #include <dm.h>
+#include <mapmem.h>
+#include <image.h>
+#include <log.h>
+#include <memalign.h>
 #include <mmc.h>
+#include <part.h>
 #include <spl.h>
 #include <vbe.h>
 #include <version_string.h>
@@ -211,12 +214,15 @@ static int vbe_simple_read_fw_bootflow(struct udevice *bdev,
 				       struct udevice *meth,
 				       struct bootflow *bflow)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(u8, buf, MMC_MAX_BLOCK_LEN);
+	ALLOC_CACHE_ALIGN_BUFFER(u8, sbuf, MMC_MAX_BLOCK_LEN);
 	struct udevice *media = dev_get_parent(bdev);
 	struct simple_priv *priv = dev_get_priv(meth);
+	const char *fit_uname, *fit_uname_config;
+	struct bootm_headers images = {};
+	ulong offset, size, blknum, addr, len, load_addr, num_blks;
 	struct blk_desc *desc;
 	struct udevice *blk;
-	ulong offset, size;
+	void *buf;
 	int ret;
 
 	log_debug("media=%s\n", media->name);
@@ -231,20 +237,37 @@ static int vbe_simple_read_fw_bootflow(struct udevice *bdev,
 	offset = priv->area_start + priv->skip_offset;
 
 	/* read in one block to find the FIT size */
-	log_debug("read\n");
-	ret = blk_read(blk, offset / desc->blksz, 1, buf);
+	blknum =  offset / desc->blksz;
+	log_debug("read at %lx, blknum %lx\n", offset, blknum);
+	ret = blk_read(blk, blknum, 1, &sbuf);
 	if (ret < 0)
 		return log_msg_ret("rd", ret);
 
-	log_debug("fdt\n");
-	ret = fdt_check_header(buf);
+	ret = fdt_check_header(&sbuf);
 	if (ret < 0)
 		return log_msg_ret("fdt", -EINVAL);
-	size = fdt_totalsize(buf);
+	size = fdt_totalsize(&sbuf);
 	if (size > priv->area_size)
 		return log_msg_ret("fdt", -E2BIG);
 	bflow->size = size;
 	log_debug("FIT size %lx\n", size);
+
+	addr = CONFIG_SPL_TEXT_BASE;
+	buf = map_sysmem(addr, size);
+	num_blks = size / desc->blksz;
+	log_debug("read %lx, %lx blocks to %p\n", size, num_blks, buf);
+	ret = blk_read(blk, blknum, num_blks, buf);
+	if (ret < 0)
+		return log_msg_ret("rd", ret);
+
+	fit_uname = NULL;
+	fit_uname_config = NULL;
+	log_debug("loading FIT\n");
+	ret = fit_image_load(&images, addr, &fit_uname, &fit_uname_config,
+			     IH_ARCH_SANDBOX, IH_TYPE_SPL_FIRMWARE,
+			     BOOTSTAGE_ID_FIT_SPL_START, FIT_LOAD_IGNORED,
+			     &load_addr, &len);
+
 
 	return 0;
 }

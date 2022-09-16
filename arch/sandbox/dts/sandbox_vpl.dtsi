@@ -10,11 +10,46 @@
 	u-boot-vpl-elf {
 		no-expanded;
 	};
-	u-boot-spl-elf {
-		no-expanded;
-	};
-	u-boot-elf {
-		no-expanded;
+	fw-update {
+		type = "section";
+		offset = <0x200000>;
+		size = <0xe00000>;
+
+		fit {
+			description = "AP firmware";
+			images {
+				spl {
+					description = "U-Boot SPL";
+					type = "spl_firmware";
+					arch = "sandbox";
+					os = "u-boot";
+					compression = "none";
+
+					u-boot-spl-elf {
+						no-expanded;
+					};
+				};
+				u-boot {
+					description = "U-Boot";
+					type = "firmware";
+					arch = "sandbox";
+					os = "u-boot";
+					compression = "none";
+
+					u-boot-elf {
+						no-expanded;
+					};
+				};
+			};
+
+			configurations {
+				conf-1 {
+					description = "AP Firmware v1";
+					spl_firmware = "spl";
+					firmware = "u-boot";
+				};
+			};
+		};
 	};
 	fdtmap {
 	};

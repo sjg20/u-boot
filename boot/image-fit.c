@@ -1990,6 +1990,8 @@ static const char *fit_get_image_type_property(int type)
 		return FIT_FPGA_PROP;
 	case IH_TYPE_STANDALONE:
 		return FIT_STANDALONE_PROP;
+	case IH_TYPE_SPL_FIRMWARE:
+		return FIT_SPL_FIRMWARE_PROP;
 	}
 
 	return "unknown";

@@ -229,6 +229,7 @@ enum {
 	IH_TYPE_COPRO,			/* Coprocessor Image for remoteproc*/
 	IH_TYPE_SUNXI_EGON,		/* Allwinner eGON Boot Image */
 	IH_TYPE_SUNXI_TOC0,		/* Allwinner TOC0 Boot Image */
+	IH_TYPE_SPL_FIRMWARE,		/* U-Boot SPL firmware */
 
 	IH_TYPE_COUNT,			/* Number of image types */
 };
@@ -954,6 +955,7 @@ int booti_setup(ulong image, ulong *relocated_addr, ulong *size,
 #define FIT_SETUP_PROP		"setup"
 #define FIT_FPGA_PROP		"fpga"
 #define FIT_FIRMWARE_PROP	"firmware"
+#define FIT_SPL_FIRMWARE_PROP	"spl_firmware"
 #define FIT_STANDALONE_PROP	"standalone"
 
 #define FIT_MAX_HASH_LEN	HASH_MAX_DIGEST_SIZE
