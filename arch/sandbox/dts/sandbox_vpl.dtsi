@@ -16,6 +16,7 @@
 		size = <0xe00000>;
 
 		fit {
+			fit,external-offset = <0>;
 			description = "AP firmware";
 			images {
 				spl {
