@@ -97,7 +97,7 @@ static int load_from_image(struct spl_image_info *spl_image,
 
 	next_phase = spl_next_phase();
 	pos = spl_get_image_pos();
-	size = spl_get_image_pos();
+	size = spl_get_image_size();
 	log_info("Reading from pos %lx size %lx\n", pos, size);
 
 	/*

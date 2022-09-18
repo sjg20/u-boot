@@ -2047,8 +2047,7 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 		if (IS_ENABLED(CONFIG_FIT_BEST_MATCH) && !fit_uname_config) {
 			cfg_noffset = fit_conf_find_compat(fit, gd_fdt_blob());
 		} else {
-			cfg_noffset = fit_conf_get_node(fit,
-							fit_uname_config);
+			cfg_noffset = fit_conf_get_node(fit, fit_uname_config);
 		}
 		if (cfg_noffset < 0) {
 			puts("Could not find configuration node\n");

@@ -239,23 +239,24 @@ static int vbe_simple_read_fw_bootflow(struct udevice *bdev,
 	/* read in one block to find the FIT size */
 	blknum =  offset / desc->blksz;
 	log_debug("read at %lx, blknum %lx\n", offset, blknum);
-	ret = blk_read(blk, blknum, 1, &sbuf);
+	ret = blk_read(blk, blknum, 1, sbuf);
 	if (ret < 0)
 		return log_msg_ret("rd", ret);
 
-	ret = fdt_check_header(&sbuf);
+	ret = fdt_check_header(sbuf);
 	if (ret < 0)
 		return log_msg_ret("fdt", -EINVAL);
-	size = fdt_totalsize(&sbuf);
+	size = fdt_totalsize(sbuf);
 	if (size > priv->area_size)
 		return log_msg_ret("fdt", -E2BIG);
-	bflow->size = size;
 	log_debug("FIT size %lx\n", size);
+
 
 	addr = CONFIG_SPL_TEXT_BASE;
 	buf = map_sysmem(addr, size);
-	num_blks = size / desc->blksz;
-	log_debug("read %lx, %lx blocks to %p\n", size, num_blks, buf);
+	num_blks = DIV_ROUND_UP(size, desc->blksz);
+	log_debug("read %lx, %lx blocks to %lx / %p\n", size, num_blks, addr,
+		  buf);
 	ret = blk_read(blk, blknum, num_blks, buf);
 	if (ret < 0)
 		return log_msg_ret("rd", ret);
@@ -267,7 +268,32 @@ static int vbe_simple_read_fw_bootflow(struct udevice *bdev,
 			     IH_ARCH_SANDBOX, IH_TYPE_SPL_FIRMWARE,
 			     BOOTSTAGE_ID_FIT_SPL_START, FIT_LOAD_IGNORED,
 			     &load_addr, &len);
+	if (ret < 0)
+		return log_msg_ret("ld", ret);
+	log_debug("loaded to %lx\n", load_addr);
 
+	/* For FIT external data, read the actual data in */
+	if (load_addr + len > addr + size) {
+		ulong base = ALIGN_DOWN(load_addr, desc->blksz);
+		ulong full_size = load_addr + len - base;
+		void *base_buf;
+
+		blknum = (offset + base - addr) / desc->blksz;
+		num_blks = DIV_ROUND_UP(full_size, desc->blksz);
+		base_buf = map_sysmem(base, full_size);
+		log_debug("read %lx %lx, %lx blocks to %lx / %p\n", blknum,
+			  full_size, num_blks, base, base_buf);
+		ret = blk_read(blk, blknum, num_blks, base_buf);
+		if (ret < 0)
+			return log_msg_ret("rd", ret);
+	}
+
+	bflow->name = strdup(fdt_get_name(buf, ret, NULL));
+	if (!bflow->name)
+		return log_msg_ret("name", -ENOMEM);
+	bflow->blk = blk;
+	bflow->buf = map_sysmem(load_addr, len);
+	bflow->size = len;
 
 	return 0;
 }
@@ -413,13 +439,15 @@ static int simple_load_from_image(struct spl_image_info *spl_image,
 	log_debug("bootdev %s\n", bdev->name);
 
 	ret = vbe_simple_read_fw_bootflow(bdev, vdev, &bflow);
-	log_debug("fw ret=%d\n", ret);
+	log_debug("\nfw ret=%d\n", ret);
 	if (ret)
 		return log_msg_ret("rd", ret);
 
 	/* To be implemented */
-
-	return -ENOENT;
+	spl_image->flags = SPL_SANDBOXF_ARG_IS_BUF;
+	spl_image->arg = bflow.buf;
+	spl_image->size = bflow.size;
+	log_debug("SPL image at %p size %x\n", bflow.buf, bflow.size);
 
 	return 0;
 }

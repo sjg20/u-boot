@@ -12,7 +12,7 @@
 	};
 	fw-update {
 		type = "section";
-		offset = <0x200000>;
+		offset = <0x400000>;
 		size = <0xe00000>;
 
 		fit {
@@ -45,6 +45,7 @@
 
 			configurations {
 				conf-1 {
+					compatible = "sandbox";
 					description = "AP Firmware v1";
 					spl_firmware = "spl";
 					firmware = "u-boot";
