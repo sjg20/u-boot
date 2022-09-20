@@ -5965,6 +5965,63 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertIn('Expected __bss_size symbol in vpl/u-boot-vpl',
                       str(e.exception))
 
+    def testSymbolsElf(self):
+        """Test binman can assign symbols embedded in an ELF file"""
+        if not elf.ELF_TOOLS:
+            self.skipTest('Python elftools not available')
+        self._SetupTplElf('u_boot_binman_syms')
+        self._SetupVplElf('u_boot_binman_syms')
+        self._SetupSplElf('u_boot_binman_syms')
+        data = self._DoReadFileDtb('256_symbols_elf.dts')[0]
+        image_fname = tools.get_output_filename('image.bin')
+
+        image = control.images['image']
+        entries = image.GetEntries()
+
+        for entry in entries.values():
+            # No symbols in u-boot and it has faked contents anyway
+            if entry.name == 'u-boot':
+                continue
+            edata = data[entry.image_pos:entry.image_pos + entry.size]
+            efname = tools.get_output_filename(f'edata-{entry.name}')
+            tools.write_file(efname, edata)
+
+            syms = elf.GetSymbolFileOffset(efname, ['_binman_u_boot'])
+            re_name = re.compile('_binman_(u_boot_(.*))_prop_(.*)')
+            for name, sym in syms.items():
+                msg = 'test'
+                val = elf.GetSymbolValue(sym, edata, msg)
+                entry_m = re_name.match(name)
+                if entry_m:
+                    ename, prop = entry_m.group(1), entry_m.group(3)
+                entry, entry_name, prop_name = image.LookupEntry(entries,
+                                                                 name, msg)
+                if prop_name == 'offset':
+                    expect_val = entry.offset
+                elif prop_name == 'image_pos':
+                    expect_val = entry.image_pos
+                elif prop_name == 'size':
+                    expect_val = entry.size
+                self.assertEqual(expect_val, val)
+
+    def testSymbolsElfBad(self):
+        """Check error when trying to write symbols without the elftools lib"""
+        if not elf.ELF_TOOLS:
+            self.skipTest('Python elftools not available')
+        self._SetupTplElf('u_boot_binman_syms')
+        self._SetupVplElf('u_boot_binman_syms')
+        self._SetupSplElf('u_boot_binman_syms')
+        try:
+            elf.ELF_TOOLS = False
+            with self.assertRaises(ValueError) as exc:
+                self._DoReadFileDtb('256_symbols_elf.dts')
+        finally:
+            elf.ELF_TOOLS = True
+        self.assertIn(
+            "Section '/binman': entry '/binman/u-boot-spl-elf': "
+            'Cannot write symbols to an ELF file without Python elftools',
+            str(exc.exception))
+
 
 if __name__ == "__main__":
     unittest.main()
