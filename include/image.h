@@ -691,9 +691,10 @@ int boot_get_fdt_fit(struct bootm_headers *images, ulong addr,
  *			name (e.g. "conf-1") or NULL to use the default. On
  *			exit points to the selected configuration name.
  * @param arch		Expected architecture (IH_ARCH_...)
- * @param image_type	Required image type (IH_TYPE_...). If this is
+ * @param image_ph_type	Required image type (IH_TYPE_...). If this is
  *			IH_TYPE_KERNEL then we allow IH_TYPE_KERNEL_NOLOAD
- *			also.
+ *			also. If a phase is required, this is included also,
+ *			see image_phase_and_type()
  * @param bootstage_id	ID of starting bootstage to use for progress updates.
  *			This will be added to the BOOTSTAGE_SUB values when
  *			calling bootstage_mark()
@@ -704,7 +705,7 @@ int boot_get_fdt_fit(struct bootm_headers *images, ulong addr,
  */
 int fit_image_load(struct bootm_headers *images, ulong addr,
 		   const char **fit_unamep, const char **fit_uname_configp,
-		   int arch, int image_type, int bootstage_id,
+		   int arch, int image_ph_type, int bootstage_id,
 		   enum fit_load_op load_op, ulong *datap, ulong *lenp);
 
 /**
@@ -1210,6 +1211,8 @@ int fit_check_format(const void *fit, ulong size);
  * fit_conf_find_compat
  * @fit: pointer to the FIT format image header
  * @fdt: pointer to the device tree to compare against
+ * @phase: U-Boot phase to look for. If not IH_PHASE_NONE then only
+ * configurations with the given phase will be considered
  *
  * fit_conf_find_compat() attempts to find the configuration whose fdt is the
  * most compatible with the passed in device tree.
@@ -1249,7 +1252,8 @@ int fit_check_format(const void *fit, ulong size);
  *     offset to the configuration to use if one was found
  *     -1 otherwise
  */
-int fit_conf_find_compat(const void *fit, const void *fdt);
+int fit_conf_find_compat(const void *fit, const void *fdt,
+			 enum image_phase_t phase);
 
 /**
  * fit_conf_get_node - get node offset for configuration of a given unit name
