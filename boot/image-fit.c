@@ -803,6 +803,40 @@ int fit_image_get_comp(const void *fit, int noffset, uint8_t *comp)
 	return 0;
 }
 
+/**
+ * fit_image_get_phase() - get the phase for a configuration node
+ * @fit: pointer to the FIT format image header
+ * @offset: configuration-node offset
+ * @phasep: returns the phase
+ *
+ * Finds the phase property in a given configuration node. If the property is
+ * found, its (string) value is translated to the numeric id which is returned
+ * to the caller.
+ *
+ * Returns: 0 on success, -ENOENT if missing, -EINVAL for invalid value
+ */
+int fit_image_get_phase(const void *fit, int offset, enum image_phase_t *phasep)
+{
+	const void *data;
+	int len, ret;
+
+	/* Get phase name from property data */
+	data = fdt_getprop(fit, offset, FIT_PHASE_PROP, &len);
+	if (!data) {
+		fit_get_debug(fit, offset, FIT_PHASE_PROP, len);
+		*phasep = 0;
+		return -ENOENT;
+	}
+
+	/* Translate phase name to id */
+	ret = genimg_get_phase_id(data);
+	if (ret < 0)
+		return ret;
+	*phasep = ret;
+
+	return 0;
+}
+
 static int fit_image_get_address(const void *fit, int noffset, char *name,
 			  ulong *load)
 {
@@ -1687,7 +1721,8 @@ int fit_check_format(const void *fit, ulong size)
 	return 0;
 }
 
-int fit_conf_find_compat(const void *fit, const void *fdt)
+int fit_conf_find_compat(const void *fit, const void *fdt,
+			 enum image_phase_t phase)
 {
 	int ndepth = 0;
 	int noffset, confs_noffset, images_noffset;
@@ -1725,6 +1760,27 @@ int fit_conf_find_compat(const void *fit, const void *fdt)
 
 		if (ndepth > 1)
 			continue;
+
+		if (phase) {
+			enum image_phase_t conf_phase;
+			int ret;
+
+			ret = fit_image_get_phase(fit, noffset, &conf_phase);
+			if (ret == -EINVAL) {
+				log_debug("Invalid phase in node '%s'\n",
+					  fdt_get_name(fit, noffset, NULL));
+				continue;
+			} else if (ret) {
+				log_debug("Missing phase in node '%s'\n",
+					  fdt_get_name(fit, noffset, NULL));
+				continue;
+			} else if (conf_phase != phase) {
+				log_debug("Phase %s mismatch in node '%s'\n",
+					  genimg_get_phase_name(conf_phase),
+					  fdt_get_name(fit, noffset, NULL));
+				continue;
+			}
+		}
 
 		/* If there's a compat property in the config node, use that. */
 		if (fdt_getprop(fit, noffset, "compatible", NULL)) {
@@ -1954,9 +2010,10 @@ static const char *fit_get_image_type_property(int type)
 
 int fit_image_load(struct bootm_headers *images, ulong addr,
 		   const char **fit_unamep, const char **fit_uname_configp,
-		   int arch, int image_type, int bootstage_id,
+		   int arch, int ph_type, int bootstage_id,
 		   enum fit_load_op load_op, ulong *datap, ulong *lenp)
 {
+	int image_type = image_ph_type(ph_type);
 	int cfg_noffset, noffset;
 	const char *fit_uname;
 	const char *fit_uname_config;
@@ -2000,10 +2057,10 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 		 */
 		bootstage_mark(bootstage_id + BOOTSTAGE_SUB_NO_UNIT_NAME);
 		if (IS_ENABLED(CONFIG_FIT_BEST_MATCH) && !fit_uname_config) {
-			cfg_noffset = fit_conf_find_compat(fit, gd_fdt_blob());
+			cfg_noffset = fit_conf_find_compat(fit, gd_fdt_blob(),
+						image_ph_phase(ph_type));
 		} else {
-			cfg_noffset = fit_conf_get_node(fit,
-							fit_uname_config);
+			cfg_noffset = fit_conf_get_node(fit, fit_uname_config);
 		}
 		if (cfg_noffset < 0) {
 			puts("Could not find configuration node\n");
