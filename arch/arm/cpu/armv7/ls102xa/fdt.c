@@ -146,7 +146,7 @@ void ft_cpu_setup(void *blob, struct bd_info *bd)
 	 * Since second uboot binary has a head, that space need to be
 	 * reserved either(assuming its size is less than 0x1000).
 	 */
-	off = fdt_add_mem_rsv(blob, CONFIG_SYS_TEXT_BASE - UBOOT_HEAD_LEN,
+	off = fdt_add_mem_rsv(blob, CONFIG_TEXT_BASE - UBOOT_HEAD_LEN,
 			CONFIG_SYS_MONITOR_LEN + CONFIG_SYS_SPL_MALLOC_SIZE +
 			UBOOT_HEAD_LEN);
 	if (off < 0)
