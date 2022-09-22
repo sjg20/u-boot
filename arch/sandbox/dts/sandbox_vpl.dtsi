@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Devicetree file for VPL (Verifying Program Loader)
+ */
+
+&binman {
+	u-boot-tpl-elf {
+		no-expanded;
+	};
+	u-boot-vpl-elf {
+		no-expanded;
+	};
+	fw-update {
+		type = "section";
+
+		/*
+		 * provide plenty of space for ELF files with debug info so that
+		 * gdb can be used
+		 */
+		offset = <0x400000>;
+		size = <0xdffc00>;
+
+		fit {
+			fit,external-offset = <0>;
+			description = "AP firmware";
+			images {
+				spl {
+					description = "U-Boot SPL";
+					type = "firmware";
+					arch = "sandbox";
+					os = "u-boot";
+					compression = "none";
+
+					u-boot-spl-elf {
+						no-expanded;
+					};
+				};
+				u-boot {
+					description = "U-Boot";
+					type = "firmware";
+					arch = "sandbox";
+					os = "u-boot";
+					compression = "none";
+
+					u-boot-elf {
+						no-expanded;
+					};
+				};
+			};
+
+			configurations {
+				conf-spl-1 {
+					compatible = "sandbox";
+					description = "AP Firmware v1 (SPL)";
+					phase = "spl";
+					firmware = "spl";
+				};
+				conf-1 {
+					compatible = "sandbox";
+					description = "AP Firmware v1";
+					phase = "u-boot";
+					firmware = "u-boot";
+				};
+			};
+		};
+	};
+	state {
+		type = "fill";
+		size = <0x200>;
+	};
+	version {
+		type = "text";
+		text = "1.2.3";
+		size = <0x200>;
+	};
+	fdtmap {
+	};
+};
