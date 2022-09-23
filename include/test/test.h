@@ -22,6 +22,7 @@
  * @force_fail_alloc: Force all memory allocs to fail
  * @skip_post_probe: Skip uclass post-probe processing
  * @runs_per_test: Number of times to run each test (typically 1)
+ * @force_run: true to run tests marked with the UT_TESTF_MANUAL flag
  * @fdt_chksum: crc8 of the device tree contents
  * @fdt_copy: Copy of the device tree
  * @fdt_size: Size of the device-tree copy
@@ -42,6 +43,7 @@ struct unit_test_state {
 	int force_fail_alloc;
 	int skip_post_probe;
 	int runs_per_test;
+	bool force_run;
 	uint fdt_chksum;
 	void *fdt_copy;
 	uint fdt_size;
@@ -63,6 +65,12 @@ enum {
 	/* do extra driver model init and uninit */
 	UT_TESTF_DM		= BIT(6),
 	UT_TESTF_OTHER_FDT	= BIT(7),	/* read in other device tree */
+	/*
+	 * Only run if explicitly requested with 'ut -f <suite> <test>'. The
+	 * test name must end in "_norun" so that pytest detects this also,
+	 * since it cannot access the flags.
+	 */
+	UT_TESTF_MANUAL		= BIT(8),
 };
 
 /**
