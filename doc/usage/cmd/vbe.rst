@@ -8,6 +8,7 @@ Synopsis
 
     vbe list
     vbe select <name_or_id>
+    vbe state
 
 Description
 -----------
@@ -49,6 +50,13 @@ device name can be provided.
 Without any arguments, any selected device is deselected.
 
 
+vbe state
+~~~~~~~~~
+
+This shows the current state of VBE. At present this is just a list of the
+U-Boot phases which booted using VBE.
+
+
 Examples
 --------
 
@@ -81,6 +89,11 @@ This shows selecting a VBE device by its name::
       2  *    firmware0        vbe_simple      VBE simple
     ---  ---  --------------   --------------  -----------
     =>
+
+This shows the state after a successful boot into U-Boot proper, using VBE::
+
+   => vbe state
+   Phases: VPL SPL
 
 
 Return value

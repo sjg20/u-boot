@@ -7,7 +7,9 @@
  */
 
 #include <common.h>
+#include <bloblist.h>
 #include <dm.h>
+#include <spl.h>
 #include <vbe.h>
 #include <test/suites.h>
 #include <test/ut.h>
@@ -67,3 +69,29 @@ static int vbe_cmd_select(struct unit_test_state *uts)
 	return 0;
 }
 BOOTSTD_TEST(vbe_cmd_select, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+
+/* Check the 'vbe state' command */
+static int vbe_cmd_state(struct unit_test_state *uts)
+{
+	struct vbe_handoff *handoff;
+
+	console_record_reset_enable();
+	ut_asserteq(CMD_RET_FAILURE, run_command("vbe state", 0));
+	ut_assert_nextline("No VBE state");
+	ut_assert_console_end();
+
+	ut_assertok(bloblist_ensure_size(BLOBLISTT_VBE,
+					 sizeof(struct vbe_handoff), 0,
+					 (void **)&handoff));
+	ut_assertok(run_command("vbe state", 0));
+	ut_assert_nextline("Phases: (none)");
+	ut_assert_console_end();
+
+	handoff->phases = 1 << PHASE_VPL | 1 << PHASE_SPL;
+	ut_assertok(run_command("vbe state", 0));
+	ut_assert_nextline("Phases: VPL SPL");
+	ut_assert_console_end();
+
+	return 0;
+}
+BOOTSTD_TEST(vbe_cmd_state, 0);
