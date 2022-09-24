@@ -34,6 +34,7 @@ stages:
     # If we've been asked to use clang only do one configuration.
     - export UBOOT_TRAVIS_BUILD_DIR=/tmp/${TEST_PY_BD}
     - echo BUILD_ENV ${BUILD_ENV}
+    - pip install pyelftools
     - tools/buildman/buildman -o ${UBOOT_TRAVIS_BUILD_DIR} -w -E -W -e
         --board ${TEST_PY_BD} ${OVERRIDE}
     - cp ~/grub_x86.efi $UBOOT_TRAVIS_BUILD_DIR/
@@ -113,6 +114,7 @@ build all PowerPC platforms:
 build all other platforms:
   stage: world build
   script:
+    - pip install pyelftools
     - ret=0;
       ./tools/buildman/buildman -o /tmp -P -E -W -x arm,powerpc || ret=$?;
       if [[ $ret -ne 0 ]]; then
