@@ -1,14 +1,17 @@
 # SPDX-License-Identifier: GPL-2.0+
 # Copyright 2022 Google LLC
-#
-# Test addition of VBE
+
+"""Test VBE OS requests are processed correctly
+
+These should result in additions (fixups) to the device tree.
+"""
 
 import pytest
 
 import fit_util
 
 # Define a base ITS which we can adjust using % and a dictionary
-base_its = '''
+BASE_ITS = '''
 /dts-v1/;
 
 / {
@@ -64,7 +67,7 @@ base_its = '''
 '''
 
 # Define a base FDT - currently we don't use anything in this
-base_fdt = '''
+BASE_FDT = '''
 /dts-v1/;
 
 / {
@@ -77,7 +80,7 @@ base_fdt = '''
 # then run the 'bootm' command, then run the unit test which checks that the
 # working tree has the required things filled in according to the OS requests
 # above (random, aslr2, etc.)
-base_script = '''
+BASE_SCRIPT = '''
 host load hostfs 0 %(fit_addr)x %(fit)s
 fdt addr %(fit_addr)x
 bootm start %(fit_addr)x
@@ -91,9 +94,10 @@ ut bootstd vbe_test_fixup
 @pytest.mark.boardspec('sandbox_flattree')
 @pytest.mark.requiredtool('dtc')
 def test_vbe(u_boot_console):
+    """Set up a FIT, boot it and check the fixups happened"""
     cons = u_boot_console
     kernel = fit_util.make_kernel(cons, 'vbe-kernel.bin', 'kernel')
-    fdt = fit_util.make_dtb(cons, base_fdt, 'vbe-fdt')
+    fdt = fit_util.make_dtb(cons, BASE_FDT, 'vbe-fdt')
     fdt_out = fit_util.make_fname(cons, 'fdt-out.dtb')
 
     params = {
@@ -109,10 +113,10 @@ def test_vbe(u_boot_console):
         'compression' : 'none',
     }
     mkimage = cons.config.build_dir + '/tools/mkimage'
-    fit = fit_util.make_fit(cons, mkimage, base_its, params, 'test-vbe.fit',
-                            base_fdt)
+    fit = fit_util.make_fit(cons, mkimage, BASE_ITS, params, 'test-vbe.fit',
+                            BASE_FDT)
     params['fit'] = fit
-    cmd = base_script % params
+    cmd = BASE_SCRIPT % params
 
     with cons.log.section('Kernel load'):
         output = cons.run_command_list(cmd.splitlines())
