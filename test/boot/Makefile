@@ -9,3 +9,4 @@ ifdef CONFIG_OF_LIVE
 obj-$(CONFIG_BOOTMETH_VBE_SIMPLE) += vbe_simple.o
 endif
 obj-$(CONFIG_BOOTMETH_VBE) += vbe_fixup.o
+obj-$(CONFIG_CMD_VBE) += vbe.o

@@ -68,6 +68,7 @@ Shell commands
    cmd/size
    cmd/true
    cmd/ums
+   cmd/vbe
    cmd/wdt
 
 Booting OS
