@@ -27,39 +27,32 @@
 				spl {
 					description = "U-Boot SPL";
 					type = "firmware";
+					phase = "spl";
 					arch = "sandbox";
 					os = "u-boot";
 					compression = "none";
 
 					u-boot-spl-elf {
-						no-expanded;
 					};
 				};
 				u-boot {
 					description = "U-Boot";
 					type = "firmware";
+					phase = "u-boot";
 					arch = "sandbox";
 					os = "u-boot";
 					compression = "none";
 
 					u-boot-elf {
-						no-expanded;
 					};
 				};
 			};
 
 			configurations {
-				conf-spl-1 {
-					compatible = "sandbox";
-					description = "AP Firmware v1 (SPL)";
-					phase = "spl";
-					firmware = "spl";
-				};
 				conf-1 {
 					compatible = "sandbox";
 					description = "AP Firmware v1";
-					phase = "u-boot";
-					firmware = "u-boot";
+					firmware = "spl", "u-boot";
 				};
 			};
 		};
