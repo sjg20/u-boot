@@ -566,6 +566,10 @@ config VPL_BOOTMETH_VBE_SIMPLE_FW
 
 endif # BOOTMETH_VBE
 
+config EXPO
+	bool "Support for expos - groups of scenes displaying a UI"
+	default y if BOOTMETH_VBE
+
 config BOOTMETH_SANDBOX
 	def_bool y
 	depends on SANDBOX

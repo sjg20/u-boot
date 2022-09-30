@@ -382,6 +382,34 @@ static int do_bootflow_boot(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	return 0;
 }
+
+static int do_bootflow_menu(struct cmd_tbl *cmdtp, int flag, int argc,
+			    char *const argv[])
+{
+	struct bootstd_priv *std;
+	struct bootflow *bflow;
+	int ret;
+
+	ret = bootstd_get_priv(&std);
+	if (ret)
+		return CMD_RET_FAILURE;
+
+	ret = bootflow_menu_run(std, &bflow);
+	if (ret) {
+		if (ret == -EAGAIN)
+			printf("Nothing chosen\n");
+		else
+			printf("Menu failed (err=%d)\n", ret);
+
+		return CMD_RET_FAILURE;
+	}
+
+	ret = bootflow_run_boot(NULL, bflow);
+	if (ret)
+		return CMD_RET_FAILURE;
+
+	return 0;
+}
 #endif /* CONFIG_CMD_BOOTFLOW_FULL */
 
 #ifdef CONFIG_SYS_LONGHELP
@@ -391,7 +419,8 @@ static char bootflow_help_text[] =
 	"bootflow list [-e]             - list scanned bootflows (-e errors)\n"
 	"bootflow select [<num>|<name>] - select a bootflow\n"
 	"bootflow info [-d]             - show info on current bootflow (-d dump bootflow)\n"
-	"bootflow boot                  - boot current bootflow (or first available if none selected)";
+	"bootflow boot                  - boot current bootflow (or first available if none selected)\n"
+	"bootflow menu                  - show a menu of available bootflows";
 #else
 	"scan - boot first available bootflow\n";
 #endif
@@ -403,6 +432,7 @@ U_BOOT_CMD_WITH_SUBCMDS(bootflow, "Boot flows", bootflow_help_text,
 	U_BOOT_SUBCMD_MKENT(list, 2, 1, do_bootflow_list),
 	U_BOOT_SUBCMD_MKENT(select, 2, 1, do_bootflow_select),
 	U_BOOT_SUBCMD_MKENT(info, 2, 1, do_bootflow_info),
-	U_BOOT_SUBCMD_MKENT(boot, 1, 1, do_bootflow_boot)
+	U_BOOT_SUBCMD_MKENT(boot, 1, 1, do_bootflow_boot),
+	U_BOOT_SUBCMD_MKENT(boot, 1, 1, do_bootflow_menu),
 #endif
 );
