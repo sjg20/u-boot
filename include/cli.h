@@ -7,6 +7,8 @@
 #ifndef __CLI_H
 #define __CLI_H
 
+#include <stdbool.h>
+
 /**
  * struct cli_ch_state - state information for reading cmdline characters
  *
@@ -211,8 +213,11 @@ void cli_ch_init(struct cli_ch_state *cch);
  *    } while (!done)
  *
  * @cch: Current state
- * @ichar: Input character to process, or 0 if none
- * Returns: Resulting input character after processing, 0 if none
+ * @ichar: Input character to process, or 0 if none, or -ETIMEDOUT if no
+ * character has been received within a small number of milliseconds (this
+ * cancels any existing escape sequence)
+ * Returns: Resulting input character after processing, 0 if none, '\e' if
+ * an existing escape sequence was cancelled
  */
 int cli_ch_process(struct cli_ch_state *cch, int ichar);
 

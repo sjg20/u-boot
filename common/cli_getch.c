@@ -146,6 +146,19 @@ int cli_ch_process(struct cli_ch_state *cch, int ichar)
 			cch->emit_upto = 0;
 		}
 		return 0;
+	} else if (ichar == -ETIMEDOUT) {
+		/*
+		 * If we are in an escape sequence but nothing has followed the
+		 * Escape character, then the user probably just pressed the
+		 * Escape key. Return it and clear the sequence.
+		 */
+		if (cch->esc_len) {
+			cch->esc_len = 0;
+			return '\e';
+		}
+
+		/* Otherwise there is nothing to return */
+		return 0;
 	}
 
 	if (ichar == '\n' || ichar == '\r')
