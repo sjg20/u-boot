@@ -191,6 +191,8 @@ void cli_ch_init(struct cli_ch_state *cch);
  * If @ichar is a valid character and there is no escape sequence in progress,
  * then it is returned as is.
  *
+ * If the Enter key is pressed, '\n' is returned.
+ *
  * Usage should be like this::
  *
  *    struct cli_ch_state cch;
