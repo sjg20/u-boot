@@ -8,6 +8,19 @@
 #define __CLI_H
 
 /**
+ * struct cli_ch_state - state information for reading cmdline characters
+ *
+ * @esc_len: Number of escape characters read so far
+ * @esc_save: Escape characters collected so far
+ * @emit_upto: Next character to emit from esc_save (0 if not emitting)
+ */
+struct cli_ch_state {
+	int esc_len;
+	char esc_save[8];
+	int emit_upto;
+};
+
+/**
  * Go into the command loop
  *
  * This will return if we get a timeout waiting for a command. See
@@ -154,5 +167,51 @@ void cli_loop(void);
 void cli_init(void);
 
 #define endtick(seconds) (get_ticks() + (uint64_t)(seconds) * get_tbclk())
+#define CTL_CH(c)		((c) - 'a' + 1)
+
+/**
+ * cli_ch_init() - Set up the initial state to process input characters
+ *
+ * @cch: State to set up
+ */
+void cli_ch_init(struct cli_ch_state *cch);
+
+/**
+ * cli_ch_process() - Process an input character
+ *
+ * When @ichar is 0, this function returns any characters from an invalid escape
+ * sequence which are still pending in the buffer
+ *
+ * Otherwise it processes the input character. If it is an escape character,
+ * then an escape sequence is started and the function returns 0. If we are in
+ * the middle of an escape sequence, the character is processed and may result
+ * in returning 0 (if more characters are needed) or a valid character (if
+ * @ichar finishes the sequence).
+ *
+ * If @ichar is a valid character and there is no escape sequence in progress,
+ * then it is returned as is.
+ *
+ * Usage should be like this::
+ *
+ *    struct cli_ch_state cch;
+ *
+ *    cli_ch_init(cch);
+ *    do
+ *       {
+ *       int ichar;
+ *
+         ichar = cli_ch_process(cch, 0);
+ *       if (!ichar) {
+ *          ch = getchar();
+ *          ichar = cli_ch_process(cch, ichar);
+ *       }
+ *       (handle the ichar character)
+ *    } while (!done)
+ *
+ * @cch: Current state
+ * @ichar: Input character to process, or 0 if none
+ * Returns: Resulting input character after processing, 0 if none
+ */
+int cli_ch_process(struct cli_ch_state *cch, int ichar);
 
 #endif
