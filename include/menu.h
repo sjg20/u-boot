@@ -53,6 +53,8 @@ enum bootmenu_key {
 	BKEY_PLUS,
 	BKEY_MINUS,
 	BKEY_SPACE,
+
+	BKEY_COUNT,
 };
 
 /**
@@ -100,5 +102,7 @@ enum bootmenu_key bootmenu_autoboot_loop(struct bootmenu_data *menu,
  */
 enum bootmenu_key bootmenu_loop(struct bootmenu_data *menu,
 				struct cli_ch_state *cch);
+
+enum bootmenu_key bootmenu_conv_key(int ichar);
 
 #endif /* __MENU_H__ */

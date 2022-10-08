@@ -11,8 +11,12 @@
 #include <common.h>
 #include <bootflow.h>
 #include <bootstd.h>
+#include <cli.h>
 #include <dm.h>
 #include <expo.h>
+#include <menu.h>
+#include <watchdog.h>
+#include <linux/delay.h>
 
 enum {
 	START,
@@ -79,12 +83,15 @@ int bootflow_menu_new(struct expo **expp)
 
 int bootflow_menu_run(struct bootstd_priv *std, struct bootflow **bflowp)
 {
+	struct cli_ch_state s_cch, *cch = &s_cch;
 	struct bootflow *sel_bflow;
 	struct udevice *dev;
 	struct expo *exp;
 	uint sel_id;
 	bool done;
 	int ret;
+
+	cli_ch_init(cch);
 
 	sel_bflow = NULL;
 	*bflowp = NULL;
@@ -108,13 +115,34 @@ int bootflow_menu_run(struct bootstd_priv *std, struct bootflow **bflowp)
 	done = false;
 	do {
 		struct expo_action act;
-		int key;
+		int ichar, key;
 
 		ret = expo_render(exp);
 		if (ret)
 			break;
 
-		key = getchar();
+		ichar = cli_ch_process(cch, 0);
+		if (!ichar) {
+			while (!ichar && !tstc()) {
+				WATCHDOG_RESET();
+				mdelay(10);
+				ichar = cli_ch_process(cch, -ETIMEDOUT);
+			}
+			if (!ichar) {
+				ichar = getchar();
+				ichar = cli_ch_process(cch, ichar);
+			}
+		}
+
+		key = 0;
+		if (ichar) {
+			key = bootmenu_conv_key(ichar);
+			if (key == BKEY_NONE)
+				key = ichar;
+		}
+		if (!key)
+			continue;
+
 		printf("%d\n", key);
 
 		ret = expo_send_key(exp, key);

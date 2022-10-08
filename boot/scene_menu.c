@@ -6,11 +6,15 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
+#define LOG_CATEGORY	LOGC_BOOT
+
 #include <common.h>
 #include <dm.h>
 #include <expo.h>
 #include <malloc.h>
 #include <mapmem.h>
+#include <menu.h>
 #include <video.h>
 #include <video_console.h>
 #include <linux/input.h>
@@ -150,11 +154,14 @@ int scene_menu_send_key(struct scene_obj_menu *menu, int key,
 	struct scene_menuitem *item, *cur;
 
 	cur = NULL;
-	list_for_each_entry(item, &menu->item_head, sibling) {
-		/* select an item if not done already */
-		if (menu->cur_item_id == item->id) {
-			cur = item;
-			break;
+
+	if (!list_empty(&menu->item_head)) {
+		list_for_each_entry(item, &menu->item_head, sibling) {
+			/* select an item if not done already */
+			if (menu->cur_item_id == item->id) {
+				cur = item;
+				break;
+			}
 		}
 	}
 
@@ -162,25 +169,29 @@ int scene_menu_send_key(struct scene_obj_menu *menu, int key,
 		return -ENOTTY;
 
 	switch (key) {
-	case KEY_UP:
-		if (item != (struct scene_menuitem *)menu->item_head.next) {
+	case BKEY_UP:
+		if (item != list_first_entry(&menu->item_head,
+					     struct scene_menuitem, sibling)) {
 			item = list_entry(item->sibling.prev,
 					  struct scene_menuitem, sibling);
 			event->type = EXPOACT_POINT;
 			event->select.id = item->id;
+			log_debug("up to item %d\n", event->select.id);
 		}
 		break;
-	case KEY_DOWN:
+	case BKEY_DOWN:
 		if (!list_is_last(&item->sibling, &menu->item_head)) {
 			item = list_entry(item->sibling.next,
 					  struct scene_menuitem, sibling);
 			event->type = EXPOACT_POINT;
 			event->select.id = item->id;
+			log_debug("down to item %d\n", event->select.id);
 		}
 		break;
-	case KEY_ENTER:
+	case BKEY_SELECT:
 		event->type = EXPOACT_SELECT;
 		event->select.id = item->id;
+		log_debug("select item %d\n", event->select.id);
 		break;
 	}
 

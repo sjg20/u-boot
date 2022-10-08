@@ -139,6 +139,7 @@ int cli_ch_process(struct cli_ch_state *cch, int ichar)
 	 * wants to check if there are more characters saved in the escape
 	 * sequence
 	 */
+// 	printf("cch->esc_len=%d, ichar=%d\n", cch->esc_len, ichar);
 	if (!ichar) {
 		if (cch->emit_upto) {
 			if (cch->emit_upto < cch->esc_len)
