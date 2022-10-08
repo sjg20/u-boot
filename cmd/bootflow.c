@@ -433,6 +433,6 @@ U_BOOT_CMD_WITH_SUBCMDS(bootflow, "Boot flows", bootflow_help_text,
 	U_BOOT_SUBCMD_MKENT(select, 2, 1, do_bootflow_select),
 	U_BOOT_SUBCMD_MKENT(info, 2, 1, do_bootflow_info),
 	U_BOOT_SUBCMD_MKENT(boot, 1, 1, do_bootflow_boot),
-	U_BOOT_SUBCMD_MKENT(boot, 1, 1, do_bootflow_menu),
+	U_BOOT_SUBCMD_MKENT(menu, 1, 1, do_bootflow_menu),
 #endif
 );

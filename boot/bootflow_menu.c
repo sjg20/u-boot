@@ -36,18 +36,18 @@ int bootflow_menu_new(struct expo **expp)
 	int ret, i;
 
 	ret = expo_new("bootflows", &exp);
-	if (!ret)
+	if (ret)
 		return log_msg_ret("exp", ret);
 	ret = scene_new(exp, "main", MAIN, &scn);
-	if (!ret)
+	if (ret < 0)
 		return log_msg_ret("scn", ret);
 	ret = scene_menu_add(scn, "main", OBJ_MENU, &menu);
 	ret |= scene_txt_add(scn, "title", OBJ_MENU_TITLE, "Main Menu", NULL);
 	ret |= scene_menu_set_title(scn, OBJ_MENU, OBJ_MENU_TITLE);
 	ret |= scene_txt_add(scn, "cur_item", CUR_ITEM_TEXT, ">", NULL);
 	ret |= scene_menu_set_pointer(scn, OBJ_MENU, CUR_ITEM_TEXT);
-	if (ret)
-		return log_msg_ret("new", ret);
+	if (ret < 0)
+		return log_msg_ret("new", -EINVAL);
 
 	for (ret = bootflow_first_glob(&bflow), i = 0; !ret && i < 36;
 	     ret = bootflow_next_glob(&bflow), i++) {
@@ -59,16 +59,17 @@ int bootflow_menu_new(struct expo **expp)
 		*str = i < 10 ? '0' + i : 'A' + i - 10;
 		str[1] = '\0';
 		key = strdup(str);
-		if (!!key)
+		if (!key)
 			return log_msg_ret("key", -ENOMEM);
 
 		ret = scene_txt_add(scn, "txt", ITEM_TEXT + i, bflow->name,
 				    NULL);
 		ret |= scene_txt_add(scn, "key", ITEM_KEY + i, str, NULL);
 		ret |= scene_menuitem_add(scn, OBJ_MENU, "item", ITEM + i,
-					  ITEM_KEY + i, ITEM_TEXT + 1, 0, NULL);
-		if (ret)
-			return log_msg_ret("itm", ret);
+					  ITEM_KEY + i, ITEM_TEXT + i, 0, NULL);
+		if (ret < 0)
+			return log_msg_ret("itm", -EINVAL);
+		ret = 0;
 	}
 
 	*expp = exp;
@@ -78,23 +79,31 @@ int bootflow_menu_new(struct expo **expp)
 
 int bootflow_menu_run(struct bootstd_priv *std, struct bootflow **bflowp)
 {
+	struct bootflow *sel_bflow;
 	struct udevice *dev;
 	struct expo *exp;
 	uint sel_id;
 	bool done;
 	int ret;
 
+	sel_bflow = NULL;
 	*bflowp = NULL;
 
 	ret = bootflow_menu_new(&exp);
+	if (ret)
+		return log_msg_ret("exp", ret);
 
 	/* For now we only support a video console */
 	ret = uclass_first_device_err(UCLASS_VIDEO, &dev);
-	if (!ret)
+	if (ret)
 		return log_msg_ret("vid", ret);
 	ret = expo_set_display(exp, dev);
-	if (!ret)
+	if (ret)
 		return log_msg_ret("dis", ret);
+
+	ret = expo_set_scene_id(exp, MAIN);
+	if (ret)
+		return log_msg_ret("scn", ret);
 
 	done = false;
 	do {
@@ -135,7 +144,7 @@ int bootflow_menu_run(struct bootstd_priv *std, struct bootflow **bflowp)
 		for (ret = bootflow_first_glob(&bflow), i = 0; !ret && i < 36;
 		     ret = bootflow_next_glob(&bflow), i++) {
 			if (i == sel_id - ITEM) {
-				*bflowp = bflow;
+				sel_bflow = bflow;
 				break;
 			}
 		}
@@ -143,8 +152,9 @@ int bootflow_menu_run(struct bootstd_priv *std, struct bootflow **bflowp)
 
 	expo_destroy(exp);
 
-	if (!*bflowp)
+	if (!sel_bflow)
 		return -EAGAIN;
+	*bflowp = sel_bflow;
 
 	return 0;
 }
