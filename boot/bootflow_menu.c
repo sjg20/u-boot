@@ -92,7 +92,7 @@ int bootflow_menu_new(struct expo **expp)
 
 	for (ret = bootflow_first_glob(&bflow), i = 0; !ret && i < 36;
 	     ret = bootflow_next_glob(&bflow), i++) {
-		char str[2], *key;
+		char str[2], *name, *key;
 
 		if (bflow->state != BOOTFLOWST_READY)
 			continue;
@@ -102,8 +102,14 @@ int bootflow_menu_new(struct expo **expp)
 		key = strdup(str);
 		if (!key)
 			return log_msg_ret("key", -ENOMEM);
+		name = strdup(dev_get_parent(bflow->dev)->name);
+		if (!name) {
+			free(key);
+			return log_msg_ret("nam", -ENOMEM);
+		}
 
-		ret = scene_txt_add(scn, "txt", ITEM_DESC + i, bflow->name,
+		ret = scene_txt_add(scn, "name", ITEM_NAME + i, name, NULL);
+		ret = scene_txt_add(scn, "desc", ITEM_DESC + i, bflow->name,
 				    NULL);
 		ret |= scene_txt_add(scn, "key", ITEM_KEY + i, key, NULL);
 		ret |= scene_menuitem_add(scn, OBJ_MENU, "item", ITEM + i,
@@ -152,6 +158,8 @@ int bootflow_menu_apply_theme(struct expo *exp, ofnode node)
 			if (ret)
 				return log_msg_ret("sz", ret);
 			scene_txt_set_font(scn, ITEM_KEY + i, font_name,
+					   font_size);
+			scene_txt_set_font(scn, ITEM_NAME + i, font_name,
 					   font_size);
 		}
 	}

@@ -72,12 +72,23 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		if (!menu->cur_item_id)
 			menu_point_to_item(menu, item->id);
 
-		ret = scene_obj_set_pos(scn, item->key_id, menu->obj.x + 100,
+		/*
+		 * Put the name on the left, then leave a space for the pointer,
+		 * then the key and the description
+		 */
+		if (item->name_id) {
+			ret = scene_obj_set_pos(scn, item->name_id, menu->obj.x,
+						y);
+			if (ret < 0)
+				return log_msg_ret("nam", ret);
+		}
+
+		ret = scene_obj_set_pos(scn, item->key_id, menu->obj.x + 230,
 					y);
 		if (ret < 0)
 			return log_msg_ret("key", ret);
 
-		ret = scene_obj_set_pos(scn, item->desc_id, menu->obj.x + 130,
+		ret = scene_obj_set_pos(scn, item->desc_id, menu->obj.x + 260,
 					y);
 		if (ret < 0)
 			return log_msg_ret("des", ret);
@@ -119,7 +130,7 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		 * points to
 		 */
 		ret = scene_obj_set_pos(scn, menu->pointer_id,
-					menu->obj.x + 50, cur_y);
+					menu->obj.x + 200, cur_y);
 		if (ret < 0)
 			return log_msg_ret("ptr", ret);
 	}
