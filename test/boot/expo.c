@@ -22,14 +22,15 @@ enum {
 	OBJ_MENU_TITLE,
 
 	ITEM1,
-	ITEM2,
-	ITEM1_TEXT,
+	ITEM1_DESC,
 	ITEM1_KEY,
 	ITEM1_PREVIEW,
-	ITEM2_TEXT,
+
+	ITEM2,
+	ITEM2_DESC,
 	ITEM2_KEY,
 	ITEM2_PREVIEW,
-	CUR_ITEM_TEXT,
+	POINTER_TEXT,
 };
 
 #define BAD_POINTER	((void *)1)
@@ -283,13 +284,13 @@ static int expo_object_menu(struct unit_test_state *uts)
 	ut_assertok(scene_menu_set_title(scn, OBJ_MENU, OBJ_MENU_TITLE));
 	ut_asserteq(OBJ_MENU_TITLE, menu->title_id);
 
-	pointer_id = scene_txt_add(scn, "cur_item", CUR_ITEM_TEXT, ">", &ptr);
+	pointer_id = scene_txt_add(scn, "cur_item", POINTER_TEXT, ">", &ptr);
 	ut_assert(pointer_id > 0);
 
-	ut_assertok(scene_menu_set_pointer(scn, OBJ_MENU, CUR_ITEM_TEXT));
-	ut_asserteq(CUR_ITEM_TEXT, menu->pointer_id);
+	ut_assertok(scene_menu_set_pointer(scn, OBJ_MENU, POINTER_TEXT));
+	ut_asserteq(POINTER_TEXT, menu->pointer_id);
 
-	txt_id = scene_txt_add(scn, "item1", ITEM1_TEXT, "Lord Melchett",
+	txt_id = scene_txt_add(scn, "item1", ITEM1_DESC, "Lord Melchett",
 			       &txt1);
 	ut_assert(txt_id > 0);
 
@@ -301,7 +302,7 @@ static int expo_object_menu(struct unit_test_state *uts)
 	ut_assert(preview_id > 0);
 
 	id = scene_menuitem_add(scn, OBJ_MENU, "linux", ITEM1, ITEM1_KEY,
-				ITEM1_TEXT, ITEM1_PREVIEW, &item);
+				ITEM1_DESC, ITEM1_PREVIEW, &item);
 	ut_asserteq(ITEM1, id);
 	ut_asserteq(id, item->id);
 	ut_asserteq(key_id, item->key_id);
@@ -376,23 +377,23 @@ static int expo_render_image(struct unit_test_state *uts)
 	ut_assert(id > 0);
 	ut_assertok(scene_menu_set_title(scn, OBJ_MENU, OBJ_MENU_TITLE));
 
-	id = scene_txt_add(scn, "cur_item", CUR_ITEM_TEXT, ">", NULL);
+	id = scene_txt_add(scn, "cur_item", POINTER_TEXT, ">", NULL);
 	ut_assert(id > 0);
-	ut_assertok(scene_menu_set_pointer(scn, OBJ_MENU, CUR_ITEM_TEXT));
+	ut_assertok(scene_menu_set_pointer(scn, OBJ_MENU, POINTER_TEXT));
 
 	id = scene_txt_add(scn, "item1-preview", ITEM1_PREVIEW, "(preview1)",
 			   NULL);
 	ut_assert(id > 0);
 
-	id = scene_txt_add(scn, "item1 txt", ITEM1_TEXT, "Lord Melchett", NULL);
+	id = scene_txt_add(scn, "item1 txt", ITEM1_DESC, "Lord Melchett", NULL);
 	ut_assert(id > 0);
 	id = scene_txt_add(scn, "item1-key", ITEM1_KEY, "1", NULL);
 	ut_assert(id > 0);
 	id = scene_menuitem_add(scn, OBJ_MENU, "item1", ITEM1, ITEM1_KEY,
-				ITEM1_TEXT, ITEM1_PREVIEW, NULL);
+				ITEM1_DESC, ITEM1_PREVIEW, NULL);
 	ut_assert(id > 0);
 
-	id = scene_txt_add(scn, "item2 txt", ITEM2_TEXT, "Lord Percy", NULL);
+	id = scene_txt_add(scn, "item2 txt", ITEM2_DESC, "Lord Percy", NULL);
 	ut_assert(id > 0);
 	id = scene_txt_add(scn, "item2-key", ITEM2_KEY, "2", NULL);
 	ut_assert(id > 0);
@@ -401,7 +402,7 @@ static int expo_render_image(struct unit_test_state *uts)
 	ut_assert(id > 0);
 
 	id = scene_menuitem_add(scn, OBJ_MENU, "item2", ITEM2, ITEM2_KEY,
-				ITEM2_TEXT, ITEM2_PREVIEW, NULL);
+				ITEM2_DESC, ITEM2_PREVIEW, NULL);
 	ut_assert(id > 0);
 
 	ut_assertok(scene_obj_set_pos(scn, OBJ_MENU, 50, 400));

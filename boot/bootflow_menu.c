@@ -31,7 +31,7 @@ enum {
 	OBJ_POINTER,
 
 	ITEM = 100,
-	ITEM_TEXT = 200,
+	ITEM_DESC = 200,
 	ITEM_KEY = 300,
 
 	MARGIN_LEFT	 = 100,
@@ -102,11 +102,11 @@ int bootflow_menu_new(struct expo **expp)
 		if (!key)
 			return log_msg_ret("key", -ENOMEM);
 
-		ret = scene_txt_add(scn, "txt", ITEM_TEXT + i, bflow->name,
+		ret = scene_txt_add(scn, "des", ITEM_DESC + i, bflow->name,
 				    NULL);
 		ret |= scene_txt_add(scn, "key", ITEM_KEY + i, key, NULL);
 		ret |= scene_menuitem_add(scn, OBJ_MENU, "item", ITEM + i,
-					  ITEM_KEY + i, ITEM_TEXT + i, 0, NULL);
+					  ITEM_KEY + i, ITEM_DESC + i, 0, NULL);
 		if (ret < 0)
 			return log_msg_ret("itm", -EINVAL);
 		ret = 0;
@@ -145,7 +145,7 @@ int bootflow_menu_apply_theme(struct expo *exp, ofnode node)
 		if (ret)
 			return log_msg_ret("sz", ret);
 		for (i = 0; i < priv->num_bootflows; i++) {
-			ret = scene_txt_set_font(scn, ITEM_TEXT + i,
+			ret = scene_txt_set_font(scn, ITEM_DESC + i,
 						 font_name, font_size);
 			if (ret)
 				return log_msg_ret("sz", ret);
