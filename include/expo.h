@@ -398,10 +398,21 @@ int scene_obj_get_hw(struct scene *scn, uint id, int *widthp);
  * @desc_id: ID of text object to use as the description text
  * @preview_id: ID of object to use as the preview (text or image)
  * @itemp: If non-NULL, returns the new object
+ * Returns: ID number for the item, or -ve on error
  */
 int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
 		       uint id, uint key_id, uint name_id, uint desc_id,
 		       uint preview_id, struct scene_menuitem **itemp);
+
+/**
+ * scene_arrange() - Arrange the scene to deal with object sizes
+ *
+ * Updates any menus in the scene so that their objects are in the right place
+ *
+ * @scn: Scene to arrange
+ * Returns: 0 if OK, -ve on error
+ */
+int scene_arrange(struct scene *scn);
 
 /**
  * expo_send_key() - set a keypress to the expo

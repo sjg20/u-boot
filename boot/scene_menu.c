@@ -88,7 +88,7 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		if (ret < 0)
 			return log_msg_ret("key", ret);
 
-		ret = scene_obj_set_pos(scn, item->desc_id, menu->obj.x + 260,
+		ret = scene_obj_set_pos(scn, item->desc_id, menu->obj.x + 280,
 					y);
 		if (ret < 0)
 			return log_msg_ret("des", ret);

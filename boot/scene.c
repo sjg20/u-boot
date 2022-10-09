@@ -305,6 +305,25 @@ int scene_obj_render(struct scene_obj *obj)
 	return 0;
 }
 
+int scene_arrange(struct scene *scn)
+{
+	struct scene_obj *obj;
+	int ret;
+
+	list_for_each_entry(obj, &scn->obj_head, sibling) {
+		if (obj->type == SCENEOBJT_MENU) {
+			struct scene_obj_menu *menu;
+
+			menu = (struct scene_obj_menu *)obj,
+			ret = scene_menu_arrange(scn, menu);
+			if (ret)
+				return log_msg_ret("arr", ret);
+		}
+	}
+
+	return 0;
+}
+
 int scene_render(struct scene *scn)
 {
 	struct scene_obj *obj;

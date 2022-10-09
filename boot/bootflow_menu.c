@@ -150,19 +150,21 @@ int bootflow_menu_apply_theme(struct expo *exp, ofnode node)
 		log_info("font size %d\n", font_size);
 		scene_txt_set_font(scn, OBJ_PROMPT, font_name, font_size);
 		scene_txt_set_font(scn, OBJ_POINTER, font_name, font_size);
-		if (ret)
-			return log_msg_ret("sz", ret);
 		for (i = 0; i < priv->num_bootflows; i++) {
 			ret = scene_txt_set_font(scn, ITEM_DESC + i,
 						 font_name, font_size);
 			if (ret)
-				return log_msg_ret("sz", ret);
+				return log_msg_ret("des", ret);
 			scene_txt_set_font(scn, ITEM_KEY + i, font_name,
 					   font_size);
 			scene_txt_set_font(scn, ITEM_NAME + i, font_name,
 					   font_size);
 		}
 	}
+
+	ret = scene_arrange(scn);
+	if (ret)
+		return log_msg_ret("arr", ret);
 
 	return 0;
 }
