@@ -49,6 +49,7 @@ struct menu_priv {
 
 int bootflow_menu_new(struct expo **expp)
 {
+	struct udevice *last_bootdev;
 	struct scene_obj_menu *menu;
 	struct menu_priv *priv;
 	struct bootflow *bflow;
@@ -90,9 +91,11 @@ int bootflow_menu_new(struct expo **expp)
 	if (ret < 0)
 		return log_msg_ret("new", -EINVAL);
 
+	last_bootdev = NULL;
 	for (ret = bootflow_first_glob(&bflow), i = 0; !ret && i < 36;
 	     ret = bootflow_next_glob(&bflow), i++) {
 		char str[2], *name, *key;
+		bool add_gap;
 
 		if (bflow->state != BOOTFLOWST_READY)
 			continue;
@@ -108,6 +111,9 @@ int bootflow_menu_new(struct expo **expp)
 			return log_msg_ret("nam", -ENOMEM);
 		}
 
+		add_gap = last_bootdev != bflow->dev;
+		last_bootdev = bflow->dev;
+
 		ret = scene_txt_add(scn, "name", ITEM_NAME + i, name, NULL);
 		ret = scene_txt_add(scn, "desc", ITEM_DESC + i,
 				    bflow->os_name ? bflow->os_name :
@@ -115,7 +121,9 @@ int bootflow_menu_new(struct expo **expp)
 		ret |= scene_txt_add(scn, "key", ITEM_KEY + i, key, NULL);
 		ret |= scene_menuitem_add(scn, OBJ_MENU, "item", ITEM + i,
 					  ITEM_KEY + i, ITEM_NAME + i,
-					  ITEM_DESC + i, 0, NULL);
+					  ITEM_DESC + i, 0,
+					  add_gap ? SCENEMIF_GAP_BEFORE : 0,
+					  NULL);
 		if (ret < 0)
 			return log_msg_ret("itm", -EINVAL);
 		ret = 0;

@@ -68,6 +68,14 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 	list_for_each_entry(item, &menu->item_head, sibling) {
 		int height;
 
+		ret = scene_obj_get_hw(scn, item->desc_id, NULL);
+		if (ret < 0)
+			return log_msg_ret("get", ret);
+		height = ret;
+
+		if (item->flags & SCENEMIF_GAP_BEFORE)
+			y += height;
+
 		/* select an item if not done already */
 		if (!menu->cur_item_id)
 			menu_point_to_item(menu, item->id);
@@ -92,11 +100,6 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 					y);
 		if (ret < 0)
 			return log_msg_ret("des", ret);
-
-		ret = scene_obj_get_hw(scn, item->desc_id, NULL);
-		if (ret < 0)
-			return log_msg_ret("get", ret);
-		height = ret;
 
 		if (menu->cur_item_id == item->id)
 			cur_y = y;
@@ -246,7 +249,8 @@ int scene_menu_send_key(struct scene *scn, struct scene_obj_menu *menu, int key,
 
 int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
 		       uint id, uint key_id, uint name_id, uint desc_id,
-		       uint preview_id, struct scene_menuitem **itemp)
+		       uint preview_id, uint flags,
+		       struct scene_menuitem **itemp)
 {
 	struct scene_obj_menu *menu;
 	struct scene_menuitem *item;
@@ -274,6 +278,7 @@ int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
 	item->name_id = name_id;
 	item->desc_id = desc_id;
 	item->preview_id = preview_id;
+	item->flags = flags;
 	list_add_tail(&item->sibling, &menu->item_head);
 
 	ret = scene_menu_arrange(scn, menu);

@@ -721,6 +721,19 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 int image_source_script(ulong addr, const char *fit_uname);
 
 /**
+ * image_locate_script() - Locate the raw script in an image
+ *
+ * @buf: Address of image
+ * @size: Size of image in bytes
+ * @fit_uname: Node name of FIT image to read
+ * @datap: Returns pointer to raw script on success
+ * @lenp: Returns size of raw script on success
+ * @return 0 if OK, non-zero on error
+ */
+int image_locate_script(void *buf, int size, const char *fit_uname,
+			char **datap, uint *lenp);
+
+/**
  * fit_get_node_from_config() - Look up an image a FIT by type
  *
  * This looks in the selected conf- node (images->fit_uname_cfg) for a

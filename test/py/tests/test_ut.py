@@ -185,6 +185,22 @@ booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
 
         u_boot_utils.run_and_log(
             cons, f'mkimage -C none -A arm -T script -d {cmd_fname} {scr_fname}')
+
+        kernel = 'vmlinuz-5.15.63-rockchip64'
+        target = os.path.join(bootdir, kernel)
+        with open(target, 'wb') as outf:
+            print('kernel', outf)
+
+        symlink = os.path.join(bootdir, 'Image')
+        if os.path.exists(symlink):
+            os.remove(symlink)
+        u_boot_utils.run_and_log(
+            cons, f'echo here {kernel} {symlink}')
+        #os.symlink(kernel, symlink)
+        u_boot_utils.run_and_log(cons, f'ln -s {kernel} {symlink}')
+
+        u_boot_utils.run_and_log(
+            cons, f'mkimage -C none -A arm -T script -d {cmd_fname} {scr_fname}')
         complete = True
 
     except ValueError as exc:

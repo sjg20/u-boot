@@ -164,6 +164,15 @@ struct scene_obj_menu {
 };
 
 /**
+ * enum scene_menuitem_flags_t - flags for menu items
+ *
+ * @SCENEMIF_GAP_BEFORE: Add a gap before this item
+ */
+enum scene_menuitem_flags_t {
+	SCENEMIF_GAP_BEFORE	= 1 << 0,
+};
+
+/**
  * struct scene_menuitem - a menu item in a menu
  *
  * A menu item has:
@@ -175,6 +184,7 @@ struct scene_obj_menu {
  * @name_id: ID of text object to use as the name text
  * @desc_id: ID of text object to use as the description text
  * @preview_id: ID of the preview object, or 0 if none
+ * @flags: Flags for this item
  * @sibling: Node to link this item to its siblings
  */
 struct scene_menuitem {
@@ -184,6 +194,7 @@ struct scene_menuitem {
 	uint name_id;
 	uint desc_id;
 	uint preview_id;
+	uint flags;
 	struct list_head sibling;
 };
 
@@ -397,12 +408,14 @@ int scene_obj_get_hw(struct scene *scn, uint id, int *widthp);
  * @name_id: ID of text object to use as the name text
  * @desc_id: ID of text object to use as the description text
  * @preview_id: ID of object to use as the preview (text or image)
+ * @flags: Flags for this item (enum scene_menuitem_flags_t)
  * @itemp: If non-NULL, returns the new object
  * Returns: ID number for the item, or -ve on error
  */
 int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
 		       uint id, uint key_id, uint name_id, uint desc_id,
-		       uint preview_id, struct scene_menuitem **itemp);
+		       uint preview_id, uint flags,
+		       struct scene_menuitem **itemp);
 
 /**
  * scene_arrange() - Arrange the scene to deal with object sizes
