@@ -31,8 +31,9 @@ enum {
 	OBJ_POINTER,
 
 	ITEM = 100,
-	ITEM_DESC = 200,
-	ITEM_KEY = 300,
+	ITEM_NAME = 200,
+	ITEM_DESC = 300,
+	ITEM_KEY = 400,
 
 	MARGIN_LEFT	 = 100,
 };
@@ -102,11 +103,12 @@ int bootflow_menu_new(struct expo **expp)
 		if (!key)
 			return log_msg_ret("key", -ENOMEM);
 
-		ret = scene_txt_add(scn, "des", ITEM_DESC + i, bflow->name,
+		ret = scene_txt_add(scn, "txt", ITEM_DESC + i, bflow->name,
 				    NULL);
 		ret |= scene_txt_add(scn, "key", ITEM_KEY + i, key, NULL);
 		ret |= scene_menuitem_add(scn, OBJ_MENU, "item", ITEM + i,
-					  ITEM_KEY + i, ITEM_DESC + i, 0, NULL);
+					  ITEM_KEY + i, ITEM_NAME + i,
+					  ITEM_DESC + i, 0, NULL);
 		if (ret < 0)
 			return log_msg_ret("itm", -EINVAL);
 		ret = 0;

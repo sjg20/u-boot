@@ -22,11 +22,13 @@ enum {
 	OBJ_MENU_TITLE,
 
 	ITEM1,
+	ITEM1_NAME,
 	ITEM1_DESC,
 	ITEM1_KEY,
 	ITEM1_PREVIEW,
 
 	ITEM2,
+	ITEM2_NAME,
 	ITEM2_DESC,
 	ITEM2_KEY,
 	ITEM2_PREVIEW,
@@ -302,7 +304,7 @@ static int expo_object_menu(struct unit_test_state *uts)
 	ut_assert(preview_id > 0);
 
 	id = scene_menuitem_add(scn, OBJ_MENU, "linux", ITEM1, ITEM1_KEY,
-				ITEM1_DESC, ITEM1_PREVIEW, &item);
+				ITEM1_NAME, ITEM1_DESC, ITEM1_PREVIEW, &item);
 	ut_asserteq(ITEM1, id);
 	ut_asserteq(id, item->id);
 	ut_asserteq(key_id, item->key_id);
@@ -390,7 +392,7 @@ static int expo_render_image(struct unit_test_state *uts)
 	id = scene_txt_add(scn, "item1-key", ITEM1_KEY, "1", NULL);
 	ut_assert(id > 0);
 	id = scene_menuitem_add(scn, OBJ_MENU, "item1", ITEM1, ITEM1_KEY,
-				ITEM1_DESC, ITEM1_PREVIEW, NULL);
+				ITEM1_NAME, ITEM1_DESC, ITEM1_PREVIEW, NULL);
 	ut_assert(id > 0);
 
 	id = scene_txt_add(scn, "item2 txt", ITEM2_DESC, "Lord Percy", NULL);
@@ -402,7 +404,7 @@ static int expo_render_image(struct unit_test_state *uts)
 	ut_assert(id > 0);
 
 	id = scene_menuitem_add(scn, OBJ_MENU, "item2", ITEM2, ITEM2_KEY,
-				ITEM2_DESC, ITEM2_PREVIEW, NULL);
+				ITEM2_NAME, ITEM2_DESC, ITEM2_PREVIEW, NULL);
 	ut_assert(id > 0);
 
 	ut_assertok(scene_obj_set_pos(scn, OBJ_MENU, 50, 400));

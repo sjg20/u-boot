@@ -394,13 +394,14 @@ int scene_obj_get_hw(struct scene *scn, uint id, int *widthp);
  * @name: Name to use (this is allocated by this call)
  * @id: ID to use for the new object (0 to allocate one)
  * @key_id: ID of text object to use as the keypress to show
+ * @name_id: ID of text object to use as the name text
  * @desc_id: ID of text object to use as the description text
  * @preview_id: ID of object to use as the preview (text or image)
  * @itemp: If non-NULL, returns the new object
  */
 int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
-		       uint id, uint key_id, uint desc_id, uint preview_id,
-		       struct scene_menuitem **itemp);
+		       uint id, uint key_id, uint name_id, uint desc_id,
+		       uint preview_id, struct scene_menuitem **itemp);
 
 /**
  * expo_send_key() - set a keypress to the expo

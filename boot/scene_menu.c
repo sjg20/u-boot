@@ -232,8 +232,8 @@ int scene_menu_send_key(struct scene *scn, struct scene_obj_menu *menu, int key,
 }
 
 int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
-		       uint id, uint key_id, uint desc_id, uint preview_id,
-		       struct scene_menuitem **itemp)
+		       uint id, uint key_id, uint name_id, uint desc_id,
+		       uint preview_id, struct scene_menuitem **itemp)
 {
 	struct scene_obj_menu *menu;
 	struct scene_menuitem *item;
@@ -258,6 +258,7 @@ int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
 
 	item->id = resolve_id(scn->expo, id);
 	item->key_id = key_id;
+	item->name_id = name_id;
 	item->desc_id = desc_id;
 	item->preview_id = preview_id;
 	list_add_tail(&item->sibling, &menu->item_head);
