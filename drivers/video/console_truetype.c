@@ -584,6 +584,17 @@ static struct font_info *console_truetype_find_font(void)
 	return NULL;
 }
 
+const char *vidconsole_default_font(void)
+{
+	struct font_info *tab;
+
+	tab = console_truetype_find_font();
+	if (tab)
+		return tab->name;
+
+	return NULL;
+}
+
 void vidconsole_list_fonts(void)
 {
 	struct font_info *tab;

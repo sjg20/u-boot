@@ -148,12 +148,32 @@ int scene_menu_add(struct scene *scn, const char *name, uint id,
 	return menu->obj.id;
 }
 
-int scene_menu_send_key(struct scene_obj_menu *menu, int key,
+static struct scene_menuitem *scene_menu_find_key(struct scene *scn,
+						  struct scene_obj_menu *menu,
+						  int key)
+{
+	struct scene_menuitem *item;
+
+	list_for_each_entry(item, &menu->item_head, sibling) {
+		if (item->key_id) {
+			struct scene_obj_txt *txt;
+
+			txt = scene_obj_find(scn, item->key_id, SCENEOBJT_TEXT);
+			if (txt && txt->str && *txt->str == key)
+				return item;
+		}
+	}
+
+	return NULL;
+}
+
+int scene_menu_send_key(struct scene *scn, struct scene_obj_menu *menu, int key,
 			struct expo_action *event)
 {
-	struct scene_menuitem *item, *cur;
+	struct scene_menuitem *item, *cur, *key_item;
 
 	cur = NULL;
+	key_item = NULL;
 
 	if (!list_empty(&menu->item_head)) {
 		list_for_each_entry(item, &menu->item_head, sibling) {
@@ -192,6 +212,17 @@ int scene_menu_send_key(struct scene_obj_menu *menu, int key,
 		event->type = EXPOACT_SELECT;
 		event->select.id = item->id;
 		log_debug("select item %d\n", event->select.id);
+		break;
+	case BKEY_QUIT:
+		event->type = EXPOACT_QUIT;
+		log_debug("quit\n");
+		break;
+	case '0'...'9':
+		key_item = scene_menu_find_key(scn, menu, key);
+		if (key_item) {
+			event->type = EXPOACT_SELECT;
+			event->select.id = key_item->id;
+		}
 		break;
 	}
 

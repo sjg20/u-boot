@@ -15,6 +15,7 @@ enum expoact_type {
 	EXPOACT_NONE,		/* no action */
 	EXPOACT_POINT,		/* menu item was highlighted */
 	EXPOACT_SELECT,		/* menu item was selected */
+	EXPOACT_QUIT,		/* request to exit the menu */
 };
 
 struct expo_action {
@@ -37,6 +38,8 @@ struct expo_action {
  * @scene_id: Current scene ID (0 if none)
  * @next_id: Next ID number to use
  * @action: Action selected by user
+ * @priv: Private data for the owner
+ * @scene_head: List of scenes
  */
 struct expo {
 	char *name;
@@ -44,6 +47,7 @@ struct expo {
 	uint scene_id;
 	uint next_id;
 	struct expo_action action;
+	void *priv;
 	struct list_head scene_head;
 };
 
@@ -187,10 +191,11 @@ struct scene_menuitem {
  * Allocates a new expo
  *
  * @name: Name of expo (this is allocated by this call)
+ * @priv: Private data for the caller
  * @expp: Returns a pointer to the new expo on success
  * Returns: 0 if OK, -ENOMEM if out of memory
  */
-int expo_new(const char *name, struct expo **expp);
+int expo_new(const char *name, void *priv, struct expo **expp);
 
 /**
  * expo_destroy() - Destroy an expo and free all its memory
@@ -248,6 +253,15 @@ int expo_theme_set(struct expo *expo, ofnode node);
  * Returns: ID number for the scene, or -ve on error
  */
 int scene_new(struct expo *exp, const char *name, uint id, struct scene **scnp);
+
+/**
+ * expo_lookup_scene_id() - Look up a scene by ID
+ *
+ * @exp: Expo to check
+ * @scene_id: Scene ID to look up
+ * @returns pointer to scene if found, else NULL
+ */
+struct scene *expo_lookup_scene_id(struct expo *exp, uint scene_id);
 
 /**
  * scene_title_set() - set the scene title

@@ -244,8 +244,16 @@ void vidconsole_list_fonts(void);
  * @dev: vidconsole device
  * @name: Font name
  * @size: Size of the font (norminal pixel height) or 0 for default
+ * Returns 0 on success, -ve on error
  */
 int vidconsole_select_font(struct udevice *dev, const char *name, uint size);
+
+/**
+ * vidconsole_default_font() - Get the name of the default font
+ *
+ * Returns: name of default font, or NULL if none
+ */
+const char *vidconsole_default_font(void);
 
 #ifdef CONFIG_VIDEO_COPY
 /**

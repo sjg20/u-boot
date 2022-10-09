@@ -55,7 +55,7 @@ static int expo_base(struct unit_test_state *uts)
 
 	exp = NULL;
 	strcpy(name, EXPO_NAME);
-	ut_assertok(expo_new(name, &exp));
+	ut_assertok(expo_new(name, NULL, &exp));
 	*name = '\0';
 	ut_assertnonnull(exp);
 	ut_asserteq(0, exp->scene_id);
@@ -75,7 +75,7 @@ static int expo_base(struct unit_test_state *uts)
 
 		malloc_enable_testing(i);
 		exp2 = BAD_POINTER;
-		ut_asserteq(-ENOMEM, expo_new(EXPO_NAME, &exp2));
+		ut_asserteq(-ENOMEM, expo_new(EXPO_NAME, NULL, &exp2));
 		ut_asserteq_ptr(BAD_POINTER, exp2);
 		malloc_disable_testing();
 	}
@@ -95,7 +95,7 @@ static int expo_scene(struct unit_test_state *uts)
 
 	start_mem = ut_check_free();
 
-	ut_assertok(expo_new(EXPO_NAME, &exp));
+	ut_assertok(expo_new(EXPO_NAME, NULL, &exp));
 
 	scn = NULL;
 	ut_asserteq(0, exp->next_id);
@@ -150,7 +150,7 @@ static int expo_object(struct unit_test_state *uts)
 
 	start_mem = ut_check_free();
 
-	ut_assertok(expo_new(EXPO_NAME, &exp));
+	ut_assertok(expo_new(EXPO_NAME, NULL, &exp));
 	id = scene_new(exp, SCENE_NAME1, SCENE1, &scn);
 	ut_assert(id > 0);
 
@@ -210,7 +210,7 @@ static int expo_object_attr(struct unit_test_state *uts)
 
 	start_mem = ut_check_free();
 
-	ut_assertok(expo_new(EXPO_NAME, &exp));
+	ut_assertok(expo_new(EXPO_NAME, NULL, &exp));
 	id = scene_new(exp, SCENE_NAME1, SCENE1, &scn);
 	ut_assert(id > 0);
 
@@ -262,7 +262,7 @@ static int expo_object_menu(struct unit_test_state *uts)
 
 	start_mem = ut_check_free();
 
-	ut_assertok(expo_new(EXPO_NAME, &exp));
+	ut_assertok(expo_new(EXPO_NAME, NULL, &exp));
 	id = scene_new(exp, SCENE_NAME1, SCENE1, &scn);
 	ut_assert(id > 0);
 
@@ -348,7 +348,7 @@ static int expo_render_image(struct unit_test_state *uts)
 
 	ut_assertok(uclass_first_device_err(UCLASS_VIDEO, &dev));
 
-	ut_assertok(expo_new(EXPO_NAME, &exp));
+	ut_assertok(expo_new(EXPO_NAME, NULL, &exp));
 	id = scene_new(exp, SCENE_NAME1, SCENE1, &scn);
 	ut_assert(id > 0);
 	ut_assertok(expo_set_display(exp, dev));

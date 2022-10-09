@@ -322,7 +322,7 @@ int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 			struct scene_obj_menu *menu;
 
 			menu = (struct scene_obj_menu *)obj,
-			ret = scene_menu_send_key(menu, key, event);
+			ret = scene_menu_send_key(scn, menu, key, event);
 			if (ret)
 				return log_msg_ret("key", ret);
 

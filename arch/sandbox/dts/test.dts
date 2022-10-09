@@ -98,6 +98,10 @@
 			compatible = "u-boot,script";
 		};
 
+		theme {
+			font-size = <60>;
+		};
+
 		/*
 		 * This is used for the VBE OS-request tests. A FAT filesystem
 		 * created in a partition with the VBE information appearing

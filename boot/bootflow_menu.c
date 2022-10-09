@@ -14,7 +14,9 @@
 #include <cli.h>
 #include <dm.h>
 #include <expo.h>
+#include <malloc.h>
 #include <menu.h>
+#include <video_console.h>
 #include <watchdog.h>
 #include <linux/delay.h>
 
@@ -31,17 +33,32 @@ enum {
 	ITEM_KEY = 300,
 };
 
+/**
+ * struct menu_priv - information about the menu
+ *
+ * @num_bootflows: Number of bootflows in the menu
+ */
+struct menu_priv {
+	int num_bootflows;
+};
+
 int bootflow_menu_new(struct expo **expp)
 {
 	struct scene_obj_menu *menu;
+	struct menu_priv *priv;
 	struct bootflow *bflow;
 	struct scene *scn;
 	struct expo *exp;
 	int ret, i;
 
-	ret = expo_new("bootflows", &exp);
+	priv = calloc(1, sizeof(*priv));
+	if (!priv)
+		return log_msg_ret("prv", -ENOMEM);
+
+	ret = expo_new("bootflows", priv, &exp);
 	if (ret)
 		return log_msg_ret("exp", ret);
+
 	ret = scene_new(exp, "main", MAIN, &scn);
 	if (ret < 0)
 		return log_msg_ret("scn", ret);
@@ -68,15 +85,48 @@ int bootflow_menu_new(struct expo **expp)
 
 		ret = scene_txt_add(scn, "txt", ITEM_TEXT + i, bflow->name,
 				    NULL);
-		ret |= scene_txt_add(scn, "key", ITEM_KEY + i, str, NULL);
+		ret |= scene_txt_add(scn, "key", ITEM_KEY + i, key, NULL);
 		ret |= scene_menuitem_add(scn, OBJ_MENU, "item", ITEM + i,
 					  ITEM_KEY + i, ITEM_TEXT + i, 0, NULL);
 		if (ret < 0)
 			return log_msg_ret("itm", -EINVAL);
 		ret = 0;
+		priv->num_bootflows++;
 	}
 
 	*expp = exp;
+
+	return 0;
+}
+
+int bootflow_menu_apply_theme(struct expo *exp, ofnode node)
+{
+	struct menu_priv *priv = exp->priv;
+	const char *font_name;
+	struct scene *scn;
+	u32 font_size;
+	int ret;
+
+	log_info("Applying theme %s\n", ofnode_get_name(node));
+	scn = expo_lookup_scene_id(exp, MAIN);
+	if (!scn)
+		return log_msg_ret("scn", -ENOENT);
+
+	font_name = vidconsole_default_font();
+	if (!font_name)
+		return log_msg_ret("fnt", -ENOENT);
+
+	if (!ofnode_read_u32(node, "font-size", &font_size)) {
+		int i;
+
+		log_info("font size %d\n", font_size);
+		for (i = 0; i < priv->num_bootflows; i++) {
+			ret = scene_txt_set_font(scn, ITEM_TEXT + i,
+						 font_name, font_size);
+			if (ret)
+				return log_msg_ret("sz", ret);
+		}
+	}
 
 	return 0;
 }
@@ -99,6 +149,12 @@ int bootflow_menu_run(struct bootstd_priv *std, struct bootflow **bflowp)
 	ret = bootflow_menu_new(&exp);
 	if (ret)
 		return log_msg_ret("exp", ret);
+
+	if (ofnode_valid(std->theme)) {
+		ret = bootflow_menu_apply_theme(exp, std->theme);
+		if (ret)
+			return log_msg_ret("thm", ret);
+	}
 
 	/* For now we only support a video console */
 	ret = uclass_first_device_err(UCLASS_VIDEO, &dev);
@@ -125,7 +181,7 @@ int bootflow_menu_run(struct bootstd_priv *std, struct bootflow **bflowp)
 		if (!ichar) {
 			while (!ichar && !tstc()) {
 				WATCHDOG_RESET();
-				mdelay(10);
+				mdelay(2);
 				ichar = cli_ch_process(cch, -ETIMEDOUT);
 			}
 			if (!ichar) {
@@ -143,8 +199,6 @@ int bootflow_menu_run(struct bootstd_priv *std, struct bootflow **bflowp)
 		if (!key)
 			continue;
 
-		printf("%d\n", key);
-
 		ret = expo_send_key(exp, key);
 		if (ret)
 			break;
@@ -154,6 +208,9 @@ int bootflow_menu_run(struct bootstd_priv *std, struct bootflow **bflowp)
 			switch (act.type) {
 			case EXPOACT_SELECT:
 				sel_id = act.select.id;
+				done = true;
+				break;
+			case EXPOACT_QUIT:
 				done = true;
 				break;
 			default:
