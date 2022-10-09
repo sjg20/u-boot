@@ -71,19 +71,21 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		/* select an item if not done already */
 		if (!menu->cur_item_id)
 			menu_point_to_item(menu, item->id);
-		ret = scene_obj_set_pos(scn, item->desc_id, menu->obj.x + 100,
+
+		ret = scene_obj_set_pos(scn, item->key_id, menu->obj.x + 100,
 					y);
 		if (ret < 0)
-			return log_msg_ret("txt", ret);
-
-		ret = scene_obj_set_pos(scn, item->key_id, menu->obj.x, y);
-		if (ret < 0)
 			return log_msg_ret("key", ret);
+
+		ret = scene_obj_set_pos(scn, item->desc_id, menu->obj.x + 130,
+					y);
+		if (ret < 0)
+			return log_msg_ret("des", ret);
 
 		ret = scene_obj_get_hw(scn, item->desc_id, NULL);
 		if (ret < 0)
 			return log_msg_ret("get", ret);
-		height =ret;
+		height = ret;
 
 		if (menu->cur_item_id == item->id)
 			cur_y = y;
