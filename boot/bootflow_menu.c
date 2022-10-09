@@ -109,8 +109,9 @@ int bootflow_menu_new(struct expo **expp)
 		}
 
 		ret = scene_txt_add(scn, "name", ITEM_NAME + i, name, NULL);
-		ret = scene_txt_add(scn, "desc", ITEM_DESC + i, bflow->name,
-				    NULL);
+		ret = scene_txt_add(scn, "desc", ITEM_DESC + i,
+				    bflow->os_name ? bflow->os_name :
+				    bflow->name, NULL);
 		ret |= scene_txt_add(scn, "key", ITEM_KEY + i, key, NULL);
 		ret |= scene_menuitem_add(scn, OBJ_MENU, "item", ITEM + i,
 					  ITEM_KEY + i, ITEM_NAME + i,
@@ -134,7 +135,7 @@ int bootflow_menu_apply_theme(struct expo *exp, ofnode node)
 	u32 font_size;
 	int ret;
 
-	log_info("Applying theme %s\n", ofnode_get_name(node));
+	log_debug("Applying theme %s\n", ofnode_get_name(node));
 	scn = expo_lookup_scene_id(exp, MAIN);
 	if (!scn)
 		return log_msg_ret("scn", -ENOENT);
@@ -147,7 +148,7 @@ int bootflow_menu_apply_theme(struct expo *exp, ofnode node)
 	if (!ofnode_read_u32(node, "font-size", &font_size)) {
 		int i;
 
-		log_info("font size %d\n", font_size);
+		log_debug("font size %d\n", font_size);
 		scene_txt_set_font(scn, OBJ_PROMPT, font_name, font_size);
 		scene_txt_set_font(scn, OBJ_POINTER, font_name, font_size);
 		for (i = 0; i < priv->num_bootflows; i++) {

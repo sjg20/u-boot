@@ -308,7 +308,7 @@ int bootmeth_alloc_file(struct bootflow *bflow, uint size_limit, uint align)
 		return log_msg_ret("buf", -ENOMEM);
 	addr = map_to_sysmem(buf);
 
-	ret = fs_read(bflow->fname, addr, 0, 0, &bytes_read);
+	ret = fs_read(bflow->fname, addr, 0, size, &bytes_read);
 	if (ret) {
 		free(buf);
 		return log_msg_ret("read", ret);
