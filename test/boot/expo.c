@@ -305,7 +305,7 @@ static int expo_object_menu(struct unit_test_state *uts)
 	ut_asserteq(ITEM1, id);
 	ut_asserteq(id, item->id);
 	ut_asserteq(key_id, item->key_id);
-	ut_asserteq(txt_id, item->text_id);
+	ut_asserteq(txt_id, item->desc_id);
 	ut_asserteq(preview_id, item->preview_id);
 
 	/* adding an item should cause the first item to become current */

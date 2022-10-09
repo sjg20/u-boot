@@ -71,7 +71,7 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		/* select an item if not done already */
 		if (!menu->cur_item_id)
 			menu_point_to_item(menu, item->id);
-		ret = scene_obj_set_pos(scn, item->text_id, menu->obj.x + 100,
+		ret = scene_obj_set_pos(scn, item->desc_id, menu->obj.x + 100,
 					y);
 		if (ret < 0)
 			return log_msg_ret("txt", ret);
@@ -80,7 +80,7 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		if (ret < 0)
 			return log_msg_ret("key", ret);
 
-		ret = scene_obj_get_hw(scn, item->text_id, NULL);
+		ret = scene_obj_get_hw(scn, item->desc_id, NULL);
 		if (ret < 0)
 			return log_msg_ret("get", ret);
 		height =ret;
@@ -232,7 +232,7 @@ int scene_menu_send_key(struct scene *scn, struct scene_obj_menu *menu, int key,
 }
 
 int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
-		       uint id, uint key_id, uint text_id, uint preview_id,
+		       uint id, uint key_id, uint desc_id, uint preview_id,
 		       struct scene_menuitem **itemp)
 {
 	struct scene_obj_menu *menu;
@@ -244,7 +244,7 @@ int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
 		return log_msg_ret("find", -ENOENT);
 
 	/* Check that the text ID is valid */
-	if (!scene_obj_find(scn, text_id, SCENEOBJT_TEXT))
+	if (!scene_obj_find(scn, desc_id, SCENEOBJT_TEXT))
 		return log_msg_ret("txt", -EINVAL);
 
 	item = calloc(1, sizeof(struct scene_obj_menu));
@@ -258,7 +258,7 @@ int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
 
 	item->id = resolve_id(scn->expo, id);
 	item->key_id = key_id;
-	item->text_id = text_id;
+	item->desc_id = desc_id;
 	item->preview_id = preview_id;
 	list_add_tail(&item->sibling, &menu->item_head);
 

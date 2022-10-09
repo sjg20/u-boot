@@ -167,12 +167,13 @@ struct scene_obj_menu {
  * struct scene_menuitem - a menu item in a menu
  *
  * A menu item has:
- * - a text object holding the prompt
+ * - text object holding the name (short) and description (can be longer)
  * - a text object holding the keypress
  *
  * @obj: Basic object information
  * @key_id: ID of text object to use as the keypress to show
- * @text_id: ID of text object to use as the prompt text
+ * @name_id: ID of text object to use as the name text
+ * @desc_id: ID of text object to use as the description text
  * @preview_id: ID of the preview object, or 0 if none
  * @sibling: Node to link this item to its siblings
  */
@@ -180,7 +181,8 @@ struct scene_menuitem {
 	char *name;
 	uint id;
 	uint key_id;
-	uint text_id;
+	uint name_id;
+	uint desc_id;
 	uint preview_id;
 	struct list_head sibling;
 };
@@ -392,12 +394,12 @@ int scene_obj_get_hw(struct scene *scn, uint id, int *widthp);
  * @name: Name to use (this is allocated by this call)
  * @id: ID to use for the new object (0 to allocate one)
  * @key_id: ID of text object to use as the keypress to show
- * @text_id: ID of text object to use as the prompt text
+ * @desc_id: ID of text object to use as the description text
  * @preview_id: ID of object to use as the preview (text or image)
  * @itemp: If non-NULL, returns the new object
  */
 int scene_menuitem_add(struct scene *scn, uint menu_id, const char *name,
-		       uint id, uint key_id, uint text_id, uint preview_id,
+		       uint id, uint key_id, uint desc_id, uint preview_id,
 		       struct scene_menuitem **itemp);
 
 /**

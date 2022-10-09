@@ -252,7 +252,6 @@ int scene_obj_render(struct scene_obj *obj)
 	struct scene *scn = obj->scene;
 	struct expo *exp = scn->expo;
 	struct udevice *cons, *dev = exp->display;
-	struct video_priv *priv = dev_get_uclass_priv(dev);
 	int x, y, ret;
 
 	ret = device_find_first_child_by_uclass(dev, UCLASS_VIDEO_CONSOLE,
