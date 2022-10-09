@@ -203,8 +203,8 @@ static void video_display_rle8_bitmap(struct udevice *dev,
 /**
  * video_splash_align_axis() - Align a single coordinate
  *
- *- if a coordinate is 0x7fff then the image will be centred in
- *  that direction
+ *- if a coordinate is BMP_ALIGN_CENTER (0x7fff) then the image will be centred
+ *  in that direction
  *- if a coordinate is -ve then it will be offset to the
  *  left/top of the centre by that many pixels
  *- if a coordinate is positive it will be used unchnaged.
@@ -213,8 +213,7 @@ static void video_display_rle8_bitmap(struct udevice *dev,
  * @panel_size:	Size of panel in pixels for that axis
  * @picture_size:	Size of bitmap in pixels for that axis
  */
-static void video_splash_align_axis(int *axis, unsigned long panel_size,
-				    unsigned long picture_size)
+void video_splash_align_axis(int *axis, uint panel_size, uint picture_size)
 {
 	long panel_picture_delta = panel_size - picture_size;
 	long axis_alignment;

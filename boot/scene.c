@@ -252,12 +252,18 @@ int scene_obj_render(struct scene_obj *obj)
 	struct scene *scn = obj->scene;
 	struct expo *exp = scn->expo;
 	struct udevice *cons, *dev = exp->display;
-	int ret;
+	struct video_priv *priv = dev_get_uclass_priv(dev);
+	int x, y, ret;
 
 	ret = device_find_first_child_by_uclass(dev, UCLASS_VIDEO_CONSOLE,
 						&cons);
 	if (ret)
 		cons = NULL;
+
+	x = obj->x;
+	y = obj->y;
+// 	video_splash_align_axis(&x, priv->xsize, 0);
+// 	video_splash_align_axis(&y, priv->ysize, 0);
 
 	switch (obj->type) {
 	case SCENEOBJT_NONE:
@@ -265,8 +271,8 @@ int scene_obj_render(struct scene_obj *obj)
 	case SCENEOBJT_IMAGE: {
 		struct scene_obj_img *img = (struct scene_obj_img *)obj;
 
-		ret = video_bmp_display(dev, map_to_sysmem(img->data),
-					img->obj.x, img->obj.y, false);
+		ret = video_bmp_display(dev, map_to_sysmem(img->data), x, y,
+					true);
 		if (ret < 0)
 			return log_msg_ret("img", ret);
 		break;
@@ -284,12 +290,16 @@ int scene_obj_render(struct scene_obj *obj)
 		}
 		if (ret)
 			return log_msg_ret("font", ret);
-		vidconsole_set_cursor_pos(cons, txt->obj.x, txt->obj.y);
+		vidconsole_set_cursor_pos(cons, x, y);
 		vidconsole_put_string(cons, txt->str);
 		break;
 	}
 	case SCENEOBJT_MENU:
-		/* the text and item pointer are rendered elsewhere */
+		/*
+		 * The text and item pointer are rendered as normal objects so
+		 * we don't need to do anything here. The menu simply controls
+		 * where they are positioned.
+		 */
 		break;
 	}
 

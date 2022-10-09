@@ -248,7 +248,7 @@ void video_bmp_get_info(void *bmp_image, ulong *widthp, ulong *heightp,
  *		  that direction
  *		- if a coordinate is -ve then it will be offset to the
  *		  left/top of the centre by that many pixels
- *		- if a coordinate is positive it will be used unchnaged.
+ *		- if a coordinate is positive it will be used unchanged.
  * Return: 0 if OK, -ve on error
  */
 int video_bmp_display(struct udevice *dev, ulong bmp_image, int x, int y,
@@ -294,6 +294,21 @@ void video_set_default_colors(struct udevice *dev, bool invert);
  * is in use
  */
 int video_default_font_height(struct udevice *dev);
+
+/**
+ * video_splash_align_axis() - Align a single coordinate
+ *
+ *- if a coordinate is BMP_ALIGN_CENTER (0x7fff) then the image will be centred
+ *  in that direction
+ *- if a coordinate is -ve then it will be offset to the
+ *  left/top of the centre by that many pixels
+ *- if a coordinate is positive it will be used unchnaged.
+ *
+ * @axis:	Input and output coordinate
+ * @panel_size:	Size of panel in pixels for that axis
+ * @picture_size:	Size of bitmap in pixels for that axis
+ */
+void video_splash_align_axis(int *axis, uint panel_size, uint picture_size);
 
 #ifdef CONFIG_VIDEO_COPY
 /**

@@ -24,13 +24,17 @@ enum {
 	START,
 	MAIN,
 
+	OBJ_LOGO,
 	OBJ_MENU,
+	OBJ_PROMPT,
 	OBJ_MENU_TITLE,
-	CUR_ITEM_TEXT,
+	OBJ_POINTER,
 
 	ITEM = 100,
 	ITEM_TEXT = 200,
 	ITEM_KEY = 300,
+
+	MARGIN_LEFT	 = 100,
 };
 
 /**
@@ -49,6 +53,7 @@ int bootflow_menu_new(struct expo **expp)
 	struct bootflow *bflow;
 	struct scene *scn;
 	struct expo *exp;
+	void *logo;
 	int ret, i;
 
 	priv = calloc(1, sizeof(*priv));
@@ -62,11 +67,25 @@ int bootflow_menu_new(struct expo **expp)
 	ret = scene_new(exp, "main", MAIN, &scn);
 	if (ret < 0)
 		return log_msg_ret("scn", ret);
+
+	ret |= scene_txt_add(scn, "prompt", OBJ_PROMPT,
+			     "Use UP and DOWN to choose, ENTER to select",
+			     NULL);
+// 	ret |= scene_obj_set_pos(scn, OBJ_PROMPT, MARGIN_LEFT, 100);
+
 	ret = scene_menu_add(scn, "main", OBJ_MENU, &menu);
-	ret |= scene_txt_add(scn, "title", OBJ_MENU_TITLE, "Main Menu", NULL);
-	ret |= scene_menu_set_title(scn, OBJ_MENU, OBJ_MENU_TITLE);
-	ret |= scene_txt_add(scn, "cur_item", CUR_ITEM_TEXT, ">", NULL);
-	ret |= scene_menu_set_pointer(scn, OBJ_MENU, CUR_ITEM_TEXT);
+	ret |= scene_obj_set_pos(scn, OBJ_MENU, MARGIN_LEFT, 100);
+// 	ret |= scene_txt_add(scn, "title", OBJ_MENU_TITLE, "Main Menu", NULL);
+	ret |= scene_menu_set_title(scn, OBJ_MENU, OBJ_PROMPT);
+
+	logo = video_get_u_boot_logo();
+	if (logo) {
+		ret |= scene_img_add(scn, "logo", OBJ_LOGO, logo, NULL);
+		ret |= scene_obj_set_pos(scn, OBJ_LOGO, -4, 4);
+	}
+
+	ret |= scene_txt_add(scn, "cur_item", OBJ_POINTER, ">", NULL);
+	ret |= scene_menu_set_pointer(scn, OBJ_MENU, OBJ_POINTER);
 	if (ret < 0)
 		return log_msg_ret("new", -EINVAL);
 
@@ -116,15 +135,22 @@ int bootflow_menu_apply_theme(struct expo *exp, ofnode node)
 	if (!font_name)
 		return log_msg_ret("fnt", -ENOENT);
 
+	/* Avoid error-checking optional items */
 	if (!ofnode_read_u32(node, "font-size", &font_size)) {
 		int i;
 
 		log_info("font size %d\n", font_size);
+		scene_txt_set_font(scn, OBJ_PROMPT, font_name, font_size);
+		scene_txt_set_font(scn, OBJ_POINTER, font_name, font_size);
+		if (ret)
+			return log_msg_ret("sz", ret);
 		for (i = 0; i < priv->num_bootflows; i++) {
 			ret = scene_txt_set_font(scn, ITEM_TEXT + i,
 						 font_name, font_size);
 			if (ret)
 				return log_msg_ret("sz", ret);
+			scene_txt_set_font(scn, ITEM_KEY + i, font_name,
+					   font_size);
 		}
 	}
 

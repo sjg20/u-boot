@@ -60,7 +60,7 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		if (ret < 0)
 			return log_msg_ret("hei", ret);
 
-		y += ret;
+		y += ret * 2;
 	}
 
 	cur_y = -1;
