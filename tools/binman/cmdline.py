@@ -128,6 +128,9 @@ controlled by a description in the board device tree.'''
         default=False, help='Update the binman node with offset/size info')
     build_parser.add_argument('--update-fdt-in-elf', type=str,
         help='Update an ELF file with the output dtb: infile,outfile,begin_sym,end_sym')
+    build_parser.add_argument(
+        '-W', '--ignore-missing-blobs', action='store_true', default=False,
+        help='Return success even if there are missing blobs')
 
     subparsers.add_parser(
         'bintool-docs', help='Write out bintool documentation (see bintool.rst)')
