@@ -33,13 +33,10 @@ struct host_ops {
 	 *
 	 * @dev: Device to update
 	 * @filename: Name of the file, e.g. "/path/to/disk.img"
-	 * @removable: true if the device should be marked as removable, false
-	 *	if it is fixed. See enum blk_flag_t
 	 * Returns: 0 if OK, -EEXIST if a file is already attached, other -ve on
 	 * other error
 	 */
-	int (*attach_file)(struct udevice *dev, const char *filename,
-			   bool removable);
+	int (*attach_file)(struct udevice *dev, const char *filename);
 
 	/**
 	 * detach_file() - Detach a file from the device
@@ -58,12 +55,10 @@ struct host_ops {
  *
  * @dev: Device to update
  * @filename: Name of the file, e.g. "/path/to/disk.img"
- * @removable: true if the device should be marked as removable, false
- *	if it is fixed. See enum blk_flag_t
  * Returns: 0 if OK, -EEXIST if a file is already attached, other -ve on
  * other error
  */
-int host_attach_file(struct udevice *dev, const char *filename, bool removable);
+int host_attach_file(struct udevice *dev, const char *filename);
 
 /**
  * host_detach_file() - Detach a file from the device
@@ -78,18 +73,19 @@ int host_detach_file(struct udevice *dev);
  * host_create_device() - Create a new host device
  *
  * @label: Label of the attachment, e.g. "test1"
+ * @removable: true if the device should be marked as removable, false
+ *	if it is fixed. See enum blk_flag_t
  * @devp: Returns the device created, on success
  * Returns: 0 if OK, -ve on error
  */
-int host_create_device(const char *label, struct udevice **devp);
+int host_create_device(const char *label, bool removable,
+		       struct udevice **devp);
 
 /**
  * host_create_attach_file() - Create a new host device attached to a file
  *
  * @label: Label of the attachment, e.g. "test1"
  * @filename: Name of the file, e.g. "/path/to/disk.img"
- * @removable: true if the device should be marked as removable, false
- *	if it is fixed. See enum blk_flag_t
  * @devp: Returns the device created, on success
  * Returns: 0 if OK, -ve on error
  */

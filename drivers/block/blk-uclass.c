@@ -26,7 +26,7 @@ static struct {
 	{ UCLASS_USB, "usb" },
 	{ UCLASS_MMC,  "mmc" },
 	{ UCLASS_AHCI, "sata" },
-	{ UCLASS_ROOT, "host" },
+	{ UCLASS_HOST, "host" },
 	{ UCLASS_NVME, "nvme" },
 	{ UCLASS_EFI_MEDIA, "efi" },
 	{ UCLASS_EFI_LOADER, "efiloader" },
@@ -494,7 +494,6 @@ unsigned long blk_derase(struct blk_desc *block_dev, lbaint_t start,
 int blk_find_from_parent(struct udevice *parent, struct udevice **devp)
 {
 	struct udevice *dev;
-	int ret;
 
 	if (device_find_first_child_by_uclass(parent, UCLASS_BLK, &dev)) {
 		debug("%s: No block device found for parent '%s'\n", __func__,

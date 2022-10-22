@@ -10,6 +10,7 @@
 #define LOG_CATEGORY UCLASS_HOST
 
 #include <common.h>
+#include <blk.h>
 #include <dm.h>
 #include <malloc.h>
 #include <sandbox_host.h>
@@ -28,11 +29,11 @@ struct host_priv {
 	struct udevice *cur_dev;
 };
 
-int host_create_device(const char *label, struct udevice **devp)
+int host_create_device(const char *label, bool removable, struct udevice **devp)
 {
-	struct host_sb_plat *plat;
 	char dev_name[30], *str, *label_new;
-	struct udevice *dev;
+	struct host_sb_plat *plat;
+	struct udevice *dev, *blk;
 	int ret;
 
 	snprintf(dev_name, sizeof(dev_name), "host-%s", label);
@@ -51,6 +52,12 @@ int host_create_device(const char *label, struct udevice **devp)
 		goto no_dev;
 	device_set_name_alloced(dev);
 
+	if (!blk_find_from_parent(dev, &blk)) {
+		struct blk_desc *desc = dev_get_uclass_plat(blk);
+
+		desc->removable = removable;
+	}
+
 	plat = dev_get_plat(dev);
 	plat->label = label_new;
 	*devp = dev;
@@ -65,14 +72,14 @@ no_label:
 	return ret;
 }
 
-int host_attach_file(struct udevice *dev, const char *filename, bool removable)
+int host_attach_file(struct udevice *dev, const char *filename)
 {
 	struct host_ops *ops = host_get_ops(dev);
 
 	if (!ops->attach_file)
 		return -ENOSYS;
 
-	return ops->attach_file(dev, filename, removable);
+	return ops->attach_file(dev, filename);
 }
 
 int host_create_attach_file(const char *label, const char *filename,
@@ -81,11 +88,11 @@ int host_create_attach_file(const char *label, const char *filename,
 	struct udevice *dev;
 	int ret;
 
-	ret = host_create_device(label, &dev);
+	ret = host_create_device(label, removable, &dev);
 	if (ret)
 		return log_msg_ret("cre", ret);
 
-	ret = host_attach_file(dev, filename, removable);
+	ret = host_attach_file(dev, filename);
 	if (ret) {
 		device_unbind(dev);
 		return log_msg_ret("att", ret);

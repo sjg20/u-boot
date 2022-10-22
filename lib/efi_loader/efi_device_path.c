@@ -17,7 +17,6 @@
 #include <nvme.h>
 #include <efi_loader.h>
 #include <part.h>
-#include <sandboxblockdev.h>
 #include <uuid.h>
 #include <asm-generic/unaligned.h>
 #include <linux/compat.h> /* U16_MAX */

@@ -589,7 +589,7 @@ static int efi_disk_create_part(struct udevice *dev)
 	efi_status_t ret;
 
 	if (dev_tag_get_ptr(dev_get_parent(dev), DM_TAG_EFI, (void **)&parent))
-		return -1;
+		return -EBADCOOKIE;
 
 	desc = dev_get_uclass_plat(dev_get_parent(dev));
 	diskid = desc->devnum;
@@ -646,6 +646,9 @@ int efi_disk_probe(void *ctx, struct event *event)
 	if (id != UCLASS_BLK)
 		return 0;
 
+	if (device_get_uclass_id(dev_get_parent(dev)) == UCLASS_HOST)
+		return 0;
+
 	/*
 	 * avoid creating duplicated objects now that efi_driver
 	 * has already created an efi_disk at this moment.
@@ -682,8 +685,11 @@ static int efi_disk_delete_raw(struct udevice *dev)
 	struct blk_desc *desc;
 	struct efi_disk_obj *diskobj;
 
+	if (device_get_uclass_id(dev_get_parent(dev)) == UCLASS_HOST)
+		return 0;
+
 	if (dev_tag_get_ptr(dev, DM_TAG_EFI, (void **)&handle))
-		return -1;
+		return -EBADCOOKIE;
 
 	desc = dev_get_uclass_plat(dev);
 	if (desc->uclass_id != UCLASS_EFI_LOADER) {
@@ -712,8 +718,11 @@ static int efi_disk_delete_part(struct udevice *dev)
 	efi_handle_t handle;
 	struct efi_disk_obj *diskobj;
 
+	if (device_get_uclass_id(dev_get_parent(dev)) == UCLASS_HOST)
+		return 0;
+
 	if (dev_tag_get_ptr(dev, DM_TAG_EFI, (void **)&handle))
-		return -1;
+		return -EBADCOOKIE;
 
 	diskobj = container_of(handle, struct efi_disk_obj, header);
 
@@ -737,11 +746,19 @@ static int efi_disk_delete_part(struct udevice *dev)
  */
 int efi_disk_remove(void *ctx, struct event *event)
 {
+	struct udevice *dev, *parent;
 	enum uclass_id id;
-	struct udevice *dev;
 
 	dev = event->data.dm.dev;
 	id = device_get_uclass_id(dev);
+
+	parent = dev_get_parent(dev);
+	if (id == UCLASS_PARTITION)
+		parent = dev_get_parent(parent);
+
+	/* Ignore host devices */
+	if (device_get_uclass_id(parent) == UCLASS_HOST)
+		return 0;
 
 	if (id == UCLASS_BLK)
 		return efi_disk_delete_raw(dev);

@@ -19,20 +19,24 @@
 #include <sandbox_host.h>
 #include <dm/device-internal.h>
 
-static int host_sb_attach_file(struct udevice *dev, const char *filename,
-			       bool removable)
+static int host_sb_attach_file(struct udevice *dev, const char *filename)
 {
 	struct host_sb_plat *plat = dev_get_plat(dev);
-	struct udevice *blk, *bdev;
 	struct blk_desc *desc;
+	struct udevice *blk;
+	int ret, fd, size;
 	char *fname;
-	int ret, fd;
 
 	if (!filename)
 		return -EINVAL;
 
 	if (plat->fd)
 		return log_msg_ret("fd", -EEXIST);
+
+	/* Sanity check that host_sb_bind() has been used */
+	ret = blk_find_from_parent(dev, &blk);
+	if (ret)
+		return ret;
 
 	fd = os_open(filename, OS_O_RDWR);
 	if (fd == -1) {
@@ -51,25 +55,8 @@ static int host_sb_attach_file(struct udevice *dev, const char *filename,
 		goto err_fname;
 	}
 
-	ret = blk_create_devicef(dev, "sandbox_host_blk", "blk", UCLASS_HOST,
-				 dev_seq(dev), 512,
-				 os_lseek(fd, 0, OS_SEEK_END) / 512, &blk);
-	if (ret)
-		goto err_blk;
-
-	desc = dev_get_uclass_plat(blk);
-	desc->removable = removable;
-	snprintf(desc->vendor, BLK_VEN_SIZE, "U-Boot");
-	snprintf(desc->product, BLK_PRD_SIZE, "hostfile");
-	snprintf(desc->revision, BLK_REV_SIZE, "1.0");
-
-	if (CONFIG_IS_ENABLED(BOOTSTD)) {
-		ret = bootdev_bind(dev, "host_bootdev", "bootdev", &bdev);
-		if (ret) {
-			log_debug("Cannot create bootdev device\n");
-			goto err_bdev;
-		}
-	}
+	size = os_filesize(fd);
+	desc->lba = size / desc->blksz;
 
 	/* write this in last, when nothing can go wrong */
 	plat = dev_get_plat(dev);
@@ -78,12 +65,6 @@ static int host_sb_attach_file(struct udevice *dev, const char *filename,
 
 	return 0;
 
-err_bdev:
-	ret = device_unbind(blk);
-	if (ret)
-		return log_msg_ret("unb", ret);
-err_blk:
-	free(fname);
 err_fname:
 	os_close(fd);
 
@@ -115,6 +96,31 @@ int host_sb_detach_file(struct udevice *dev)
 	return 0;
 }
 
+static int host_sb_bind(struct udevice *dev)
+{
+	struct udevice *blk, *bdev;
+	struct blk_desc *desc;
+	int ret;
+
+	ret = blk_create_devicef(dev, "sandbox_host_blk", "blk", UCLASS_HOST,
+				 dev_seq(dev), 512, 0, &blk);
+	if (ret)
+		return log_msg_ret("blk", ret);
+
+	desc = dev_get_uclass_plat(blk);
+	snprintf(desc->vendor, BLK_VEN_SIZE, "U-Boot");
+	snprintf(desc->product, BLK_PRD_SIZE, "hostfile");
+	snprintf(desc->revision, BLK_REV_SIZE, "1.0");
+
+	if (CONFIG_IS_ENABLED(BOOTSTD)) {
+		ret = bootdev_bind(dev, "host_bootdev", "bootdev", &bdev);
+		if (ret)
+			return log_msg_ret("bd", ret);
+	}
+
+	return 0;
+}
+
 struct host_ops host_sb_ops = {
 	.attach_file	= host_sb_attach_file,
 	.detach_file	= host_sb_detach_file,
@@ -130,5 +136,6 @@ U_BOOT_DRIVER(host_sb_drv) = {
 	.id		= UCLASS_HOST,
 	.of_match	= host_ids,
 	.ops		= &host_sb_ops,
+	.bind		= host_sb_bind,
 	.plat_auto	= sizeof(struct host_sb_plat),
 };

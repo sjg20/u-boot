@@ -50,6 +50,7 @@ Shell commands
    cmd/fdt
    cmd/for
    cmd/gpio
+   cmd/host
    cmd/load
    cmd/loadm
    cmd/loady
