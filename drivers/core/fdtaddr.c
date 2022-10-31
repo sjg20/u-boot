@@ -43,7 +43,7 @@ fdt_addr_t devfdt_get_addr_index(const struct udevice *dev, int index)
 		}
 
 		reg = fdt_getprop(gd->fdt_blob, offset, "reg", &len);
-		if (!reg || (len <= (index * sizeof(fdt32_t) * (na + ns)))) {
+		if (!reg || (len < ((index + 1) * sizeof(fdt32_t) * (na + ns)))) {
 			debug("Req index out of range\n");
 			return FDT_ADDR_T_NONE;
 		}
