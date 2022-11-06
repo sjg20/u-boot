@@ -31,7 +31,6 @@ CONFIG_CUSTOM_SYS_INIT_SP_ADDR=0x80480000
 # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
 CONFIG_SPL_LOAD_FIT=y
 CONFIG_SPL_LOAD_FIT_ADDRESS=0x81000000
-# CONFIG_USE_SPL_FIT_GENERATOR is not set
 CONFIG_OF_BOARD_SETUP=y
 CONFIG_BOOTCOMMAND="run findfdt; run envboot; run init_${boot}; run boot_rprocs; run get_fit_${boot}; run get_overlaystring; run run_fit"
 CONFIG_LOGLEVEL=7
