@@ -101,6 +101,19 @@ static int dm_test_usb_multi(struct unit_test_state *uts)
 }
 DM_TEST(dm_test_usb_multi, UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
 
+/* test that we can scan storage devices */
+static int dm_test_usb_stor(struct unit_test_state *uts)
+{
+	state_set_skip_delays(true);
+	ut_assertok(run_command("usb start", 0));
+	ut_assertok(usb_init());
+	ut_asserteq(0, usb_stor_scan(1));
+	ut_assertok(usb_stop());
+
+	return 0;
+}
+DM_TEST(dm_test_usb_stor, UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
+
 /* test that we have an associated ofnode with the usb device */
 static int dm_test_usb_fdt_node(struct unit_test_state *uts)
 {

@@ -107,22 +107,65 @@ BOOTSTD_TEST(bootdev_test_cmd_select, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 static int bootdev_test_labels(struct unit_test_state *uts)
 {
 	struct udevice *dev, *media;
+	int mflags = 0;
 
-	ut_assertok(bootdev_find_by_label("mmc2", &dev, NULL));
+	ut_assertok(bootdev_find_by_label("mmc2", &dev, &mflags));
 	ut_asserteq(UCLASS_BOOTDEV, device_get_uclass_id(dev));
+	ut_asserteq(0, mflags);
 	media = dev_get_parent(dev);
 	ut_asserteq(UCLASS_MMC, device_get_uclass_id(media));
 	ut_asserteq_str("mmc2", media->name);
 
+	/* Check method flags */
+	ut_assertok(bootdev_find_by_label("pxe", &dev, &mflags));
+	ut_asserteq(BOOTFLOW_METHF_PXE_ONLY, mflags);
+	ut_assertok(bootdev_find_by_label("dhcp", &dev, &mflags));
+	ut_asserteq(BOOTFLOW_METHF_DHCP_ONLY, mflags);
+
 	/* Check invalid uclass */
-	ut_asserteq(-EINVAL, bootdev_find_by_label("fred0", &dev, NULL));
+	ut_asserteq(-EINVAL, bootdev_find_by_label("fred0", &dev, &mflags));
 
 	/* Check unknown sequence number */
-	ut_asserteq(-ENOENT, bootdev_find_by_label("mmc6", &dev, NULL));
+	ut_asserteq(-ENOENT, bootdev_find_by_label("mmc6", &dev, &mflags));
 
 	return 0;
 }
 BOOTSTD_TEST(bootdev_test_labels, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+
+/* Check bootdev_find_by_any() */
+static int bootdev_test_any(struct unit_test_state *uts)
+{
+	struct udevice *dev, *media;
+	int mflags;
+
+	/* this happens to have a dev_seq() of 8 ('dm uclass' to see) */
+	console_record_reset_enable();
+	ut_assertok(bootdev_find_by_any("8", &dev, &mflags));
+	ut_asserteq(UCLASS_BOOTDEV, device_get_uclass_id(dev));
+	ut_asserteq(0, mflags);
+	media = dev_get_parent(dev);
+	ut_asserteq(UCLASS_MMC, device_get_uclass_id(media));
+	ut_asserteq_str("mmc2", media->name);
+	ut_assert_console_end();
+
+	/* there should not be this many bootdevs */
+	ut_asserteq(-ENODEV, bootdev_find_by_any("50", &dev, &mflags));
+	ut_assert_nextline("Cannot find '50' (err=-19)");
+	ut_assert_console_end();
+
+	/* Check method flags */
+	ut_assertok(bootdev_find_by_any("pxe", &dev, &mflags));
+	ut_asserteq(BOOTFLOW_METHF_PXE_ONLY, mflags);
+
+	/* Check invalid uclass */
+	ut_asserteq(-EINVAL, bootdev_find_by_any("fred0", &dev, &mflags));
+	ut_assert_nextline("Unknown uclass 'fred0' in label");
+	ut_assert_nextline("Cannot find bootdev 'fred0' (err=-22)");
+	ut_assert_console_end();
+
+	return 0;
+}
+BOOTSTD_TEST(bootdev_test_any, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check bootdev ordering with the bootdev-order property */
 static int bootdev_test_order(struct unit_test_state *uts)
@@ -193,7 +236,6 @@ static int bootdev_test_prio(struct unit_test_state *uts)
 	struct bootflow_iter iter;
 	struct bootflow bflow;
 	struct udevice *blk;
-	int i;
 
 	state_set_skip_delays(true);
 
@@ -287,12 +329,21 @@ static int bootdev_test_cmd_hunt(struct unit_test_state *uts)
 	ut_assertok(run_command("bootdev hunt -l", 0));
 	ut_assert_nextline("Prio  Used  Uclass           Hunter");
 	ut_assert_nextlinen("----");
-	ut_assert_skip_to_line("(total hunters: 9)");
+	ut_assert_nextline("   6        ethernet         eth_bootdev");
+	ut_assert_skip_to_line("(total hunters: 8)");
+	ut_assert_console_end();
+
+	/* Use the MMC hunter and see that it updates */
+	ut_assertok(run_command("bootdev hunt mmc", 0));
+	ut_assertok(run_command("bootdev hunt -l", 0));
+	ut_assert_skip_to_line("   5        ide              ide_bootdev");
+	ut_assert_nextline("   2     *  mmc              mmc_bootdev");
+	ut_assert_skip_to_line("(total hunters: 8)");
 	ut_assert_console_end();
 
 	/* Scan all hunters */
 	sandbox_set_eth_enable(false);
-
+	state_set_skip_delays(true);
 	ut_assertok(run_command("bootdev hunt", 0));
 	ut_assert_nextline("Hunting with: ethernet");
 
@@ -334,6 +385,21 @@ static int bootdev_test_cmd_hunt(struct unit_test_state *uts)
 }
 BOOTSTD_TEST(bootdev_test_cmd_hunt, UT_TESTF_DM | UT_TESTF_SCAN_FDT |
 	     UT_TESTF_ETH_BOOTDEV);
+
+/* Check searching for bootdevs using the hunters */
+static int bootdev_test_hunt_scan(struct unit_test_state *uts)
+{
+	struct bootflow_iter iter;
+	struct bootflow bflow;
+
+	ut_assertok(bootstd_test_drop_bootdev_order(uts));
+	ut_assertok(bootflow_scan_first(&iter, BOOTFLOWF_SHOW | BOOTFLOWF_HUNT |
+					BOOTFLOWF_SKIP_GLOBAL, &bflow));
+	ut_assertok(bootstd_test_check_mmc_hunter(uts));
+
+	return 0;
+}
+BOOTSTD_TEST(bootdev_test_hunt_scan, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
 /* Check that only bootable partitions are processed */
 static int bootdev_test_bootable(struct unit_test_state *uts)
