@@ -103,17 +103,17 @@ static int bootdev_test_labels(struct unit_test_state *uts)
 {
 	struct udevice *dev, *media;
 
-	ut_assertok(bootdev_find_by_label("mmc2", &dev));
+	ut_assertok(bootdev_find_by_label("mmc2", &dev, NULL));
 	ut_asserteq(UCLASS_BOOTDEV, device_get_uclass_id(dev));
 	media = dev_get_parent(dev);
 	ut_asserteq(UCLASS_MMC, device_get_uclass_id(media));
 	ut_asserteq_str("mmc2", media->name);
 
 	/* Check invalid uclass */
-	ut_asserteq(-EINVAL, bootdev_find_by_label("fred0", &dev));
+	ut_asserteq(-EINVAL, bootdev_find_by_label("fred0", &dev, NULL));
 
 	/* Check unknown sequence number */
-	ut_asserteq(-ENOENT, bootdev_find_by_label("mmc6", &dev));
+	ut_asserteq(-ENOENT, bootdev_find_by_label("mmc6", &dev, NULL));
 
 	return 0;
 }
