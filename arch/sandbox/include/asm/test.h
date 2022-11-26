@@ -334,4 +334,18 @@ void sandbox_set_fake_efi_mgr_dev(struct udevice *dev, bool fake_dev);
  */
 int sandbox_load_other_fdt(void **fdtp, int *sizep);
 
+/**
+ * sandbox_set_eth_enable() - Enable / disable the ethernet bootdev hunter
+ *
+ * @enable: true to enable the hunter, false to disable
+ */
+void sandbox_set_eth_enable(bool enable);
+
+/**
+ * sandbox_eth_enabled() - Check if Ethernet is enabled
+ *
+ * Returns: true if Ethernet is enabled on sandbox, False if not
+ */
+bool sandbox_eth_enabled(void);
+
 #endif

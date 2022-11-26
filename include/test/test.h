@@ -169,4 +169,15 @@ static inline int test_load_other_fdt(struct unit_test_state *uts)
 	return ret;
 }
 
+/* Allow etthernet to be disabled for testing purposes */
+static inline bool test_eth_enabled(void)
+{
+	bool enabled = true;
+
+#ifdef CONFIG_SANDBOX
+	enabled = sandbox_eth_enabled();
+#endif
+	return enabled;
+}
+
 #endif /* __TEST_TEST_H */
