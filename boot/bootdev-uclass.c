@@ -407,12 +407,12 @@ static int label_to_uclass(const char *label, int *seqp, int *method_flagsp)
 int bootdev_find_by_label(const char *label, struct udevice **devp,
 			  int *method_flagsp)
 {
+	int seq, ret, method_flags = 0;
 	struct udevice *media;
 	struct uclass *uc;
 	enum uclass_id id;
-	int seq, ret;
 
-	ret = label_to_uclass(label, &seq, method_flagsp);
+	ret = label_to_uclass(label, &seq, &method_flags);
 	if (ret < 0)
 		return log_msg_ret("uc", ret);
 	id = ret;
@@ -442,6 +442,8 @@ int bootdev_find_by_label(const char *label, struct udevice **devp,
 		if (!ret) {
 			log_debug("- found %s\n", bdev->name);
 			*devp = bdev;
+			if (method_flagsp)
+				*method_flagsp = method_flags;
 			return 0;
 		}
 		log_debug("- no device in %s\n", media->name);
@@ -488,6 +490,21 @@ int bootdev_find_by_any(const char *name, struct udevice **devp,
 	}
 
 	*devp = dev;
+
+	return 0;
+}
+
+int bootdev_hunt_and_find_by_label(const char *label, struct udevice **devp,
+				   int *method_flagsp)
+{
+	int ret;
+
+	ret = bootdev_hunt(label, false);
+	if (ret)
+		return log_msg_ret("scn", ret);
+	ret = bootdev_find_by_label(label, devp, method_flagsp);
+	if (ret)
+		return log_msg_ret("fnd", ret);
 
 	return 0;
 }

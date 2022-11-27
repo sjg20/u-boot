@@ -355,27 +355,55 @@ static int bootdev_test_bootable(struct unit_test_state *uts)
 }
 BOOTSTD_TEST(bootdev_test_bootable, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
-/* Check hunting for bootdev of a particular priority */
-static int bootdev_test_hunt_prio(struct unit_test_state *uts)
+/* Check hunting for bootdevs with a particular label */
+static int bootdev_test_hunt_label(struct unit_test_state *uts)
 {
-	state_set_skip_delays(true);
+	struct udevice *dev, *old;
+	struct bootstd_priv *std;
+	int mflags;
 
+	/* get access to the used hunters */
+	ut_assertok(bootstd_get_priv(&std));
+
+	/* scan an unknown uclass */
 	console_record_reset_enable();
-	ut_assertok(bootdev_hunt_prio(BOOTDEVP_4_SCAN_FAST, false));
-	ut_assert_nextline("scanning bus for devices...");
-	ut_assert_skip_to_line("            Type: Hard Disk");
-	ut_assert_nextlinen("            Capacity:");
+	old = (void *)&mflags;   /* abitrary pointer to check against dev */
+	dev = old;
+	mflags = 123;
+	ut_asserteq(-EINVAL,
+		    bootdev_hunt_and_find_by_label("fred", &dev, &mflags));
+	ut_assert_nextline("Unknown uclass 'fred' in label");
+	ut_asserteq_ptr(old, dev);
+	ut_asserteq(123, mflags);
+	ut_assert_console_end();
+	ut_asserteq(0, std->hunters_used);
+
+	/* scan an invalid mmc controllers */
+	ut_asserteq(-ENOENT,
+		    bootdev_hunt_and_find_by_label("mmc4", &dev, &mflags));
+	ut_asserteq_ptr(old, dev);
+	ut_asserteq(123, mflags);
+	ut_assert_nextline("Unknown seq 4 for label 'mmc4'");
 	ut_assert_console_end();
 
-	/* now try a different priority, verbosely */
-	ut_assertok(bootdev_hunt_prio(BOOTDEVP_5_SCAN_SLOW, true));
-	ut_assert_nextline("Hunting with: ide");
-	ut_assert_nextline("Bus 0: not available  ");
-	ut_assert_nextline("Hunting with: usb");
-	ut_assert_nextline(
-		"Bus usb@1: scanning bus usb@1 for devices... 5 USB Device(s) found");
+	ut_assertok(bootstd_test_check_mmc_hunter(uts));
+
+	/* scan for a particular mmc controller */
+	ut_assertok(bootdev_hunt_and_find_by_label("mmc1", &dev, &mflags));
+	ut_assertnonnull(dev);
+	ut_asserteq_str("mmc1.bootdev", dev->name);
+	ut_asserteq(0, mflags);
+	ut_assert_console_end();
+
+	/* scan all of usb */
+	state_set_skip_delays(true);
+	ut_assertok(bootdev_hunt_and_find_by_label("usb", &dev, &mflags));
+	ut_assertnonnull(dev);
+	ut_asserteq_str("usb_mass_storage.lun0.bootdev", dev->name);
+	ut_asserteq(0, mflags);
+	ut_assert_nextlinen("Bus usb@1: scanning bus usb@1");
 	ut_assert_console_end();
 
 	return 0;
 }
-BOOTSTD_TEST(bootdev_test_hunt_prio, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+BOOTSTD_TEST(bootdev_test_hunt_label, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
