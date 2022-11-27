@@ -189,6 +189,7 @@ static int bootflow_cmd_info(struct unit_test_state *uts)
 	ut_assert_nextline("Filename:  /extlinux/extlinux.conf");
 	ut_assert_nextlinen("Buffer:    ");
 	ut_assert_nextline("Size:      253 (595 bytes)");
+	ut_assert_nextline("FDT:       <NULL>");
 	ut_assert_nextline("Error:     0");
 	ut_assert_console_end();
 

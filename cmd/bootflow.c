@@ -337,6 +337,12 @@ static int do_bootflow_info(struct cmd_tbl *cmdtp, int flag, int argc,
 	printf("Filename:  %s\n", bflow->fname);
 	printf("Buffer:    %lx\n", (ulong)map_to_sysmem(bflow->buf));
 	printf("Size:      %x (%d bytes)\n", bflow->size, bflow->size);
+	printf("FDT:       %s\n", bflow->fdt_fname);
+	if (bflow->fdt_fname) {
+		printf("FDT size:  %x (%d bytes)\n", bflow->fdt_size,
+		       bflow->fdt_size);
+		printf("FDT addr:  %lx\n", bflow->fdt_addr);
+	}
 	printf("Error:     %d\n", bflow->err);
 	if (dump && bflow->buf) {
 		/* Set some sort of maximum on the size */
