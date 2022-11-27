@@ -655,6 +655,8 @@ int efi_disk_probe(void *ctx, struct event *event)
 	struct udevice *child;
 	int ret;
 
+	return 0;
+
 	dev = event->data.dm.dev;
 	id = device_get_uclass_id(dev);
 
@@ -756,6 +758,7 @@ int efi_disk_remove(void *ctx, struct event *event)
 	enum uclass_id id;
 	struct udevice *dev;
 
+	return 0;
 	dev = event->data.dm.dev;
 	id = device_get_uclass_id(dev);
 
