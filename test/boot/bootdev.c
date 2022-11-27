@@ -238,14 +238,14 @@ static int bootdev_test_hunter(struct unit_test_state *uts)
 	bootdev_list_hunters(std);
 	ut_assert_nextline("Prio  Used  Uclass           Hunter");
 	ut_assert_nextlinen("----");
-	ut_assert_nextline("  50        ethernet         eth_bootdev");
-	ut_assert_nextline("  40        ide              ide_bootdev");
-	ut_assert_nextline("  10        mmc              mmc_bootdev");
-	ut_assert_nextline("  30        nvme             nvme_bootdev");
-	ut_assert_nextline("  30        scsi             scsi_bootdev");
-	ut_assert_nextline("  30        spi_flash        sf_bootdev");
-	ut_assert_nextline("  40        usb              usb_bootdev");
-	ut_assert_nextline("  30        virtio           virtio_bootdev");
+	ut_assert_nextline("   6        ethernet         eth_bootdev");
+	ut_assert_nextline("   5        ide              ide_bootdev");
+	ut_assert_nextline("   2        mmc              mmc_bootdev");
+	ut_assert_nextline("   4        nvme             nvme_bootdev");
+	ut_assert_nextline("   4        scsi             scsi_bootdev");
+	ut_assert_nextline("   4        spi_flash        sf_bootdev");
+	ut_assert_nextline("   5        usb              usb_bootdev");
+	ut_assert_nextline("   4        virtio           virtio_bootdev");
 	ut_assert_nextline("(total hunters: 8)");
 	ut_assert_console_end();
 
@@ -300,14 +300,14 @@ static int bootdev_test_cmd_hunt(struct unit_test_state *uts)
 	ut_assertok(run_command("bootdev hunt -l", 0));
 	ut_assert_nextlinen("Prio");
 	ut_assert_nextlinen("----");
-	ut_assert_nextline("  50     *  ethernet         eth_bootdev");
-	ut_assert_nextline("  40     *  ide              ide_bootdev");
-	ut_assert_nextline("  10     *  mmc              mmc_bootdev");
-	ut_assert_nextline("  30     *  nvme             nvme_bootdev");
-	ut_assert_nextline("  30     *  scsi             scsi_bootdev");
-	ut_assert_nextline("  30     *  spi_flash        sf_bootdev");
-	ut_assert_nextline("  40     *  usb              usb_bootdev");
-	ut_assert_nextline("  30     *  virtio           virtio_bootdev");
+	ut_assert_nextline("   6     *  ethernet         eth_bootdev");
+	ut_assert_nextline("   5     *  ide              ide_bootdev");
+	ut_assert_nextline("   2     *  mmc              mmc_bootdev");
+	ut_assert_nextline("   4     *  nvme             nvme_bootdev");
+	ut_assert_nextline("   4     *  scsi             scsi_bootdev");
+	ut_assert_nextline("   4     *  spi_flash        sf_bootdev");
+	ut_assert_nextline("   5     *  usb              usb_bootdev");
+	ut_assert_nextline("   4     *  virtio           virtio_bootdev");
 	ut_assert_nextline("(total hunters: 8)");
 	ut_assert_console_end();
 
@@ -361,14 +361,14 @@ static int bootdev_test_hunt_prio(struct unit_test_state *uts)
 	state_set_skip_delays(true);
 
 	console_record_reset_enable();
-	ut_assertok(bootdev_hunt_prio(BOOTDEVP_2_SCAN_FAST, false));
+	ut_assertok(bootdev_hunt_prio(BOOTDEVP_4_SCAN_FAST, false));
 	ut_assert_nextline("scanning bus for devices...");
 	ut_assert_skip_to_line("            Type: Hard Disk");
 	ut_assert_nextlinen("            Capacity:");
 	ut_assert_console_end();
 
 	/* now try a different priority, verbosely */
-	ut_assertok(bootdev_hunt_prio(BOOTDEVP_3_SCAN_SLOW, true));
+	ut_assertok(bootdev_hunt_prio(BOOTDEVP_5_SCAN_SLOW, true));
 	ut_assert_nextline("Hunting with: ide");
 	ut_assert_nextline("Bus 0: not available  ");
 	ut_assert_nextline("Hunting with: usb");
