@@ -6,6 +6,11 @@
 ifndef CONFIG_SPL_BUILD
 obj-$(CONFIG_DM_SCSI) += scsi-uclass.o
 obj-$(CONFIG_SCSI) += scsi.o
+
+ifdef CONFIG_DM_SCSI
+obj-$(CONFIG_$(SPL_TPL_)BOOTSTD) += scsi_bootdev.o
+endif
+
 endif
 
 ifdef CONFIG_SPL_BUILD
