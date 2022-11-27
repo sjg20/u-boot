@@ -30,6 +30,8 @@ struct udevice;
  * @bootmeth_count: Number of bootmeth devices in @bootmeth_order
  * @bootmeth_order: List of bootmeth devices to use, in order, NULL-terminated
  * @vbe_bootmeth: Currently selected VBE bootmeth, NULL if none
+ * @hunters_used: Bitmask of used hunters, indexed by their position in the
+ * linker list. The bit is set if the hunter has been used already
  */
 struct bootstd_priv {
 	const char **prefixes;
@@ -41,6 +43,7 @@ struct bootstd_priv {
 	int bootmeth_count;
 	struct udevice **bootmeth_order;
 	struct udevice *vbe_bootmeth;
+	uint hunters_used;
 };
 
 /**
