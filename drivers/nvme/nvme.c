@@ -806,7 +806,7 @@ static const struct blk_ops nvme_blk_ops = {
 };
 
 U_BOOT_DRIVER(nvme_blk) = {
-	.name	= "nvme-blk",
+	.name	= "nvme_blk",
 	.id	= UCLASS_BLK,
 	.probe	= nvme_blk_probe,
 	.ops	= &nvme_blk_ops,
@@ -888,7 +888,7 @@ int nvme_init(struct udevice *udev)
 		sprintf(name, "blk#%d", i);
 
 		/* The real blksz and size will be set by nvme_blk_probe() */
-		ret = blk_create_devicef(udev, "nvme-blk", name, UCLASS_NVME,
+		ret = blk_create_devicef(udev, "nvme_blk", name, UCLASS_NVME,
 					 -1, 512, 0, &ns_udev);
 		if (ret)
 			goto free_id;
