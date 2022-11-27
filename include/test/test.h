@@ -171,7 +171,7 @@ static inline int test_load_other_fdt(struct unit_test_state *uts)
 	return ret;
 }
 
-/* Allow etthernet to be disabled for testing purposes */
+/* Allow ethernet to be disabled for testing purposes */
 static inline bool test_eth_enabled(void)
 {
 	bool enabled = true;
@@ -182,7 +182,7 @@ static inline bool test_eth_enabled(void)
 	return enabled;
 }
 
-/* Allow etthernet bootdev to be ignored for testing purposes */
+/* Allow ethernet bootdev to be ignored for testing purposes */
 static inline bool test_eth_bootdev_enabled(void)
 {
 	bool enabled = true;
