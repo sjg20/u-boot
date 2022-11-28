@@ -88,6 +88,7 @@ struct bootflow {
  *
  * @BOOTFLOWF_SINGLE_DEV: Just scan one bootmeth
  * @BOOTFLOWF_SKIP_GLOBAL: (internal) Don't scan global bootmeths
+ * @BOOTFLOWF_SINGLE_UCLASS: (internal) Keep scanning through all devices in
  * this uclass
  */
 enum bootflow_flags_t {
@@ -102,7 +103,7 @@ enum bootflow_flags_t {
 	 */
 	BOOTFLOWF_SINGLE_DEV	= 1 << 16,
 	BOOTFLOWF_SKIP_GLOBAL	= 1 << 17,
-};
+	BOOTFLOWF_SINGLE_UCLASS	= 1 << 18,};
 
 /**
  * enum bootflow_meth_flags_t - flags controlling which bootmeths are used
@@ -162,6 +163,8 @@ enum bootflow_meth_flags_t {
  *	happens before the normal ones)
  * @method_flags: flags controlling which methods should be used for this @dev
  * (enum bootflow_meth_flags_t)
+ * @single_label: A single label that we are iterating through (e.g. "mmc0" or
+ * "mmc")
  */
 struct bootflow_iter {
 	int flags;
@@ -181,6 +184,7 @@ struct bootflow_iter {
 	struct udevice **method_order;
 	bool doing_global;
 	int method_flags;
+	const char *single_label;
 };
 
 /**
@@ -231,14 +235,18 @@ int bootflow_iter_drop_bootmeth(struct bootflow_iter *iter,
  *
  * @dev:	Boot device to scan, NULL to work through all of them until it
  *	finds one that can supply a bootflow
+ * @label:	Label to control the scan, NULL to work through all devices
+ *	until it finds one that can supply a bootflow
  * @iter:	Place to store private info (inited by this call)
- * @flags:	Flags for iterator (enum bootflow_flags_t)
+ * @flags:	Flags for iterator (enum bootflow_flags_t). Note that if @dev
+ * is NULL, then BOOTFLOWF_SKIP_GLOBAL is set automatically by this function
  * @bflow:	Place to put the bootflow if found
  * Return: 0 if found,  -ENODEV if no device, other -ve on other error
  *	(iteration can continue)
  */
-int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
-			  int flags, struct bootflow *bflow);
+int bootflow_scan_bootdev(struct udevice *dev, const char *label,
+			  struct bootflow_iter *iter, int flags,
+			  struct bootflow *bflow);
 
 /**
  * bootflow_scan_first() - find the first bootflow

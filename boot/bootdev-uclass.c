@@ -640,10 +640,10 @@ int bootdev_next_prio(struct bootflow_iter *iter, struct udevice **devp)
 	return 0;
 }
 
-int bootdev_setup_iter_order(struct bootflow_iter *iter, struct udevice **devp,
-			     int *method_flagsp)
+int bootdev_setup_iter_order(struct bootflow_iter *iter, const char *label,
+			     struct udevice **devp, int *method_flagsp)
 {
-	struct udevice *bootstd, *dev = *devp;
+	struct udevice *bootstd, *dev = NULL;
 	bool show = iter->flags & BOOTFLOWF_SHOW;
 	int ret;
 
@@ -664,6 +664,19 @@ int bootdev_setup_iter_order(struct bootflow_iter *iter, struct udevice **devp,
 	if (dev) {
 		iter->flags |= BOOTFLOWF_SINGLE_DEV;
 		log_debug("Selected boodev: %s\n", dev->name);
+	} else if (label) {
+		iter->single_label = label;
+		if (iter->flags & BOOTFLOWF_HUNT) {
+			ret = bootdev_hunt(label, show);
+			if (ret)
+				return log_msg_ret("hun", ret);
+		}
+		ret = bootdev_find_by_any(label, &dev, method_flagsp);
+		if (ret)
+			return log_msg_ret("lab", ret);
+
+		iter->flags |= BOOTFLOWF_SINGLE_UCLASS;
+		log_debug("Selected label: %s, flags %x\n", label, iter->flags);
 	} else {
 		bool ok;
 
