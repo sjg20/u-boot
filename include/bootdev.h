@@ -274,10 +274,13 @@ int bootdev_find_by_any(const char *name, struct udevice **devp,
  * @devp: On entry, *devp is NULL to scan all, otherwise this is the (single)
  *	device to scan. Returns the first device to use, which is the passed-in
  *	@devp if it was non-NULL
+ * @method_flagsp: If non-NULL, returns any flags implied by the label
+ * (enum bootflow_meth_flags_t), 0 if none
  * Return: 0 if OK, -ENOENT if no bootdevs, -ENOMEM if out of memory, other -ve
  *	on other error
  */
-int bootdev_setup_iter_order(struct bootflow_iter *iter, struct udevice **devp);
+int bootdev_setup_iter_order(struct bootflow_iter *iter, struct udevice **devp,
+			     int *method_flagsp);
 
 /**
  * bootdev_list_hunters() - List the available bootdev hunters
