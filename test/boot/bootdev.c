@@ -256,10 +256,10 @@ static int bootdev_test_prio(struct unit_test_state *uts)
 	struct bootflow bflow;
 	struct udevice *blk;
 
-	state_set_skip_delays(true);
+	test_set_skip_delays(true);
 
 	/* disable ethernet since the hunter will run dhcp */
-	sandbox_set_eth_enable(false);
+	test_set_eth_enable(false);
 
 	/* Start up USB which gives us three additional bootdevs */
 	usb_started = false;
@@ -302,7 +302,7 @@ static int bootdev_test_hunter(struct unit_test_state *uts)
 {
 	struct bootstd_priv *std;
 
-	state_set_skip_delays(true);
+	test_set_skip_delays(true);
 
 	/* get access to the used hunters */
 	ut_assertok(bootstd_get_priv(&std));
@@ -340,7 +340,7 @@ static int bootdev_test_cmd_hunt(struct unit_test_state *uts)
 {
 	struct bootstd_priv *std;
 
-	state_set_skip_delays(true);
+	test_set_skip_delays(true);
 
 	/* get access to the used hunters */
 	ut_assertok(bootstd_get_priv(&std));
@@ -362,8 +362,8 @@ static int bootdev_test_cmd_hunt(struct unit_test_state *uts)
 	ut_assert_console_end();
 
 	/* Scan all hunters */
-	sandbox_set_eth_enable(false);
-	state_set_skip_delays(true);
+	test_set_eth_enable(false);
+	test_set_skip_delays(true);
 	ut_assertok(run_command("bootdev hunt", 0));
 	ut_assert_nextline("Hunting with: ethernet");
 
@@ -468,7 +468,7 @@ BOOTSTD_TEST(bootdev_test_bootable, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check hunting for bootdev of a particular priority */
 static int bootdev_test_hunt_prio(struct unit_test_state *uts)
 {
-	state_set_skip_delays(true);
+	test_set_skip_delays(true);
 
 	console_record_reset_enable();
 	ut_assertok(bootdev_hunt_prio(BOOTDEVP_4_SCAN_FAST, false));
@@ -531,7 +531,7 @@ static int bootdev_test_hunt_label(struct unit_test_state *uts)
 	ut_assert_console_end();
 
 	/* scan all of usb */
-	state_set_skip_delays(true);
+	test_set_skip_delays(true);
 	ut_assertok(bootdev_hunt_and_find_by_label("usb", &dev, &mflags));
 	ut_assertnonnull(dev);
 	ut_asserteq_str("usb_mass_storage.lun0.bootdev", dev->name);
@@ -553,7 +553,7 @@ static int bootdev_test_next_label(struct unit_test_state *uts)
 	struct udevice *dev;
 	int mflags;
 
-	sandbox_set_eth_enable(false);
+	test_set_eth_enable(false);
 
 	/* get access to the used hunters */
 	ut_assertok(bootstd_get_priv(&std));
@@ -631,8 +631,8 @@ static int bootdev_test_next_prio(struct unit_test_state *uts)
 	struct udevice *dev;
 	int ret;
 
-	sandbox_set_eth_enable(false);
-	state_set_skip_delays(true);
+	test_set_eth_enable(false);
+	test_set_skip_delays(true);
 
 	/* get access to the used hunters */
 	ut_assertok(bootstd_get_priv(&std));

@@ -71,7 +71,7 @@ BOOTSTD_TEST(bootflow_cmd, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check 'bootflow scan' with a label / seq */
 static int bootflow_cmd_label(struct unit_test_state *uts)
 {
-	sandbox_set_eth_enable(false);
+	test_set_eth_enable(false);
 
 	console_record_reset_enable();
 	ut_assertok(run_command("bootflow scan -lH mmc1", 0));
@@ -525,8 +525,8 @@ static int bootflow_cmd_hunt_label(struct unit_test_state *uts)
 	/* get access to the used hunters */
 	ut_assertok(bootstd_get_priv(&std));
 
-	state_set_skip_delays(true);
-	sandbox_set_eth_enable(false);
+	test_set_skip_delays(true);
+	test_set_eth_enable(false);
 	ut_assertok(bootstd_test_drop_bootdev_order(uts));
 
 	console_record_reset_enable();

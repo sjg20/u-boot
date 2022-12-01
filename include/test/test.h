@@ -225,4 +225,20 @@ static inline void test_sf_set_enable_bootdevs(bool enable)
 #endif
 }
 
+/**
+ * Control skipping of time delays
+ *
+ * Some tests have unnecessay time delays (e.g. USB). Allow these to be
+ * skipped to speed up testing
+ *
+ * @param skip_delays	true to skip delays from now on, false to honour delay
+ *			requests
+ */
+static inline void test_set_skip_delays(bool skip_delays)
+{
+#ifdef CONFIG_SANDBOX
+	state_set_skip_delays(skip_delays);
+#endif
+}
+
 #endif /* __TEST_TEST_H */
