@@ -29,7 +29,8 @@ struct rockchip_timer_priv {
 	struct rk_timer *timer;
 };
 
-static inline int64_t rockchip_timer_get_curr_value(struct rk_timer *timer)
+static inline notrace int64_t
+		rockchip_timer_get_curr_value(struct rk_timer *timer)
 {
 	uint64_t timebase_h, timebase_l;
 	uint64_t cntr;
@@ -57,6 +58,9 @@ ulong timer_get_boot_us(void)
 		timer_get_count(gd->timer, &ticks);
 	} else if (CONFIG_IS_ENABLED(OF_REAL) && ret == -EAGAIN) {
 		/* We have been called so early that the DM is not ready,... */
+
+		bootstage_start(BOOTSTAGE_ID_ACCUM_TIMER, "timer");
+
 		ofnode node = offset_to_ofnode(-1);
 		struct rk_timer *timer = NULL;
 
@@ -78,6 +82,7 @@ ulong timer_get_boot_us(void)
 			debug("%s: could not read clock-frequency\n", __func__);
 			return 0;
 		}
+		bootstage_accum(BOOTSTAGE_ID_ACCUM_TIMER);
 	} else {
 		return 0;
 	}
@@ -87,7 +92,7 @@ ulong timer_get_boot_us(void)
 }
 #endif
 
-static u64 rockchip_timer_get_count(struct udevice *dev)
+static u64 notrace rockchip_timer_get_count(struct udevice *dev)
 {
 	struct rockchip_timer_priv *priv = dev_get_priv(dev);
 	uint64_t cntr = rockchip_timer_get_curr_value(priv->timer);
