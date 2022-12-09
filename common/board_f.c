@@ -9,6 +9,8 @@
  * Marius Groeger <mgroeger@sysgo.de>
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <bloblist.h>
 #include <bootstage.h>
