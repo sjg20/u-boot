@@ -11,7 +11,7 @@ class Entry_tee_os(Entry_blob_named_by_arg):
 
     Properties / Entry arguments:
         - tee-os-path: Filename of file to read into entry. This is typically
-            called tee-pager.bin
+            called tee.bin or tee.elf
 
     This entry holds the run-time firmware, typically started by U-Boot SPL.
     See the U-Boot README for your architecture or board for how to use it. See
