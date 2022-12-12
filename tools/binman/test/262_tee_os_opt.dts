@@ -15,5 +15,7 @@
 			 */
 			filename = "tee.elf";
 		};
+		u-boot {
+		};
 	};
 };

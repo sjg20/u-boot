@@ -5,6 +5,7 @@
 #
 
 from binman.etype.blob_named_by_arg import Entry_blob_named_by_arg
+from binman import elf
 
 class Entry_tee_os(Entry_blob_named_by_arg):
     """Entry containing an OP-TEE Trusted OS (TEE) blob
@@ -16,6 +17,9 @@ class Entry_tee_os(Entry_blob_named_by_arg):
     This entry holds the run-time firmware, typically started by U-Boot SPL.
     See the U-Boot README for your architecture or board for how to use it. See
     https://github.com/OP-TEE/optee_os for more information about OP-TEE.
+
+    Note that if the file is in ELF format, it must go in a FIT. In that case,
+    this entry will mark itself as not present.
     """
     def __init__(self, section, etype, node):
         super().__init__(section, etype, node, 'tee-os')
@@ -25,6 +29,6 @@ class Entry_tee_os(Entry_blob_named_by_arg):
         ok = super().ObtainContents(fake_size)
         if not ok:
             return False
-        if not self.missing:
+        if not self.missing and elf.is_valid(self.data):
             self.mark_not_present('uses Elf format which must be in a FIT')
         return True

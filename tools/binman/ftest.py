@@ -5364,7 +5364,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
     def testPackTeeOsOptional(self):
         """Test that an image with an optional TEE binary can be created"""
         data = self._DoReadFile('262_tee_os_opt.dts')
-        self.assertEqual(0, len(data))
+        self.assertEqual(U_BOOT_DATA, data)
 
     def testFitFdtOper(self):
         """Check handling of a specified FIT operation"""
