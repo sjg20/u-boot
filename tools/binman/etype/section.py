@@ -672,6 +672,9 @@ class Entry_section(Entry):
 
     def GetEntryContents(self, skip_entry=None):
         """Call ObtainContents() for each entry in the section
+
+        Note that this may set entry.present to False if the entry is not
+        actually needed
         """
         def _CheckDone(entry):
             if entry != skip_entry:
@@ -715,6 +718,9 @@ class Entry_section(Entry):
             self.Raise('Internal error: Could not complete processing of contents: remaining %s' %
                        todo)
         return True
+
+    def CheckPresent(self):
+        self._entries = {n: e for n, e in self._entries.items() if e.present}
 
     def _SetEntryOffsetSize(self, name, offset, size):
         """Set the offset and size of an entry

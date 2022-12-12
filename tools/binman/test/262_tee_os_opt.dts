@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: GPL-2.0+
+
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	binman {
+		tee-os {
+			/*
+			 * this results in nothing being added since only the
+			 * .bin format is supported by this etype, unless it is
+			 * part of a FIT
+			 */
+			filename = "tee.elf";
+		};
+	};
+};

@@ -20,3 +20,11 @@ class Entry_tee_os(Entry_blob_named_by_arg):
     def __init__(self, section, etype, node):
         super().__init__(section, etype, node, 'tee-os')
         self.external = True
+
+    def ObtainContents(self, fake_size=0):
+        ok = super().ObtainContents(fake_size)
+        if not ok:
+            return False
+        if not self.missing:
+            self.mark_not_present('uses Elf format which must be in a FIT')
+        return True
