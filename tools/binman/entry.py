@@ -1289,3 +1289,16 @@ features to produce new behaviours.
     def mark_not_present(self, msg):
         tout.info("Entry '%s' marked absent: %s" % (self._node.path, msg))
         self.present = False
+
+    def read_elf_segments(self):
+        """Read segments from an entry that can generate an ELF file
+
+        Returns:
+            tuple:
+                list of segments, each:
+                    int: Segment number (0 = first)
+                    int: Start address of segment in memory
+                    bytes: Contents of segment
+                int: entry address of ELF file
+        """
+        return None

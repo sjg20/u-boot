@@ -4,6 +4,8 @@
 # Entry-type module for OP-TEE Trusted OS firmware blob
 #
 
+import struct
+
 from binman.etype.blob_named_by_arg import Entry_blob_named_by_arg
 from binman import elf
 
@@ -19,16 +21,41 @@ class Entry_tee_os(Entry_blob_named_by_arg):
     https://github.com/OP-TEE/optee_os for more information about OP-TEE.
 
     Note that if the file is in ELF format, it must go in a FIT. In that case,
-    this entry will mark itself as not present.
+    this entry will mark itself as not present, providing the data only through
+    the read_elf_segments() method.
     """
     def __init__(self, section, etype, node):
         super().__init__(section, etype, node, 'tee-os')
         self.external = True
 
+    @staticmethod
+    def is_optee_bin(data):
+        return len(data) >= 8 and data[0:5] == b'OPTE\x01'
+
     def ObtainContents(self, fake_size=0):
         ok = super().ObtainContents(fake_size)
         if not ok:
             return False
-        if not self.missing and elf.is_valid(self.data):
-            self.mark_not_present('uses Elf format which must be in a FIT')
+        if not self.missing:
+            if elf.is_valid(self.data):
+                self.mark_not_present('uses Elf format which must be in a FIT')
+            elif self.is_optee_bin(self.data):
+                self.mark_not_present('uses v1 format which must be in a FIT')
         return True
+
+    def read_elf_segments(self):
+        data = self.GetData()
+        if self.is_optee_bin(data):
+            # OP-TEE v1 format (tee.bin)
+            init_sz, start_hi, start_lo, _, paged_sz = (
+                struct.unpack_from('<5I', data, 0x8))
+            if paged_sz != 0:
+                self.Raise("OP-TEE paged mode not supported")
+            e_entry = (start_hi << 32) + start_lo
+            p_addr = e_entry
+            p_data = data[0x1c:]
+            if len(p_data) != init_sz:
+                self.Raise("Invalid OP-TEE file: size mismatch (expected %#x, have %#x)" %
+                           (init_sz, len(p_data)))
+            return [[0, p_addr, p_data]], e_entry
+        return None

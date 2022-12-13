@@ -112,6 +112,8 @@ REPACK_DTB_PROPS = ['orig-offset', 'orig-size']
 # Supported compression bintools
 COMP_BINTOOLS = ['bzip2', 'gzip', 'lz4', 'lzma_alone', 'lzop', 'xz', 'zstd']
 
+TEE_ADDR = 0x5678
+
 class TestFunctional(unittest.TestCase):
     """Functional tests for binman
 
@@ -218,6 +220,13 @@ class TestFunctional(unittest.TestCase):
             tools.read_file(cls.ElfTestFile('elf_sections')))
         TestFunctional._MakeInputFile('tee.elf',
             tools.read_file(cls.ElfTestFile('elf_sections')))
+
+        # Newer OP_TEE file in v1 binary format
+        init_sz, start_hi, start_lo, dummy, paged_sz = (
+            len(U_BOOT_DATA), 0, TEE_ADDR, 0, 0)
+        data = b'OPTE\x01xxx' + struct.pack('<5I', init_sz, start_hi, start_lo,
+                                            dummy, paged_sz) + U_BOOT_DATA
+        TestFunctional._MakeInputFile('tee.bin', data)
 
         cls.comp_bintools = {}
         for name in COMP_BINTOOLS:
@@ -6102,53 +6111,24 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         entry_args = {
             'of-list': 'test-fdt1 test-fdt2',
             'default-dt': 'test-fdt2',
-            'tee-os-path': 'tee.elf',
+            'tee-os-path': 'tee.bin',
         }
         test_subdir = os.path.join(self._indir, TEST_FDT_SUBDIR)
         data = self._DoReadFileDtb(
-            '263_tee_os_opt_fit.py',
+            '263_tee_os_opt_fit.dts',
             entry_args=entry_args,
             extra_indirs=[test_subdir])[0]
 
-        self.assertEqual(U_BOOT_NODTB_DATA, data[-len(U_BOOT_NODTB_DATA):])
-        fit_data = data[len(U_BOOT_DATA):-len(U_BOOT_NODTB_DATA)]
-
-        base_keys = {'description', 'type', 'arch', 'os', 'compression',
-                     'data', 'load'}
-        dtb = fdt.Fdt.FromData(fit_data)
+        # There should be only one node, holding the data set up in SetUpClass()
+        # for tee.bin
+        dtb = fdt.Fdt.FromData(data)
         dtb.Scan()
-
-        elf_data = tools.read_file(os.path.join(self._indir, 'bl31.elf'))
-        segments, entry = elf.read_loadable_segments(elf_data)
-
-        # We assume there are two segments
-        self.assertEquals(2, len(segments))
-
-        atf1 = dtb.GetNode('/images/atf-1')
-        _, start, data = segments[0]
-        self.assertEqual(base_keys | {'entry'}, atf1.props.keys())
-        self.assertEqual(entry,
-                         fdt_util.fdt32_to_cpu(atf1.props['entry'].value))
-        self.assertEqual(start,
-                         fdt_util.fdt32_to_cpu(atf1.props['load'].value))
-        self.assertEqual(data, atf1.props['data'].bytes)
-
-        atf2 = dtb.GetNode('/images/atf-2')
-        self.assertEqual(base_keys, atf2.props.keys())
-        _, start, data = segments[1]
-        self.assertEqual(start,
-                         fdt_util.fdt32_to_cpu(atf2.props['load'].value))
-        self.assertEqual(data, atf2.props['data'].bytes)
-
-        conf = dtb.GetNode('/configurations')
-        self.assertEqual({'default'}, conf.props.keys())
-
-        for subnode in conf.subnodes:
-            self.assertEqual({'description', 'fdt', 'loadables'},
-                             subnode.props.keys())
-            self.assertEqual(
-                ['atf-1', 'atf-2', 'tee-1', 'tee-2'],
-                fdt_util.GetStringList(subnode, 'loadables'))
+        node = dtb.GetNode('/images/tee-1')
+        self.assertEqual(TEE_ADDR,
+                         fdt_util.fdt32_to_cpu(node.props['load'].value))
+        self.assertEqual(TEE_ADDR,
+                         fdt_util.fdt32_to_cpu(node.props['entry'].value))
+        self.assertEqual(U_BOOT_DATA, node.props['data'].bytes)
 
 
 if __name__ == "__main__":
