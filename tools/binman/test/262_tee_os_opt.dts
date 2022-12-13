@@ -7,6 +7,8 @@
 	#size-cells = <1>;
 
 	binman {
+		u-boot {
+		};
 		tee-os {
 			/*
 			 * this results in nothing being added since only the
@@ -15,7 +17,7 @@
 			 */
 			filename = "tee.elf";
 		};
-		u-boot {
+		u-boot-img {
 		};
 	};
 };
