@@ -707,6 +707,14 @@ class TestFunctional(unittest.TestCase):
         AddNode(dtb.GetRoot(), '')
         return tree
 
+    def _CheckSign(self, fit, key):
+        try:
+            tools.run('fit_check_sign', '-k', key, '-f', fit)
+        except:
+            self.fail('Expected signed FIT container')
+            return False
+        return True
+
     def testRun(self):
         """Test a basic run with valid args"""
         result = self._RunBinman('-h')
@@ -5569,7 +5577,6 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
             "Node '/binman/fit': subnode 'configurations/@config-SEQ': Unknown directive 'fit,config'",
             err)
 
-
     def testFitSplitElfMissing(self):
         """Test an split-elf FIT with a missing ELF file"""
         if not elf.ELF_TOOLS:
@@ -6441,6 +6448,72 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertEqual('atf-1', node.props['firmware'].value)
         self.assertEqual(['u-boot', 'atf-2'],
                          fdt_util.GetStringList(node, 'loadables'))
+
+    def _PrepareSignEnv(self, dts='261_fit_sign.dts'):
+        """Prepare sign environment
+
+        Create private and public keys, add pubkey into dtb.
+
+        Returns:
+            Tuple:
+                FIT container
+                Image name
+                Private key
+                DTB
+                Path to directory with extracted image and keys
+        """
+
+        data = self._DoReadFileRealDtb(dts)
+
+        updated_fname = tools.get_output_filename('image-updated.bin')
+        tools.write_file(updated_fname, data)
+
+        outdir = os.path.join(self._indir, 'extract')
+        einfos = control.ExtractEntries(updated_fname, None, outdir, [])
+
+        dtb = tools.get_output_filename('source.dtb')
+        private_key = tools.get_output_filename('test_key.key')
+        public_key = tools.get_output_filename('test_key.crt')
+        fit = tools.get_output_filename('fit.fit')
+        key_dir = tools.get_output_dir()
+
+        tools.run('openssl', 'req', '-batch' , '-newkey', 'rsa:4096',
+                  '-sha256', '-new',  '-nodes',  '-x509', '-keyout',
+                  private_key, '-out', public_key)
+        tools.run('fdt_add_pubkey', '-a', 'sha256,rsa4096', '-k', key_dir,
+                  '-n', 'test_key', dtb)
+
+        return fit, updated_fname, private_key, dtb, key_dir
+
+    def testSignSimple(self):
+        """Test that a FIT container can be signed in image"""
+        is_signed = False
+        try:
+            fit, updated_fname, private_key, dtb, key_dir = self._PrepareSignEnv()
+            with test_util.capture_sys_output() as (stdout, stderr):
+                # do sign with private key
+                self._DoBinman('sign', '-i', updated_fname, '-k', private_key,
+                               '-a', 'sha256,rsa4096', 'fit')
+                is_signed = self._CheckSign(fit, dtb)
+        finally:
+            shutil.rmtree(key_dir)
+
+        self.assertEqual(is_signed, True)
+
+    def testSignExactFIT(self):
+        """Test that a FIT container can be signed and replaced in image"""
+        is_signed = False
+        try:
+            fit, updated_fname, private_key, dtb, key_dir = self._PrepareSignEnv()
+            with test_util.capture_sys_output() as (stdout, stderr):
+                # do sign with private key
+                self._DoBinman('sign', '-i', updated_fname, '-k', private_key,
+                               '-a', 'sha256,rsa4096', '-f', fit, 'fit')
+                is_signed = self._CheckSign(fit, dtb)
+        finally:
+            shutil.rmtree(key_dir)
+
+        self.assertEqual(is_signed, True)
 
 
 if __name__ == "__main__":
