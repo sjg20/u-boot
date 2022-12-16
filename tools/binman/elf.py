@@ -21,6 +21,7 @@ ELF_TOOLS = True
 try:
     from elftools.elf.elffile import ELFFile
     from elftools.elf.elffile import ELFError
+    import elftools
     from elftools.elf.sections import SymbolTableSection
 except:  # pragma: no cover
     ELF_TOOLS = False
@@ -518,3 +519,18 @@ def read_loadable_segments(data):
             rend = start + segment['p_filesz']
             segments.append((i, segment['p_paddr'], data[start:rend]))
     return segments, entry
+
+def is_valid(data):
+    """Check if some binary data is a valid ELF file
+
+    Args:
+        data (bytes): Bytes to check
+
+    Returns:
+        bool: True if a valid Elf file, False if not
+    """
+    try:
+        DecodeElf(data, 0)
+        return True
+    except elftools.common.exceptions.ELFError:
+        return False
