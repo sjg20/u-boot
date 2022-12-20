@@ -77,6 +77,7 @@ enum {
 	BLOBLIST_VERSION	= 0,
 	BLOBLIST_MAGIC		= 0xb00757a3,
 	BLOBLIST_ALIGN		= 16,
+	BLOBLIST_DATA_ALIGN	= 8,
 };
 
 /* Supported tags - add new ones to tag_name in bloblist.c */
@@ -174,14 +175,12 @@ enum bloblist_tag_t {
  */
 struct bloblist_hdr {
 	u32 magic;
-	u32 version;
-	u32 hdr_size;
-	u32 flags;
-
-	u32 size;
+	u8 chksum;
+	u8 version;
+	u8 hdr_size;
+	u8 spare;
 	u32 alloced;
-	u32 spare;
-	u32 chksum;
+	u32 size;
 };
 
 /**
@@ -200,10 +199,18 @@ struct bloblist_hdr {
  * @spare: Spare space for other things
  */
 struct bloblist_rec {
-	u32 tag;
-	u32 hdr_size;
+	u32 tag_hdr_size;
 	u32 size;
-	u32 spare;
+};
+
+enum {
+	BLOBLISTR_TAG_SHIFT		= 0,
+	BLOBLISTR_TAG_MASK		= 0xffffffU << BLOBLISTR_TAG_SHIFT,
+	BLOBLISTR_HDR_SIZE_SHIFT	= 24,
+	BLOBLISTR_HDR_SIZE_MASK		= 0xffU << BLOBLISTR_HDR_SIZE_SHIFT,
+
+	BLOBLIST_HDR_SIZE		= 16,
+	BLOBLIST_REC_HDR_SIZE		= 8,
 };
 
 /**
