@@ -133,6 +133,8 @@
  * @mtc_size: Size of MTC region
  * @chromeos_vpd: Chromium OS Vital Product Data region, typically NULL, meaning
  *	not used
+ * @table_size: Number of bytes taken up by the sysinfo table
+ * @rec_count: Number of records in the sysinfo table
  */
 struct sysinfo_t {
 	unsigned int cpu_khz;
@@ -211,6 +213,8 @@ struct sysinfo_t {
 	u64 mtc_start;
 	u32 mtc_size;
 	void	*chromeos_vpd;
+	uint table_size;
+	uint rec_count;
 };
 
 extern struct sysinfo_t lib_sysinfo;
