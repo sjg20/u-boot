@@ -15,6 +15,7 @@
 #include <spl.h>
 #include <tables_csum.h>
 #include <asm/global_data.h>
+#include <linux/log2.h>
 #include <u-boot/crc.h>
 
 /*
@@ -77,8 +78,12 @@ static struct bloblist_rec *bloblist_first_blob(struct bloblist_hdr *hdr)
 
 static inline uint rec_hdr_size(struct bloblist_rec *rec)
 {
-	return (rec->tag_hdr_size & BLOBLISTR_HDR_SIZE_MASK) >>
+	uint code;
+
+	code = (rec->tag_hdr_size & BLOBLISTR_HDR_SIZE_MASK) >>
 		BLOBLISTR_HDR_SIZE_SHIFT;
+
+	return 1U << code;
 }
 
 static inline uint rec_tag(struct bloblist_rec *rec)
@@ -156,7 +161,7 @@ static int bloblist_addrec(uint tag, int size, int align,
 	rec = (void *)hdr + hdr->alloced;
 
 	rec->tag_hdr_size = tag |
-		(data_start - hdr->alloced) << BLOBLISTR_HDR_SIZE_SHIFT;
+		ilog2(data_start - hdr->alloced) << BLOBLISTR_HDR_SIZE_SHIFT;
 	rec->size = size;
 	// rec->spare = 0;
 
