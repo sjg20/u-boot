@@ -3,7 +3,10 @@
  * Copyright (c) 2013 Google, Inc
  */
 
-/* Decode and dump U-Boot profiling information */
+/*
+ * Decode and dump U-Boot profiling information into a format that can be used
+ * by kernelshark
+ */
 
 #include <assert.h>
 #include <ctype.h>
@@ -19,11 +22,21 @@
 
 #include <compiler.h>
 #include <trace.h>
+#include <abuf.h>
 
 #define MAX_LINE_LEN 500
 
+/* from linux/kernel.h */
+#define __ALIGN_MASK(x,mask)	(((x)+(mask))&~(mask))
+#define ALIGN(x,a)		__ALIGN_MASK((x),(typeof(x))(a)-1)
+
 enum {
 	FUNCF_TRACE	= 1 << 0,	/* Include this function in trace */
+};
+
+/* Section types */
+enum {
+	SECTION_OPTIONS,
 };
 
 struct func_info {
@@ -46,6 +59,14 @@ struct trace_configline_info {
 	enum trace_line_type type;
 	const char *name;	/* identifier name / wildcard */
 	regex_t regex;		/* Regex to use if name starts with / */
+};
+
+struct twriter {
+	int ptr;
+	int base;
+	struct abuf str_buf;
+	int str_ptr;
+	FILE *fout;
 };
 
 /* The contents of the trace config file */
@@ -481,32 +502,100 @@ static void out_func(ulong func_offset, int is_caller, const char *suffix)
 		printf("%lx%s", func_offset, suffix);
 }
 
+static int tput_short(FILE *fout, unsigned int val)
+{
+	fputc(val, fout);
+	fputc(val >> 8, fout);
+
+	return 2;
+}
+
+static int tputl(FILE *fout, ulong val)
+{
+	fputc(val, fout);
+	fputc(val >> 8, fout);
+	fputc(val >> 16, fout);
+	fputc(val >> 24, fout);
+
+	return 4;
+}
+
+static int tputq(FILE *fout, unsigned long long val)
+{
+	tputl(fout, val);
+	tputl(fout, val >> 32U);
+
+	return 4;
+}
+
+static int add_str(struct twriter *tw, const char *name)
+{
+	int str_ptr;
+	int len;
+
+	len = strlen(name) + 1;
+	str_ptr = tw->str_ptr;
+	tw->str_ptr += len;
+
+	if (tw->str_ptr > abuf_size(&tw->str_buf)) {
+		int new_size;
+
+		new_size = ALIGN(tw->str_ptr, 4096);
+		if (!abuf_realloc(&tw->str_buf, new_size))
+			return -1;
+	}
+
+	return str_ptr;
+}
+
+static int put_header(struct twriter *tw, int id, int flags, const char *name)
+{
+	int str_id;
+	int lptr;
+
+	tw->base = tw->ptr;
+	lptr = 0;
+	lptr += tput_short(tw->fout, id);
+	lptr += tput_short(tw->fout, flags);
+	str_id = add_str(tw, name);
+	lptr += tputl(tw->fout, str_id);
+
+	/* placeholder for size */
+	lptr += tputq(tw->fout, 0);
+
+	return lptr;
+}
+
 /*
- * # tracer: function
- * #
- * #           TASK-PID   CPU#    TIMESTAMP  FUNCTION
- * #              | |      |          |         |
- * #           bash-4251  [01] 10152.583854: path_put <-path_walk
- * #           bash-4251  [01] 10152.583855: dput <-path_put
- * #           bash-4251  [01] 10152.583855: _atomic_dec_and_lock <-dput
+ * See here for format:
+ *
+ * https://github.com/rostedt/trace-cmd/blob/master/Documentation/trace-cmd/trace-cmd.dat.v7.5.txt
  */
-static int make_ftrace(void)
+static int make_ftrace(FILE *fout)
 {
 	struct trace_call *call;
 	int missing_count = 0, skip_count = 0;
+	struct twriter tws, *tw = &tws;
+	int base;
 	int i;
 
-	printf("# tracer: function\n"
-	      "#\n"
-	      "# entries-in-buffer/entries-written: 140080/250280   #P:4\n"
-	      "#\n"
-	      "#                              _-----=> irqs-off\n"
-	      "#                             / _----=> need-resched\n"
-	      "#                            | / _---=> hardirq/softirq\n"
-	      "#                            || / _--=> preempt-depth\n"
-	      "#                            ||| /     delay\n"
-	      "#           TASK-PID   CPU#  ||||    TIMESTAMP  FUNCTION\n"
-	      "#              | |       |   ||||       |         |\n");
+	memset(tw, '\0', sizeof(*tw));
+	abuf_init(&tw->str_buf);
+	tw->fout = fout;
+
+	tw->ptr = 0;
+	tw->ptr += fprintf(fout, "%c%c%ctracing7%c%c%c", 0x17, 0x08, 0x44,
+			   0 /* terminator */, 0 /* little endian */,
+			   4 /* 32-bit long values */);
+
+	/* host-machine page size 4KB */
+	tw->ptr += tputl(fout, 4 << 10);
+
+	/* no compression */
+	tw->ptr += fprintf(fout, "none%cversion%c\n", 0, 0);
+
+	tw->ptr += put_header(tw, SECTION_OPTIONS, 0, "options");
+
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		struct func_info *func = find_func_by_offset(call->func);
 		ulong time = call->flags & FUNCF_TIMESTAMP_MASK;
@@ -559,7 +648,7 @@ static int prof_tool(int argc, char *const argv[],
 		const char *cmd = *argv;
 
 		if (0 == strcmp(cmd, "dump-ftrace"))
-			err = make_ftrace();
+			err = make_ftrace(stdout);
 		else
 			warn("Unknown command '%s'\n", cmd);
 	}

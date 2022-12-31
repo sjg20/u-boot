@@ -22,6 +22,11 @@
 	};
 
 	binman: binman {
+		u_boot: u-boot-nodtb {
+		};
+		u-boot-dtb {
+			align-to-sym = <&u_boot>, "_end";
+		};
 	};
 
 	memory {
