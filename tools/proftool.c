@@ -24,6 +24,9 @@
 #include <trace.h>
 #include <abuf.h>
 
+/* Set to 1 to emit version 7 file (currently only partly supported) */
+#define VERSION7	0
+
 #define MAX_LINE_LEN 500
 
 /* from linux/kernel.h */
@@ -535,6 +538,13 @@ static int tputq(FILE *fout, unsigned long long val)
 	return 4;
 }
 
+static int tputs(FILE *fout, const char *str)
+{
+	fputs(str, fout);
+
+	return strlen(str);
+}
+
 static int add_str(struct twriter *tw, const char *name)
 {
 	int str_ptr;
@@ -599,7 +609,8 @@ static int make_ftrace(FILE *fout)
 	struct trace_call *call;
 	int missing_count = 0, skip_count = 0;
 	struct twriter tws, *tw = &tws;
-	int i, ret;
+	int i, ret, len;
+	char str[300];
 
 	memset(tw, '\0', sizeof(*tw));
 	abuf_init(&tw->str_buf);
@@ -613,23 +624,38 @@ static int make_ftrace(FILE *fout)
 	/* host-machine page size 4KB */
 	tw->ptr += tputl(fout, 4 << 10);
 
-	/* no compression */
-	tw->ptr += fprintf(fout, "none%cversion%c\n", 0, 0);
+	tw->ptr += fprintf(fout, "header_page%c", 0);
 
-	ret = start_header(tw, SECTION_OPTIONS, 0, "options");
-	if (ret < 0) {
-		fprintf(stderr, "Cannot start option header\n");
-		return -1;
+	sprintf(str,
+		"\tfield: u64 timestamp;\toffset:0;\tsize:8;\tsigned:0;\n"
+		"\tfield: local_t commit;\toffset:8;\tsize:8;\tsigned:1;\n"
+		"\tfield: int overwrite;\toffset:8;\tsize:1;\tsigned:1;\n"
+		"\tfield: char data;\toffset:16;\tsize:4080;\tsigned:1;\n");
+	len = strlen(str);
+	tw->ptr += tputq(fout, len);
+	tw->ptr += tputs(fout, str);
+
+	/* no compression */
+	if (VERSION7) {
+		tw->ptr += fprintf(fout, "none%cversion%c\n", 0, 0);
+
+		ret = start_header(tw, SECTION_OPTIONS, 0, "options");
+		if (ret < 0) {
+			fprintf(stderr, "Cannot start option header\n");
+			return -1;
+		}
+		tw->ptr += ret;
+		tw->ptr += tputh(fout, OPTION_DONE);
+		tw->ptr += tputl(fout, 8);
+		tw->ptr += tputl(fout, 0);
+		ret = finish_header(tw);
+		if (ret < 0) {
+			fprintf(stderr, "Cannot finish option header\n");
+			return -1;
+		}
 	}
-	tw->ptr += ret;
-	tw->ptr += tputh(fout, OPTION_DONE);
-	tw->ptr += tputl(fout, 8);
-	tw->ptr += tputl(fout, 0);
-	ret = finish_header(tw);
-	if (ret < 0) {
-		fprintf(stderr, "Cannot finish option header\n");
-		return -1;
-	}
+
+	return 0;
 
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		struct func_info *func = find_func_by_offset(call->func);
@@ -692,6 +718,7 @@ static int prof_tool(int argc, char *const argv[],
 				return -1;
 			}
 			err = make_ftrace(fout);
+			fclose(fout);
 		} else {
 			warn("Unknown command '%s'\n", cmd);
 		}

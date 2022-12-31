@@ -42,7 +42,8 @@ void main_loop(void)
 {
 	const char *s;
 
-	trace_set_enabled(0);
+	if (IS_ENABLED(CONFIG_TRACE))
+		trace_set_enabled(0);
 
 	bootstage_mark_name(BOOTSTAGE_ID_MAIN_LOOP, "main_loop");
 
