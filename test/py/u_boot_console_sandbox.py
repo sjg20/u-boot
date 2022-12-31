@@ -28,6 +28,7 @@ class ConsoleSandbox(ConsoleBase):
         super(ConsoleSandbox, self).__init__(log, config, max_fifo_fill=1024)
         self.sandbox_flags = []
         self.use_dtb = True
+        self.build_dir = None
 
     def get_spawn(self):
         """Connect to a fresh U-Boot instance.
@@ -54,13 +55,15 @@ class ConsoleSandbox(ConsoleBase):
         cmd = []
         if self.config.gdbserver:
             cmd += ['gdbserver', self.config.gdbserver]
-        cmd += [self.config.build_dir + fname, '-v']
+        build_dir = self.build_dir or self.config.build_dir
+        cmd += [build_dir + fname, '-v']
         if self.use_dtb:
             cmd += ['-d', self.config.dtb]
         cmd += self.sandbox_flags
         return Spawn(cmd, cwd=self.config.source_dir)
 
-    def restart_uboot_with_flags(self, flags, expect_reset=False, use_dtb=True):
+    def restart_uboot_with_flags(self, flags, expect_reset=False, use_dtb=True,
+                                 build_dir=None):
         """Run U-Boot with the given command-line flags
 
         Args:
@@ -69,6 +72,8 @@ class ConsoleSandbox(ConsoleBase):
                 to be reset while the 1st boot process after main boot before
                 prompt. False by default.
             use_dtb: True to use a device tree file, False to run without one
+            build_dir (str): Build directory containing U-Boot, or None to use
+                self.config.build_dir
 
         Returns:
             A u_boot_spawn.Spawn object that is attached to U-Boot.
@@ -77,10 +82,12 @@ class ConsoleSandbox(ConsoleBase):
         try:
             self.sandbox_flags = flags
             self.use_dtb = use_dtb
+            self.build_dir = build_dir
             return self.restart_uboot(expect_reset)
         finally:
             self.sandbox_flags = []
             self.use_dtb = True
+            self.build_dir = None
 
     def kill(self, sig):
         """Send a specific Unix signal to the sandbox process.

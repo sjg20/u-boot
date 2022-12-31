@@ -97,7 +97,6 @@ uint64_t notrace get_ticks(void)
 		ret = dm_timer_init();
 		if (ret)
 			panic("Could not initialize timer (err %d)\n", ret);
-#endif
 	}
 
 	ret = timer_get_count(gd->timer, &count);
