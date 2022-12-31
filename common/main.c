@@ -15,6 +15,7 @@
 #include <env.h>
 #include <init.h>
 #include <net.h>
+#include <trace.h>
 #include <version_string.h>
 #include <efi_loader.h>
 
@@ -40,6 +41,8 @@ static void run_preboot_environment_command(void)
 void main_loop(void)
 {
 	const char *s;
+
+	trace_set_enabled(0);
 
 	bootstage_mark_name(BOOTSTAGE_ID_MAIN_LOOP, "main_loop");
 
