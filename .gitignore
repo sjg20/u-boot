@@ -104,3 +104,6 @@ __pycache__
 # pylint files
 /pylint.cur
 /pylint.out/
+
+# moveconfig database
+/moveconfig.db
