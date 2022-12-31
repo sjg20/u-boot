@@ -39,6 +39,10 @@ enum {
 	SECTION_OPTIONS,
 };
 
+enum {
+	OPTION_DONE,
+};
+
 struct func_info {
 	unsigned long offset;
 	const char *name;
@@ -108,8 +112,9 @@ static void usage(void)
 		"   dump-ftrace\t\tDump out textual data in ftrace format\n"
 		"\n"
 		"Options:\n"
-		"   -c <cfg>\tSpecific config file\n"
+		"   -c <cfg>\tSpecify config file\n"
 		"   -m <map>\tSpecify Systen.map file\n"
+		"   -o <fname>\tSpecify output file\n"
 		"   -t <fname>\tSpecify trace data file (from U-Boot 'trace calls')\n"
 		"   -v <0-4>\tSpecify verbosity\n");
 	exit(EXIT_FAILURE);
@@ -171,8 +176,10 @@ static int read_system_map(FILE *fin)
 		if (func_count > 1)
 			func[-1].code_size = func->offset - func[-1].offset;
 	}
-	notice("%d functions found in map file\n", func_count);
+	notice("%d functions found in map file, start addr %lx\n", func_count,
+	       start);
 	text_offset = start;
+
 	return 0;
 }
 
@@ -502,7 +509,7 @@ static void out_func(ulong func_offset, int is_caller, const char *suffix)
 		printf("%lx%s", func_offset, suffix);
 }
 
-static int tput_short(FILE *fout, unsigned int val)
+static int tputh(FILE *fout, unsigned int val)
 {
 	fputc(val, fout);
 	fputc(val >> 8, fout);
@@ -548,22 +555,38 @@ static int add_str(struct twriter *tw, const char *name)
 	return str_ptr;
 }
 
-static int put_header(struct twriter *tw, int id, int flags, const char *name)
+static int start_header(struct twriter *tw, int id, int flags, const char *name)
 {
 	int str_id;
 	int lptr;
 
 	tw->base = tw->ptr;
 	lptr = 0;
-	lptr += tput_short(tw->fout, id);
-	lptr += tput_short(tw->fout, flags);
+	lptr += tputh(tw->fout, id);
+	lptr += tputh(tw->fout, flags);
 	str_id = add_str(tw, name);
+	if (str_id < 0)
+		return -1;
 	lptr += tputl(tw->fout, str_id);
 
 	/* placeholder for size */
 	lptr += tputq(tw->fout, 0);
 
 	return lptr;
+}
+
+static int finish_header(struct twriter *tw)
+{
+	int size;
+
+	size = tw->ptr - tw->base;
+	if (fseek(tw->fout, tw->base + 8, SEEK_SET))
+		return -1;
+	tputq(tw->fout, size);
+	if (fseek(tw->fout, tw->base + 8, SEEK_SET))
+		return -1;
+
+	return 0;
 }
 
 /*
@@ -576,8 +599,7 @@ static int make_ftrace(FILE *fout)
 	struct trace_call *call;
 	int missing_count = 0, skip_count = 0;
 	struct twriter tws, *tw = &tws;
-	int base;
-	int i;
+	int i, ret;
 
 	memset(tw, '\0', sizeof(*tw));
 	abuf_init(&tw->str_buf);
@@ -594,7 +616,20 @@ static int make_ftrace(FILE *fout)
 	/* no compression */
 	tw->ptr += fprintf(fout, "none%cversion%c\n", 0, 0);
 
-	tw->ptr += put_header(tw, SECTION_OPTIONS, 0, "options");
+	ret = start_header(tw, SECTION_OPTIONS, 0, "options");
+	if (ret < 0) {
+		fprintf(stderr, "Cannot start option header\n");
+		return -1;
+	}
+	tw->ptr += ret;
+	tw->ptr += tputh(fout, OPTION_DONE);
+	tw->ptr += tputl(fout, 8);
+	tw->ptr += tputl(fout, 0);
+	ret = finish_header(tw);
+	if (ret < 0) {
+		fprintf(stderr, "Cannot finish option header\n");
+		return -1;
+	}
 
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		struct func_info *func = find_func_by_offset(call->func);
@@ -631,7 +666,7 @@ static int make_ftrace(FILE *fout)
 
 static int prof_tool(int argc, char *const argv[],
 		     const char *prof_fname, const char *map_fname,
-		     const char *trace_config_fname)
+		     const char *trace_config_fname, const char *out_fname)
 {
 	int err = 0;
 
@@ -647,10 +682,19 @@ static int prof_tool(int argc, char *const argv[],
 	for (; argc; argc--, argv++) {
 		const char *cmd = *argv;
 
-		if (0 == strcmp(cmd, "dump-ftrace"))
-			err = make_ftrace(stdout);
-		else
+		if (0 == strcmp(cmd, "dump-ftrace")) {
+			FILE *fout;
+
+			fout = fopen(out_fname, "w");
+			if (!fout) {
+				fprintf(stderr, "Cannot write file '%s'\n",
+					out_fname);
+				return -1;
+			}
+			err = make_ftrace(fout);
+		} else {
 			warn("Unknown command '%s'\n", cmd);
+		}
 	}
 
 	return err;
@@ -661,23 +705,24 @@ int main(int argc, char *argv[])
 	const char *map_fname = "System.map";
 	const char *trace_fname = NULL;
 	const char *config_fname = NULL;
+	const char *out_fname = NULL;
 	int opt;
 
 	verbose = 2;
-	while ((opt = getopt(argc, argv, "c:m:t:v:")) != -1) {
+	while ((opt = getopt(argc, argv, "c:m:o:t:v:")) != -1) {
 		switch (opt) {
 		case 'c':
 			config_fname = optarg;
 			break;
-
 		case 'm':
 			map_fname = optarg;
 			break;
-
+		case 'o':
+			out_fname = optarg;
+			break;
 		case 't':
 			trace_fname = optarg;
 			break;
-
 		case 'v':
 			verbose = atoi(optarg);
 			break;
@@ -691,5 +736,6 @@ int main(int argc, char *argv[])
 		usage();
 
 	debug("Debug enabled\n");
-	return prof_tool(argc, argv, trace_fname, map_fname, config_fname);
+	return prof_tool(argc, argv, trace_fname, map_fname, config_fname,
+			 out_fname);
 }

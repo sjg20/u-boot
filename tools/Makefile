@@ -228,7 +228,7 @@ hostprogs-$(CONFIG_ARCH_KIRKWOOD) += kwboot
 hostprogs-$(CONFIG_ARCH_MVEBU) += kwboot
 
 hostprogs-y += proftool
-proftool-objs = proftool.o abuf.o
+proftool-objs = proftool.o lib/abuf.o
 
 hostprogs-$(CONFIG_STATIC_RELA) += relocate-rela
 hostprogs-$(CONFIG_RISCV) += prelink-riscv
