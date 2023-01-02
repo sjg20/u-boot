@@ -35,6 +35,8 @@
 
 enum {
 	FUNCF_TRACE	= 1 << 0,	/* Include this function in trace */
+	TRACE_PAGE_SIZE	= 4096,		/* Assumed page size for trace */
+	TRACE_PID	= 1,		/* PID to use for U-Boot */
 };
 
 /* Section types */
@@ -44,6 +46,13 @@ enum {
 
 enum {
 	OPTION_DONE,
+};
+
+/* types of trace records */
+enum trace_type {
+	__TRACE_FIRST_TYPE = 0,
+
+	TRACE_FN,
 };
 
 struct func_info {
@@ -609,7 +618,7 @@ static int make_ftrace(FILE *fout)
 	struct trace_call *call;
 	int missing_count = 0, skip_count = 0;
 	struct twriter tws, *tw = &tws;
-	int i, ret, len;
+	int i, ret, len, start;
 	char str[500];
 
 	memset(tw, '\0', sizeof(*tw));
@@ -695,9 +704,12 @@ static int make_ftrace(FILE *fout)
 	/* number of symbols, 0 for now */
 	tw->ptr += tputl(fout, 0);
 
+	/* trace_printk, 0 for now */
+	tw->ptr += tputl(fout, 0);
+
 	/* number of processes */
 	tw->ptr += tputl(fout, 1);
-	snprintf(str, sizeof(str), "1 u-boot");
+	snprintf(str, sizeof(str), "%d u-boot\n", TRACE_PID);
 	tw->ptr += tputq(fout, len);
 	tw->ptr += tputs(fout, str);
 
@@ -708,26 +720,33 @@ static int make_ftrace(FILE *fout)
 
 	/* trace data */
 	tw->base = tw->ptr;
-	tw->ptr += tputq(fout, tw->ptr + 16);
+	start = ALIGN(tw->ptr + 16, 4096);
+	tw->ptr += tputq(fout, start);
 
 	/* use a placeholder for the size */
 	tw->ptr += tputq(fout, 0);
 
-	ret = finish_header(tw);
+	ret = fseek(fout, start, SEEK_SET);
 	if (ret < 0) {
-		fprintf(stderr, "Cannot finish option header\n");
+		fprintf(stderr, "Cannot seek to page start\n");
 		return -1;
 	}
+	tw->ptr = start;
 
-	return 0;
+	/* page header */
+	tw->ptr += tputq(fout, 0x1234);		/* timestamp */
+	tw->ptr += tputq(fout, 0);		/* commit (data size) */
 
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
-		struct func_info *func = find_func_by_offset(call->func);
+		struct func_info *func;
+		struct func_info *caller_func;
 		ulong time = call->flags & FUNCF_TIMESTAMP_MASK;
+		uint delta;
 
 		if (TRACE_CALL_TYPE(call) != FUNCF_ENTRY &&
 		    TRACE_CALL_TYPE(call) != FUNCF_EXIT)
 			continue;
+		func = find_func_by_offset(call->func);
 		if (!func) {
 			warn("Cannot find function at %lx\n",
 			     text_offset + call->func);
@@ -742,12 +761,26 @@ static int make_ftrace(FILE *fout)
 			continue;
 		}
 
-		printf("%16s-%-5d [000] ....  %lu.%06lu: ", "uboot", 1,
-		       time / 1000000, time % 1000000);
+		delta = 0;
 
-		out_func(call->func, 0, " <- ");
-		out_func(call->caller, 1, "\n");
+		/* type_len is 6, meaning 4 * 6 = 24 bytes */
+		tw->ptr += tputl(fout, 6 | delta << 5);
+		tw->ptr += tputh(fout, TRACE_FN);
+		tw->ptr += tputh(fout, 0);	/* flags */
+		tw->ptr += tputl(fout, TRACE_PID);	/* PID */
+		tw->ptr += tputq(fout, func->offset);	/* function */
+
+		caller_func = find_caller_by_offset(call->caller);
+		tw->ptr += tputq(fout, caller_func->offset);	/* caller */
+		break;
 	}
+
+	ret = finish_header(tw);
+	if (ret < 0) {
+		fprintf(stderr, "Cannot finish option header\n");
+		return -1;
+	}
+
 	info("ftrace: %d functions not found, %d excluded\n", missing_count,
 	     skip_count);
 
