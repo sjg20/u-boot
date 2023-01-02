@@ -46,8 +46,20 @@ enum {
 	SECTION_OPTIONS,
 };
 
+/* Option types */
 enum {
 	OPTION_DONE,
+	OPTION_DATE,
+	OPTION_CPUSTAT,
+	OPTION_BUFFER,
+	OPTION_TRACECLOCK,
+	OPTION_UNAME,
+	OPTION_HOOK,
+	OPTION_OFFSET,
+	OPTION_CPUCOUNT,
+	OPTION_VERSION,
+	OPTION_PROCMAPS,
+	OPTION_TRACEID,
 };
 
 /* types of trace records */
@@ -821,7 +833,7 @@ static int make_ftrace(FILE *fout)
 	for (i = 0; i < func_count; i++) {
 		struct func_info *func = &func_list[i];
 
-		if (func->objsection) {
+		if (1 || func->objsection) {
 			snprintf(str, sizeof(str), "%s T %08lx\n", func->name,
 				 func->offset);
 			len = strlen(str);
@@ -847,6 +859,49 @@ static int make_ftrace(FILE *fout)
 	/* number of CPUs */
 	tw->ptr += tputl(fout, 1);
 
+	tw->ptr += fprintf(fout, "options  %c", 0);
+
+	/* traceclock */
+	tw->ptr += tputh(fout, OPTION_TRACECLOCK);
+	tw->ptr += tputl(fout, 0);
+
+	/* uname */
+	tw->ptr += tputh(fout, OPTION_UNAME);
+	snprintf(str, sizeof(str), "U-Boot\n");
+	len = strlen(str);
+	tw->ptr += tputl(fout, len);
+	tw->ptr += tputs(fout, str);
+
+	/* version */
+	tw->ptr += tputh(fout, OPTION_VERSION);
+	snprintf(str, sizeof(str), "unknown\n");
+	len = strlen(str);
+	tw->ptr += tputl(fout, len);
+	tw->ptr += tputs(fout, str);
+
+	/* trace ID */
+	tw->ptr += tputh(fout, OPTION_TRACEID);
+	tw->ptr += tputl(fout, 8);
+	tw->ptr += tputq(fout, 0x123456780abcdef0);
+
+	/* cpustat */
+	tw->ptr += tputh(fout, OPTION_CPUSTAT);
+	snprintf(str, sizeof(str),
+		 "CPU: 0\n"
+		 "entries: 100\n"
+		 "overrun: 43565\n"
+		 "commit overrun: 0\n"
+		 "bytes: 3360\n"
+		 "oldest event ts: 963732.447752\n"
+		 "now ts: 963832.146824\n"
+		 "dropped events: 0\n"
+		 "read events: 42379\n");
+	len = strlen(str);
+	tw->ptr += tputl(fout, len);
+	tw->ptr += tputs(fout, str);
+
+	tw->ptr += tputh(fout, OPTION_DONE);
+
 	tw->ptr += fprintf(fout, "flyrecord%c", 0);
 
 	/* trace data */
@@ -858,6 +913,12 @@ static int make_ftrace(FILE *fout)
 	if (ret < 0)
 		return -1;
 	tw->ptr += ret;
+
+	snprintf(str, sizeof(str),
+		 "[local] global counter uptime perf mono mono_raw boot x86-tsc\n");
+	len = strlen(str);
+	tw->ptr += tputq(fout, len);
+	tw->ptr += tputs(fout, str);
 
 	in_page = false;
 	base_timestamp = 0;
@@ -915,8 +976,8 @@ static int make_ftrace(FILE *fout)
 		tw->ptr += tputq(fout, caller_func->offset);	/* caller */
 
 		upto++;
-		if (upto == 2)
-			break;
+// 		if (upto == 2)
+// 			break;
 	}
 	if (in_page && finish_page(tw))
 		return -1;
