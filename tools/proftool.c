@@ -89,10 +89,12 @@ struct trace_configline_info {
  *
  * @ptr: Position of the length value in the file
  * @base: Base position for the calculation
+ * @size: Size of the length value, in bytes (4 or 8)
  */
 struct tw_len {
 	int ptr;
 	int base;
+	int size;
 };
 
 struct twriter {
@@ -593,7 +595,21 @@ static int add_str(struct twriter *tw, const char *name)
 	return str_ptr;
 }
 
-static int push_len(struct twriter *tw, int base, const char *msg)
+/**
+ * push_len() - Push a new length request onto the stack
+ *
+ * @tw: Writer context
+ * @base: Base position of the length calculation
+ * @msg: Indicates the type of caller, for debugging
+ * @size: Size of the length value, either 4 bytes or 8
+ *
+ * This marks a place where a length must be written, covering data that is
+ * about to be written. It writes a placeholder value.
+ *
+ * Once the data is written, calling pop_len() will update the placeholder with
+ * the correct length based on how many bytes have been written
+ */
+static int push_len(struct twriter *tw, int base, const char *msg, int size)
 {
 	struct tw_len *lp;
 
@@ -601,12 +617,18 @@ static int push_len(struct twriter *tw, int base, const char *msg)
 		fprintf(stderr, "Length-stack overflow: %s\n", msg);
 		return -1;
 	}
+	if (size != 4 && size != 8) {
+		fprintf(stderr, "Length-stack invalid size %d: %s\n", size,
+			msg);
+		return -1;
+	}
 
 	lp = &tw->len_stack[tw->len_count++];
 	lp->base = base;
 	lp->ptr = tw->ptr;
+	lp->size = size;
 
-	return tputq(tw->fout, 0);
+	return size == 8 ? tputq(tw->fout, 0) : tputl(tw->fout, 0);
 }
 
 static int pop_len(struct twriter *tw, const char *msg)
@@ -645,7 +667,7 @@ static int start_header(struct twriter *tw, int id, int flags, const char *name)
 	lptr += tputl(tw->fout, str_id);
 
 	/* placeholder for size */
-	ret = push_len(tw, base, "v7 header");
+	ret = push_len(tw, base, "v7 header", 8);
 	if (ret < 0)
 		return -1;
 	lptr += ret;
@@ -669,7 +691,7 @@ static int start_page(struct twriter *tw, ulong timestamp)
 
 	/* page header */
 	tw->ptr += tputq(tw->fout, timestamp);
-	ret = push_len(tw, start + 16, "page");
+	ret = push_len(tw, start + 16, "page", 8);
 	if (ret < 0)
 		return ret;
 	tw->ptr += ret;
@@ -685,10 +707,11 @@ static int finish_page(struct twriter *tw)
 	if (ret < 0)
 		return ret;
 	end = ALIGN(tw->ptr, TRACE_PAGE_SIZE);
-	if (fseek(tw->fout, end, SEEK_SET)) {
+	if (fseek(tw->fout, end - 1, SEEK_SET)) {
 		fprintf(stderr, "cannot seek to start of next page\n");
 		return -1;
 	}
+	fputc(0, tw->fout);
 	tw->ptr = end;
 
 	return 0;
@@ -704,9 +727,10 @@ static int make_ftrace(FILE *fout)
 	struct trace_call *call;
 	int missing_count = 0, skip_count = 0;
 	struct twriter tws, *tw = &tws;
-	int i, ret, len, start;
+	int i, ret, len, start, upto;
 	bool in_page;
 	char str[500];
+	ulong base_timestamp;
 
 	memset(tw, '\0', sizeof(*tw));
 	abuf_init(&tw->str_buf);
@@ -788,18 +812,33 @@ static int make_ftrace(FILE *fout)
 	/* number of event systems files */
 	tw->ptr += tputl(fout, 0);
 
-	/* number of symbols, 1 for now */
-	tw->ptr += tputl(fout, 1);
-	snprintf(str, sizeof(str), "testing T 00000001\n");
-	len = strlen(str);
-	tw->ptr += tputl(fout, len);
-	tw->ptr += tputs(fout, str);
+	/* write symbols */
+	ret = push_len(tw, tw->ptr + 4, "syms", 4);
+	if (ret < 0)
+		return -1;
+	tw->ptr += ret;
+	printf("func_count %d\n", func_count);
+	for (i = 0; i < func_count; i++) {
+		struct func_info *func = &func_list[i];
+
+		if (func->objsection) {
+			snprintf(str, sizeof(str), "%s T %08lx\n", func->name,
+				 func->offset);
+			len = strlen(str);
+			tw->ptr += tputs(fout, str);
+		}
+	}
+	ret = pop_len(tw, "syms");
+	if (ret < 0) {
+		fprintf(stderr, "Cannot finish sym header\n");
+		return -1;
+	}
+	tw->ptr += ret;
 
 	/* trace_printk, 0 for now */
 	tw->ptr += tputl(fout, 0);
 
-	/* number of processes */
-	tw->ptr += tputl(fout, 1);
+	/* processes */
 	snprintf(str, sizeof(str), "%d u-boot\n", TRACE_PID);
 	len = strlen(str);
 	tw->ptr += tputq(fout, len);
@@ -815,13 +854,14 @@ static int make_ftrace(FILE *fout)
 	tw->ptr += tputq(fout, start);
 
 	/* use a placeholder for the size */
-	ret = push_len(tw, start, "flyrecord");
+	ret = push_len(tw, start, "flyrecord", 8);
 	if (ret < 0)
 		return -1;
 	tw->ptr += ret;
 
 	in_page = false;
-
+	base_timestamp = 0;
+	upto = 0;
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		struct func_info *func;
 		struct func_info *caller_func;
@@ -859,9 +899,10 @@ static int make_ftrace(FILE *fout)
 			if (start_page(tw, timestamp))
 				return -1;
 			in_page = true;
+			base_timestamp = timestamp;
 		}
 
-		delta = 0;
+		delta = timestamp - base_timestamp;
 
 		/* type_len is 6, meaning 4 * 6 = 24 bytes */
 		tw->ptr += tputl(fout, 6 | delta << 5);
@@ -872,7 +913,10 @@ static int make_ftrace(FILE *fout)
 
 		caller_func = find_caller_by_offset(call->caller);
 		tw->ptr += tputq(fout, caller_func->offset);	/* caller */
-		break;
+
+		upto++;
+		if (upto == 2)
+			break;
 	}
 	if (in_page && finish_page(tw))
 		return -1;
