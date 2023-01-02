@@ -535,7 +535,7 @@ static int tputq(FILE *fout, unsigned long long val)
 	tputl(fout, val);
 	tputl(fout, val >> 32U);
 
-	return 4;
+	return 8;
 }
 
 static int tputs(FILE *fout, const char *str)
@@ -589,11 +589,11 @@ static int finish_header(struct twriter *tw)
 {
 	int size;
 
-	size = tw->ptr - tw->base;
+	size = tw->ptr - tw->base - 16;
 	if (fseek(tw->fout, tw->base + 8, SEEK_SET))
 		return -1;
 	tputq(tw->fout, size);
-	if (fseek(tw->fout, tw->base + 8, SEEK_SET))
+	if (fseek(tw->fout, tw->ptr, SEEK_SET))
 		return -1;
 
 	return 0;
@@ -610,14 +610,14 @@ static int make_ftrace(FILE *fout)
 	int missing_count = 0, skip_count = 0;
 	struct twriter tws, *tw = &tws;
 	int i, ret, len;
-	char str[300];
+	char str[500];
 
 	memset(tw, '\0', sizeof(*tw));
 	abuf_init(&tw->str_buf);
 	tw->fout = fout;
 
 	tw->ptr = 0;
-	tw->ptr += fprintf(fout, "%c%c%ctracing7%c%c%c", 0x17, 0x08, 0x44,
+	tw->ptr += fprintf(fout, "%c%c%ctracing6%c%c%c", 0x17, 0x08, 0x44,
 			   0 /* terminator */, 0 /* little endian */,
 			   4 /* 32-bit long values */);
 
@@ -626,7 +626,7 @@ static int make_ftrace(FILE *fout)
 
 	tw->ptr += fprintf(fout, "header_page%c", 0);
 
-	sprintf(str,
+	snprintf(str, sizeof(str),
 		"\tfield: u64 timestamp;\toffset:0;\tsize:8;\tsigned:0;\n"
 		"\tfield: local_t commit;\toffset:8;\tsize:8;\tsigned:1;\n"
 		"\tfield: int overwrite;\toffset:8;\tsize:1;\tsigned:1;\n"
@@ -635,8 +635,8 @@ static int make_ftrace(FILE *fout)
 	tw->ptr += tputq(fout, len);
 	tw->ptr += tputs(fout, str);
 
-	/* no compression */
 	if (VERSION7) {
+		/* no compression */
 		tw->ptr += fprintf(fout, "none%cversion%c\n", 0, 0);
 
 		ret = start_header(tw, SECTION_OPTIONS, 0, "options");
@@ -653,6 +653,70 @@ static int make_ftrace(FILE *fout)
 			fprintf(stderr, "Cannot finish option header\n");
 			return -1;
 		}
+	}
+
+	tw->ptr += fprintf(fout, "header_event%c", 0);
+	snprintf(str, sizeof(str),
+		"# compressed entry header\n"
+		"\ttype_len    :    5 bits\n"
+		"\ttime_delta  :   27 bits\n"
+		"\tarray       :   32 bits\n"
+		"\n"
+		"\tpadding     : type == 29\n"
+		"\ttime_extend : type == 30\n"
+		"\ttime_stamp : type == 31\n"
+		"\tdata max type_len  == 28\n");
+	len = strlen(str);
+	tw->ptr += tputq(fout, len);
+	tw->ptr += tputs(fout, str);
+
+	/* number of ftrace-event-format files */
+	tw->ptr += tputl(fout, 1);
+	snprintf(str, sizeof(str),
+		 "name: function\n"
+		 "ID: 1\n"
+		 "format:\n"
+		 "\tfield:unsigned short common_type;\toffset:0;\tsize:2;\tsigned:0;\n"
+		 "\tfield:unsigned char common_flags;\toffset:2;\tsize:1;\tsigned:0;\n"
+		 "\tfield:unsigned char common_preempt_count;\toffset:3;\tsize:1;signed:0;\n"
+		 "\tfield:int common_pid;\toffset:4;\tsize:4;\tsigned:1;\n"
+		 "\n"
+		 "\tfield:unsigned long ip;\toffset:8;\tsize:8;\tsigned:0;\n"
+		 "\tfield:unsigned long parent_ip;\toffset:16;\tsize:8;\tsigned:0;\n"
+		 "\n"
+		 "print fmt: \" %%ps <-- %%ps\", (void *)REC->ip, (void *)REC->parent_ip\n");
+	len = strlen(str);
+	tw->ptr += tputq(fout, len);
+	tw->ptr += tputs(fout, str);
+
+	/* number of event systems files */
+	tw->ptr += tputl(fout, 0);
+
+	/* number of symbols, 0 for now */
+	tw->ptr += tputl(fout, 0);
+
+	/* number of processes */
+	tw->ptr += tputl(fout, 1);
+	snprintf(str, sizeof(str), "1 u-boot");
+	tw->ptr += tputq(fout, len);
+	tw->ptr += tputs(fout, str);
+
+	/* number of CPUs */
+	tw->ptr += tputl(fout, 1);
+
+	tw->ptr += fprintf(fout, "flyrecord%c", 0);
+
+	/* trace data */
+	tw->base = tw->ptr;
+	tw->ptr += tputq(fout, tw->ptr + 16);
+
+	/* use a placeholder for the size */
+	tw->ptr += tputq(fout, 0);
+
+	ret = finish_header(tw);
+	if (ret < 0) {
+		fprintf(stderr, "Cannot finish option header\n");
+		return -1;
 	}
 
 	return 0;
