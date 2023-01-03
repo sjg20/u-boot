@@ -267,7 +267,7 @@ static struct func_info *find_func_by_offset(uint32_t offset)
 	return found;
 }
 
-#if 0
+#if 1
 /* This finds the function which contains the given offset */
 static struct func_info *find_caller_by_offset(uint32_t offset)
 {
@@ -1011,10 +1011,8 @@ static int make_ftrace(FILE *fout)
 	depth = -min_depth;
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		struct func_info *func;
-// 		struct func_info *caller_func;
 		ulong timestamp;
 		int delta;
-		bool entry;
 		int rec_words;
 
 		func = find_func_by_offset(call->func);
@@ -1035,7 +1033,7 @@ static int make_ftrace(FILE *fout)
 #if 0
 		rec_words = 6;
 #else
-		entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
+		bool entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
 
 		/* 2 header words and then 3 or 8 others */
 		rec_words = 2 + (entry ? 3 : 8);
@@ -1069,6 +1067,8 @@ static int make_ftrace(FILE *fout)
 			return -1;
 		}
 #if 0
+		struct func_info *caller_func;
+
 		/* type_len is 6, meaning 4 * 6 = 24 bytes */
 		tw->ptr += tputl(fout, rec_words | delta << 5);
 		tw->ptr += tputh(fout, TRACE_FN);
@@ -1076,7 +1076,7 @@ static int make_ftrace(FILE *fout)
 		tw->ptr += tputl(fout, TRACE_PID);	/* PID */
 		tw->ptr += tputq(fout, text_offset + func->offset);	/* function */
 		caller_func = find_caller_by_offset(call->caller);
-		tw->ptr += tputq(fout, caller_func->offset);	/* caller */
+		tw->ptr += tputq(fout, text_offset + caller_func->offset);	/* caller */
 #else
 		tw->ptr += tputl(fout, rec_words | delta << 5);
 		if (entry) {
