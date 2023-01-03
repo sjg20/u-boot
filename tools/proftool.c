@@ -24,6 +24,8 @@
 #include <trace.h>
 #include <abuf.h>
 
+#include <linux/list.h>
+
 /* Set to 1 to emit version 7 file (currently only partly supported) */
 #define VERSION7	0
 
@@ -39,6 +41,7 @@ enum {
 	TRACE_PID	= 1,		/* PID to use for U-Boot */
 	LEN_STACK_SIZE	= 4,		/* number of nested length fix-ups */
 	TRACE_PAGE_MASK	= TRACE_PAGE_SIZE - 1,
+	MAX_STACK_DEPTH	= 50,		/* Max nested function calls */
 };
 
 /**
@@ -46,10 +49,12 @@ enum {
  *
  * @OUT_FMT_FUNCTION: Write ftrace 'function' records
  * @OUT_FMT_FUNCGRAPH: Write ftrace funcgraph_entry and funcgraph_exit records
+ * @OUT_FMT_FLAMEGRAPH: Write a file suitable for flamegraph.pl
  */
 enum out_format_t {
 	OUT_FMT_FUNCTION,
 	OUT_FMT_FUNCGRAPH,
+	OUT_FMT_FLAMEGRAPH,
 };
 
 /* Section types */
@@ -91,6 +96,22 @@ enum trace_type {
 	TRACE_BRANCH,
 	TRACE_GRAPH_RET,
 	TRACE_GRAPH_ENT,
+};
+
+/**
+ * struct flame_node - a node in the call-stack tree
+ *
+ * @parent: Pointer to parent node (the one that called this function), NULL if
+ *	none
+ * @next: Next node in the list of all nodes in the tree
+ * @func: Function this node refers to
+ * @count: Number of times this call-stack occurred
+ */
+struct flame_node {
+	struct flame_node *parent;
+	struct list_head next;
+	struct func_info *func;
+	int count;
 };
 
 struct func_info {
@@ -180,9 +201,11 @@ static void usage(void)
 		"\n"
 		"Commands\n"
 		"   dump-ftrace\t\tDump out textual data in ftrace format\n"
+		"   dump-flamegraph\t\tWrite a file to use with flamegraph.pl\n"
 		"\n"
 		"Options:\n"
 		"   -c <cfg>\tSpecify config file\n"
+		"   -f <function | funcgraph>\tSpecify type of ftrace records\n"
 		"   -m <map>\tSpecify Systen.map file\n"
 		"   -o <fname>\tSpecify output file\n"
 		"   -t <fname>\tSpecify trace data file (from U-Boot 'trace calls')\n"
@@ -1004,6 +1027,8 @@ static int calc_min_depth(void)
 static int write_pages(struct twriter *tw, enum out_format_t out_format,
 		       int *missing_countp, int *skip_countp)
 {
+	ulong func_stack[MAX_STACK_DEPTH];
+	int stack_ptr;	/* next free position in stack */
 	int upto, depth, page_upto, i;
 	int missing_count = 0, skip_count = 0;
 	struct trace_call *call;
@@ -1015,6 +1040,9 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 	base_timestamp = 0;
 	upto = 0;
 	page_upto = 0;
+
+	/* maintain a stack of start times for calling functions */
+	stack_ptr = 0;
 
 	/*
 	 * The first thing in the trace may not be the top-level function, so
@@ -1049,7 +1077,7 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 			rec_words = 2 + (entry ? 3 : 8);
 
 		/* convert timestamp from us to ns */
-		timestamp = (call->flags & FUNCF_TIMESTAMP_MASK);
+		timestamp = call->flags & FUNCF_TIMESTAMP_MASK;
 		if (in_page) {
 			if (page_upto + rec_words * 4 > TRACE_PAGE_SIZE) {
 				if (finish_page(tw))
@@ -1101,17 +1129,37 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 			tw->ptr += tputl(fout, depth); /* depth */
 			if (entry) {
 				depth++;
+// 				if (stack_ptr == MAX_STACK_DEPTH) {
+// 					fprintf(stderr,
+// 						"Call-stack overflow at %d\n",
+// 					        stack_ptr);
+// 					return -1;
+// 				}
+				if (stack_ptr < MAX_STACK_DEPTH)
+					func_stack[stack_ptr] = timestamp;
+				stack_ptr++;
 			} else {
+				ulong func_duration = 0;
+
 				depth--;
+				if (stack_ptr && stack_ptr <= MAX_STACK_DEPTH) {
+					ulong start = func_stack[--stack_ptr];
+
+					func_duration = timestamp - start;
+				}
 				tw->ptr += tputl(fout, 0);	/* overrun */
 				tw->ptr += tputq(fout, 0);	/* calltime */
-				tw->ptr += tputq(fout, 0);	/* rettime */
+				/* rettime */
+				tw->ptr += tputq(fout, func_duration);
 			}
 		}
 
 		page_upto += 4 + rec_words * 4;
 		upto++;
-		if (upto == 200)
+// 		printf("%d %s\n", stack_ptr, func->name);
+// 		if (upto == 200)
+// 			break;
+		if (stack_ptr == MAX_STACK_DEPTH)
 			break;
 	}
 	if (in_page && finish_page(tw))
@@ -1213,6 +1261,65 @@ static int make_ftrace(FILE *fout, enum out_format_t out_format)
 	return 0;
 }
 
+static int make_flame_tree(struct list_head *head, struct flame_node **treep)
+{
+	struct trace_call *call;
+	int missing_count = 0;
+	bool active;
+	int i, depth;
+
+	/*
+	 * The first thing in the trace may not be the top-level function, so
+	 * set the initial depth so that no function goes below depth 0
+	 */
+	depth = -calc_min_depth();
+	printf("start depth %d\n", depth);
+
+	/* don't start until we get to the top level of the call stack */
+	active = false;
+	for (i = 0, call = call_list; i < call_count; i++, call++) {
+		bool entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
+		struct func_info *func;
+
+		if (entry)
+			depth++;
+		else
+			depth--;
+		if (!active) {
+			if (!depth)
+				active = true;
+			break;
+		}
+
+		func = find_func_by_offset(call->func);
+		if (!func) {
+			warn("Cannot find function at %lx\n",
+			     text_offset + call->func);
+			missing_count++;
+			continue;
+		}
+	}
+
+	return 0;
+}
+
+static int make_flamegraph(FILE *fout)
+{
+	struct list_head head;
+	struct flame_node *tree;
+
+	if (make_flame_tree(&head, &tree))
+		return -1;
+
+	/*
+	 * Create a tree of stack traces, with the root node being the top-level
+	 * function and the leaf nodes being leaf functions. Each node has a
+	 * count of how many times this function appears in the trace
+	 */
+
+	return 0;
+}
+
 static int prof_tool(int argc, char *const argv[],
 		     const char *prof_fname, const char *map_fname,
 		     const char *trace_config_fname, const char *out_fname,
@@ -1232,7 +1339,7 @@ static int prof_tool(int argc, char *const argv[],
 	for (; argc; argc--, argv++) {
 		const char *cmd = *argv;
 
-		if (0 == strcmp(cmd, "dump-ftrace")) {
+		if (!strcmp(cmd, "dump-ftrace")) {
 			FILE *fout;
 
 			fout = fopen(out_fname, "w");
@@ -1242,6 +1349,17 @@ static int prof_tool(int argc, char *const argv[],
 				return -1;
 			}
 			err = make_ftrace(fout, out_format);
+			fclose(fout);
+		} else if (!strcmp(cmd, "dump-flamegraph")) {
+			FILE *fout;
+
+			fout = fopen(out_fname, "w");
+			if (!fout) {
+				fprintf(stderr, "Cannot write file '%s'\n",
+					out_fname);
+				return -1;
+			}
+			err = make_flamegraph(fout);
 			fclose(fout);
 		} else {
 			warn("Unknown command '%s'\n", cmd);
