@@ -966,46 +966,40 @@ static int write_options(struct twriter *tw)
 	return 0;
 }
 
-/*
- * See here for format:
- *
- * https://github.com/rostedt/trace-cmd/blob/master/Documentation/trace-cmd/trace-cmd.dat.v7.5.txt
- */
-static int make_ftrace(FILE *fout)
+static int calc_min_depth(void)
 {
 	struct trace_call *call;
+	int depth, min_depth, i;
+
+	/* Calculate minimum depth */
+	depth = 0;
+	min_depth = 0;
+	for (i = 0, call = call_list; i < call_count; i++, call++) {
+		switch (TRACE_CALL_TYPE(call)) {
+		case FUNCF_ENTRY:
+			depth++;
+			break;
+		case FUNCF_EXIT:
+			depth--;
+			if (depth < min_depth)
+				min_depth = depth;
+			break;
+		}
+	}
+
+	return min_depth;
+}
+
+static int write_flyrecord(struct twriter *tw, int *missing_countp,
+			   int *skip_countp)
+{
+	int start, ret, len, upto, depth, page_upto, i;
 	int missing_count = 0, skip_count = 0;
-	struct twriter tws, *tw = &tws;
-	int i, ret, len, start, upto;
-	bool in_page;
+	struct trace_call *call;
 	ulong base_timestamp;
-	int page_upto, depth, min_depth;
+	FILE *fout = tw->fout;
+	bool in_page;
 	char str[200];
-
-	memset(tw, '\0', sizeof(*tw));
-	abuf_init(&tw->str_buf);
-	tw->fout = fout;
-
-	tw->ptr = 0;
-	ret = output_headers(tw);
-	if (ret < 0) {
-		fprintf(stderr, "Cannot output headers\n");
-		return -1;
-	}
-	/* number of event systems files */
-	tw->ptr += tputl(fout, 0);
-
-	ret = write_symbols(tw);
-	if (ret < 0) {
-		fprintf(stderr, "Cannot write symbols\n");
-		return -1;
-	}
-
-	ret = write_options(tw);
-	if (ret < 0) {
-		fprintf(stderr, "Cannot write options\n");
-		return -1;
-	}
 
 	tw->ptr += fprintf(fout, "flyrecord%c", 0);
 
@@ -1031,24 +1025,13 @@ static int make_ftrace(FILE *fout)
 	upto = 0;
 	page_upto = 0;
 
-	/* Calculate minimum depth */
-	depth = 0;
-	min_depth = 0;
-	for (i = 0, call = call_list; i < call_count; i++, call++) {
-		switch (TRACE_CALL_TYPE(call)) {
-		case FUNCF_ENTRY:
-			depth++;
-			break;
-		case FUNCF_EXIT:
-			depth--;
-			if (depth < min_depth)
-				min_depth = depth;
-			break;
-		}
-	}
 	printf("trace text base %lx, map file %lx\n", text_base, text_offset);
 
-	depth = -min_depth;
+	/*
+	 * The first thing in the trace may not be the top-level function, so
+	 * set the initial depth so that no function goes below depth 0
+	 */
+	depth = -calc_min_depth();
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		struct func_info *func;
 		ulong timestamp;
@@ -1149,6 +1132,54 @@ static int make_ftrace(FILE *fout)
 	ret = pop_len(tw, "flyrecord");
 	if (ret < 0) {
 		fprintf(stderr, "Cannot finish flyrecord header\n");
+		return -1;
+	}
+
+	*missing_countp = missing_count;
+	*skip_countp = skip_count;
+
+	return 0;
+}
+
+/*
+ * See here for format:
+ *
+ * https://github.com/rostedt/trace-cmd/blob/master/Documentation/trace-cmd/trace-cmd.dat.v7.5.txt
+ */
+static int make_ftrace(FILE *fout)
+{
+	int missing_count, skip_count;
+	struct twriter tws, *tw = &tws;
+	int ret;
+
+	memset(tw, '\0', sizeof(*tw));
+	abuf_init(&tw->str_buf);
+	tw->fout = fout;
+
+	tw->ptr = 0;
+	ret = output_headers(tw);
+	if (ret < 0) {
+		fprintf(stderr, "Cannot output headers\n");
+		return -1;
+	}
+	/* number of event systems files */
+	tw->ptr += tputl(fout, 0);
+
+	ret = write_symbols(tw);
+	if (ret < 0) {
+		fprintf(stderr, "Cannot write symbols\n");
+		return -1;
+	}
+
+	ret = write_options(tw);
+	if (ret < 0) {
+		fprintf(stderr, "Cannot write options\n");
+		return -1;
+	}
+
+	ret = write_flyrecord(tw, &missing_count, &skip_count);
+	if (ret < 0) {
+		fprintf(stderr, "Cannot write flyrecord\n");
 		return -1;
 	}
 
