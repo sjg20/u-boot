@@ -1092,24 +1092,17 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 					 text_offset + caller_func->offset);
 		} else {
 			tw->ptr += tputl(fout, rec_words | delta << 5);
+			tw->ptr += tputh(fout, entry ? TRACE_GRAPH_ENT
+						: TRACE_GRAPH_RET);
+			tw->ptr += tputh(fout, 0);	/* flags */
+			tw->ptr += tputl(fout, TRACE_PID); /* PID */
+			/* function */
+			tw->ptr += tputq(fout, text_offset + func->offset);
+			tw->ptr += tputl(fout, depth); /* depth */
 			if (entry) {
-				tw->ptr += tputh(fout, TRACE_GRAPH_ENT);
-				tw->ptr += tputh(fout, 0);	/* flags */
-				tw->ptr += tputl(fout, TRACE_PID); /* PID */
-				/* function */
-				tw->ptr += tputq(fout,
-						 text_offset + func->offset);
-				tw->ptr += tputl(fout, depth++); /* depth */
+				depth++;
 			} else {
-				if (depth)
-					depth--;
-				tw->ptr += tputh(fout, TRACE_GRAPH_RET);
-				tw->ptr += tputh(fout, 0);	/* flags */
-				tw->ptr += tputl(fout, TRACE_PID); /* PID */
-				/* function */
-				tw->ptr += tputq(fout,
-						 text_offset + func->offset);
-				tw->ptr += tputl(fout, depth);	/* depth */
+				depth--;
 				tw->ptr += tputl(fout, 0);	/* overrun */
 				tw->ptr += tputq(fout, 0);	/* calltime */
 				tw->ptr += tputq(fout, 0);	/* rettime */
