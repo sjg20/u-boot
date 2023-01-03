@@ -139,7 +139,8 @@ int func_count;
 struct trace_call *call_list;
 int call_count;
 int verbose;	/* Verbosity level 0=none, 1=warn, 2=notice, 3=info, 4=debug */
-unsigned long text_offset;		/* text address of first function */
+ulong text_offset;		/* text address of first function */
+ulong text_base;		/* CONFIG_TEXT_BASE from trace file */
 
 static void outf(int level, const char *fmt, ...)
 		__attribute__ ((format (__printf__, 2, 3)));
@@ -266,6 +267,7 @@ static struct func_info *find_func_by_offset(uint32_t offset)
 	return found;
 }
 
+#if 0
 /* This finds the function which contains the given offset */
 static struct func_info *find_caller_by_offset(uint32_t offset)
 {
@@ -291,7 +293,7 @@ static struct func_info *find_caller_by_offset(uint32_t offset)
 
 	return low >= 0 ? &func_list[low] : NULL;
 }
-
+#endif
 static int read_calls(FILE *fin, size_t count)
 {
 	struct trace_call *call_data;
@@ -326,6 +328,7 @@ static int read_profile(FILE *fin, int *not_found)
 			break; /* EOF */
 		else if (err)
 			return 1;
+		text_base = hdr.text_base;
 
 		switch (hdr.type) {
 		case TRACE_CHUNK_FUNCS:
@@ -762,6 +765,7 @@ static int make_ftrace(FILE *fout)
 	char str[800];
 	ulong base_timestamp;
 	int page_upto, depth, min_depth;
+	ulong textbase;
 
 	memset(tw, '\0', sizeof(*tw));
 	abuf_init(&tw->str_buf);
@@ -892,8 +896,6 @@ static int make_ftrace(FILE *fout)
 
 		snprintf(str, sizeof(str), "%016lx T %s\n",
 			 text_offset + func->offset, func->name);
-		if (i < 10)
-			printf("%d: %s", i, str);
 		len = strlen(str);
 		tw->ptr += tputs(fout, str);
 	}
@@ -903,7 +905,7 @@ static int make_ftrace(FILE *fout)
 		return -1;
 	}
 	tw->ptr += ret;
-	printf("check %x %x\n", tw->ptr, ftell(tw->fout));
+	printf("check %x %lx\n", tw->ptr, ftell(tw->fout));
 
 	/* trace_printk, 0 for now */
 	tw->ptr += tputl(fout, 0);
@@ -993,6 +995,7 @@ static int make_ftrace(FILE *fout)
 	/* Calculate minimum depth */
 	depth = 0;
 	min_depth = 0;
+	textbase = -1;
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		switch (TRACE_CALL_TYPE(call)) {
 		case FUNCF_ENTRY:
@@ -1003,8 +1006,13 @@ static int make_ftrace(FILE *fout)
 			if (depth < min_depth)
 				min_depth = depth;
 			break;
+		case FUNCF_TEXTBASE:
+			textbase = call->func;
+			break;
 		}
 	}
+	printf("trace text base %lx, %lx, map file %lx\n", textbase, text_base,
+	       text_offset);
 
 	depth = -min_depth;
 	for (i = 0, call = call_list; i < call_count; i++, call++) {

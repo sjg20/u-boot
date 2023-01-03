@@ -268,7 +268,9 @@ int trace_list_calls(void *buff, size_t buff_size, size_t *needed)
 			struct trace_call *call = &hdr->ftrace[rec];
 			struct trace_call *out = ptr;
 
-			out->func = call->func * FUNC_SITE_SIZE;
+			out->func = call->func;
+			if (TRACE_CALL_TYPE(call) != FUNCF_TEXTBASE)
+				out->func *= FUNC_SITE_SIZE;
 			out->caller = call->caller * FUNC_SITE_SIZE;
 			out->flags = call->flags;
 			upto++;
@@ -278,8 +280,11 @@ int trace_list_calls(void *buff, size_t buff_size, size_t *needed)
 
 	/* Update the header */
 	if (output_hdr) {
+		memset(output_hdr, '\0', sizeof(*output_hdr));
 		output_hdr->rec_count = upto;
 		output_hdr->type = TRACE_CHUNK_CALLS;
+		output_hdr->version = TRACE_VERSION;
+		output_hdr->text_base = CONFIG_TEXT_BASE;
 	}
 
 	/* Work out how must of the buffer we used */
