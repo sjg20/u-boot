@@ -69,7 +69,7 @@ int trace_list_functions(void *buff, size_t buff_size, size_t *needed);
 enum ftrace_flags {
 	FUNCF_EXIT		= 0UL << 30,
 	FUNCF_ENTRY		= 1UL << 30,
-	FUNCF_TEXTBASE		= 2UL << 30,
+	/* two more values are available */
 
 	FUNCF_TIMESTAMP_MASK	= 0x3fffffff,
 };

@@ -118,18 +118,6 @@ static void notrace add_ftrace(void *func_ptr, void *caller, ulong flags)
 	hdr->ftrace_count++;
 }
 
-static void notrace add_textbase(void)
-{
-	if (hdr->ftrace_count < hdr->ftrace_size) {
-		struct trace_call *rec = &hdr->ftrace[hdr->ftrace_count];
-
-		rec->func = CONFIG_TEXT_BASE;
-		rec->caller = 0;
-		rec->flags = FUNCF_TEXTBASE;
-	}
-	hdr->ftrace_count++;
-}
-
 /**
  * __cyg_profile_func_enter() - record function entry
  *
@@ -268,9 +256,7 @@ int trace_list_calls(void *buff, size_t buff_size, size_t *needed)
 			struct trace_call *call = &hdr->ftrace[rec];
 			struct trace_call *out = ptr;
 
-			out->func = call->func;
-			if (TRACE_CALL_TYPE(call) != FUNCF_TEXTBASE)
-				out->func *= FUNC_SITE_SIZE;
+			out->func = call->func * FUNC_SITE_SIZE;
 			out->caller = call->caller * FUNC_SITE_SIZE;
 			out->flags = call->flags;
 			upto++;
@@ -390,7 +376,6 @@ int notrace trace_init(void *buff, size_t buff_size)
 	/* Use any remaining space for the timed function trace */
 	hdr->ftrace = (struct trace_call *)(buff + needed);
 	hdr->ftrace_size = (buff_size - needed) / sizeof(*hdr->ftrace);
-	add_textbase();
 
 	puts("trace: enabled\n");
 	hdr->depth_limit = CONFIG_TRACE_CALL_DEPTH_LIMIT;

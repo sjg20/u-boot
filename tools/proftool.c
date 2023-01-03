@@ -765,7 +765,6 @@ static int make_ftrace(FILE *fout)
 	char str[800];
 	ulong base_timestamp;
 	int page_upto, depth, min_depth;
-	ulong textbase;
 
 	memset(tw, '\0', sizeof(*tw));
 	abuf_init(&tw->str_buf);
@@ -995,7 +994,6 @@ static int make_ftrace(FILE *fout)
 	/* Calculate minimum depth */
 	depth = 0;
 	min_depth = 0;
-	textbase = -1;
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		switch (TRACE_CALL_TYPE(call)) {
 		case FUNCF_ENTRY:
@@ -1006,13 +1004,9 @@ static int make_ftrace(FILE *fout)
 			if (depth < min_depth)
 				min_depth = depth;
 			break;
-		case FUNCF_TEXTBASE:
-			textbase = call->func;
-			break;
 		}
 	}
-	printf("trace text base %lx, %lx, map file %lx\n", textbase, text_base,
-	       text_offset);
+	printf("trace text base %lx, map file %lx\n", text_base, text_offset);
 
 	depth = -min_depth;
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
@@ -1023,9 +1017,6 @@ static int make_ftrace(FILE *fout)
 		bool entry;
 		int rec_words;
 
-		if (TRACE_CALL_TYPE(call) != FUNCF_ENTRY &&
-		    TRACE_CALL_TYPE(call) != FUNCF_EXIT)
-			continue;
 		func = find_func_by_offset(call->func);
 		if (!func) {
 			warn("Cannot find function at %lx\n",
@@ -1073,7 +1064,8 @@ static int make_ftrace(FILE *fout)
 			 * hard to imagine how this could happen since it means
 			 * that no function calls were made for a long time
 			 */
-			fprintf(stderr, "cannot represent time delta\n");
+			fprintf(stderr, "cannot represent time delta %x\n",
+				delta);
 			return -1;
 		}
 #if 0
