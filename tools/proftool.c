@@ -750,27 +750,12 @@ static int finish_page(struct twriter *tw)
 	return 0;
 }
 
-/*
- * See here for format:
- *
- * https://github.com/rostedt/trace-cmd/blob/master/Documentation/trace-cmd/trace-cmd.dat.v7.5.txt
- */
-static int make_ftrace(FILE *fout)
+static int output_headers(struct twriter *tw)
 {
-	struct trace_call *call;
-	int missing_count = 0, skip_count = 0;
-	struct twriter tws, *tw = &tws;
-	int i, ret, len, start, upto;
-	bool in_page;
+	FILE *fout = tw->fout;
 	char str[800];
-	ulong base_timestamp;
-	int page_upto, depth, min_depth;
+	int len, ret;
 
-	memset(tw, '\0', sizeof(*tw));
-	abuf_init(&tw->str_buf);
-	tw->fout = fout;
-
-	tw->ptr = 0;
 	tw->ptr += fprintf(fout, "%c%c%ctracing6%c%c%c", 0x17, 0x08, 0x44,
 			   0 /* terminator */, 0 /* little endian */,
 			   4 /* 32-bit long values */);
@@ -881,8 +866,13 @@ static int make_ftrace(FILE *fout)
 	tw->ptr += tputq(fout, len);
 	tw->ptr += tputs(fout, str);
 
-	/* number of event systems files */
-	tw->ptr += tputl(fout, 0);
+	return 0;
+}
+
+static int write_symbols(struct twriter *tw)
+{
+	char str[200];
+	int ret, i;
 
 	/* write symbols */
 	ret = push_len(tw, tw->ptr + 4, "syms", 4);
@@ -895,16 +885,21 @@ static int make_ftrace(FILE *fout)
 
 		snprintf(str, sizeof(str), "%016lx T %s\n",
 			 text_offset + func->offset, func->name);
-		len = strlen(str);
-		tw->ptr += tputs(fout, str);
+		tw->ptr += tputs(tw->fout, str);
 	}
 	ret = pop_len(tw, "syms");
-	if (ret < 0) {
-		fprintf(stderr, "Cannot finish sym header\n");
+	if (ret < 0)
 		return -1;
-	}
 	tw->ptr += ret;
-	printf("check %x %lx\n", tw->ptr, ftell(tw->fout));
+
+	return 0;
+}
+
+static int write_options(struct twriter *tw)
+{
+	FILE *fout = tw->fout;
+	char str[200];
+	int len;
 
 	/* trace_printk, 0 for now */
 	tw->ptr += tputl(fout, 0);
@@ -968,6 +963,50 @@ static int make_ftrace(FILE *fout)
 
 	tw->ptr += tputh(fout, OPTION_DONE);
 
+	return 0;
+}
+
+/*
+ * See here for format:
+ *
+ * https://github.com/rostedt/trace-cmd/blob/master/Documentation/trace-cmd/trace-cmd.dat.v7.5.txt
+ */
+static int make_ftrace(FILE *fout)
+{
+	struct trace_call *call;
+	int missing_count = 0, skip_count = 0;
+	struct twriter tws, *tw = &tws;
+	int i, ret, len, start, upto;
+	bool in_page;
+	ulong base_timestamp;
+	int page_upto, depth, min_depth;
+	char str[200];
+
+	memset(tw, '\0', sizeof(*tw));
+	abuf_init(&tw->str_buf);
+	tw->fout = fout;
+
+	tw->ptr = 0;
+	ret = output_headers(tw);
+	if (ret < 0) {
+		fprintf(stderr, "Cannot output headers\n");
+		return -1;
+	}
+	/* number of event systems files */
+	tw->ptr += tputl(fout, 0);
+
+	ret = write_symbols(tw);
+	if (ret < 0) {
+		fprintf(stderr, "Cannot write symbols\n");
+		return -1;
+	}
+
+	ret = write_options(tw);
+	if (ret < 0) {
+		fprintf(stderr, "Cannot write options\n");
+		return -1;
+	}
+
 	tw->ptr += fprintf(fout, "flyrecord%c", 0);
 
 	/* trace data */
@@ -985,6 +1024,7 @@ static int make_ftrace(FILE *fout)
 	len = strlen(str);
 	tw->ptr += tputq(fout, len);
 	tw->ptr += tputs(fout, str);
+// 	printf("check %x %lx\n", tw->ptr, ftell(tw->fout));
 
 	in_page = false;
 	base_timestamp = 0;
