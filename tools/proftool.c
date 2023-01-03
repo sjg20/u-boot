@@ -67,6 +67,16 @@ enum trace_type {
 	__TRACE_FIRST_TYPE = 0,
 
 	TRACE_FN,
+	TRACE_CTX,
+	TRACE_WAKE,
+	TRACE_STACK,
+	TRACE_PRINT,
+	TRACE_BPRINT,
+	TRACE_MMIO_RW,
+	TRACE_MMIO_MAP,
+	TRACE_BRANCH,
+	TRACE_GRAPH_RET,
+	TRACE_GRAPH_ENT,
 };
 
 struct func_info {
@@ -741,7 +751,7 @@ static int make_ftrace(FILE *fout)
 	struct twriter tws, *tw = &tws;
 	int i, ret, len, start, upto;
 	bool in_page;
-	char str[500];
+	char str[800];
 	ulong base_timestamp;
 
 	memset(tw, '\0', sizeof(*tw));
@@ -803,7 +813,8 @@ static int make_ftrace(FILE *fout)
 	tw->ptr += tputs(fout, str);
 
 	/* number of ftrace-event-format files */
-	tw->ptr += tputl(fout, 1);
+	tw->ptr += tputl(fout, 3);
+
 	snprintf(str, sizeof(str),
 		 "name: function\n"
 		 "ID: 1\n"
@@ -821,6 +832,43 @@ static int make_ftrace(FILE *fout)
 	tw->ptr += tputq(fout, len);
 	tw->ptr += tputs(fout, str);
 
+	snprintf(str, sizeof(str),
+		 "name: funcgraph_entry\n"
+		 "ID: 11\n"
+		 "format:\n"
+		 "\tfield:unsigned short common_type;\toffset:0;\tsize:2;\tsigned:0;\n"
+		 "\tfield:unsigned char common_flags;\toffset:2;\tsize:1;\tsigned:0;\n"
+		 "\tfield:unsigned char common_preempt_count;\toffset:3;\tsize:1;signed:0;\n"
+		 "\tfield:int common_pid;\toffset:4;\tsize:4;\tsigned:1;\n"
+		 "\n"
+		 "\tfield:unsigned long func;\toffset:8;\tsize:8;\tsigned:0;\n"
+		 "\tfield:int depth;\toffset:16;\tsize:4;\tsigned:1;\n"
+		"\n"
+		 "print fmt: \"--> %%ps (%%d)\", (void *)REC->func, REC->depth\n");
+	len = strlen(str);
+	tw->ptr += tputq(fout, len);
+	tw->ptr += tputs(fout, str);
+
+	snprintf(str, sizeof(str),
+		"name: funcgraph_exit\n"
+		"ID: 10\n"
+		"format:\n"
+		"\tfield:unsigned short common_type;\toffset:0;\tsize:2;\tsigned:0;\n"
+		"\tfield:unsigned char common_flags;\toffset:2;\tsize:1;\tsigned:0;\n"
+		"\tfield:unsigned char common_preempt_count;\toffset:3;\tsize:1;signed:0;\n"
+		"\tfield:int common_pid;\toffset:4;\tsize:4;\tsigned:1;\n"
+		"\n"
+		"\tfield:unsigned long func;\toffset:8;\tsize:8;\tsigned:0;\n"
+		"\tfield:int depth;\toffset:16;\tsize:4;\tsigned:1;\n"
+		"\tfield:unsigned int overrun;\toffset:20;\tsize:4;\tsigned:0;\n"
+		"\tfield:unsigned long long calltime;\toffset:24;\tsize:8;\tsigned:0;\n"
+		"\tfield:unsigned long long rettime;\toffset:32;\tsize:8;\tsigned:0;\n"
+		"\n"
+		"print fmt: \"<-- %%ps (%%d) (start: %%llx  end: %%llx) over: %%d\", (void *)REC->func, REC->depth, REC->calltime, REC->rettime, REC->depth\n");
+	len = strlen(str);
+	tw->ptr += tputq(fout, len);
+	tw->ptr += tputs(fout, str);
+
 	/* number of event systems files */
 	tw->ptr += tputl(fout, 0);
 
@@ -834,8 +882,8 @@ static int make_ftrace(FILE *fout)
 		struct func_info *func = &func_list[i];
 
 		if (1 || func->objsection) {
-			snprintf(str, sizeof(str), "%s T %08lx\n", func->name,
-				 func->offset);
+			snprintf(str, sizeof(str), "%016lx T %s\n",
+				 text_offset + func->offset, func->name);
 			len = strlen(str);
 			tw->ptr += tputs(fout, str);
 		}
@@ -867,14 +915,14 @@ static int make_ftrace(FILE *fout)
 
 	/* uname */
 	tw->ptr += tputh(fout, OPTION_UNAME);
-	snprintf(str, sizeof(str), "U-Boot\n");
+	snprintf(str, sizeof(str), "U-Boot");
 	len = strlen(str);
 	tw->ptr += tputl(fout, len);
 	tw->ptr += tputs(fout, str);
 
 	/* version */
 	tw->ptr += tputh(fout, OPTION_VERSION);
-	snprintf(str, sizeof(str), "unknown\n");
+	snprintf(str, sizeof(str), "unknown");
 	len = strlen(str);
 	tw->ptr += tputl(fout, len);
 	tw->ptr += tputs(fout, str);
@@ -926,7 +974,7 @@ static int make_ftrace(FILE *fout)
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		struct func_info *func;
 		struct func_info *caller_func;
-		ulong timestamp = call->flags & FUNCF_TIMESTAMP_MASK;
+		ulong timestamp;;
 		uint delta;
 		uint page_upto;
 
@@ -948,6 +996,8 @@ static int make_ftrace(FILE *fout)
 			continue;
 		}
 
+		/* convert timestamp from us to ns */
+		timestamp = (call->flags & FUNCF_TIMESTAMP_MASK) * 1000;
 		if (in_page) {
 			page_upto = tw->ptr & TRACE_PAGE_MASK;
 			if (page_upto + 24 > TRACE_PAGE_SIZE) {
@@ -964,17 +1014,27 @@ static int make_ftrace(FILE *fout)
 		}
 
 		delta = timestamp - base_timestamp;
-
+#if 1
 		/* type_len is 6, meaning 4 * 6 = 24 bytes */
 		tw->ptr += tputl(fout, 6 | delta << 5);
 		tw->ptr += tputh(fout, TRACE_FN);
 		tw->ptr += tputh(fout, 0);	/* flags */
 		tw->ptr += tputl(fout, TRACE_PID);	/* PID */
-		tw->ptr += tputq(fout, func->offset);	/* function */
-
+		tw->ptr += tputq(fout, text_offset + func->offset);	/* function */
 		caller_func = find_caller_by_offset(call->caller);
 		tw->ptr += tputq(fout, caller_func->offset);	/* caller */
-
+#else
+		if (TRACE_CALL_TYPE(call) == FUNCF_ENTRY) {
+			/* type_len is 5, meaning 4 * 4 = 20 bytes */
+			tw->ptr += tputl(fout, 5 | delta << 5);
+			tw->ptr += tputh(fout, TRACE_GRAPH_ENT);
+			tw->ptr += tputh(fout, 0);	/* flags */
+			tw->ptr += tputl(fout, TRACE_PID);	/* PID */
+			tw->ptr += tputq(fout, text_offset + func->offset);	/* function */
+			tw->ptr += tputl(fout, 1);	/* depth */
+		} else if (TRACE_CALL_TYPE(call) == FUNCF_EXIT) {
+		}
+#endif
 		upto++;
 // 		if (upto == 2)
 // 			break;
