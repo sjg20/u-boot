@@ -60,6 +60,9 @@ enum {
 	OPTION_VERSION,
 	OPTION_PROCMAPS,
 	OPTION_TRACEID,
+	OPTION_TIME_SHIFT,
+	OPTION_GUEST,
+	OPTION_TSC2NSEC,
 };
 
 /* types of trace records */
@@ -624,6 +627,7 @@ static int add_str(struct twriter *tw, const char *name)
  * @base: Base position of the length calculation
  * @msg: Indicates the type of caller, for debugging
  * @size: Size of the length value, either 4 bytes or 8
+ * Returns number of bytes written to the file (=@size on success), -ve on error
  *
  * This marks a place where a length must be written, covering data that is
  * about to be written. It writes a placeholder value.
@@ -656,7 +660,7 @@ static int push_len(struct twriter *tw, int base, const char *msg, int size)
 static int pop_len(struct twriter *tw, const char *msg)
 {
 	struct tw_len *lp;
-	int len;
+	int len, ret;
 
 	if (!tw->len_count) {
 		fprintf(stderr, "Length-stack underflow: %s\n", msg);
@@ -667,7 +671,9 @@ static int pop_len(struct twriter *tw, const char *msg)
 	if (fseek(tw->fout, lp->ptr, SEEK_SET))
 		return -1;
 	len = tw->ptr - lp->base;
-	tputq(tw->fout, len);
+	ret = lp->size == 8 ? tputq(tw->fout, len) : tputl(tw->fout, len);
+	if (ret < 0)
+		return -1;
 	if (fseek(tw->fout, tw->ptr, SEEK_SET))
 		return -1;
 
@@ -755,7 +761,7 @@ static int make_ftrace(FILE *fout)
 	bool in_page;
 	char str[800];
 	ulong base_timestamp;
-	int page_upto;
+	int page_upto, depth, min_depth;
 
 	memset(tw, '\0', sizeof(*tw));
 	abuf_init(&tw->str_buf);
@@ -884,12 +890,12 @@ static int make_ftrace(FILE *fout)
 	for (i = 0; i < func_count; i++) {
 		struct func_info *func = &func_list[i];
 
-		if (1 || func->objsection) {
-			snprintf(str, sizeof(str), "%016lx T %s\n",
-				 text_offset + func->offset, func->name);
-			len = strlen(str);
-			tw->ptr += tputs(fout, str);
-		}
+		snprintf(str, sizeof(str), "%016lx T %s\n",
+			 text_offset + func->offset, func->name);
+		if (i < 10)
+			printf("%d: %s", i, str);
+		len = strlen(str);
+		tw->ptr += tputs(fout, str);
 	}
 	ret = pop_len(tw, "syms");
 	if (ret < 0) {
@@ -897,6 +903,7 @@ static int make_ftrace(FILE *fout)
 		return -1;
 	}
 	tw->ptr += ret;
+	printf("check %x %x\n", tw->ptr, ftell(tw->fout));
 
 	/* trace_printk, 0 for now */
 	tw->ptr += tputl(fout, 0);
@@ -934,6 +941,13 @@ static int make_ftrace(FILE *fout)
 	tw->ptr += tputh(fout, OPTION_TRACEID);
 	tw->ptr += tputl(fout, 8);
 	tw->ptr += tputq(fout, 0x123456780abcdef0);
+
+	/* time conversion */
+	tw->ptr += tputh(fout, OPTION_TSC2NSEC);
+	tw->ptr += tputl(fout, 16);
+	tw->ptr += tputl(fout, 1000);	/* multiplier */
+	tw->ptr += tputl(fout, 1);	/* shift */
+	tw->ptr += tputq(fout, 0);	/* offset */
 
 	/* cpustat */
 	tw->ptr += tputh(fout, OPTION_CPUSTAT);
@@ -975,11 +989,29 @@ static int make_ftrace(FILE *fout)
 	base_timestamp = 0;
 	upto = 0;
 	page_upto = 0;
+
+	/* Calculate minimum depth */
+	depth = 0;
+	min_depth = 0;
+	for (i = 0, call = call_list; i < call_count; i++, call++) {
+		switch (TRACE_CALL_TYPE(call)) {
+		case FUNCF_ENTRY:
+			depth++;
+			break;
+		case FUNCF_EXIT:
+			depth--;
+			if (depth < min_depth)
+				min_depth = depth;
+			break;
+		}
+	}
+
+	depth = -min_depth;
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		struct func_info *func;
-		struct func_info *caller_func;
-		ulong timestamp;;
-		uint delta;
+// 		struct func_info *caller_func;
+		ulong timestamp;
+		int delta;
 		bool entry;
 		int rec_words;
 
@@ -1005,13 +1037,13 @@ static int make_ftrace(FILE *fout)
 		rec_words = 6;
 #else
 		entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
-		if (!entry)
-			continue;
-		rec_words = entry ? 5 : 0;
+
+		/* 2 header words and then 3 or 8 others */
+		rec_words = 2 + (entry ? 3 : 8);
 #endif
 
 		/* convert timestamp from us to ns */
-		timestamp = (call->flags & FUNCF_TIMESTAMP_MASK) * 1000;
+		timestamp = (call->flags & FUNCF_TIMESTAMP_MASK);
 		if (in_page) {
 			if (page_upto + rec_words * 4 > TRACE_PAGE_SIZE) {
 				if (finish_page(tw))
@@ -1028,6 +1060,14 @@ static int make_ftrace(FILE *fout)
 		}
 
 		delta = timestamp - base_timestamp;
+		if (delta > 0x07fffff) {
+			/*
+			 * hard to imagine how this could happen since it means
+			 * that no function calls were made for a long time
+			 */
+			fprintf(stderr, "cannot represent time delta\n");
+			return -1;
+		}
 #if 0
 		/* type_len is 6, meaning 4 * 6 = 24 bytes */
 		tw->ptr += tputl(fout, rec_words | delta << 5);
@@ -1038,21 +1078,30 @@ static int make_ftrace(FILE *fout)
 		caller_func = find_caller_by_offset(call->caller);
 		tw->ptr += tputq(fout, caller_func->offset);	/* caller */
 #else
+		tw->ptr += tputl(fout, rec_words | delta << 5);
 		if (entry) {
-			/* type_len is 5, meaning 5 * 4 = 20 bytes */
-			tw->ptr += tputl(fout, rec_words | delta << 5);
 			tw->ptr += tputh(fout, TRACE_GRAPH_ENT);
 			tw->ptr += tputh(fout, 0);	/* flags */
 			tw->ptr += tputl(fout, TRACE_PID);	/* PID */
 			tw->ptr += tputq(fout, text_offset + func->offset);	/* function */
-			tw->ptr += tputl(fout, 1);	/* depth */
+			tw->ptr += tputl(fout, depth++);	/* depth */
 		} else {
+			if (depth)
+				depth--;
+			tw->ptr += tputh(fout, TRACE_GRAPH_RET);
+			tw->ptr += tputh(fout, 0);	/* flags */
+			tw->ptr += tputl(fout, TRACE_PID);	/* PID */
+			tw->ptr += tputq(fout, text_offset + func->offset);	/* function */
+			tw->ptr += tputl(fout, depth);	/* depth */
+			tw->ptr += tputl(fout, 0);	/* overrun */
+			tw->ptr += tputq(fout, 0);	/* calltime */
+			tw->ptr += tputq(fout, 0);	/* rettime */
 		}
 #endif
 		page_upto += 4 + rec_words * 4;
 		upto++;
-// 		if (upto == 2)
-// 			break;
+		if (upto == 200)
+			break;
 	}
 	if (in_page && finish_page(tw))
 		return -1;
