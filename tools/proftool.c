@@ -123,6 +123,7 @@ struct flame_node {
 	struct list_head sibling_node;
 	struct func_info *func;
 	int count;
+	ulong duration;
 };
 
 struct func_info {
@@ -1297,6 +1298,8 @@ static struct flame_node *create_node(const char *msg)
  */
 static int make_flame_tree(struct flame_node **treep)
 {
+	ulong func_stack[MAX_STACK_DEPTH];
+	int stack_ptr;	/* next free position in stack */
 	struct flame_node *node, *tree;
 	struct func_info *func, *end;
 	struct trace_call *call;
@@ -1304,6 +1307,9 @@ static int make_flame_tree(struct flame_node **treep)
 	bool active;
 	int i, depth;
 	int nodes;
+
+	/* maintain a stack of start times for calling functions */
+	stack_ptr = 0;
 
 	/*
 	 * The first thing in the trace may not be the top-level function, so
@@ -1325,9 +1331,10 @@ static int make_flame_tree(struct flame_node **treep)
 	for (func = func_list, end = func + func_count; func < end; func++)
 		func->node = NULL;
 
-	printf("depth start %d\n", depth);
+// 	printf("depth start %d\n", depth);
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		bool entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
+		ulong timestamp = call->flags & FUNCF_TIMESTAMP_MASK;
 		struct flame_node *child, *chd;
 		struct func_info *func;
 
@@ -1335,7 +1342,7 @@ static int make_flame_tree(struct flame_node **treep)
 			depth++;
 		else
 			depth--;
-		printf("depth %d, active=%d\n", depth, active);
+// 		printf("depth %d, active=%d\n", depth, active);
 		if (!active) {
 			if (!depth)
 				active = true;
@@ -1369,18 +1376,29 @@ static int make_flame_tree(struct flame_node **treep)
 				child->parent = node;
 				nodes++;
 			}
-			printf("entry %s: move from %s to %s\n", func->name,
-			       node->func ? node->func->name : "(root)",
-			       child->func->name);
+// 			printf("entry %s: move from %s to %s\n", func->name,
+// 			       node->func ? node->func->name : "(root)",
+// 			       child->func->name);
 			node = child;
+			node->count++;
+			if (stack_ptr < MAX_STACK_DEPTH)
+				func_stack[stack_ptr] = timestamp;
+			stack_ptr++;
 		} else if (node->parent) {
-			printf("exit  %s: move from %s to %s\n", func->name,
-			       node->func->name, node->parent->func ?
-			       node->parent->func->name : "(root)");
+			ulong func_duration = 0;
+
+// 			printf("exit  %s: move from %s to %s\n", func->name,
+// 			       node->func->name, node->parent->func ?
+// 			       node->parent->func->name : "(root)");
 			node = node->parent;
+			if (stack_ptr && stack_ptr <= MAX_STACK_DEPTH) {
+				ulong start = func_stack[--stack_ptr];
+
+				func_duration = timestamp - start;
+			}
+			node->duration += func_duration;
 		}
 
-		child->count++;
 	}
 	printf("%d nodes\n", nodes);
 	*treep = tree;
@@ -1395,16 +1413,17 @@ static void output_tree(FILE *fout, const struct flame_node *node, char *str,
 	int pos;
 
 	if (node->count)
-		fprintf(fout, "%s %d\n", str, node->count);
+// 		fprintf(fout, "%s %d\n", str, node->count);
+		fprintf(fout, "%s %ld\n", str, node->duration);
 
 	pos = base;
 	if (pos)
 		str[pos++] = ';';
-	printf("%d: before base=%d, str=%s\n", level, base, str);
+// 	printf("%d: before base=%d, str=%s\n", level, base, str);
 	list_for_each_entry(child, &node->child_head, sibling_node) {
 		int len;
 
-		printf("%d: in base=%d\n", level, base);
+// 		printf("%d: in base=%d\n", level, base);
 		len = strlen(child->func->name);
 		strcpy(str + pos, child->func->name);
 
