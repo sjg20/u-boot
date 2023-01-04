@@ -118,6 +118,7 @@ enum trace_type {
  * @count: Number of times this call-stack occurred
  */
 struct flame_node {
+	struct flame_node *parent;
 	struct list_head child_head;
 	struct list_head sibling_node;
 	struct func_info *func;
@@ -1327,14 +1328,14 @@ static int make_flame_tree(struct flame_node **treep)
 	printf("depth start %d\n", depth);
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		bool entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
-		struct flame_node *child;
+		struct flame_node *child, *chd;
 		struct func_info *func;
 
 		if (entry)
 			depth++;
 		else
 			depth--;
-// 		printf("depth %d\n", depth);
+		printf("depth %d, active=%d\n", depth, active);
 		if (!active) {
 			if (!depth)
 				active = true;
@@ -1349,17 +1350,34 @@ static int make_flame_tree(struct flame_node **treep)
 			continue;
 		}
 
-		/* see if we have this as a child node already */
-		child = func->node;
-		if (!child) {
-			/* create a new node */
-			child = create_node("child");
-			if (!child)
-				return -1;
-			list_add_tail(&child->sibling_node, &node->child_head);
-			child->func = func;
-			func->node = child;
-			nodes++;
+		if (entry) {
+			/* see if we have this as a child node already */
+			child = NULL;
+			list_for_each_entry(chd, &node->child_head, sibling_node) {
+				if (chd->func == func) {
+					child = chd;
+					break;
+				}
+			}
+			if (!child) {
+				/* create a new node */
+				child = create_node("child");
+				if (!child)
+					return -1;
+				list_add_tail(&child->sibling_node, &node->child_head);
+				child->func = func;
+				child->parent = node;
+				nodes++;
+			}
+			printf("entry %s: move from %s to %s\n", func->name,
+			       node->func ? node->func->name : "(root)",
+			       child->func->name);
+			node = child;
+		} else if (node->parent) {
+			printf("exit  %s: move from %s to %s\n", func->name,
+			       node->func->name, node->parent->func ?
+			       node->parent->func->name : "(root)");
+			node = node->parent;
 		}
 
 		child->count++;
@@ -1370,48 +1388,45 @@ static int make_flame_tree(struct flame_node **treep)
 	return 0;
 }
 
-static __attribute__ ((noipa)) void output_tree(FILE *fout, const struct flame_node *node, const char *str,
-			char *ptr)
+static void output_tree(FILE *fout, const struct flame_node *node, char *str,
+			int base, int level)
 {
 	const struct flame_node *child;
+	int pos;
 
 	if (node->count)
 		fprintf(fout, "%s %d\n", str, node->count);
 
-	if (ptr > str)
-		*ptr++ = ';';
-// 	printf("before ptr=%p\n", ptr);
+	pos = base;
+	if (pos)
+		str[pos++] = ';';
+	printf("%d: before base=%d, str=%s\n", level, base, str);
 	list_for_each_entry(child, &node->child_head, sibling_node) {
-		const char *from;
-		char *to;
 		int len;
 
-// 		printf("in ptr=%p\n", ptr);
-		len = 0;
-		for (from = child->func->name, to = ptr; *from; len++)
-			*to++ = *from++;
-		*to = '\0';
+		printf("%d: in base=%d\n", level, base);
+		len = strlen(child->func->name);
+		strcpy(str + pos, child->func->name);
 
 // 		strcpy(ptr, child->func->name);
-// 		printf("after ptr=%p\n", ptr);
+		printf("%d: after str=%s\n", level, str);
 // 		len = strlen(ptr);
 // 		len = sprintf(ptr, "%s%s", str == ptr ? "" : ";",
 // 			      child->func->name);
-		output_tree(fout, child, str, to);
+		output_tree(fout, child, str, pos + len, level + 1);
 	}
 }
 
 static __attribute__ ((noinline)) int make_flamegraph(FILE *fout)
 {
 	struct flame_node *tree;
-	char str[500], *ptr;
+	char str[500];
 
 	if (make_flame_tree(&tree))
 		return -1;
 
 	*str = '\0';
-	ptr = str;
-	output_tree(fout, tree, str, ptr);
+	output_tree(fout, tree, str, 0, 0);
 
 	return 0;
 }
