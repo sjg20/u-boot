@@ -35,6 +35,17 @@
 #define __ALIGN_MASK(x,mask)	(((x)+(mask))&~(mask))
 #define ALIGN(x,a)		__ALIGN_MASK((x),(typeof(x))(a)-1)
 
+/**
+ * container_of - cast a member of a structure out to the containing structure
+ * @ptr:	the pointer to the member.
+ * @type:	the type of the container struct this is embedded in.
+ * @member:	the name of the member within the struct.
+ *
+ */
+#define container_of(ptr, type, member) ({			\
+	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
+	(type *)( (char *)__mptr - offsetof(type,member) );})
+
 enum {
 	FUNCF_TRACE	= 1 << 0,	/* Include this function in trace */
 	TRACE_PAGE_SIZE	= 4096,		/* Assumed page size for trace */
@@ -101,15 +112,14 @@ enum trace_type {
 /**
  * struct flame_node - a node in the call-stack tree
  *
- * @parent: Pointer to parent node (the one that called this function), NULL if
- *	none
- * @next: Next node in the list of all nodes in the tree
- * @func: Function this node refers to
+ * @child_head: List of children of this node
+ * @sibling: Next node in the list of children
+ * @func: Function this node refers to (NULL for root node)
  * @count: Number of times this call-stack occurred
  */
 struct flame_node {
-	struct flame_node *parent;
-	struct list_head next;
+	struct list_head child_head;
+	struct list_head sibling_node;
 	struct func_info *func;
 	int count;
 };
@@ -122,6 +132,7 @@ struct func_info {
 	unsigned flags;
 	/* the section this function is in */
 	struct objsection_info *objsection;
+	struct flame_node *node;	/* associated flame node */
 };
 
 enum trace_line_type {
@@ -1261,12 +1272,37 @@ static int make_ftrace(FILE *fout, enum out_format_t out_format)
 	return 0;
 }
 
-static int make_flame_tree(struct list_head *head, struct flame_node **treep)
+static struct flame_node *create_node(const char *msg)
 {
+	struct flame_node *node;
+
+	node = calloc(1, sizeof(*node));
+	if (!node) {
+		fprintf(stderr, "Out of memory for %s\n", msg);
+		return NULL;
+	}
+	INIT_LIST_HEAD(&node->child_head);
+
+	return node;
+}
+
+/**
+ *
+ * make_flame_tree() - Creat a tree of stack traces
+ *
+ * Set up a tree, with the root node having the top-level functions as children
+ * and the leaf nodes being leaf functions. Each node has a count of how many
+ * times this function appears in the trace
+ */
+static int make_flame_tree(struct flame_node **treep)
+{
+	struct flame_node *node, *tree;
+	struct func_info *func, *end;
 	struct trace_call *call;
 	int missing_count = 0;
 	bool active;
 	int i, depth;
+	int nodes;
 
 	/*
 	 * The first thing in the trace may not be the top-level function, so
@@ -1277,18 +1313,32 @@ static int make_flame_tree(struct list_head *head, struct flame_node **treep)
 
 	/* don't start until we get to the top level of the call stack */
 	active = false;
+
+	tree = create_node("tree");
+	if (!tree)
+		return -1;
+	node = tree;
+	nodes = 0;
+
+	/* clear the func->node value */
+	for (func = func_list, end = func + func_count; func < end; func++)
+		func->node = NULL;
+
+	printf("depth start %d\n", depth);
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		bool entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
+		struct flame_node *child;
 		struct func_info *func;
 
 		if (entry)
 			depth++;
 		else
 			depth--;
+// 		printf("depth %d\n", depth);
 		if (!active) {
 			if (!depth)
 				active = true;
-			break;
+			continue;
 		}
 
 		func = find_func_by_offset(call->func);
@@ -1298,24 +1348,70 @@ static int make_flame_tree(struct list_head *head, struct flame_node **treep)
 			missing_count++;
 			continue;
 		}
+
+		/* see if we have this as a child node already */
+		child = func->node;
+		if (!child) {
+			/* create a new node */
+			child = create_node("child");
+			if (!child)
+				return -1;
+			list_add_tail(&child->sibling_node, &node->child_head);
+			child->func = func;
+			func->node = child;
+			nodes++;
+		}
+
+		child->count++;
 	}
+	printf("%d nodes\n", nodes);
+	*treep = tree;
 
 	return 0;
 }
 
-static int make_flamegraph(FILE *fout)
+static __attribute__ ((noipa)) void output_tree(FILE *fout, const struct flame_node *node, const char *str,
+			char *ptr)
 {
-	struct list_head head;
-	struct flame_node *tree;
+	const struct flame_node *child;
 
-	if (make_flame_tree(&head, &tree))
+	if (node->count)
+		fprintf(fout, "%s %d\n", str, node->count);
+
+	if (ptr > str)
+		*ptr++ = ';';
+// 	printf("before ptr=%p\n", ptr);
+	list_for_each_entry(child, &node->child_head, sibling_node) {
+		const char *from;
+		char *to;
+		int len;
+
+// 		printf("in ptr=%p\n", ptr);
+		len = 0;
+		for (from = child->func->name, to = ptr; *from; len++)
+			*to++ = *from++;
+		*to = '\0';
+
+// 		strcpy(ptr, child->func->name);
+// 		printf("after ptr=%p\n", ptr);
+// 		len = strlen(ptr);
+// 		len = sprintf(ptr, "%s%s", str == ptr ? "" : ";",
+// 			      child->func->name);
+		output_tree(fout, child, str, to);
+	}
+}
+
+static __attribute__ ((noinline)) int make_flamegraph(FILE *fout)
+{
+	struct flame_node *tree;
+	char str[500], *ptr;
+
+	if (make_flame_tree(&tree))
 		return -1;
 
-	/*
-	 * Create a tree of stack traces, with the root node being the top-level
-	 * function and the leaf nodes being leaf functions. Each node has a
-	 * count of how many times this function appears in the trace
-	 */
+	*str = '\0';
+	ptr = str;
+	output_tree(fout, tree, str, ptr);
 
 	return 0;
 }

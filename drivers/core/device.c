@@ -8,6 +8,8 @@
  * Pavel Herrmann <morpheus.ibis@gmail.com>
  */
 
+#define typeof __typeof__
+
 #include <common.h>
 #include <cpu_func.h>
 #include <event.h>
