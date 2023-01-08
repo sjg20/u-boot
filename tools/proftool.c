@@ -1338,9 +1338,6 @@ static int make_flame_tree(struct flame_node **treep)
 	 * This is an 'empty' stack, where stack_ptr points to the next
 	 * available stack position.
 	 *
-	 * The first entry on the stack is always the top-level function from
-	 * which the flamegraph processing begins (@active becomes true)
-	 *
 	 * @timestamp: Timestamp of entry into this function
 	 * @child_total: Running total of child durations
 	 */
@@ -1380,9 +1377,9 @@ static int make_flame_tree(struct flame_node **treep)
 	for (func = func_list, end = func + func_count; func < end; func++)
 		func->node = NULL;
 
-	stack[stack_ptr].timestamp = 0;
-	stack[stack_ptr].child_duration = 0;
-	stack_ptr++;
+// 	stack[stack_ptr].timestamp = 0;
+// 	stack[stack_ptr].child_duration = 0;
+// 	stack_ptr++;
 
 // 	printf("depth start %d\n", depth);
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
@@ -1396,15 +1393,15 @@ static int make_flame_tree(struct flame_node **treep)
 		else
 			depth--;
 // 		printf("depth %d, active=%d\n", depth, active);
-		if (!active) {
+// 		if (!active) {
 			/*
 			 * ignore stack traces which don't have a common root,
 			 * since it looks odd in the graph and is confusing
 			 */
-			if (!depth)
-				active = true;
-			continue;
-		}
+// 			if (!depth)
+// 				active = true;
+// 			continue;
+// 		}
 
 		func = find_func_by_offset(call->func);
 		if (!func) {
@@ -1413,6 +1410,11 @@ static int make_flame_tree(struct flame_node **treep)
 			missing_count++;
 			continue;
 		}
+
+		if (!strcmp("initr_dm", func->name))
+			active = true;
+		if (!active)
+			continue;
 
 		if (entry) {
 			/* see if we have this as a child node already */
@@ -1439,12 +1441,14 @@ static int make_flame_tree(struct flame_node **treep)
 			child->count++;
 			if (stack_ptr < MAX_STACK_DEPTH) {
 				stack[stack_ptr].timestamp = timestamp;
-				stack[stack_ptr].child_duration = 0;
+				stack[stack_ptr].child_total = 0;
 			}
+			debug("%d: %20s: entry at %ld\n", stack_ptr, func->name,
+			      timestamp);
 			stack_ptr++;
 			node = child;
 		} else if (node->parent) {
-			ulong func_duration = 0, child_duration = 0;
+			ulong total_duration = 0, child_duration = 0;
 			struct stack_info *stk;
 
 // 			printf("exit  %s: move from %s to %s\n", func->name,
@@ -1452,15 +1456,28 @@ static int make_flame_tree(struct flame_node **treep)
 // 			       node->parent->func->name : "(root)");
 			if (stack_ptr && stack_ptr <= MAX_STACK_DEPTH) {
 				stk = &stack[--stack_ptr];
-				func_duration = timestamp - stk->timestamp;
+
+				/*
+				 * get total duration of the function which just
+				 * exited
+				 */
+				total_duration = timestamp - stk->timestamp;
+				child_duration = stk->child_total;
+
+				if (stack_ptr)
+					stack[stack_ptr - 1].child_total += total_duration;
+
+				debug("%d: %20s: exit at %ld, total %ld, child %ld, child_total=%ld\n",
+				      stack_ptr, func->name, timestamp,
+				      total_duration, child_duration,
+				      stk->child_total);
 			}
-			node->duration += func_duration;
-			if (stack_ptr && stack_ptr < MAX_STACK_DEPTH) {
-				stk = &stack[stack_ptr];
-				stk->child_duration += func_duration;
-			}
+			node->duration += total_duration - child_duration;
 			node = node->parent;
 		}
+// 		if (i == 34995)
+// 			break;
+// 		printf("i %d\n", i);
 
 	}
 	printf("%d nodes\n", nodes);
@@ -1477,7 +1494,8 @@ static void output_tree(FILE *fout, const struct flame_node *node, char *str,
 
 	if (node->count)
 // 		fprintf(fout, "%s %d\n", str, node->count);
-		fprintf(fout, "%s %ld\n", str, node->duration);
+		fprintf(fout, "%s %ld\n", str,
+			node->duration ? node->duration : 1);
 
 	pos = base;
 	if (pos)

@@ -344,7 +344,7 @@ config TRACE_BUFFER_SIZE
 config TRACE_CALL_DEPTH_LIMIT
 	int "Trace call depth limit"
 	depends on TRACE
-	default 15
+	default 20
 	help
 	  Sets the maximum call depth up to which function calls are recorded.
 
