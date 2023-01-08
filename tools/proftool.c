@@ -131,6 +131,18 @@ struct flame_node {
 	ulong duration;
 };
 
+/**
+ * struct flame_state - state information for building the flame graph
+ */
+struct flame_state {
+	struct flame_node *node;
+	struct stack_info {
+		ulong timestamp;
+		ulong child_total;
+	} stack[MAX_STACK_DEPTH];
+	int stack_ptr;	/* next free position in stack */
+};
+
 struct func_info {
 	unsigned long offset;
 	const char *name;
@@ -1329,8 +1341,82 @@ static struct flame_node *create_node(const char *msg)
 	return node;
 }
 
+static int process_call(struct flame_state *state, bool entry, ulong timestamp,
+			struct func_info *func)
+{
+	struct flame_node *node = state->node;
+	int stack_ptr = state->stack_ptr;
+	int nodes = 0;
+
+	if (entry) {
+		struct flame_node *child, *chd;
+
+		/* see if we have this as a child node already */
+		child = NULL;
+		list_for_each_entry(chd, &node->child_head, sibling_node) {
+			if (chd->func == func) {
+				child = chd;
+				break;
+			}
+		}
+		if (!child) {
+			/* create a new node */
+			child = create_node("child");
+			if (!child)
+				return -1;
+			list_add_tail(&child->sibling_node, &node->child_head);
+			child->func = func;
+			child->parent = node;
+			nodes++;
+		}
+		debug("entry %s: move from %s to %s\n", func->name,
+		      node->func ? node->func->name : "(root)",
+		      child->func->name);
+		child->count++;
+		if (stack_ptr < MAX_STACK_DEPTH) {
+			state->stack[stack_ptr].timestamp = timestamp;
+			state->stack[stack_ptr].child_total = 0;
+		}
+		debug("%d: %20s: entry at %ld\n", stack_ptr, func->name,
+		      timestamp);
+		stack_ptr++;
+		node = child;
+	} else if (node->parent) {
+		ulong total_duration = 0, child_duration = 0;
+		struct stack_info *stk;
+
+		debug("exit  %s: move from %s to %s\n", func->name,
+		      node->func->name, node->parent->func ?
+		      node->parent->func->name : "(root)");
+		if (stack_ptr && stack_ptr <= MAX_STACK_DEPTH) {
+			stk = &state->stack[--stack_ptr];
+
+			/*
+			 * get total duration of the function which just
+			 * exited
+			 */
+			total_duration = timestamp - stk->timestamp;
+			child_duration = stk->child_total;
+
+			if (stack_ptr)
+				state->stack[stack_ptr - 1].child_total += total_duration;
+
+			debug("%d: %20s: exit at %ld, total %ld, child %ld, child_total=%ld\n",
+			      stack_ptr, func->name, timestamp,
+			      total_duration, child_duration,
+			      stk->child_total);
+		}
+		node->duration += total_duration - child_duration;
+		node = node->parent;
+	}
+
+	state->stack_ptr = stack_ptr;
+	state->node = node;
+
+	return 0;
+}
+
 /**
- *
  * make_flame_tree() - Creat a tree of stack traces
  *
  * Set up a tree, with the root node having the top-level functions as children
@@ -1347,21 +1433,17 @@ static int make_flame_tree(enum out_format_t out_format,
 	 * @timestamp: Timestamp of entry into this function
 	 * @child_total: Running total of child durations
 	 */
-	struct stack_info {
-		ulong timestamp;
-		ulong child_total;
-	} stack[MAX_STACK_DEPTH];
-	int stack_ptr;	/* next free position in stack */
-	struct flame_node *node, *tree;
+	struct flame_node *tree;
 	struct func_info *func, *end;
 	struct trace_call *call;
+	struct flame_state state;
 	int missing_count = 0;
 	bool active;
 	int i, depth;
 	int nodes;
 
 	/* maintain a stack of start times for calling functions */
-	stack_ptr = 0;
+	state.stack_ptr = 0;
 
 	/*
 	 * The first thing in the trace may not be the top-level function, so
@@ -1375,7 +1457,7 @@ static int make_flame_tree(enum out_format_t out_format,
 	tree = create_node("tree");
 	if (!tree)
 		return -1;
-	node = tree;
+	state.node = tree;
 	nodes = 0;
 
 	/* clear the func->node value */
@@ -1385,7 +1467,6 @@ static int make_flame_tree(enum out_format_t out_format,
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		bool entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
 		ulong timestamp = call->flags & FUNCF_TIMESTAMP_MASK;
-		struct flame_node *child, *chd;
 		struct func_info *func;
 
 		if (entry)
@@ -1410,65 +1491,9 @@ static int make_flame_tree(enum out_format_t out_format,
 			continue;
 		}
 
-		if (entry) {
-			/* see if we have this as a child node already */
-			child = NULL;
-			list_for_each_entry(chd, &node->child_head, sibling_node) {
-				if (chd->func == func) {
-					child = chd;
-					break;
-				}
-			}
-			if (!child) {
-				/* create a new node */
-				child = create_node("child");
-				if (!child)
-					return -1;
-				list_add_tail(&child->sibling_node, &node->child_head);
-				child->func = func;
-				child->parent = node;
-				nodes++;
-			}
-			debug("entry %s: move from %s to %s\n", func->name,
-			      node->func ? node->func->name : "(root)",
-			      child->func->name);
-			child->count++;
-			if (stack_ptr < MAX_STACK_DEPTH) {
-				stack[stack_ptr].timestamp = timestamp;
-				stack[stack_ptr].child_total = 0;
-			}
-			debug("%d: %20s: entry at %ld\n", stack_ptr, func->name,
-			      timestamp);
-			stack_ptr++;
-			node = child;
-		} else if (node->parent) {
-			ulong total_duration = 0, child_duration = 0;
-			struct stack_info *stk;
+		if (process_call(&state, entry, timestamp, func))
+			return -1;
 
-			debug("exit  %s: move from %s to %s\n", func->name,
-			      node->func->name, node->parent->func ?
-			      node->parent->func->name : "(root)");
-			if (stack_ptr && stack_ptr <= MAX_STACK_DEPTH) {
-				stk = &stack[--stack_ptr];
-
-				/*
-				 * get total duration of the function which just
-				 * exited
-				 */
-				total_duration = timestamp - stk->timestamp;
-				child_duration = stk->child_total;
-
-				if (stack_ptr)
-					stack[stack_ptr - 1].child_total += total_duration;
-
-				debug("%d: %20s: exit at %ld, total %ld, child %ld, child_total=%ld\n",
-				      stack_ptr, func->name, timestamp,
-				      total_duration, child_duration,
-				      stk->child_total);
-			}
-			node->duration += total_duration - child_duration;
-			node = node->parent;
-		}
 	}
 	printf("%d nodes\n", nodes);
 	*treep = tree;
