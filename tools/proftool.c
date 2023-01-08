@@ -1426,13 +1426,13 @@ static int make_flame_tree(struct flame_node **treep)
 // 			printf("exit  %s: move from %s to %s\n", func->name,
 // 			       node->func->name, node->parent->func ?
 // 			       node->parent->func->name : "(root)");
-			node = node->parent;
 			if (stack_ptr && stack_ptr <= MAX_STACK_DEPTH) {
 				ulong start = func_stack[--stack_ptr];
 
 				func_duration = timestamp - start;
 			}
 			node->duration += func_duration;
+			node = node->parent;
 		}
 
 	}
@@ -1464,7 +1464,7 @@ static void output_tree(FILE *fout, const struct flame_node *node, char *str,
 		strcpy(str + pos, child->func->name);
 
 // 		strcpy(ptr, child->func->name);
-		printf("%d: after str=%s\n", level, str);
+// 		printf("%d: after str=%s\n", level, str);
 // 		len = strlen(ptr);
 // 		len = sprintf(ptr, "%s%s", str == ptr ? "" : ";",
 // 			      child->func->name);
