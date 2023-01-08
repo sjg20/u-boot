@@ -133,6 +133,13 @@ struct flame_node {
 
 /**
  * struct flame_state - state information for building the flame graph
+ *
+ * @node: Current node being processed (corresponds to a function call)
+ * @stack: Stack of call-start time for this function as well as the
+ * accumulated total time of all child calls (so we can subtract them from the
+ * function's call time
+ * @stack_ptr: points to first empty position in the stack
+ * @nodes: Number of nodes created (running count)
  */
 struct flame_state {
 	struct flame_node *node;
@@ -140,18 +147,26 @@ struct flame_state {
 		ulong timestamp;
 		ulong child_total;
 	} stack[MAX_STACK_DEPTH];
-	int stack_ptr;	/* next free position in stack */
+	int stack_ptr;
+	int nodes;
 };
 
+/**
+ * struct func_info - information recorded for each function
+ *
+ * @offset: Function offset in the image
+ * @name: Function name
+ * @code_size: Total code size of the function
+ * @flags: Either 0 or FUNCF_TRACE
+ * @objsection:
+ */
 struct func_info {
 	unsigned long offset;
 	const char *name;
 	unsigned long code_size;
-	unsigned long call_count;
 	unsigned flags;
 	/* the section this function is in */
 	struct objsection_info *objsection;
-	struct flame_node *node;	/* associated flame node */
 };
 
 enum trace_line_type {
@@ -1381,6 +1396,7 @@ static int process_call(struct flame_state *state, bool entry, ulong timestamp,
 		      timestamp);
 		stack_ptr++;
 		node = child;
+		child->count++;
 	} else if (node->parent) {
 		ulong total_duration = 0, child_duration = 0;
 		struct stack_info *stk;
@@ -1434,13 +1450,11 @@ static int make_flame_tree(enum out_format_t out_format,
 	 * @child_total: Running total of child durations
 	 */
 	struct flame_node *tree;
-	struct func_info *func, *end;
 	struct trace_call *call;
 	struct flame_state state;
 	int missing_count = 0;
 	bool active;
 	int i, depth;
-	int nodes;
 
 	/* maintain a stack of start times for calling functions */
 	state.stack_ptr = 0;
@@ -1458,11 +1472,7 @@ static int make_flame_tree(enum out_format_t out_format,
 	if (!tree)
 		return -1;
 	state.node = tree;
-	nodes = 0;
-
-	/* clear the func->node value */
-	for (func = func_list, end = func + func_count; func < end; func++)
-		func->node = NULL;
+	state.nodes = 0;
 
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		bool entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
@@ -1495,7 +1505,7 @@ static int make_flame_tree(enum out_format_t out_format,
 			return -1;
 
 	}
-	printf("%d nodes\n", nodes);
+	printf("%d nodes\n", state.nodes);
 	*treep = tree;
 
 	return 0;
