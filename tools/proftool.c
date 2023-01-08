@@ -213,8 +213,8 @@ static void usage(void)
 		"Usage: proftool [-cmtv] <cmd> <profdata>\n"
 		"\n"
 		"Commands\n"
-		"   dump-ftrace\t\tDump out textual data in ftrace format\n"
-		"   dump-flamegraph\t\tWrite a file to use with flamegraph.pl\n"
+		"   dump-ftrace\t\tDump out trace records in ftrace format\n"
+		"   dump-flamegraph\tWrite a file to use with flamegraph.pl\n"
 		"\n"
 		"Options:\n"
 		"   -c <cfg>\tSpecify config file\n"
@@ -989,7 +989,7 @@ static int write_options(struct twriter *tw)
 	tw->ptr += tputh(fout, OPTION_TSC2NSEC);
 	tw->ptr += tputl(fout, 16);
 	tw->ptr += tputl(fout, 1000);	/* multiplier */
-	tw->ptr += tputl(fout, 1);	/* shift */
+	tw->ptr += tputl(fout, 0);	/* shift */
 	tw->ptr += tputq(fout, 0);	/* offset */
 
 	/* cpustat */
@@ -1045,14 +1045,17 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 	int upto, depth, page_upto, i;
 	int missing_count = 0, skip_count = 0;
 	struct trace_call *call;
-	ulong base_timestamp;
+	ulong last_timestamp;
 	FILE *fout = tw->fout;
+	int last_delta = 0;
+	int err_count;
 	bool in_page;
 
 	in_page = false;
-	base_timestamp = 0;
+	last_timestamp = 0;
 	upto = 0;
 	page_upto = 0;
+	err_count = 0;
 
 	/* maintain a stack of start times for calling functions */
 	stack_ptr = 0;
@@ -1066,8 +1069,8 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 		bool entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
 		struct func_info *func;
 		ulong timestamp;
+		uint rec_words;
 		int delta;
-		int rec_words;
 
 		func = find_func_by_offset(call->func);
 		if (!func) {
@@ -1102,11 +1105,34 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 			if (start_page(tw, timestamp))
 				return -1;
 			in_page = true;
-			base_timestamp = timestamp;
+			last_timestamp = timestamp;
+			last_delta = 0;
 			page_upto = tw->ptr & TRACE_PAGE_MASK;
+			if (1 || upto > 1877000) {
+				fprintf(stderr,
+					"new page, last_timestamp=%ld, upto=%d\n",
+					last_timestamp, upto);
+			}
 		}
 
-		delta = timestamp - base_timestamp;
+		delta = timestamp - last_timestamp;
+		if (delta < 0) {
+			fprintf(stderr, "Time went backwards\n");
+			err_count++;
+		}
+#if 0
+		if (delta < last_delta) {
+			fprintf(stderr,
+				"Delta went backwards from %x to %x: last_timestamp=%lx, timestamp=%lx, call->flags=%x, upto=%d\n",
+				last_delta, delta, last_timestamp, timestamp, call->flags, upto);
+			err_count++;
+		}
+#endif
+		if (err_count > 20) {
+			fprintf(stderr, "Too many errors, giving up\n");
+			return -1;
+		}
+
 		if (delta > 0x07fffff) {
 			/*
 			 * hard to imagine how this could happen since it means
@@ -1120,8 +1146,16 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 		if (out_format == OUT_FMT_FUNCTION) {
 			struct func_info *caller_func;
 
+			if (1 || (upto >= 140 && upto < 150) || upto >= 1878275) {
+				fprintf(stderr, "%d: delta=%d, stamp=%ld\n",
+					upto, delta, timestamp);
+				fprintf(stderr,
+					"   last_delta %x to %x: last_timestamp=%lx, timestamp=%lx, call->flags=%x, upto=%d\n",
+					last_delta, delta, last_timestamp, timestamp, call->flags, upto);
+			}
+
 			/* type_len is 6, meaning 4 * 6 = 24 bytes */
-			tw->ptr += tputl(fout, rec_words | delta << 5);
+			tw->ptr += tputl(fout, rec_words | (uint)delta << 5);
 			tw->ptr += tputh(fout, TRACE_FN);
 			tw->ptr += tputh(fout, 0);	/* flags */
 			tw->ptr += tputl(fout, TRACE_PID);	/* PID */
@@ -1167,6 +1201,8 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 			}
 		}
 
+		last_delta = delta;
+		last_timestamp = timestamp;
 		page_upto += 4 + rec_words * 4;
 		upto++;
 // 		printf("%d %s\n", stack_ptr, func->name);
