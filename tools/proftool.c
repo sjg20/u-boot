@@ -1334,7 +1334,10 @@ static struct flame_node *create_node(const char *msg)
  */
 static int make_flame_tree(struct flame_node **treep)
 {
-	ulong func_stack[MAX_STACK_DEPTH];
+	struct stack_info {
+		ulong timestamp;
+		ulong duration;
+	} stack[MAX_STACK_DEPTH];
 	int stack_ptr;	/* next free position in stack */
 	struct flame_node *node, *tree;
 	struct func_info *func, *end;
@@ -1417,8 +1420,10 @@ static int make_flame_tree(struct flame_node **treep)
 // 			       child->func->name);
 			node = child;
 			node->count++;
-			if (stack_ptr < MAX_STACK_DEPTH)
-				func_stack[stack_ptr] = timestamp;
+			if (stack_ptr < MAX_STACK_DEPTH) {
+				stack[stack_ptr].timestamp = timestamp;
+				stack[stack_ptr].duration = 0;
+			}
 			stack_ptr++;
 		} else if (node->parent) {
 			ulong func_duration = 0;
@@ -1427,9 +1432,10 @@ static int make_flame_tree(struct flame_node **treep)
 // 			       node->func->name, node->parent->func ?
 // 			       node->parent->func->name : "(root)");
 			if (stack_ptr && stack_ptr <= MAX_STACK_DEPTH) {
-				ulong start = func_stack[--stack_ptr];
+				struct stack_info *stk;
 
-				func_duration = timestamp - start;
+				stk = &stack[--stack_ptr];
+				func_duration = timestamp - stk->timestamp;
 			}
 			node->duration += func_duration;
 			node = node->parent;
