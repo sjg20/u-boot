@@ -1336,7 +1336,10 @@ static int make_flame_tree(struct flame_node **treep)
 {
 	/*
 	 * This is an 'empty' stack, where stack_ptr points to the next
-	 * available stack position
+	 * available stack position.
+	 *
+	 * The first entry on the stack is always the top-level function from
+	 * which the flamegraph processing begins (@active becomes true)
 	 *
 	 * @timestamp: Timestamp of entry into this function
 	 * @child_total: Running total of child durations
@@ -1377,6 +1380,10 @@ static int make_flame_tree(struct flame_node **treep)
 	for (func = func_list, end = func + func_count; func < end; func++)
 		func->node = NULL;
 
+	stack[stack_ptr].timestamp = 0;
+	stack[stack_ptr].child_duration = 0;
+	stack_ptr++;
+
 // 	printf("depth start %d\n", depth);
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		bool entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
@@ -1390,6 +1397,10 @@ static int make_flame_tree(struct flame_node **treep)
 			depth--;
 // 		printf("depth %d, active=%d\n", depth, active);
 		if (!active) {
+			/*
+			 * ignore stack traces which don't have a common root,
+			 * since it looks odd in the graph and is confusing
+			 */
 			if (!depth)
 				active = true;
 			continue;
@@ -1444,7 +1455,7 @@ static int make_flame_tree(struct flame_node **treep)
 				func_duration = timestamp - stk->timestamp;
 			}
 			node->duration += func_duration;
-			if (stack_ptr < MAX_STACK_DEPTH) {
+			if (stack_ptr && stack_ptr < MAX_STACK_DEPTH) {
 				stk = &stack[stack_ptr];
 				stk->child_duration += func_duration;
 			}
