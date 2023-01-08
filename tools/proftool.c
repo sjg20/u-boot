@@ -1487,20 +1487,24 @@ static void output_tree(FILE *fout, enum out_format_t out_format,
 	const struct flame_node *child;
 	int pos;
 
-	if (out_format == OUT_FMT_FLAMEGRAPH_CALLS) {
-		if (node->count)
+	if (node->count) {
+		if (out_format == OUT_FMT_FLAMEGRAPH_CALLS) {
 			fprintf(fout, "%s %d\n", str, node->count);
-	} else {
-		/*
-		 * Write out the number of microseconds used by this call stack.
-		 * Since the time taken by child calls is subtracted from this
-		 * total, it can reach 0, meaning that this function took no
-		 * time beyond what its children used. For this case, write 1
-		 * rather than 0, so that this call stack appears in the
-		 * flamegraph
-		 */
-		fprintf(fout, "%s %ld\n", str,
-			node->duration ? node->duration : 1);
+		} else {
+			/*
+			 * Write out the number of microseconds used by this
+			 * call stack. Since the time taken by child calls is
+			 * subtracted from this total, it can reach 0, meaning
+			 * that this function took no time beyond what its
+			 * children used. For this case, write 1 rather than 0,
+			 * so that this call stack appears in the flamegraph.
+			 * This has the effect of inflating the timing slightly,
+			 * but only by at most 1 microsecond per function,
+			 * assuming that is the timestamp resolution
+			 */
+			fprintf(fout, "%s %ld\n", str,
+				node->duration ? node->duration : 1);
+		}
 	}
 
 	pos = base;
@@ -1568,6 +1572,7 @@ static int prof_tool(int argc, char *const argv[],
 			if (out_format != OUT_FMT_FLAMEGRAPH_CALLS &&
 			    out_format != OUT_FMT_FLAMEGRAPH_TIMING)
 				out_format = OUT_FMT_FLAMEGRAPH_CALLS;
+			printf("out_format %d\n", out_format);
 			fout = fopen(out_fname, "w");
 			if (!fout) {
 				fprintf(stderr, "Cannot write file '%s'\n",
