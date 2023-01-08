@@ -58,14 +58,19 @@ enum {
 /**
  * enum out_format_t - supported output formats
  *
+ * @OUT_FMT_DEFAULT: Use the default for the output file
  * @OUT_FMT_FUNCTION: Write ftrace 'function' records
  * @OUT_FMT_FUNCGRAPH: Write ftrace funcgraph_entry and funcgraph_exit records
- * @OUT_FMT_FLAMEGRAPH: Write a file suitable for flamegraph.pl
+ * @OUT_FMT_FLAMEGRAPH_CALLS: Write a file suitable for flamegraph.pl
+ * @OUT_FMT_FLAMEGRAPH_TIMING: Write a file suitable for flamegraph.pl with the
+ * counts set to the number of microseconds used by each function
  */
 enum out_format_t {
+	OUT_FMT_DEFAULT,
 	OUT_FMT_FUNCTION,
 	OUT_FMT_FUNCGRAPH,
-	OUT_FMT_FLAMEGRAPH,
+	OUT_FMT_FLAMEGRAPH_CALLS,
+	OUT_FMT_FLAMEGRAPH_TIMING,
 };
 
 /* Section types */
@@ -1332,7 +1337,8 @@ static struct flame_node *create_node(const char *msg)
  * and the leaf nodes being leaf functions. Each node has a count of how many
  * times this function appears in the trace
  */
-static int make_flame_tree(struct flame_node **treep)
+static int make_flame_tree(enum out_format_t out_format,
+			   struct flame_node **treep)
 {
 	/*
 	 * This is an 'empty' stack, where stack_ptr points to the next
@@ -1362,7 +1368,6 @@ static int make_flame_tree(struct flame_node **treep)
 	 * set the initial depth so that no function goes below depth 0
 	 */
 	depth = -calc_min_depth();
-	printf("start depth %d\n", depth);
 
 	/* don't start until we get to the top level of the call stack */
 	active = false;
@@ -1377,11 +1382,6 @@ static int make_flame_tree(struct flame_node **treep)
 	for (func = func_list, end = func + func_count; func < end; func++)
 		func->node = NULL;
 
-// 	stack[stack_ptr].timestamp = 0;
-// 	stack[stack_ptr].child_duration = 0;
-// 	stack_ptr++;
-
-// 	printf("depth start %d\n", depth);
 	for (i = 0, call = call_list; i < call_count; i++, call++) {
 		bool entry = TRACE_CALL_TYPE(call) == FUNCF_ENTRY;
 		ulong timestamp = call->flags & FUNCF_TIMESTAMP_MASK;
@@ -1392,16 +1392,15 @@ static int make_flame_tree(struct flame_node **treep)
 			depth++;
 		else
 			depth--;
-// 		printf("depth %d, active=%d\n", depth, active);
-// 		if (!active) {
+		if (!active) {
 			/*
 			 * ignore stack traces which don't have a common root,
 			 * since it looks odd in the graph and is confusing
 			 */
-// 			if (!depth)
-// 				active = true;
-// 			continue;
-// 		}
+			if (!depth)
+				active = true;
+			continue;
+		}
 
 		func = find_func_by_offset(call->func);
 		if (!func) {
@@ -1410,11 +1409,6 @@ static int make_flame_tree(struct flame_node **treep)
 			missing_count++;
 			continue;
 		}
-
-		if (!strcmp("initr_dm", func->name))
-			active = true;
-		if (!active)
-			continue;
 
 		if (entry) {
 			/* see if we have this as a child node already */
@@ -1435,9 +1429,9 @@ static int make_flame_tree(struct flame_node **treep)
 				child->parent = node;
 				nodes++;
 			}
-// 			printf("entry %s: move from %s to %s\n", func->name,
-// 			       node->func ? node->func->name : "(root)",
-// 			       child->func->name);
+			debug("entry %s: move from %s to %s\n", func->name,
+			      node->func ? node->func->name : "(root)",
+			      child->func->name);
 			child->count++;
 			if (stack_ptr < MAX_STACK_DEPTH) {
 				stack[stack_ptr].timestamp = timestamp;
@@ -1451,9 +1445,9 @@ static int make_flame_tree(struct flame_node **treep)
 			ulong total_duration = 0, child_duration = 0;
 			struct stack_info *stk;
 
-// 			printf("exit  %s: move from %s to %s\n", func->name,
-// 			       node->func->name, node->parent->func ?
-// 			       node->parent->func->name : "(root)");
+			debug("exit  %s: move from %s to %s\n", func->name,
+			      node->func->name, node->parent->func ?
+			      node->parent->func->name : "(root)");
 			if (stack_ptr && stack_ptr <= MAX_STACK_DEPTH) {
 				stk = &stack[--stack_ptr];
 
@@ -1475,10 +1469,6 @@ static int make_flame_tree(struct flame_node **treep)
 			node->duration += total_duration - child_duration;
 			node = node->parent;
 		}
-// 		if (i == 34995)
-// 			break;
-// 		printf("i %d\n", i);
-
 	}
 	printf("%d nodes\n", nodes);
 	*treep = tree;
@@ -1517,12 +1507,12 @@ static void output_tree(FILE *fout, const struct flame_node *node, char *str,
 	}
 }
 
-static __attribute__ ((noinline)) int make_flamegraph(FILE *fout)
+static int make_flamegraph(FILE *fout, enum out_format_t out_format)
 {
 	struct flame_node *tree;
 	char str[500];
 
-	if (make_flame_tree(&tree))
+	if (make_flame_tree(out_format, &tree))
 		return -1;
 
 	*str = '\0';
@@ -1553,6 +1543,9 @@ static int prof_tool(int argc, char *const argv[],
 		if (!strcmp(cmd, "dump-ftrace")) {
 			FILE *fout;
 
+			if (out_format != OUT_FMT_FUNCTION &&
+			    out_format != OUT_FMT_FUNCGRAPH)
+				out_format = OUT_FMT_FUNCTION;
 			fout = fopen(out_fname, "w");
 			if (!fout) {
 				fprintf(stderr, "Cannot write file '%s'\n",
@@ -1564,13 +1557,16 @@ static int prof_tool(int argc, char *const argv[],
 		} else if (!strcmp(cmd, "dump-flamegraph")) {
 			FILE *fout;
 
+			if (out_format != OUT_FMT_FLAMEGRAPH_CALLS &&
+			    out_format != OUT_FMT_FLAMEGRAPH_TIMING)
+				out_format = OUT_FMT_FLAMEGRAPH_CALLS;
 			fout = fopen(out_fname, "w");
 			if (!fout) {
 				fprintf(stderr, "Cannot write file '%s'\n",
 					out_fname);
 				return -1;
 			}
-			err = make_flamegraph(fout);
+			err = make_flamegraph(fout, out_format);
 			fclose(fout);
 		} else {
 			warn("Unknown command '%s'\n", cmd);
@@ -1586,7 +1582,7 @@ int main(int argc, char *argv[])
 	const char *trace_fname = NULL;
 	const char *config_fname = NULL;
 	const char *out_fname = NULL;
-	enum out_format_t out_format = OUT_FMT_FUNCGRAPH;
+	enum out_format_t out_format = OUT_FMT_DEFAULT;
 	int opt;
 
 	verbose = 2;
@@ -1600,6 +1596,10 @@ int main(int argc, char *argv[])
 				out_format = OUT_FMT_FUNCTION;
 			} else if (!strcmp("funcgraph", optarg)) {
 				out_format = OUT_FMT_FUNCGRAPH;
+			} else if (!strcmp("calls", optarg)) {
+				out_format = OUT_FMT_FLAMEGRAPH_CALLS;
+			} else if (!strcmp("timing", optarg)) {
+				out_format = OUT_FMT_FLAMEGRAPH_TIMING;
 			} else {
 				fprintf(stderr, "Invalid format: use function or funcgraph\n");
 				exit(1);;
