@@ -1334,9 +1334,16 @@ static struct flame_node *create_node(const char *msg)
  */
 static int make_flame_tree(struct flame_node **treep)
 {
+	/*
+	 * This is an 'empty' stack, where stack_ptr points to the next
+	 * available stack position
+	 *
+	 * @timestamp: Timestamp of entry into this function
+	 * @child_total: Running total of child durations
+	 */
 	struct stack_info {
 		ulong timestamp;
-		ulong duration;
+		ulong child_total;
 	} stack[MAX_STACK_DEPTH];
 	int stack_ptr;	/* next free position in stack */
 	struct flame_node *node, *tree;
@@ -1418,26 +1425,29 @@ static int make_flame_tree(struct flame_node **treep)
 // 			printf("entry %s: move from %s to %s\n", func->name,
 // 			       node->func ? node->func->name : "(root)",
 // 			       child->func->name);
-			node = child;
-			node->count++;
+			child->count++;
 			if (stack_ptr < MAX_STACK_DEPTH) {
 				stack[stack_ptr].timestamp = timestamp;
-				stack[stack_ptr].duration = 0;
+				stack[stack_ptr].child_duration = 0;
 			}
 			stack_ptr++;
+			node = child;
 		} else if (node->parent) {
-			ulong func_duration = 0;
+			ulong func_duration = 0, child_duration = 0;
+			struct stack_info *stk;
 
 // 			printf("exit  %s: move from %s to %s\n", func->name,
 // 			       node->func->name, node->parent->func ?
 // 			       node->parent->func->name : "(root)");
 			if (stack_ptr && stack_ptr <= MAX_STACK_DEPTH) {
-				struct stack_info *stk;
-
 				stk = &stack[--stack_ptr];
 				func_duration = timestamp - stk->timestamp;
 			}
 			node->duration += func_duration;
+			if (stack_ptr < MAX_STACK_DEPTH) {
+				stk = &stack[stack_ptr];
+				stk->child_duration += func_duration;
+			}
 			node = node->parent;
 		}
 
