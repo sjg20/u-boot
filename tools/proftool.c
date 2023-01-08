@@ -158,15 +158,12 @@ struct flame_state {
  * @name: Function name
  * @code_size: Total code size of the function
  * @flags: Either 0 or FUNCF_TRACE
- * @objsection:
  */
 struct func_info {
 	unsigned long offset;
 	const char *name;
 	unsigned long code_size;
 	unsigned flags;
-	/* the section this function is in */
-	struct objsection_info *objsection;
 };
 
 enum trace_line_type {
@@ -346,7 +343,6 @@ static struct func_info *find_func_by_offset(uint32_t offset)
 	return found;
 }
 
-#if 1
 /* This finds the function which contains the given offset */
 static struct func_info *find_caller_by_offset(uint32_t offset)
 {
@@ -372,7 +368,7 @@ static struct func_info *find_caller_by_offset(uint32_t offset)
 
 	return low >= 0 ? &func_list[low] : NULL;
 }
-#endif
+
 static int read_calls(FILE *fin, size_t count)
 {
 	struct trace_call *call_data;
@@ -520,31 +516,6 @@ static void check_trace_config(void)
 		check_trace_config_line(line);
 }
 
-/**
- * Check the functions to see if they each have an objsection. If not, then
- * the linker must have eliminated them.
- */
-static void check_functions(void)
-{
-	struct func_info *func, *end;
-	unsigned long removed_code_size = 0;
-	int not_found = 0;
-
-	/* Look for missing functions */
-	for (func = func_list, end = func + func_count; func < end; func++) {
-		if (!func->objsection) {
-			removed_code_size += func->code_size;
-			not_found++;
-		}
-	}
-
-	/* Figure out what functions we want to trace */
-	check_trace_config();
-
-	warn("%d functions removed by linker, %ld code size\n",
-	     not_found, removed_code_size);
-}
-
 static int read_trace_config(FILE *fin)
 {
 	char buff[200];
@@ -568,8 +539,7 @@ static int read_trace_config(FILE *fin)
 		if (!*s || *s == '#')
 			continue;
 
-		line = (struct trace_configline_info *)calloc(1,
-							      sizeof(*line));
+		line = (struct trace_configline_info *)calloc(1, sizeof(*line));
 		if (!line) {
 			error("Cannot allocate config line\n");
 			return -1;
@@ -1361,7 +1331,6 @@ static int process_call(struct flame_state *state, bool entry, ulong timestamp,
 {
 	struct flame_node *node = state->node;
 	int stack_ptr = state->stack_ptr;
-	int nodes = 0;
 
 	if (entry) {
 		struct flame_node *child, *chd;
@@ -1382,7 +1351,7 @@ static int process_call(struct flame_state *state, bool entry, ulong timestamp,
 			list_add_tail(&child->sibling_node, &node->child_head);
 			child->func = func;
 			child->parent = node;
-			nodes++;
+			state->nodes++;
 		}
 		debug("entry %s: move from %s to %s\n", func->name,
 		      node->func ? node->func->name : "(root)",
@@ -1511,34 +1480,38 @@ static int make_flame_tree(enum out_format_t out_format,
 	return 0;
 }
 
-static void output_tree(FILE *fout, const struct flame_node *node, char *str,
+static void output_tree(FILE *fout, enum out_format_t out_format,
+			const struct flame_node *node, char *str,
 			int base, int level)
 {
 	const struct flame_node *child;
 	int pos;
 
-	if (node->count)
-// 		fprintf(fout, "%s %d\n", str, node->count);
+	if (out_format == OUT_FMT_FLAMEGRAPH_CALLS) {
+		if (node->count)
+			fprintf(fout, "%s %d\n", str, node->count);
+	} else {
+		/*
+		 * Write out the number of microseconds used by this call stack.
+		 * Since the time taken by child calls is subtracted from this
+		 * total, it can reach 0, meaning that this function took no
+		 * time beyond what its children used. For this case, write 1
+		 * rather than 0, so that this call stack appears in the
+		 * flamegraph
+		 */
 		fprintf(fout, "%s %ld\n", str,
 			node->duration ? node->duration : 1);
+	}
 
 	pos = base;
 	if (pos)
 		str[pos++] = ';';
-// 	printf("%d: before base=%d, str=%s\n", level, base, str);
 	list_for_each_entry(child, &node->child_head, sibling_node) {
 		int len;
 
-// 		printf("%d: in base=%d\n", level, base);
 		len = strlen(child->func->name);
 		strcpy(str + pos, child->func->name);
-
-// 		strcpy(ptr, child->func->name);
-// 		printf("%d: after str=%s\n", level, str);
-// 		len = strlen(ptr);
-// 		len = sprintf(ptr, "%s%s", str == ptr ? "" : ";",
-// 			      child->func->name);
-		output_tree(fout, child, str, pos + len, level + 1);
+		output_tree(fout, out_format, child, str, pos + len, level + 1);
 	}
 }
 
@@ -1551,7 +1524,7 @@ static int make_flamegraph(FILE *fout, enum out_format_t out_format)
 		return -1;
 
 	*str = '\0';
-	output_tree(fout, tree, str, 0, 0);
+	output_tree(fout, out_format, tree, str, 0, 0);
 
 	return 0;
 }
@@ -1570,7 +1543,7 @@ static int prof_tool(int argc, char *const argv[],
 	if (trace_config_fname && read_trace_config_file(trace_config_fname))
 		return -1;
 
-	check_functions();
+	check_trace_config();
 
 	for (; argc; argc--, argv++) {
 		const char *cmd = *argv;
