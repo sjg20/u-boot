@@ -316,7 +316,7 @@ void trace_print_stats(void)
 	puts(" calls not traced due to depth\n");
 	print_grouped_ull(hdr->ftrace_size, 10);
 	puts(" max function calls\n");
-	printf("\ntrace buffer %lx call records %p\n", hdr, hdr->ftrace);
+	printf("\ntrace buffer %p call records %p\n", hdr, hdr->ftrace);
 }
 
 void notrace trace_set_enabled(int enabled)
@@ -359,9 +359,11 @@ int notrace trace_init(void *buff, size_t buff_size)
 		       (ulong)map_to_sysmem(buff));
 		printf("%lu traced function calls", count);
 		if (hdr->ftrace_count > hdr->ftrace_size) {
-			printf(" (%lu dropped due to overflow)\n",
+			printf(" (%lu dropped due to overflow)",
 			       hdr->ftrace_count - hdr->ftrace_size);
+			hdr->ftrace_count = hdr->ftrace_size;
 		}
+		puts("\n");
 		memcpy(buff, hdr, used);
 #else
 		puts("trace: already enabled\n");

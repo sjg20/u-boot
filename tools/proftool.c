@@ -1076,7 +1076,6 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 		uint rec_words;
 		int delta;
 
-		printf("func_offset=%x\n", call->func);
 		func = find_func_by_offset(call->func);
 		if (!func) {
 			warn("Cannot find function at %lx\n",
@@ -1089,7 +1088,6 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 			}
 			continue;
 		}
-		printf("   func=%s\n", func->name);
 
 		if (!(func->flags & FUNCF_TRACE)) {
 			debug("Funcion '%s' is excluded from trace\n",
@@ -1424,8 +1422,8 @@ static int make_flame_tree(enum out_format_t out_format,
 	struct trace_call *call;
 	struct flame_state state;
 	int missing_count = 0;
-	bool active;
 	int i, depth;
+	bool active;
 
 	/* maintain a stack of start times for calling functions */
 	state.stack_ptr = 0;
@@ -1437,7 +1435,7 @@ static int make_flame_tree(enum out_format_t out_format,
 	depth = -calc_min_depth();
 
 	/* don't start until we get to the top level of the call stack */
-	active = false;
+	active = true;
 
 	tree = create_node("tree");
 	if (!tree)
@@ -1459,8 +1457,12 @@ static int make_flame_tree(enum out_format_t out_format,
 			 * ignore stack traces which don't have a common root,
 			 * since it looks odd in the graph and is confusing
 			 */
-			if (!depth)
+			if (!depth) {
 				active = true;
+				fprintf(stderr,
+					"skipped %d records looking for common root function\n",
+					i);
+			}
 			continue;
 		}
 
