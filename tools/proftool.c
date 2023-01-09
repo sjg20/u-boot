@@ -452,6 +452,15 @@ static struct func_info *find_caller_by_offset(uint offset)
 	return low >= 0 ? &func_list[low] : NULL;
 }
 
+/**
+ * read_calls() - Read the list of calls from the trace data
+ *
+ * The calls are stored consecutively in the trace output produced by U-Boot
+ *
+ * @fin: File to read from
+ * @count: Number of calls to read
+ * Returns: 0 if OK, -1 on error
+ */
 static int read_calls(FILE *fin, size_t count)
 {
 	struct trace_call *call_data;
@@ -468,16 +477,24 @@ static int read_calls(FILE *fin, size_t count)
 	call_data = call_list;
 	for (i = 0; i < count; i++, call_data++) {
 		if (read_data(fin, call_data, sizeof(*call_data)))
-			return 1;
+			return -1;
 	}
 	return 0;
 }
 
-static int read_profile(FILE *fin, int *not_found)
+/**
+ * read_profile() - Read the U-Boot profile file
+ *
+ * Read in the calls from the profile file. The function list is ignored at
+ * present
+ *
+ * @fin: File to read
+ * Returns 0 if OK, non-zero on error
+ */
+static int read_profile(FILE *fin)
 {
 	struct trace_output_hdr hdr;
 
-	*not_found = 0;
 	while (!feof(fin)) {
 		int err;
 
@@ -502,6 +519,14 @@ static int read_profile(FILE *fin, int *not_found)
 	return 0;
 }
 
+/**
+ * read_map_file() - Read the System.map file
+ *
+ * This reads the file into the func_list array
+ *
+ * @fname: Filename to read
+ * Returns 0 if OK, non-zero on error
+ */
 static int read_map_file(const char *fname)
 {
 	FILE *fmap;
@@ -519,9 +544,17 @@ static int read_map_file(const char *fname)
 	return err;
 }
 
+/**
+ * read_profile_file() - Open and read the U-Boot profile file
+ *
+ * Read in the calls from the profile file. The function list is ignored at
+ * present
+ *
+ * @fin: File to read
+ * Returns 0 if OK, non-zero on error
+ */
 static int read_profile_file(const char *fname)
 {
-	int not_found = INT_MAX;
 	FILE *fprof;
 	int err;
 
@@ -531,16 +564,10 @@ static int read_profile_file(const char *fname)
 		      fname);
 		return 1;
 	} else {
-		err = read_profile(fprof, &not_found);
+		err = read_profile(fprof);
 		fclose(fprof);
 		if (err)
 			return err;
-
-		if (not_found) {
-			warn("%d profile functions could not be found in the map file - are you sure that your profile data and map file correspond?\n",
-			     not_found);
-			return 1;
-		}
 	}
 	return 0;
 }
@@ -591,6 +618,7 @@ static void check_trace_config_line(struct trace_configline_info *item)
 	}
 }
 
+/** check_trace_config() - Check trace-config file, reporting any problems */
 static void check_trace_config(void)
 {
 	struct trace_configline_info *line;
@@ -688,20 +716,7 @@ static int read_trace_config_file(const char *fname)
 	fclose(fin);
 	return err;
 }
-/*
-static void out_func(ulong func_offset, int is_caller, const char *suffix)
-{
-	struct func_info *func;
 
-	func = (is_caller ? find_caller_by_offset : find_func_by_offset)
-		(func_offset);
-
-	if (func)
-		printf("%s%s", func->name, suffix);
-	else
-		printf("%lx%s", func_offset, suffix);
-}
-*/
 static int tputh(FILE *fout, unsigned int val)
 {
 	fputc(val, fout);
@@ -1011,7 +1026,6 @@ static int write_symbols(struct twriter *tw)
 	if (ret < 0)
 		return -1;
 	tw->ptr += ret;
-	printf("func_count %d\n", func_count);
 	for (i = 0; i < func_count; i++) {
 		struct func_info *func = &func_list[i];
 
@@ -1259,12 +1273,6 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 			tw->ptr += tputl(fout, depth); /* depth */
 			if (entry) {
 				depth++;
-// 				if (stack_ptr == MAX_STACK_DEPTH) {
-// 					fprintf(stderr,
-// 						"Call-stack overflow at %d\n",
-// 					        stack_ptr);
-// 					return -1;
-// 				}
 				if (stack_ptr < MAX_STACK_DEPTH)
 					func_stack[stack_ptr] = timestamp;
 				stack_ptr++;
@@ -1288,9 +1296,6 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 		last_timestamp = timestamp;
 		page_upto += 4 + rec_words * 4;
 		upto++;
-// 		printf("%d %s\n", stack_ptr, func->name);
-// 		if (upto == 200)
-// 			break;
 		if (stack_ptr == MAX_STACK_DEPTH)
 			break;
 	}
@@ -1326,9 +1331,8 @@ static int write_flyrecord(struct twriter *tw, enum out_format_t out_format,
 	len = strlen(str);
 	tw->ptr += tputq(fout, len);
 	tw->ptr += tputs(fout, str);
-// 	printf("check %x %lx\n", tw->ptr, ftell(tw->fout));
 
-	printf("trace text base %lx, map file %lx\n", text_base, text_offset);
+	debug("trace text base %lx, map file %lx\n", text_base, text_offset);
 
 	ret = write_pages(tw, out_format, missing_countp, skip_countp);
 	if (ret < 0) {
@@ -1542,7 +1546,7 @@ static int make_flame_tree(enum out_format_t out_format,
 			return -1;
 
 	}
-	printf("%d nodes\n", state.nodes);
+	fprintf(stderr, "%d nodes\n", state.nodes);
 	*treep = tree;
 
 	return 0;
@@ -1640,7 +1644,6 @@ static int prof_tool(int argc, char *const argv[],
 			if (out_format != OUT_FMT_FLAMEGRAPH_CALLS &&
 			    out_format != OUT_FMT_FLAMEGRAPH_TIMING)
 				out_format = OUT_FMT_FLAMEGRAPH_CALLS;
-			printf("out_format %d\n", out_format);
 			fout = fopen(out_fname, "w");
 			if (!fout) {
 				fprintf(stderr, "Cannot write file '%s'\n",
