@@ -26,6 +26,8 @@
 
 #include <linux/list.h>
 
+#define _DEBUG	0
+
 /* Set to 1 to emit version 7 file (currently only partly supported) */
 #define VERSION7	0
 
@@ -1074,13 +1076,20 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 		uint rec_words;
 		int delta;
 
+		printf("func_offset=%x\n", call->func);
 		func = find_func_by_offset(call->func);
 		if (!func) {
 			warn("Cannot find function at %lx\n",
 			     text_offset + call->func);
 			missing_count++;
+			if (missing_count > 20) {
+				/* perhaps trace does not match System.map */
+				fprintf(stderr, "Too many missing functions\n");
+				return -1;
+			}
 			continue;
 		}
+		printf("   func=%s\n", func->name);
 
 		if (!(func->flags & FUNCF_TRACE)) {
 			debug("Funcion '%s' is excluded from trace\n",
@@ -1110,7 +1119,7 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 			last_timestamp = timestamp;
 			last_delta = 0;
 			page_upto = tw->ptr & TRACE_PAGE_MASK;
-			if (1 || upto > 1877000) {
+			if (_DEBUG) {
 				fprintf(stderr,
 					"new page, last_timestamp=%ld, upto=%d\n",
 					last_timestamp, upto);
@@ -1122,14 +1131,7 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 			fprintf(stderr, "Time went backwards\n");
 			err_count++;
 		}
-#if 0
-		if (delta < last_delta) {
-			fprintf(stderr,
-				"Delta went backwards from %x to %x: last_timestamp=%lx, timestamp=%lx, call->flags=%x, upto=%d\n",
-				last_delta, delta, last_timestamp, timestamp, call->flags, upto);
-			err_count++;
-		}
-#endif
+
 		if (err_count > 20) {
 			fprintf(stderr, "Too many errors, giving up\n");
 			return -1;
@@ -1148,7 +1150,7 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 		if (out_format == OUT_FMT_FUNCTION) {
 			struct func_info *caller_func;
 
-			if (1 || (upto >= 140 && upto < 150) || upto >= 1878275) {
+			if (_DEBUG) {
 				fprintf(stderr, "%d: delta=%d, stamp=%ld\n",
 					upto, delta, timestamp);
 				fprintf(stderr,

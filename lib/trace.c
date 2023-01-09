@@ -314,6 +314,9 @@ void trace_print_stats(void)
 	printf("%15d call depth limit\n", hdr->depth_limit);
 	print_grouped_ull(hdr->ftrace_too_deep_count, 10);
 	puts(" calls not traced due to depth\n");
+	print_grouped_ull(hdr->ftrace_size, 10);
+	puts(" max function calls\n");
+	printf("\ntrace buffer %lx call records %p\n", hdr, hdr->ftrace);
 }
 
 void notrace trace_set_enabled(int enabled)
@@ -338,8 +341,8 @@ int notrace trace_init(void *buff, size_t buff_size)
 
 	if (!was_disabled) {
 #ifdef CONFIG_TRACE_EARLY
+		ulong used, count;
 		char *end;
-		ulong used;
 
 		/*
 		 * Copy over the early trace data if we have it. Disable
@@ -348,12 +351,17 @@ int notrace trace_init(void *buff, size_t buff_size)
 		trace_enabled = 0;
 		hdr = map_sysmem(CONFIG_TRACE_EARLY_ADDR,
 				 CONFIG_TRACE_EARLY_SIZE);
-		end = (char *)&hdr->ftrace[min(hdr->ftrace_count,
-					       hdr->ftrace_size)];
+		count = min(hdr->ftrace_count, hdr->ftrace_size);
+		end = (char *)&hdr->ftrace[count];
 		used = end - (char *)hdr;
 		printf("trace: copying %08lx bytes of early data from %x to %08lx\n",
 		       used, CONFIG_TRACE_EARLY_ADDR,
 		       (ulong)map_to_sysmem(buff));
+		printf("%lu traced function calls", count);
+		if (hdr->ftrace_count > hdr->ftrace_size) {
+			printf(" (%lu dropped due to overflow)\n",
+			       hdr->ftrace_count - hdr->ftrace_size);
+		}
 		memcpy(buff, hdr, used);
 #else
 		puts("trace: already enabled\n");
@@ -376,9 +384,9 @@ int notrace trace_init(void *buff, size_t buff_size)
 	/* Use any remaining space for the timed function trace */
 	hdr->ftrace = (struct trace_call *)(buff + needed);
 	hdr->ftrace_size = (buff_size - needed) / sizeof(*hdr->ftrace);
+	hdr->depth_limit = CONFIG_TRACE_CALL_DEPTH_LIMIT;
 
 	puts("trace: enabled\n");
-	hdr->depth_limit = CONFIG_TRACE_CALL_DEPTH_LIMIT;
 	trace_enabled = 1;
 	trace_inited = 1;
 
@@ -416,7 +424,6 @@ int notrace trace_early_init(void)
 	/* Use any remaining space for the timed function trace */
 	hdr->ftrace = (struct trace_call *)((char *)hdr + needed);
 	hdr->ftrace_size = (buff_size - needed) / sizeof(*hdr->ftrace);
-	add_textbase();
 	hdr->depth_limit = CONFIG_TRACE_EARLY_CALL_DEPTH_LIMIT;
 	printf("trace: early enable at %08x\n", CONFIG_TRACE_EARLY_ADDR);
 
