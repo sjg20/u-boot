@@ -1423,7 +1423,6 @@ static int make_flame_tree(enum out_format_t out_format,
 	struct flame_state state;
 	int missing_count = 0;
 	int i, depth;
-	bool active;
 
 	/* maintain a stack of start times for calling functions */
 	state.stack_ptr = 0;
@@ -1433,9 +1432,6 @@ static int make_flame_tree(enum out_format_t out_format,
 	 * set the initial depth so that no function goes below depth 0
 	 */
 	depth = -calc_min_depth();
-
-	/* don't start until we get to the top level of the call stack */
-	active = true;
 
 	tree = create_node("tree");
 	if (!tree)
@@ -1452,19 +1448,6 @@ static int make_flame_tree(enum out_format_t out_format,
 			depth++;
 		else
 			depth--;
-		if (!active) {
-			/*
-			 * ignore stack traces which don't have a common root,
-			 * since it looks odd in the graph and is confusing
-			 */
-			if (!depth) {
-				active = true;
-				fprintf(stderr,
-					"skipped %d records looking for common root function\n",
-					i);
-			}
-			continue;
-		}
 
 		func = find_func_by_offset(call->func);
 		if (!func) {
