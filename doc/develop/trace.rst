@@ -329,7 +329,9 @@ There are a few parameters in the code that you may want to consider.
 There is a function call depth limit (set to 15 by default). When the
 stack depth goes above this then no tracing information is recorded.
 The maximum depth reached is recorded and displayed by the 'trace stats'
-command.
+command. While it might be tempting to set the depth limit quite high, this
+can dramatically increase the size of the trace output as well as the execution
+time.
 
 
 Future Work
