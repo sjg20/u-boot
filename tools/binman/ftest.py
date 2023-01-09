@@ -6188,6 +6188,11 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
             err,
             "Image '.*' is missing external blobs but is still functional: missing")
 
+    def testNull(self):
+        """Test an image with a null entry"""
+        data = self._DoReadFile('267_null.dts')
+        self.assertEqual(U_BOOT_DATA + b'\xff\xff\xff\xff' + U_BOOT_IMG_DATA, data)
+
 
 if __name__ == "__main__":
     unittest.main()
