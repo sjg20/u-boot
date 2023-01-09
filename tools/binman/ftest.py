@@ -6193,6 +6193,16 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         data = self._DoReadFile('267_null.dts')
         self.assertEqual(U_BOOT_DATA + b'\xff\xff\xff\xff' + U_BOOT_IMG_DATA, data)
 
+    def testBlobSubnode(self):
+        """Test a blob with a subnode embedded in it"""
+        data = self._DoReadFile('268_blob_subnode.dts')
+        self.assertEqual(U_BOOT_DATA[:1] + BLOB_DATA + U_BOOT_DATA[3:], data)
+
+    def testBlobSubnodeNull(self):
+        """Test a blob with a subnode embedded in it"""
+        data = self._DoReadFile('269_blob_subnode_null.dts')
+        self.assertEqual(U_BOOT_DATA, data)
+
 
 if __name__ == "__main__":
     unittest.main()

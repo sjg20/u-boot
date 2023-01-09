@@ -5,6 +5,8 @@
 # Entry-type module for blobs, which are binary objects read from files
 #
 
+from collections import OrderedDict
+
 from binman.entry import Entry
 from binman import state
 from dtoc import fdt_util
@@ -35,6 +37,36 @@ class Entry_blob(Entry):
         super().__init__(section, etype, node,
                          auto_write_symbols=auto_write_symbols)
         self._filename = fdt_util.GetString(self._node, 'filename', self.etype)
+        self._entries = OrderedDict()
+
+    def ReadNode(self):
+        super().ReadNode()
+        self.ReadEntries()
+
+    def ReadEntries(self):
+        for node in self._node.subnodes:
+            if node.name.startswith('hash') or node.name.startswith('signature'):
+                continue
+            entry = Entry.Create(self.section, node,
+                                 expanded=self.GetImage().use_expanded,
+                                 missing_etype=self.GetImage().missing_etype)
+            entry.ReadNode()
+            self._entries[node.name] = entry
+
+    def _PackEntries(self):
+        """Pack all entries into the blob"""
+        offset = 0
+        for entry in self._entries.values():
+            offset = entry.Pack(offset)
+        return offset
+
+    def Pack(self, offset):
+        """Pack all entries into the blob"""
+        self._PackEntries()
+
+        offset = super().Pack(offset)
+        self.CheckEntries()
+        return offset
 
     def ObtainContents(self, fake_size=0):
         self._filename = self.GetDefaultFilename()
@@ -51,6 +83,26 @@ class Entry_blob(Entry):
 
         self.ReadBlobContents()
         return True
+
+    def BuildBlobData(self, required):
+        # Override with any local entries
+        data = self.data
+        for entry in self._entries.values():
+            if entry.ObtainContents() is False:
+                return False
+            entry_data = entry.GetData(True)
+            if entry_data is not None:
+                data = (data[:entry.offset] + entry_data +
+                        data[entry.offset + len(entry_data):])
+
+        return data
+
+    def GetData(self, required=True):
+        data = self.BuildBlobData(required)
+        if data is False or data is None:
+            return None
+        self.SetContents(data)
+        return data
 
     def ReadFileContents(self, pathname):
         """Read blob contents into memory
