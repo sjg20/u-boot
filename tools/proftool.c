@@ -1922,11 +1922,11 @@ static int prof_tool(int argc, char *const argv[],
 
 int main(int argc, char *argv[])
 {
+	enum out_format_t out_format = OUT_FMT_DEFAULT;
 	const char *map_fname = "System.map";
 	const char *trace_fname = NULL;
 	const char *config_fname = NULL;
 	const char *out_fname = NULL;
-	enum out_format_t out_format = OUT_FMT_DEFAULT;
 	int opt;
 
 	verbose = 2;
@@ -1961,7 +1961,6 @@ int main(int argc, char *argv[])
 		case 'v':
 			verbose = atoi(optarg);
 			break;
-
 		default:
 			usage();
 		}
