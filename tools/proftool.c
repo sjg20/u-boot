@@ -1945,7 +1945,8 @@ int main(int argc, char *argv[])
 			} else if (!strcmp("timing", optarg)) {
 				out_format = OUT_FMT_FLAMEGRAPH_TIMING;
 			} else {
-				fprintf(stderr, "Invalid format: use function or funcgraph\n");
+				fprintf(stderr,
+					"Invalid format: use function, funcgraph, calls, timing\n");
 				exit(1);;
 			}
 			break;
