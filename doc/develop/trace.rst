@@ -274,6 +274,15 @@ here. To convert it into something useful, you can use proftool.
 This tool must be given the U-Boot map file and the trace data received
 from running that U-Boot. It produces a text output file.
 
+ * This file consists of lines like:
+ *
+ * include-func <regex>
+ * exclude-func <regex>
+ *
+ * where <regex> is a regular expression matched against function names. It
+ * allow some functions to be dropped from the trace when producing ftrace
+ * records
+
 Options
 
 -m <map_file>

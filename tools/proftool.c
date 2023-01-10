@@ -627,6 +627,21 @@ static void check_trace_config(void)
 		check_trace_config_line(line);
 }
 
+/**
+ * read_trace_config() - read the trace-config file
+ *
+ * This file consists of lines like:
+ *
+ * include-func <regex>
+ * exclude-func <regex>
+ *
+ * where <regex> is a regular expression matched against function names. It
+ * allow some functions to be dropped from the trace when producing ftrace
+ * records
+ *
+ * @fin: File to process
+ * Returns: 0 if OK, -1 on error
+ */
 static int read_trace_config(FILE *fin)
 {
 	char buff[200];
@@ -717,6 +732,13 @@ static int read_trace_config_file(const char *fname)
 	return err;
 }
 
+/**
+ * tputh() - Write a 16-bit little-endian value to a file
+ *
+ * @fout: File to write to
+ * @val: Value to write
+ * Returns: number of bytes written (2)
+ */
 static int tputh(FILE *fout, unsigned int val)
 {
 	fputc(val, fout);
@@ -725,6 +747,13 @@ static int tputh(FILE *fout, unsigned int val)
 	return 2;
 }
 
+/**
+ * tputl() - Write a 32-bit little-endian value to a file
+ *
+ * @fout: File to write to
+ * @val: Value to write
+ * Returns: number of bytes written (4)
+ */
 static int tputl(FILE *fout, ulong val)
 {
 	fputc(val, fout);
@@ -735,6 +764,13 @@ static int tputl(FILE *fout, ulong val)
 	return 4;
 }
 
+/**
+ * tputh() - Write a 64-bit little-endian value to a file
+ *
+ * @fout: File to write to
+ * @val: Value to write
+ * Returns: number of bytes written (8)
+ */
 static int tputq(FILE *fout, unsigned long long val)
 {
 	tputl(fout, val);
@@ -743,6 +779,15 @@ static int tputq(FILE *fout, unsigned long long val)
 	return 8;
 }
 
+/**
+ * tputh() - Write a string to a file
+ *
+ * The string is written without its terminator
+ *
+ * @fout: File to write to
+ * @val: Value to write
+ * Returns: number of bytes written
+ */
 static int tputs(FILE *fout, const char *str)
 {
 	fputs(str, fout);
@@ -750,6 +795,15 @@ static int tputs(FILE *fout, const char *str)
 	return strlen(str);
 }
 
+/**
+ * add_str() - add a name string to the string table
+ *
+ * This is used by the v7 format
+ *
+ * @tw: Writer context
+ * @name: String to write
+ * Returns: Updated value of string pointer, or -1 if out of memory
+ */
 static int add_str(struct twriter *tw, const char *name)
 {
 	int str_ptr;
@@ -807,6 +861,18 @@ static int push_len(struct twriter *tw, int base, const char *msg, int size)
 	return size == 8 ? tputq(tw->fout, 0) : tputl(tw->fout, 0);
 }
 
+/**
+ * pop_len() - Update a length value once the length is known
+ *
+ * Pops a value of the length stack and updates the file at that position with
+ * the number of bytes written between now and then. Once done, the file is
+ * seeked to the current (tw->ptr) position again, so writing can continue as
+ * normal.
+ *
+ * @tw: Writer context
+ * @msg: Indicates the type of caller, for debugging
+ * Returns 0 if OK, -1 on error
+ */
 static int pop_len(struct twriter *tw, const char *msg)
 {
 	struct tw_len *lp;
@@ -830,7 +896,19 @@ static int pop_len(struct twriter *tw, const char *msg)
 	return 0;
 }
 
-static int start_header(struct twriter *tw, int id, int flags, const char *name)
+/**
+ * start_header() - Start a v7 section
+ *
+ * Writes a header in v7 format
+ *
+ * @tw: Writer context
+ * @id: ID of header to write (SECTION_...)
+ * @flags: Flags value to write
+ * @name: Name of section
+ * Returns: number of bytes written
+ */
+static int start_header(struct twriter *tw, int id, uint flags,
+			const char *name)
 {
 	int str_id;
 	int lptr;
@@ -855,6 +933,16 @@ static int start_header(struct twriter *tw, int id, int flags, const char *name)
 	return lptr;
 }
 
+/**
+ * start_page() - Start a new page of output data
+ *
+ * The output is arranged in 4KB pages with a base timestamp at the start of
+ * each. This starts a new page, making sure it is aligned to 4KB in the output
+ * file.
+ *
+ * @tw: Writer context
+ * @timestamp: Base timestamp for the page
+ */
 static int start_page(struct twriter *tw, ulong timestamp)
 {
 	int start;
@@ -879,6 +967,14 @@ static int start_page(struct twriter *tw, ulong timestamp)
 	return 0;
 }
 
+/**
+ * finish_page() - finish a page
+ *
+ * Sets the lengths correctly and moves to the start of the next page
+ *
+ * @tw: Writer context
+ * Returns: 0 on success, -1 on error
+ */
 static int finish_page(struct twriter *tw)
 {
 	int ret, end;
@@ -887,16 +983,34 @@ static int finish_page(struct twriter *tw)
 	if (ret < 0)
 		return ret;
 	end = ALIGN(tw->ptr, TRACE_PAGE_SIZE);
-	if (fseek(tw->fout, end - 1, SEEK_SET)) {
-		fprintf(stderr, "cannot seek to start of next page\n");
-		return -1;
+
+	/*
+	 * Write a byte so that the data actually makes to the file, in the case
+	 * that we never write any more pages
+	 */
+	if (tw->ptr != end) {
+		if (fseek(tw->fout, end - 1, SEEK_SET)) {
+			fprintf(stderr, "cannot seek to start of next page\n");
+			return -1;
+		}
+		fputc(0, tw->fout);
+		tw->ptr = end;
 	}
-	fputc(0, tw->fout);
-	tw->ptr = end;
 
 	return 0;
 }
 
+/**
+ * output_headers() - Output v6 headers to the file
+ *
+ * Writes out the various formats so that trace-cmd and kernelshark can make
+ * sense of the data
+ *
+ * This updates tw->ptr as it goes
+ *
+ * @tw: Writer context
+ * Returns: 0 on success, -ve on error
+ */
 static int output_headers(struct twriter *tw)
 {
 	FILE *fout = tw->fout;
@@ -1016,6 +1130,19 @@ static int output_headers(struct twriter *tw)
 	return 0;
 }
 
+/**
+ * write_symbols() - Write the symbols out
+ *
+ * Writes the symbol information in the following format to mimic the Linux
+ * /proc/kallsyms file:
+ *
+ * <address> T <name>
+ *
+ * This updates tw->ptr as it goes
+ *
+ * @tw: Writer context
+ * Returns: 0 on success, -ve on error
+ */
 static int write_symbols(struct twriter *tw)
 {
 	char str[200];
@@ -1041,6 +1168,18 @@ static int write_symbols(struct twriter *tw)
 	return 0;
 }
 
+/**
+ * write_options() - Write the options out
+ *
+ * Writes various options which are needed or useful. We use OPTION_TSC2NSEC
+ * to indicates that values in the output need to be multiplied by 1000 since
+ * U-Boot's trace values are in microseconds.
+ *
+ * This updates tw->ptr as it goes
+ *
+ * @tw: Writer context
+ * Returns: 0 on success, -ve on error
+ */
 static int write_options(struct twriter *tw)
 {
 	FILE *fout = tw->fout;
@@ -1091,7 +1230,7 @@ static int write_options(struct twriter *tw)
 	tw->ptr += tputl(fout, 0);	/* shift */
 	tw->ptr += tputq(fout, 0);	/* offset */
 
-	/* cpustat */
+	/* cpustat - bogus data for now, but at least it mentions the CPU */
 	tw->ptr += tputh(fout, OPTION_CPUSTAT);
 	snprintf(str, sizeof(str),
 		 "CPU: 0\n"
@@ -1112,6 +1251,19 @@ static int write_options(struct twriter *tw)
 	return 0;
 }
 
+/**
+ * calc_min_depth() - Calculate the minimum call depth from the call list
+ *
+ * Starting with a depth of 0, this works through the call list, adding 1 for
+ * each function call and subtracting 1 for each function return. Most likely
+ * the value ends up being negative, since the trace does not start at the
+ * very top of the call stack, e.g. main(), but some function called by that.
+ *
+ * This value can be used to calculate the depth value for the first call,
+ * such that it never goes negative for subsequent returns.
+ *
+ * Returns: minimum call depth (e.g. -2)
+ */
 static int calc_min_depth(void)
 {
 	struct trace_call *call;
@@ -1136,6 +1288,20 @@ static int calc_min_depth(void)
 	return min_depth;
 }
 
+/**
+ * write_pages() - Write the pages of trace data
+ *
+ * This works through all the calls, writing out as many pages of data as are
+ * needed.
+ *
+ * @tw: Writer context
+ * @out_format: Output format to use
+ * @missing_countp: Returns number of missing functions (not found in function
+ * list)
+ * @skip_countp: Returns number of skipped functions (excluded from trace)
+ *
+ * Returns: 0 on success, -ve on error
+ */
 static int write_pages(struct twriter *tw, enum out_format_t out_format,
 		       int *missing_countp, int *skip_countp)
 {
@@ -1307,6 +1473,20 @@ static int write_pages(struct twriter *tw, enum out_format_t out_format,
 	return 0;
 }
 
+/**
+ * write_flyrecord() - Write the flyrecord information
+ *
+ * Writes the header and pages of data for the "flyrecord" section. It also
+ * writes out the counter-type info, selecting "[local]"
+ *
+ * @tw: Writer context
+ * @out_format: Output format to use
+ * @missing_countp: Returns number of missing functions (not found in function
+ * list)
+ * @skip_countp: Returns number of skipped functions (excluded from trace)
+ *
+ * Returns: 0 on success, -ve on error
+ */
 static int write_flyrecord(struct twriter *tw, enum out_format_t out_format,
 			   int *missing_countp, int *skip_countp)
 {
@@ -1349,10 +1529,16 @@ static int write_flyrecord(struct twriter *tw, enum out_format_t out_format,
 	return 0;
 }
 
-/*
+/**
+ * make_ftrace() - Write out an ftrace file
+ *
  * See here for format:
  *
  * https://github.com/rostedt/trace-cmd/blob/master/Documentation/trace-cmd/trace-cmd.dat.v7.5.txt
+ *
+ * @fout: Output file
+ * @out_format: Output format to use
+ * Returns: 0 on success, -ve on error
  */
 static int make_ftrace(FILE *fout, enum out_format_t out_format)
 {
@@ -1397,6 +1583,12 @@ static int make_ftrace(FILE *fout, enum out_format_t out_format)
 	return 0;
 }
 
+/**
+ * create_node() - Create a new node in the flamegraph tree
+ *
+ * @msg: Message to use for debugging if something goes wrong
+ * Returns: Pointer to newly created node, or NULL on error
+ */
 static struct flame_node *create_node(const char *msg)
 {
 	struct flame_node *node;
@@ -1411,6 +1603,22 @@ static struct flame_node *create_node(const char *msg)
 	return node;
 }
 
+/**
+ * process_call(): Add a call to the flamegraph info
+ *
+ * For function calls, if this call stack has been seen before, this increments
+ * the call count, creating a new node if needed.
+ *
+ * For function returns, it adds up the time spent in this call stack,
+ * subtracting the time spent by child functions.
+ *
+ * @state: Current flamegraph state
+ * @entry: true if this is a function entry, false if a function exit
+ * @timestamp: Timestamp from the trace file (in microseconds)
+ * @func: Function that was called/returned from
+ *
+ * Returns: 0 on success, -ve on error
+ */
 static int process_call(struct flame_state *state, bool entry, ulong timestamp,
 			struct func_info *func)
 {
