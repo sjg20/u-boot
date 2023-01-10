@@ -5,7 +5,7 @@
  */
 
 /*
- * Decode and dump U-Boot profiling information into formats that can be used
+ * Decode and dump U-Boot trace information into formats that can be used
  * by trace-cmd, kernelshark or flamegraph.pl
  *
  * See doc/develop/trace.rst for more information
@@ -150,7 +150,8 @@ struct flame_node {
  * @node: Current node being processed (corresponds to a function call)
  * @stack: Stack of call-start time for this function as well as the
  * accumulated total time of all child calls (so we can subtract them from the
- * function's call time
+ * function's call time. This is an 'empty' stack, meaning that @stack_ptr
+ * points to the next available stack position
  * @stack_ptr: points to first empty position in the stack
  * @nodes: Number of nodes created (running count)
  */
@@ -391,7 +392,7 @@ static int read_data(FILE *fin, void *buff, int size)
 	if (!err)
 		return 1;
 	if (err != size) {
-		error("Cannot read profile file at pos %lx\n", ftell(fin));
+		error("Cannot read trace file at pos %lx\n", ftell(fin));
 		return -1;
 	}
 	return 0;
@@ -483,15 +484,15 @@ static int read_calls(FILE *fin, size_t count)
 }
 
 /**
- * read_profile() - Read the U-Boot profile file
+ * read_trace() - Read the U-Boot trace file
  *
- * Read in the calls from the profile file. The function list is ignored at
+ * Read in the calls from the trace file. The function list is ignored at
  * present
  *
  * @fin: File to read
  * Returns 0 if OK, non-zero on error
  */
-static int read_profile(FILE *fin)
+static int read_trace(FILE *fin)
 {
 	struct trace_output_hdr hdr;
 
@@ -545,26 +546,26 @@ static int read_map_file(const char *fname)
 }
 
 /**
- * read_profile_file() - Open and read the U-Boot profile file
+ * read_trace_file() - Open and read the U-Boot trace file
  *
- * Read in the calls from the profile file. The function list is ignored at
+ * Read in the calls from the trace file. The function list is ignored at
  * present
  *
  * @fin: File to read
  * Returns 0 if OK, non-zero on error
  */
-static int read_profile_file(const char *fname)
+static int read_trace_file(const char *fname)
 {
 	FILE *fprof;
 	int err;
 
 	fprof = fopen(fname, "rb");
 	if (!fprof) {
-		error("Cannot open profile data file '%s'\n",
+		error("Cannot open trace data file '%s'\n",
 		      fname);
 		return 1;
 	} else {
-		err = read_profile(fprof);
+		err = read_trace(fprof);
 		fclose(fprof);
 		if (err)
 			return err;
@@ -1695,29 +1696,26 @@ static int process_call(struct flame_state *state, bool entry, ulong timestamp,
 }
 
 /**
- * make_flame_tree() - Creat a tree of stack traces
+ * make_flame_tree() - Create a tree of stack traces
  *
  * Set up a tree, with the root node having the top-level functions as children
  * and the leaf nodes being leaf functions. Each node has a count of how many
  * times this function appears in the trace
+ *
+ * @out_format: Output format to use
+ * @treep: Returns the resulting flamegraph tree
+ * Returns: 0 on success, -ve on error
  */
 static int make_flame_tree(enum out_format_t out_format,
 			   struct flame_node **treep)
 {
-	/*
-	 * This is an 'empty' stack, where stack_ptr points to the next
-	 * available stack position.
-	 *
-	 * @timestamp: Timestamp of entry into this function
-	 * @child_total: Running total of child durations
-	 */
+	struct flame_state state;
 	struct flame_node *tree;
 	struct trace_call *call;
-	struct flame_state state;
 	int missing_count = 0;
 	int i, depth;
 
-	/* maintain a stack of start times for calling functions */
+	/* maintain a stack of start times, etc. for 'calling' functions */
 	state.stack_ptr = 0;
 
 	/*
@@ -1760,9 +1758,36 @@ static int make_flame_tree(enum out_format_t out_format,
 	return 0;
 }
 
-static void output_tree(FILE *fout, enum out_format_t out_format,
-			const struct flame_node *node, char *str,
-			int base, int level)
+/**
+ * output_tree() - Output a flamegraph tree
+ *
+ * Writes the tree out to a file in a format suitable for flamegraph.pl
+ *
+ * This works by maintaining a string shared across all recursive calls. The
+ * function name for this node is added to the existing string, to make up the
+ * full call-stack description. For example, on entry, @str might contain:
+ *
+ *    "initf_bootstage;bootstage_mark_name"
+ *                                        ^ @base
+ *
+ * with @base pointing to the \0 at the end of the string. This function adds
+ * a ';' following by the name of the current function, e.g. "timer_get_boot_us"
+ * as well as the output value, to get the full line:
+ *
+ * initf_bootstage;bootstage_mark_name;timer_get_boot_us 123
+ *
+ * @fout: Output file
+ * @out_format: Output format to use
+ * @node: Node to output (pass the whole tree at first)
+ * @str: String to use to build the output line (e.g. 500 charas long)
+ * @maxlen: Maximum length of string
+ * @base: Current base position in the string
+ * @treep: Returns the resulting flamegraph tree
+ * Returns 0 if OK, -1 on error
+ */
+static int output_tree(FILE *fout, enum out_format_t out_format,
+		       const struct flame_node *node, char *str, int maxlen,
+		       int base)
 {
 	const struct flame_node *child;
 	int pos;
@@ -1794,11 +1819,27 @@ static void output_tree(FILE *fout, enum out_format_t out_format,
 		int len;
 
 		len = strlen(child->func->name);
+		if (pos + len + 1 >= maxlen) {
+			fprintf(stderr, "String too short (%d chars)\n",
+				maxlen);
+			return -1;
+		}
 		strcpy(str + pos, child->func->name);
-		output_tree(fout, out_format, child, str, pos + len, level + 1);
+		if (output_tree(fout, out_format, child, str, maxlen,
+				pos + len))
+			return -1;
 	}
+
+	return 0;
 }
 
+/**
+ * make_flamegraph() - Write out a flame graph
+ *
+ * @fout: Output file
+ * @out_format: Output format to use, e.g. function counts or timing
+ * Returns 0 if OK, -1 on error
+ */
 static int make_flamegraph(FILE *fout, enum out_format_t out_format)
 {
 	struct flame_node *tree;
@@ -1808,13 +1849,24 @@ static int make_flamegraph(FILE *fout, enum out_format_t out_format)
 		return -1;
 
 	*str = '\0';
-	output_tree(fout, out_format, tree, str, 0, 0);
+	if (output_tree(fout, out_format, tree, str, sizeof(str), 0))
+		return -1;
 
 	return 0;
 }
 
+/**
+ * prof_tool() - Performs requested action
+ *
+ * @argc: Number of arguments (used to obtain the command
+ * @argv: List of arguments
+ * @trace_fname: Filename of input file (trace data from U-Boot)
+ * @map_fname: Filename of map file (System.map from U-Boot)
+ * @trace_config_fname: Trace-configuration file, or NULL if none
+ * @out_fname: Output filename
+ */
 static int prof_tool(int argc, char *const argv[],
-		     const char *prof_fname, const char *map_fname,
+		     const char *trace_fname, const char *map_fname,
 		     const char *trace_config_fname, const char *out_fname,
 		     enum out_format_t out_format)
 {
@@ -1822,7 +1874,7 @@ static int prof_tool(int argc, char *const argv[],
 
 	if (read_map_file(map_fname))
 		return -1;
-	if (prof_fname && read_profile_file(prof_fname))
+	if (trace_fname && read_trace_file(trace_fname))
 		return -1;
 	if (trace_config_fname && read_trace_config_file(trace_config_fname))
 		return -1;
@@ -1917,6 +1969,12 @@ int main(int argc, char *argv[])
 	argc -= optind; argv += optind;
 	if (argc < 1)
 		usage();
+
+	if (!out_fname || !map_fname || !trace_fname) {
+		fprintf(stderr,
+			"Must provide trace data, System.map file and output file\n");
+		usage();
+	}
 
 	debug("Debug enabled\n");
 	return prof_tool(argc, argv, trace_fname, map_fname, config_fname,
