@@ -1,0 +1,23 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	binman {
+		section {
+			size = <4>;
+			section-fill {
+				missing {
+					type = "blob-ext";
+					filename = "missing.bin";
+				};
+			};
+
+			null {
+				offset = <1>;
+				size = <2>;
+			};
+		};
+	};
+};

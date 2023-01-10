@@ -1512,6 +1512,18 @@ Continuous Integration systems can build without the binaries being
 available. This is set by the `SetAllowMissing()` method, if
 `--allow-missing` is passed to binman.
 
+A subnode is supported also:
+
+section-fill:
+    Provides the data used to pad parts of the section, where no entries are
+    present to provide the data. This is like using pad bytes, except that
+    the data can be anything. Conceptually the section starts with the
+    fill data, then the 'real' entries in the section are overlaid on top
+    of it, overwriting the pad data. Note that the size of the fill data
+    does not influence the section size, which is set by normal means. If
+    the fill data is too large, the data at the end is ignored. If it is too
+    small, the normal pad bytes are used.
+
 
 
 .. _etype_tee_os:

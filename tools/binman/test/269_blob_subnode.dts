@@ -1,0 +1,20 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	binman {
+		size = <4>;
+		section-fill {
+			u-boot {
+			};
+		};
+
+		inset {
+			type = "blob";
+			offset = <1>;
+			filename = "blobfile";
+		};
+	};
+};

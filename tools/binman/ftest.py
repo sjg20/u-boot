@@ -6199,6 +6199,66 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         data = self._DoReadFile('268_null.dts')
         self.assertEqual(U_BOOT_DATA + b'\xff\xff\xff\xff' + U_BOOT_IMG_DATA, data)
 
+    def testBlobSubnode(self):
+        """Test a section with a blob as the fill data"""
+        data = self._DoReadFile('269_blob_subnode.dts')
+        self.assertEqual(U_BOOT_DATA[:1] + BLOB_DATA + U_BOOT_DATA[3:], data)
+        image = control.images['image']
+        entries = image.GetEntries()
+
+        self.assertIn('inset', entries)
+        inset = entries['inset']
+        self.assertEqual(1, inset.offset);
+        self.assertEqual(1, inset.image_pos);
+        self.assertEqual(2, inset.size);
+
+    def testBlobSubnodeNull(self):
+        """Test a section with a blob as the fill data and a null entry"""
+        data = self._DoReadFile('270_blob_subnode_null.dts')
+        self.assertEqual(U_BOOT_DATA, data)
+
+    def testBlobSubnodeSection(self):
+        """Test a subsection with a blob as the fill data and a null entry"""
+        data = self._DoReadFile('271_blob_subnode_sect.dts')
+        self.assertEqual(U_BOOT_DATA, data[:len(U_BOOT_DATA)])
+        fhdr, fentries = fmap_util.DecodeFmap(data[len(U_BOOT_DATA):])
+        self.assertEqual(3, fhdr.nareas)
+        fiter = iter(fentries)
+
+        fentry = next(fiter)
+        self.assertEqual(b'SECTION', fentry.name)
+        self.assertEqual(0, fentry.offset)
+        self.assertEqual(len(U_BOOT_DATA), fentry.size)
+        self.assertEqual(0, fentry.flags)
+
+        # Make sure that the NUUL entry appears in the FMAP
+        fentry = next(fiter)
+        self.assertEqual(b'NULL', fentry.name)
+        self.assertEqual(1, fentry.offset)
+        self.assertEqual(2, fentry.size)
+        self.assertEqual(0, fentry.flags)
+
+        fentry = next(fiter)
+        self.assertEqual(b'FMAP', fentry.name)
+        self.assertEqual(len(U_BOOT_DATA), fentry.offset)
+
+    def testBlobFillMissing(self):
+        """Test a section-fill with missing data"""
+        with self.assertRaises(ValueError) as e:
+            self._DoReadFile('272_blob_fill_missing.dts')
+        self.assertIn("Filename 'missing.bin' not found in input path",
+                      str(e.exception))
+
+    def testBlobFillMissingOk(self):
+        """Test a section-fill with missing data allowed"""
+        with test_util.capture_sys_output() as (stdout, stderr):
+            ret = self._DoTestFile('158_blob_ext_missing.dts',
+                                   allow_missing=True)
+        self.assertEqual(103, ret)
+        err = stderr.getvalue()
+        self.assertRegex(err, "Image 'main-section'.*missing.*: blob-ext")
+        self.assertIn('Some images are invalid', err)
+
 
 if __name__ == "__main__":
     unittest.main()

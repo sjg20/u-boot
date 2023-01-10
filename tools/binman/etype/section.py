@@ -157,6 +157,18 @@ class Entry_section(Entry):
     Continuous Integration systems can build without the binaries being
     available. This is set by the `SetAllowMissing()` method, if
     `--allow-missing` is passed to binman.
+
+    A subnode is supported also:
+
+    section-fill:
+        Provides the data used to pad parts of the section, where no entries are
+        present to provide the data. This is like using pad bytes, except that
+        the data can be anything. Conceptually the section starts with the
+        fill data, then the 'real' entries in the section are overlaid on top
+        of it, overwriting the pad data. Note that the size of the fill data
+        does not influence the section size, which is set by normal means. If
+        the fill data is too large, the data at the end is ignored. If it is too
+        small, the normal pad bytes are used.
     """
     def __init__(self, section, etype, node, test=False):
         if not test:
@@ -168,6 +180,7 @@ class Entry_section(Entry):
         self._end_4gb = False
         self._ignore_missing = False
         self._filename = None
+        self._fill_entry = None
 
     def IsSpecialSubnode(self, node):
         """Check if a node is a special one used by the section itself
@@ -178,7 +191,9 @@ class Entry_section(Entry):
         Returns:
             bool: True if the node is a special one, else False
         """
-        return node.name.startswith('hash') or node.name.startswith('signature')
+        return (node.name.startswith('hash') or
+                node.name.startswith('signature') or
+                node.name == 'section-fill')
 
     def ReadNode(self):
         """Read properties from the section node"""
@@ -214,6 +229,10 @@ class Entry_section(Entry):
             entry.ReadNode()
             entry.SetPrefix(self._name_prefix)
             self._entries[node.name] = entry
+        fill = self._node.FindNode('section-fill')
+        if fill:
+            self._fill_entry = Entry.Create(self, fill, etype='section')
+            self._fill_entry.ReadNode()
 
     def _Raise(self, msg):
         """Raises an error for this section
@@ -267,7 +286,27 @@ class Entry_section(Entry):
     def ObtainContents(self, fake_size=0, skip_entry=None):
         return self.GetEntryContents(skip_entry=skip_entry)
 
-    def GetPaddedDataForEntry(self, entry, entry_data):
+    def GetPadding(self, pad_len, pad_byte, cur_pos, fill_data):
+        """Gets padding data to use in a section
+
+        Normally this just return the requested number of pad bytes, but when
+        fill_data is provided, the pad bytes are taked from there, starting at
+        position cur_pos.
+
+        Args:
+            pad_len (int): Number of pad bytes to return
+            pad_byte (int): Pad byte to use if fill_data does not provide
+                enough (or any) bytes
+            cur_pos (int): Current position in fill_data to start getting bytes
+                from, if needed
+            fill_data (bytes): Fill data to use to provide padding
+        """
+        padding = fill_data[cur_pos:cur_pos + pad_len] if fill_data else b''
+        padding += tools.get_bytes(pad_byte, pad_len - len(padding))
+        return padding
+
+    def GetPaddedDataForEntry(self, entry, entry_data, cur_pos=0,
+                              fill_data=b''):
         """Get the data for an entry including any padding
 
         Gets the entry data and uses the section pad-byte value to add padding
@@ -288,21 +327,37 @@ class Entry_section(Entry):
         data = bytearray()
         # Handle padding before the entry
         if entry.pad_before:
-            data += tools.get_bytes(self._pad_byte, entry.pad_before)
+            data += self.GetPadding(entry.pad_before, self._pad_byte, cur_pos,
+                                    fill_data)
 
         # Add in the actual entry data
         data += entry_data
 
         # Handle padding after the entry
         if entry.pad_after:
-            data += tools.get_bytes(self._pad_byte, entry.pad_after)
+            data += self.GetPadding(entry.pad_after, self._pad_byte,
+                                    cur_pos + len(data), fill_data)
 
         if entry.size:
-            data += tools.get_bytes(pad_byte, entry.size - len(data))
+            data += self.GetPadding(entry.size - len(data), pad_byte,
+                                    cur_pos + len(data), fill_data)
 
         self.Detail('GetPaddedDataForEntry: size %s' % to_hex_size(self.data))
 
         return data
+
+    def GetFillData(self):
+        fill = self._fill_entry
+        fill_data = b''
+        if fill:
+            fill.ObtainContents()
+            fill.Pack(0)
+            missing_opt_list = []
+            fill.CheckMissing(missing_opt_list)
+            fill.CheckOptional(missing_opt_list)
+            if not missing_opt_list:
+                fill_data = fill.GetData()
+        return fill_data
 
     def BuildSectionData(self, required):
         """Build the contents of a section
@@ -323,6 +378,7 @@ class Entry_section(Entry):
             Contents of the section (bytes)
         """
         section_data = bytearray()
+        fill_data = self.GetFillData()
 
         for entry in self._entries.values():
             entry_data = entry.GetData(required)
@@ -335,16 +391,31 @@ class Entry_section(Entry):
             if entry_data is None:
                 pad_byte = (entry._pad_byte if isinstance(entry, Entry_section)
                             else self._pad_byte)
-                entry_data = tools.get_bytes(self._pad_byte, entry.size)
+                entry_data = self.GetPadding(entry.size, self._pad_byte,
+                                             entry.offset, fill_data)
+                # entry_data = tools.get_bytes(self._pad_byte, entry.size)
 
-            data = self.GetPaddedDataForEntry(entry, entry_data)
+            data = self.GetPaddedDataForEntry(entry, entry_data,
+                                              len(section_data), fill_data)
             # Handle empty space before the entry
             pad = (entry.offset or 0) - self._skip_at_start - len(section_data)
             if pad > 0:
-                section_data += tools.get_bytes(self._pad_byte, pad)
+                padding = self.GetPadding(pad, self._pad_byte,
+                                          len(section_data), fill_data)
+                section_data += padding
 
             # Add in the actual entry data
             section_data += data
+
+        # Normally we don't pad up to the section size here, since the caller
+        # does it. As a special case, do this when we have fill data, since the
+        # data is not used by the caller.
+        if fill_data and self.size:
+            pad = self.size - self._skip_at_start - len(section_data)
+            if pad > 0:
+                padding = self.GetPadding(pad, self._pad_byte,
+                                          len(section_data), fill_data)
+                section_data += padding
 
         self.Detail('GetData: %d entries, total size %#x' %
                     (len(self._entries), len(section_data)))
@@ -367,7 +438,7 @@ class Entry_section(Entry):
         section = self.section or self
         if data is None:
             data = self.GetData()
-        return section.GetPaddedDataForEntry(self, data)
+        return section.GetPaddedDataForEntry(self, data, 0, self.GetFillData())
 
     def GetData(self, required=True):
         """Get the contents of an entry
@@ -889,6 +960,8 @@ class Entry_section(Entry):
         """
         for entry in self._entries.values():
             entry.CheckMissing(missing_list)
+        if self._fill_entry:
+            self._fill_entry.CheckMissing(missing_list)
 
     def CheckFakedBlobs(self, faked_blobs_list):
         """Check if any entries in this section have faked external blobs
@@ -900,6 +973,8 @@ class Entry_section(Entry):
         """
         for entry in self._entries.values():
             entry.CheckFakedBlobs(faked_blobs_list)
+        if self._fill_entry:
+            self._fill_entry.CheckFakedBlobs(faked_blobs_list)
 
     def CheckOptional(self, optional_list):
         """Check the section for missing but optional external blobs
