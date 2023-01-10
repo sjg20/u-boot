@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright (c) 2013 Google, Inc
+ * Copyright 2023 Google LLC
+ * Written by Simon Glass <sjg@chromium.org>
  */
 
 /*
- * Decode and dump U-Boot profiling information into a format that can be used
- * by kernelshark
+ * Decode and dump U-Boot profiling information into formats that can be used
+ * by trace-cmd, kernelshark or flamegraph.pl
+ *
+ * See doc/develop/trace.rst for more information
  */
 
 #include <assert.h>
@@ -26,12 +29,11 @@
 
 #include <linux/list.h>
 
-#define _DEBUG	0
-
-/* Set to 1 to emit version 7 file (currently only partly supported) */
+/* Set to 1 to emit version 7 file (currently this doesn't work) */
 #define VERSION7	0
 
-#define MAX_LINE_LEN 500
+/* enable some debug features */
+#define _DEBUG	0
 
 /* from linux/kernel.h */
 #define __ALIGN_MASK(x,mask)	(((x)+(mask))&~(mask))
@@ -43,6 +45,7 @@
  * @type:	the type of the container struct this is embedded in.
  * @member:	the name of the member within the struct.
  *
+ * (this is needed by list.h)
  */
 #define container_of(ptr, type, member) ({			\
 	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
@@ -55,6 +58,7 @@ enum {
 	LEN_STACK_SIZE	= 4,		/* number of nested length fix-ups */
 	TRACE_PAGE_MASK	= TRACE_PAGE_SIZE - 1,
 	MAX_STACK_DEPTH	= 50,		/* Max nested function calls */
+	MAX_LINE_LEN	= 500,		/* Max characters per line */
 };
 
 /**
@@ -75,12 +79,12 @@ enum out_format_t {
 	OUT_FMT_FLAMEGRAPH_TIMING,
 };
 
-/* Section types */
+/* Section types for v7 format (trace-cmd format) */
 enum {
 	SECTION_OPTIONS,
 };
 
-/* Option types */
+/* Option types (trace-cmd format) */
 enum {
 	OPTION_DONE,
 	OPTION_DATE,
@@ -99,7 +103,7 @@ enum {
 	OPTION_TSC2NSEC,
 };
 
-/* types of trace records */
+/* types of trace records (trace-cmd format) */
 enum trace_type {
 	__TRACE_FIRST_TYPE = 0,
 
@@ -119,10 +123,17 @@ enum trace_type {
 /**
  * struct flame_node - a node in the call-stack tree
  *
- * @child_head: List of children of this node
+ * Each stack frame detected in the trace is given a node corresponding to a
+ * function call in the call stack. Functions can appear multiple times when
+ * they are called by a different set of parent functions.
+ *
+ * @parent: Parent node (the call stack for the function that called this one)
+ * @child_head: List of children of this node (functions called from here)
  * @sibling: Next node in the list of children
  * @func: Function this node refers to (NULL for root node)
  * @count: Number of times this call-stack occurred
+ * @duration: Number of microseconds taken to run this function, excluding all
+ * of the functions it calls
  */
 struct flame_node {
 	struct flame_node *parent;
@@ -156,7 +167,7 @@ struct flame_state {
 /**
  * struct func_info - information recorded for each function
  *
- * @offset: Function offset in the image
+ * @offset: Function offset in the image, measured from the text_base
  * @name: Function name
  * @code_size: Total code size of the function
  * @flags: Either 0 or FUNCF_TRACE
@@ -168,23 +179,37 @@ struct func_info {
 	unsigned flags;
 };
 
+/**
+ * enum trace_line_type - whether to include or exclude a function
+ *
+ * @TRACE_LINE_INCLUDE: Include the function
+ * @TRACE_LINE_EXCLUDE: Exclude the function
+ */
 enum trace_line_type {
 	TRACE_LINE_INCLUDE,
 	TRACE_LINE_EXCLUDE,
 };
 
+/**
+ * struct trace_configline_info - information about a config-file line
+ *
+ * @next: Next line
+ * @type: Line type
+ * @name: identifier name / wildcard
+ * @regex: Regex to use if name starts with '/'
+ */
 struct trace_configline_info {
 	struct trace_configline_info *next;
 	enum trace_line_type type;
-	const char *name;	/* identifier name / wildcard */
-	regex_t regex;		/* Regex to use if name starts with / */
+	const char *name;
+	regex_t regex;
 };
 
 /**
- * struct tw_len - holds information about a length that needs updating
+ * struct tw_len - holds information about a length value that need fix-ups
  *
- * This is used to record a placeholder for a u64 length which needs to be
- * updated once the length is known
+ * This is used to record a placeholder for a u32 or u64 length which is written
+ * to the output file but needs to be updated once the length is actually known
  *
  * This allows us to write tw->ptr - @len_base to position @ptr in the file
  *
@@ -198,6 +223,18 @@ struct tw_len {
 	int size;
 };
 
+/**
+ * struct twriter - Writer for trace records
+ *
+ * Maintains state used when writing the output file in trace-cmd format
+ *
+ * @ptr: Current file position
+ * @len_stack: Stack of length values that need fixing up
+ * @len: Number of items on @len_stack
+ * @str_buf: Buffer of strings (for v7 format)
+ * @str_ptr: Current write-position in the buffer for strings
+ * @fout: Output file
+ */
 struct twriter {
 	int ptr;
 	struct tw_len len_stack[LEN_STACK_SIZE];
@@ -210,14 +247,17 @@ struct twriter {
 /* The contents of the trace config file */
 struct trace_configline_info *trace_config_head;
 
+/* list of all functions in System.map file, sorted by offset in the image */
 struct func_info *func_list;
-int func_count;
-struct trace_call *call_list;
-int call_count;
+
+int func_count;			/* number of functions */
+struct trace_call *call_list;	/* list of all calls in the input trace file */
+int call_count;			/* number of calls */
 int verbose;	/* Verbosity level 0=none, 1=warn, 2=notice, 3=info, 4=debug */
 ulong text_offset;		/* text address of first function */
 ulong text_base;		/* CONFIG_TEXT_BASE from trace file */
 
+/* debugging helpers */
 static void outf(int level, const char *fmt, ...)
 		__attribute__ ((format (__printf__, 2, 3)));
 #define error(fmt, b...) outf(0, fmt, ##b)
@@ -225,7 +265,6 @@ static void outf(int level, const char *fmt, ...)
 #define notice(fmt, b...) outf(2, fmt, ##b)
 #define info(fmt, b...) outf(3, fmt, ##b)
 #define debug(fmt, b...) outf(4, fmt, ##b)
-
 
 static void outf(int level, const char *fmt, ...)
 {
@@ -244,19 +283,34 @@ static void usage(void)
 		"Usage: proftool [-cmtv] <cmd> <profdata>\n"
 		"\n"
 		"Commands\n"
-		"   dump-ftrace\t\tDump out trace records in ftrace format\n"
-		"   dump-flamegraph\tWrite a file to use with flamegraph.pl\n"
+		"   dump-ftrace\t\tDump out records in ftrace format for use by trace-cmd\n"
+		"   dump-flamegraph\tWrite a file for use with flamegraph.pl\n"
 		"\n"
 		"Options:\n"
 		"   -c <cfg>\tSpecify config file\n"
-		"   -f <function | funcgraph>\tSpecify type of ftrace records\n"
+		"   -f <subtype>\tSpecify output subtype\n"
 		"   -m <map>\tSpecify Systen.map file\n"
 		"   -o <fname>\tSpecify output file\n"
 		"   -t <fname>\tSpecify trace data file (from U-Boot 'trace calls')\n"
-		"   -v <0-4>\tSpecify verbosity\n");
+		"   -v <0-4>\tSpecify verbosity\n"
+		"\n"
+		"Subtypes for dump-ftrace:\n"
+		"   function - write function-call records (caller/callee)\n"
+		"   funcgraph - write function entry/exit records (graph)\n"
+		"\n"
+		"Subtypes for dump-flamegraph\n"
+		"   calls - create a flamegraph of stack frames\n"
+		"   timing - create a flamegraph of microseconds for each stack frame\n");
 	exit(EXIT_FAILURE);
 }
 
+/**
+ * h_cmp_offset - bsearch() function to compare two functions bny their offset
+ *
+ * @v1: Pointer to first function (struct func_info)
+ * @v2: Pointer to second function (struct func_info)
+ * Returns: < 0 if v1 offset < v2 offset, 0 if equal, > 0 otherwise
+ */
 static int h_cmp_offset(const void *v1, const void *v2)
 {
 	const struct func_info *f1 = v1, *f2 = v2;
@@ -264,6 +318,15 @@ static int h_cmp_offset(const void *v1, const void *v2)
 	return (f1->offset / FUNC_SITE_SIZE) - (f2->offset / FUNC_SITE_SIZE);
 }
 
+/**
+ * read_system_map() - read the System.map file to create a list of functions
+ *
+ * This also reads the text_offset value, since we assume that the first text
+ * symbol is at that address
+ *
+ * @fin: File to read
+ * Returns: 0 if OK, non-zero on error
+ */
 static int read_system_map(FILE *fin)
 {
 	unsigned long offset, start = 0;
@@ -334,7 +397,16 @@ static int read_data(FILE *fin, void *buff, int size)
 	return 0;
 }
 
-static struct func_info *find_func_by_offset(uint32_t offset)
+/**
+ * find_func_by_offset() - Look up a function by its offset
+ *
+ * @offset: Offset to search for, from text_base
+ * Returns: function, if found, else NULL
+ *
+ * This does a fast search for a function given its offset from text_base
+ *
+ */
+static struct func_info *find_func_by_offset(uint offset)
 {
 	struct func_info key, *found;
 
@@ -345,8 +417,17 @@ static struct func_info *find_func_by_offset(uint32_t offset)
 	return found;
 }
 
-/* This finds the function which contains the given offset */
-static struct func_info *find_caller_by_offset(uint32_t offset)
+/**
+ * find_caller_by_offset() - finds the function which contains the given offset
+ *
+ * @offset: Offset to search for, from text_base
+ * Returns: function, if found, else NULL
+ *
+ * If the offset falls between two functions, then it is assumed to belong to
+ * the first function (with the lowest offset). This is a way of figuring out
+ * which function owns code at a particular offset
+ */
+static struct func_info *find_caller_by_offset(uint offset)
 {
 	int low;	/* least function that could be a match */
 	int high;	/* greated function that could be a match */

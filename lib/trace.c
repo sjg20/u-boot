@@ -316,7 +316,8 @@ void trace_print_stats(void)
 	puts(" calls not traced due to depth\n");
 	print_grouped_ull(hdr->ftrace_size, 10);
 	puts(" max function calls\n");
-	printf("\ntrace buffer %p call records %p\n", hdr, hdr->ftrace);
+	printf("\ntrace buffer %lx call records %lx\n", map_to_sysmem(hdr),
+	       map_to_sysmem(hdr->ftrace));
 }
 
 void notrace trace_set_enabled(int enabled)
