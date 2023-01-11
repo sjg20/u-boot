@@ -142,6 +142,7 @@ class Entry(object):
         self.auto_write_symbols = auto_write_symbols
         self.absent = False
         self.optional = False
+        self.elf_start_sym = None
 
     @staticmethod
     def FindEntryClass(etype, expanded):
@@ -667,11 +668,13 @@ class Entry(object):
         Args:
           section: Section containing the entry
         """
+
+        print('write', self._node.path, self.auto_write_symbols)
         if self.auto_write_symbols:
             # Check if we are writing symbols into an ELF file
             is_elf = self.GetDefaultFilename() == self.elf_fname
             elf.LookupAndWriteSymbols(self.elf_fname, self, section.GetImage(),
-                                      is_elf)
+                                      is_elf, self.elf_start_sym)
 
     def CheckEntries(self):
         """Check that the entry offsets are correct

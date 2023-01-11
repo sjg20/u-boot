@@ -35,10 +35,13 @@ class Entry_blob(Entry):
         super().__init__(section, etype, node,
                          auto_write_symbols=auto_write_symbols)
         self._filename = fdt_util.GetString(self._node, 'filename', self.etype)
-        if not auto_write_symbols:
+        if not self.auto_write_symbols:
             if fdt_util.GetBool(self._node, 'write-symbols'):
                 self.auto_write_symbols = True
-                self.elf_fname = fdt_util.GetString(self._node, 'efl-filename')
+                self.elf_fname = fdt_util.GetString(self._node, 'elf-filename')
+                self.elf_start_sym = fdt_util.GetString(self._node,
+                                                        'elf-base-sym',
+                                                        '__image_copy_start')
 
     def ObtainContents(self, fake_size=0):
         self._filename = self.GetDefaultFilename()

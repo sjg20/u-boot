@@ -549,6 +549,8 @@ class Entry_section(Entry):
         """Write symbol values into binary files for access at run time"""
         for entry in self._entries.values():
             entry.WriteSymbols(self)
+        if self._fill_entry:
+            self._fill_entry.WriteSymbols(self)
 
     def SetCalculatedProperties(self):
         super().SetCalculatedProperties()
@@ -564,6 +566,9 @@ class Entry_section(Entry):
     def ProcessContents(self):
         sizes_ok_base = super(Entry_section, self).ProcessContents()
         sizes_ok = True
+        if self._fill_entry:
+            if not self._fill_entry.ProcessContents():
+                sizes_ok = False
         for entry in self._entries.values():
             if not entry.ProcessContents():
                 sizes_ok = False

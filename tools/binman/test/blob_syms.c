@@ -12,6 +12,8 @@ typedef unsigned long ulong;
 
 DECLARE_BINMAN_MAGIC_SYM;
 
-unsigned long val1;
+unsigned long val1 = 123;
+unsigned long val2 = 456;
 binman_sym_declare(unsigned long, inset, offset);
-unsigned long val2;
+unsigned long val3 = 789;
+binman_sym_declare(unsigned long, inset, size);

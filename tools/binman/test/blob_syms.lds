@@ -15,7 +15,7 @@ SECTIONS
 	. = ALIGN(4);
 	.text :
 	{
-		__image_copy_start = .;
+		__my_start_sym = .;
 		*(.text*)
 	}
 
