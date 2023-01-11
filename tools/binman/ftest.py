@@ -6259,6 +6259,11 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertRegex(err, "Image 'main-section'.*missing.*: blob-ext")
         self.assertIn('Some images are invalid', err)
 
+    def testBlobSymbol(self):
+        """Test a blob with symbols read from an ELF file"""
+        data = self._DoReadFile('273_blob_symbol.dts')
+        self.assertEqual(U_BOOT_DATA, data)
+
 
 if __name__ == "__main__":
     unittest.main()

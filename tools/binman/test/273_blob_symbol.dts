@@ -1,0 +1,23 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	binman {
+		size = <4>;
+		section-fill {
+			blob {
+				filename = "blob_syms.bin";
+				write-symbols;
+				elf-filename = "blob_syms";
+			};
+		};
+
+		inset {
+			type = "null";
+			offset = <1>;
+			size = <2>;
+		};
+	};
+};
