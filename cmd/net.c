@@ -245,7 +245,7 @@ static int parse_args(enum proto_t proto, int argc, char *const argv[])
 
 	switch (argc) {
 	case 1:
-		if (CONFIG_IS_ENABLED(CMD_TFTPPUT) && proto == TFTPPUT)
+		if (CONFIG(CMD_TFTPPUT) && proto == TFTPPUT)
 			return 1;
 
 		/* refresh bootfile name from env */
@@ -254,7 +254,7 @@ static int parse_args(enum proto_t proto, int argc, char *const argv[])
 		break;
 
 	case 2:
-		if (CONFIG_IS_ENABLED(CMD_TFTPPUT) && proto == TFTPPUT)
+		if (CONFIG(CMD_TFTPPUT) && proto == TFTPPUT)
 			return 1;
 		/*
 		 * Only one arg - accept two forms:
@@ -276,7 +276,7 @@ static int parse_args(enum proto_t proto, int argc, char *const argv[])
 		break;
 
 	case 3:
-		if (CONFIG_IS_ENABLED(CMD_TFTPPUT) && proto == TFTPPUT) {
+		if (CONFIG(CMD_TFTPPUT) && proto == TFTPPUT) {
 			if (parse_addr_size(argv))
 				return 1;
 		} else {

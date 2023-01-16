@@ -7,7 +7,7 @@
 #define __DT_STRUCTS
 
 /* These structures may only be used in SPL */
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if CONFIG(OF_PLATDATA)
 struct driver_info;
 
 /**

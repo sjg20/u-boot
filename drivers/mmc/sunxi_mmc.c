@@ -40,7 +40,7 @@ struct sunxi_mmc_priv {
 	struct mmc_config cfg;
 };
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !CONFIG(DM_MMC)
 /* support 4 mmc hosts */
 struct sunxi_mmc_priv mmc_host[4];
 
@@ -290,7 +290,7 @@ static int sunxi_mmc_set_ios_common(struct sunxi_mmc_priv *priv,
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !CONFIG(DM_MMC)
 static int sunxi_mmc_core_init(struct mmc *mmc)
 {
 	struct sunxi_mmc_priv *priv = mmc->priv;
@@ -507,7 +507,7 @@ out:
 	return error;
 }
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !CONFIG(DM_MMC)
 static int sunxi_mmc_set_ios_legacy(struct mmc *mmc)
 {
 	struct sunxi_mmc_priv *priv = mmc->priv;

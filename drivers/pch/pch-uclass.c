@@ -66,7 +66,7 @@ int pch_ioctl(struct udevice *dev, ulong req, void *data, int size)
 UCLASS_DRIVER(pch) = {
 	.id		= UCLASS_PCH,
 	.name		= "pch",
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if CONFIG(OF_REAL)
 	.post_bind	= dm_scan_fdt_dev,
 #endif
 };

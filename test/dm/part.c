@@ -44,7 +44,7 @@ static int dm_test_part(struct unit_test_state *uts)
 	};
 
 	ut_asserteq(1, blk_get_device_by_str("mmc", "1", &mmc_dev_desc));
-	if (CONFIG_IS_ENABLED(RANDOM_UUID)) {
+	if (CONFIG(RANDOM_UUID)) {
 		gen_rand_uuid_str(parts[0].uuid, UUID_STR_FORMAT_STD);
 		gen_rand_uuid_str(parts[1].uuid, UUID_STR_FORMAT_STD);
 		gen_rand_uuid_str(str_disk_guid, UUID_STR_FORMAT_STD);

@@ -380,7 +380,7 @@ void fit_print_contents(const void *fit)
 	const char *p;
 	time_t timestamp;
 
-	if (!CONFIG_IS_ENABLED(FIT_PRINT))
+	if (!CONFIG(FIT_PRINT))
 		return;
 
 	/* Indent string is defined in header image.h */
@@ -485,7 +485,7 @@ void fit_image_print(const void *fit, int image_noffset, const char *p)
 	int ndepth;
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(FIT_PRINT))
+	if (!CONFIG(FIT_PRINT))
 		return;
 
 	/* Mandatory properties */
@@ -1664,7 +1664,7 @@ int fit_check_format(const void *fit, ulong size)
 		return -ENOEXEC;
 	}
 
-	if (CONFIG_IS_ENABLED(FIT_FULL_CHECK)) {
+	if (CONFIG(FIT_FULL_CHECK)) {
 		/*
 		 * If we are not given the size, make do wtih calculating it.
 		 * This is not as secure, so we should consider a flag to
@@ -1683,7 +1683,7 @@ int fit_check_format(const void *fit, ulong size)
 		 * the same name as a valid node but with a unit address
 		 * attached. Protect against this by disallowing unit addresses.
 		 */
-		if (!ret && CONFIG_IS_ENABLED(FIT_SIGNATURE)) {
+		if (!ret && CONFIG(FIT_SIGNATURE)) {
 			ret = fdt_check_no_at(fit, 0);
 
 			if (ret) {
@@ -2082,7 +2082,7 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 	ret = fit_check_format(fit, IMAGE_SIZE_INVAL);
 	if (ret) {
 		printf("Bad FIT %s image format! (err=%d)\n", prop_name, ret);
-		if (CONFIG_IS_ENABLED(FIT_SIGNATURE) && ret == -EADDRNOTAVAIL)
+		if (CONFIG(FIT_SIGNATURE) && ret == -EADDRNOTAVAIL)
 			printf("Signature checking prevents use of unit addresses (@) in nodes\n");
 		bootstage_error(bootstage_id + BOOTSTAGE_SUB_FORMAT);
 		return ret;

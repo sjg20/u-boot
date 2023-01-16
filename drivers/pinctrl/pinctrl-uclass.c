@@ -20,7 +20,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if CONFIG_IS_ENABLED(PINCTRL_FULL)
+#if CONFIG(PINCTRL_FULL)
 /**
  * pinctrl_config_one() - apply pinctrl settings for a single node
  *
@@ -150,7 +150,7 @@ static int pinconfig_post_bind(struct udevice *dev)
 
 UCLASS_DRIVER(pinconfig) = {
 	.id = UCLASS_PINCONFIG,
-#if CONFIG_IS_ENABLED(PINCONF_RECURSIVE)
+#if CONFIG(PINCONF_RECURSIVE)
 	.post_bind = pinconfig_post_bind,
 #endif
 	.name = "pinconfig",
@@ -429,7 +429,7 @@ static int __maybe_unused pinctrl_post_bind(struct udevice *dev)
 
 UCLASS_DRIVER(pinctrl) = {
 	.id = UCLASS_PINCTRL,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if CONFIG(OF_REAL)
 	.post_bind = pinctrl_post_bind,
 #endif
 	.flags = DM_UC_FLAG_SEQ_ALIAS,

@@ -1207,7 +1207,7 @@ int gpmc_nand_init(struct nand_chip *nand)
 /* First NAND chip for SPL use only */
 static __maybe_unused struct nand_chip *nand_chip;
 
-#if CONFIG_IS_ENABLED(SYS_NAND_SELF_INIT)
+#if CONFIG(SYS_NAND_SELF_INIT)
 
 static int gpmc_nand_probe(struct udevice *dev)
 {

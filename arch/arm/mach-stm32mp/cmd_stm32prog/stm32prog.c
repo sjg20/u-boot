@@ -1358,7 +1358,7 @@ static int dfu_init_entities(struct stm32prog_data *data)
 			alt_nb++; /* OTP*/
 	}
 
-	if (CONFIG_IS_ENABLED(DM_PMIC))
+	if (CONFIG(DM_PMIC))
 		alt_nb++; /* PMIC NVMEM*/
 
 	if (data->part_nb == 0)
@@ -1412,7 +1412,7 @@ static int dfu_init_entities(struct stm32prog_data *data)
 	if (!ret && IS_ENABLED(CONFIG_CMD_STM32PROG_OTP) && otp_size)
 		ret = stm32prog_alt_add_virt(dfu, "OTP", PHASE_OTP, otp_size);
 
-	if (!ret && CONFIG_IS_ENABLED(DM_PMIC))
+	if (!ret && CONFIG(DM_PMIC))
 		ret = stm32prog_alt_add_virt(dfu, "PMIC", PHASE_PMIC, PMIC_SIZE);
 
 	if (ret)
@@ -1483,7 +1483,7 @@ int stm32prog_otp_read(struct stm32prog_data *data, u32 offset, u8 *buffer,
 
 		/* call the service */
 		result = -EOPNOTSUPP;
-		if (data->tee && CONFIG_IS_ENABLED(OPTEE))
+		if (data->tee && CONFIG(OPTEE))
 			result = optee_ta_invoke(data, TA_NVMEM_READ, NVMEM_OTP,
 						 data->otp_part, OTP_SIZE_TA);
 		else if (IS_ENABLED(CONFIG_ARM_SMCCC))
@@ -1525,7 +1525,7 @@ int stm32prog_otp_start(struct stm32prog_data *data)
 	}
 
 	result = -EOPNOTSUPP;
-	if (data->tee && CONFIG_IS_ENABLED(OPTEE)) {
+	if (data->tee && CONFIG(OPTEE)) {
 		result = optee_ta_invoke(data, TA_NVMEM_WRITE, NVMEM_OTP,
 					 data->otp_part, OTP_SIZE_TA);
 	} else if (IS_ENABLED(CONFIG_ARM_SMCCC)) {
@@ -1583,7 +1583,7 @@ int stm32prog_pmic_read(struct stm32prog_data *data, u32 offset, u8 *buffer,
 	int result = 0, ret;
 	struct udevice *dev;
 
-	if (!CONFIG_IS_ENABLED(PMIC_STPMIC1)) {
+	if (!CONFIG(PMIC_STPMIC1)) {
 		stm32prog_err("PMIC update not supported");
 
 		return -EOPNOTSUPP;
@@ -1633,7 +1633,7 @@ int stm32prog_pmic_start(struct stm32prog_data *data)
 	int ret;
 	struct udevice *dev;
 
-	if (!CONFIG_IS_ENABLED(PMIC_STPMIC1)) {
+	if (!CONFIG(PMIC_STPMIC1)) {
 		stm32prog_err("PMIC update not supported");
 
 		return -EOPNOTSUPP;
@@ -1735,7 +1735,7 @@ static void stm32prog_end_phase(struct stm32prog_data *data, u64 offset)
 		}
 	}
 
-	if (CONFIG_IS_ENABLED(MMC) &&
+	if (CONFIG(MMC) &&
 	    data->cur_part->part_id < 0) {
 		char cmdbuf[60];
 
@@ -1748,7 +1748,7 @@ static void stm32prog_end_phase(struct stm32prog_data *data, u64 offset)
 		}
 	}
 
-	if (CONFIG_IS_ENABLED(MTD) &&
+	if (CONFIG(MTD) &&
 	    data->cur_part->bin_nb > 1) {
 		if (stm32prog_copy_fsbl(data->cur_part)) {
 			stm32prog_err("%s (0x%x): copy of fsbl failed",
@@ -1977,7 +1977,7 @@ void stm32prog_clean(struct stm32prog_data *data)
 	free(data->otp_part);
 	free(data->buffer);
 
-	if (CONFIG_IS_ENABLED(OPTEE) && data->tee) {
+	if (CONFIG(OPTEE) && data->tee) {
 		tee_close_session(data->tee, data->tee_session);
 		data->tee = NULL;
 		data->tee_session = 0x0;

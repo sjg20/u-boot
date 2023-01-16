@@ -76,7 +76,7 @@ void board_init_f(ulong dummy)
 	clrbits_le32(CCU_REG_ADDR(CCU_IOM_MPRT_ADMASK_MEM_RAM0),
 		     CCU_ADMASK_P_MASK | CCU_ADMASK_NS_MASK);
 
-#if CONFIG_IS_ENABLED(ALTERA_SDRAM)
+#if CONFIG(ALTERA_SDRAM)
 		struct udevice *dev;
 
 		ret = uclass_get_device(UCLASS_RAM, 0, &dev);

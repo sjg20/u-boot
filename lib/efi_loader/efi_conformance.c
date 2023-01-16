@@ -38,7 +38,7 @@ efi_status_t efi_ecpt_register(void)
 		return ret;
 	}
 
-	if (CONFIG_IS_ENABLED(EFI_EBBR_2_1_CONFORMANCE))
+	if (CONFIG(EFI_EBBR_2_1_CONFORMANCE))
 		guidcpy(&ecpt->conformance_profiles[num_entries++],
 			&efi_ebbr_2_1_guid);
 

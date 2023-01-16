@@ -12,7 +12,7 @@
 #include <asm/mipsregs.h>
 #include <asm/reboot.h>
 
-#if !CONFIG_IS_ENABLED(SYSRESET)
+#if !CONFIG(SYSRESET)
 void __weak _machine_restart(void)
 {
 	fprintf(stderr, "*** reset failed ***\n");

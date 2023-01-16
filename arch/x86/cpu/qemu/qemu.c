@@ -17,7 +17,7 @@
 
 static bool i440fx;
 
-#if CONFIG_IS_ENABLED(QFW_PIO)
+#if CONFIG(QFW_PIO)
 U_BOOT_DRVINFO(x86_qfw_pio) = {
 	.name = "qfw_pio",
 };
@@ -97,7 +97,7 @@ static void qemu_chipset_init(void)
 	}
 }
 
-#if CONFIG_IS_ENABLED(X86_32BIT_INIT)
+#if CONFIG(X86_32BIT_INIT)
 int arch_cpu_init(void)
 {
 	post_code(POST_CPU_INIT);

@@ -69,7 +69,7 @@ struct disk_partition {
 	 * PART_EFI_SYSTEM_PARTITION	the partition is an EFI system partition
 	 */
 	int	bootable;
-#if CONFIG_IS_ENABLED(PARTITION_UUIDS)
+#if CONFIG(PARTITION_UUIDS)
 	char	uuid[UUID_STR_LEN + 1];	/* filesystem UUID as string, if exists	*/
 #endif
 #ifdef CONFIG_PARTITION_TYPE_GUID
@@ -87,7 +87,7 @@ struct disk_part {
 };
 
 /* Misc _get_dev functions */
-#if CONFIG_IS_ENABLED(PARTITIONS)
+#if CONFIG(PARTITIONS)
 /**
  * blk_get_dev() - get a pointer to a block device given its type and number
  *
@@ -406,7 +406,7 @@ struct part_driver {
 
 #include <part_efi.h>
 
-#if CONFIG_IS_ENABLED(EFI_PARTITION)
+#if CONFIG(EFI_PARTITION)
 /* disk/part_efi.c */
 /**
  * write_gpt_table() - Write the GUID Partition Table to disk
@@ -542,7 +542,7 @@ int get_disk_guid(struct blk_desc *dev_desc, char *guid);
 
 #endif
 
-#if CONFIG_IS_ENABLED(DOS_PARTITION)
+#if CONFIG(DOS_PARTITION)
 /**
  * is_valid_dos_buf() - Ensure that a DOS MBR image is valid
  *
@@ -569,7 +569,7 @@ int layout_mbr_partitions(struct disk_partition *p, int count,
 
 #endif
 
-#if CONFIG_IS_ENABLED(PARTITIONS)
+#if CONFIG(PARTITIONS)
 /**
  * part_driver_get_count() - get partition driver count
  *

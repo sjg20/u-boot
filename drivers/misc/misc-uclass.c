@@ -70,7 +70,7 @@ int misc_set_enabled(struct udevice *dev, bool val)
 UCLASS_DRIVER(misc) = {
 	.id		= UCLASS_MISC,
 	.name		= "misc",
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if CONFIG(OF_REAL)
 	.post_bind	= dm_scan_fdt_dev,
 #endif
 };

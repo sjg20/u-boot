@@ -188,8 +188,8 @@ struct env_driver {
 #define env_save_ptr(x) NULL
 #endif
 
-#define ENV_SAVE_PTR(x) (CONFIG_IS_ENABLED(SAVEENV) ? (x) : NULL)
-#define ENV_ERASE_PTR(x) (CONFIG_IS_ENABLED(CMD_ERASEENV) ? (x) : NULL)
+#define ENV_SAVE_PTR(x) (CONFIG(SAVEENV) ? (x) : NULL)
+#define ENV_ERASE_PTR(x) (CONFIG(CMD_ERASEENV) ? (x) : NULL)
 
 extern struct hsearch_data env_htab;
 

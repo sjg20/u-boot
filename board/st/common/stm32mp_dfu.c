@@ -115,7 +115,7 @@ void set_dfu_alt_info(char *interface, char *devstr)
 	snprintf(buf, DFU_ALT_BUF_LEN,
 		 "ram 0=%s", CONFIG_DFU_ALT_RAM0);
 
-	if (CONFIG_IS_ENABLED(MMC)) {
+	if (CONFIG(MMC)) {
 		if (!uclass_get_device(UCLASS_MMC, 0, &dev))
 			board_get_alt_info_mmc(dev, buf);
 
@@ -123,7 +123,7 @@ void set_dfu_alt_info(char *interface, char *devstr)
 			board_get_alt_info_mmc(dev, buf);
 	}
 
-	if (CONFIG_IS_ENABLED(MTD)) {
+	if (CONFIG(MTD)) {
 		/* probe all MTD devices */
 		mtd_probe_devices();
 
@@ -159,7 +159,7 @@ void set_dfu_alt_info(char *interface, char *devstr)
 	puts("DFU alt info setting: done\n");
 }
 
-#if CONFIG_IS_ENABLED(DFU_VIRT)
+#if CONFIG(DFU_VIRT)
 #include <dfu.h>
 #include <power/stpmic1.h>
 

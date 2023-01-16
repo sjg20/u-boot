@@ -89,7 +89,7 @@ static int socfpga_dwmmc_get_clk_rate(struct udevice *dev)
 {
 	struct dwmci_socfpga_priv_data *priv = dev_get_priv(dev);
 	struct dwmci_host *host = &priv->host;
-#if CONFIG_IS_ENABLED(CLK)
+#if CONFIG(CLK)
 	struct clk clk;
 	int ret;
 

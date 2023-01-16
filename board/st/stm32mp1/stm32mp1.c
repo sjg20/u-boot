@@ -88,7 +88,7 @@
 #define USB_START_LOW_THRESHOLD_UV	1230000
 #define USB_START_HIGH_THRESHOLD_UV	2150000
 
-#if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
+#if CONFIG(EFI_HAVE_CAPSULE_SUPPORT)
 struct efi_fw_image fw_images[1];
 
 struct efi_capsule_update_info update_info = {
@@ -129,7 +129,7 @@ int checkboard(void)
 		 fdt_compat && fdt_compat_len ? fdt_compat : "");
 
 	/* display the STMicroelectronics board identification */
-	if (CONFIG_IS_ENABLED(CMD_STBOARD)) {
+	if (CONFIG(CMD_STBOARD)) {
 		ret = uclass_get_device_by_driver(UCLASS_MISC,
 						  DM_DRIVER_GET(stm32mp_bsec),
 						  &dev);
@@ -272,7 +272,7 @@ static int setup_led(enum led_state_t cmd)
 	struct udevice *dev;
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(LED))
+	if (!CONFIG(LED))
 		return 0;
 
 	ret = get_led(&dev, "u-boot,boot-led");
@@ -292,7 +292,7 @@ static void __maybe_unused led_error_blink(u32 nb_blink)
 	if (!nb_blink)
 		return;
 
-	if (CONFIG_IS_ENABLED(LED)) {
+	if (CONFIG(LED)) {
 		ret = get_led(&led, "u-boot,error-led");
 		if (!ret) {
 			/* make u-boot,error-led blinking */
@@ -616,7 +616,7 @@ error:
 
 static bool board_is_stm32mp15x_dk2(void)
 {
-	if (CONFIG_IS_ENABLED(TARGET_ST_STM32MP15x) &&
+	if (CONFIG(TARGET_ST_STM32MP15x) &&
 	    of_machine_is_compatible("st,stm32mp157c-dk2"))
 		return true;
 
@@ -625,7 +625,7 @@ static bool board_is_stm32mp15x_dk2(void)
 
 static bool board_is_stm32mp15x_ev1(void)
 {
-	if (CONFIG_IS_ENABLED(TARGET_ST_STM32MP15x) &&
+	if (CONFIG(TARGET_ST_STM32MP15x) &&
 	    (of_machine_is_compatible("st,stm32mp157a-ev1") ||
 	     of_machine_is_compatible("st,stm32mp157c-ev1") ||
 	     of_machine_is_compatible("st,stm32mp157d-ev1") ||
@@ -677,7 +677,7 @@ int board_init(void)
 
 	setup_led(LEDST_ON);
 
-#if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
+#if CONFIG(EFI_HAVE_CAPSULE_SUPPORT)
 	efi_guid_t image_type_guid = STM32MP_FIP_IMAGE_GUID;
 
 	guidcpy(&fw_images[0].image_type_id, &image_type_guid);
@@ -822,22 +822,22 @@ enum env_location env_get_location(enum env_operation op, int prio)
 	switch (bootmode & TAMP_BOOT_DEVICE_MASK) {
 	case BOOT_FLASH_SD:
 	case BOOT_FLASH_EMMC:
-		if (CONFIG_IS_ENABLED(ENV_IS_IN_MMC))
+		if (CONFIG(ENV_IS_IN_MMC))
 			return ENVL_MMC;
-		else if (CONFIG_IS_ENABLED(ENV_IS_IN_EXT4))
+		else if (CONFIG(ENV_IS_IN_EXT4))
 			return ENVL_EXT4;
 		else
 			return ENVL_NOWHERE;
 
 	case BOOT_FLASH_NAND:
 	case BOOT_FLASH_SPINAND:
-		if (CONFIG_IS_ENABLED(ENV_IS_IN_UBI))
+		if (CONFIG(ENV_IS_IN_UBI))
 			return ENVL_UBI;
 		else
 			return ENVL_NOWHERE;
 
 	case BOOT_FLASH_NOR:
-		if (CONFIG_IS_ENABLED(ENV_IS_IN_SPI_FLASH))
+		if (CONFIG(ENV_IS_IN_SPI_FLASH))
 			return ENVL_SPI_FLASH;
 		else
 			return ENVL_NOWHERE;
@@ -903,7 +903,7 @@ const char *env_ext4_get_dev_part(void)
 
 int mmc_get_env_dev(void)
 {
-	const int mmc_env_dev = CONFIG_IS_ENABLED(ENV_IS_IN_MMC, (CONFIG_SYS_MMC_ENV_DEV), (-1));
+	const int mmc_env_dev = CONFIG(ENV_IS_IN_MMC, (CONFIG_SYS_MMC_ENV_DEV), (-1));
 
 	if (mmc_env_dev >= 0)
 		return mmc_env_dev;
@@ -930,7 +930,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 		if (IS_ENABLED(CONFIG_FDT_FIXUP_PARTITIONS))
 			fdt_fixup_mtdparts(blob, nodes, ARRAY_SIZE(nodes));
 
-	if (CONFIG_IS_ENABLED(FDT_SIMPLEFB))
+	if (CONFIG(FDT_SIMPLEFB))
 		fdt_simplefb_enable_and_mem_rsv(blob);
 
 	return 0;

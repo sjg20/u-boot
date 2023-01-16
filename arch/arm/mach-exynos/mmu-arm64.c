@@ -7,7 +7,7 @@
 #include <common.h>
 #include <asm/armv8/mmu.h>
 
-#if CONFIG_IS_ENABLED(EXYNOS7420)
+#if CONFIG(EXYNOS7420)
 
 static struct mm_region exynos7420_mem_map[] = {
 	{
@@ -30,7 +30,7 @@ static struct mm_region exynos7420_mem_map[] = {
 
 struct mm_region *mem_map = exynos7420_mem_map;
 
-#elif CONFIG_IS_ENABLED(EXYNOS7870)
+#elif CONFIG(EXYNOS7870)
 
 static struct mm_region exynos7870_mem_map[] = {
 	{
@@ -63,7 +63,7 @@ static struct mm_region exynos7870_mem_map[] = {
 
 struct mm_region *mem_map = exynos7870_mem_map;
 
-#elif CONFIG_IS_ENABLED(EXYNOS7880)
+#elif CONFIG(EXYNOS7880)
 
 static struct mm_region exynos7880_mem_map[] = {
 	{

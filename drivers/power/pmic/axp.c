@@ -7,7 +7,7 @@
 #include <power/pmic.h>
 #include <sysreset.h>
 
-#if CONFIG_IS_ENABLED(SYSRESET)
+#if CONFIG(SYSRESET)
 static int axp_sysreset_request(struct udevice *dev, enum sysreset_t type)
 {
 	int ret;
@@ -53,7 +53,7 @@ static int axp_pmic_bind(struct udevice *dev)
 	if (ret)
 		return ret;
 
-	if (CONFIG_IS_ENABLED(SYSRESET)) {
+	if (CONFIG(SYSRESET)) {
 		ret = device_bind_driver_to_node(dev, "axp_sysreset", "axp_sysreset",
 						 dev_ofnode(dev), NULL);
 		if (ret)

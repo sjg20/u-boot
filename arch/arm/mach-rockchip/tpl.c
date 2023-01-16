@@ -17,7 +17,7 @@
 #include <linux/bitops.h>
 #include <linux/kconfig.h>
 
-#if CONFIG_IS_ENABLED(BANNER_PRINT)
+#if CONFIG(BANNER_PRINT)
 #include <timestamp.h>
 #endif
 

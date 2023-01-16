@@ -165,7 +165,7 @@ struct dma {
 	unsigned long id;
 };
 
-# if CONFIG_IS_ENABLED(OF_CONTROL) && CONFIG_IS_ENABLED(DMA)
+# if CONFIG(OF_CONTROL) && CONFIG(DMA)
 /**
  * dma_get_by_index - Get/request a DMA by integer index.
  *
@@ -307,7 +307,7 @@ int dma_send(struct dma *dma, void *src, size_t len, void *metadata);
 int dma_get_cfg(struct dma *dma, u32 cfg_id, void **cfg_data);
 #endif /* CONFIG_DMA_CHANNELS */
 
-#if CONFIG_IS_ENABLED(DMA)
+#if CONFIG(DMA)
 /*
  * dma_get_device - get a DMA device which supports transfer
  * type of transfer_type

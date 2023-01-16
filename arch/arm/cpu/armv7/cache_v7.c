@@ -14,7 +14,7 @@
 #define ARMV7_DCACHE_INVAL_RANGE	1
 #define ARMV7_DCACHE_CLEAN_INVAL_RANGE	2
 
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !CONFIG(SYS_DCACHE_OFF)
 
 /* Asm functions from cache_v7_asm.S */
 void v7_flush_dcache_all(void);
@@ -151,7 +151,7 @@ void mmu_page_table_flush(unsigned long start, unsigned long stop)
 	flush_dcache_range(start, stop);
 	v7_inval_tlb();
 }
-#else /* #if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF) */
+#else /* #if !CONFIG(SYS_DCACHE_OFF) */
 void invalidate_dcache_all(void)
 {
 }
@@ -176,9 +176,9 @@ void mmu_page_table_flush(unsigned long start, unsigned long stop)
 {
 }
 
-#endif /* #if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF) */
+#endif /* #if !CONFIG(SYS_DCACHE_OFF) */
 
-#if !CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+#if !CONFIG(SYS_ICACHE_OFF)
 /* Invalidate entire I-cache and branch predictor array */
 void invalidate_icache_all(void)
 {

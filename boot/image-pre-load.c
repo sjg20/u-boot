@@ -366,7 +366,7 @@ int image_pre_load(ulong addr)
 
 	image_load_offset = 0;
 
-	if (CONFIG_IS_ENABLED(IMAGE_PRE_LOAD_SIG))
+	if (CONFIG(IMAGE_PRE_LOAD_SIG))
 		ret = image_pre_load_sig(addr);
 
 	return ret;

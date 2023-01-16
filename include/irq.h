@@ -125,7 +125,7 @@ struct irq_ops {
 	 */
 	int (*free)(struct irq *irq);
 
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if CONFIG(ACPIGEN)
 	/**
 	 * get_acpi() - Get the ACPI info for an irq
 	 *

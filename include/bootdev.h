@@ -202,7 +202,7 @@ int bootdev_find_by_any(const char *name, struct udevice **devp);
  */
 int bootdev_setup_iter_order(struct bootflow_iter *iter, struct udevice **devp);
 
-#if CONFIG_IS_ENABLED(BOOTSTD)
+#if CONFIG(BOOTSTD)
 /**
  * bootdev_setup_for_dev() - Bind a new bootdev device
  *

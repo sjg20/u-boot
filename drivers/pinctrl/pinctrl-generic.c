@@ -70,7 +70,7 @@ static int pinctrl_group_name_to_selector(struct udevice *dev,
 	return -ENOSYS;
 }
 
-#if CONFIG_IS_ENABLED(PINMUX)
+#if CONFIG(PINMUX)
 /**
  * pinmux_func_name_to_selector() - return the function selector for a function
  *
@@ -146,7 +146,7 @@ static int pinmux_enable_setting(struct udevice *dev, bool is_group,
 }
 #endif
 
-#if CONFIG_IS_ENABLED(PINCONF)
+#if CONFIG(PINCONF)
 /**
  * pinconf_prop_name_to_param() - return parameter ID for a property name
  *

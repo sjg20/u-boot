@@ -140,7 +140,7 @@ const struct musb_platform_ops omap2430_ops = {
 	.disable	= omap2430_musb_disable,
 };
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if CONFIG(DM_USB)
 
 struct omap2430_musb_plat {
 	void *base;
@@ -280,4 +280,4 @@ U_BOOT_DRIVER(omap2430_musb) = {
 	.priv_auto	= sizeof(struct musb_host_data),
 };
 
-#endif /* CONFIG_IS_ENABLED(DM_USB) */
+#endif /* CONFIG(DM_USB) */

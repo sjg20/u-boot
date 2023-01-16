@@ -131,7 +131,7 @@ int board_late_init(void)
 		return 0;
 	}
 
-	if (!CONFIG_IS_ENABLED(ENV_VARS_UBOOT_RUNTIME_CONFIG))
+	if (!CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG))
 		return 0;
 
 	return board_late_init_xilinx();
@@ -154,7 +154,7 @@ int dram_init(void)
 {
 	int ret;
 
-	if (CONFIG_IS_ENABLED(SYS_MEM_RSVD_FOR_MMU))
+	if (CONFIG(SYS_MEM_RSVD_FOR_MMU))
 		ret = fdtdec_setup_mem_size_base();
 	else
 		ret = fdtdec_setup_mem_size_base_lowest();

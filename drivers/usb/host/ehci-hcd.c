@@ -31,7 +31,7 @@
  */
 #define HCHALT_TIMEOUT (8 * 1000)
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !CONFIG(DM_USB)
 static struct ehci_ctrl ehcic[CONFIG_USB_MAX_CONTROLLER_COUNT];
 #endif
 
@@ -112,7 +112,7 @@ static struct descriptor {
 
 static struct ehci_ctrl *ehci_get_ctrl(struct usb_device *udev)
 {
-#if CONFIG_IS_ENABLED(DM_USB)
+#if CONFIG(DM_USB)
 	return dev_get_priv(usb_get_bus(udev->dev));
 #else
 	return udev->controller;
@@ -1030,7 +1030,7 @@ static void ehci_setup_ops(struct ehci_ctrl *ctrl, const struct ehci_ops *ops)
 	}
 }
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !CONFIG(DM_USB)
 void ehci_set_controller_priv(int index, void *priv, const struct ehci_ops *ops)
 {
 	struct ehci_ctrl *ctrl = &ehcic[index];
@@ -1154,7 +1154,7 @@ static int ehci_common_init(struct ehci_ctrl *ctrl, uint tweaks)
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !CONFIG(DM_USB)
 int usb_lowlevel_stop(int index)
 {
 	ehci_shutdown(&ehcic[index]);
@@ -1583,7 +1583,7 @@ static int _ehci_lock_async(struct ehci_ctrl *ctrl, int lock)
 	return ehci_disable_async(ctrl);
 }
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !CONFIG(DM_USB)
 int submit_bulk_msg(struct usb_device *dev, unsigned long pipe,
 			    void *buffer, int length)
 {
@@ -1629,7 +1629,7 @@ int usb_lock_async(struct usb_device *dev, int lock)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if CONFIG(DM_USB)
 static int ehci_submit_control_msg(struct udevice *dev, struct usb_device *udev,
 				   unsigned long pipe, void *buffer, int length,
 				   struct devrequest *setup)

@@ -726,7 +726,7 @@ void reset_cpu(ulong addr)
 	hang();
 }
 
-#if CONFIG_IS_ENABLED(SHOW_BOOT_PROGRESS)
+#if CONFIG(SHOW_BOOT_PROGRESS)
 void show_boot_progress(int val)
 {
 	u32 fuseval;

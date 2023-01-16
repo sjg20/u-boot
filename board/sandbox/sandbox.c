@@ -29,7 +29,7 @@
  */
 gd_t *gd;
 
-#if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
+#if CONFIG(EFI_HAVE_CAPSULE_SUPPORT)
 /* GUIDs for capsule updatable firmware images */
 #define SANDBOX_UBOOT_IMAGE_GUID \
 	EFI_GUID(0x09d7cf52, 0x0720, 0x4710, 0x91, 0xd1, \
@@ -73,7 +73,7 @@ struct efi_capsule_update_info update_info = {
 u8 num_image_type_guids = ARRAY_SIZE(fw_images);
 #endif /* EFI_HAVE_CAPSULE_SUPPORT */
 
-#if !CONFIG_IS_ENABLED(OF_PLATDATA)
+#if !CONFIG(OF_PLATDATA)
 /*
  * Add a simple GPIO device (don't use with of-platdata as it interferes with
  * the auto-generated devices)

@@ -1077,8 +1077,8 @@ static void dhcp_handler(uchar *pkt, unsigned dest, struct in_addr sip,
 			    strlen(CONFIG_SYS_BOOTFILE_PREFIX)) == 0) {
 #endif	/* CONFIG_SYS_BOOTFILE_PREFIX */
 			dhcp_packet_process_options(bp);
-			if (CONFIG_IS_ENABLED(EFI_LOADER) &&
-			    CONFIG_IS_ENABLED(NETDEVICES))
+			if (CONFIG(EFI_LOADER) &&
+			    CONFIG(NETDEVICES))
 				efi_net_set_dhcp_ack(pkt, len);
 
 #if defined(CONFIG_SERVERIP_FROM_PROXYDHCP)

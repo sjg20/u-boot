@@ -231,7 +231,7 @@ static int part_get_info_extended(struct blk_desc *dev_desc,
 		return -1;
 	}
 
-#if CONFIG_IS_ENABLED(PARTITION_UUIDS)
+#if CONFIG(PARTITION_UUIDS)
 	if (!ext_part_sector)
 		disksig = get_unaligned_le32(&buffer[DOS_PART_DISKSIG_OFFSET]);
 #endif
@@ -256,7 +256,7 @@ static int part_get_info_extended(struct blk_desc *dev_desc,
 			/* sprintf(info->type, "%d, pt->sys_ind); */
 			strcpy((char *)info->type, "U-Boot");
 			info->bootable = get_bootable(pt);
-#if CONFIG_IS_ENABLED(PARTITION_UUIDS)
+#if CONFIG(PARTITION_UUIDS)
 			sprintf(info->uuid, "%08x-%02x", disksig, part_num);
 #endif
 			info->sys_ind = pt->sys_ind;
@@ -292,7 +292,7 @@ static int part_get_info_extended(struct blk_desc *dev_desc,
 		info->blksz = DOS_PART_DEFAULT_SECTOR;
 		info->bootable = 0;
 		strcpy((char *)info->type, "U-Boot");
-#if CONFIG_IS_ENABLED(PARTITION_UUIDS)
+#if CONFIG(PARTITION_UUIDS)
 		info->uuid[0] = 0;
 #endif
 		return 0;
@@ -318,7 +318,7 @@ int is_valid_dos_buf(void *buf)
 	return test_block_type(buf) == DOS_MBR ? 0 : -1;
 }
 
-#if CONFIG_IS_ENABLED(CMD_MBR)
+#if CONFIG(CMD_MBR)
 static void lba_to_chs(lbaint_t lba, unsigned char *rc, unsigned char *rh,
 		       unsigned char *rs)
 {

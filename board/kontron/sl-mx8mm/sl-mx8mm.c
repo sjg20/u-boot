@@ -18,7 +18,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
+#if CONFIG(EFI_HAVE_CAPSULE_SUPPORT)
 struct efi_fw_image fw_images[] = {
 	{
 		.image_type_id = KONTRON_SL_MX8MM_FIT_IMAGE_GUID,
@@ -146,11 +146,11 @@ enum env_location env_get_location(enum env_operation op, int prio)
 	 * Make sure that the environment is loaded from
 	 * the MMC if we are running from SD card or eMMC.
 	 */
-	if (CONFIG_IS_ENABLED(ENV_IS_IN_MMC) &&
+	if (CONFIG(ENV_IS_IN_MMC) &&
 	    (boot_dev == SD1_BOOT || boot_dev == SD2_BOOT))
 		return ENVL_MMC;
 
-	if (CONFIG_IS_ENABLED(ENV_IS_IN_SPI_FLASH))
+	if (CONFIG(ENV_IS_IN_SPI_FLASH))
 		return ENVL_SPI_FLASH;
 
 	return ENVL_NOWHERE;

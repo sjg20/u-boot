@@ -223,7 +223,7 @@ int pci_init(void);
  */
 int init_cache_f_r(void);
 
-#if !CONFIG_IS_ENABLED(CPU)
+#if !CONFIG(CPU)
 /**
  * print_cpuinfo() - Display information about the CPU
  *

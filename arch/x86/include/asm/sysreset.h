@@ -8,7 +8,7 @@
 #include <dt-structs.h>
 
 struct x86_sysreset_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if CONFIG(OF_PLATDATA)
 	struct dtd_x86_reset dtplat;
 #endif
 

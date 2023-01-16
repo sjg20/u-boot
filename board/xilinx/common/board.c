@@ -29,7 +29,7 @@
 
 #include "fru.h"
 
-#if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
+#if CONFIG(EFI_HAVE_CAPSULE_SUPPORT)
 struct efi_fw_image fw_images[] = {
 #if defined(XILINX_BOOT_IMAGE_GUID)
 	{
@@ -196,7 +196,7 @@ static int xilinx_read_eeprom_fru(struct udevice *dev, char *name,
 	}
 
 	fru_capture((unsigned long)fru_content);
-	if (gd->flags & GD_FLG_RELOC || (_DEBUG && CONFIG_IS_ENABLED(DTB_RESELECT))) {
+	if (gd->flags & GD_FLG_RELOC || (_DEBUG && CONFIG(DTB_RESELECT))) {
 		printf("Xilinx I2C FRU format at %s:\n", name);
 		ret = fru_display(0);
 		if (ret) {
@@ -294,7 +294,7 @@ static int xilinx_read_eeprom_single(char *name,
 
 	debug("%s: i2c memory detected: %s\n", __func__, name);
 
-	if (CONFIG_IS_ENABLED(CMD_FRU) && xilinx_detect_fru(buffer))
+	if (CONFIG(CMD_FRU) && xilinx_detect_fru(buffer))
 		return xilinx_read_eeprom_fru(dev, name, desc);
 
 	if (xilinx_detect_legacy(buffer))
@@ -400,14 +400,14 @@ int board_late_init_xilinx(void)
 	struct xilinx_board_description *desc;
 	phys_size_t bootm_size = gd->ram_top - gd->ram_base;
 
-	if (!CONFIG_IS_ENABLED(MICROBLAZE)) {
+	if (!CONFIG(MICROBLAZE)) {
 		ulong scriptaddr;
 
 		scriptaddr = env_get_hex("scriptaddr", 0);
 		ret |= env_set_hex("scriptaddr", gd->ram_base + scriptaddr);
 	}
 
-	if (CONFIG_IS_ENABLED(ARCH_ZYNQ) || CONFIG_IS_ENABLED(MICROBLAZE))
+	if (CONFIG(ARCH_ZYNQ) || CONFIG(MICROBLAZE))
 		bootm_size = min(bootm_size, (phys_size_t)(SZ_512M + SZ_256M));
 
 	ret |= env_set_hex("script_offset_f", CONFIG_BOOT_SCRIPT_OFFSET);
@@ -444,7 +444,7 @@ int board_late_init_xilinx(void)
 				ret |= env_set_by_index("uuid", id, uuid);
 			}
 
-			if (!CONFIG_IS_ENABLED(NET))
+			if (!CONFIG(NET))
 				continue;
 
 			for (i = 0; i < EEPROM_HDR_NO_OF_MAC_ADDR; i++) {
@@ -474,7 +474,7 @@ int __maybe_unused board_fit_config_name_match(const char *name)
 	return -1;
 }
 
-#if CONFIG_IS_ENABLED(DTB_RESELECT)
+#if CONFIG(DTB_RESELECT)
 #define MAX_NAME_LENGTH	50
 
 char * __maybe_unused __weak board_name_decode(void)
@@ -544,7 +544,7 @@ error:
 
 bool __maybe_unused __weak board_detection(void)
 {
-	if (CONFIG_IS_ENABLED(DM_I2C) && CONFIG_IS_ENABLED(I2C_EEPROM)) {
+	if (CONFIG(DM_I2C) && CONFIG(I2C_EEPROM)) {
 		int ret;
 
 		ret = xilinx_read_eeprom();

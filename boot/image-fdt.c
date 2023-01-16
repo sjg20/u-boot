@@ -36,7 +36,7 @@ static void fdt_error(const char *msg)
 	puts(" - must RESET the board to recover.\n");
 }
 
-#if CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)
+#if CONFIG(LEGACY_IMAGE_FORMAT)
 static const struct legacy_img_hdr *image_get_fdt(ulong fdt_addr)
 {
 	const struct legacy_img_hdr *fdt_hdr = map_sysmem(fdt_addr, 0);
@@ -272,7 +272,7 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 	*of_flat_tree = of_start;
 	*of_size = of_len;
 
-	if (CONFIG_IS_ENABLED(CMD_FDT))
+	if (CONFIG(CMD_FDT))
 		set_working_fdt_addr(map_to_sysmem(*of_flat_tree));
 	return 0;
 
@@ -297,7 +297,7 @@ static int select_fdt(struct bootm_headers *images, const char *select, u8 arch,
 	const char *buf;
 	ulong fdt_addr;
 
-#if CONFIG_IS_ENABLED(FIT)
+#if CONFIG(FIT)
 	const char *fit_uname_config = images->fit_uname_cfg;
 	const char *fit_uname_fdt = NULL;
 	ulong default_addr;
@@ -332,7 +332,7 @@ static int select_fdt(struct bootm_headers *images, const char *select, u8 arch,
 			debug("*  fdt: cmdline image address = 0x%08lx\n",
 			      fdt_addr);
 		}
-#if CONFIG_IS_ENABLED(FIT)
+#if CONFIG(FIT)
 	} else {
 		/* use FIT configuration provided in first bootm
 		 * command argument
@@ -356,7 +356,7 @@ static int select_fdt(struct bootm_headers *images, const char *select, u8 arch,
 	 */
 	buf = map_sysmem(fdt_addr, 0);
 	switch (genimg_get_format(buf)) {
-#if CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)
+#if CONFIG(LEGACY_IMAGE_FORMAT)
 	case IMAGE_FORMAT_LEGACY: {
 			const struct legacy_img_hdr *fdt_hdr;
 			ulong load, load_end;
@@ -408,7 +408,7 @@ static int select_fdt(struct bootm_headers *images, const char *select, u8 arch,
 		 * (libfdt based) and raw FDT blob (also libfdt
 		 * based).
 		 */
-#if CONFIG_IS_ENABLED(FIT)
+#if CONFIG(FIT)
 			/* check FDT blob vs FIT blob */
 			if (!fit_check_format(buf, IMAGE_SIZE_INVAL)) {
 				ulong load, len;
@@ -638,7 +638,7 @@ int image_setup_libfdt(struct bootm_headers *images, void *blob,
 
 	/* Update ethernet nodes */
 	fdt_fixup_ethernet(blob);
-#if CONFIG_IS_ENABLED(CMD_PSTORE)
+#if CONFIG(CMD_PSTORE)
 	/* Append PStore configuration */
 	fdt_fixup_pstore(blob);
 #endif
@@ -665,7 +665,7 @@ int image_setup_libfdt(struct bootm_headers *images, void *blob,
 			goto err;
 		}
 	}
-	if (!of_live_active() && CONFIG_IS_ENABLED(EVENT)) {
+	if (!of_live_active() && CONFIG(EVENT)) {
 		struct event_ft_fixup fixup;
 
 		fixup.tree = oftree_from_fdt(blob);

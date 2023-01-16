@@ -381,7 +381,7 @@ struct dm_gpio_ops {
 	int (*get_flags)(struct udevice *dev, unsigned int offset,
 			 ulong *flagsp);
 
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if CONFIG(ACPIGEN)
 	/**
 	 * get_acpi() - Get the ACPI info for a GPIO
 	 *

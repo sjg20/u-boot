@@ -2655,9 +2655,9 @@ sub u_boot_line {
 	}
 
 	# Do not use CONFIG_ prefix in CONFIG_IS_ENABLED() calls
-	if ($line =~ /^\+.*CONFIG_IS_ENABLED\(CONFIG_\w*\).*/) {
-		ERROR("CONFIG_IS_ENABLED_CONFIG",
-		      "CONFIG_IS_ENABLED() takes values without the CONFIG_ prefix\n" . $herecurr);
+	if ($line =~ /^\+.*CONFIG\(CONFIG_\w*\).*/) {
+		ERROR("CONFIG_CONFIG",
+		      "CONFIG() takes values without the CONFIG_ prefix\n" . $herecurr);
 	}
 
 	# Use _priv as a suffix for the device-private data struct

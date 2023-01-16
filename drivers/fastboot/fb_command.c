@@ -56,11 +56,11 @@ static const struct {
 	},
 	[FASTBOOT_COMMAND_FLASH] =  {
 		.command = "flash",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_FLASH, (flash), (NULL))
+		.dispatch = CONFIG(FASTBOOT_FLASH, (flash), (NULL))
 	},
 	[FASTBOOT_COMMAND_ERASE] =  {
 		.command = "erase",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_FLASH, (erase), (NULL))
+		.dispatch = CONFIG(FASTBOOT_FLASH, (erase), (NULL))
 	},
 	[FASTBOOT_COMMAND_BOOT] =  {
 		.command = "boot",
@@ -92,27 +92,27 @@ static const struct {
 	},
 	[FASTBOOT_COMMAND_OEM_FORMAT] = {
 		.command = "oem format",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_CMD_OEM_FORMAT, (oem_format), (NULL))
+		.dispatch = CONFIG(FASTBOOT_CMD_OEM_FORMAT, (oem_format), (NULL))
 	},
 	[FASTBOOT_COMMAND_OEM_PARTCONF] = {
 		.command = "oem partconf",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_CMD_OEM_PARTCONF, (oem_partconf), (NULL))
+		.dispatch = CONFIG(FASTBOOT_CMD_OEM_PARTCONF, (oem_partconf), (NULL))
 	},
 	[FASTBOOT_COMMAND_OEM_BOOTBUS] = {
 		.command = "oem bootbus",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_CMD_OEM_BOOTBUS, (oem_bootbus), (NULL))
+		.dispatch = CONFIG(FASTBOOT_CMD_OEM_BOOTBUS, (oem_bootbus), (NULL))
 	},
 	[FASTBOOT_COMMAND_OEM_RUN] = {
 		.command = "oem run",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_OEM_RUN, (run_ucmd), (NULL))
+		.dispatch = CONFIG(FASTBOOT_OEM_RUN, (run_ucmd), (NULL))
 	},
 	[FASTBOOT_COMMAND_UCMD] = {
 		.command = "UCmd",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_UUU_SUPPORT, (run_ucmd), (NULL))
+		.dispatch = CONFIG(FASTBOOT_UUU_SUPPORT, (run_ucmd), (NULL))
 	},
 	[FASTBOOT_COMMAND_ACMD] = {
 		.command = "ACmd",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_UUU_SUPPORT, (run_acmd), (NULL))
+		.dispatch = CONFIG(FASTBOOT_UUU_SUPPORT, (run_acmd), (NULL))
 	},
 };
 
@@ -295,11 +295,11 @@ void fastboot_data_complete(char *response)
  */
 static void __maybe_unused flash(char *cmd_parameter, char *response)
 {
-	if (CONFIG_IS_ENABLED(FASTBOOT_FLASH_MMC))
+	if (CONFIG(FASTBOOT_FLASH_MMC))
 		fastboot_mmc_flash_write(cmd_parameter, fastboot_buf_addr,
 					 image_size, response);
 
-	if (CONFIG_IS_ENABLED(FASTBOOT_FLASH_NAND))
+	if (CONFIG(FASTBOOT_FLASH_NAND))
 		fastboot_nand_flash_write(cmd_parameter, fastboot_buf_addr,
 					  image_size, response);
 }
@@ -315,10 +315,10 @@ static void __maybe_unused flash(char *cmd_parameter, char *response)
  */
 static void __maybe_unused erase(char *cmd_parameter, char *response)
 {
-	if (CONFIG_IS_ENABLED(FASTBOOT_FLASH_MMC))
+	if (CONFIG(FASTBOOT_FLASH_MMC))
 		fastboot_mmc_erase(cmd_parameter, response);
 
-	if (CONFIG_IS_ENABLED(FASTBOOT_FLASH_NAND))
+	if (CONFIG(FASTBOOT_FLASH_NAND))
 		fastboot_nand_erase(cmd_parameter, response);
 }
 

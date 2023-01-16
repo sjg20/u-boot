@@ -59,7 +59,7 @@ int board_early_init_f(void)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if CONFIG(DM_GPIO)
 static void board_gpio_init(void)
 {
 	struct gpio_desc desc;

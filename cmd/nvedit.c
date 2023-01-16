@@ -60,7 +60,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #endif
 
-#if CONFIG_IS_ENABLED(ENV_SUPPORT)
+#if CONFIG(ENV_SUPPORT)
 #if	!defined(ENV_IS_IN_DEVICE)		&& \
 	!defined(CONFIG_ENV_IS_NOWHERE)
 # error Define one of CONFIG_ENV_IS_IN_{EEPROM|FLASH|MMC|FAT|EXT4|\
@@ -234,7 +234,7 @@ static int _do_env_set(int flag, int argc, char *const argv[], int env_flag)
 
 	debug("Initial value for argc=%d\n", argc);
 
-#if CONFIG_IS_ENABLED(CMD_NVEDIT_EFI)
+#if CONFIG(CMD_NVEDIT_EFI)
 	if (argc > 1 && argv[1][0] == '-' && argv[1][1] == 'e')
 		return do_env_set_efi(NULL, flag, --argc, ++argv);
 #endif

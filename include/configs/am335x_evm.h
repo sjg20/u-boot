@@ -47,19 +47,19 @@
 #define BOOTENV_DEV_NAME_NAND(devtypeu, devtypel, instance) \
 	#devtypel #instance " "
 
-#if CONFIG_IS_ENABLED(CMD_USB)
+#if CONFIG(CMD_USB)
 # define BOOT_TARGET_USB(func) func(USB, usb, 0)
 #else
 # define BOOT_TARGET_USB(func)
 #endif
 
-#if CONFIG_IS_ENABLED(CMD_PXE)
+#if CONFIG(CMD_PXE)
 # define BOOT_TARGET_PXE(func) func(PXE, pxe, na)
 #else
 # define BOOT_TARGET_PXE(func)
 #endif
 
-#if CONFIG_IS_ENABLED(CMD_DHCP)
+#if CONFIG(CMD_DHCP)
 # define BOOT_TARGET_DHCP(func) func(DHCP, dhcp, na)
 #else
 # define BOOT_TARGET_DHCP(func)

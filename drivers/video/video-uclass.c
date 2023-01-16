@@ -196,14 +196,14 @@ u32 video_index_to_colour(struct video_priv *priv, unsigned int idx)
 {
 	switch (priv->bpix) {
 	case VIDEO_BPP16:
-		if (CONFIG_IS_ENABLED(VIDEO_BPP16)) {
+		if (CONFIG(VIDEO_BPP16)) {
 			return ((colours[idx].r >> 3) << 11) |
 			       ((colours[idx].g >> 2) <<  5) |
 			       ((colours[idx].b >> 3) <<  0);
 		}
 		break;
 	case VIDEO_BPP32:
-		if (CONFIG_IS_ENABLED(VIDEO_BPP32)) {
+		if (CONFIG(VIDEO_BPP32)) {
 			if (priv->format == VIDEO_X2R10G10B10)
 				return (colours[idx].r << 22) |
 				       (colours[idx].g << 12) |
@@ -233,7 +233,7 @@ void video_set_default_colors(struct udevice *dev, bool invert)
 	struct video_priv *priv = dev_get_uclass_priv(dev);
 	int fore, back;
 
-	if (CONFIG_IS_ENABLED(SYS_WHITE_ON_BLACK)) {
+	if (CONFIG(SYS_WHITE_ON_BLACK)) {
 		/* White is used when switching to bold, use light gray here */
 		fore = VID_LIGHT_GRAY;
 		back = VID_BLACK;
@@ -271,7 +271,7 @@ int video_sync(struct udevice *vid, bool force)
 	 * architectures do not actually implement it. Is there a way to find
 	 * out whether it exists? For now, ARM is safe.
 	 */
-#if defined(CONFIG_ARM) && !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if defined(CONFIG_ARM) && !CONFIG(SYS_DCACHE_OFF)
 	struct video_priv *priv = dev_get_uclass_priv(vid);
 
 	if (priv->flush_dcache) {
@@ -455,7 +455,7 @@ static int video_post_probe(struct udevice *dev)
 	/* Set up colors  */
 	video_set_default_colors(dev, false);
 
-	if (!CONFIG_IS_ENABLED(NO_FB_CLEAR))
+	if (!CONFIG(NO_FB_CLEAR))
 		video_clear(dev);
 
 	/*

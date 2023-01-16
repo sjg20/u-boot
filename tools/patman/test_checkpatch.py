@@ -406,10 +406,10 @@ index 0000000..2234c87
         self.check_single_message(pm, 'BARRED_INCLUDE_IN_HDR', 'error')
 
     def test_config_is_enabled_config(self):
-        """Test for accidental CONFIG_IS_ENABLED(CONFIG_*) calls"""
+        """Test for accidental CONFIG(CONFIG_*) calls"""
         pm = PatchMaker()
-        pm.add_line('common/main.c', 'if (CONFIG_IS_ENABLED(CONFIG_CLK))')
-        self.check_single_message(pm, 'CONFIG_IS_ENABLED_CONFIG', 'error')
+        pm.add_line('common/main.c', 'if (CONFIG(CONFIG_CLK))')
+        self.check_single_message(pm, 'CONFIG_CONFIG', 'error')
 
     def check_struct(self, auto, suffix, warning):
         """Check one of the warnings for struct naming

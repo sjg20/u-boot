@@ -20,7 +20,7 @@
 typedef int64_t time64_t;
 struct udevice;
 
-#if CONFIG_IS_ENABLED(DM_RTC)
+#if CONFIG(DM_RTC)
 struct rtc_ops {
 	/**
 	 * get() - get the current time

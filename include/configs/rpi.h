@@ -122,7 +122,7 @@
 	"fdt_addr_r=0x02600000\0" \
 	"ramdisk_addr_r=0x02700000\0"
 
-#if CONFIG_IS_ENABLED(CMD_MMC)
+#if CONFIG(CMD_MMC)
 	#define BOOT_TARGET_MMC(func) \
 		func(MMC, mmc, 0) \
 		func(MMC, mmc, 1) \
@@ -131,19 +131,19 @@
 	#define BOOT_TARGET_MMC(func)
 #endif
 
-#if CONFIG_IS_ENABLED(CMD_USB)
+#if CONFIG(CMD_USB)
 	#define BOOT_TARGET_USB(func) func(USB, usb, 0)
 #else
 	#define BOOT_TARGET_USB(func)
 #endif
 
-#if CONFIG_IS_ENABLED(CMD_PXE)
+#if CONFIG(CMD_PXE)
 	#define BOOT_TARGET_PXE(func) func(PXE, pxe, na)
 #else
 	#define BOOT_TARGET_PXE(func)
 #endif
 
-#if CONFIG_IS_ENABLED(CMD_DHCP)
+#if CONFIG(CMD_DHCP)
 	#define BOOT_TARGET_DHCP(func) func(DHCP, dhcp, na)
 #else
 	#define BOOT_TARGET_DHCP(func)

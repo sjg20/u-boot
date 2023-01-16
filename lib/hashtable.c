@@ -818,7 +818,7 @@ int himport_r(struct hsearch_data *htab,
 	if (nvars)
 		memcpy(localvars, vars, sizeof(vars[0]) * nvars);
 
-#if CONFIG_IS_ENABLED(ENV_APPEND)
+#if CONFIG(ENV_APPEND)
 	flag |= H_NOCLEAR;
 #endif
 
@@ -942,7 +942,7 @@ int himport_r(struct hsearch_data *htab,
 		e.data = value;
 
 		hsearch_r(e, ENV_ENTER, &rv, htab, flag);
-#if !CONFIG_IS_ENABLED(ENV_WRITEABLE_LIST)
+#if !CONFIG(ENV_WRITEABLE_LIST)
 		if (rv == NULL) {
 			printf("himport_r: can't insert \"%s=%s\" into hash table\n",
 				name, value);

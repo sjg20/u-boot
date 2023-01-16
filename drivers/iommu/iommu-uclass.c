@@ -8,7 +8,7 @@
 #include <common.h>
 #include <dm.h>
 
-#if (CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA))
+#if (CONFIG(OF_CONTROL) && !CONFIG(OF_PLATDATA))
 int dev_iommu_enable(struct udevice *dev)
 {
 	struct ofnode_phandle_args args;

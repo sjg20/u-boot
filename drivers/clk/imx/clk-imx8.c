@@ -42,7 +42,7 @@ static int imx8_clk_enable(struct clk *clk)
 	return __imx8_clk_enable(clk, 1);
 }
 
-#if CONFIG_IS_ENABLED(CMD_CLK)
+#if CONFIG(CMD_CLK)
 int soc_clk_dump(void)
 {
 	struct udevice *dev;

@@ -21,9 +21,9 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 	ut_asserteq(1, CONFIG(CMDLINE))
 	ut_asserteq(0, CONFIG(__UNDEFINED))
 
-	ut_asserteq(1, CONFIG_IS_ENABLED(CMDLINE))
-	ut_asserteq(0, CONFIG_IS_ENABLED(OF_PLATDATA))
-	ut_asserteq(0, CONFIG_IS_ENABLED(_UNDEFINED))
+	ut_asserteq(1, CONFIG(CMDLINE))
+	ut_asserteq(0, CONFIG(OF_PLATDATA))
+	ut_asserteq(0, CONFIG(_UNDEFINED))
 
 	ut_asserteq(1, CONFIG(CMDLINE))
 	ut_asserteq(0, CONFIG(OF_PLATDATA))
@@ -57,7 +57,7 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 	 * cause SPL to not be built.
 	 */
 	if (!IS_ENABLED(CONFIG_SANDBOX_SPL) &&
-	    CONFIG_IS_ENABLED(TEST_KCONFIG)) {
+	    CONFIG(TEST_KCONFIG)) {
 		val = CONFIG_IF_ENABLED_INT(TEST_KCONFIG_ENABLE,
 					    TEST_KCONFIG_VALUE);
 		printf("value2 %ld\n", val);

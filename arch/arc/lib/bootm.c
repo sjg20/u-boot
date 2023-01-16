@@ -29,7 +29,7 @@ static int boot_prep_linux(struct bootm_headers *images)
 {
 	int ret;
 
-	if (CONFIG_IS_ENABLED(LMB)) {
+	if (CONFIG(LMB)) {
 		ret = image_setup_linux(images);
 		if (ret)
 			return ret;
@@ -65,7 +65,7 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 	       "(fake run for tracing)" : "");
 	bootstage_mark_name(BOOTSTAGE_ID_BOOTM_HANDOFF, "start_kernel");
 
-	if (CONFIG_IS_ENABLED(OF_LIBFDT) && images->ft_len) {
+	if (CONFIG(OF_LIBFDT) && images->ft_len) {
 		r0 = 2;
 		r2 = (unsigned int)images->ft_addr;
 	} else {

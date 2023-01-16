@@ -34,7 +34,7 @@
 #include <irq_func.h>
 #include <asm/interrupt.h>
 
-#if !CONFIG_IS_ENABLED(X86_64)
+#if !CONFIG(X86_64)
 
 struct irq_action {
 	interrupt_handler_t *handler;
@@ -66,7 +66,7 @@ void irq_install_handler(int irq, interrupt_handler_t *handler, void *arg)
 	irq_handlers[irq].arg = arg;
 	irq_handlers[irq].count = 0;
 
-	if (CONFIG_IS_ENABLED(I8259_PIC))
+	if (CONFIG(I8259_PIC))
 		unmask_irq(irq);
 
 	if (status)
@@ -86,7 +86,7 @@ void irq_free_handler(int irq)
 
 	status = disable_interrupts();
 
-	if (CONFIG_IS_ENABLED(I8259_PIC))
+	if (CONFIG(I8259_PIC))
 		mask_irq(irq);
 
 	irq_handlers[irq].handler = NULL;
@@ -108,13 +108,13 @@ void do_irq(int hw_irq)
 	}
 
 	if (irq_handlers[irq].handler) {
-		if (CONFIG_IS_ENABLED(I8259_PIC))
+		if (CONFIG(I8259_PIC))
 			mask_irq(irq);
 
 		irq_handlers[irq].handler(irq_handlers[irq].arg);
 		irq_handlers[irq].count++;
 
-		if (CONFIG_IS_ENABLED(I8259_PIC)) {
+		if (CONFIG(I8259_PIC)) {
 			unmask_irq(irq);
 			specific_eoi(irq);
 		}
@@ -130,7 +130,7 @@ void do_irq(int hw_irq)
 #if defined(CONFIG_CMD_IRQ)
 int do_irqinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
-#if !CONFIG_IS_ENABLED(X86_64)
+#if !CONFIG(X86_64)
 	struct idt_ptr ptr;
 	int irq;
 

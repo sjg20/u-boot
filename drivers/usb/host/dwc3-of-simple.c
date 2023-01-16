@@ -51,7 +51,7 @@ static int dwc3_of_simple_clk_init(struct udevice *dev,
 	if (ret)
 		return ret;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if CONFIG(CLK)
 	ret = clk_enable_bulk(&simple->clks);
 	if (ret) {
 		clk_release_bulk(&simple->clks);

@@ -28,7 +28,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
+#if CONFIG(EFI_HAVE_CAPSULE_SUPPORT)
 struct efi_fw_image fw_images[] = {
 	{
 		.image_type_id = KONTRON_SL28_FIT_IMAGE_GUID,
@@ -69,7 +69,7 @@ enum env_location env_get_location(enum env_operation op, int prio)
 	if (prio)
 		return ENVL_UNKNOWN;
 
-	if (!CONFIG_IS_ENABLED(ENV_IS_IN_SPI_FLASH))
+	if (!CONFIG(ENV_IS_IN_SPI_FLASH))
 		return ENVL_NOWHERE;
 
 	/* write and erase always operate on the environment */
@@ -109,7 +109,7 @@ static void print_cpld_version(void)
 int checkboard(void)
 {
 	printf("EL:    %d\n", current_el());
-	if (CONFIG_IS_ENABLED(SL28CPLD))
+	if (CONFIG(SL28CPLD))
 		print_cpld_version();
 
 	return 0;
@@ -157,7 +157,7 @@ int fsl_board_late_init(void)
 	 * If the watchdog isn't enabled at reset (which is a configuration
 	 * option) disabling it doesn't hurt either.
 	 */
-	if (!CONFIG_IS_ENABLED(WATCHDOG_AUTOSTART))
+	if (!CONFIG(WATCHDOG_AUTOSTART))
 		stop_recovery_watchdog();
 
 	return 0;
@@ -188,7 +188,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 
 	fdt_fixup_icid(blob);
 
-	if (CONFIG_IS_ENABLED(SL28_SPL_LOADS_OPTEE_BL32)) {
+	if (CONFIG(SL28_SPL_LOADS_OPTEE_BL32)) {
 		node = fdt_node_offset_by_compatible(blob, -1, "linaro,optee-tz");
 		if (node)
 			fdt_set_node_status(blob, node, FDT_STATUS_OKAY);

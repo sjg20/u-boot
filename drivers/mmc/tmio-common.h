@@ -136,10 +136,10 @@ struct tmio_sd_priv {
 #ifdef CONFIG_DM_REGULATOR
 	struct udevice *vqmmc_dev;
 #endif
-#if CONFIG_IS_ENABLED(CLK)
+#if CONFIG(CLK)
 	struct clk			clk;
 #endif
-#if CONFIG_IS_ENABLED(RENESAS_SDHI)
+#if CONFIG(RENESAS_SDHI)
 	unsigned int			smpcmp;
 	u8				tap_set;
 	u8				tap_num;

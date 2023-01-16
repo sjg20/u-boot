@@ -26,7 +26,7 @@
 
 #include <linux/types.h>
 
-#if CONFIG_IS_ENABLED(DM_SERIAL) && !defined(CONFIG_SYS_NS16550_REG_SIZE)
+#if CONFIG(DM_SERIAL) && !defined(CONFIG_SYS_NS16550_REG_SIZE)
 /*
  * For driver model we always use one byte per register, and sort out the
  * differences in the driver
@@ -111,7 +111,7 @@ struct ns16550 {
 	UART_REG(scr);		/* 10*/
 	UART_REG(ssr);		/* 11*/
 #endif
-#if CONFIG_IS_ENABLED(DM_SERIAL)
+#if CONFIG(DM_SERIAL)
 	struct ns16550_plat *plat;
 #endif
 };

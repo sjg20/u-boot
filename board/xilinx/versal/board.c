@@ -41,7 +41,7 @@ int board_init(void)
 	fpga_add(fpga_xilinx, &versalpl);
 #endif
 
-	if (CONFIG_IS_ENABLED(DM_I2C) && CONFIG_IS_ENABLED(I2C_EEPROM))
+	if (CONFIG(DM_I2C) && CONFIG(I2C_EEPROM))
 		xilinx_read_eeprom();
 
 	return 0;
@@ -141,7 +141,7 @@ int board_late_init(void)
 		return 0;
 	}
 
-	if (!CONFIG_IS_ENABLED(ENV_VARS_UBOOT_RUNTIME_CONFIG))
+	if (!CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG))
 		return 0;
 
 	bootmode = versal_get_bootmode();

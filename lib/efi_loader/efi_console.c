@@ -1296,7 +1296,7 @@ efi_status_t efi_console_register(void)
 						     NULL);
 
 	/* Create console node and install device path protocols */
-	if (CONFIG_IS_ENABLED(DM_SERIAL)) {
+	if (CONFIG(DM_SERIAL)) {
 		dp = efi_dp_from_uart();
 		if (!dp)
 			goto out_of_memory;

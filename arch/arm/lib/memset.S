@@ -13,7 +13,7 @@
 	.align	5
 
 	.syntax unified
-#if CONFIG_IS_ENABLED(SYS_THUMB_BUILD) && !defined(MEMSET_NO_THUMB_BUILD)
+#if CONFIG(SYS_THUMB_BUILD) && !defined(MEMSET_NO_THUMB_BUILD)
 	.thumb
 	.thumb_func
 #endif

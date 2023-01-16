@@ -26,7 +26,7 @@ struct hwspinlock {
 	unsigned long id;
 };
 
-#if CONFIG_IS_ENABLED(DM_HWSPINLOCK)
+#if CONFIG(DM_HWSPINLOCK)
 
 /**
  * hwspinlock_get_by_index - Get a hardware spinlock by integer index

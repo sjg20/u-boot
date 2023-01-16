@@ -126,7 +126,7 @@ fdt_addr_t fdtdec_get_addr_size_fixed(const void *blob, int node,
 		return FDT_ADDR_T_NONE;
 	}
 
-#if CONFIG_IS_ENABLED(OF_TRANSLATE)
+#if CONFIG(OF_TRANSLATE)
 	if (translate)
 		addr = fdt_translate_address(blob, node, prop_addr);
 	else
@@ -907,7 +907,7 @@ int fdt_get_resource(const void *fdt, int node, const char *property,
 
 	while (ptr + na + ns <= end) {
 		if (i == index) {
-			if (CONFIG_IS_ENABLED(OF_TRANSLATE))
+			if (CONFIG(OF_TRANSLATE))
 				res->start = fdt_translate_address(fdt, node, ptr);
 			else
 				res->start = fdtdec_get_number(ptr, na);
@@ -1153,18 +1153,18 @@ int fdtdec_setup_mem_size_base_lowest(void)
 
 static int uncompress_blob(const void *src, ulong sz_src, void **dstp)
 {
-#if CONFIG_IS_ENABLED(MULTI_DTB_FIT_GZIP) ||\
-	CONFIG_IS_ENABLED(MULTI_DTB_FIT_LZO)
+#if CONFIG(MULTI_DTB_FIT_GZIP) ||\
+	CONFIG(MULTI_DTB_FIT_LZO)
 	size_t sz_out = CONFIG_VAL(MULTI_DTB_FIT_UNCOMPRESS_SZ);
 	bool gzip = 0, lzo = 0;
 	ulong sz_in = sz_src;
 	void *dst;
 	int rc;
 
-	if (CONFIG_IS_ENABLED(GZIP))
+	if (CONFIG(GZIP))
 		if (gzip_parse_header(src, sz_in) >= 0)
 			gzip = 1;
-	if (CONFIG_IS_ENABLED(LZO))
+	if (CONFIG(LZO))
 		if (!gzip && lzop_is_valid_header(src))
 			lzo = 1;
 
@@ -1172,23 +1172,23 @@ static int uncompress_blob(const void *src, ulong sz_src, void **dstp)
 		return -EBADMSG;
 
 
-	if (CONFIG_IS_ENABLED(MULTI_DTB_FIT_DYN_ALLOC)) {
+	if (CONFIG(MULTI_DTB_FIT_DYN_ALLOC)) {
 		dst = malloc(sz_out);
 		if (!dst) {
 			puts("uncompress_blob: Unable to allocate memory\n");
 			return -ENOMEM;
 		}
 	} else  {
-# if CONFIG_IS_ENABLED(MULTI_DTB_FIT_USER_DEFINED_AREA)
+# if CONFIG(MULTI_DTB_FIT_USER_DEFINED_AREA)
 		dst = (void *)CONFIG_VAL(MULTI_DTB_FIT_USER_DEF_ADDR);
 # else
 		return -ENOTSUPP;
 # endif
 	}
 
-	if (CONFIG_IS_ENABLED(GZIP) && gzip)
+	if (CONFIG(GZIP) && gzip)
 		rc = gunzip(dst, sz_out, (u8 *)src, &sz_in);
-	else if (CONFIG_IS_ENABLED(LZO) && lzo)
+	else if (CONFIG(LZO) && lzo)
 		rc = lzop_decompress(src, sz_in, dst, &sz_out);
 	else
 		hang();
@@ -1196,7 +1196,7 @@ static int uncompress_blob(const void *src, ulong sz_src, void **dstp)
 	if (rc < 0) {
 		/* not a valid compressed blob */
 		puts("uncompress_blob: Unable to uncompress\n");
-		if (CONFIG_IS_ENABLED(MULTI_DTB_FIT_DYN_ALLOC))
+		if (CONFIG(MULTI_DTB_FIT_DYN_ALLOC))
 			free(dst);
 		return -EBADMSG;
 	}
@@ -1663,7 +1663,7 @@ int fdtdec_setup(void)
 		}
 	}
 
-	if (CONFIG_IS_ENABLED(MULTI_DTB_FIT))
+	if (CONFIG(MULTI_DTB_FIT))
 		setup_multi_dtb_fit();
 
 	ret = fdtdec_prepare_fdt();

@@ -8,7 +8,7 @@
 #include <asm/cache.h>
 #include <linux/sizes.h>
 
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !CONFIG(SYS_DCACHE_OFF)
 void enable_caches(void)
 {
 	/* Enable D-cache. I-cache is already enabled in start.S */

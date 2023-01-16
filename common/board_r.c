@@ -155,7 +155,7 @@ static int initr_reloc_global_data(void)
 	 * The fdt_blob needs to be moved to new relocation address
 	 * incase of FDT blob is embedded with in image
 	 */
-	if (CONFIG_IS_ENABLED(OF_EMBED) && CONFIG_IS_ENABLED(NEEDS_MANUAL_RELOC))
+	if (CONFIG(OF_EMBED) && CONFIG(NEEDS_MANUAL_RELOC))
 		gd->fdt_blob += gd->reloc_off;
 
 #ifdef CONFIG_EFI_LOADER
@@ -215,7 +215,7 @@ static int initr_malloc(void)
 
 static int initr_of_live(void)
 {
-	if (CONFIG_IS_ENABLED(OF_LIVE)) {
+	if (CONFIG(OF_LIVE)) {
 		int ret;
 
 		bootstage_start(BOOTSTAGE_ID_ACCUM_OF_LIVE, "of_live");
@@ -307,7 +307,7 @@ static int initr_binman(void)
 {
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(BINMAN_FDT))
+	if (!CONFIG(BINMAN_FDT))
 		return 0;
 
 	ret = binman_init();
@@ -452,8 +452,8 @@ static int initr_env(void)
 		env_set_hex("fdtcontroladdr",
 			    (unsigned long)map_to_sysmem(gd->fdt_blob));
 
-	#if (CONFIG_IS_ENABLED(SAVE_PREV_BL_INITRAMFS_START_ADDR) || \
-						CONFIG_IS_ENABLED(SAVE_PREV_BL_FDT_ADDR))
+	#if (CONFIG(SAVE_PREV_BL_INITRAMFS_START_ADDR) || \
+						CONFIG(SAVE_PREV_BL_FDT_ADDR))
 		save_prev_bl_data();
 	#endif
 
@@ -560,7 +560,7 @@ static int dm_announce(void)
 		dm_get_stats(&device_count, &uclass_count);
 		printf("Core:  %d devices, %d uclasses", device_count,
 		       uclass_count);
-		if (CONFIG_IS_ENABLED(OF_REAL))
+		if (CONFIG(OF_REAL))
 			printf(", devicetree: %s", fdtdec_get_srcname());
 		printf("\n");
 		if (IS_ENABLED(CONFIG_OF_HAS_PRIOR_STAGE) &&
@@ -609,7 +609,7 @@ static init_fnc_t init_sequence_r[] = {
 	 */
 #endif
 	initr_reloc_global_data,
-#if CONFIG_IS_ENABLED(NEEDS_MANUAL_RELOC) && CONFIG_IS_ENABLED(EVENT)
+#if CONFIG(NEEDS_MANUAL_RELOC) && CONFIG(EVENT)
 	event_manual_reloc,
 #endif
 #if defined(CONFIG_SYS_INIT_RAM_LOCK) && defined(CONFIG_E500)
@@ -656,7 +656,7 @@ static init_fnc_t init_sequence_r[] = {
 	serial_initialize,
 	initr_announce,
 	dm_announce,
-#if CONFIG_IS_ENABLED(WDT)
+#if CONFIG(WDT)
 	initr_watchdog,
 #endif
 	INIT_FUNC_WATCHDOG_RESET
@@ -802,7 +802,7 @@ void board_init_r(gd_t *new_gd, ulong dest_addr)
 	 * TODO(sjg@chromium.org): Consider doing this for all archs, or
 	 * dropping the new_gd parameter.
 	 */
-	if (CONFIG_IS_ENABLED(X86_64) && !IS_ENABLED(CONFIG_EFI_APP))
+	if (CONFIG(X86_64) && !IS_ENABLED(CONFIG_EFI_APP))
 		arch_setup_gd(new_gd);
 
 #if !defined(CONFIG_X86) && !defined(CONFIG_ARM) && !defined(CONFIG_ARM64)

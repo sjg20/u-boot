@@ -17,7 +17,7 @@
 #include <rtc.h>
 #include <i2c.h>
 
-#if !CONFIG_IS_ENABLED(DM_RTC)
+#if !CONFIG(DM_RTC)
 static uchar rtc_read  (uchar reg);
 static void  rtc_write (uchar reg, uchar val);
 

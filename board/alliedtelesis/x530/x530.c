@@ -122,7 +122,7 @@ int board_init(void)
 
 void arch_preboot_os(void)
 {
-	if (CONFIG_IS_ENABLED(WDT))
+	if (CONFIG(WDT))
 		wdt_stop_all();
 }
 

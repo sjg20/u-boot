@@ -36,31 +36,31 @@
 
 /* Environment options */
 
-#if CONFIG_IS_ENABLED(CMD_USB)
+#if CONFIG(CMD_USB)
 # define BOOT_TARGET_USB(func) func(USB, usb, 0)
 #else
 # define BOOT_TARGET_USB(func)
 #endif
 
-#if CONFIG_IS_ENABLED(CMD_SCSI)
+#if CONFIG(CMD_SCSI)
 # define BOOT_TARGET_SCSI(func) func(SCSI, scsi, 0)
 #else
 # define BOOT_TARGET_SCSI(func)
 #endif
 
-#if CONFIG_IS_ENABLED(CMD_VIRTIO)
+#if CONFIG(CMD_VIRTIO)
 # define BOOT_TARGET_VIRTIO(func) func(VIRTIO, virtio, 0)
 #else
 # define BOOT_TARGET_VIRTIO(func)
 #endif
 
-#if CONFIG_IS_ENABLED(CMD_NVME)
+#if CONFIG(CMD_NVME)
 # define BOOT_TARGET_NVME(func) func(NVME, nvme, 0)
 #else
 # define BOOT_TARGET_NVME(func)
 #endif
 
-#if CONFIG_IS_ENABLED(CMD_DHCP)
+#if CONFIG(CMD_DHCP)
 # define BOOT_TARGET_DHCP(func) func(DHCP, dhcp, na)
 #else
 # define BOOT_TARGET_DHCP(func)

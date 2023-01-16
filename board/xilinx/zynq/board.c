@@ -37,7 +37,7 @@ int board_init(void)
 	if (IS_ENABLED(CONFIG_SPL_BUILD))
 		printf("Silicon version:\t%d\n", zynq_get_silicon_version());
 
-	if (CONFIG_IS_ENABLED(DM_I2C) && CONFIG_IS_ENABLED(I2C_EEPROM))
+	if (CONFIG(DM_I2C) && CONFIG(I2C_EEPROM))
 		xilinx_read_eeprom();
 
 	return 0;
@@ -55,7 +55,7 @@ int board_late_init(void)
 		return 0;
 	}
 
-	if (!CONFIG_IS_ENABLED(ENV_VARS_UBOOT_RUNTIME_CONFIG))
+	if (!CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG))
 		return 0;
 
 	switch ((zynq_slcr_get_boot_mode()) & ZYNQ_BM_MASK) {

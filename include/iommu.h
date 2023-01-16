@@ -3,8 +3,8 @@
 
 struct udevice;
 
-#if (CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)) && \
-	CONFIG_IS_ENABLED(IOMMU)
+#if (CONFIG(OF_CONTROL) && !CONFIG(OF_PLATDATA)) && \
+	CONFIG(IOMMU)
 int dev_iommu_enable(struct udevice *dev);
 #else
 static inline int dev_iommu_enable(struct udevice *dev)

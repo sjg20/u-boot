@@ -31,7 +31,7 @@
  */
 int run_command(const char *cmd, int flag)
 {
-#if !CONFIG_IS_ENABLED(HUSH_PARSER)
+#if !CONFIG(HUSH_PARSER)
 	/*
 	 * cli_run_command can return 0 or 1 for success, so clean up
 	 * its result.
@@ -168,7 +168,7 @@ int do_run(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 }
 #endif
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if CONFIG(OF_CONTROL)
 bool cli_process_fdt(const char **cmdp)
 {
 	/* Allow the fdt to override the boot command */
@@ -236,7 +236,7 @@ err:
 	 */
 	hang();
 }
-#endif /* CONFIG_IS_ENABLED(OF_CONTROL) */
+#endif /* CONFIG(OF_CONTROL) */
 
 void cli_loop(void)
 {

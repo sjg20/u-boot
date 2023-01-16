@@ -156,7 +156,7 @@ static int tpm_uclass_post_probe(struct udevice *dev)
 	const char *drv = TPM_RNG_DRV_NAME;
 	struct udevice *child;
 
-	if (CONFIG_IS_ENABLED(TPM_RNG)) {
+	if (CONFIG(TPM_RNG)) {
 		ret = device_find_first_child_by_uclass(dev, UCLASS_RNG,
 							&child);
 
@@ -177,7 +177,7 @@ UCLASS_DRIVER(tpm) = {
 	.id			= UCLASS_TPM,
 	.name			= "tpm",
 	.flags			= DM_UC_FLAG_SEQ_ALIAS,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if CONFIG(OF_REAL)
 	.post_bind		= dm_scan_fdt_dev,
 #endif
 	.post_probe		= tpm_uclass_post_probe,

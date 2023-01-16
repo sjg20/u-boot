@@ -168,7 +168,7 @@ U_BOOT_DRIVER(bootstd_drv) = {
 UCLASS_DRIVER(bootstd) = {
 	.id		= UCLASS_BOOTSTD,
 	.name		= "bootstd",
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if CONFIG(OF_REAL)
 	.post_bind	= dm_scan_fdt_dev,
 #endif
 };

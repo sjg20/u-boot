@@ -28,7 +28,7 @@
 #define LAW_EN		0x80000000
 
 #if defined(CONFIG_NAND_SPL) || \
-	(defined(CONFIG_SPL_BUILD) && CONFIG_IS_ENABLED(INIT_MINIMAL))
+	(defined(CONFIG_SPL_BUILD) && CONFIG(INIT_MINIMAL))
 #define MINIMAL_SPL
 #endif
 

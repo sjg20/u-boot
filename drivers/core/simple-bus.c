@@ -25,13 +25,13 @@ fdt_addr_t simple_bus_translate(struct udevice *dev, fdt_addr_t addr)
 
 static int simple_bus_post_bind(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if CONFIG(OF_PLATDATA)
 	return 0;
 #else
 	struct simple_bus_plat *plat = dev_get_uclass_plat(dev);
 	int ret;
 
-	if (CONFIG_IS_ENABLED(SIMPLE_BUS_CORRECT_RANGE)) {
+	if (CONFIG(SIMPLE_BUS_CORRECT_RANGE)) {
 		uint64_t caddr, paddr, len;
 
 		/* only read range index 0 */
@@ -65,7 +65,7 @@ UCLASS_DRIVER(simple_bus) = {
 	.per_device_plat_auto	= sizeof(struct simple_bus_plat),
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if CONFIG(OF_REAL)
 static const struct udevice_id generic_simple_bus_ids[] = {
 	{ .compatible = "simple-bus" },
 	{ .compatible = "simple-mfd" },

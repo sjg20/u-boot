@@ -43,7 +43,7 @@ static void imx_watchdog_expire_now(struct watchdog_regs *wdog, bool ext_reset)
 }
 
 #if !defined(CONFIG_IMX_WATCHDOG) || \
-    (defined(CONFIG_IMX_WATCHDOG) && !CONFIG_IS_ENABLED(WDT))
+    (defined(CONFIG_IMX_WATCHDOG) && !CONFIG(WDT))
 void __attribute__((weak)) reset_cpu(void)
 {
 	struct watchdog_regs *wdog = (struct watchdog_regs *)WDOG1_BASE_ADDR;
@@ -91,7 +91,7 @@ static void imx_watchdog_init(struct watchdog_regs *wdog, bool ext_reset,
 	imx_watchdog_reset(wdog);
 }
 
-#if !CONFIG_IS_ENABLED(WDT)
+#if !CONFIG(WDT)
 void hw_watchdog_reset(void)
 {
 	struct watchdog_regs *wdog = (struct watchdog_regs *)WDOG1_BASE_ADDR;
