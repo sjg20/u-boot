@@ -240,16 +240,18 @@ static const char *parse_config_line(const char *p, const char **endp)
 {
 	const char *q, *r;
 
-	p = strstr(p, "CONFIG_");
+	p = strstr(p, "CONFIG");
 	if (!p) {
 		*endp = NULL;
 		return NULL;
 	}
-	if ((isalnum(p[-1]) || p[-1] == '_')) {
-		*endp = p + 7;
+	*endp = p + 6;
+	if ((isalnum(p[-1]) || p[-1] == '_'))
 		return NULL;
-	}
-	p += 7;
+	p += 6;
+	if (*p != '_' && *p != '(')
+		return NULL;
+	p++;
 	q = p;
 	while (isalnum(*q) || *q == '_')
 		q++;
@@ -261,9 +263,15 @@ static const char *parse_config_line(const char *p, const char **endp)
 	 * U-Boot also handles
 	 *   CONFIG_IS_ENABLED(...)
 	 *   CONFIG_VAL(...)
+	 *   CONFIG_IF_INT(..., <ignored>)
+	 *
+	 * In the final one the ignored option is too hard to process, so we
+	 * ignore this minor problem. It means that things that change that
+	 * option may fail to be detected with an incremental build.
 	 */
 	if ((q - p == 10 && !memcmp(p, "IS_ENABLED(", 11)) ||
-	    (q - p == 3 && !memcmp(p, "VAL(", 4))) {
+	    (q - p == 3 && !memcmp(p, "VAL(", 4)) ||
+	    (q - p == 6 && !memcmp(p, "IF_INT(", 7))) {
 		p = q + 1;
 		q = p;
 		while (isalnum(*q) || *q == '_')
@@ -486,6 +494,21 @@ static int run_tests(void)
 	out = parse_config_line(buf, &end);
 	CHECKP(buf + 11, out);
 	CHECKP(buf + 15, end);
+
+	strcpy(buf, "CONFIG(JOHN)");
+	out = parse_config_line(buf, &end);
+	CHECKP(buf + 7, out);
+	CHECKP(buf + 11, end);
+
+	strcpy(buf, "and CONFIG(ANNA) too");
+	out = parse_config_line(buf, &end);
+	CHECKP(buf + 11, out);
+	CHECKP(buf + 15, end);
+
+	strcpy(buf, "CONFIG_IF_INT(CHRISTIAN, OTHER) too");
+	out = parse_config_line(buf, &end);
+	CHECKP(buf + 14, out);
+	CHECKP(buf + 23, end);
 
 	return 0;
 }
