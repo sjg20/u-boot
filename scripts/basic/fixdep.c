@@ -425,11 +425,84 @@ static void parse_dep_file(char *m, const char *target)
 	xprintf("$(deps_%s):\n", target);
 }
 
+#define CHECKP(expect, got)	\
+	if (expect != got) { \
+		fprintf(stderr, "Test failed at line %d: expect %ld, got %ld\n", \
+			__LINE__, expect - buf, got - buf); \
+		return 1; \
+	}
+
+#define CHECK(expect, got)	\
+	if (expect != got) { \
+		fprintf(stderr, "Test failed at line %d: expect %p, got %p\n", \
+			__LINE__, expect, got); \
+		return 1; \
+	}
+
+static int run_tests(void)
+{
+	const char *out, *end;
+	char buf_s[40], *buf = buf_s + 1;
+
+	/* make sure the previous char doesn't look like part of the CONFIG */
+	buf_s[0] = ' ';
+
+	strcpy(buf, "");
+	out = parse_config_line(buf, &end);
+	CHECK(NULL, out);
+	CHECK(NULL, end);
+
+	strcpy(buf, "nothing");
+	out = parse_config_line(buf, &end);
+	CHECK(NULL, out);
+	CHECK(NULL, end);
+
+	strcpy(buf, "CONFIG_OPTION_MORE");
+	out = parse_config_line(buf, &end);
+	CHECKP(buf + 7, out);
+	CHECKP(buf + 18, end);
+
+	strcpy(buf, "some CONFIG_OPTION_MORE");
+	out = parse_config_line(buf, &end);
+	CHECKP(buf + 12, out);
+	CHECKP(buf + 23, end);
+
+	strcpy(buf, "some CONFIG_OPTION_MORE here");
+	out = parse_config_line(buf, &end);
+	CHECKP(buf + 12, out);
+	CHECKP(buf + 23, end);
+
+	strcpy(buf, "CONFIG_OPTION_MODULE");
+	out = parse_config_line(buf, &end);
+	CHECKP(buf + 7, out);
+	CHECKP(buf + 13, end);
+
+	strcpy(buf, "CONFIG_IS_ENABLED(FRED)");
+	out = parse_config_line(buf, &end);
+	CHECKP(buf + 18, out);
+	CHECKP(buf + 22, end);
+
+	strcpy(buf, "CONFIG_VAL(MARY)");
+	out = parse_config_line(buf, &end);
+	CHECKP(buf + 11, out);
+	CHECKP(buf + 15, end);
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	const char *depfile, *target, *cmdline;
 	void *buf;
 
+	if (argc == 2 && !strcmp("-t", argv[1])) {
+		if (run_tests()) {
+			fprintf(stderr, "Tests failed\n");
+			return 1;
+		}
+		printf("Tests passed\n");
+		return 0;
+	}
 	if (argc != 4)
 		usage();
 
