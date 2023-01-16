@@ -264,7 +264,7 @@ if_changed_dep = $(if $(strip $(any-prereq) $(arg-check) ),                  \
 	@set -e;                                                             \
 	$(echo-cmd) $(cmd_$(1));                                             \
 	scripts/basic/fixdep $(depfile) $@ '$(make-cmd)' > $(dot-target).tmp;\
-	rm -f $(depfile);                                                    \
+	mv $(depfile) $(dot-target).saved;                                                    \
 	mv -f $(dot-target).tmp $(dot-target).cmd, @:)
 
 # Usage: $(call if_changed_rule,foo)
