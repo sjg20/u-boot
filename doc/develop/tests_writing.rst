@@ -320,15 +320,15 @@ to control that.
 Finally, add the test to the build by adding to the Makefile in the same
 directory::
 
-  obj-$(CONFIG_$(SPL_)CMDLINE) += wibble.o
+  obj-$(CONFIG_CMDLINE) += wibble.o
 
 Note that CMDLINE is never enabled in SPL, so this test will only be present in
 U-Boot proper. See below for how to do SPL tests.
 
 As before, you can add an extra Kconfig check if needed::
 
-  ifneq ($(CONFIG_$(SPL_)WIBBLE),)
-  obj-$(CONFIG_$(SPL_)CMDLINE) += wibble.o
+  ifneq ($(CONFIG_WIBBLE),)
+  obj-$(CONFIG_CMDLINE) += wibble.o
   endif
 
 

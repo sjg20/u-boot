@@ -4,17 +4,17 @@
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 
 obj-y += mmc.o
-obj-$(CONFIG_$(SPL_)DM_MMC) += mmc-uclass.o
+obj-$(CONFIG_DM_MMC) += mmc-uclass.o
 
-ifdef CONFIG_$(SPL_TPL_)DM_MMC
-obj-$(CONFIG_$(SPL_TPL_)BOOTSTD) += mmc_bootdev.o
+ifdef CONFIG_DM_MMC
+obj-$(CONFIG_BOOTSTD) += mmc_bootdev.o
 endif
 
-obj-$(CONFIG_$(SPL_TPL_)MMC_WRITE) += mmc_write.o
+obj-$(CONFIG_MMC_WRITE) += mmc_write.o
 obj-$(CONFIG_MMC_PWRSEQ) += mmc-pwrseq.o
 obj-$(CONFIG_MMC_SDHCI_ADMA_HELPERS) += sdhci-adma.o
 
-ifndef CONFIG_$(SPL_)BLK
+ifndef CONFIG_BLK
 obj-y += mmc_legacy.o
 endif
 
@@ -46,7 +46,7 @@ obj-$(CONFIG_MMC_MXS)			+= mxsmmc.o
 obj-$(CONFIG_MMC_OCTEONTX)		+= octeontx_hsmmc.o
 obj-$(CONFIG_MMC_OWL)			+= owl_mmc.o
 obj-$(CONFIG_MMC_PCI)			+= pci_mmc.o
-obj-$(CONFIG_$(SPL_TPL_)SUPPORT_EMMC_RPMB) += rpmb.o
+obj-$(CONFIG_SUPPORT_EMMC_RPMB) += rpmb.o
 obj-$(CONFIG_MMC_SANDBOX)		+= sandbox_mmc.o
 obj-$(CONFIG_SH_MMCIF) += sh_mmcif.o
 obj-$(CONFIG_SH_SDHI) += sh_sdhi.o

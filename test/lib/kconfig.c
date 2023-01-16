@@ -18,14 +18,24 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 	ut_asserteq(1, IS_ENABLED(CONFIG_CMDLINE))
 	ut_asserteq(0, IS_ENABLED(CONFIG__UNDEFINED))
 
+	ut_asserteq(1, CONFIG(CMDLINE))
+	ut_asserteq(0, CONFIG(__UNDEFINED))
+
 	ut_asserteq(1, CONFIG_IS_ENABLED(CMDLINE))
 	ut_asserteq(0, CONFIG_IS_ENABLED(OF_PLATDATA))
 	ut_asserteq(0, CONFIG_IS_ENABLED(_UNDEFINED))
+
+	ut_asserteq(1, CONFIG(CMDLINE))
+	ut_asserteq(0, CONFIG(OF_PLATDATA))
+	ut_asserteq(0, CONFIG(_UNDEFINED))
 
 	ut_asserteq(0xc000,
 		    IF_ENABLED_INT(CONFIG_BLOBLIST_FIXED, CONFIG_BLOBLIST_ADDR));
 	ut_asserteq(0xc000,
 		    CONFIG_IF_ENABLED_INT(BLOBLIST_FIXED, BLOBLIST_ADDR));
+
+	ut_asserteq(0xc000,
+		    CONFIG_IF_INT(BLOBLIST_FIXED, BLOBLIST_ADDR));
 
 	/*
 	 * This fails if CONFIG_TEST_KCONFIG_ENABLE is not enabled, since the
