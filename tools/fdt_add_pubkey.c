@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 		ret = info.crypto->add_verify_data(&info, dest_blob);
 		if (ret == -ENOSPC)
 			continue;
-		else if (ret)
+		else if (ret < 0)
 			break;
 
 		signode = fdt_path_offset(dest_blob, "/signature");
