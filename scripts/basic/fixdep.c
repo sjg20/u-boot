@@ -236,47 +236,68 @@ static int str_ends_with(const char *s, int slen, const char *sub)
 	return !memcmp(s + slen - sublen, sub, sublen);
 }
 
-static void parse_config_file(const char *p)
+static const char *parse_config_line(const char *p, const char **endp)
 {
 	const char *q, *r;
-	const char *start = p;
 
-	while ((p = strstr(p, "CONFIG_"))) {
-		if (p > start && (isalnum(p[-1]) || p[-1] == '_')) {
-			p += 7;
-			continue;
-		}
-		p += 7;
+	p = strstr(p, "CONFIG_");
+	if (!p) {
+		*endp = NULL;
+		return NULL;
+	}
+	if ((isalnum(p[-1]) || p[-1] == '_')) {
+		*endp = p + 7;
+		return NULL;
+	}
+	p += 7;
+	q = p;
+	while (isalnum(*q) || *q == '_')
+		q++;
+	if (str_ends_with(p, q - p, "_MODULE"))
+		r = q - 7;
+	else
+		r = q;
+	/*
+	 * U-Boot also handles
+	 *   CONFIG_IS_ENABLED(...)
+	 *   CONFIG_VAL(...)
+	 */
+	if ((q - p == 10 && !memcmp(p, "IS_ENABLED(", 11)) ||
+	    (q - p == 3 && !memcmp(p, "VAL(", 4))) {
+		p = q + 1;
 		q = p;
 		while (isalnum(*q) || *q == '_')
 			q++;
-		if (str_ends_with(p, q - p, "_MODULE"))
-			r = q - 7;
-		else
-			r = q;
-		/*
-		 * U-Boot also handles
-		 *   CONFIG_IS_ENABLED(...)
-		 *   CONFIG_VAL(...)
-		 */
-		if ((q - p == 10 && !memcmp(p, "IS_ENABLED(", 11)) ||
-		    (q - p == 3 && !memcmp(p, "VAL(", 4))) {
-			p = q + 1;
-			q = p;
-			while (isalnum(*q) || *q == '_')
-				q++;
-			r = q;
-			if (r > p && tmp_buf[0]) {
-				memcpy(tmp_buf + 4, p, r - p);
-				r = tmp_buf + 4 + (r - p);
-				p = tmp_buf;
-			}
+		r = q;
+		if (r > p && tmp_buf[0]) {
+			memcpy(tmp_buf + 4, p, r - p);
+			r = tmp_buf + 4 + (r - p);
+			p = tmp_buf;
 		}
-		/* end U-Boot hack */
+	}
+	/* end U-Boot hack */
+	*endp = r;
 
-		if (r > p)
-			use_config(p, r - p);
-		p = q;
+	if (r > p)
+		return p;
+
+	return NULL;
+}
+
+static void parse_config_file(const char *base)
+{
+	const char *p;
+
+	if (!*base)
+		return;
+	p = base + 1;
+	while (p) {
+		const char *out, *end;
+
+		out = parse_config_line(p, &end);
+		if (out)
+			use_config(out, end - out);
+		p = end;
 	}
 }
 
