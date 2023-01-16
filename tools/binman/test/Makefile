@@ -29,7 +29,7 @@ LDS_BINMAN := -T $(SRC)u_boot_binman_syms.lds
 LDS_BINMAN_BAD := -T $(SRC)u_boot_binman_syms_bad.lds
 LDS_BINMAN_X86 := -T $(SRC)u_boot_binman_syms_x86.lds
 LDS_BINMAN_EMBED := -T $(SRC)u_boot_binman_embed.lds
-LDS_EFL_SECTIONS := -T $(SRC)elf_sections.lds
+LDS_ELF_SECTIONS := -T $(SRC)elf_sections.lds
 
 TARGETS = u_boot_ucode_ptr u_boot_no_ucode_ptr bss_data \
 	u_boot_binman_syms u_boot_binman_syms.bin u_boot_binman_syms_bad \
@@ -71,7 +71,7 @@ u_boot_binman_embed: u_boot_binman_embed.c
 u_boot_binman_embed_sm: CFLAGS += $(LDS_BINMAN_EMBED)
 u_boot_binman_embed_sm: u_boot_binman_embed_sm.c
 
-elf_sections: CFLAGS += $(LDS_EFL_SECTIONS)
+elf_sections: CFLAGS += $(LDS_ELF_SECTIONS)
 elf_sections: elf_sections.c
 
 clean:
