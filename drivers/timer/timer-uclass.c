@@ -51,7 +51,7 @@ unsigned long notrace timer_get_rate(struct udevice *dev)
 
 static int timer_pre_probe(struct udevice *dev)
 {
-	if (IS_ENABLED(CONFIG_NEEDS_MANUAL_RELOC) &&
+	if (CONFIG(NEEDS_MANUAL_RELOC) &&
 	    (gd->flags & GD_FLG_RELOC)) {
 		struct timer_ops *ops = timer_get_ops(dev);
 		static int reloc_done;

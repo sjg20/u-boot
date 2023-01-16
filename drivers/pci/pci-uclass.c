@@ -653,7 +653,7 @@ int dm_pci_hose_probe_bus(struct udevice *bus)
 		return log_msg_ret("probe", -EINVAL);
 	}
 
-	if (IS_ENABLED(CONFIG_PCI_ENHANCED_ALLOCATION))
+	if (CONFIG(PCI_ENHANCED_ALLOCATION))
 		ea_pos = dm_pci_find_capability(bus, PCI_CAP_ID_EA);
 	else
 		ea_pos = 0;
@@ -931,7 +931,7 @@ int pci_bind_bus_devices(struct udevice *bus)
 		pplat->device = device;
 		pplat->class = class;
 
-		if (IS_ENABLED(CONFIG_PCI_ARID)) {
+		if (CONFIG(PCI_ARID)) {
 			ari_off = dm_pci_find_ext_capability(dev,
 							     PCI_EXT_CAP_ID_ARI);
 			if (ari_off) {
@@ -1025,13 +1025,13 @@ static int decode_regions(struct pci_controller *hose, ofnode parent_node,
 			continue;
 		}
 
-		if (!IS_ENABLED(CONFIG_SYS_PCI_64BIT) &&
+		if (!CONFIG(SYS_PCI_64BIT) &&
 		    type == PCI_REGION_MEM && upper_32_bits(pci_addr)) {
 			debug(" - pci_addr beyond the 32-bit boundary, ignoring\n");
 			continue;
 		}
 
-		if (!IS_ENABLED(CONFIG_PHYS_64BIT) && upper_32_bits(addr)) {
+		if (!CONFIG(PHYS_64BIT) && upper_32_bits(addr)) {
 			debug(" - addr beyond the 32-bit boundary, ignoring\n");
 			continue;
 		}
@@ -1047,7 +1047,7 @@ static int decode_regions(struct pci_controller *hose, ofnode parent_node,
 		}
 
 		pos = -1;
-		if (!IS_ENABLED(CONFIG_PCI_REGION_MULTI_ENTRY)) {
+		if (!CONFIG(PCI_REGION_MULTI_ENTRY)) {
 			for (i = 0; i < hose->region_count; i++) {
 				if (hose->regions[i].flags == type)
 					pos = i;
@@ -1069,7 +1069,7 @@ static int decode_regions(struct pci_controller *hose, ofnode parent_node,
 		if (bd->bi_dram[i].size) {
 			phys_addr_t start = bd->bi_dram[i].start;
 
-			if (IS_ENABLED(CONFIG_PCI_MAP_SYSTEM_MEMORY))
+			if (CONFIG(PCI_MAP_SYSTEM_MEMORY))
 				start = virt_to_phys((void *)(uintptr_t)bd->bi_dram[i].start);
 
 			pci_set_region(hose->regions + hose->region_count++,
@@ -1518,7 +1518,7 @@ static void *dm_pci_map_ea_bar(struct udevice *dev, int bar, size_t offset,
 	u32 ea_entry;
 	phys_addr_t addr;
 
-	if (IS_ENABLED(CONFIG_PCI_SRIOV)) {
+	if (CONFIG(PCI_SRIOV)) {
 		/*
 		 * In the case of a Virtual Function device, device is
 		 * Physical function, so pdata will point to required VF
@@ -1550,7 +1550,7 @@ static void *dm_pci_map_ea_bar(struct udevice *dev, int bar, size_t offset,
 			addr |= ((u64)ea_entry) << 32;
 		}
 
-		if (IS_ENABLED(CONFIG_PCI_SRIOV))
+		if (CONFIG(PCI_SRIOV))
 			addr += dm_pci_map_ea_virt(dev, ea_off, pdata);
 
 		if (~((phys_addr_t)0) - addr < offset)
@@ -1572,7 +1572,7 @@ void *dm_pci_map_bar(struct udevice *dev, int bar, size_t offset, size_t len,
 	u32 bar_response;
 	int ea_off;
 
-	if (IS_ENABLED(CONFIG_PCI_SRIOV)) {
+	if (CONFIG(PCI_SRIOV)) {
 		/*
 		 * In case of Virtual Function devices, use PF udevice
 		 * as EA capability is defined in Physical Function
@@ -1587,7 +1587,7 @@ void *dm_pci_map_bar(struct udevice *dev, int bar, size_t offset, size_t len,
 	 * Incase of virtual functions, pdata will help read VF BEI
 	 * and EA entry size.
 	 */
-	if (IS_ENABLED(CONFIG_PCI_ENHANCED_ALLOCATION))
+	if (CONFIG(PCI_ENHANCED_ALLOCATION))
 		ea_off = dm_pci_find_capability(udev, PCI_CAP_ID_EA);
 	else
 		ea_off = 0;

@@ -23,7 +23,7 @@ static struct nx_tieoff_registerset *nx_tieoff = (void *)PHY_BASEADDR_TIEOFF;
 
 static int tieoff_readl(void __iomem *reg)
 {
-	if (IS_ENABLED(CONFIG_ARCH_S5P4418))
+	if (CONFIG(ARCH_S5P4418))
 		return read_sec_reg_by_id(reg, NEXELL_TOFF_SEC_ID);
 	else
 		return readl(reg);
@@ -31,7 +31,7 @@ static int tieoff_readl(void __iomem *reg)
 
 static int  tieoff_writetl(void __iomem *reg, int val)
 {
-	if (IS_ENABLED(CONFIG_ARCH_S5P4418))
+	if (CONFIG(ARCH_S5P4418))
 		return write_sec_reg_by_id(reg, val, NEXELL_TOFF_SEC_ID);
 	else
 		return writel(val, reg);

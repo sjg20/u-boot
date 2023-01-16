@@ -240,7 +240,7 @@ static const struct sunxi_pinctrl_function suniv_f1c100s_pinctrl_functions[] = {
 	{ "mmc0",	2 },	/* PF0-PF5 */
 	{ "mmc1",	3 },	/* PC0-PC2 */
 	{ "spi0",	2 },	/* PC0-PC3 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
 	{ "uart0",	5 },	/* PE0-PE1 */
@@ -262,7 +262,7 @@ static const struct sunxi_pinctrl_function sun4i_a10_pinctrl_functions[] = {
 	{ "i2c0",	2 },	/* PB0-PB1 */
 	{ "i2c1",	2 },	/* PB18-PB19 */
 	{ "mmc0",	2 },	/* PF0-PF5 */
-#if IS_ENABLED(CONFIG_MMC1_PINS_PH)
+#if CONFIG(MMC1_PINS_PH)
 	{ "mmc1",	5 },	/* PH22-PH27 */
 #else
 	{ "mmc1",	4 },	/* PG0-PG5 */
@@ -270,7 +270,7 @@ static const struct sunxi_pinctrl_function sun4i_a10_pinctrl_functions[] = {
 	{ "mmc2",	3 },	/* PC6-PC15 */
 	{ "mmc3",	2 },	/* PI4-PI9 */
 	{ "spi0",	3 },	/* PC0-PC2, PC23 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	4 },	/* PF2-PF4 */
 #else
 	{ "uart0",	2 },	/* PB22-PB23 */
@@ -294,7 +294,7 @@ static const struct sunxi_pinctrl_function sun5i_a13_pinctrl_functions[] = {
 	{ "mmc1",	2 },	/* PG3-PG8 */
 	{ "mmc2",	3 },	/* PC6-PC15 */
 	{ "spi0",	3 },	/* PC0-PC3 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	4 },	/* PF2-PF4 */
 #else
 	{ "uart0",	2 },	/* PB19-PB20 */
@@ -320,7 +320,7 @@ static const struct sunxi_pinctrl_function sun6i_a31_pinctrl_functions[] = {
 	{ "mmc2",	3 },	/* PC6-PC15, PC24 */
 	{ "mmc3",	4 },	/* PC6-PC15, PC24 */
 	{ "spi0",	3 },	/* PC0-PC2, PC27 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
 	{ "uart0",	2 },	/* PH20-PH21 */
@@ -357,14 +357,14 @@ static const struct sunxi_pinctrl_function sun7i_a20_pinctrl_functions[] = {
 	{ "i2c0",	2 },	/* PB0-PB1 */
 	{ "i2c1",	2 },	/* PB18-PB19 */
 	{ "mmc0",	2 },	/* PF0-PF5 */
-#if IS_ENABLED(CONFIG_MMC1_PINS_PH)
+#if CONFIG(MMC1_PINS_PH)
 	{ "mmc1",	5 },	/* PH22-PH27 */
 #else
 	{ "mmc1",	4 },	/* PG0-PG5 */
 #endif
 	{ "mmc2",	3 },	/* PC5-PC15, PC24 */
 	{ "spi0",	3 },	/* PC0-PC2, PC23 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	4 },	/* PF2-PF4 */
 #else
 	{ "uart0",	2 },	/* PB22-PB23 */
@@ -387,7 +387,7 @@ static const struct sunxi_pinctrl_function sun8i_a23_pinctrl_functions[] = {
 	{ "mmc1",	2 },	/* PG0-PG5 */
 	{ "mmc2",	3 },	/* PC5-PC16 */
 	{ "spi0",	3 },	/* PC0-PC3 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #endif
 	{ "uart1",	2 },	/* PG6-PG7 */
@@ -425,7 +425,7 @@ static const struct sunxi_pinctrl_function sun8i_a33_pinctrl_functions[] = {
 	{ "mmc1",	2 },	/* PG0-PG5 */
 	{ "mmc2",	3 },	/* PC5-PC16 */
 	{ "spi0",	3 },	/* PC0-PC3 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
 	{ "uart0",	3 },	/* PB0-PB1 */
@@ -451,7 +451,7 @@ static const struct sunxi_pinctrl_function sun8i_a83t_pinctrl_functions[] = {
 	{ "mmc1",	2 },	/* PG0-PG5 */
 	{ "mmc2",	3 },	/* PC5-PC16 */
 	{ "spi0",	3 },	/* PC0-PC3 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
 	{ "uart0",	2 },	/* PB9-PB10 */
@@ -492,7 +492,7 @@ static const struct sunxi_pinctrl_function sun8i_h3_pinctrl_functions[] = {
 	{ "mmc1",	2 },	/* PG0-PG5 */
 	{ "mmc2",	3 },	/* PC5-PC16 */
 	{ "spi0",	3 },	/* PC0-PC3 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
 	{ "uart0",	2 },	/* PA4-PA5 */
@@ -532,7 +532,7 @@ static const struct sunxi_pinctrl_function sun8i_v3s_pinctrl_functions[] = {
 	{ "mmc1",	2 },	/* PG0-PG5 */
 	{ "mmc2",	2 },	/* PC0-PC10 */
 	{ "spi0",	3 },	/* PC0-PC3 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
 	{ "uart0",	3 },	/* PB8-PB9 */
@@ -558,7 +558,7 @@ static const struct sunxi_pinctrl_function sun9i_a80_pinctrl_functions[] = {
 	{ "mmc1",	2 },	/* PG0-PG5 */
 	{ "mmc2",	3 },	/* PC6-PC16 */
 	{ "spi0",	3 },	/* PC0-PC2, PC19 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	4 },	/* PF2-PF4 */
 #else
 	{ "uart0",	2 },	/* PH12-PH13 */
@@ -599,7 +599,7 @@ static const struct sunxi_pinctrl_function sun50i_a64_pinctrl_functions[] = {
 	{ "mmc2",	3 },	/* PC1-PC16 */
 	{ "pwm",	2 },	/* PD22 */
 	{ "spi0",	4 },	/* PC0-PC3 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
 	{ "uart0",	4 },	/* PB8-PB9 */
@@ -640,7 +640,7 @@ static const struct sunxi_pinctrl_function sun50i_h5_pinctrl_functions[] = {
 	{ "mmc1",	2 },	/* PG0-PG5 */
 	{ "mmc2",	3 },	/* PC1-PC16 */
 	{ "spi0",	3 },	/* PC0-PC3 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
 	{ "uart0",	2 },	/* PA4-PA5 */
@@ -666,7 +666,7 @@ static const struct sunxi_pinctrl_function sun50i_h6_pinctrl_functions[] = {
 	{ "mmc1",	2 },	/* PG0-PG5 */
 	{ "mmc2",	3 },	/* PC1-PC14 */
 	{ "spi0",	4 },	/* PC0-PC7 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
 	{ "uart0",	2 },	/* PH0-PH1 */
@@ -704,7 +704,7 @@ static const struct sunxi_pinctrl_function sun50i_h616_pinctrl_functions[] = {
 	{ "mmc1",	2 },	/* PG0-PG5 */
 	{ "mmc2",	3 },	/* PC0-PC16 */
 	{ "spi0",	4 },	/* PC0-PC7, PC15-PC16 */
-#if IS_ENABLED(CONFIG_UART0_PORT_F)
+#if CONFIG(UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2-PF4 */
 #else
 	{ "uart0",	2 },	/* PH0-PH1 */

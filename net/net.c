@@ -307,7 +307,7 @@ void net_auto_load(void)
 	if (s != NULL && strcmp(s, "NFS") == 0) {
 		if (net_check_prereq(NFS)) {
 /* We aren't expecting to get a serverip, so just accept the assigned IP */
-			if (IS_ENABLED(CONFIG_BOOTP_SERVERIP)) {
+			if (CONFIG(BOOTP_SERVERIP)) {
 				net_set_state(NETLOOP_SUCCESS);
 			} else {
 				printf("Cannot autoload with NFS\n");
@@ -332,7 +332,7 @@ void net_auto_load(void)
 	}
 	if (net_check_prereq(TFTPGET)) {
 /* We aren't expecting to get a serverip, so just accept the assigned IP */
-		if (IS_ENABLED(CONFIG_BOOTP_SERVERIP)) {
+		if (CONFIG(BOOTP_SERVERIP)) {
 			net_set_state(NETLOOP_SUCCESS);
 		} else {
 			printf("Cannot autoload with TFTPGET\n");
@@ -348,7 +348,7 @@ static int net_init_loop(void)
 	if (eth_get_dev()) {
 		memcpy(net_ethaddr, eth_get_ethaddr(), 6);
 
-		if (IS_ENABLED(CONFIG_IPV6)) {
+		if (CONFIG(IPV6)) {
 			ip6_make_lladdr(&net_link_local_ip6, net_ethaddr);
 			if (!memcmp(&net_ip6, &net_null_addr_ip6,
 				    sizeof(struct in6_addr)))
@@ -401,7 +401,7 @@ int net_init(void)
 
 		/* Only need to setup buffer pointers once. */
 		first_call = 0;
-		if (IS_ENABLED(CONFIG_PROT_TCP))
+		if (CONFIG(PROT_TCP))
 			tcp_set_tcp_state(TCP_CLOSED);
 	}
 
@@ -574,7 +574,7 @@ restart:
 			break;
 		}
 
-		if (IS_ENABLED(CONFIG_PROT_UDP) && protocol == UDP)
+		if (CONFIG(PROT_UDP) && protocol == UDP)
 			udp_start();
 
 		break;
@@ -606,7 +606,7 @@ restart:
 		if (arp_timeout_check() > 0)
 			time_start = get_timer(0);
 
-		if (IS_ENABLED(CONFIG_IPV6)) {
+		if (CONFIG(IPV6)) {
 			if (use_ip6 && (ndisc_timeout_check() > 0))
 				time_start = get_timer(0);
 		}
@@ -1266,7 +1266,7 @@ void net_process_received_packet(uchar *in_packet, int len)
 		rarp_receive(ip, len);
 		break;
 #endif
-#if IS_ENABLED(CONFIG_IPV6)
+#if CONFIG(IPV6)
 	case PROT_IP6:
 		net_ip6_handler(et, (struct ip6_hdr *)ip, len);
 		break;
@@ -1363,7 +1363,7 @@ void net_process_received_packet(uchar *in_packet, int len)
 			   "received UDP (to=%pI4, from=%pI4, len=%d)\n",
 			   &dst_ip, &src_ip, len);
 
-		if (IS_ENABLED(CONFIG_UDP_CHECKSUM) && ip->udp_xsum != 0) {
+		if (CONFIG(UDP_CHECKSUM) && ip->udp_xsum != 0) {
 			ulong   xsum;
 			u8 *sumptr;
 			ushort  sumlen;
@@ -1469,7 +1469,7 @@ static int net_check_prereq(enum proto_t protocol)
 		/* Fall through */
 	case TFTPGET:
 	case TFTPPUT:
-		if (IS_ENABLED(CONFIG_IPV6) && use_ip6) {
+		if (CONFIG(IPV6) && use_ip6) {
 			if (!memcmp(&net_server_ip6, &net_null_addr_ip6,
 				    sizeof(struct in6_addr)) &&
 				    !strchr(net_boot_file_name, '[')) {
@@ -1489,7 +1489,7 @@ common:
 	case NETCONS:
 	case FASTBOOT:
 	case TFTPSRV:
-		if (IS_ENABLED(CONFIG_IPV6) && use_ip6) {
+		if (CONFIG(IPV6) && use_ip6) {
 			if (!memcmp(&net_link_local_ip6, &net_null_addr_ip6,
 				    sizeof(struct in6_addr))) {
 				puts("*** ERROR: `ip6addr` not set\n");

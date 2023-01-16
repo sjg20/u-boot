@@ -64,7 +64,7 @@ int set_cpu_clk_info(void)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_TARGET_SOCFPGA_SOC64)
+#if CONFIG(TARGET_SOCFPGA_SOC64)
 int cm_set_qspi_controller_clk_hz(u32 clk_hz)
 {
 	u32 reg;

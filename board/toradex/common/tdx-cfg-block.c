@@ -67,7 +67,7 @@ bool valid_cfgblock_carrier;
 struct toradex_hw tdx_car_hw_tag;
 #endif
 
-#define TARGET_IS_ENABLED(x) IS_ENABLED(CONFIG_TARGET_ ## x)
+#define TARGET_IS_ENABLED(x) CONFIG(TARGET_ ## x)
 
 const struct toradex_som toradex_modules[] = {
 	 [0] = { "UNKNOWN MODULE",                       0                                  },

@@ -399,7 +399,7 @@ void tegra_pmc_writel(u32 value, unsigned long offset);
 #define PMC_CNTRL		0x0
 #define  PMC_CNTRL_MAIN_RST	BIT(4)
 
-#if IS_ENABLED(CONFIG_TEGRA186)
+#if CONFIG(TEGRA186)
 #  define PMC_SCRATCH0 0x32000
 #else
 #  define PMC_SCRATCH0 0x00050

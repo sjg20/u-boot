@@ -20,7 +20,7 @@ int checkboard(void)
 	const char *fdt_compat;
 	int fdt_compat_len;
 
-	if (IS_ENABLED(CONFIG_TFABOOT))
+	if (CONFIG(TFABOOT))
 		mode = "trusted";
 	else
 		mode = "basic";
@@ -38,7 +38,7 @@ int checkboard(void)
 /* board dependent setup after realloc */
 int board_init(void)
 {
-	if (IS_ENABLED(CONFIG_DM_REGULATOR))
+	if (CONFIG(DM_REGULATOR))
 		regulators_enable_boot_on(_DEBUG);
 
 	return 0;

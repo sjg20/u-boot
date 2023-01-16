@@ -21,7 +21,7 @@ int spl_parse_legacy_header(struct spl_image_info *spl_image,
 	u32 header_size = sizeof(struct legacy_img_hdr);
 
 	/* check uImage header CRC */
-	if (IS_ENABLED(CONFIG_SPL_LEGACY_IMAGE_CRC_CHECK) &&
+	if (CONFIG(SPL_LEGACY_IMAGE_CRC_CHECK) &&
 	    !image_check_hcrc(header)) {
 		puts("SPL: Image header CRC check failed!\n");
 		return -EINVAL;
@@ -69,7 +69,7 @@ int spl_parse_legacy_header(struct spl_image_info *spl_image,
  */
 static inline int spl_image_get_comp(const struct legacy_img_hdr *hdr)
 {
-	if (IS_ENABLED(CONFIG_SPL_LZMA))
+	if (CONFIG(SPL_LZMA))
 		return image_get_comp(hdr);
 
 	return IH_COMP_NONE;

@@ -21,7 +21,7 @@ static enum endianness check_endianness(u32 handoff)
 	case SOC64_HANDOFF_MAGIC_CLOCK:
 	case SOC64_HANDOFF_MAGIC_MISC:
 		return BIG_ENDIAN;
-#if IS_ENABLED(CONFIG_TARGET_SOCFPGA_N5X)
+#if CONFIG(TARGET_SOCFPGA_N5X)
 	case SOC64_HANDOFF_DDR_UMCTL2_MAGIC:
 		debug("%s: umctl2 handoff data\n", __func__);
 		return LITTLE_ENDIAN;

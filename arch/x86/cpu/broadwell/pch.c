@@ -607,7 +607,7 @@ static int broadwell_pch_probe(struct udevice *dev)
 			return broadwell_pch_early_init(dev);
 		else
 			return broadwell_pch_init(dev);
-	} else if (IS_ENABLED(CONFIG_SPL) && !IS_ENABLED(CONFIG_SPL_BUILD)) {
+	} else if (CONFIG(SPL) && !CONFIG(SPL_BUILD)) {
 		return broadwell_pch_init(dev);
 	} else {
 		return 0;

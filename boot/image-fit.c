@@ -1427,7 +1427,7 @@ int fit_image_verify(const void *fit, int image_noffset)
 	size_t		size;
 	char		*err_msg = "";
 
-	if (IS_ENABLED(CONFIG_FIT_SIGNATURE) && strchr(name, '@')) {
+	if (CONFIG(FIT_SIGNATURE) && strchr(name, '@')) {
 		/*
 		 * We don't support this since libfdt considers names with the
 		 * name root but different @ suffix to be equal
@@ -1565,10 +1565,10 @@ int fit_image_check_arch(const void *fit, int noffset, uint8_t arch)
 	int aarch32_support = 0;
 
 	/* Let's assume that sandbox can load any architecture */
-	if (IS_ENABLED(CONFIG_SANDBOX))
+	if (CONFIG(SANDBOX))
 		return true;
 
-	if (IS_ENABLED(CONFIG_ARM64_SUPPORT_AARCH32))
+	if (CONFIG(ARM64_SUPPORT_AARCH32))
 		aarch32_support = 1;
 
 	if (fit_image_get_arch(fit, noffset, &image_arch))
@@ -1839,7 +1839,7 @@ int fit_conf_get_node(const void *fit, const char *conf_uname)
 	if (conf_uname == NULL) {
 		/* get configuration unit name from the default property */
 		debug("No configuration specified, trying default...\n");
-		if (!tools_build() && IS_ENABLED(CONFIG_MULTI_DTB_FIT)) {
+		if (!tools_build() && CONFIG(MULTI_DTB_FIT)) {
 			noffset = fit_find_config_node(fit);
 			if (noffset < 0)
 				return noffset;
@@ -2099,7 +2099,7 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 		 * fit_conf_get_node() will try to find default config node
 		 */
 		bootstage_mark(bootstage_id + BOOTSTAGE_SUB_NO_UNIT_NAME);
-		if (IS_ENABLED(CONFIG_FIT_BEST_MATCH) && !fit_uname_config) {
+		if (CONFIG(FIT_BEST_MATCH) && !fit_uname_config) {
 			cfg_noffset = fit_conf_find_compat(fit, gd_fdt_blob());
 		} else {
 			cfg_noffset = fit_conf_get_node(fit, fit_uname_config);
@@ -2149,7 +2149,7 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 	}
 
 	bootstage_mark(bootstage_id + BOOTSTAGE_SUB_CHECK_ARCH);
-	if (!tools_build() && IS_ENABLED(CONFIG_SANDBOX)) {
+	if (!tools_build() && CONFIG(SANDBOX)) {
 		if (!fit_image_check_target_arch(fit, noffset)) {
 			puts("Unsupported Architecture\n");
 			bootstage_error(bootstage_id + BOOTSTAGE_SUB_CHECK_ARCH);
@@ -2208,7 +2208,7 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 	}
 
 	/* Decrypt data before uncompress/move */
-	if (IS_ENABLED(CONFIG_FIT_CIPHER) && IMAGE_ENABLE_DECRYPT) {
+	if (CONFIG(FIT_CIPHER) && IMAGE_ENABLE_DECRYPT) {
 		puts("   Decrypting Data ... ");
 		if (fit_image_uncipher(fit, noffset, &buf, &size)) {
 			puts("Error\n");
@@ -2218,7 +2218,7 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 	}
 
 	/* perform any post-processing on the image data */
-	if (!tools_build() && IS_ENABLED(CONFIG_FIT_IMAGE_POST_PROCESS))
+	if (!tools_build() && CONFIG(FIT_IMAGE_POST_PROCESS))
 		board_fit_image_post_process(fit, noffset, &buf, &size);
 
 	len = (ulong)size;

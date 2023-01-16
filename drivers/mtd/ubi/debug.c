@@ -225,7 +225,7 @@ static struct dentry *dfs_rootdir;
  */
 int ubi_debugfs_init(void)
 {
-	if (!IS_ENABLED(CONFIG_DEBUG_FS))
+	if (!CONFIG(DEBUG_FS))
 		return 0;
 
 	dfs_rootdir = debugfs_create_dir("ubi", NULL);
@@ -245,7 +245,7 @@ int ubi_debugfs_init(void)
  */
 void ubi_debugfs_exit(void)
 {
-	if (IS_ENABLED(CONFIG_DEBUG_FS))
+	if (CONFIG(DEBUG_FS))
 		debugfs_remove(dfs_rootdir);
 }
 
@@ -403,7 +403,7 @@ int ubi_debugfs_init_dev(struct ubi_device *ubi)
 	struct dentry *dent;
 	struct ubi_debug_info *d = &ubi->dbg;
 
-	if (!IS_ENABLED(CONFIG_DEBUG_FS))
+	if (!CONFIG(DEBUG_FS))
 		return 0;
 
 	n = snprintf(d->dfs_dir_name, UBI_DFS_DIR_LEN + 1, UBI_DFS_DIR_NAME,
@@ -501,7 +501,7 @@ out:
  */
 void ubi_debugfs_exit_dev(struct ubi_device *ubi)
 {
-	if (IS_ENABLED(CONFIG_DEBUG_FS))
+	if (CONFIG(DEBUG_FS))
 		debugfs_remove_recursive(ubi->dbg.dfs_dir);
 }
 

@@ -134,7 +134,7 @@ static int sun8i_rsb_init(struct sunxi_rsb_reg *base)
 	return sun8i_rsb_set_device_mode(base);
 }
 
-#if IS_ENABLED(CONFIG_AXP_PMIC_BUS)
+#if CONFIG(AXP_PMIC_BUS)
 int rsb_read(const u16 runtime_addr, const u8 reg_addr, u8 *data)
 {
 	struct sunxi_rsb_reg *base = (struct sunxi_rsb_reg *)SUNXI_RSB_BASE;
@@ -163,7 +163,7 @@ int rsb_init(void)
 	/* Enable RSB and PIO clk, and de-assert their resets */
 	prcm_apb0_enable(PRCM_APB0_GATE_PIO | PRCM_APB0_GATE_RSB);
 
-	if (IS_ENABLED(CONFIG_MACH_SUN9I)) {
+	if (CONFIG(MACH_SUN9I)) {
 		sunxi_gpio_set_cfgpin(SUNXI_GPN(0), SUN9I_GPN_R_RSB);
 		sunxi_gpio_set_cfgpin(SUNXI_GPN(1), SUN9I_GPN_R_RSB);
 		sunxi_gpio_set_pull(SUNXI_GPN(0), 1);

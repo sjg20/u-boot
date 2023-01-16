@@ -290,7 +290,7 @@ struct spi_mem_driver {
 	void (*shutdown)(struct spi_mem *mem);
 };
 
-#if IS_ENABLED(CONFIG_SPI_MEM)
+#if CONFIG(SPI_MEM)
 int spi_controller_dma_map_mem_op_data(struct spi_controller *ctlr,
 				       const struct spi_mem_op *op,
 				       struct sg_table *sg);

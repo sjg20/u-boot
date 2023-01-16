@@ -507,13 +507,13 @@ static bool mctl_channel_init(struct dram_para *para)
 		writel(0x00000909, &mctl_phy->dx[i].gcr[5]);
 
 	for (i = 0; i < 4; i++) {
-		if (IS_ENABLED(CONFIG_DRAM_ODT_EN))
+		if (CONFIG(DRAM_ODT_EN))
 			val = 0x0;
 		else
 			val = 0xaaaa;
 		clrsetbits_le32(&mctl_phy->dx[i].gcr[2], 0xffff, val);
 
-		if (IS_ENABLED(CONFIG_DRAM_ODT_EN))
+		if (CONFIG(DRAM_ODT_EN))
 			val = 0x0;
 		else
 			val = 0x2020;

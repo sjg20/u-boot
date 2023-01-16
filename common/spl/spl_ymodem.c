@@ -110,7 +110,7 @@ int spl_ymodem_load_image(struct spl_image_info *spl_image,
 	if (res <= 0)
 		goto end_stream;
 
-	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT_FULL) &&
+	if (CONFIG(SPL_LOAD_FIT_FULL) &&
 	    image_get_magic((struct legacy_img_hdr *)buf) == FDT_MAGIC) {
 		addr = CONFIG_SYS_LOAD_ADDR;
 		ih = (struct legacy_img_hdr *)addr;
@@ -128,7 +128,7 @@ int spl_ymodem_load_image(struct spl_image_info *spl_image,
 		ret = spl_parse_image_header(spl_image, bootdev, ih);
 		if (ret)
 			return ret;
-	} else if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
+	} else if (CONFIG(SPL_LOAD_FIT) &&
 	    image_get_magic((struct legacy_img_hdr *)buf) == FDT_MAGIC) {
 		struct spl_load_info load;
 		struct ymodem_fit_info info;
@@ -176,7 +176,7 @@ end_stream:
 	printf("Loaded %lu bytes\n", size);
 
 #ifdef CONFIG_SPL_GZIP
-	if (!(IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
+	if (!(CONFIG(SPL_LOAD_FIT) &&
 	      image_get_magic((struct legacy_img_hdr *)buf) == FDT_MAGIC) &&
 	    (ih->ih_comp == IH_COMP_GZIP)) {
 		if (gunzip((void *)(spl_image->load_addr + sizeof(*ih)),

@@ -49,7 +49,7 @@ int board_early_init_r(void)
 
 int board_init(void)
 {
-	if (IS_ENABLED(CONFIG_NET_OCTEONTX))
+	if (CONFIG(NET_OCTEONTX))
 		fdt_parse_phy_info();
 
 	return 0;
@@ -133,7 +133,7 @@ int board_late_init(void)
 		env_set("serial#", boardserial);
 	}
 
-	if (IS_ENABLED(CONFIG_NET_OCTEONTX))
+	if (CONFIG(NET_OCTEONTX))
 		board_late_probe_devices();
 
 	if (save_env)

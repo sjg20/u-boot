@@ -137,7 +137,7 @@ SPL_LOAD_IMAGE_METHOD("Fast SPI", 1, BOOT_DEVICE_FAST_SPI,
 
 void board_boot_order(u32 *spl_boot_list)
 {
-	bool use_spi_flash = IS_ENABLED(CONFIG_APL_BOOT_FROM_FAST_SPI_FLASH);
+	bool use_spi_flash = CONFIG(APL_BOOT_FROM_FAST_SPI_FLASH);
 
 	if (use_spi_flash) {
 		spl_boot_list[0] = BOOT_DEVICE_FAST_SPI;

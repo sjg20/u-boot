@@ -200,7 +200,7 @@ struct stdio_dev *stdio_get_by_name(const char *name)
 		if (strcmp(sdev->name, name) == 0)
 			return sdev;
 	}
-	if (IS_ENABLED(CONFIG_VIDEO)) {
+	if (CONFIG(VIDEO)) {
 		/*
 		 * We did not find a suitable stdio device. If there is a video
 		 * driver with a name starting with 'vidconsole', we can try
@@ -316,7 +316,7 @@ int stdio_add_devices(void)
 	struct udevice *dev;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_DM_KEYBOARD)) {
+	if (CONFIG(DM_KEYBOARD)) {
 		/*
 		 * For now we probe all the devices here. At some point this
 		 * should be done only when the devices are required - e.g. we
@@ -340,7 +340,7 @@ int stdio_add_devices(void)
 #if CONFIG(SYS_I2C_LEGACY)
 	i2c_init_all();
 #endif
-	if (IS_ENABLED(CONFIG_VIDEO)) {
+	if (CONFIG(VIDEO)) {
 		/*
 		 * If the console setting is not in environment variables then
 		 * console_init_r() will not be calling iomux_doenv() (which
@@ -353,7 +353,7 @@ int stdio_add_devices(void)
 		struct udevice *vdev;
 		int ret;
 
-		if (!IS_ENABLED(CONFIG_SYS_CONSOLE_IS_IN_ENV)) {
+		if (!CONFIG(SYS_CONSOLE_IS_IN_ENV)) {
 			for (ret = uclass_first_device_check(UCLASS_VIDEO,
 							     &vdev);
 					vdev;
@@ -363,8 +363,8 @@ int stdio_add_devices(void)
 					       __func__, vdev->name, ret);
 			}
 		}
-		if (IS_ENABLED(CONFIG_SPLASH_SCREEN) &&
-		    IS_ENABLED(CONFIG_CMD_BMP))
+		if (CONFIG(SPLASH_SCREEN) &&
+		    CONFIG(CMD_BMP))
 			splash_display();
 	}
 
@@ -376,12 +376,12 @@ int stdio_add_devices(void)
 #ifdef CONFIG_USB_FUNCTION_ACM
 	drv_usbacm_init ();
 #endif
-	if (IS_ENABLED(CONFIG_NETCONSOLE))
+	if (CONFIG(NETCONSOLE))
 		drv_nc_init();
 #ifdef CONFIG_JTAG_CONSOLE
 	drv_jtag_console_init();
 #endif
-	if (IS_ENABLED(CONFIG_CBMEM_CONSOLE))
+	if (CONFIG(CBMEM_CONSOLE))
 		cbmemc_init();
 
 	return 0;

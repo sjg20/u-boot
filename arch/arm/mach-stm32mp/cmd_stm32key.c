@@ -60,28 +60,28 @@ static u8 stm32key_index;
 
 static u8 get_key_nb(void)
 {
-	if (IS_ENABLED(CONFIG_STM32MP13x))
+	if (CONFIG(STM32MP13x))
 		return ARRAY_SIZE(stm32mp13_list);
 
-	if (IS_ENABLED(CONFIG_STM32MP15x))
+	if (CONFIG(STM32MP15x))
 		return ARRAY_SIZE(stm32mp15_list);
 }
 
 static const struct stm32key *get_key(u8 index)
 {
-	if (IS_ENABLED(CONFIG_STM32MP13x))
+	if (CONFIG(STM32MP13x))
 		return &stm32mp13_list[index];
 
-	if (IS_ENABLED(CONFIG_STM32MP15x))
+	if (CONFIG(STM32MP15x))
 		return &stm32mp15_list[index];
 }
 
 static u32 get_otp_close_mask(void)
 {
-	if (IS_ENABLED(CONFIG_STM32MP13x))
+	if (CONFIG(STM32MP13x))
 		return STM32_OTP_STM32MP13x_CLOSE_MASK;
 
-	if (IS_ENABLED(CONFIG_STM32MP15x))
+	if (CONFIG(STM32MP15x))
 		return STM32_OTP_STM32MP15x_CLOSE_MASK;
 }
 

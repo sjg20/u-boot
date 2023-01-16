@@ -370,7 +370,7 @@ static int hdmi_prepare(struct dp_sync_info *sync)
 	/* Set DC_CONTROL to 0x00 */
 	nx_hdmi_set_reg(0, HDMI_LINK_DC_CONTROL, 0x0);
 
-	if (IS_ENABLED(CONFIG_HDMI_PATTERN))
+	if (CONFIG(HDMI_PATTERN))
 		nx_hdmi_set_reg(0, HDMI_LINK_VIDEO_PATTERN_GEN, 0x1);
 	else
 		nx_hdmi_set_reg(0, HDMI_LINK_VIDEO_PATTERN_GEN, 0x0);

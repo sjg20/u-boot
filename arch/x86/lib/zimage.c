@@ -314,7 +314,7 @@ int setup_zimage(struct boot_params *setup_base, char *cmd_line, int auto_boot,
 	int bootproto = get_boot_protocol(hdr, false);
 
 	log_debug("Setup E820 entries\n");
-	if (IS_ENABLED(CONFIG_COREBOOT_SYSINFO)) {
+	if (CONFIG(COREBOOT_SYSINFO)) {
 		setup_base->e820_entries = cb_install_e820_map(
 			ARRAY_SIZE(setup_base->e820_map), setup_base->e820_map);
 	} else {
@@ -365,7 +365,7 @@ int setup_zimage(struct boot_params *setup_base, char *cmd_line, int auto_boot,
 			strcpy(cmd_line, (char *)cmdline_force);
 		else
 			build_command_line(cmd_line, auto_boot);
-		if (IS_ENABLED(CONFIG_CMD_BOOTM)) {
+		if (CONFIG(CMD_BOOTM)) {
 			ret = bootm_process_cmdline(cmd_line, max_size,
 						    BOOTM_CL_ALL);
 			if (ret) {
@@ -379,17 +379,17 @@ int setup_zimage(struct boot_params *setup_base, char *cmd_line, int auto_boot,
 		printf("\"\n");
 	}
 
-	if (IS_ENABLED(CONFIG_INTEL_MID) && bootproto >= 0x0207)
+	if (CONFIG(INTEL_MID) && bootproto >= 0x0207)
 		hdr->hardware_subarch = X86_SUBARCH_INTEL_MID;
 
-	if (IS_ENABLED(CONFIG_GENERATE_ACPI_TABLE))
+	if (CONFIG(GENERATE_ACPI_TABLE))
 		setup_base->acpi_rsdp_addr = acpi_get_rsdp_addr();
 
 	log_debug("Setup devicetree\n");
 	setup_device_tree(hdr, (const void *)env_get_hex("fdtaddr", 0));
 	setup_video(&setup_base->screen_info);
 
-	if (IS_ENABLED(CONFIG_EFI_STUB))
+	if (CONFIG(EFI_STUB))
 		setup_efi_info(&setup_base->efi_info);
 
 	return 0;

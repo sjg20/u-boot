@@ -99,7 +99,7 @@ typedef enum {
 
 static int setup_fec(void)
 {
-	if (IS_ENABLED(CONFIG_FEC_MXC)) {
+	if (CONFIG(FEC_MXC)) {
 		struct iomuxc_gpr_base_regs *gpr =
 			(struct iomuxc_gpr_base_regs *)IOMUXC_GPR_BASE_ADDR;
 
@@ -112,7 +112,7 @@ static int setup_fec(void)
 
 int board_phy_config(struct phy_device *phydev)
 {
-	if (IS_ENABLED(CONFIG_FEC_MXC)) {
+	if (CONFIG(FEC_MXC)) {
 		/* enable rgmii rxc skew and phy mode select to RGMII copper */
 		phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x1f);
 		phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x8);
@@ -130,7 +130,7 @@ int board_phy_config(struct phy_device *phydev)
 
 int board_init(void)
 {
-	if (IS_ENABLED(CONFIG_FEC_MXC))
+	if (CONFIG(FEC_MXC))
 		setup_fec();
 
 	return 0;
@@ -536,7 +536,7 @@ int board_late_init(void)
 {
 	int ret;
 
-	if (IS_ENABLED(CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
+	if (CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
 		env_set("board_name", "IOT-GATE-IMX8");
 		env_set("board_rev", "SBC-IOTMX8");
 	}

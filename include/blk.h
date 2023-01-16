@@ -24,7 +24,7 @@ struct udevice;
 
 static inline bool blk_enabled(void)
 {
-	return CONFIG(BLK) || IS_ENABLED(CONFIG_SPL_LEGACY_BLOCK);
+	return CONFIG(BLK) || CONFIG(SPL_LEGACY_BLOCK);
 }
 
 #define BLK_VEN_SIZE		40

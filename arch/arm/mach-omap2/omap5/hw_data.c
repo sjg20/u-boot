@@ -382,8 +382,8 @@ struct vcores_data omap5430_volts_es2 = {
  */
 void enable_ipu1_clocks(void)
 {
-	if (!IS_ENABLED(CONFIG_DRA7XX) ||
-	    !IS_ENABLED(CONFIG_REMOTEPROC_TI_IPU))
+	if (!CONFIG(DRA7XX) ||
+	    !CONFIG(REMOTEPROC_TI_IPU))
 		return;
 
 	u32 const clk_domains[] = {
@@ -423,8 +423,8 @@ void enable_ipu1_clocks(void)
  */
 void enable_ipu2_clocks(void)
 {
-	if (!IS_ENABLED(CONFIG_DRA7XX) ||
-	    !IS_ENABLED(CONFIG_REMOTEPROC_TI_IPU))
+	if (!CONFIG(DRA7XX) ||
+	    !CONFIG(REMOTEPROC_TI_IPU))
 		return;
 
 	u32 const clk_domains[] = {
@@ -559,8 +559,8 @@ void enable_basic_uboot_clocks(void)
 {
 	u32 cm_ipu_clkstctrl = 0;
 
-	if (IS_ENABLED(CONFIG_DRA7XX) &&
-	    !IS_ENABLED(CONFIG_REMOTEPROC_TI_IPU))
+	if (CONFIG(DRA7XX) &&
+	    !CONFIG(REMOTEPROC_TI_IPU))
 		cm_ipu_clkstctrl = (*prcm)->cm_ipu_clkstctrl;
 
 	u32 const clk_domains_essential[] = {cm_ipu_clkstctrl, 0};

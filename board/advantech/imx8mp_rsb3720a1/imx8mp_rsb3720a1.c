@@ -143,7 +143,7 @@ static int setup_eqos(void)
 
 int board_phy_config(struct phy_device *phydev)
 {
-	if (IS_ENABLED(CONFIG_FEC_MXC) || IS_ENABLED(CONFIG_DWC_ETH_QOS)) {
+	if (CONFIG(FEC_MXC) || CONFIG(DWC_ETH_QOS)) {
 		/* enable rgmii rxc skew and phy mode select to RGMII copper */
 		phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x1f);
 		phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x8);
@@ -198,7 +198,7 @@ int board_init(void)
 
 int board_late_init(void)
 {
-	if (IS_ENABLED(CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
+	if (CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
 		env_set("board_name", "RSB3720A1");
 		env_set("board_rev", "iMX8MP");
 	}

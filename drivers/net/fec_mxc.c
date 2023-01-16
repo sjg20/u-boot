@@ -138,7 +138,7 @@ static int fec_get_clk_rate(void *udev, int idx)
 	struct udevice *dev;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_IMX8) ||
+	if (CONFIG(IMX8) ||
 	    CONFIG(CLK_CCF)) {
 		dev = udev;
 		if (!dev) {
@@ -1132,7 +1132,7 @@ static int fecmxc_probe(struct udevice *dev)
 		}
 	}
 
-	if (IS_ENABLED(CONFIG_IMX8)) {
+	if (CONFIG(IMX8)) {
 		ret = clk_get_by_name(dev, "ipg", &priv->ipg_clk);
 		if (ret < 0) {
 			debug("Can't get FEC ipg clk: %d\n", ret);

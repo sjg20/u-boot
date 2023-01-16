@@ -1883,7 +1883,7 @@ static void octeontx_nfc_chip_sizing(struct nand_chip *nand)
 		if (!mtd->subpage_sft && !(ecc->steps & (ecc->steps - 1)))
 			mtd->subpage_sft = fls(ecc->steps) - 1;
 
-		if (IS_ENABLED(CONFIG_NAND_OCTEONTX_HW_ECC)) {
+		if (CONFIG(NAND_OCTEONTX_HW_ECC)) {
 			debug("%s: ecc mode: %d\n", __func__, ecc->mode);
 			if (ecc->mode != NAND_ECC_SOFT &&
 			    !octeontx_nand_calc_bch_ecc_strength(nand)) {
@@ -2069,7 +2069,7 @@ static int octeontx_pci_nand_probe(struct udevice *dev)
 	if (probe_done)
 		return 0;
 
-	if (IS_ENABLED(CONFIG_NAND_OCTEONTX_HW_ECC)) {
+	if (CONFIG(NAND_OCTEONTX_HW_ECC)) {
 		bch_vf = octeontx_bch_getv();
 		if (!bch_vf) {
 			struct octeontx_probe_device *probe_dev;
@@ -2228,7 +2228,7 @@ void board_nand_init(void)
 	struct udevice *dev;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_NAND_OCTEONTX_HW_ECC)) {
+	if (CONFIG(NAND_OCTEONTX_HW_ECC)) {
 		ret = uclass_get_device_by_driver(UCLASS_MISC,
 						  DM_DRIVER_GET(octeontx_pci_bchpf),
 						  &dev);

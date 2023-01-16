@@ -38,7 +38,7 @@ int fsps_update_config(struct udevice *dev, ulong rom_offset,
 	struct fsp_s_config *cfg = &upd->config;
 	ofnode node;
 
-	if (IS_ENABLED(CONFIG_HAVE_VBT)) {
+	if (CONFIG(HAVE_VBT)) {
 		void *buf;
 		int ret;
 
@@ -184,7 +184,7 @@ int arch_fsp_init_r(void)
 	if (!ll_boot_init())
 		return 0;
 
-	s3wake = IS_ENABLED(CONFIG_HAVE_ACPI_RESUME) &&
+	s3wake = CONFIG(HAVE_ACPI_RESUME) &&
 		gd->arch.prev_sleep_state == ACPI_S3;
 
 	/*

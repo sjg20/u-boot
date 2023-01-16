@@ -146,7 +146,7 @@ static struct mmc *__init_mmc_device(int dev, bool force_init,
 	if (force_init)
 		mmc->has_init = 0;
 
-	if (IS_ENABLED(CONFIG_MMC_SPEED_MODE_SET))
+	if (CONFIG(MMC_SPEED_MODE_SET))
 		mmc->user_speed_mode = speed_mode;
 
 	if (mmc_init(mmc))

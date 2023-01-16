@@ -100,9 +100,9 @@ static void set_run_led(struct udevice *dev)
 {
 	int val = RUN_LED_OFF;
 
-	if (IS_ENABLED(CONFIG_RUN_LED_RED))
+	if (CONFIG(RUN_LED_RED))
 		val = RUN_LED_RED;
-	else if (IS_ENABLED(CONFIG_RUN_LED_GREEN))
+	else if (CONFIG(RUN_LED_GREEN))
 		val = RUN_LED_GREEN;
 
 	dm_i2c_reg_write(dev, I2C_REG_RUN_LED, val);

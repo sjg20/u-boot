@@ -336,7 +336,7 @@ static struct fstype_info fstypes[] = {
 		.mkdir = fs_mkdir_unsupported,
 	},
 #endif
-#if IS_ENABLED(CONFIG_FS_EROFS)
+#if CONFIG(FS_EROFS)
 	{
 		.fstype = FS_TYPE_EROFS,
 		.name = "erofs",
@@ -805,7 +805,7 @@ int do_load(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[],
 		return 1;
 	}
 
-	if (IS_ENABLED(CONFIG_CMD_BOOTEFI))
+	if (CONFIG(CMD_BOOTEFI))
 		efi_set_bootdev(argv[1], (argc > 2) ? argv[2] : "",
 				(argc > 4) ? argv[4] : "", map_sysmem(addr, 0),
 				len_read);

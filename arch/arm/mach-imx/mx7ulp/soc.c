@@ -87,7 +87,7 @@ int arch_cpu_init(void)
 #if defined(CONFIG_ARCH_MISC_INIT)
 int arch_misc_init(void)
 {
-	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+	if (CONFIG(FSL_CAAM)) {
 		struct udevice *dev;
 		int ret;
 

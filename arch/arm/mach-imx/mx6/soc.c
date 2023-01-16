@@ -738,7 +738,7 @@ static void setup_serial_number(void)
 
 int arch_misc_init(void)
 {
-	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+	if (CONFIG(FSL_CAAM)) {
 		struct udevice *dev;
 		int ret;
 
@@ -747,7 +747,7 @@ int arch_misc_init(void)
 			printf("Failed to initialize caam_jr: %d\n", ret);
 	}
 
-	if (IS_ENABLED(CONFIG_FSL_DCP_RNG)) {
+	if (CONFIG(FSL_DCP_RNG)) {
 		struct udevice *dev;
 		int ret;
 

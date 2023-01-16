@@ -87,7 +87,7 @@ void board_init_f(ulong dummy)
 
 	/* Clear global data */
 	memset((void *)gd, 0, sizeof(gd_t));
-	if (IS_ENABLED(CONFIG_DEBUG_UART))
+	if (CONFIG(DEBUG_UART))
 		debug_uart_init();
 	board_early_init_f();
 	ret = spl_early_init();

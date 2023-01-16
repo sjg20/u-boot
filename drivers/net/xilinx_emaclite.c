@@ -565,7 +565,7 @@ static int emaclite_probe(struct udevice *dev)
 	struct xemaclite *emaclite = dev_get_priv(dev);
 	int ret;
 
-	if (IS_ENABLED(CONFIG_DM_ETH_PHY))
+	if (CONFIG(DM_ETH_PHY))
 		emaclite->bus = eth_phy_get_mdio_bus(dev);
 
 	if (!emaclite->bus) {
@@ -579,7 +579,7 @@ static int emaclite_probe(struct udevice *dev)
 			return ret;
 	}
 
-	if (IS_ENABLED(CONFIG_DM_ETH_PHY)) {
+	if (CONFIG(DM_ETH_PHY)) {
 		eth_phy_set_mdio_bus(dev, emaclite->bus);
 		emaclite->phyaddr = eth_phy_get_addr(dev);
 	}
@@ -620,7 +620,7 @@ static int emaclite_of_to_plat(struct udevice *dev)
 
 	emaclite->phyaddr = -1;
 
-	if (!(IS_ENABLED(CONFIG_DM_ETH_PHY))) {
+	if (!(CONFIG(DM_ETH_PHY))) {
 		offset = fdtdec_lookup_phandle(gd->fdt_blob, dev_of_offset(dev),
 					       "phy-handle");
 		if (offset > 0)

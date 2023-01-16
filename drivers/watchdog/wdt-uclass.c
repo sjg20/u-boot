@@ -65,7 +65,7 @@ static void init_watchdog_dev(struct udevice *dev)
 
 	priv = dev_get_uclass_priv(dev);
 
-	if (IS_ENABLED(CONFIG_SYSRESET_WATCHDOG_AUTO)) {
+	if (CONFIG(SYSRESET_WATCHDOG_AUTO)) {
 		ret = sysreset_register_wdt(dev);
 		if (ret)
 			printf("WDT:   Failed to register %s for sysreset\n",
@@ -124,7 +124,7 @@ int wdt_start(struct udevice *dev, u64 timeout_ms, ulong flags)
 		priv->running = true;
 
 		memset(str, 0, 16);
-		if (IS_ENABLED(CONFIG_WATCHDOG)) {
+		if (CONFIG(WATCHDOG)) {
 			/* Register the watchdog driver as a cyclic function */
 			priv->cyclic = cyclic_register(wdt_cyclic,
 						       priv->reset_period * 1000,
@@ -140,7 +140,7 @@ int wdt_start(struct udevice *dev, u64 timeout_ms, ulong flags)
 		}
 
 		printf("WDT:   Started %s with%s servicing %s (%ds timeout)\n",
-		       dev->name, IS_ENABLED(CONFIG_WATCHDOG) ? "" : "out",
+		       dev->name, CONFIG(WATCHDOG) ? "" : "out",
 		       str, priv->timeout);
 	}
 
@@ -266,7 +266,7 @@ static int wdt_pre_probe(struct udevice *dev)
 	 * indicated by a hw_margin_ms property.
 	 */
 	ulong reset_period = 1000;
-	bool autostart = IS_ENABLED(CONFIG_WATCHDOG_AUTOSTART);
+	bool autostart = CONFIG(WATCHDOG_AUTOSTART);
 	struct wdt_priv *priv;
 
 	if (CONFIG(OF_CONTROL) && !CONFIG(OF_PLATDATA)) {

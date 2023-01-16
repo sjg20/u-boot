@@ -28,7 +28,7 @@
 #include <elf.h>
 #include <soc.h>
 
-#if IS_ENABLED(CONFIG_SYS_K3_SPL_ATF)
+#if CONFIG(SYS_K3_SPL_ATF)
 enum {
 	IMAGE_ID_ATF,
 	IMAGE_ID_OPTEE,
@@ -128,7 +128,7 @@ int early_console_init(void)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_SYS_K3_SPL_ATF)
+#if CONFIG(SYS_K3_SPL_ATF)
 
 void init_env(void)
 {
@@ -162,7 +162,7 @@ int load_firmware(char *name_fw, char *name_loadaddr, u32 *loadaddr)
 	char *name = NULL;
 	int size = 0;
 
-	if (!IS_ENABLED(CONFIG_FS_LOADER))
+	if (!CONFIG(FS_LOADER))
 		return 0;
 
 	*loadaddr = 0;
@@ -268,7 +268,7 @@ start_arm64:
 void board_fit_image_post_process(const void *fit, int node, void **p_image,
 				  size_t *p_size)
 {
-#if IS_ENABLED(CONFIG_SYS_K3_SPL_ATF)
+#if CONFIG(SYS_K3_SPL_ATF)
 	int len;
 	int i;
 	const char *os;
@@ -595,7 +595,7 @@ void spl_board_prepare_for_linux(void)
 
 int misc_init_r(void)
 {
-	if (IS_ENABLED(CONFIG_TI_AM65_CPSW_NUSS)) {
+	if (CONFIG(TI_AM65_CPSW_NUSS)) {
 		struct udevice *dev;
 		int ret;
 

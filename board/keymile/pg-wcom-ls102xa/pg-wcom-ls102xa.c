@@ -112,7 +112,7 @@ int board_early_init_f(void)
 
 static int pg_wcom_misc_init_f(void *ctx, struct event *event)
 {
-	if (IS_ENABLED(CONFIG_PG_WCOM_UBOOT_UPDATE_SUPPORTED))
+	if (CONFIG(PG_WCOM_UBOOT_UPDATE_SUPPORTED))
 		check_for_uboot_update();
 
 	return 0;
@@ -121,7 +121,7 @@ EVENT_SPY(EVT_MISC_INIT_F, pg_wcom_misc_init_f);
 
 int board_init(void)
 {
-	if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_A010315))
+	if (CONFIG(SYS_FSL_ERRATUM_A010315))
 		erratum_a010315();
 
 	fsl_serdes_init();
@@ -152,7 +152,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 {
 	ft_cpu_setup(blob, bd);
 
-	if (IS_ENABLED(CONFIG_PCI))
+	if (CONFIG(PCI))
 		ft_pci_setup(blob, bd);
 
 	return 0;

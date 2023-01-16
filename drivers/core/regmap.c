@@ -50,7 +50,7 @@ DECLARE_GLOBAL_DATA_PTR;
  */
 static inline bool do_range_check(void)
 {
-	return _LOG_DEBUG || !IS_ENABLED(CONFIG_SPL);
+	return _LOG_DEBUG || !CONFIG(SPL);
 
 }
 

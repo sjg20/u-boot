@@ -256,13 +256,13 @@ static int initr_dm_devices(void)
 {
 	int ret;
 
-	if (IS_ENABLED(CONFIG_TIMER_EARLY)) {
+	if (CONFIG(TIMER_EARLY)) {
 		ret = dm_timer_init();
 		if (ret)
 			return ret;
 	}
 
-	if (IS_ENABLED(CONFIG_MULTIPLEXER)) {
+	if (CONFIG(MULTIPLEXER)) {
 		/*
 		 * Initialize the multiplexer controls to their default state.
 		 * This must be done early as other drivers may unknowingly
@@ -429,10 +429,10 @@ static int initr_pvblock(void)
  */
 static int should_load_env(void)
 {
-	if (IS_ENABLED(CONFIG_OF_CONTROL))
+	if (CONFIG(OF_CONTROL))
 		return ofnode_conf_read_int("load-environment", 1);
 
-	if (IS_ENABLED(CONFIG_DELAY_ENVIRONMENT))
+	if (CONFIG(DELAY_ENVIRONMENT))
 		return 0;
 
 	return 1;
@@ -448,7 +448,7 @@ static int initr_env(void)
 
 	env_import_fdt();
 
-	if (IS_ENABLED(CONFIG_OF_CONTROL))
+	if (CONFIG(OF_CONTROL))
 		env_set_hex("fdtcontroladdr",
 			    (unsigned long)map_to_sysmem(gd->fdt_blob));
 
@@ -556,14 +556,14 @@ static int dm_announce(void)
 	int device_count;
 	int uclass_count;
 
-	if (IS_ENABLED(CONFIG_DM)) {
+	if (CONFIG(DM)) {
 		dm_get_stats(&device_count, &uclass_count);
 		printf("Core:  %d devices, %d uclasses", device_count,
 		       uclass_count);
 		if (CONFIG(OF_REAL))
 			printf(", devicetree: %s", fdtdec_get_srcname());
 		printf("\n");
-		if (IS_ENABLED(CONFIG_OF_HAS_PRIOR_STAGE) &&
+		if (CONFIG(OF_HAS_PRIOR_STAGE) &&
 		    (gd->fdt_src == FDTSRC_SEPARATE ||
 		     gd->fdt_src == FDTSRC_EMBED)) {
 			printf("Warning: Unexpected devicetree source (not from a prior stage)");
@@ -802,7 +802,7 @@ void board_init_r(gd_t *new_gd, ulong dest_addr)
 	 * TODO(sjg@chromium.org): Consider doing this for all archs, or
 	 * dropping the new_gd parameter.
 	 */
-	if (CONFIG(X86_64) && !IS_ENABLED(CONFIG_EFI_APP))
+	if (CONFIG(X86_64) && !CONFIG(EFI_APP))
 		arch_setup_gd(new_gd);
 
 #if !defined(CONFIG_X86) && !defined(CONFIG_ARM) && !defined(CONFIG_ARM64)
@@ -810,7 +810,7 @@ void board_init_r(gd_t *new_gd, ulong dest_addr)
 #endif
 	gd->flags &= ~GD_FLG_LOG_READY;
 
-	if (IS_ENABLED(CONFIG_NEEDS_MANUAL_RELOC)) {
+	if (CONFIG(NEEDS_MANUAL_RELOC)) {
 		for (int i = 0; i < ARRAY_SIZE(init_sequence_r); i++)
 			MANUAL_RELOC(init_sequence_r[i]);
 	}

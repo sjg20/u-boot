@@ -302,7 +302,7 @@ static void tftp_complete(void)
 			time_start * 1000, "/s");
 	}
 	puts("\ndone\n");
-	if (IS_ENABLED(CONFIG_CMD_BOOTEFI)) {
+	if (CONFIG(CMD_BOOTEFI)) {
 		if (!tftp_put_active)
 			efi_set_bootdev("Net", "", tftp_filename,
 					map_sysmem(tftp_load_addr, 0),
@@ -323,7 +323,7 @@ static void tftp_send(void)
 	 *	We will always be sending some sort of packet, so
 	 *	cobble together the packet headers now.
 	 */
-	if (IS_ENABLED(CONFIG_IPV6) && use_ip6)
+	if (CONFIG(IPV6) && use_ip6)
 		pkt = net_tx_packet + net_eth_hdr_size() +
 		      IP6_HDR_SIZE + UDP_HDR_SIZE;
 	else
@@ -429,7 +429,7 @@ static void tftp_send(void)
 		break;
 	}
 
-	if (IS_ENABLED(CONFIG_IPV6) && use_ip6)
+	if (CONFIG(IPV6) && use_ip6)
 		net_send_udp_packet6(net_server_ethaddr,
 				     &tftp_remote_ip6,
 				     tftp_remote_port,
@@ -769,7 +769,7 @@ void tftp_start(enum proto_t protocol)
 		saved_tftp_block_size_option = 0;
 	}
 
-	if (IS_ENABLED(CONFIG_NET_TFTP_VARS)) {
+	if (CONFIG(NET_TFTP_VARS)) {
 
 		/*
 		 * Allow the user to choose TFTP blocksize and timeout.
@@ -810,7 +810,7 @@ void tftp_start(enum proto_t protocol)
 	debug("TFTP blocksize = %i, TFTP windowsize = %d timeout = %ld ms\n",
 	      tftp_block_size_option, tftp_window_size_option, timeout_ms);
 
-	if (IS_ENABLED(CONFIG_IPV6))
+	if (CONFIG(IPV6))
 		tftp_remote_ip6 = net_server_ip6;
 
 	tftp_remote_ip = net_server_ip;
@@ -828,7 +828,7 @@ void tftp_start(enum proto_t protocol)
 		       tftp_filename);
 	}
 
-	if (IS_ENABLED(CONFIG_IPV6)) {
+	if (CONFIG(IPV6)) {
 		if (use_ip6) {
 			char *s, *e;
 			size_t len;
@@ -848,7 +848,7 @@ void tftp_start(enum proto_t protocol)
 
 	printf("Using %s device\n", eth_get_name());
 
-	if (IS_ENABLED(CONFIG_IPV6) && use_ip6) {
+	if (CONFIG(IPV6) && use_ip6) {
 		printf("TFTP from server %pI6c; our IP address is %pI6c",
 		       &tftp_remote_ip6, &net_ip6);
 
@@ -865,7 +865,7 @@ void tftp_start(enum proto_t protocol)
 	}
 
 	/* Check if we need to send across this subnet */
-	if (IS_ENABLED(CONFIG_IPV6) && use_ip6) {
+	if (CONFIG(IPV6) && use_ip6) {
 		if (!ip6_addr_in_subnet(&net_ip6, &tftp_remote_ip6,
 					net_prefix_length))
 			printf("; sending through gateway %pI6c",

@@ -137,10 +137,10 @@ void cgc1_pll3_init(ulong freq)
 
 	clrbits_le32(&cgc1_regs->pll3pfdcfg, 0x3F);
 
-	if (IS_ENABLED(CONFIG_IMX8ULP_LD_MODE)) {
+	if (CONFIG(IMX8ULP_LD_MODE)) {
 		setbits_le32(&cgc1_regs->pll3pfdcfg, 25 << 0);
 		clrsetbits_le32(&cgc1_regs->nicclk, GENMASK(26, 21), 3 << 21); /* 195M */
-	} else if (IS_ENABLED(CONFIG_IMX8ULP_ND_MODE)) {
+	} else if (CONFIG(IMX8ULP_ND_MODE)) {
 		setbits_le32(&cgc1_regs->pll3pfdcfg, 21 << 0);
 		clrsetbits_le32(&cgc1_regs->nicclk, GENMASK(26, 21), 1 << 21); /* 231M */
 	} else {
@@ -179,7 +179,7 @@ void cgc1_pll3_init(ulong freq)
 	clrbits_le32(&cgc1_regs->pll3div_pfd1, BIT(23));
 	clrbits_le32(&cgc1_regs->pll3div_pfd1, BIT(31));
 
-	if (!IS_ENABLED(CONFIG_IMX8ULP_LD_MODE) && !IS_ENABLED(CONFIG_IMX8ULP_ND_MODE)) {
+	if (!CONFIG(IMX8ULP_LD_MODE) && !CONFIG(IMX8ULP_ND_MODE)) {
 		/* nicclk select pll3 pfd0 */
 		clrsetbits_le32(&cgc1_regs->nicclk, GENMASK(29, 28), BIT(28));
 		while (!(readl(&cgc1_regs->nicclk) & BIT(27)))
@@ -219,11 +219,11 @@ void cgc2_pll4_init(bool pll4_reset)
 
 	/* Enable all 4 PFDs */
 	setbits_le32(&cgc2_regs->pll4pfdcfg, 18 << 0); /* 528 */
-	if (IS_ENABLED(CONFIG_IMX8ULP_LD_MODE)) {
+	if (CONFIG(IMX8ULP_LD_MODE)) {
 		setbits_le32(&cgc2_regs->pll4pfdcfg, 24 << 8);
 		/* 99Mhz for NIC_LPAV */
 		clrsetbits_le32(&cgc2_regs->niclpavclk, GENMASK(26, 21), 3 << 21);
-	} else if (IS_ENABLED(CONFIG_IMX8ULP_ND_MODE)) {
+	} else if (CONFIG(IMX8ULP_ND_MODE)) {
 		setbits_le32(&cgc2_regs->pll4pfdcfg, 24 << 8);
 		/* 198Mhz for NIC_LPAV */
 		clrsetbits_le32(&cgc2_regs->niclpavclk, GENMASK(26, 21), 1 << 21);

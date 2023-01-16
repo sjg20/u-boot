@@ -29,7 +29,7 @@ int board_late_init(void)
 	return 0;
 }
 
-#if (IS_ENABLED(CONFIG_DEBUG_UART_BOARD_INIT))
+#if (CONFIG(DEBUG_UART_BOARD_INIT))
 static void board_uart0_hw_init(void)
 {
 	/* FLEXCOM3 IO0 */
@@ -53,10 +53,10 @@ int board_early_init_f(void)
 
 #define MAC24AA_MAC_OFFSET     0xfa
 
-#if (IS_ENABLED(CONFIG_MISC_INIT_R))
+#if (CONFIG(MISC_INIT_R))
 int misc_init_r(void)
 {
-#if (IS_ENABLED(CONFIG_I2C_EEPROM))
+#if (CONFIG(I2C_EEPROM))
 	at91_set_ethaddr(MAC24AA_MAC_OFFSET);
 	at91_set_eth1addr(MAC24AA_MAC_OFFSET);
 #endif

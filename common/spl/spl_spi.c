@@ -131,7 +131,7 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 			return err;
 		}
 
-		if (IS_ENABLED(CONFIG_SPL_LOAD_FIT_FULL) &&
+		if (CONFIG(SPL_LOAD_FIT_FULL) &&
 		    image_get_magic(header) == FDT_MAGIC) {
 			err = spi_flash_read(flash, payload_offs,
 					     roundup(fdt_totalsize(header), 4),
@@ -140,7 +140,7 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 				return err;
 			err = spl_parse_image_header(spl_image, bootdev,
 					(struct legacy_img_hdr *)CONFIG_SYS_LOAD_ADDR);
-		} else if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
+		} else if (CONFIG(SPL_LOAD_FIT) &&
 			   image_get_magic(header) == FDT_MAGIC) {
 			struct spl_load_info load;
 
@@ -153,7 +153,7 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 			err = spl_load_simple_fit(spl_image, &load,
 						  payload_offs,
 						  header);
-		} else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER)) {
+		} else if (CONFIG(SPL_LOAD_IMX_CONTAINER)) {
 			struct spl_load_info load;
 
 			load.dev = flash;
@@ -172,7 +172,7 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 					     spl_image->size,
 					     (void *)spl_image->load_addr);
 		}
-		if (IS_ENABLED(CONFIG_SPI_FLASH_SOFT_RESET)) {
+		if (CONFIG(SPI_FLASH_SOFT_RESET)) {
 			err = spi_nor_remove(flash);
 			if (err)
 				return err;

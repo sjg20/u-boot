@@ -619,7 +619,7 @@ void set_lpav_qos(void)
 
 int arch_cpu_init(void)
 {
-	if (IS_ENABLED(CONFIG_SPL_BUILD)) {
+	if (CONFIG(SPL_BUILD)) {
 		u32 val = 0;
 		int ret;
 		bool rdc_en = true; /* Default assume DBD_EN is set */

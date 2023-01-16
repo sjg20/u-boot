@@ -1035,7 +1035,7 @@ static int udma_alloc_tchan_sci_req(struct udma_chan *uc)
 	 * register configuration still has to be done locally in
 	 * absence of RM services.
 	 */
-	if (IS_ENABLED(CONFIG_K3_DM_FW))
+	if (CONFIG(K3_DM_FW))
 		udma_alloc_tchan_raw(uc);
 
 	return 0;
@@ -1146,7 +1146,7 @@ static int udma_alloc_rchan_sci_req(struct udma_chan *uc)
 	 * register configuration still has to be done locally in
 	 * absence of RM services.
 	 */
-	if (IS_ENABLED(CONFIG_K3_DM_FW))
+	if (CONFIG(K3_DM_FW))
 		udma_alloc_rchan_raw(uc);
 
 	return 0;

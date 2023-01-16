@@ -404,7 +404,7 @@ static int stm32mp_bsec_read_otp(struct udevice *dev, u32 *val, u32 otp)
 	u32 tmp_data = 0;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_ARM_SMCCC) && !IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(ARM_SMCCC) && !CONFIG(SPL_BUILD))
 		return stm32_smc(STM32_SMC_BSEC,
 				 STM32_SMC_READ_OTP,
 				 otp, 0, val);
@@ -435,7 +435,7 @@ static int stm32mp_bsec_read_shadow(struct udevice *dev, u32 *val, u32 otp)
 {
 	struct stm32mp_bsec_plat *plat;
 
-	if (IS_ENABLED(CONFIG_ARM_SMCCC) && !IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(ARM_SMCCC) && !CONFIG(SPL_BUILD))
 		return stm32_smc(STM32_SMC_BSEC,
 				 STM32_SMC_READ_SHADOW,
 				 otp, 0, val);
@@ -464,7 +464,7 @@ static int stm32mp_bsec_write_otp(struct udevice *dev, u32 val, u32 otp)
 {
 	struct stm32mp_bsec_plat *plat;
 
-	if (IS_ENABLED(CONFIG_ARM_SMCCC) && !IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(ARM_SMCCC) && !CONFIG(SPL_BUILD))
 		return stm32_smc_exec(STM32_SMC_BSEC,
 				      STM32_SMC_PROG_OTP,
 				      otp, val);
@@ -479,7 +479,7 @@ static int stm32mp_bsec_write_shadow(struct udevice *dev, u32 val, u32 otp)
 {
 	struct stm32mp_bsec_plat *plat;
 
-	if (IS_ENABLED(CONFIG_ARM_SMCCC) && !IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(ARM_SMCCC) && !CONFIG(SPL_BUILD))
 		return stm32_smc_exec(STM32_SMC_BSEC,
 				      STM32_SMC_WRITE_SHADOW,
 				      otp, val);
@@ -499,7 +499,7 @@ static int stm32mp_bsec_write_lock(struct udevice *dev, u32 val, u32 otp)
 		return 0; /* nothing to do */
 	}
 
-	if (IS_ENABLED(CONFIG_ARM_SMCCC) && !IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(ARM_SMCCC) && !CONFIG(SPL_BUILD))
 		return stm32_smc_exec(STM32_SMC_BSEC,
 				      STM32_SMC_WRLOCK_OTP,
 				      otp, 0);
@@ -625,7 +625,7 @@ static int stm32mp_bsec_read(struct udevice *dev, int offset,
 	if ((offs % 4) || (size % 4))
 		return -EINVAL;
 
-	if (IS_ENABLED(CONFIG_OPTEE) && priv->tee) {
+	if (CONFIG(OPTEE) && priv->tee) {
 		cmd = FUSE_ACCESS;
 		if (shadow)
 			cmd = SHADOW_ACCESS;
@@ -681,7 +681,7 @@ static int stm32mp_bsec_write(struct udevice *dev, int offset,
 	if ((offs % 4) || (size % 4))
 		return -EINVAL;
 
-	if (IS_ENABLED(CONFIG_OPTEE) && priv->tee) {
+	if (CONFIG(OPTEE) && priv->tee) {
 		cmd = FUSE_ACCESS;
 		if (shadow)
 			cmd = SHADOW_ACCESS;
@@ -742,14 +742,14 @@ static int stm32mp_bsec_probe(struct udevice *dev)
 			return ret;
 	}
 
-	if (IS_ENABLED(CONFIG_OPTEE))
+	if (CONFIG(OPTEE))
 		bsec_optee_open(dev);
 
 	/*
 	 * update unlocked shadow for OTP cleared by the rom code
 	 * only executed in SPL, it is done in TF-A for TFABOOT
 	 */
-	if (IS_ENABLED(CONFIG_SPL_BUILD)) {
+	if (CONFIG(SPL_BUILD)) {
 		plat = dev_get_plat(dev);
 
 		for (otp = 57; otp <= BSEC_OTP_MAX_VALUE; otp++)

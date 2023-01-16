@@ -415,7 +415,7 @@ static void fsl_qspi_prepare_lut(struct fsl_qspi *q,
 	lutval[0] |= LUT_DEF(0, LUT_CMD, LUT_PAD(op->cmd.buswidth),
 			     op->cmd.opcode);
 
-	if (IS_ENABLED(CONFIG_FSL_QSPI_AHB_FULL_MAP)) {
+	if (CONFIG(FSL_QSPI_AHB_FULL_MAP)) {
 		if (op->addr.nbytes) {
 			lutval[lutidx / 2] |= LUT_DEF(lutidx, LUT_ADDR,
 						      LUT_PAD(op->addr.buswidth),
@@ -468,7 +468,7 @@ static void fsl_qspi_prepare_lut(struct fsl_qspi *q,
 	for (i = 0; i < ARRAY_SIZE(lutval); i++)
 		qspi_writel(q, lutval[i], base + QUADSPI_LUT_REG(i));
 
-	if (IS_ENABLED(CONFIG_FSL_QSPI_AHB_FULL_MAP)) {
+	if (CONFIG(FSL_QSPI_AHB_FULL_MAP)) {
 		if (op->data.nbytes && op->data.dir == SPI_MEM_DATA_IN &&
 		    op->addr.nbytes) {
 			for (i = 0; i < ARRAY_SIZE(lutval); i++)
@@ -520,7 +520,7 @@ static void fsl_qspi_select_mem(struct fsl_qspi *q, struct spi_slave *slave)
 
 static u32 fsl_qspi_memsize_per_cs(struct fsl_qspi *q)
 {
-	if (IS_ENABLED(CONFIG_FSL_QSPI_AHB_FULL_MAP)) {
+	if (CONFIG(FSL_QSPI_AHB_FULL_MAP)) {
 		if (needs_single_bus(q))
 			return q->memmap_size / 2;
 		else
@@ -534,7 +534,7 @@ static void fsl_qspi_read_ahb(struct fsl_qspi *q, const struct spi_mem_op *op)
 {
 	void __iomem *ahb_read_addr = q->ahb_addr;
 
-	if (IS_ENABLED(CONFIG_FSL_QSPI_AHB_FULL_MAP)) {
+	if (CONFIG(FSL_QSPI_AHB_FULL_MAP)) {
 		if (op->addr.nbytes)
 			ahb_read_addr += op->addr.val;
 	}
@@ -643,7 +643,7 @@ static int fsl_qspi_exec_op(struct spi_slave *slave,
 	if (needs_amba_base_offset(q))
 		addr_offset = q->memmap_phy;
 
-	if (IS_ENABLED(CONFIG_FSL_QSPI_AHB_FULL_MAP)) {
+	if (CONFIG(FSL_QSPI_AHB_FULL_MAP)) {
 		if (op->addr.nbytes)
 			addr_offset += op->addr.val;
 	}
@@ -738,7 +738,7 @@ static int fsl_qspi_default_setup(struct fsl_qspi *q)
 	qspi_writel(q, 0, base + QUADSPI_BUF1IND);
 	qspi_writel(q, 0, base + QUADSPI_BUF2IND);
 
-	if (IS_ENABLED(CONFIG_FSL_QSPI_AHB_FULL_MAP))
+	if (CONFIG(FSL_QSPI_AHB_FULL_MAP))
 		qspi_writel(q, QUADSPI_BFGENCR_SEQID(SEQID_LUT_AHB),
 			    q->iobase + QUADSPI_BFGENCR);
 	else

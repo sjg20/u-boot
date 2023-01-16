@@ -177,7 +177,7 @@ int acpi_write_tcpa(struct acpi_ctx *ctx, const struct acpi_writer *entry)
 	void *log;
 	int ret;
 
-	if (!IS_ENABLED(CONFIG_TPM_V1))
+	if (!CONFIG(TPM_V1))
 		return -ENOENT;
 	if (!CONFIG(BLOBLIST))
 		return -ENXIO;
@@ -236,7 +236,7 @@ static int acpi_write_tpm2(struct acpi_ctx *ctx,
 	void *lasa;
 	int ret;
 
-	if (!IS_ENABLED(CONFIG_TPM_V2))
+	if (!CONFIG(TPM_V2))
 		return log_msg_ret("none", -ENOENT);
 
 	tpm2 = ctx->current;
@@ -418,7 +418,7 @@ int acpi_write_gnvs(struct acpi_ctx *ctx, const struct acpi_writer *entry)
 {
 	ulong addr;
 
-	if (!IS_ENABLED(CONFIG_ACPI_GNVS_EXTERNAL)) {
+	if (!CONFIG(ACPI_GNVS_EXTERNAL)) {
 		int i;
 
 		/* We need the DSDT to be done */

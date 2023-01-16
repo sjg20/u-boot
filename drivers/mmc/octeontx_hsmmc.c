@@ -155,7 +155,7 @@ const char *mmc_reg_str(u64 reg)
 		return "MIO_EMM_WDOG";
 	if (reg == MIO_EMM_DMA_ARG())
 		return "MIO_EMM_DMA_ARG";
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX)) {
+	if (CONFIG(ARCH_OCTEONTX)) {
 		if (reg == MIO_EMM_SAMPLE())
 			return "MIO_EMM_SAMPLE";
 	}
@@ -167,7 +167,7 @@ const char *mmc_reg_str(u64 reg)
 		return "MIO_EMM_BUF_IDX";
 	if (reg == MIO_EMM_BUF_DAT())
 		return "MIO_EMM_BUF_DAT";
-	if (!IS_ENABLED(CONFIG_ARCH_OCTEONTX)) {
+	if (!CONFIG(ARCH_OCTEONTX)) {
 		if (reg == MIO_EMM_CALB())
 			return "MIO_EMM_CALB";
 		if (reg == MIO_EMM_TAP())
@@ -470,7 +470,7 @@ static void octeontx_mmc_print_registers2(struct mmc *mmc,
 		emm_mode.u = readq(host->base_addr + MIO_EMM_MODEX(bus));
 		printf("\nMIO_EMM_MODE%u:               0x%016llx\n",
 		       bus, emm_mode.u);
-		if (!IS_ENABLED(CONFIG_ARCH_OCTEONTX)) {
+		if (!CONFIG(ARCH_OCTEONTX)) {
 			printf("    50:    hs400_timing:        %s\n",
 			       emm_mode.s.hs400_timing ? "yes" : "no");
 			printf("    49:    hs200_timing:        %s\n",
@@ -618,7 +618,7 @@ static void octeontx_mmc_print_registers2(struct mmc *mmc,
 	printf("\nMIO_EMM_WDOG:                 0x%016llx (%u)\n",
 	       emm_wdog.u, emm_wdog.s.clk_cnt);
 
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX)) {
+	if (CONFIG(ARCH_OCTEONTX)) {
 		emm_sample.u = readq(host->base_addr + MIO_EMM_SAMPLE());
 		printf("\nMIO_EMM_SAMPLE:               0x%016llx\n",
 		       emm_sample.u);
@@ -635,7 +635,7 @@ static void octeontx_mmc_print_registers2(struct mmc *mmc,
 	printf("\nMIO_EMM_RCA:                  0x%016llx\n", emm_rca.u);
 	printf("    0-15:  card_rca:            0x%04x\n",
 	       emm_rca.s.card_rca);
-	if (!IS_ENABLED(CONFIG_ARCH_OCTEONTX)) {
+	if (!CONFIG(ARCH_OCTEONTX)) {
 		emm_calb.u = readq(host->base_addr + MIO_EMM_CALB());
 		printf("\nMIO_EMM_CALB:                 0x%016llx\n",
 		       emm_calb.u);
@@ -2664,8 +2664,8 @@ static int octeontx_mmc_configure_delay(struct mmc *mmc)
 
 	debug("%s(%s)\n", __func__, mmc->dev->name);
 
-	if (IS_ENABLED(CONFIG_ARCH_OCTEON) ||
-	    IS_ENABLED(CONFIG_ARCH_OCTEONTX)) {
+	if (CONFIG(ARCH_OCTEON) ||
+	    CONFIG(ARCH_OCTEONTX)) {
 		union mio_emm_sample emm_sample;
 
 		emm_sample.u = 0;
@@ -2818,7 +2818,7 @@ static int octeontx_mmc_configure_delay(struct mmc *mmc)
  */
 static void octeontx_mmc_io_drive_setup(struct mmc *mmc)
 {
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX2)) {
+	if (CONFIG(ARCH_OCTEONTX2)) {
 		struct octeontx_mmc_slot *slot = mmc_to_slot(mmc);
 		union mio_emm_io_ctl io_ctl;
 
@@ -3074,7 +3074,7 @@ static int octeontx_mmc_set_input_bus_timing(struct mmc *mmc)
 {
 	struct octeontx_mmc_slot *slot = mmc_to_slot(mmc);
 
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX)) {
+	if (CONFIG(ARCH_OCTEONTX)) {
 		union mio_emm_sample sample;
 
 		sample.u = 0;
@@ -3146,7 +3146,7 @@ static int octeontx_mmc_set_output_bus_timing(struct mmc *mmc)
 	unsigned int cout_delay, dout_delay;
 	char env_name[32];
 
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX))
+	if (CONFIG(ARCH_OCTEONTX))
 		return 0;
 
 	debug("%s(%s)\n", __func__, mmc->dev->name);
@@ -3415,7 +3415,7 @@ static int octeontx_mmc_init_lowlevel(struct mmc *mmc)
 	slot->clock = mmc->cfg->f_min;
 	octeontx_mmc_set_clock(&slot->mmc);
 
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX2)) {
+	if (CONFIG(ARCH_OCTEONTX2)) {
 		if (host->cond_clock_glitch) {
 			union mio_emm_debug emm_debug;
 
@@ -3437,7 +3437,7 @@ static int octeontx_mmc_init_lowlevel(struct mmc *mmc)
 	do_switch(mmc, emm_switch);
 	slot->cached_switch.u = emm_switch.u;
 
-	if (!IS_ENABLED(CONFIG_ARCH_OCTEONTX))
+	if (!CONFIG(ARCH_OCTEONTX))
 		octeontx_mmc_init_timing(mmc);
 
 	set_wdog(mmc, 1000000); /* Set to 1 second */
@@ -3460,7 +3460,7 @@ static u32 xlate_voltage(u32 voltage)
 	u32 volt = 0;
 
 	/* Convert to millivolts. Only necessary on ARM Octeon TX/TX2 */
-	if (!IS_ENABLED(CONFIG_ARCH_OCTEON))
+	if (!CONFIG(ARCH_OCTEON))
 		voltage /= 1000;
 
 	if (voltage >= 1650 && voltage <= 1950)
@@ -3557,7 +3557,7 @@ static int octeontx_mmc_get_config(struct udevice *dev)
 	slot->cfg.f_min = 400000;
 	slot->cfg.b_max = CONFIG_SYS_MMC_MAX_BLK_COUNT;
 
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX2)) {
+	if (CONFIG(ARCH_OCTEONTX2)) {
 		slot->hs400_tuning_block =
 			ofnode_read_s32_default(dev_ofnode(dev),
 						"marvell,hs400-tuning-block",
@@ -3652,7 +3652,7 @@ static int octeontx_mmc_get_config(struct udevice *dev)
 		slot->cfg.host_caps |= MMC_MODE_HS | MMC_MODE_HS_52MHz |
 				       MMC_MODE_DDR_52MHz;
 
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX2)) {
+	if (CONFIG(ARCH_OCTEONTX2)) {
 		if (!slot->is_asim && !slot->is_emul) {
 			if (ofnode_read_bool(node, "mmc-hs200-1_8v"))
 				slot->cfg.host_caps |= MMC_MODE_HS200 |
@@ -3871,7 +3871,7 @@ static int octeontx_mmc_host_probe(struct udevice *dev)
 	host->sys_freq = clk_get_rate(&clk);
 	debug("%s(%s): I/O clock %llu\n", __func__, dev->name, host->sys_freq);
 
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX2)) {
+	if (CONFIG(ARCH_OCTEONTX2)) {
 		/* Flags for issues to work around */
 		dm_pci_read_config8(dev, PCI_REVISION_ID, &rev);
 		if (otx_is_soc(CN96XX)) {

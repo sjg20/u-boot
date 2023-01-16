@@ -192,10 +192,10 @@ int power_init_board(void)
 #if defined(CONFIG_DISPLAY_BOARDINFO) || defined(CONFIG_DISPLAY_BOARDINFO_LATE)
 int checkboard(void)
 {
-	if (IS_ENABLED(CONFIG_BOARD_TYPES)) {
+	if (CONFIG(BOARD_TYPES)) {
 		const char *board_info;
 
-		if (IS_ENABLED(CONFIG_DISPLAY_BOARDINFO_LATE)) {
+		if (CONFIG(DISPLAY_BOARDINFO_LATE)) {
 			/*
 			 * Printing type requires having revision, although
 			 * this will succeed only if done late.
@@ -244,8 +244,8 @@ int board_late_init(void)
 #ifdef CONFIG_MISC_INIT_R
 int misc_init_r(void)
 {
-	if (IS_ENABLED(CONFIG_BOARD_TYPES) &&
-	    !IS_ENABLED(CONFIG_DISPLAY_BOARDINFO_LATE)) {
+	if (CONFIG(BOARD_TYPES) &&
+	    !CONFIG(DISPLAY_BOARDINFO_LATE)) {
 		/*
 		 * If revision was not set by late display boardinfo,
 		 * set it here. At this point regulators should be already

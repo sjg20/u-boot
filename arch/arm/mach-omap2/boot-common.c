@@ -208,7 +208,7 @@ int load_firmware(char *name_fw, u32 *loadaddr)
 	struct udevice *fsdev;
 	int size = 0;
 
-	if (!IS_ENABLED(CONFIG_FS_LOADER))
+	if (!CONFIG(FS_LOADER))
 		return 0;
 
 	if (!*loadaddr)
@@ -227,8 +227,8 @@ void spl_boot_ipu(void)
 	int ret, size;
 	u32 loadaddr = IPU1_LOAD_ADDR;
 
-	if (!IS_ENABLED(CONFIG_SPL_BUILD) ||
-	    !IS_ENABLED(CONFIG_REMOTEPROC_TI_IPU))
+	if (!CONFIG(SPL_BUILD) ||
+	    !CONFIG(REMOTEPROC_TI_IPU))
 		return;
 
 	size = load_firmware("dra7-ipu1-fw.xem4", &loadaddr);
@@ -308,8 +308,8 @@ void spl_board_init(void)
 #ifdef CONFIG_AM33XX
 	am33xx_spl_board_init();
 #endif
-	if (IS_ENABLED(CONFIG_SPL_BUILD) &&
-	    IS_ENABLED(CONFIG_REMOTEPROC_TI_IPU))
+	if (CONFIG(SPL_BUILD) &&
+	    CONFIG(REMOTEPROC_TI_IPU))
 		spl_boot_ipu();
 }
 

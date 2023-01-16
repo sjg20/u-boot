@@ -1217,7 +1217,7 @@ static int macb_eth_probe(struct udevice *dev)
 
 	macb->config = (struct macb_config *)dev_get_driver_data(dev);
 	if (!macb->config) {
-		if (IS_ENABLED(CONFIG_DMA_ADDR_T_64BIT)) {
+		if (CONFIG(DMA_ADDR_T_64BIT)) {
 			if (GEM_BFEXT(DAW64, gem_readl(macb, DCFG6)))
 				default_gem_config.hw_dma_cap = HW_DMA_CAP_64B;
 		}

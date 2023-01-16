@@ -234,7 +234,7 @@ static efi_status_t try_load_entry(u16 n, efi_handle_t *handle,
 		if (ret != EFI_SUCCESS)
 			goto unload;
 		/* try to register load file2 for initrd's */
-		if (IS_ENABLED(CONFIG_EFI_LOAD_FILE2_INITRD)) {
+		if (CONFIG(EFI_LOAD_FILE2_INITRD)) {
 			ret = efi_initrd_register();
 			if (ret != EFI_SUCCESS)
 				goto unload;

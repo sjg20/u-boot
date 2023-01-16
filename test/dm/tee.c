@@ -207,7 +207,7 @@ static int dm_test_tee(struct unit_test_state *uts)
 	if (rc)
 		goto out;
 
-	if (IS_ENABLED(CONFIG_OPTEE_TA_RPC_TEST))
+	if (CONFIG(OPTEE_TA_RPC_TEST))
 		rc = test_tee_rpc(uts);
 out:
 	/* In case test_tee() asserts these may still remain allocated */

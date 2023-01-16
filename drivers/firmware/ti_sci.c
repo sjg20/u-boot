@@ -3057,7 +3057,7 @@ U_BOOT_DRIVER(ti_sci) = {
 	.priv_auto	= sizeof(struct ti_sci_info),
 };
 
-#if IS_ENABLED(CONFIG_K3_DM_FW)
+#if CONFIG(K3_DM_FW)
 U_BOOT_DRIVER(ti_sci_dm) = {
 	.name = "ti_sci_dm",
 	.id = UCLASS_FIRMWARE,

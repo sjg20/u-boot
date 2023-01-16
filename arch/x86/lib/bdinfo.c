@@ -17,6 +17,6 @@ void arch_print_bdinfo(void)
 {
 	bdinfo_print_num_l("prev table", gd->arch.table);
 
-	if (IS_ENABLED(CONFIG_EFI_STUB))
+	if (CONFIG(EFI_STUB))
 		efi_show_bdinfo();
 }

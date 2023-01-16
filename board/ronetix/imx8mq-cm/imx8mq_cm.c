@@ -75,7 +75,7 @@ int board_mmc_get_env_dev(int devno)
 
 int board_late_init(void)
 {
-	if (IS_ENABLED(CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
+	if (CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
 		env_set("board_name", "imx8mq-cm");
 		env_set("board_rev", "v2.0");
 	}

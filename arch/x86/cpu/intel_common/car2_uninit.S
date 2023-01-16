@@ -40,7 +40,7 @@ car_nem_teardown:
 	and	$(~(1 << 0)), %eax
 	wrmsr
 
-#elif IS_ENABLED(CONFIG_INTEL_CAR_CQOS)
+#elif CONFIG(INTEL_CAR_CQOS)
 .global car_cqos_teardown
 car_cqos_teardown:
 
@@ -61,7 +61,7 @@ car_cqos_teardown:
 	and	$~MSR_IA32_PQR_ASSOC_MASK, %edx
 	wrmsr
 
-#elif IS_ENABLED(CONFIG_INTEL_CAR_NEM_ENHANCED)
+#elif CONFIG(INTEL_CAR_NEM_ENHANCED)
 .global car_nem_enhanced_teardown
 car_nem_enhanced_teardown:
 

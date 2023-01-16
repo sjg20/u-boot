@@ -79,7 +79,7 @@ static int env_sf_save(void)
 	if (ret)
 		return ret;
 
-	if (IS_ENABLED(CONFIG_ENV_SECT_SIZE_AUTO))
+	if (CONFIG(ENV_SECT_SIZE_AUTO))
 		sect_size = env_flash->mtd.erasesize;
 
 	ret = env_export(&env_new);
@@ -202,7 +202,7 @@ static int env_sf_save(void)
 	if (ret)
 		return ret;
 
-	if (IS_ENABLED(CONFIG_ENV_SECT_SIZE_AUTO))
+	if (CONFIG(ENV_SECT_SIZE_AUTO))
 		sect_size = env_flash->mtd.erasesize;
 
 	/* Is the sector larger than the env (i.e. embedded) */
@@ -369,7 +369,7 @@ static int env_sf_init_early(void)
 
 	tmp_env1 = (env_t *)memalign(ARCH_DMA_MINALIGN,
 			CONFIG_ENV_SIZE);
-	if (IS_ENABLED(CONFIG_SYS_REDUNDAND_ENVIRONMENT))
+	if (CONFIG(SYS_REDUNDAND_ENVIRONMENT))
 		tmp_env2 = (env_t *)memalign(ARCH_DMA_MINALIGN,
 					     CONFIG_ENV_SIZE);
 
@@ -383,7 +383,7 @@ static int env_sf_init_early(void)
 	read1_fail = spi_flash_read(env_flash, CONFIG_ENV_OFFSET,
 				    CONFIG_ENV_SIZE, tmp_env1);
 
-	if (IS_ENABLED(CONFIG_SYS_REDUNDAND_ENVIRONMENT)) {
+	if (CONFIG(SYS_REDUNDAND_ENVIRONMENT)) {
 		read2_fail = spi_flash_read(env_flash,
 					    CONFIG_ENV_OFFSET_REDUND,
 					    CONFIG_ENV_SIZE, tmp_env2);
@@ -418,7 +418,7 @@ err_read:
 	spi_flash_free(env_flash);
 
 	free(tmp_env1);
-	if (IS_ENABLED(CONFIG_SYS_REDUNDAND_ENVIRONMENT))
+	if (CONFIG(SYS_REDUNDAND_ENVIRONMENT))
 		free(tmp_env2);
 out:
 	/* env is not valid. always return 0 */

@@ -2551,7 +2551,7 @@ static int lpddr4_set_rate(struct dram_info *dram,
 	lpddr4_set_ctl(dram, params, ctl_fn,
 		       dfs_cfgs_lpddr4[ctl_fn].base.ddr_freq);
 
-	if (IS_ENABLED(CONFIG_RAM_ROCKCHIP_DEBUG))
+	if (CONFIG(RAM_ROCKCHIP_DEBUG))
 		printf("%s: change freq to %dMHz %d, %d\n", __func__,
 		       dfs_cfgs_lpddr4[ctl_fn].base.ddr_freq / MHz,
 		       ctl_fn, phy_fn);
@@ -2971,7 +2971,7 @@ static int sdram_init(struct dram_info *dram,
 			continue;
 		}
 
-		if (IS_ENABLED(CONFIG_RAM_ROCKCHIP_DEBUG)) {
+		if (CONFIG(RAM_ROCKCHIP_DEBUG)) {
 			printf("Channel ");
 			printf(channel ? "1: " : "0: ");
 		}

@@ -45,7 +45,7 @@ void spl_dram_init(void)
 
 void spl_board_init(void)
 {
-	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+	if (CONFIG(FSL_CAAM)) {
 		struct udevice *dev;
 		int ret;
 
@@ -104,7 +104,7 @@ int power_init_board(void)
 	 * Enable DVS control through PMIC_STBY_REQ and
 	 * set B1_ENMODE=1 (ON by PMIC_ON_REQ=H)
 	 */
-	if (IS_ENABLED(CONFIG_IMX8M_VDD_SOC_850MV))
+	if (CONFIG(IMX8M_VDD_SOC_850MV))
 		/* set DVS0 to 0.85v for special case */
 		pmic_reg_write(p, PCA9450_BUCK1OUT_DVS0, 0x14);
 	else
@@ -127,7 +127,7 @@ int power_init_board(void)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_SPL_LOAD_FIT)
+#if CONFIG(SPL_LOAD_FIT)
 int board_fit_config_name_match(const char *name)
 {
 	/* Just empty function now - can't decide what to choose */

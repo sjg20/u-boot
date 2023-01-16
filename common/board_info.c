@@ -23,13 +23,13 @@ int __weak checkboard(void)
  */
 int __weak show_board_info(void)
 {
-	if (IS_ENABLED(CONFIG_OF_CONTROL)) {
+	if (CONFIG(OF_CONTROL)) {
 		struct udevice *dev;
 		const char *model;
 		char str[80];
 		int ret = -ENOSYS;
 
-		if (IS_ENABLED(CONFIG_SYSINFO)) {
+		if (CONFIG(SYSINFO)) {
 			/* This might provide more detail */
 			ret = sysinfo_get(&dev);
 			if (!ret) {

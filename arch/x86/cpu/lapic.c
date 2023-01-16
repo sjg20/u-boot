@@ -65,7 +65,7 @@ void lapic_write(unsigned long reg, unsigned long v)
 
 void enable_lapic(void)
 {
-	if (!IS_ENABLED(CONFIG_INTEL_QUARK)) {
+	if (!CONFIG(INTEL_QUARK)) {
 		msr_t msr;
 
 		msr = msr_read(MSR_IA32_APICBASE);
@@ -79,7 +79,7 @@ void enable_lapic(void)
 
 void disable_lapic(void)
 {
-	if (!IS_ENABLED(CONFIG_INTEL_QUARK)) {
+	if (!CONFIG(INTEL_QUARK)) {
 		msr_t msr;
 
 		msr = msr_read(MSR_IA32_APICBASE);

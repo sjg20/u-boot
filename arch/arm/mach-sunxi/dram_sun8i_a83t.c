@@ -287,7 +287,7 @@ static int mctl_channel_init(struct dram_para *para)
 
 
 	/* Set ODT */
-	if (IS_ENABLED(CONFIG_DRAM_ODT_EN))
+	if (CONFIG(DRAM_ODT_EN))
 		rval = 0x0;
 	else
 		rval = 0x2;

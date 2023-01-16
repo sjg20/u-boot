@@ -31,9 +31,9 @@ static struct npcm_otp_priv *otp_priv;
 static int npcm_otp_check_inputs(u32 arr, u32 word)
 {
 	if (arr >= NPCM_NUM_OF_SA) {
-		if (IS_ENABLED(CONFIG_ARCH_NPCM8XX))
+		if (CONFIG(ARCH_NPCM8XX))
 			printf("\nError: npcm8XX otp includs only one bank: 0\n");
-		if (IS_ENABLED(CONFIG_ARCH_NPCM7XX))
+		if (CONFIG(ARCH_NPCM7XX))
 			printf("\nError: npcm7XX otp includs only two banks: 0 and 1\n");
 		return -1;
 	}
@@ -484,7 +484,7 @@ static int npcm_otp_bind(struct udevice *dev)
 	}
 	otp_priv->regs[0] = regs;
 
-	if (IS_ENABLED(CONFIG_ARCH_NPCM7xx)) {
+	if (CONFIG(ARCH_NPCM7xx)) {
 		regs = dev_remap_addr_index(dev, 1);
 		if (!regs) {
 			printf("Cannot find reg address (arr #1), binding failed\n");

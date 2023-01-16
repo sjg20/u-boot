@@ -152,7 +152,7 @@ int spl_parse_board_header(struct spl_image_info *spl_image,
 		return -EINVAL;
 	}
 
-	if (IS_ENABLED(CONFIG_SPL_SPI_FLASH_SUPPORT) &&
+	if (CONFIG(SPL_SPI_FLASH_SUPPORT) &&
 	    bootdev->boot_device == BOOT_DEVICE_SPI &&
 	    mhdr->blockid != IBR_HDR_SPI_ID) {
 		printf("ERROR: Wrong blockid (0x%x) in SPI kwbimage\n",
@@ -160,7 +160,7 @@ int spl_parse_board_header(struct spl_image_info *spl_image,
 		return -EINVAL;
 	}
 
-	if (IS_ENABLED(CONFIG_SPL_SATA) &&
+	if (CONFIG(SPL_SATA) &&
 	    bootdev->boot_device == BOOT_DEVICE_SATA &&
 	    mhdr->blockid != IBR_HDR_SATA_ID) {
 		printf("ERROR: Wrong blockid (0x%x) in SATA kwbimage\n",
@@ -168,7 +168,7 @@ int spl_parse_board_header(struct spl_image_info *spl_image,
 		return -EINVAL;
 	}
 
-	if (IS_ENABLED(CONFIG_SPL_MMC) &&
+	if (CONFIG(SPL_MMC) &&
 	    (bootdev->boot_device == BOOT_DEVICE_MMC1 ||
 	     bootdev->boot_device == BOOT_DEVICE_MMC2 ||
 	     bootdev->boot_device == BOOT_DEVICE_MMC2_2) &&
@@ -186,7 +186,7 @@ int spl_parse_board_header(struct spl_image_info *spl_image,
 	 * This expects that sector size is 512 bytes and recalculates
 	 * data offset to bytes relative to the main header.
 	 */
-	if (IS_ENABLED(CONFIG_SPL_SATA) && mhdr->blockid == IBR_HDR_SATA_ID) {
+	if (CONFIG(SPL_SATA) && mhdr->blockid == IBR_HDR_SATA_ID) {
 		if (spl_image->offset < 1) {
 			printf("ERROR: Wrong srcaddr (0x%08x) in SATA kwbimage\n",
 			       spl_image->offset);
@@ -201,7 +201,7 @@ int spl_parse_board_header(struct spl_image_info *spl_image,
 	 * This expects that sector size is 512 bytes and recalculates
 	 * data offset to bytes.
 	 */
-	if (IS_ENABLED(CONFIG_SPL_MMC) && mhdr->blockid == IBR_HDR_SDIO_ID)
+	if (CONFIG(SPL_MMC) && mhdr->blockid == IBR_HDR_SDIO_ID)
 		spl_image->offset *= 512;
 
 	if (spl_image->offset % 4 != 0) {
@@ -349,7 +349,7 @@ void board_init_f(ulong dummy)
 	ret = ddr3_init();
 	if (ret) {
 		printf("ddr3_init() failed: %d\n", ret);
-		if (IS_ENABLED(CONFIG_DDR_RESET_ON_TRAINING_FAILURE) &&
+		if (CONFIG(DDR_RESET_ON_TRAINING_FAILURE) &&
 		    get_boot_device() != BOOT_DEVICE_UART)
 			reset_cpu();
 		else

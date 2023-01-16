@@ -90,7 +90,7 @@ static int stpmic1_bind(struct udevice *dev)
 		dev_dbg(dev, "no child found\n");
 #endif /* DM_REGULATOR */
 
-	if (!IS_ENABLED(CONFIG_SPL_BUILD)) {
+	if (!CONFIG(SPL_BUILD)) {
 		ret = device_bind_driver(dev, "stpmic1-nvm",
 					 "stpmic1-nvm", NULL);
 		if (ret)

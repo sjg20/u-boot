@@ -31,7 +31,7 @@ binman_sym_declare(ulong, ddr_1d_imem_fw, size);
 binman_sym_declare(ulong, ddr_1d_dmem_fw, image_pos);
 binman_sym_declare(ulong, ddr_1d_dmem_fw, size);
 
-#if !IS_ENABLED(CONFIG_IMX8M_DDR3L)
+#if !CONFIG(IMX8M_DDR3L)
 binman_sym_declare(ulong, ddr_2d_imem_fw, image_pos);
 binman_sym_declare(ulong, ddr_2d_imem_fw, size);
 
@@ -69,7 +69,7 @@ void ddr_load_train_firmware(enum fw_type type)
 			dmem_len = binman_sym(ulong, ddr_1d_dmem_fw, size);
 			break;
 		case FW_2D_IMAGE:
-#if !IS_ENABLED(CONFIG_IMX8M_DDR3L)
+#if !CONFIG(IMX8M_DDR3L)
 			imem_start = binman_sym(ulong, ddr_2d_imem_fw, image_pos);
 			imem_len = binman_sym(ulong, ddr_2d_imem_fw, size);
 			dmem_start = binman_sym(ulong, ddr_2d_dmem_fw, image_pos);

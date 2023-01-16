@@ -194,9 +194,9 @@ static inline enum board_type get_board_type_runtime(void)
 
 static inline enum board_type get_board_type_config(void)
 {
-	if (IS_ENABLED(CONFIG_BOARD_HSDK))
+	if (CONFIG(BOARD_HSDK))
 		return T_BOARD_HSDK;
-	else if (IS_ENABLED(CONFIG_BOARD_HSDK_4XD))
+	else if (CONFIG(BOARD_HSDK_4XD))
 		return T_BOARD_HSDK_4XD;
 	else
 		return T_BOARD_NONE;

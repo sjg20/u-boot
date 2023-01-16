@@ -137,27 +137,27 @@ enum env_location env_get_location(enum env_operation op, int prio)
 		return ENVL_UNKNOWN;
 
 	/* NOWHERE is exclusive, no other option can be defined. */
-	if (IS_ENABLED(CONFIG_ENV_IS_NOWHERE))
+	if (CONFIG(ENV_IS_NOWHERE))
 		return ENVL_NOWHERE;
 
 	switch (sunxi_get_boot_device()) {
 	case BOOT_DEVICE_MMC1:
 	case BOOT_DEVICE_MMC2:
-		if (prio == 0 && IS_ENABLED(CONFIG_ENV_IS_IN_FAT))
+		if (prio == 0 && CONFIG(ENV_IS_IN_FAT))
 			return ENVL_FAT;
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_MMC))
+		if (CONFIG(ENV_IS_IN_MMC))
 			return ENVL_MMC;
 		break;
 	case BOOT_DEVICE_NAND:
-		if (prio == 0 && IS_ENABLED(CONFIG_ENV_IS_IN_UBI))
+		if (prio == 0 && CONFIG(ENV_IS_IN_UBI))
 			return ENVL_UBI;
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_NAND))
+		if (CONFIG(ENV_IS_IN_NAND))
 			return ENVL_NAND;
 		break;
 	case BOOT_DEVICE_SPI:
-		if (prio == 0 && IS_ENABLED(CONFIG_ENV_IS_IN_SPI_FLASH))
+		if (prio == 0 && CONFIG(ENV_IS_IN_SPI_FLASH))
 			return ENVL_SPI_FLASH;
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_FAT))
+		if (CONFIG(ENV_IS_IN_FAT))
 			return ENVL_FAT;
 		break;
 	case BOOT_DEVICE_BOARD:
@@ -175,9 +175,9 @@ enum env_location env_get_location(enum env_operation op, int prio)
 	 * or UBI, or NOWHERE, which is already handled above.
 	 */
 	if (prio == 0) {
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_FAT))
+		if (CONFIG(ENV_IS_IN_FAT))
 			return ENVL_FAT;
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_UBI))
+		if (CONFIG(ENV_IS_IN_UBI))
 			return ENVL_UBI;
 	}
 
@@ -371,7 +371,7 @@ static void mmc_pinmux_setup(int sdc)
 	case 1:
 #if defined(CONFIG_MACH_SUN4I) || defined(CONFIG_MACH_SUN7I) || \
     defined(CONFIG_MACH_SUN8I_R40)
-		if (IS_ENABLED(CONFIG_MMC1_PINS_PH)) {
+		if (CONFIG(MMC1_PINS_PH)) {
 			/* SDC1: PH22-PH-27 */
 			for (pin = SUNXI_GPH(22); pin <= SUNXI_GPH(27); pin++) {
 				sunxi_gpio_set_cfgpin(pin, SUN4I_GPH_SDC1);
@@ -526,7 +526,7 @@ int board_mmc_init(struct bd_info *bis)
 	 * most boards seem to have such a slot. The others haven't reported
 	 * any problem with unconditionally enabling this in the SPL.
 	 */
-	if (!IS_ENABLED(CONFIG_UART0_PORT_F)) {
+	if (!CONFIG(UART0_PORT_F)) {
 		mmc_pinmux_setup(0);
 		if (!sunxi_mmc_init(0))
 			return -1;
@@ -577,7 +577,7 @@ void sunxi_board_init(void)
 	int power_failed = 0;
 
 #ifdef CONFIG_LED_STATUS
-	if (IS_ENABLED(CONFIG_SPL_DRIVERS_MISC))
+	if (CONFIG(SPL_DRIVERS_MISC))
 		status_led_init();
 #endif
 
@@ -590,7 +590,7 @@ void sunxi_board_init(void)
 	defined CONFIG_AXP809_POWER || defined CONFIG_AXP818_POWER
 	power_failed = axp_init();
 
-	if (IS_ENABLED(CONFIG_AXP_DISABLE_BOOT_ON_POWERON) && !power_failed) {
+	if (CONFIG(AXP_DISABLE_BOOT_ON_POWERON) && !power_failed) {
 		u8 boot_reason;
 
 		pmic_bus_read(AXP_POWER_STATUS, &boot_reason);
@@ -650,7 +650,7 @@ void sunxi_board_init(void)
 #endif
 
 #if defined CONFIG_AXP809_POWER || defined CONFIG_AXP818_POWER
-	power_failed |= axp_set_sw(IS_ENABLED(CONFIG_AXP_SW_ON));
+	power_failed |= axp_set_sw(CONFIG(AXP_SW_ON));
 #endif
 #endif
 	printf("DRAM:");
@@ -852,7 +852,7 @@ int misc_init_r(void)
 	/* Set fdtfile to match the FIT configuration chosen in SPL. */
 	spl_dt_name = get_spl_dt_name();
 	if (spl_dt_name) {
-		char *prefix = IS_ENABLED(CONFIG_ARM64) ? "allwinner/" : "";
+		char *prefix = CONFIG(ARM64) ? "allwinner/" : "";
 		char str[64];
 
 		snprintf(str, sizeof(str), "%s%s.dtb", prefix, spl_dt_name);

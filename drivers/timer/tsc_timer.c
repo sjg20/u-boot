@@ -398,7 +398,7 @@ static void tsc_timer_ensure_setup(bool early)
 {
 	if (gd->arch.tsc_inited)
 		return;
-	if (IS_ENABLED(CONFIG_X86_TSC_READ_BASE))
+	if (CONFIG(X86_TSC_READ_BASE))
 		gd->arch.tsc_base = rdtsc();
 
 	if (!gd->arch.clock_rate) {

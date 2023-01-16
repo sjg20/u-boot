@@ -15,7 +15,7 @@
 #include <common.h>
 #include <asm/io.h>
 #include <asm/arch/cpu.h>
-#if IS_ENABLED(CONFIG_TARGET_AM335X_GUARDIAN)
+#if CONFIG(TARGET_AM335X_GUARDIAN)
 #include <asm/arch/mem-guardian.h>
 #else
 #include <asm/arch/mem.h>

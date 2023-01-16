@@ -61,7 +61,7 @@ int fuse_prog(u32 bank, u32 word, u32 val)
 		return -EINVAL;
 	}
 
-	if (IS_ENABLED(CONFIG_IMX8QXP)) {
+	if (CONFIG(IMX8QXP)) {
 		if (word >= FSL_QXP_FUSE_GAP_START &&
 		    word <= FSL_QXP_FUSE_GAP_END) {
 			printf("Invalid word argument for this SoC\n");

@@ -88,7 +88,7 @@ int board_early_init_f(void)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DM_GPIO)
+#if CONFIG(DM_GPIO)
 static void board_gpio_init(void)
 {
 	/* TODO */
@@ -97,7 +97,7 @@ static void board_gpio_init(void)
 static inline void board_gpio_init(void) {}
 #endif
 
-#if IS_ENABLED(CONFIG_FEC_MXC)
+#if CONFIG(FEC_MXC)
 #include <miiphy.h>
 
 int board_phy_config(struct phy_device *phydev)

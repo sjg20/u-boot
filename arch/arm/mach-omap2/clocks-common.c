@@ -865,7 +865,7 @@ void do_enable_ipu_clocks(u32 const *clk_domains,
 {
 	u32 i, max = 10;
 
-	if (!IS_ENABLED(CONFIG_REMOTEPROC_TI_IPU))
+	if (!CONFIG(REMOTEPROC_TI_IPU))
 		return;
 
 	/* Put the clock domains in SW_WKUP mode */

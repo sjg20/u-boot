@@ -67,7 +67,7 @@ U_BOOT_DRIVER(wdt_reboot) = {
 	.ops = &wdt_reboot_ops,
 };
 
-#if IS_ENABLED(CONFIG_SYSRESET_WATCHDOG_AUTO)
+#if CONFIG(SYSRESET_WATCHDOG_AUTO)
 int sysreset_register_wdt(struct udevice *dev)
 {
 	struct wdt_reboot_plat *plat = malloc(sizeof(*plat));

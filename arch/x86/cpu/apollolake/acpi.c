@@ -90,7 +90,7 @@ int acpi_create_gnvs(struct acpi_global_nvs *gnvs)
 
 	/* TODO(sjg@chromium.org): Add the console log to gnvs->cbmc */
 
-	if (IS_ENABLED(CONFIG_CHROMEOS))
+	if (CONFIG(CHROMEOS))
 		chromeos_init_acpi(&gnvs->chromeos);
 
 	/* Set unknown wake source */

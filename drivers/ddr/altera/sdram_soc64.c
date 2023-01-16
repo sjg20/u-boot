@@ -100,7 +100,7 @@ int emif_reset(struct altera_sdram_plat *plat)
 	return 0;
 }
 
-#if !IS_ENABLED(CONFIG_TARGET_SOCFPGA_N5X)
+#if !CONFIG(TARGET_SOCFPGA_N5X)
 int poll_hmc_clock_status(void)
 {
 	return wait_for_bit_le32((const void *)(socfpga_get_sysmgr_addr() +
@@ -267,7 +267,7 @@ void sdram_set_firewall(struct bd_info *bd)
 		/* Keep first 1MB of SDRAM memory region as secure region when
 		 * using ATF flow, where the ATF code is located.
 		 */
-		if (IS_ENABLED(CONFIG_SPL_ATF) && i == 0)
+		if (CONFIG(SPL_ATF) && i == 0)
 			value += SZ_1M;
 
 		/* Setting non-secure MPU region base and base extended */
@@ -320,7 +320,7 @@ static int altera_sdram_of_to_plat(struct udevice *dev)
 	fdt_addr_t addr;
 
 	/* These regs info are part of DDR handoff in bitstream */
-#if IS_ENABLED(CONFIG_TARGET_SOCFPGA_N5X)
+#if CONFIG(TARGET_SOCFPGA_N5X)
 	return 0;
 #endif
 

@@ -257,7 +257,7 @@ void erofs_close(void)
 
 int erofs_uuid(char *uuid_str)
 {
-	if (IS_ENABLED(CONFIG_LIB_UUID)) {
+	if (CONFIG(LIB_UUID)) {
 		if (ctxt.cur_dev)
 			uuid_bin_to_str(sbi.uuid, uuid_str,
 					UUID_STR_FORMAT_STD);

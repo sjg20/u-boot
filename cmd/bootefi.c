@@ -87,7 +87,7 @@ void efi_set_bootdev(const char *dev, const char *devnr, const char *path,
 
 	/* Remember only PE-COFF and FIT images */
 	if (efi_check_pe(buffer, buffer_size, NULL) != EFI_SUCCESS) {
-		if (IS_ENABLED(CONFIG_FIT) &&
+		if (CONFIG(FIT) &&
 		    !fit_check_format(buffer, IMAGE_SIZE_INVAL)) {
 			/*
 			 * FIT images of type EFI_OS are started via command
@@ -394,7 +394,7 @@ static efi_status_t do_bootefi_exec(efi_handle_t handle, void *load_options)
 out:
 	free(load_options);
 
-	if (IS_ENABLED(CONFIG_EFI_LOAD_FILE2_INITRD)) {
+	if (CONFIG(EFI_LOAD_FILE2_INITRD)) {
 		if (efi_initrd_deregister() != EFI_SUCCESS)
 			log_err("Failed to remove loadfile2 for initrd\n");
 	}
@@ -690,7 +690,7 @@ static int do_bootefi(struct cmd_tbl *cmdtp, int flag, int argc,
 	else if (ret != EFI_SUCCESS)
 		return CMD_RET_FAILURE;
 
-	if (IS_ENABLED(CONFIG_CMD_BOOTEFI_BOOTMGR)) {
+	if (CONFIG(CMD_BOOTEFI_BOOTMGR)) {
 		if (!strcmp(argv[1], "bootmgr"))
 			return do_efibootmgr();
 	}

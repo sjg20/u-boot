@@ -413,7 +413,7 @@ static int zynq_load(xilinx_desc *desc, const void *buf, size_t bsize,
 	if (bstype != BIT_PARTIAL)
 		zynq_slcr_devcfg_enable();
 
-	if (!IS_ENABLED(CONFIG_SPL_BUILD))
+	if (!CONFIG(SPL_BUILD))
 		puts("INFO:post config was not run, please run manually if needed\n");
 
 	return FPGA_SUCCESS;

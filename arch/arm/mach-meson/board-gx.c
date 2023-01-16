@@ -58,7 +58,7 @@ void meson_init_reserved_memory(void *fdt)
 	 * Early Meson GX Firmware revisions did not provide the reserved
 	 * memory zones in the registers, keep fixed memory zone handling.
 	 */
-	if (IS_ENABLED(CONFIG_MESON_GX) &&
+	if (CONFIG(MESON_GX) &&
 	    !reg && !bl31_start && !bl32_start) {
 		bl31_start = 0x10000000;
 		bl31_size = 0x200000;

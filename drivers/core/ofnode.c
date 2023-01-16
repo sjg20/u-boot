@@ -485,7 +485,7 @@ int ofnode_read_u32_array(ofnode node, const char *propname,
 					   out_values, sz);
 
 		/* get the error right, but space is more important in SPL */
-		if (!IS_ENABLED(CONFIG_SPL_BUILD)) {
+		if (!CONFIG(SPL_BUILD)) {
 			if (ret == -FDT_ERR_NOTFOUND)
 				return -EINVAL;
 			else if (ret == -FDT_ERR_BADLAYOUT)
@@ -629,7 +629,7 @@ static fdt_addr_t __ofnode_get_addr_size_index(ofnode node, int index,
 
 		ns = of_n_size_cells(ofnode_to_np(node));
 
-		if (translate && IS_ENABLED(CONFIG_OF_TRANSLATE) && ns > 0) {
+		if (translate && CONFIG(OF_TRANSLATE) && ns > 0) {
 			return of_translate_address(ofnode_to_np(node), prop_val);
 		} else {
 			na = of_n_addr_cells(ofnode_to_np(node));

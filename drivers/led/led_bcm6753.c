@@ -138,12 +138,12 @@ static int bcm6753_led_set_state(struct udevice *dev, enum led_state_t state)
 	switch (state) {
 	case LEDST_OFF:
 		setbits_32(priv->regs + CLED_SW_LED_IP_CLEAR_REG, (1 << priv->pin));
-		if (IS_ENABLED(CONFIG_LED_BLINK))
+		if (CONFIG(LED_BLINK))
 			bcm6753_led_set_period(dev, 0);
 		break;
 	case LEDST_ON:
 		setbits_32(priv->regs + CLED_SW_LED_IP_SET_REG, (1 << priv->pin));
-		if (IS_ENABLED(CONFIG_LED_BLINK))
+		if (CONFIG(LED_BLINK))
 			bcm6753_led_set_period(dev, 0);
 		break;
 	case LEDST_TOGGLE:

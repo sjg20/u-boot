@@ -150,7 +150,7 @@ int dp_control_setup(int module,
 	nx_dpc_set_delay(module, rgb_pvd, hsync_cp1, vsync_fram, de_cp2);
 	nx_dpc_set_dither(module, r_dither, g_dither, b_dither);
 
-	if (IS_ENABLED(CONFIG_MACH_S5P6818)) {
+	if (CONFIG(MACH_S5P6818)) {
 		/* Set TFT_CLKCTRL (offset : 1030h)
 		 * Field name : DPC0_CLKCTRL, DPC1_CLKCRL
 		 * Default value : clk_inv_lv0/1 = 0 : PADCLK_InvCLK

@@ -121,7 +121,7 @@ static int dwmac_setup_gx(struct udevice *dev, struct eth_pdata *edata)
 		out_le32(plat->regs + ETH_REG_0, GX_ETH_REG_0_INVERT_RMII_CLK |
 						 GX_ETH_REG_0_CLK_EN);
 
-		if (!IS_ENABLED(CONFIG_MESON_GXBB))
+		if (!CONFIG(MESON_GXBB))
 			writel(0x10110181, plat->regs + ETH_REG_2);
 
 		break;

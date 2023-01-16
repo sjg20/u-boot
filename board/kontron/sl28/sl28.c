@@ -145,7 +145,7 @@ static void sl28_set_prompt(void)
 
 int fsl_board_late_init(void)
 {
-	if (IS_ENABLED(CONFIG_CMDLINE_PS_SUPPORT))
+	if (CONFIG(CMDLINE_PS_SUPPORT))
 		sl28_set_prompt();
 
 	/*

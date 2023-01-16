@@ -816,7 +816,7 @@ static int stm32mp1_clk_probe(struct udevice *dev)
 	/* DDRPHYC father */
 	gd->mem_clk = clk_stm32_get_rate_by_name("pll2_r");
 
-	if (IS_ENABLED(CONFIG_DISPLAY_CPUINFO)) {
+	if (CONFIG(DISPLAY_CPUINFO)) {
 		if (gd->flags & GD_FLG_RELOC) {
 			char buf[32];
 

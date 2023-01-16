@@ -109,7 +109,7 @@ static int x86_spl_init(void)
 		debug("%s: dram_init() failed\n", __func__);
 		return ret;
 	}
-	if (IS_ENABLED(CONFIG_ENABLE_MRC_CACHE)) {
+	if (CONFIG(ENABLE_MRC_CACHE)) {
 		ret = mrccache_spl_save();
 		if (ret)
 			debug("%s: Failed to write to mrccache (err=%d)\n",
@@ -169,7 +169,7 @@ void board_init_f(ulong flags)
 		printf("x86_spl_init: error %d\n", ret);
 		hang();
 	}
-#if IS_ENABLED(CONFIG_TPL) || IS_ENABLED(CONFIG_SYS_COREBOOT)
+#if CONFIG(TPL) || CONFIG(SYS_COREBOOT)
 	gd->bd = malloc(sizeof(*gd->bd));
 	if (!gd->bd) {
 		printf("Out of memory for bd_info size %x\n", sizeof(*gd->bd));
@@ -214,7 +214,7 @@ static int spl_board_load_image(struct spl_image_info *spl_image,
 	spl_image->os = IH_OS_U_BOOT;
 	spl_image->name = "U-Boot";
 
-	if (!IS_ENABLED(CONFIG_SYS_COREBOOT)) {
+	if (!CONFIG(SYS_COREBOOT)) {
 		/*
 		 * Copy U-Boot from ROM
 		 * TODO(sjg@chromium.org): Figure out a way to get the text base

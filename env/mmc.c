@@ -121,7 +121,7 @@ static inline s64 mmc_offset(int copy)
 	}
 
 	/* try the GPT partition with "U-Boot ENV" TYPE GUID */
-	if (IS_ENABLED(CONFIG_PARTITION_TYPE_GUID)) {
+	if (CONFIG(PARTITION_TYPE_GUID)) {
 		err = mmc_offset_try_partition(NULL, copy, &val);
 		if (!err)
 			return val;
@@ -130,7 +130,7 @@ static inline s64 mmc_offset(int copy)
 	defvalue = ENV_MMC_OFFSET;
 	propname = dt_prop.offset;
 
-	if (IS_ENABLED(CONFIG_SYS_REDUNDAND_ENVIRONMENT) && copy) {
+	if (CONFIG(SYS_REDUNDAND_ENVIRONMENT) && copy) {
 		defvalue = ENV_MMC_OFFSET_REDUND;
 		propname = dt_prop.offset_redund;
 	}
@@ -142,7 +142,7 @@ static inline s64 mmc_offset(int copy)
 {
 	s64 offset = ENV_MMC_OFFSET;
 
-	if (IS_ENABLED(CONFIG_SYS_REDUNDAND_ENVIRONMENT) && copy)
+	if (CONFIG(SYS_REDUNDAND_ENVIRONMENT) && copy)
 		offset = ENV_MMC_OFFSET_REDUND;
 
 	return offset;
@@ -264,7 +264,7 @@ static int env_mmc_save(void)
 	if (ret)
 		goto fini;
 
-	if (IS_ENABLED(CONFIG_SYS_REDUNDAND_ENVIRONMENT)) {
+	if (CONFIG(SYS_REDUNDAND_ENVIRONMENT)) {
 		if (gd->env_valid == ENV_VALID)
 			copy = 1;
 
@@ -289,7 +289,7 @@ static int env_mmc_save(void)
 
 	ret = 0;
 
-	if (IS_ENABLED(CONFIG_SYS_REDUNDAND_ENVIRONMENT))
+	if (CONFIG(SYS_REDUNDAND_ENVIRONMENT))
 		gd->env_valid = gd->env_valid == ENV_REDUND ? ENV_VALID : ENV_REDUND;
 
 fini:
@@ -338,7 +338,7 @@ static int env_mmc_erase(void)
 	printf("\n");
 	ret = erase_env(mmc, CONFIG_ENV_SIZE, offset);
 
-	if (IS_ENABLED(CONFIG_SYS_REDUNDAND_ENVIRONMENT)) {
+	if (CONFIG(SYS_REDUNDAND_ENVIRONMENT)) {
 		copy = 1;
 
 		if (IS_ENABLED(ENV_MMC_HWPART_REDUND)) {

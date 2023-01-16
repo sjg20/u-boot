@@ -513,9 +513,9 @@ static enum bootstage_id get_bootstage_id(bool start)
 {
 	enum u_boot_phase phase = spl_phase();
 
-	if (IS_ENABLED(CONFIG_TPL_BUILD) && phase == PHASE_TPL)
+	if (CONFIG(TPL_BUILD) && phase == PHASE_TPL)
 		return start ? BOOTSTAGE_ID_START_TPL : BOOTSTAGE_ID_END_TPL;
-	else if (IS_ENABLED(CONFIG_VPL_BUILD) && phase == PHASE_VPL)
+	else if (CONFIG(VPL_BUILD) && phase == PHASE_VPL)
 		return start ? BOOTSTAGE_ID_START_VPL : BOOTSTAGE_ID_END_VPL;
 	else
 		return start ? BOOTSTAGE_ID_START_SPL : BOOTSTAGE_ID_END_SPL;
@@ -609,8 +609,8 @@ int spl_early_init(void)
 int spl_init(void)
 {
 	int ret;
-	bool setup_malloc = !(IS_ENABLED(CONFIG_SPL_STACK_R) &&
-			IS_ENABLED(CONFIG_SPL_SYS_MALLOC_SIMPLE));
+	bool setup_malloc = !(CONFIG(SPL_STACK_R) &&
+			CONFIG(SPL_SYS_MALLOC_SIMPLE));
 
 	debug("%s\n", __func__);
 
@@ -794,8 +794,8 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	initr_watchdog();
 #endif
 
-	if (IS_ENABLED(CONFIG_SPL_OS_BOOT) || CONFIG(HANDOFF) ||
-	    IS_ENABLED(CONFIG_SPL_ATF))
+	if (CONFIG(SPL_OS_BOOT) || CONFIG(HANDOFF) ||
+	    CONFIG(SPL_ATF))
 		dram_init_banksize();
 
 	bootcount_inc();

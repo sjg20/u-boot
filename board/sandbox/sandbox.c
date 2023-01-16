@@ -172,7 +172,7 @@ int board_late_init(void)
 
 int init_addr_map(void)
 {
-	if (IS_ENABLED(CONFIG_ADDR_MAP))
+	if (CONFIG(ADDR_MAP))
 		addrmap_set_entry(0, 0, CFG_SYS_SDRAM_SIZE, 0);
 
 	return 0;

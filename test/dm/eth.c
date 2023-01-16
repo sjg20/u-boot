@@ -23,7 +23,7 @@
 
 #define DM_TEST_ETH_NUM		4
 
-#if IS_ENABLED(CONFIG_IPV6)
+#if CONFIG(IPV6)
 static int dm_test_string_to_ip6(struct unit_test_state *uts)
 {
 	char *str;

@@ -408,7 +408,7 @@ __weak int arch_reserve_mmu(void)
 
 static int reserve_video(void)
 {
-	if (IS_ENABLED(CONFIG_VIDEO)) {
+	if (CONFIG(VIDEO)) {
 		ulong addr;
 		int ret;
 
@@ -530,7 +530,7 @@ static int reserve_global_data(void)
 
 static int reserve_fdt(void)
 {
-	if (!IS_ENABLED(CONFIG_OF_EMBED)) {
+	if (!CONFIG(OF_EMBED)) {
 		/*
 		 * If the device tree is sitting immediately above our image
 		 * then we must relocate it. If it is embedded in the data
@@ -609,7 +609,7 @@ int setup_bdinfo(void)
 {
 	struct bd_info *bd = gd->bd;
 
-	if (IS_ENABLED(CONFIG_SYS_HAS_SRAM)) {
+	if (CONFIG(SYS_HAS_SRAM)) {
 		bd->bi_sramstart = CONFIG_SYS_SRAM_BASE; /* start of SRAM */
 		bd->bi_sramsize = CONFIG_SYS_SRAM_SIZE;  /* size  of SRAM */
 	}
@@ -629,7 +629,7 @@ static int init_post(void)
 
 static int reloc_fdt(void)
 {
-	if (!IS_ENABLED(CONFIG_OF_EMBED)) {
+	if (!CONFIG(OF_EMBED)) {
 		if (gd->flags & GD_FLG_SKIP_RELOC)
 			return 0;
 		if (gd->new_fdt) {
@@ -763,8 +763,8 @@ static int jump_to_copy(void)
 /* Record the board_init_f() bootstage (after arch_cpu_init()) */
 static int initf_bootstage(void)
 {
-	bool from_spl = IS_ENABLED(CONFIG_SPL_BOOTSTAGE) &&
-			IS_ENABLED(CONFIG_BOOTSTAGE_STASH);
+	bool from_spl = CONFIG(SPL_BOOTSTAGE) &&
+			CONFIG(BOOTSTAGE_STASH);
 	int ret;
 
 	ret = bootstage_init(!from_spl);
@@ -797,7 +797,7 @@ static int initf_dm(void)
 	if (ret)
 		return ret;
 
-	if (IS_ENABLED(CONFIG_TIMER_EARLY)) {
+	if (CONFIG(TIMER_EARLY)) {
 		ret = dm_timer_init();
 		if (ret)
 			return ret;

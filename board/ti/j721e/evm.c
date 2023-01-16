@@ -376,7 +376,7 @@ void configure_serdes_torrent(void)
 	struct phy serdes;
 	int ret;
 
-	if (!IS_ENABLED(CONFIG_PHY_CADENCE_TORRENT))
+	if (!CONFIG(PHY_CADENCE_TORRENT))
 		return;
 
 	ret = uclass_get_device_by_driver(UCLASS_PHY,
@@ -410,7 +410,7 @@ void configure_serdes_sierra(void)
 	int ret, count, i;
 	int link_count = 0;
 
-	if (!IS_ENABLED(CONFIG_PHY_CADENCE_SIERRA))
+	if (!CONFIG(PHY_CADENCE_SIERRA))
 		return;
 
 	ret = uclass_get_device_by_driver(UCLASS_MISC,
@@ -485,7 +485,7 @@ static void setup_serial(void)
 
 int board_late_init(void)
 {
-	if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
+	if (CONFIG(TI_I2C_BOARD_DETECT)) {
 		setup_board_eeprom_env();
 		setup_serial();
 
@@ -506,7 +506,7 @@ int board_late_init(void)
 
 static int __maybe_unused detect_SW3_1_state(void)
 {
-	if (IS_ENABLED(CONFIG_TARGET_J7200_A72_EVM) || IS_ENABLED(CONFIG_TARGET_J721E_A72_EVM)) {
+	if (CONFIG(TARGET_J7200_A72_EVM) || CONFIG(TARGET_J721E_A72_EVM)) {
 		struct gpio_desc desc = {0};
 		int ret;
 		char *hypermux_sel_gpio = (board_is_j721e_som()) ? "8" : "6";
@@ -546,9 +546,9 @@ void spl_board_init(void)
 	int ret;
 #endif
 
-	if ((IS_ENABLED(CONFIG_TARGET_J721E_A72_EVM) ||
-	     IS_ENABLED(CONFIG_TARGET_J7200_A72_EVM)) &&
-	    IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
+	if ((CONFIG(TARGET_J721E_A72_EVM) ||
+	     CONFIG(TARGET_J7200_A72_EVM)) &&
+	    CONFIG(TI_I2C_BOARD_DETECT)) {
 		if (!board_is_j721e_sk())
 			probe_daughtercards();
 	}
@@ -571,8 +571,8 @@ void spl_board_init(void)
 			printf("ESM PMIC init failed: %d\n", ret);
 	}
 #endif
-	if ((IS_ENABLED(CONFIG_TARGET_J7200_A72_EVM) || IS_ENABLED(CONFIG_TARGET_J721E_A72_EVM)) &&
-	    IS_ENABLED(CONFIG_HBMC_AM654)) {
+	if ((CONFIG(TARGET_J7200_A72_EVM) || CONFIG(TARGET_J721E_A72_EVM)) &&
+	    CONFIG(HBMC_AM654)) {
 		struct udevice *dev;
 		int ret;
 

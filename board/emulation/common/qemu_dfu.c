@@ -54,8 +54,8 @@ void set_dfu_alt_info(char *interface, char *devstr)
 	 * Currently dfu_alt_info is needed on Qemu ARM64 for
 	 * capsule updates
 	*/
-	if (IS_ENABLED(CONFIG_EFI_CAPSULE_FIRMWARE_MANAGEMENT) &&
-	    IS_ENABLED(CONFIG_TARGET_QEMU_ARM_64BIT)) {
+	if (CONFIG(EFI_CAPSULE_FIRMWARE_MANAGEMENT) &&
+	    CONFIG(TARGET_QEMU_ARM_64BIT)) {
 		/* probe all MTD devices */
 		mtd_probe_devices();
 

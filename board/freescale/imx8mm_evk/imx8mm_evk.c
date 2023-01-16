@@ -16,7 +16,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if IS_ENABLED(CONFIG_FEC_MXC)
+#if CONFIG(FEC_MXC)
 static int setup_fec(void)
 {
 	struct iomuxc_gpr_base_regs *gpr =
@@ -47,7 +47,7 @@ int board_phy_config(struct phy_device *phydev)
 
 int board_init(void)
 {
-	if (IS_ENABLED(CONFIG_FEC_MXC))
+	if (CONFIG(FEC_MXC))
 		setup_fec();
 
 	return 0;
@@ -60,7 +60,7 @@ int board_mmc_get_env_dev(int devno)
 
 int board_late_init(void)
 {
-	if (IS_ENABLED(CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
+	if (CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
 		env_set("board_name", "EVK");
 		env_set("board_rev", "iMX8MM");
 	}

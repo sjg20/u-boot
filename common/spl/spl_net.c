@@ -47,7 +47,7 @@ static int spl_net_load_image(struct spl_image_info *spl_image,
 		return rv;
 	}
 
-	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
+	if (CONFIG(SPL_LOAD_FIT) &&
 	    image_get_magic(header) == FDT_MAGIC) {
 		struct spl_load_info load;
 

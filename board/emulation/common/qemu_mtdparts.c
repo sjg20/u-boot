@@ -52,8 +52,8 @@ void board_mtdparts_default(const char **mtdids, const char **mtdparts)
 	memset(ids, 0, sizeof(ids));
 
 	/* Currently mtdparts is needed on Qemu ARM64 for capsule updates */
-	if (IS_ENABLED(CONFIG_EFI_CAPSULE_FIRMWARE_MANAGEMENT) &&
-	    IS_ENABLED(CONFIG_TARGET_QEMU_ARM_64BIT)) {
+	if (CONFIG(EFI_CAPSULE_FIRMWARE_MANAGEMENT) &&
+	    CONFIG(TARGET_QEMU_ARM_64BIT)) {
 		/* probe all MTD devices */
 		for (uclass_first_device(UCLASS_MTD, &dev); dev;
 		     uclass_next_device(&dev)) {

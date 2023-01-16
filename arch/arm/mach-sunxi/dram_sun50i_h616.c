@@ -706,7 +706,7 @@ static bool mctl_phy_init(struct dram_para *para)
 	for (i = 0; i < ARRAY_SIZE(phy_init); i++)
 		writel(phy_init[i], &ptr[i]);
 
-	if (IS_ENABLED(CONFIG_DRAM_SUN50I_H616_UNKNOWN_FEATURE)) {
+	if (CONFIG(DRAM_SUN50I_H616_UNKNOWN_FEATURE)) {
 		ptr = (u32*)(SUNXI_DRAM_PHY0_BASE + 0x780);
 		for (i = 0; i < 32; i++)
 			writel(0x16, &ptr[i]);
@@ -721,7 +721,7 @@ static bool mctl_phy_init(struct dram_para *para)
 	writel(0x80, SUNXI_DRAM_PHY0_BASE + 0x3dc);
 	writel(0x80, SUNXI_DRAM_PHY0_BASE + 0x45c);
 
-	if (IS_ENABLED(CONFIG_DRAM_ODT_EN))
+	if (CONFIG(DRAM_ODT_EN))
 		mctl_phy_configure_odt();
 
 	clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 4, 7, 0xa);
@@ -788,7 +788,7 @@ static bool mctl_phy_init(struct dram_para *para)
 	clrbits_le32(&mctl_ctl->rfshctl3, 1);
 	writel(1, &mctl_ctl->swctl);
 
-	if (IS_ENABLED(CONFIG_DRAM_SUN50I_H616_WRITE_LEVELING)) {
+	if (CONFIG(DRAM_SUN50I_H616_WRITE_LEVELING)) {
 		for (i = 0; i < 5; i++)
 			if (mctl_phy_write_leveling(para))
 				break;
@@ -798,7 +798,7 @@ static bool mctl_phy_init(struct dram_para *para)
 		}
 	}
 
-	if (IS_ENABLED(CONFIG_DRAM_SUN50I_H616_READ_CALIBRATION)) {
+	if (CONFIG(DRAM_SUN50I_H616_READ_CALIBRATION)) {
 		for (i = 0; i < 5; i++)
 			if (mctl_phy_read_calibration(para))
 				break;
@@ -808,7 +808,7 @@ static bool mctl_phy_init(struct dram_para *para)
 		}
 	}
 
-	if (IS_ENABLED(CONFIG_DRAM_SUN50I_H616_READ_TRAINING)) {
+	if (CONFIG(DRAM_SUN50I_H616_READ_TRAINING)) {
 		for (i = 0; i < 5; i++)
 			if (mctl_phy_read_training(para))
 				break;
@@ -818,7 +818,7 @@ static bool mctl_phy_init(struct dram_para *para)
 		}
 	}
 
-	if (IS_ENABLED(CONFIG_DRAM_SUN50I_H616_WRITE_TRAINING)) {
+	if (CONFIG(DRAM_SUN50I_H616_WRITE_TRAINING)) {
 		for (i = 0; i < 5; i++)
 			if (mctl_phy_write_training(para))
 				break;
@@ -828,7 +828,7 @@ static bool mctl_phy_init(struct dram_para *para)
 		}
 	}
 
-	if (IS_ENABLED(CONFIG_DRAM_SUN50I_H616_BIT_DELAY_COMPENSATION))
+	if (CONFIG(DRAM_SUN50I_H616_BIT_DELAY_COMPENSATION))
 		mctl_phy_bit_delay_compensation(para);
 
 	clrbits_le32(SUNXI_DRAM_PHY0_BASE + 0x60, 4);

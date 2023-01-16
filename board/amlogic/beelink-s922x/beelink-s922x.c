@@ -24,7 +24,7 @@ int misc_init_r(void)
 	char efuse_mac_addr[EFUSE_MAC_SIZE], tmp[3];
 	ssize_t len;
 
-	if (IS_ENABLED(CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG) &&
+	if (CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG) &&
 	    meson_get_soc_rev(tmp, sizeof(tmp)) > 0)
 		env_set("soc_rev", tmp);
 

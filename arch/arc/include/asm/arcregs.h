@@ -123,12 +123,12 @@
 
 static const inline int is_isa_arcv2(void)
 {
-	return IS_ENABLED(CONFIG_ISA_ARCV2);
+	return CONFIG(ISA_ARCV2);
 }
 
 static const inline int is_isa_arcompact(void)
 {
-	return IS_ENABLED(CONFIG_ISA_ARCOMPACT);
+	return CONFIG(ISA_ARCOMPACT);
 }
 #endif /* __ASSEMBLY__ */
 

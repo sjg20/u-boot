@@ -220,7 +220,7 @@ static int ftgmac100_phy_init(struct udevice *dev)
 	struct phy_device *phydev;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_DM_MDIO))
+	if (CONFIG(DM_MDIO))
 		phydev = dm_eth_phy_connect(dev);
 	else
 		phydev = phy_connect(priv->bus, priv->phy_addr, dev, priv->phy_mode);
@@ -598,7 +598,7 @@ static int ftgmac100_probe(struct udevice *dev)
 	 * dm_eth_phy_connect
 	 */
 	if (priv->phy_mode != PHY_INTERFACE_MODE_NCSI &&
-	    !IS_ENABLED(CONFIG_DM_MDIO)) {
+	    !CONFIG(DM_MDIO)) {
 		ret = ftgmac100_mdio_init(dev);
 		if (ret) {
 			dev_err(dev, "Failed to initialize mdiobus: %d\n", ret);

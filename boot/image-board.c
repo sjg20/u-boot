@@ -173,7 +173,7 @@ void memmove_wd(void *to, void *from, size_t len, ulong chunksz)
 	if (to == from)
 		return;
 
-	if (IS_ENABLED(CONFIG_HW_WATCHDOG) || IS_ENABLED(CONFIG_WATCHDOG)) {
+	if (CONFIG(HW_WATCHDOG) || CONFIG(WATCHDOG)) {
 		if (to > from) {
 			from += len;
 			to += len;
@@ -283,7 +283,7 @@ int genimg_get_format(const void *img_addr)
 		if (!fdt_check_header(img_addr))
 			return IMAGE_FORMAT_FIT;
 	}
-	if (IS_ENABLED(CONFIG_ANDROID_BOOT_IMAGE) &&
+	if (CONFIG(ANDROID_BOOT_IMAGE) &&
 	    !android_image_check_header(img_addr))
 		return IMAGE_FORMAT_ANDROID;
 
@@ -425,7 +425,7 @@ static int select_ramdisk(struct bootm_headers *images, const char *select, u8 a
 		}
 		break;
 	case IMAGE_FORMAT_ANDROID:
-		if (IS_ENABLED(CONFIG_ANDROID_BOOT_IMAGE)) {
+		if (CONFIG(ANDROID_BOOT_IMAGE)) {
 			void *ptr = map_sysmem(images->os.start, 0);
 			int ret;
 
@@ -439,7 +439,7 @@ static int select_ramdisk(struct bootm_headers *images, const char *select, u8 a
 	}
 
 	if (!done) {
-		if (IS_ENABLED(CONFIG_SUPPORT_RAW_INITRD)) {
+		if (CONFIG(SUPPORT_RAW_INITRD)) {
 			char *end = NULL;
 
 			if (select)
@@ -491,7 +491,7 @@ int boot_get_ramdisk(int argc, char *const argv[], struct bootm_headers *images,
 	*rd_start = 0;
 	*rd_end = 0;
 
-	if (IS_ENABLED(CONFIG_ANDROID_BOOT_IMAGE)) {
+	if (CONFIG(ANDROID_BOOT_IMAGE)) {
 		char *buf;
 
 		/* Look for an Android boot image */
@@ -627,7 +627,7 @@ int boot_ramdisk_high(struct lmb *lmb, ulong rd_data, ulong rd_len,
 			 * AMP boot scenarios in which we might not be
 			 * HW cache coherent
 			 */
-			if (IS_ENABLED(CONFIG_MP)) {
+			if (CONFIG(MP)) {
 				flush_cache((unsigned long)*initrd_start,
 					    ALIGN(rd_len, ARCH_DMA_MINALIGN));
 			}
@@ -666,7 +666,7 @@ int boot_get_fpga(int argc, char *const argv[], struct bootm_headers *images,
 	int err;
 	int devnum = 0; /* TODO support multi fpga platforms */
 
-	if (!IS_ENABLED(CONFIG_FPGA))
+	if (!CONFIG(FPGA))
 		return -ENOSYS;
 
 	/* Check to see if the images struct has a FIT configuration */
@@ -863,7 +863,7 @@ int boot_get_cmdline(struct lmb *lmb, ulong *cmd_start, ulong *cmd_end)
 	 * Help the compiler detect that this function is only called when
 	 * CONFIG_SYS_BOOT_GET_CMDLINE is enabled
 	 */
-	if (!IS_ENABLED(CONFIG_SYS_BOOT_GET_CMDLINE))
+	if (!CONFIG(SYS_BOOT_GET_CMDLINE))
 		return 0;
 
 	barg = IF_ENABLED_INT(CONFIG_SYS_BOOT_GET_CMDLINE, CONFIG_SYS_BARGSIZE);
@@ -913,7 +913,7 @@ int boot_get_kbd(struct lmb *lmb, struct bd_info **kbd)
 
 	debug("## kernel board info at 0x%08lx\n", (ulong)*kbd);
 
-	if (_DEBUG && IS_ENABLED(CONFIG_CMD_BDI))
+	if (_DEBUG && CONFIG(CMD_BDI))
 		do_bdinfo(NULL, 0, 0, NULL);
 
 	return 0;
@@ -932,7 +932,7 @@ int image_setup_linux(struct bootm_headers *images)
 	if (CONFIG(OF_LIBFDT))
 		boot_fdt_add_mem_rsv_regions(lmb, *of_flat_tree);
 
-	if (IS_ENABLED(CONFIG_SYS_BOOT_GET_CMDLINE)) {
+	if (CONFIG(SYS_BOOT_GET_CMDLINE)) {
 		ret = boot_get_cmdline(lmb, &images->cmdline_start,
 				       &images->cmdline_end);
 		if (ret) {

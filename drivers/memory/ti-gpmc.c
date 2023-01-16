@@ -190,7 +190,7 @@ static void gpmc_cs_bool_timings(int cs, const struct gpmc_bool_timings *p)
 			   p->cycle2cyclediffcsen);
 }
 
-#if IS_ENABLED(CONFIG_TI_GPMC_DEBUG)
+#if CONFIG(TI_GPMC_DEBUG)
 /**
  * get_gpmc_timing_reg - read a timing parameter and print DTS settings for it.
  * @cs:      Chip Select Region
@@ -409,7 +409,7 @@ static int set_gpmc_timing_reg(int cs, int reg, int st_bit, int end_bit, int max
 	}
 
 	l = gpmc_cs_read_reg(cs, reg);
-	if (IS_ENABLED(CONFIG_TI_GPMC_DEBUG)) {
+	if (CONFIG(TI_GPMC_DEBUG)) {
 		pr_info("GPMC CS%d: %-17s: %3d ticks, %3lu ns (was %3i ticks) %3d ns\n",
 			cs, name, ticks, gpmc_get_clk_period(cs, cd) * ticks / 1000,
 				(l >> st_bit) & mask, time);
@@ -618,7 +618,7 @@ static int gpmc_cs_set_timings(int cs, const struct gpmc_timings *t,
 	if (ret)
 		return -ENXIO;
 
-	if (IS_ENABLED(CONFIG_TI_GPMC_DEBUG)) {
+	if (CONFIG(TI_GPMC_DEBUG)) {
 		pr_info("GPMC CS%d CLK period is %lu ns (div %d)\n",
 			cs, (div * gpmc_get_fclk_period()) / 1000, div);
 	}

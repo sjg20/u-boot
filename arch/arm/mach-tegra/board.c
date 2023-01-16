@@ -14,13 +14,13 @@
 #include <asm/cache.h>
 #include <asm/global_data.h>
 #include <asm/io.h>
-#if IS_ENABLED(CONFIG_TEGRA_CLKRST)
+#if CONFIG(TEGRA_CLKRST)
 #include <asm/arch/clock.h>
 #endif
-#if IS_ENABLED(CONFIG_TEGRA_PINCTRL)
+#if CONFIG(TEGRA_PINCTRL)
 #include <asm/arch/funcmux.h>
 #endif
-#if IS_ENABLED(CONFIG_TEGRA_MC)
+#if CONFIG(TEGRA_MC)
 #include <asm/arch/mc.h>
 #endif
 #include <asm/arch/tegra.h>
@@ -94,7 +94,7 @@ bool tegra_cpu_is_non_secure(void)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_TEGRA_MC)
+#if CONFIG(TEGRA_MC)
 /* Read the RAM size directly from the memory controller */
 static phys_size_t query_sdram_size(void)
 {
@@ -155,7 +155,7 @@ int dram_init(void)
 	if (err == 0)
 		return 0;
 
-#if IS_ENABLED(CONFIG_TEGRA_MC)
+#if CONFIG(TEGRA_MC)
 	/* We do not initialise DRAM here. We just query the size */
 	gd->ram_size = query_sdram_size();
 #endif
@@ -163,7 +163,7 @@ int dram_init(void)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_TEGRA_PINCTRL)
+#if CONFIG(TEGRA_PINCTRL)
 static int uart_configs[] = {
 #if defined(CONFIG_TEGRA20)
  #if defined(CONFIG_TEGRA_UARTA_UAA_UAB)
@@ -235,7 +235,7 @@ static void setup_uarts(int uart_ids)
 
 void board_init_uart_f(void)
 {
-#if IS_ENABLED(CONFIG_TEGRA_PINCTRL)
+#if CONFIG(TEGRA_PINCTRL)
 	int uart_ids = 0;	/* bit mask of which UART ids to enable */
 
 #ifdef CONFIG_TEGRA_ENABLE_UARTA

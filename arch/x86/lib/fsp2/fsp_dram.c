@@ -32,11 +32,11 @@ int dram_init(void)
 	if (spl_phase() == PHASE_SPL) {
 		bool s3wake = false;
 
-		s3wake = IS_ENABLED(CONFIG_HAVE_ACPI_RESUME) &&
+		s3wake = CONFIG(HAVE_ACPI_RESUME) &&
 			gd->arch.prev_sleep_state == ACPI_S3;
 
 		ret = fsp_memory_init(s3wake,
-			      IS_ENABLED(CONFIG_APL_BOOT_FROM_FAST_SPI_FLASH));
+			      CONFIG(APL_BOOT_FROM_FAST_SPI_FLASH));
 		if (ret) {
 			log_debug("Memory init failed (err=%x)\n", ret);
 			return ret;

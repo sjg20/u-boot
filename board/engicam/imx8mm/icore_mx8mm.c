@@ -22,7 +22,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if IS_ENABLED(CONFIG_FEC_MXC)
+#if CONFIG(FEC_MXC)
 
 #define FEC_RST_PAD IMX_GPIO_NR(3, 7)
 static iomux_v3_cfg_t const fec1_rst_pads[] = {
@@ -73,7 +73,7 @@ int board_phy_config(struct phy_device *phydev)
 
 int board_init(void)
 {
-	if (IS_ENABLED(CONFIG_FEC_MXC))
+	if (CONFIG(FEC_MXC))
 		setup_fec();
 
 	return 0;

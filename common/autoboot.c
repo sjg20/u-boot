@@ -80,7 +80,7 @@ static int passwd_abort_crypt(uint64_t etime)
 	int never_timeout = 0;
 	int err;
 
-	if (IS_ENABLED(CONFIG_AUTOBOOT_STOP_STR_ENABLE) && !crypt_env_str)
+	if (CONFIG(AUTOBOOT_STOP_STR_ENABLE) && !crypt_env_str)
 		crypt_env_str = CONFIG_AUTOBOOT_STOP_STR_CRYPT;
 
 	if (!crypt_env_str)
@@ -97,7 +97,7 @@ static int passwd_abort_crypt(uint64_t etime)
 
 			if ((presskey[presskey_len] == '\r') ||
 			    (presskey[presskey_len] == '\n')) {
-				if (IS_ENABLED(CONFIG_AUTOBOOT_NEVER_TIMEOUT) &&
+				if (CONFIG(AUTOBOOT_NEVER_TIMEOUT) &&
 				    !presskey_len) {
 					never_timeout = 1;
 					continue;
@@ -322,9 +322,9 @@ static void flush_stdin(void)
  */
 static bool fallback_to_sha256(void)
 {
-	if (IS_ENABLED(CONFIG_AUTOBOOT_SHA256_FALLBACK))
+	if (CONFIG(AUTOBOOT_SHA256_FALLBACK))
 		return env_get_yesno("bootstopusesha256") == 1;
-	else if (IS_ENABLED(CONFIG_CRYPT_PW))
+	else if (CONFIG(CRYPT_PW))
 		return false;
 	else
 		return true;
@@ -339,7 +339,7 @@ static int abortboot_key_sequence(int bootdelay)
 	int abort;
 	uint64_t etime = endtick(bootdelay);
 
-	if (IS_ENABLED(CONFIG_AUTOBOOT_FLUSH_STDIN))
+	if (CONFIG(AUTOBOOT_FLUSH_STDIN))
 		flush_stdin();
 #  ifdef CONFIG_AUTOBOOT_PROMPT
 	/*
@@ -349,8 +349,8 @@ static int abortboot_key_sequence(int bootdelay)
 	printf(CONFIG_AUTOBOOT_PROMPT, bootdelay);
 #  endif
 
-	if (IS_ENABLED(CONFIG_AUTOBOOT_ENCRYPTION)) {
-		if (IS_ENABLED(CONFIG_CRYPT_PW) && !fallback_to_sha256())
+	if (CONFIG(AUTOBOOT_ENCRYPTION)) {
+		if (CONFIG(CRYPT_PW) && !fallback_to_sha256())
 			abort = passwd_abort_crypt(etime);
 		else
 			abort = passwd_abort_sha256(etime);
@@ -390,7 +390,7 @@ static int abortboot_single_key(int bootdelay)
 				abort  = 1;	/* don't auto boot	*/
 				bootdelay = 0;	/* no more delay	*/
 				key = getchar();/* consume input	*/
-				if (IS_ENABLED(CONFIG_AUTOBOOT_USE_MENUKEY))
+				if (CONFIG(AUTOBOOT_USE_MENUKEY))
 					menukey = key;
 				break;
 			}
@@ -416,7 +416,7 @@ static int abortboot(int bootdelay)
 			abort = abortboot_single_key(bootdelay);
 	}
 
-	if (IS_ENABLED(CONFIG_SILENT_CONSOLE) && abort)
+	if (CONFIG(SILENT_CONSOLE) && abort)
 		gd->flags &= ~GD_FLG_SILENT;
 
 	return abort;
@@ -454,12 +454,12 @@ const char *bootdelay_process(void)
 	 * setting? It is possibly helpful for security since the device tree
 	 * may be signed whereas the environment is often loaded from storage.
 	 */
-	if (IS_ENABLED(CONFIG_OF_CONTROL))
+	if (CONFIG(OF_CONTROL))
 		bootdelay = ofnode_conf_read_int("bootdelay", bootdelay);
 
 	debug("### main_loop entered: bootdelay=%d\n\n", bootdelay);
 
-	if (IS_ENABLED(CONFIG_AUTOBOOT_MENU_SHOW))
+	if (CONFIG(AUTOBOOT_MENU_SHOW))
 		bootdelay = menu_show(bootdelay);
 	bootretry_init_cmd_timeout();
 
@@ -473,7 +473,7 @@ const char *bootdelay_process(void)
 	else
 		s = env_get("bootcmd");
 
-	if (IS_ENABLED(CONFIG_OF_CONTROL))
+	if (CONFIG(OF_CONTROL))
 		process_fdt_options();
 	stored_bootdelay = bootdelay;
 
@@ -490,7 +490,7 @@ void autoboot_command(const char *s)
 		int prev;
 
 		lock = autoboot_keyed() &&
-			!IS_ENABLED(CONFIG_AUTOBOOT_KEYED_CTRLC);
+			!CONFIG(AUTOBOOT_KEYED_CTRLC);
 		if (lock)
 			prev = disable_ctrlc(1); /* disable Ctrl-C checking */
 
@@ -500,7 +500,7 @@ void autoboot_command(const char *s)
 			disable_ctrlc(prev);	/* restore Ctrl-C checking */
 	}
 
-	if (IS_ENABLED(CONFIG_AUTOBOOT_USE_MENUKEY) &&
+	if (CONFIG(AUTOBOOT_USE_MENUKEY) &&
 	    menukey == AUTOBOOT_MENUKEY) {
 		s = env_get("menucmd");
 		if (s)

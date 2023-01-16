@@ -652,7 +652,7 @@ struct ti_sci_resource {
 	struct ti_sci_resource_desc *desc;
 };
 
-#if IS_ENABLED(CONFIG_TI_SCI_PROTOCOL)
+#if CONFIG(TI_SCI_PROTOCOL)
 
 const struct ti_sci_handle *ti_sci_get_handle_from_sysfw(struct udevice *dev);
 const struct ti_sci_handle *ti_sci_get_handle(struct udevice *dev);

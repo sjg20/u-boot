@@ -79,7 +79,7 @@ static int save_vesa_mode(struct vesa_mode_info *vesa)
 	int size;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_EFI_APP)) {
+	if (CONFIG(EFI_APP)) {
 		ret = get_mode_info(vesa);
 		if (ret) {
 			printf("EFI graphics output protocol not found\n");

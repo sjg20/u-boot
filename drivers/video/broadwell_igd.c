@@ -692,7 +692,7 @@ static int broadwell_igd_probe(struct udevice *dev)
 		return ret;
 
 	/* Use write-combining for the graphics memory, 256MB */
-	fbbase = IS_ENABLED(CONFIG_VIDEO_COPY) ? plat->copy_base : plat->base;
+	fbbase = CONFIG(VIDEO_COPY) ? plat->copy_base : plat->base;
 	ret = mtrr_add_request(MTRR_TYPE_WRCOMB, fbbase, 256 << 20);
 	if (!ret)
 		ret = mtrr_commit(true);

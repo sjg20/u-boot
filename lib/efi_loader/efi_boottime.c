@@ -2172,7 +2172,7 @@ static efi_status_t EFIAPI efi_exit_boot_services(efi_handle_t image_handle,
 
 	if (!efi_st_keep_devices) {
 		bootm_disable_interrupts();
-		if (IS_ENABLED(CONFIG_USB_DEVICE))
+		if (CONFIG(USB_DEVICE))
 			udc_disconnect();
 		board_quiesce_devices();
 		dm_remove_devices_flags(DM_REMOVE_ACTIVE_ALL);
@@ -2200,7 +2200,7 @@ static efi_status_t EFIAPI efi_exit_boot_services(efi_handle_t image_handle,
 	efi_set_watchdog(0);
 	schedule();
 out:
-	if (IS_ENABLED(CONFIG_EFI_TCG2_PROTOCOL)) {
+	if (CONFIG(EFI_TCG2_PROTOCOL)) {
 		if (ret != EFI_SUCCESS)
 			efi_tcg2_notify_exit_boot_services_failed();
 	}
@@ -3158,7 +3158,7 @@ efi_status_t EFIAPI efi_start_image(efi_handle_t image_handle,
 	image_obj->exit_status = &exit_status;
 	image_obj->exit_jmp = &exit_jmp;
 
-	if (IS_ENABLED(CONFIG_EFI_TCG2_PROTOCOL)) {
+	if (CONFIG(EFI_TCG2_PROTOCOL)) {
 		if (image_obj->image_type == IMAGE_SUBSYSTEM_EFI_APPLICATION) {
 			ret = efi_tcg2_measure_efi_app_invocation(image_obj);
 			if (ret == EFI_SECURITY_VIOLATION) {
@@ -3428,7 +3428,7 @@ static efi_status_t EFIAPI efi_exit(efi_handle_t image_handle,
 	    exit_status != EFI_SUCCESS)
 		efi_delete_image(image_obj, loaded_image_protocol);
 
-	if (IS_ENABLED(CONFIG_EFI_TCG2_PROTOCOL)) {
+	if (CONFIG(EFI_TCG2_PROTOCOL)) {
 		if (image_obj->image_type == IMAGE_SUBSYSTEM_EFI_APPLICATION) {
 			ret = efi_tcg2_measure_efi_app_exit();
 			if (ret != EFI_SUCCESS) {

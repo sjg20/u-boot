@@ -508,7 +508,7 @@ static int build_order(struct udevice *bootstd, struct udevice **order,
 	int i, ret, count;
 
 	targets = env_get("boot_targets");
-	labels = IS_ENABLED(CONFIG_BOOTSTD_FULL) ?
+	labels = CONFIG(BOOTSTD_FULL) ?
 		bootstd_get_bootdev_order(bootstd) : NULL;
 	if (targets) {
 		char str[BOOT_TARGETS_MAX_LEN];

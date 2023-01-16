@@ -34,7 +34,7 @@ static int env_nowhere_load(void)
 	 * searches default_environment array in that case.
 	 * For U-Boot proper, import the default environment to allow reload.
 	 */
-	if (!IS_ENABLED(CONFIG_SPL_BUILD))
+	if (!CONFIG(SPL_BUILD))
 		env_set_default(NULL, 0);
 
 	gd->env_valid = ENV_INVALID;

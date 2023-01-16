@@ -168,8 +168,8 @@ static int mpc83xx_sdram_static_init(ofnode node, u32 cs, u32 mapaddr, u32 size)
 	odt_rd_cfg = ofnode_read_u32_default(node, "odt_rd_cfg", 0);
 	switch (odt_rd_cfg) {
 	case ODT_RD_ONLY_OTHER_DIMM:
-		if (!IS_ENABLED(CONFIG_ARCH_MPC8360) &&
-		    !IS_ENABLED(CONFIG_ARCH_MPC837X)) {
+		if (!CONFIG(ARCH_MPC8360) &&
+		    !CONFIG(ARCH_MPC837X)) {
 			debug("%s: odt_rd_cfg value %d invalid.\n",
 			      ofnode_get_name(node), odt_rd_cfg);
 			return -EINVAL;
@@ -178,10 +178,10 @@ static int mpc83xx_sdram_static_init(ofnode node, u32 cs, u32 mapaddr, u32 size)
 	case ODT_RD_NEVER:
 	case ODT_RD_ONLY_CURRENT:
 	case ODT_RD_ONLY_OTHER_CS:
-		if (!IS_ENABLED(CONFIG_ARCH_MPC830X) &&
-		    !IS_ENABLED(CONFIG_ARCH_MPC831X) &&
-		    !IS_ENABLED(CONFIG_ARCH_MPC8360) &&
-		    !IS_ENABLED(CONFIG_ARCH_MPC837X)) {
+		if (!CONFIG(ARCH_MPC830X) &&
+		    !CONFIG(ARCH_MPC831X) &&
+		    !CONFIG(ARCH_MPC8360) &&
+		    !CONFIG(ARCH_MPC837X)) {
 			debug("%s: odt_rd_cfg value %d invalid.\n",
 			      ofnode_get_name(node), odt_rd_cfg);
 			return -EINVAL;
@@ -199,8 +199,8 @@ static int mpc83xx_sdram_static_init(ofnode node, u32 cs, u32 mapaddr, u32 size)
 	odt_wr_cfg = ofnode_read_u32_default(node, "odt_wr_cfg", 0);
 	switch (odt_wr_cfg) {
 	case ODT_WR_ONLY_OTHER_DIMM:
-		if (!IS_ENABLED(CONFIG_ARCH_MPC8360) &&
-		    !IS_ENABLED(CONFIG_ARCH_MPC837X)) {
+		if (!CONFIG(ARCH_MPC8360) &&
+		    !CONFIG(ARCH_MPC837X)) {
 			debug("%s: odt_wr_cfg value %d invalid.\n",
 			      ofnode_get_name(node), odt_wr_cfg);
 			return -EINVAL;
@@ -209,10 +209,10 @@ static int mpc83xx_sdram_static_init(ofnode node, u32 cs, u32 mapaddr, u32 size)
 	case ODT_WR_NEVER:
 	case ODT_WR_ONLY_CURRENT:
 	case ODT_WR_ONLY_OTHER_CS:
-		if (!IS_ENABLED(CONFIG_ARCH_MPC830X) &&
-		    !IS_ENABLED(CONFIG_ARCH_MPC831X) &&
-		    !IS_ENABLED(CONFIG_ARCH_MPC8360) &&
-		    !IS_ENABLED(CONFIG_ARCH_MPC837X)) {
+		if (!CONFIG(ARCH_MPC830X) &&
+		    !CONFIG(ARCH_MPC831X) &&
+		    !CONFIG(ARCH_MPC8360) &&
+		    !CONFIG(ARCH_MPC837X)) {
 			debug("%s: odt_wr_cfg value %d invalid.\n",
 			      ofnode_get_name(node), odt_wr_cfg);
 			return -EINVAL;
@@ -620,7 +620,7 @@ static int mpc83xx_sdram_probe(struct udevice *dev)
 	switch (mcas_latency) {
 	case CASLAT_20:
 	case CASLAT_25:
-		if (!IS_ENABLED(CONFIG_ARCH_MPC8308)) {
+		if (!CONFIG(ARCH_MPC8308)) {
 			debug("%s: MCAS latency < 3.0 unsupported on MPC8308\n",
 			      dev->name);
 			return -EINVAL;

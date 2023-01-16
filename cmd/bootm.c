@@ -159,9 +159,9 @@ int do_bootm(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 		BOOTM_STATE_FINDOTHER | BOOTM_STATE_LOADOS |
 		BOOTM_STATE_OS_PREP | BOOTM_STATE_OS_FAKE_GO |
 		BOOTM_STATE_OS_GO;
-	if (IS_ENABLED(CONFIG_SYS_BOOT_RAMDISK_HIGH))
+	if (CONFIG(SYS_BOOT_RAMDISK_HIGH))
 		states |= BOOTM_STATE_RAMDISK;
-	if (IS_ENABLED(CONFIG_PPC) || IS_ENABLED(CONFIG_MIPS))
+	if (CONFIG(PPC) || CONFIG(MIPS))
 		states |= BOOTM_STATE_OS_CMDLINE;
 	ret = do_bootm_states(cmdtp, flag, argc, argv, states, &images, 1);
 

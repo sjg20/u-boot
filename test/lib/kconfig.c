@@ -15,8 +15,8 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 {
 	ulong val;
 
-	ut_asserteq(1, IS_ENABLED(CONFIG_CMDLINE))
-	ut_asserteq(0, IS_ENABLED(CONFIG__UNDEFINED))
+	ut_asserteq(1, CONFIG(CMDLINE))
+	ut_asserteq(0, CONFIG(_UNDEFINED))
 
 	ut_asserteq(1, CONFIG(CMDLINE))
 	ut_asserteq(0, CONFIG(__UNDEFINED))
@@ -43,8 +43,8 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 	 * are detected, since otherwise a build error when building U-Boot may
 	 * cause SPL to not be built.
 	 */
-	if (!IS_ENABLED(CONFIG_SANDBOX_SPL) &&
-	    IS_ENABLED(CONFIG_TEST_KCONFIG)) {
+	if (!CONFIG(SANDBOX_SPL) &&
+	    CONFIG(TEST_KCONFIG)) {
 		val = IF_ENABLED_INT(CONFIG_TEST_KCONFIG_ENABLE,
 				     CONFIG_TEST_KCONFIG_VALUE);
 		printf("value %ld\n", val);
@@ -56,7 +56,7 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 	 * are detected, since otherwise a build error when building U-Boot may
 	 * cause SPL to not be built.
 	 */
-	if (!IS_ENABLED(CONFIG_SANDBOX_SPL) &&
+	if (!CONFIG(SANDBOX_SPL) &&
 	    CONFIG(TEST_KCONFIG)) {
 		val = CONFIG_IF_ENABLED_INT(TEST_KCONFIG_ENABLE,
 					    TEST_KCONFIG_VALUE);

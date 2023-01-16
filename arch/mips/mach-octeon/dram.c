@@ -16,7 +16,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int dram_init(void)
 {
-	if (IS_ENABLED(CONFIG_RAM_OCTEON)) {
+	if (CONFIG(RAM_OCTEON)) {
 		struct ram_info ram;
 		struct udevice *dev;
 		int ret;
@@ -50,7 +50,7 @@ int dram_init(void)
 
 void board_add_ram_info(int use_default)
 {
-	if (IS_ENABLED(CONFIG_RAM_OCTEON)) {
+	if (CONFIG(RAM_OCTEON)) {
 		struct ram_info ram;
 		struct udevice *dev;
 		int ret;
@@ -79,7 +79,7 @@ phys_size_t get_effective_memsize(void)
 
 phys_size_t board_get_usable_ram_top(phys_size_t total_size)
 {
-	if (IS_ENABLED(CONFIG_RAM_OCTEON)) {
+	if (CONFIG(RAM_OCTEON)) {
 		/* Map a maximum of 256MiB - return not size but address */
 		return CFG_SYS_SDRAM_BASE + min(gd->ram_size,
 						   UBOOT_RAM_SIZE_MAX);

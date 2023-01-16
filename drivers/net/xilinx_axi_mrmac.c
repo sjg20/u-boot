@@ -23,7 +23,7 @@
 
 static void axi_mrmac_dma_write(struct mcdma_bd *bd, u32 *desc)
 {
-	if (IS_ENABLED(CONFIG_PHYS_64BIT))
+	if (CONFIG(PHYS_64BIT))
 		writeq((unsigned long)bd, desc);
 	else
 		writel((uintptr_t)bd, desc);
@@ -191,7 +191,7 @@ static int axi_mrmac_start(struct udevice *dev)
 	priv->rx_bd[1]->next_desc = lower_32_bits((u64)priv->rx_bd[0]);
 	priv->rx_bd[1]->buf_addr = lower_32_bits((u64)net_rx_packets[1]);
 
-	if (IS_ENABLED(CONFIG_PHYS_64BIT)) {
+	if (CONFIG(PHYS_64BIT)) {
 		priv->rx_bd[0]->next_desc_msb = upper_32_bits((u64)priv->rx_bd[1]);
 		priv->rx_bd[0]->buf_addr_msb = upper_32_bits((u64)net_rx_packets[0]);
 
@@ -277,7 +277,7 @@ static int axi_mrmac_send(struct udevice *dev, void *ptr, int len)
 	priv->tx_bd[1]->next_desc = lower_32_bits((u64)priv->tx_bd[0]);
 	priv->tx_bd[1]->buf_addr = lower_32_bits((u64)ptr + len / 2);
 
-	if (IS_ENABLED(CONFIG_PHYS_64BIT)) {
+	if (CONFIG(PHYS_64BIT)) {
 		priv->tx_bd[0]->next_desc_msb = upper_32_bits((u64)priv->tx_bd[1]);
 		priv->tx_bd[0]->buf_addr_msb = upper_32_bits((u64)ptr);
 

@@ -166,7 +166,7 @@ static int  npcm_usb_phy_xlate(struct phy *phy, struct ofnode_phandle_args *args
 	case USBD9PHY1:
 	case USBH2PHY3:
 	case USBD8PHY3:
-		if (!IS_ENABLED(CONFIG_ARCH_NPCM8XX))
+		if (!CONFIG(ARCH_NPCM8XX))
 			return -EINVAL;
 	case USBDPHY1:
 	case USBD8PHY1:

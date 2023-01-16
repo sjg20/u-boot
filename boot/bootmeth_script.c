@@ -127,7 +127,7 @@ static int script_boot(struct udevice *dev, struct bootflow *bflow)
 		ret = env_set_hex("devnum", desc->devnum);
 	if (!ret)
 		ret = env_set("prefix", bflow->subdir);
-	if (!ret && IS_ENABLED(CONFIG_ARCH_SUNXI) &&
+	if (!ret && CONFIG(ARCH_SUNXI) &&
 	    !strcmp("mmc", blk_get_devtype(bflow->blk)))
 		ret = env_set_hex("mmc_bootdev", desc->devnum);
 	if (ret)
@@ -150,7 +150,7 @@ static int script_bootmeth_bind(struct udevice *dev)
 {
 	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
 
-	plat->desc = IS_ENABLED(CONFIG_BOOTSTD_FULL) ?
+	plat->desc = CONFIG(BOOTSTD_FULL) ?
 		"Script boot from a block device" : "script";
 
 	return 0;

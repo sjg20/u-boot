@@ -323,12 +323,12 @@ u32 tpm_resume(struct udevice *dev);
 
 static inline bool tpm_is_v1(struct udevice *dev)
 {
-	return IS_ENABLED(CONFIG_TPM_V1) && tpm_get_version(dev) == TPM_V1;
+	return CONFIG(TPM_V1) && tpm_get_version(dev) == TPM_V1;
 }
 
 static inline bool tpm_is_v2(struct udevice *dev)
 {
-	return IS_ENABLED(CONFIG_TPM_V2) && tpm_get_version(dev) == TPM_V2;
+	return CONFIG(TPM_V2) && tpm_get_version(dev) == TPM_V2;
 }
 
 #endif /* __TPM_API_H */

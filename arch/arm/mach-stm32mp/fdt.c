@@ -270,12 +270,12 @@ static int stm32_fdt_fixup_etzpc(void *fdt, int soc_node)
 	int offset, shift;
 	u32 addr, status, decprot[ETZPC_DECPROT_NB];
 
-	if (IS_ENABLED(CONFIG_STM32MP13x)) {
+	if (CONFIG(STM32MP13x)) {
 		array = stm32mp13_ip_addr;
 		array_size = ARRAY_SIZE(stm32mp13_ip_addr);
 	}
 
-	if (IS_ENABLED(CONFIG_STM32MP15x)) {
+	if (CONFIG(STM32MP15x)) {
 		array = stm32mp15_ip_addr;
 		array_size = ARRAY_SIZE(stm32mp15_ip_addr);
 	}
@@ -491,10 +491,10 @@ int ft_system_setup(void *blob, struct bd_info *bd)
 	cpu = get_cpu_type();
 	get_soc_name(name);
 
-	if (IS_ENABLED(CONFIG_STM32MP13x))
+	if (CONFIG(STM32MP13x))
 		stm32mp13_fdt_fixup(blob, soc, cpu, name);
 
-	if (IS_ENABLED(CONFIG_STM32MP15x)) {
+	if (CONFIG(STM32MP15x)) {
 		stm32mp15_fdt_fixup(blob, soc, cpu, name);
 
 		/*

@@ -149,7 +149,7 @@ unsigned int install_e820_map(unsigned int max_entries,
 	entries[num_entries].type = E820_RESERVED;
 	num_entries++;
 
-	if (IS_ENABLED(CONFIG_HAVE_ACPI_RESUME)) {
+	if (CONFIG(HAVE_ACPI_RESUME)) {
 		ulong stack_size;
 
 		stack_size = CONFIG(HAVE_ACPI_RESUME,
@@ -182,7 +182,7 @@ unsigned int install_e820_map(unsigned int max_entries,
 	return num_entries;
 }
 
-#if CONFIG(HANDOFF) && IS_ENABLED(CONFIG_USE_HOB)
+#if CONFIG(HANDOFF) && CONFIG(USE_HOB)
 int handoff_arch_save(struct spl_handoff *ho)
 {
 	ho->arch.usable_ram_top = gd->bd->bi_dram[0].size;

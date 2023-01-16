@@ -244,11 +244,11 @@ static int sunxi_get_boot_source(void)
 	 * so we can't use that either. So if this is called from U-Boot
 	 * proper, just return MMC0 as a placeholder, for now.
 	 */
-	if (IS_ENABLED(CONFIG_MACH_SUNIV) &&
-	    !IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(MACH_SUNIV) &&
+	    !CONFIG(SPL_BUILD))
 		return SUNXI_BOOTED_FROM_MMC0;
 
-	if (IS_ENABLED(CONFIG_MACH_SUNIV))
+	if (CONFIG(MACH_SUNIV))
 		return suniv_get_boot_source();
 	if (sunxi_egon_valid(egon_head))
 		return readb(&egon_head->boot_media);
@@ -421,7 +421,7 @@ u32 spl_mmc_boot_mode(struct mmc *mmc, const u32 boot_device)
 		return result;
 
 	result = MMCSD_MODE_RAW;
-	if (!IS_SD(mmc) && IS_ENABLED(CONFIG_SUPPORT_EMMC_BOOT)) {
+	if (!IS_SD(mmc) && CONFIG(SUPPORT_EMMC_BOOT)) {
 		if (sunxi_valid_emmc_boot(mmc))
 			result = MMCSD_MODE_EMMCBOOT;
 		else

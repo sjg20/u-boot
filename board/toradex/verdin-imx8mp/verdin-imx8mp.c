@@ -62,7 +62,7 @@ static int setup_eqos(void)
 	return set_clk_eqos(ENET_125MHZ);
 }
 
-#if IS_ENABLED(CONFIG_NET)
+#if CONFIG(NET)
 int board_phy_config(struct phy_device *phydev)
 {
 	if (phydev->drv->config)
@@ -75,10 +75,10 @@ int board_init(void)
 {
 	int ret = 0;
 
-	if (IS_ENABLED(CONFIG_FEC_MXC))
+	if (CONFIG(FEC_MXC))
 		setup_fec();
 
-	if (IS_ENABLED(CONFIG_DWC_ETH_QOS))
+	if (CONFIG(DWC_ETH_QOS))
 		ret = setup_eqos();
 
 	return ret;
@@ -90,7 +90,7 @@ static void select_dt_from_module_version(void)
 	char *env_variant = env_get("variant");
 	int is_wifi = 0;
 
-	if (IS_ENABLED(CONFIG_TDX_CFG_BLOCK)) {
+	if (CONFIG(TDX_CFG_BLOCK)) {
 		/*
 		 * If we have a valid config block and it says we are a module with
 		 * Wi-Fi/Bluetooth make sure we use the -wifi device tree.
@@ -128,7 +128,7 @@ int board_phys_sdram_size(phys_size_t *size)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_OF_LIBFDT) && IS_ENABLED(CONFIG_OF_BOARD_SETUP)
+#if CONFIG(OF_LIBFDT) && CONFIG(OF_BOARD_SETUP)
 int ft_board_setup(void *blob, struct bd_info *bd)
 {
 	return ft_common_board_setup(blob, bd);

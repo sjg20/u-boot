@@ -809,7 +809,7 @@ static int k3_r5f_probe(struct udevice *dev)
 	 * SPL execution with the separated DM firmware image. The following
 	 * piece of code is not compiled in that case.
 	 */
-	if (!IS_ENABLED(CONFIG_K3_DM_FW)) {
+	if (!CONFIG(K3_DM_FW)) {
 		ret = core->tsp.sci->ops.dev_ops.is_on(core->tsp.sci,
 						       core->tsp.dev_id,
 						       &r_state, &core->in_use);

@@ -250,15 +250,15 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 	const void *fit = ctx->fit;
 	bool external_data = false;
 
-	if (IS_ENABLED(CONFIG_SPL_FPGA) ||
-	    (IS_ENABLED(CONFIG_SPL_OS_BOOT) && IS_ENABLED(CONFIG_SPL_GZIP))) {
+	if (CONFIG(SPL_FPGA) ||
+	    (CONFIG(SPL_OS_BOOT) && CONFIG(SPL_GZIP))) {
 		if (fit_image_get_type(fit, node, &type))
 			puts("Cannot get image type.\n");
 		else
 			debug("%s ", genimg_get_type_name(type));
 	}
 
-	if (IS_ENABLED(CONFIG_SPL_GZIP)) {
+	if (CONFIG(SPL_GZIP)) {
 		fit_image_get_comp(fit, node, &image_comp);
 		debug("%s ", genimg_get_comp_name(image_comp));
 	}
@@ -331,7 +331,7 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 		board_fit_image_post_process(fit, node, &src, &length);
 
 	load_ptr = map_sysmem(load_addr, length);
-	if (IS_ENABLED(CONFIG_SPL_GZIP) && image_comp == IH_COMP_GZIP) {
+	if (CONFIG(SPL_GZIP) && image_comp == IH_COMP_GZIP) {
 		size = length;
 		if (gunzip(load_ptr, CONFIG_SYS_BOOTM_LEN, src, &size)) {
 			puts("Uncompressing error\n");
@@ -363,7 +363,7 @@ static bool os_takes_devicetree(uint8_t os)
 	case IH_OS_U_BOOT:
 		return true;
 	case IH_OS_LINUX:
-		return IS_ENABLED(CONFIG_SPL_OS_BOOT);
+		return CONFIG(SPL_OS_BOOT);
 	default:
 		return false;
 	}
@@ -499,7 +499,7 @@ static int spl_fit_image_is_fpga(const void *fit, int node)
 {
 	const char *type;
 
-	if (!IS_ENABLED(CONFIG_SPL_FPGA))
+	if (!CONFIG(SPL_FPGA))
 		return 0;
 
 	type = fdt_getprop(fit, node, FIT_TYPE_PROP, NULL);
@@ -679,7 +679,7 @@ static int spl_simple_fit_parse(struct spl_fit_info *ctx)
 	if (ctx->conf_node < 0)
 		return -EINVAL;
 
-	if (IS_ENABLED(CONFIG_SPL_FIT_SIGNATURE)) {
+	if (CONFIG(SPL_FIT_SIGNATURE)) {
 		printf("## Checking hash(es) for config %s ... ",
 		       fit_get_name(ctx->fit, ctx->conf_node, NULL));
 		if (fit_config_verify(ctx->fit, ctx->conf_node))
@@ -722,7 +722,7 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	if (ret < 0)
 		return ret;
 
-	if (IS_ENABLED(CONFIG_SPL_FPGA))
+	if (CONFIG(SPL_FPGA))
 		spl_fit_load_fpga(&ctx, info, sector);
 
 	/*
@@ -734,7 +734,7 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	if (node < 0)
 		node = spl_fit_get_image_node(&ctx, FIT_FIRMWARE_PROP, 0);
 
-	if (node < 0 && IS_ENABLED(CONFIG_SPL_OS_BOOT))
+	if (node < 0 && CONFIG(SPL_OS_BOOT))
 		node = spl_fit_get_image_node(&ctx, FIT_KERNEL_PROP, 0);
 
 	if (node < 0) {
@@ -763,7 +763,7 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	 */
 	if (!spl_fit_image_get_os(ctx.fit, node, &spl_image->os))
 		debug("Image OS is %s\n", genimg_get_os_name(spl_image->os));
-	else if (!IS_ENABLED(CONFIG_SPL_OS_BOOT))
+	else if (!CONFIG(SPL_OS_BOOT))
 		spl_image->os = IH_OS_U_BOOT;
 
 	/*
@@ -837,7 +837,7 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 
 	spl_image->flags |= SPL_FIT_FOUND;
 
-	if (IS_ENABLED(CONFIG_IMX_HAB))
+	if (CONFIG(IMX_HAB))
 		board_spl_fit_post_load(ctx.fit);
 
 	return 0;

@@ -2899,7 +2899,7 @@ int mmc_start_init(struct mmc *mmc)
 	mmc->host_caps = mmc->cfg->host_caps | MMC_CAP(MMC_LEGACY) |
 			 MMC_MODE_1BIT;
 
-	if (IS_ENABLED(CONFIG_MMC_SPEED_MODE_SET)) {
+	if (CONFIG(MMC_SPEED_MODE_SET)) {
 		if (mmc->user_speed_mode != MMC_MODES_END) {
 			int i;
 			/* set host caps */

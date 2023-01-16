@@ -100,7 +100,7 @@ static int spl_romapi_load_image_seekable(struct spl_image_info *spl_image,
 		return -1;
 	}
 
-	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) && image_get_magic(header) == FDT_MAGIC) {
+	if (CONFIG(SPL_LOAD_FIT) && image_get_magic(header) == FDT_MAGIC) {
 		struct spl_load_info load;
 
 		memset(&load, 0, sizeof(load));
@@ -108,7 +108,7 @@ static int spl_romapi_load_image_seekable(struct spl_image_info *spl_image,
 		load.read = spl_romapi_read_seekable;
 		load.priv = &pagesize;
 		return spl_load_simple_fit(spl_image, &load, offset / pagesize, header);
-	} else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER)) {
+	} else if (CONFIG(SPL_LOAD_IMX_CONTAINER)) {
 		struct spl_load_info load;
 
 		memset(&load, 0, sizeof(load));
@@ -186,9 +186,9 @@ static u8 *search_container_header(u8 *p, int size)
 
 static u8 *search_img_header(u8 *p, int size)
 {
-	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT))
+	if (CONFIG(SPL_LOAD_FIT))
 		return search_fit_header(p, size);
-	else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER))
+	else if (CONFIG(SPL_LOAD_IMX_CONTAINER))
 		return search_container_header(p, size);
 
 	return NULL;
@@ -196,9 +196,9 @@ static u8 *search_img_header(u8 *p, int size)
 
 static u32 img_header_size(void)
 {
-	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT))
+	if (CONFIG(SPL_LOAD_FIT))
 		return sizeof(struct fdt_header);
-	else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER))
+	else if (CONFIG(SPL_LOAD_IMX_CONTAINER))
 		return sizeof(struct container_hdr);
 
 	return 0;
@@ -219,9 +219,9 @@ static int img_info_size(void *img_hdr)
 
 static int img_total_size(void *img_hdr)
 {
-	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT)) {
+	if (CONFIG(SPL_LOAD_FIT)) {
 		return get_fit_image_size(img_hdr);
-	} else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER)) {
+	} else if (CONFIG(SPL_LOAD_IMX_CONTAINER)) {
 		int total = get_container_size((ulong)img_hdr, NULL);
 
 		if (total < 0) {
@@ -329,9 +329,9 @@ static int spl_romapi_load_image_stream(struct spl_image_info *spl_image,
 	load.bl_len = 1;
 	load.read = spl_ram_load_read;
 
-	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT))
+	if (CONFIG(SPL_LOAD_FIT))
 		return spl_load_simple_fit(spl_image, &load, (ulong)phdr, phdr);
-	else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER))
+	else if (CONFIG(SPL_LOAD_IMX_CONTAINER))
 		return spl_load_imx_container(spl_image, &load, (ulong)phdr);
 
 	return -1;

@@ -38,7 +38,7 @@ int board_early_init_f(void)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_LOAD_ENV_FROM_MMC_BOOT_PARTITION)
+#if CONFIG(LOAD_ENV_FROM_MMC_BOOT_PARTITION)
 uint board_mmc_get_env_part(struct mmc *mmc)
 {
 	uint part = (mmc->part_config >> 3) & PART_ACCESS_MASK;
@@ -364,7 +364,7 @@ int board_init(void)
 	struct udevice *dev;
 	int tps_ret;
 
-	if (IS_ENABLED(CONFIG_USB_DWC3) || IS_ENABLED(CONFIG_USB_XHCI_IMX8M)) {
+	if (CONFIG(USB_DWC3) || CONFIG(USB_XHCI_IMX8M)) {
 		log_debug("%s: initializing USB clk\n", __func__);
 
 		/* init_usb_clk won't enable the second clock if it's a USB boot */
@@ -398,7 +398,7 @@ int board_init(void)
 
 int board_late_init(void)
 {
-	if (IS_ENABLED(CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
+	if (CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
 		u32 rev;
 		char rev_str[3];
 

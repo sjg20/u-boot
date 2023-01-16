@@ -20,7 +20,7 @@ static int cpu_sandbox_get_info(const struct udevice *dev,
 {
 	info->cpu_freq = 42 * 42 * 42 * 42 * 42;
 	info->features = 0x42424242;
-	info->address_width = IS_ENABLED(CONFIG_PHYS_64BIT) ? 64 : 32;
+	info->address_width = CONFIG(PHYS_64BIT) ? 64 : 32;
 
 	return 0;
 }

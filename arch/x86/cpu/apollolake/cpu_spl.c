@@ -62,7 +62,7 @@ static void google_chromeec_ioport_range(uint *out_basep, uint *out_sizep)
 	uint base;
 	uint size;
 
-	if (IS_ENABLED(CONFIG_EC_GOOGLE_CHROMEEC_MEC)) {
+	if (CONFIG(EC_GOOGLE_CHROMEEC_MEC)) {
 		base = MEC_EMI_BASE;
 		size = MEC_EMI_SIZE;
 	} else {
@@ -124,7 +124,7 @@ static int arch_cpu_init_tpl(void)
 			return log_msg_ret("SPI", ret);
 	} else {
 		/* Alternative code if we don't have SPI in TPL */
-		if (IS_ENABLED(CONFIG_APL_BOOT_FROM_FAST_SPI_FLASH))
+		if (CONFIG(APL_BOOT_FROM_FAST_SPI_FLASH))
 			printf("Warning: Enable APL_SPI_FLASHBOOT to use SPI-flash driver in TPL");
 		ret = fast_spi_cache_bios_region();
 		if (ret)
@@ -170,7 +170,7 @@ static int arch_cpu_init_spl(void)
 	ret = pmc_init(pmc);
 	if (ret < 0)
 		return log_msg_ret("Could not init PMC", ret);
-	if (IS_ENABLED(CONFIG_HAVE_ACPI_RESUME)) {
+	if (CONFIG(HAVE_ACPI_RESUME)) {
 		ret = pmc_prev_sleep_state(pmc);
 		if (ret < 0)
 			return log_msg_ret("Could not get PMC sleep state",

@@ -105,7 +105,7 @@ static void serial_find_console_or_panic(void)
 			}
 		}
 	}
-	if (!IS_ENABLED(CONFIG_SPL_BUILD) || !CONFIG(OF_CONTROL) ||
+	if (!CONFIG(SPL_BUILD) || !CONFIG(OF_CONTROL) ||
 	    !blob) {
 		/*
 		 * Try to use CONFIG_CONS_INDEX if available (it is numbered
@@ -174,7 +174,7 @@ int serial_init(void)
 int serial_initialize(void)
 {
 	/* Scanning uclass to probe devices */
-	if (IS_ENABLED(CONFIG_SERIAL_PROBE_ALL)) {
+	if (CONFIG(SERIAL_PROBE_ALL)) {
 		int ret;
 
 		ret  = uclass_probe_all(UCLASS_SERIAL);

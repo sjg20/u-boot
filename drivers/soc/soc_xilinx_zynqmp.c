@@ -317,7 +317,7 @@ static int soc_xilinx_zynqmp_probe(struct udevice *dev)
 
 	priv->family = zynqmp_family;
 
-	if (!IS_ENABLED(CONFIG_ZYNQMP_FIRMWARE))
+	if (!CONFIG(ZYNQMP_FIRMWARE))
 		ret = zynqmp_mmio_read(ZYNQMP_PS_VERSION, &ret_payload[2]);
 	else
 		ret = xilinx_pm_request(PM_GET_CHIPID, 0, 0, 0, 0,
@@ -327,7 +327,7 @@ static int soc_xilinx_zynqmp_probe(struct udevice *dev)
 
 	priv->revision = ret_payload[2] & ZYNQMP_PS_VER_MASK;
 
-	if (IS_ENABLED(CONFIG_ZYNQMP_FIRMWARE)) {
+	if (CONFIG(ZYNQMP_FIRMWARE)) {
 		/*
 		 * Firmware returns:
 		 * payload[0][31:0] = status of the operation

@@ -392,7 +392,7 @@ static int do_setexpr(struct cmd_tbl *cmdtp, int flag, int argc,
 		return CMD_RET_FAILURE;
 
 	/* format string assignment: "setexpr name fmt %d value" */
-	if (strcmp(argv[2], "fmt") == 0 && IS_ENABLED(CONFIG_CMD_SETEXPR_FMT)) {
+	if (strcmp(argv[2], "fmt") == 0 && CONFIG(CMD_SETEXPR_FMT)) {
 		char str[MAX_STR_LEN];
 		int result;
 

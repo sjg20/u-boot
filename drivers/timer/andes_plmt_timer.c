@@ -23,7 +23,7 @@ static u64 notrace andes_plmt_get_count(struct udevice *dev)
 	return readq((void __iomem *)MTIME_REG(dev_get_priv(dev)));
 }
 
-#if CONFIG(RISCV_MMODE) && IS_ENABLED(CONFIG_TIMER_EARLY)
+#if CONFIG(RISCV_MMODE) && CONFIG(TIMER_EARLY)
 /**
  * timer_early_get_rate() - Get the timer rate before driver model
  */

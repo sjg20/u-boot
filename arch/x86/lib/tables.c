@@ -91,7 +91,7 @@ int write_tables(void)
 		const struct table_info *table = &table_list[i];
 		int size = table->size ? : CONFIG_ROM_TABLE_SIZE;
 
-		if (IS_ENABLED(CONFIG_BLOBLIST_TABLES) && table->tag) {
+		if (CONFIG(BLOBLIST_TABLES) && table->tag) {
 			rom_table_start = (ulong)bloblist_add(table->tag, size,
 							      table->align);
 			if (!rom_table_start)
@@ -103,7 +103,7 @@ int write_tables(void)
 			return -EINTR;
 		}
 
-		if (IS_ENABLED(CONFIG_SEABIOS)) {
+		if (CONFIG(SEABIOS)) {
 			table_size = rom_table_end - rom_table_start;
 			high_table = (u32)(ulong)high_table_malloc(table_size);
 			if (high_table) {
@@ -132,23 +132,23 @@ int write_tables(void)
 		rom_table_start = rom_table_end;
 	}
 
-	if (IS_ENABLED(CONFIG_SEABIOS)) {
+	if (CONFIG(SEABIOS)) {
 		/* make sure the last item is zero */
 		cfg_tables[i].size = 0;
 		write_coreboot_table(CB_TABLE_ADDR, cfg_tables);
 	}
 
-	if (IS_ENABLED(CONFIG_BLOBLIST_TABLES)) {
+	if (CONFIG(BLOBLIST_TABLES)) {
 		void *ptr = (void *)CONFIG_ROM_TABLE_ADDR;
 
 		/* Write an RSDP pointing to the tables */
-		if (IS_ENABLED(CONFIG_GENERATE_ACPI_TABLE)) {
+		if (CONFIG(GENERATE_ACPI_TABLE)) {
 			struct acpi_ctx *ctx = gd_acpi_ctx();
 
 			acpi_write_rsdp(ptr, ctx->rsdt, ctx->xsdt);
 			ptr += ALIGN(sizeof(struct acpi_rsdp), 16);
 		}
-		if (IS_ENABLED(CONFIG_GENERATE_SMBIOS_TABLE)) {
+		if (CONFIG(GENERATE_SMBIOS_TABLE)) {
 			void *smbios;
 
 			smbios = bloblist_find(BLOBLISTT_SMBIOS_TABLES, 0);

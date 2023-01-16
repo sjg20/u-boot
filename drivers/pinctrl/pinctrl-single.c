@@ -69,7 +69,7 @@ struct single_gpiofunc_range {
  * @gpiofuncs: list gpio functions
  */
 struct single_priv {
-#if (IS_ENABLED(CONFIG_SANDBOX))
+#if (CONFIG(SANDBOX))
 	u32 *sandbox_regs;
 #endif
 	unsigned int bits_per_pin;
@@ -95,7 +95,7 @@ struct single_fdt_bits_cfg {
 	fdt32_t mask;
 };
 
-#if (!IS_ENABLED(CONFIG_SANDBOX))
+#if (!CONFIG(SANDBOX))
 
 static unsigned int single_read(struct udevice *dev, fdt_addr_t reg)
 {

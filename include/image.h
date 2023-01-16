@@ -887,7 +887,7 @@ static inline int image_check_type(const struct legacy_img_hdr *hdr, uint8_t typ
 static inline int image_check_arch(const struct legacy_img_hdr *hdr, uint8_t arch)
 {
 	/* Let's assume that sandbox can load any architecture */
-	if (!tools_build() && IS_ENABLED(CONFIG_SANDBOX))
+	if (!tools_build() && CONFIG(SANDBOX))
 		return true;
 	return (image_get_arch(hdr) == arch) ||
 		(image_get_arch(hdr) == IH_ARCH_ARM && arch == IH_ARCH_ARM64);

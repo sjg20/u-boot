@@ -146,7 +146,7 @@ static void store_bootp_params(struct bootp_hdr *bp)
 	struct in_addr tmp_ip;
 	bool overwrite_serverip = true;
 
-	if (IS_ENABLED(CONFIG_BOOTP_SERVERIP))
+	if (CONFIG(BOOTP_SERVERIP))
 		return;
 
 #if defined(CONFIG_BOOTP_PREFER_SERVERIP)

@@ -79,11 +79,11 @@ static int spl_sata_load_image(struct spl_image_info *spl_image,
 	{
 		err = -ENOSYS;
 
-		if (IS_ENABLED(CONFIG_SPL_FS_FAT)) {
+		if (CONFIG(SPL_FS_FAT)) {
 			err = spl_load_image_fat(spl_image, bootdev, stor_dev,
 					CONFIG_SYS_SATA_FAT_BOOT_PARTITION,
 					CONFIG_SPL_FS_LOAD_PAYLOAD_NAME);
-		} else if (IS_ENABLED(CONFIG_SPL_SATA_RAW_U_BOOT_USE_SECTOR)) {
+		} else if (CONFIG(SPL_SATA_RAW_U_BOOT_USE_SECTOR)) {
 			err = spl_sata_load_image_raw(spl_image, bootdev, stor_dev,
 				CONFIG_SPL_SATA_RAW_U_BOOT_SECTOR);
 		}

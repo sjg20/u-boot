@@ -530,7 +530,7 @@ int board_init(void)
 #if defined(CONFIG_SPL_BUILD)
 void spl_board_init(void)
 {
-	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+	if (CONFIG(FSL_CAAM)) {
 		struct udevice *dev;
 		int ret;
 

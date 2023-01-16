@@ -203,7 +203,7 @@ static int env_ubi_erase(void)
 		       CONFIG_ENV_UBI_VOLUME);
 		ret = 1;
 	}
-	if (IS_ENABLED(CONFIG_SYS_REDUNDAND_ENVIRONMENT)) {
+	if (CONFIG(SYS_REDUNDAND_ENVIRONMENT)) {
 		if (ubi_volume_write(ENV_UBI_VOLUME_REDUND,
 				     (void *)env_buf, CONFIG_ENV_SIZE)) {
 			printf("\n** Unable to erase env to %s:%s **\n",

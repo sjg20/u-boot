@@ -102,7 +102,7 @@ void cyclic_run(void)
 void schedule(void)
 {
 	/* The HW watchdog is not integrated into the cyclic IF (yet) */
-	if (IS_ENABLED(CONFIG_HW_WATCHDOG))
+	if (CONFIG(HW_WATCHDOG))
 		hw_watchdog_reset();
 
 	/*

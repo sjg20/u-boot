@@ -583,20 +583,20 @@ enum env_location env_get_location(enum env_operation op, int prio)
 	case SD_MODE:
 	case SD1_LSHFT_MODE:
 	case SD_MODE1:
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_FAT))
+		if (CONFIG(ENV_IS_IN_FAT))
 			return ENVL_FAT;
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_EXT4))
+		if (CONFIG(ENV_IS_IN_EXT4))
 			return ENVL_EXT4;
 		return ENVL_NOWHERE;
 	case NAND_MODE:
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_NAND))
+		if (CONFIG(ENV_IS_IN_NAND))
 			return ENVL_NAND;
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_UBI))
+		if (CONFIG(ENV_IS_IN_UBI))
 			return ENVL_UBI;
 		return ENVL_NOWHERE;
 	case QSPI_MODE_24BIT:
 	case QSPI_MODE_32BIT:
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_SPI_FLASH))
+		if (CONFIG(ENV_IS_IN_SPI_FLASH))
 			return ENVL_SPI_FLASH;
 		return ENVL_NOWHERE;
 	case JTAG_MODE:

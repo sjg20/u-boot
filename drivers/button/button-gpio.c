@@ -52,7 +52,7 @@ static int button_gpio_remove(struct udevice *dev)
 	 * The GPIO driver may have already been removed. We will need to
 	 * address this more generally.
 	 */
-	if (!IS_ENABLED(CONFIG_SANDBOX)) {
+	if (!CONFIG(SANDBOX)) {
 		struct button_gpio_priv *priv = dev_get_priv(dev);
 
 		if (dm_gpio_is_valid(&priv->gpio))

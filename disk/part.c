@@ -436,7 +436,7 @@ int blk_get_device_part_str(const char *ifname, const char *dev_part_str,
 	*dev_desc = NULL;
 	memset(info, 0, sizeof(*info));
 
-#if IS_ENABLED(CONFIG_SANDBOX) || IS_ENABLED(CONFIG_SEMIHOSTING)
+#if CONFIG(SANDBOX) || CONFIG(SEMIHOSTING)
 	/*
 	 * Special-case a pseudo block device "hostfs", to allow access to the
 	 * host's own filesystem.
@@ -449,7 +449,7 @@ int blk_get_device_part_str(const char *ifname, const char *dev_part_str,
 	}
 #endif
 
-#if IS_ENABLED(CONFIG_CMD_UBIFS) && !IS_ENABLED(CONFIG_SPL_BUILD)
+#if CONFIG(CMD_UBIFS) && !CONFIG(SPL_BUILD)
 	/*
 	 * Special-case ubi, ubi goes through a mtd, rather than through
 	 * a regular block device.

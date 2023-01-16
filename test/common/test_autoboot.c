@@ -55,7 +55,7 @@ static int test_autoboot(struct unit_test_state *uts)
 	env_set("bootstopkeycrypt", NULL);
 	env_set("bootstopkeysha256", NULL);
 
-	if (IS_ENABLED(CONFIG_CRYPT_PW_SHA256)) {
+	if (CONFIG(CRYPT_PW_SHA256)) {
 		/* test the default password from CONFIG_AUTOBOOT_STOP_STR_CRYPT */
 		ut_assertok(check_for_input(uts, "a\n", true));
 		/* test a password from the `bootstopkeycrypt` environment variable */
@@ -70,7 +70,7 @@ static int test_autoboot(struct unit_test_state *uts)
 		ut_assertok(check_for_input(uts, "test\n", true));
 	}
 
-	if (IS_ENABLED(CONFIG_AUTOBOOT_ENCRYPTION)) {
+	if (CONFIG(AUTOBOOT_ENCRYPTION)) {
 		/* test the `bootstopusesha256` and `bootstopkeysha256` features */
 		ut_assertok(env_set("bootstopusesha256", "true"));
 		ut_assertok(env_set(

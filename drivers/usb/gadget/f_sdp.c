@@ -826,9 +826,9 @@ static int sdp_handle_in_ep(struct spl_image_info *spl_image,
 		/* If imx header fails, try some U-Boot specific headers */
 		if (status) {
 #ifdef CONFIG_SPL_BUILD
-			if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER))
+			if (CONFIG(SPL_LOAD_IMX_CONTAINER))
 				sdp_func->jmp_address = (u32)search_container_header((ulong)sdp_func->jmp_address, sdp_func->dnl_bytes);
-			else if (IS_ENABLED(CONFIG_SPL_LOAD_FIT))
+			else if (CONFIG(SPL_LOAD_FIT))
 				sdp_func->jmp_address = (u32)search_fit_header((ulong)sdp_func->jmp_address, sdp_func->dnl_bytes);
 			if (sdp_func->jmp_address == 0)
 				panic("Error in search header, failed to jump\n");
@@ -851,7 +851,7 @@ static int sdp_handle_in_ep(struct spl_image_info *spl_image,
 				return SDP_EXIT;
 			}
 #endif
-			if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER)) {
+			if (CONFIG(SPL_LOAD_IMX_CONTAINER)) {
 				struct spl_load_info load;
 
 				load.dev = header;

@@ -752,7 +752,7 @@ static int init_device(struct stm32prog_data *data,
 
 	switch (dev->target) {
 	case STM32PROG_MMC:
-		if (!IS_ENABLED(CONFIG_MMC)) {
+		if (!CONFIG(MMC)) {
 			stm32prog_err("unknown device type = %d", dev->target);
 			return -ENODEV;
 		}
@@ -789,7 +789,7 @@ static int init_device(struct stm32prog_data *data,
 	case STM32PROG_NOR:
 	case STM32PROG_NAND:
 	case STM32PROG_SPI_NAND:
-		if (!IS_ENABLED(CONFIG_MTD)) {
+		if (!CONFIG(MTD)) {
 			stm32prog_err("unknown device type = %d", dev->target);
 			return -ENODEV;
 		}
@@ -942,7 +942,7 @@ static int init_device(struct stm32prog_data *data,
 			part_found = true;
 		}
 
-		if (IS_ENABLED(CONFIG_MTD) && mtd) {
+		if (CONFIG(MTD) && mtd) {
 			char mtd_part_id[32];
 			struct part_info *mtd_part;
 			struct mtd_device *mtd_dev;
@@ -1285,7 +1285,7 @@ static int stm32prog_alt_add(struct stm32prog_data *data,
 	ret = -ENODEV;
 	switch (part->target) {
 	case STM32PROG_MMC:
-		if (IS_ENABLED(CONFIG_MMC)) {
+		if (CONFIG(MMC)) {
 			ret = 0;
 			sprintf(dfustr, "mmc");
 			sprintf(devstr, "%d", part->dev_id);
@@ -1294,7 +1294,7 @@ static int stm32prog_alt_add(struct stm32prog_data *data,
 	case STM32PROG_NAND:
 	case STM32PROG_NOR:
 	case STM32PROG_SPI_NAND:
-		if (IS_ENABLED(CONFIG_MTD)) {
+		if (CONFIG(MTD)) {
 			ret = 0;
 			sprintf(dfustr, "mtd");
 			get_mtd_by_target(devstr, part->target, part->dev_id);
@@ -1346,7 +1346,7 @@ static int dfu_init_entities(struct stm32prog_data *data)
 
 	alt_nb = 1; /* number of virtual = CMD*/
 
-	if (IS_ENABLED(CONFIG_CMD_STM32PROG_OTP)) {
+	if (CONFIG(CMD_STM32PROG_OTP)) {
 		/* OTP_SIZE_SMC = 0 if SMC is not supported */
 		otp_size = OTP_SIZE_SMC;
 		/* check if PTA BSEC is supported */
@@ -1409,7 +1409,7 @@ static int dfu_init_entities(struct stm32prog_data *data)
 	if (!ret)
 		ret = stm32prog_alt_add_virt(dfu, "virtual", PHASE_CMD, CMD_SIZE);
 
-	if (!ret && IS_ENABLED(CONFIG_CMD_STM32PROG_OTP) && otp_size)
+	if (!ret && CONFIG(CMD_STM32PROG_OTP) && otp_size)
 		ret = stm32prog_alt_add_virt(dfu, "OTP", PHASE_OTP, otp_size);
 
 	if (!ret && CONFIG(DM_PMIC))
@@ -1431,7 +1431,7 @@ int stm32prog_otp_write(struct stm32prog_data *data, u32 offset, u8 *buffer,
 	u32 otp_size = data->tee ? OTP_SIZE_TA : OTP_SIZE_SMC;
 	log_debug("%s: %x %lx\n", __func__, offset, *size);
 
-	if (!IS_ENABLED(CONFIG_CMD_STM32PROG_OTP)) {
+	if (!CONFIG(CMD_STM32PROG_OTP)) {
 		stm32prog_err("OTP update not supported");
 
 		return -EOPNOTSUPP;
@@ -1460,7 +1460,7 @@ int stm32prog_otp_read(struct stm32prog_data *data, u32 offset, u8 *buffer,
 	u32 otp_size = data->tee ? OTP_SIZE_TA : OTP_SIZE_SMC;
 	int result = 0;
 
-	if (!IS_ENABLED(CONFIG_CMD_STM32PROG_OTP)) {
+	if (!CONFIG(CMD_STM32PROG_OTP)) {
 		stm32prog_err("OTP update not supported");
 
 		return -EOPNOTSUPP;
@@ -1486,7 +1486,7 @@ int stm32prog_otp_read(struct stm32prog_data *data, u32 offset, u8 *buffer,
 		if (data->tee && CONFIG(OPTEE))
 			result = optee_ta_invoke(data, TA_NVMEM_READ, NVMEM_OTP,
 						 data->otp_part, OTP_SIZE_TA);
-		else if (IS_ENABLED(CONFIG_ARM_SMCCC))
+		else if (CONFIG(ARM_SMCCC))
 			result = stm32_smc_exec(STM32_SMC_BSEC, STM32_SMC_READ_ALL,
 						(unsigned long)data->otp_part, 0);
 		if (result)
@@ -1513,7 +1513,7 @@ int stm32prog_otp_start(struct stm32prog_data *data)
 	int result = 0;
 	struct arm_smccc_res res;
 
-	if (!IS_ENABLED(CONFIG_CMD_STM32PROG_OTP)) {
+	if (!CONFIG(CMD_STM32PROG_OTP)) {
 		stm32prog_err("OTP update not supported");
 
 		return -EOPNOTSUPP;
@@ -1528,7 +1528,7 @@ int stm32prog_otp_start(struct stm32prog_data *data)
 	if (data->tee && CONFIG(OPTEE)) {
 		result = optee_ta_invoke(data, TA_NVMEM_WRITE, NVMEM_OTP,
 					 data->otp_part, OTP_SIZE_TA);
-	} else if (IS_ENABLED(CONFIG_ARM_SMCCC)) {
+	} else if (CONFIG(ARM_SMCCC)) {
 		arm_smccc_smc(STM32_SMC_BSEC, STM32_SMC_WRITE_ALL,
 			      (uintptr_t)data->otp_part, 0, 0, 0, 0, 0, &res);
 
@@ -1818,7 +1818,7 @@ static int part_delete(struct stm32prog_data *data,
 	printf("Erasing %s ", part->name);
 	switch (part->target) {
 	case STM32PROG_MMC:
-		if (!IS_ENABLED(CONFIG_MMC)) {
+		if (!CONFIG(MMC)) {
 			ret = -1;
 			stm32prog_err("%s (0x%x): erase invalid",
 				      part->name, part->id);
@@ -1852,7 +1852,7 @@ static int part_delete(struct stm32prog_data *data,
 	case STM32PROG_NOR:
 	case STM32PROG_NAND:
 	case STM32PROG_SPI_NAND:
-		if (!IS_ENABLED(CONFIG_MTD)) {
+		if (!CONFIG(MTD)) {
 			ret = -1;
 			stm32prog_err("%s (0x%x): erase invalid",
 				      part->name, part->id);
@@ -1919,7 +1919,7 @@ static void stm32prog_devices_init(struct stm32prog_data *data)
 			goto error;
 	}
 
-	if (IS_ENABLED(CONFIG_MMC)) {
+	if (CONFIG(MMC)) {
 		ret = create_gpt_partitions(data);
 		if (ret)
 			goto error;

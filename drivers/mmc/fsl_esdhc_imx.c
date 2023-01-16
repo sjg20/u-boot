@@ -180,14 +180,14 @@ static uint esdhc_xfertyp(struct mmc_cmd *cmd, struct mmc_data *data)
 
 	if (data) {
 		xfertyp |= XFERTYP_DPSEL;
-		if (!IS_ENABLED(CONFIG_SYS_FSL_ESDHC_USE_PIO) &&
+		if (!CONFIG(SYS_FSL_ESDHC_USE_PIO) &&
 		    cmd->cmdidx != MMC_CMD_SEND_TUNING_BLOCK &&
 		    cmd->cmdidx != MMC_CMD_SEND_TUNING_BLOCK_HS200)
 			xfertyp |= XFERTYP_DMAEN;
 		if (data->blocks > 1) {
 			xfertyp |= XFERTYP_MSBSEL;
 			xfertyp |= XFERTYP_BCEN;
-			if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_ESDHC111))
+			if (CONFIG(SYS_FSL_ERRATUM_ESDHC111))
 				xfertyp |= XFERTYP_AC12EN;
 		}
 
@@ -337,7 +337,7 @@ static int esdhc_setup_data(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 	}
 
 	esdhc_setup_watermark_level(priv, data);
-	if (!IS_ENABLED(CONFIG_SYS_FSL_ESDHC_USE_PIO))
+	if (!CONFIG(SYS_FSL_ESDHC_USE_PIO))
 		esdhc_setup_dma(priv, data);
 
 	/* Calculate the timeout period for data transactions */
@@ -371,7 +371,7 @@ static int esdhc_setup_data(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 	if (timeout < 0)
 		timeout = 0;
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_ESDHC_A001) &&
+	if (CONFIG(SYS_FSL_ERRATUM_ESDHC_A001) &&
 	    (timeout == 4 || timeout == 8 || timeout == 12))
 		timeout++;
 
@@ -383,7 +383,7 @@ static int esdhc_setup_data(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_MCF5441x)
+#if CONFIG(MCF5441x)
 /*
  * Swaps 32-bit words to little-endian byte order.
  */
@@ -421,7 +421,7 @@ static int esdhc_send_cmd_common(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 	struct fsl_esdhc *regs = priv->esdhc_regs;
 	unsigned long start;
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_ESDHC111) &&
+	if (CONFIG(SYS_FSL_ERRATUM_ESDHC111) &&
 	    cmd->cmdidx == MMC_CMD_STOP_TRANSMISSION)
 		return 0;
 
@@ -452,7 +452,7 @@ static int esdhc_send_cmd_common(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 
 	/* Send the command */
 	esdhc_write32(&regs->cmdarg, cmd->cmdarg);
-	if (IS_ENABLED(CONFIG_FSL_USDHC)) {
+	if (CONFIG(FSL_USDHC)) {
 		u32 mixctrl = esdhc_read32(&regs->mixctrl);
 
 		esdhc_write32(&regs->mixctrl,
@@ -523,7 +523,7 @@ static int esdhc_send_cmd_common(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 
 	/* Wait until all of the blocks are transferred */
 	if (data) {
-		if (IS_ENABLED(CONFIG_SYS_FSL_ESDHC_USE_PIO)) {
+		if (CONFIG(SYS_FSL_ESDHC_USE_PIO)) {
 			esdhc_pio_read_write(priv, data);
 		} else {
 			flags = DATA_COMPLETE;
@@ -553,7 +553,7 @@ static int esdhc_send_cmd_common(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 			dma_unmap_single(priv->dma_addr,
 					 data->blocks * data->blocksize,
 					 mmc_get_dma_dir(data));
-			if (IS_ENABLED(CONFIG_MCF5441x) &&
+			if (CONFIG(MCF5441x) &&
 			    (data->flags & MMC_DATA_READ))
 				sd_swap_dma_buff(data);
 		}
@@ -595,7 +595,7 @@ static void set_sysctl(struct fsl_esdhc_priv *priv, struct mmc *mmc, uint clock)
 	int sdhc_clk = priv->sdhc_clk;
 	uint clk;
 
-#if IS_ENABLED(CONFIG_MX53)
+#if CONFIG(MX53)
 	/* For i.MX53 eSDHCv3, SYSCTL.SDCLKFS may not be set to 0. */
 	pre_div = (regs == (struct fsl_esdhc *)MMC_SDHC3_BASE_ADDR) ? 2 : 1;
 #else
@@ -615,7 +615,7 @@ static void set_sysctl(struct fsl_esdhc_priv *priv, struct mmc *mmc, uint clock)
 
 	clk = (pre_div << 8) | (div << 4);
 
-	if (IS_ENABLED(CONFIG_FSL_USDHC))
+	if (CONFIG(FSL_USDHC))
 		esdhc_clrbits32(&regs->vendorspec, VENDORSPEC_CKEN);
 	else
 		esdhc_clrbits32(&regs->sysctl, SYSCTL_CKEN);
@@ -626,7 +626,7 @@ static void set_sysctl(struct fsl_esdhc_priv *priv, struct mmc *mmc, uint clock)
 	if (ret)
 		pr_warn("fsl_esdhc_imx: Internal clock never stabilised.\n");
 
-	if (IS_ENABLED(CONFIG_FSL_USDHC))
+	if (CONFIG(FSL_USDHC))
 		esdhc_setbits32(&regs->vendorspec, VENDORSPEC_PEREN | VENDORSPEC_CKEN);
 	else
 		esdhc_setbits32(&regs->sysctl, SYSCTL_PEREN | SYSCTL_CKEN);
@@ -938,12 +938,12 @@ static int esdhc_set_ios_common(struct fsl_esdhc_priv *priv, struct mmc *mmc)
 		set_sysctl(priv, mmc, clock);
 
 	if (mmc->clk_disable) {
-		if (IS_ENABLED(CONFIG_FSL_USDHC))
+		if (CONFIG(FSL_USDHC))
 			esdhc_clrbits32(&regs->vendorspec, VENDORSPEC_CKEN);
 		else
 			esdhc_clrbits32(&regs->sysctl, SYSCTL_CKEN);
 	} else {
-		if (IS_ENABLED(CONFIG_FSL_USDHC))
+		if (CONFIG(FSL_USDHC))
 			esdhc_setbits32(&regs->vendorspec, VENDORSPEC_PEREN |
 					VENDORSPEC_CKEN);
 		else
@@ -995,7 +995,7 @@ static int esdhc_init_common(struct fsl_esdhc_priv *priv, struct mmc *mmc)
 			return -ETIMEDOUT;
 	}
 
-	if (IS_ENABLED(CONFIG_FSL_USDHC)) {
+	if (CONFIG(FSL_USDHC)) {
 		/* RSTA doesn't reset MMC_BOOT register, so manually reset it */
 		esdhc_write32(&regs->mmcboot, 0x0);
 		/* Reset MIX_CTRL and CLK_TUNE_CTRL_STATUS regs to 0 */
@@ -1013,7 +1013,7 @@ static int esdhc_init_common(struct fsl_esdhc_priv *priv, struct mmc *mmc)
 		esdhc_write32(&regs->dllctrl, 0x0);
 	}
 
-	if (IS_ENABLED(CONFIG_FSL_USDHC))
+	if (CONFIG(FSL_USDHC))
 		esdhc_setbits32(&regs->vendorspec,
 				VENDORSPEC_HCKEN | VENDORSPEC_IPGEN);
 	else
@@ -1026,7 +1026,7 @@ static int esdhc_init_common(struct fsl_esdhc_priv *priv, struct mmc *mmc)
 	esdhc_clrbits32(&regs->irqstaten, IRQSTATEN_BRR | IRQSTATEN_BWR);
 
 	/* Put the PROCTL reg back to the default */
-	if (IS_ENABLED(CONFIG_MCF5441x))
+	if (CONFIG(MCF5441x))
 		esdhc_write32(&regs->proctl, PROCTL_INIT | PROCTL_D3CD);
 	else
 		esdhc_write32(&regs->proctl, PROCTL_INIT);
@@ -1042,7 +1042,7 @@ static int esdhc_getcd_common(struct fsl_esdhc_priv *priv)
 	struct fsl_esdhc *regs = priv->esdhc_regs;
 	int timeout = 1000;
 
-	if (IS_ENABLED(CONFIG_ESDHC_DETECT_QUIRK))
+	if (CONFIG(ESDHC_DETECT_QUIRK))
 		return 1;
 
 	if (CONFIG(DM_MMC)) {
@@ -1168,10 +1168,10 @@ static int fsl_esdhc_init(struct fsl_esdhc_priv *priv,
 		return ret;
 
 	/* ColdFire, using SDHC_DATA[3] for card detection */
-	if (IS_ENABLED(CONFIG_MCF5441x))
+	if (CONFIG(MCF5441x))
 		esdhc_write32(&regs->proctl, PROCTL_INIT | PROCTL_D3CD);
 
-	if (IS_ENABLED(CONFIG_FSL_USDHC)) {
+	if (CONFIG(FSL_USDHC)) {
 		esdhc_setbits32(&regs->vendorspec, VENDORSPEC_PEREN |
 				VENDORSPEC_HCKEN | VENDORSPEC_IPGEN | VENDORSPEC_CKEN);
 	} else {
@@ -1198,13 +1198,13 @@ static int fsl_esdhc_init(struct fsl_esdhc_priv *priv,
 	 * never exceed 25 Mhz. From this, the HS bit needs to be disabled
 	 * from host capabilities.
 	 */
-	if (IS_ENABLED(CONFIG_MCF5441x))
+	if (CONFIG(MCF5441x))
 		caps &= ~HOSTCAPBLT_HSS;
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_ESDHC135))
+	if (CONFIG(SYS_FSL_ERRATUM_ESDHC135))
 		caps &= ~(HOSTCAPBLT_SRS | HOSTCAPBLT_VS18 | HOSTCAPBLT_VS30);
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_MMC_HAS_CAPBLT_VS33))
+	if (CONFIG(SYS_FSL_MMC_HAS_CAPBLT_VS33))
 		caps |= HOSTCAPBLT_VS33;
 
 	if (caps & HOSTCAPBLT_VS18)
@@ -1220,7 +1220,7 @@ static int fsl_esdhc_init(struct fsl_esdhc_priv *priv,
 	cfg->ops = &esdhc_ops;
 #endif
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ESDHC_HAS_DDR_MODE))
+	if (CONFIG(SYS_FSL_ESDHC_HAS_DDR_MODE))
 		cfg->host_caps |= MMC_MODE_DDR_52MHz;
 
 	if (caps & HOSTCAPBLT_HSS)
@@ -1326,7 +1326,7 @@ int fsl_esdhc_initialize(struct bd_info *bis, struct fsl_esdhc_cfg *cfg)
 		return -EINVAL;
 	}
 
-	if (IS_ENABLED(CONFIG_ESDHC_DETECT_8_BIT_QUIRK))
+	if (CONFIG(ESDHC_DETECT_8_BIT_QUIRK))
 		mmc_cfg->host_caps &= ~MMC_MODE_8BIT;
 
 	ret = fsl_esdhc_init(priv, plat);
@@ -1360,7 +1360,7 @@ int fsl_esdhc_mmc_init(struct bd_info *bis)
 #if CONFIG(OF_LIBFDT)
 __weak int esdhc_status_fixup(void *blob, const char *compat)
 {
-	if (IS_ENABLED(CONFIG_FSL_ESDHC_PIN_MUX) && !hwconfig("esdhc")) {
+	if (CONFIG(FSL_ESDHC_PIN_MUX) && !hwconfig("esdhc")) {
 		do_fixup_by_compat(blob, compat, "status", "disabled",
 				sizeof("disabled"), 1);
 		return 1;

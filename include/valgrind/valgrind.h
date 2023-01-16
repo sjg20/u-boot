@@ -121,7 +121,7 @@
 #else
 /* If we're not compiling for our target platform, don't generate
    any inline asms.  */
-#  if IS_ENABLED(CONFIG_VALGRIND)
+#  if CONFIG(VALGRIND)
 #    error "Unsupported platform for valgrind"
 #  endif
 #endif
@@ -158,7 +158,7 @@
                     (_zzq_request), (_zzq_arg1), (_zzq_arg2),           \
                     (_zzq_arg3), (_zzq_arg4), (_zzq_arg5)); } while (0)
 
-#if !IS_ENABLED(CONFIG_VALGRIND)
+#if !CONFIG(VALGRIND)
 
 /* Define NVALGRIND to completely remove the Valgrind magic sequence
    from the compiled code (analogous to NDEBUG's effects on
@@ -6698,7 +6698,7 @@ __inline
 #endif
 VALGRIND_PRINTF(const char *format, ...)
 {
-#if !IS_ENABLED(CONFIG_VALGRIND)
+#if !CONFIG(VALGRIND)
    (void)format;
    return 0;
 #else /* CONFIG_VALGRIND */
@@ -6737,7 +6737,7 @@ __inline
 #endif
 VALGRIND_PRINTF_BACKTRACE(const char *format, ...)
 {
-#if !IS_ENABLED(CONFIG_VALGRIND)
+#if !CONFIG(VALGRIND)
    (void)format;
    return 0;
 #else /* CONFIG_VALGRIND */

@@ -14,9 +14,9 @@ struct ti_sci_resource_static_data {
 	u8 subtype;
 };
 
-#if IS_ENABLED(CONFIG_K3_DM_FW)
+#if CONFIG(K3_DM_FW)
 
-#if IS_ENABLED(CONFIG_SOC_K3_J721E)
+#if CONFIG(SOC_K3_J721E)
 static struct ti_sci_resource_static_data rm_static_data[] = {
 	/* Free rings */
 	{
@@ -50,7 +50,7 @@ static struct ti_sci_resource_static_data rm_static_data[] = {
 };
 #endif /* CONFIG_SOC_K3_J721E */
 
-#if IS_ENABLED(CONFIG_SOC_K3_J721S2)
+#if CONFIG(SOC_K3_J721S2)
 static struct ti_sci_resource_static_data rm_static_data[] = {
 	/* Free rings */
 	{
@@ -84,7 +84,7 @@ static struct ti_sci_resource_static_data rm_static_data[] = {
 };
 #endif /* CONFIG_SOC_K3_J721S2 */
 
-#if IS_ENABLED(CONFIG_SOC_K3_AM625) || IS_ENABLED(CONFIG_SOC_K3_AM62A7)
+#if CONFIG(SOC_K3_AM625) || CONFIG(SOC_K3_AM62A7)
 static struct ti_sci_resource_static_data rm_static_data[] = {
 	/* BC channels */
 	{

@@ -16,15 +16,15 @@ struct psil_endpoint_config *psil_get_ep_config(u32 thread_id)
 	int i;
 
 	if (!soc_ep_map) {
-		if (IS_ENABLED(CONFIG_SOC_K3_AM654))
+		if (CONFIG(SOC_K3_AM654))
 			soc_ep_map = &am654_ep_map;
-		else if (IS_ENABLED(CONFIG_SOC_K3_J721E))
+		else if (CONFIG(SOC_K3_J721E))
 			soc_ep_map = &j721e_ep_map;
-		else if (IS_ENABLED(CONFIG_SOC_K3_J721S2))
+		else if (CONFIG(SOC_K3_J721S2))
 			soc_ep_map = &j721s2_ep_map;
-		else if (IS_ENABLED(CONFIG_SOC_K3_AM642))
+		else if (CONFIG(SOC_K3_AM642))
 			soc_ep_map = &am64_ep_map;
-		else if (IS_ENABLED(CONFIG_SOC_K3_AM625))
+		else if (CONFIG(SOC_K3_AM625))
 			soc_ep_map = &am62_ep_map;
 	}
 

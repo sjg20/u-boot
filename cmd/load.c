@@ -1047,7 +1047,7 @@ static ulong load_serial_ymodem(ulong offset, int mode)
 			return (~0); /* Download aborted */
 		}
 
-		if (IS_ENABLED(CONFIG_CMD_BOOTEFI))
+		if (CONFIG(CMD_BOOTEFI))
 			efi_set_bootdev("Uart", "", "",
 					map_sysmem(offset, 0), size);
 
@@ -1099,7 +1099,7 @@ static int do_load_memory_bin(struct cmd_tbl *cmdtp, int flag, int argc,
 	unmap_sysmem(src);
 	unmap_sysmem(dst);
 
-	if (IS_ENABLED(CONFIG_CMD_BOOTEFI))
+	if (CONFIG(CMD_BOOTEFI))
 		efi_set_bootdev("Mem", "", "", map_sysmem(dest, 0), size);
 
 	printf("loaded bin to memory: size: %lu\n", size);

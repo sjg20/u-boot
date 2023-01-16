@@ -1071,7 +1071,7 @@ void clock_init(void)
 	clock_enable(CCGR_RAWNAND, 1);
 #endif
 
-	if (IS_ENABLED(CONFIG_IMX_RDC)) {
+	if (CONFIG(IMX_RDC)) {
 		clock_enable(CCGR_RDC, 1);
 		clock_enable(CCGR_SEMA1, 1);
 		clock_enable(CCGR_SEMA2, 1);

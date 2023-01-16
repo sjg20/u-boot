@@ -506,7 +506,7 @@ static int mctl_channel_init(uint16_t socid, struct dram_para *para)
 	for (i = 0; i < 4; i++) {
 		u32 clearmask = (0x3 << 4) | (0x1 << 1) | (0x3 << 2) |
 				(0x3 << 12) | (0x3 << 14);
-		u32 setmask = IS_ENABLED(CONFIG_DRAM_ODT_EN) ?
+		u32 setmask = CONFIG(DRAM_ODT_EN) ?
 				DX_GCR_ODT_DYNAMIC : DX_GCR_ODT_OFF;
 
 		if (socid == SOCID_H5) {

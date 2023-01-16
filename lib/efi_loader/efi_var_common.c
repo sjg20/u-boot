@@ -172,7 +172,7 @@ efi_status_t EFIAPI efi_query_variable_info(
 	if ((attributes & ~(u32)EFI_VARIABLE_MASK) ||
 	    (attributes & EFI_VARIABLE_AUTHENTICATED_WRITE_ACCESS) ||
 	    (attributes & EFI_VARIABLE_HARDWARE_ERROR_RECORD) ||
-	    (!IS_ENABLED(CONFIG_EFI_SECURE_BOOT) &&
+	    (!CONFIG(EFI_SECURE_BOOT) &&
 	     (attributes & EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS)))
 		return EFI_EXIT(EFI_UNSUPPORTED);
 
@@ -322,7 +322,7 @@ efi_status_t efi_init_secure_state(void)
 	u8 audit_mode = 0;
 	u8 setup_mode = 1;
 
-	if (IS_ENABLED(CONFIG_EFI_SECURE_BOOT)) {
+	if (CONFIG(EFI_SECURE_BOOT)) {
 		size = sizeof(deployed_mode);
 		ret = efi_get_variable_int(u"DeployedMode", &efi_global_variable_guid,
 					   NULL, &size, &deployed_mode, NULL);

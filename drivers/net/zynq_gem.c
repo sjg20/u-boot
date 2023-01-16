@@ -323,7 +323,7 @@ static int zynq_phy_init(struct udevice *dev)
 	/* Enable only MDIO bus */
 	writel(ZYNQ_GEM_NWCTRL_MDEN_MASK, &regs_mdio->nwctrl);
 
-	if (IS_ENABLED(CONFIG_DM_ETH_PHY))
+	if (CONFIG(DM_ETH_PHY))
 		priv->phyaddr = eth_phy_get_addr(dev);
 
 	priv->phydev = phy_connect(priv->bus, priv->phyaddr, dev,
@@ -708,7 +708,7 @@ static int gem_zynqmp_set_dynamic_config(struct udevice *dev)
 	u32 pm_info[2];
 	int ret;
 
-	if (IS_ENABLED(CONFIG_ARCH_ZYNQMP)) {
+	if (CONFIG(ARCH_ZYNQMP)) {
 		if (!zynqmp_pm_is_function_supported(PM_IOCTL,
 						     IOCTL_SET_GEM_CONFIG)) {
 			ret = ofnode_read_u32_array(dev_ofnode(dev),
@@ -798,7 +798,7 @@ static int zynq_gem_probe(struct udevice *dev)
 		}
 	}
 
-	if (IS_ENABLED(CONFIG_DM_ETH_PHY))
+	if (CONFIG(DM_ETH_PHY))
 		priv->bus = eth_phy_get_mdio_bus(dev);
 
 	if (!priv->bus) {
@@ -812,7 +812,7 @@ static int zynq_gem_probe(struct udevice *dev)
 			goto err2;
 	}
 
-	if (IS_ENABLED(CONFIG_DM_ETH_PHY))
+	if (CONFIG(DM_ETH_PHY))
 		eth_phy_set_mdio_bus(dev, priv->bus);
 
 	ret = zynq_phy_init(dev);
@@ -820,7 +820,7 @@ static int zynq_gem_probe(struct udevice *dev)
 		goto err3;
 
 	if (priv->interface == PHY_INTERFACE_MODE_SGMII && phy.dev) {
-		if (IS_ENABLED(CONFIG_DM_ETH_PHY)) {
+		if (CONFIG(DM_ETH_PHY)) {
 			if (device_is_compatible(dev, "cdns,zynqmp-gem")) {
 				ret = gem_zynqmp_set_dynamic_config(dev);
 				if (ret) {
@@ -889,7 +889,7 @@ static int zynq_gem_of_to_plat(struct udevice *dev)
 		ofnode parent;
 
 		debug("phy-handle does exist %s\n", dev->name);
-		if (!(IS_ENABLED(CONFIG_DM_ETH_PHY)))
+		if (!(CONFIG(DM_ETH_PHY)))
 			priv->phyaddr = ofnode_read_u32_default
 					(phandle_args.node, "reg", -1);
 

@@ -34,7 +34,7 @@ void sync_n_cleanup_cache_all(void);
 
 static const inline int is_ioc_enabled(void)
 {
-	return IS_ENABLED(CONFIG_ARC_DBG_IOC_ENABLE);
+	return CONFIG(ARC_DBG_IOC_ENABLE);
 }
 
 /*

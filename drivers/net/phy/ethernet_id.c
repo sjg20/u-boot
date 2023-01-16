@@ -37,7 +37,7 @@ struct phy_device *phy_connect_phy_id(struct mii_dev *bus, struct udevice *dev,
 		return NULL;
 	}
 
-	if (!IS_ENABLED(CONFIG_DM_ETH_PHY)) {
+	if (!CONFIG(DM_ETH_PHY)) {
 		ret = gpio_request_by_name_nodev(node, "reset-gpios", 0, &gpio,
 						 GPIOD_ACTIVE_LOW);
 		if (!ret) {

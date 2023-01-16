@@ -51,7 +51,7 @@ int do_elf_reloc_fixups(void);
 static inline void *manual_reloc(void *ptr)
 {
 #ifndef USE_HOSTCC
-	if (IS_ENABLED(CONFIG_NEEDS_MANUAL_RELOC))
+	if (CONFIG(NEEDS_MANUAL_RELOC))
 		return ptr + gd->reloc_off;
 #endif
 		return ptr;

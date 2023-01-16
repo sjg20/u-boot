@@ -46,11 +46,11 @@ struct spl_boot_device;
  */
 static inline bool u_boot_first_phase(void)
 {
-	if (IS_ENABLED(CONFIG_TPL)) {
-		if (IS_ENABLED(CONFIG_TPL_BUILD))
+	if (CONFIG(TPL)) {
+		if (CONFIG(TPL_BUILD))
 			return true;
-	} else if (IS_ENABLED(CONFIG_SPL)) {
-		if (IS_ENABLED(CONFIG_SPL_BUILD))
+	} else if (CONFIG(SPL)) {
+		if (CONFIG(SPL_BUILD))
 			return true;
 	} else {
 		return true;
@@ -144,11 +144,11 @@ static inline enum u_boot_phase spl_prev_phase(void)
 #elif defined(CONFIG_VPL_BUILD)
 	return PHASE_TPL;	/* VPL requires TPL */
 #elif defined(CONFIG_SPL_BUILD)
-	return IS_ENABLED(CONFIG_VPL) ? PHASE_VPL :
-		IS_ENABLED(CONFIG_TPL) ? PHASE_TPL :
+	return CONFIG(VPL) ? PHASE_VPL :
+		CONFIG(TPL) ? PHASE_TPL :
 		PHASE_NONE;
 #else
-	return IS_ENABLED(CONFIG_SPL) ? PHASE_SPL :
+	return CONFIG(SPL) ? PHASE_SPL :
 		PHASE_NONE;
 #endif
 }
@@ -162,7 +162,7 @@ static inline enum u_boot_phase spl_prev_phase(void)
 static inline enum u_boot_phase spl_next_phase(void)
 {
 #ifdef CONFIG_TPL_BUILD
-	return IS_ENABLED(CONFIG_VPL) ? PHASE_VPL : PHASE_SPL;
+	return CONFIG(VPL) ? PHASE_VPL : PHASE_SPL;
 #elif defined(CONFIG_VPL_BUILD)
 	return PHASE_SPL;
 #else

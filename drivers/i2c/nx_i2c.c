@@ -312,7 +312,7 @@ static void i2c_send_stop(struct nx_i2c_bus *bus)
 {
 	struct nx_i2c_regs *i2c = bus->regs;
 
-	if (IS_ENABLED(CONFIG_ARCH_S5P6818)) {
+	if (CONFIG(ARCH_S5P6818)) {
 		unsigned int reg;
 
 		reg = readl(&i2c->iicstat);

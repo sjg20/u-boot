@@ -24,7 +24,7 @@
 
 static int distro_get_state_desc(struct udevice *dev, char *buf, int maxsize)
 {
-	if (IS_ENABLED(CONFIG_SANDBOX)) {
+	if (CONFIG(SANDBOX)) {
 		int len;
 
 		len = snprintf(buf, maxsize, "OK");
@@ -165,7 +165,7 @@ static int distro_bootmeth_bind(struct udevice *dev)
 {
 	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
 
-	plat->desc = IS_ENABLED(CONFIG_BOOTSTD_FULL) ?
+	plat->desc = CONFIG(BOOTSTD_FULL) ?
 		"Syslinux boot from a block device" : "syslinux";
 
 	return 0;

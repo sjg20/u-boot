@@ -659,7 +659,7 @@ static int rk3066_clk_probe(struct udevice *dev)
 	priv->cru = map_sysmem(plat->dtd.reg[0], plat->dtd.reg[1]);
 #endif
 
-	if (IS_ENABLED(CONFIG_TPL_BUILD)) {
+	if (CONFIG(TPL_BUILD)) {
 		rk3066_clk_init(priv->cru, priv->grf);
 
 		/* Init CPU frequency. */

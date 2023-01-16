@@ -49,9 +49,9 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (argc < 3 ||  argc > 5)
 		return CMD_RET_USAGE;
 
-	if (IS_ENABLED(CONFIG_CMD_STM32PROG_USB) && !strcmp(argv[1], "usb"))
+	if (CONFIG(CMD_STM32PROG_USB) && !strcmp(argv[1], "usb"))
 		link = LINK_USB;
-	else if (IS_ENABLED(CONFIG_CMD_STM32PROG_SERIAL) && !strcmp(argv[1], "serial"))
+	else if (CONFIG(CMD_STM32PROG_SERIAL) && !strcmp(argv[1], "serial"))
 		link = LINK_SERIAL;
 
 	if (link == LINK_UNDEFINED) {
@@ -79,7 +79,7 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
 		}
 	}
 
-	if (IS_ENABLED(CONFIG_VIDEO))
+	if (CONFIG(VIDEO))
 		enable_vidconsole();
 
 	data = (struct stm32prog_data *)malloc(sizeof(*data));

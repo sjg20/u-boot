@@ -124,7 +124,7 @@ int checkboard(void)
 	return 0;
 }
 
-#if !IS_ENABLED(CONFIG_DM_ETH)
+#if !CONFIG(DM_ETH)
 int board_eth_init(struct bd_info *bis)
 {
 	return pci_eth_init(bis);
@@ -173,7 +173,7 @@ int misc_init_r(void)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_OF_BOARD_FIXUP)
+#if CONFIG(OF_BOARD_FIXUP)
 /*
  * TODO: currently doesn't work because rw_fdt_blob points to a
  * NOR flash address. This needs some changes in board_init_f.

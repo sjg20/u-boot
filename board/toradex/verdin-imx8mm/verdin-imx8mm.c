@@ -26,7 +26,7 @@ enum pcb_rev_t {
 	PCB_VERSION_1_1
 };
 
-#if IS_ENABLED(CONFIG_FEC_MXC)
+#if CONFIG(FEC_MXC)
 static int setup_fec(void)
 {
 	struct iomuxc_gpr_base_regs *gpr =
@@ -41,7 +41,7 @@ static int setup_fec(void)
 
 int board_init(void)
 {
-	if (IS_ENABLED(CONFIG_FEC_MXC))
+	if (CONFIG(FEC_MXC))
 		setup_fec();
 
 	return 0;
@@ -76,7 +76,7 @@ static void select_dt_from_module_version(void)
 	char *env_variant = env_get("variant");
 	int is_wifi = 0;
 
-	if (IS_ENABLED(CONFIG_TDX_CFG_BLOCK)) {
+	if (CONFIG(TDX_CFG_BLOCK)) {
 		/*
 		 * If we have a valid config block and it says we are a
 		 * module with Wi-Fi/Bluetooth make sure we use the -wifi

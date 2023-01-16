@@ -111,7 +111,7 @@ static void sun6i_p2wi_init(struct sunxi_p2wi_reg *base)
 	       &base->cc);
 }
 
-#if IS_ENABLED(CONFIG_AXP_PMIC_BUS)
+#if CONFIG(AXP_PMIC_BUS)
 int p2wi_read(const u8 addr, u8 *data)
 {
 	struct sunxi_p2wi_reg *base = (struct sunxi_p2wi_reg *)SUN6I_P2WI_BASE;

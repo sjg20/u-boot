@@ -34,7 +34,7 @@ void board_debug_uart_init(void)
 
 int board_init(void)
 {
-	if (IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(SPL_BUILD))
 		printf("Silicon version:\t%d\n", zynq_get_silicon_version());
 
 	if (CONFIG(DM_I2C) && CONFIG(I2C_EEPROM))
@@ -141,20 +141,20 @@ enum env_location env_get_location(enum env_operation op, int prio)
 
 	switch (bootmode) {
 	case ZYNQ_BM_SD:
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_FAT))
+		if (CONFIG(ENV_IS_IN_FAT))
 			return ENVL_FAT;
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_EXT4))
+		if (CONFIG(ENV_IS_IN_EXT4))
 			return ENVL_EXT4;
 		return ENVL_NOWHERE;
 	case ZYNQ_BM_NAND:
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_NAND))
+		if (CONFIG(ENV_IS_IN_NAND))
 			return ENVL_NAND;
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_UBI))
+		if (CONFIG(ENV_IS_IN_UBI))
 			return ENVL_UBI;
 		return ENVL_NOWHERE;
 	case ZYNQ_BM_NOR:
 	case ZYNQ_BM_QSPI:
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_SPI_FLASH))
+		if (CONFIG(ENV_IS_IN_SPI_FLASH))
 			return ENVL_SPI_FLASH;
 		return ENVL_NOWHERE;
 	case ZYNQ_BM_JTAG:

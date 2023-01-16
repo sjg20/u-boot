@@ -59,7 +59,7 @@ void *board_fdt_blob_setup(int *err)
 {
 	*err = 0;
 
-	if (IS_ENABLED(CONFIG_OF_SEPARATE) || IS_ENABLED(CONFIG_OF_BOARD)) {
+	if (CONFIG(OF_SEPARATE) || CONFIG(OF_BOARD)) {
 		if (fdt_magic((uintptr_t)gd->arch.firmware_fdt_addr) == FDT_MAGIC)
 			return (void *)(ulong)gd->arch.firmware_fdt_addr;
 	}

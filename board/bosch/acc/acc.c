@@ -284,7 +284,7 @@ int dram_init(void)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_SPL_BUILD)
+#if CONFIG(SPL_BUILD)
 #include <asm/arch/crm_regs.h>
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/iomux.h>
@@ -500,7 +500,7 @@ static void ccgr_init(void)
 }
 
 /* MMC board initialization is needed till adding DM support in SPL */
-#if IS_ENABLED(CONFIG_FSL_ESDHC_IMX) && !IS_ENABLED(CONFIG_DM_MMC)
+#if CONFIG(FSL_ESDHC_IMX) && !CONFIG(DM_MMC)
 #include <mmc.h>
 #include <fsl_esdhc_imx.h>
 
@@ -600,7 +600,7 @@ void board_boot_order(u32 *spl_boot_list)
 	case IMX6_BMODE_SD:
 	case IMX6_BMODE_ESD:
 		/* SD/eSD - BOOT_DEVICE_MMC1 */
-		if (IS_ENABLED(CONFIG_SYS_BOOT_EMMC)) {
+		if (CONFIG(SYS_BOOT_EMMC)) {
 			/*
 			 * boot from SD is not allowed, if boot from eMMC is
 			 * configured.
@@ -684,7 +684,7 @@ void board_init_f(ulong dummy)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_USB_EHCI_MX6)
+#if CONFIG(USB_EHCI_MX6)
 #define USB_OTHERREGS_OFFSET	0x800
 #define UCTRL_PWR_POL		BIT(9)
 

@@ -206,7 +206,7 @@ static void erratum_a008997(void)
 
 static void erratum_a009007(void)
 {
-	if (!IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_A009007))
+	if (!CONFIG(SYS_FSL_ERRATUM_A009007))
 		return;
 
 #if defined(CONFIG_ARCH_LS1043A) || defined(CONFIG_ARCH_LS1046A) || \
@@ -981,7 +981,7 @@ int board_late_init(void)
 	fspi_ahb_init();
 #endif
 
-	if (IS_ENABLED(CONFIG_DM))
+	if (CONFIG(DM))
 		enable_dwc3_snooping();
 
 	return fsl_board_late_init();

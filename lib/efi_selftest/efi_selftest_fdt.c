@@ -227,7 +227,7 @@ static int execute(void)
 			return EFI_ST_FAILURE;
 		}
 	}
-	if (IS_ENABLED(CONFIG_RISCV)) {
+	if (CONFIG(RISCV)) {
 		u32 fdt_hartid;
 
 		str = get_property(u"boot-hartid", u"chosen");
@@ -244,7 +244,7 @@ static int execute(void)
 			return EFI_ST_FAILURE;
 		}
 
-		if (IS_ENABLED(CONFIG_EFI_RISCV_BOOT_PROTOCOL)) {
+		if (CONFIG(EFI_RISCV_BOOT_PROTOCOL)) {
 			efi_uintn_t efi_hartid;
 			int r;
 

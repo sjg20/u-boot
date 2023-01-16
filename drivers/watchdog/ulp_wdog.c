@@ -98,7 +98,7 @@ void ulp_watchdog_init(struct wdog_regs *wdog, u16 timeout)
 	writel(0, &wdog->win);
 
 	/* setting 1-kHz clock source, enable counter running, and clear interrupt */
-	if (IS_ENABLED(CONFIG_ARCH_IMX9))
+	if (CONFIG(ARCH_IMX9))
 		writel((cmd32 | WDGCS_WDGE | WDGCS_WDGUPDATE | (WDG_LPO_CLK << 8) |
 		       WDGCS_FLG | WDOG_CS_PRES | WDGCS_INT), &wdog->cs);
 	else
@@ -149,7 +149,7 @@ void reset_cpu(void)
 	writel(0, &wdog->win);
 
 	/* enable counter running */
-	if (IS_ENABLED(CONFIG_ARCH_IMX9))
+	if (CONFIG(ARCH_IMX9))
 		writel((cmd32 | WDGCS_WDGE | (WDG_LPO_CLK << 8) | WDOG_CS_PRES |
 		       WDGCS_INT), &wdog->cs);
 	else

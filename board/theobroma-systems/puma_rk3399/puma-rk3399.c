@@ -136,7 +136,7 @@ int mmc_get_env_dev(void)
 	return CONFIG_SYS_MMC_ENV_DEV;
 }
 
-#if !IS_ENABLED(CONFIG_ENV_IS_NOWHERE)
+#if !CONFIG(ENV_IS_NOWHERE)
 #error Please enable CONFIG_ENV_IS_NOWHERE
 #endif
 
@@ -156,11 +156,11 @@ enum env_location arch_env_get_location(enum env_operation op, int prio)
 
 	debug("%s: booted from %s\n", __func__, boot_device);
 
-	if (IS_ENABLED(CONFIG_ENV_IS_IN_SPI_FLASH) &&
+	if (CONFIG(ENV_IS_IN_SPI_FLASH) &&
 	    !strcmp(boot_device, "/spi@ff1d0000/flash@0"))
 		return ENVL_SPI_FLASH;
 
-	if (IS_ENABLED(CONFIG_ENV_IS_IN_MMC) &&
+	if (CONFIG(ENV_IS_IN_MMC) &&
 	    (!strcmp(boot_device, "/mmc@fe320000") ||
 	     !strcmp(boot_device, "/mmc@fe330000")))
 		return ENVL_MMC;

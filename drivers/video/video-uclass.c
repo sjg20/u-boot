@@ -133,7 +133,7 @@ int video_fill(struct udevice *dev, u32 colour)
 
 	switch (priv->bpix) {
 	case VIDEO_BPP16:
-		if (IS_ENABLED(CONFIG_VIDEO_BPP16)) {
+		if (CONFIG(VIDEO_BPP16)) {
 			u16 *ppix = priv->fb;
 			u16 *end = priv->fb + priv->fb_size;
 
@@ -142,7 +142,7 @@ int video_fill(struct udevice *dev, u32 colour)
 			break;
 		}
 	case VIDEO_BPP32:
-		if (IS_ENABLED(CONFIG_VIDEO_BPP32)) {
+		if (CONFIG(VIDEO_BPP32)) {
 			u32 *ppix = priv->fb;
 			u32 *end = priv->fb + priv->fb_size;
 
@@ -425,7 +425,7 @@ int video_default_font_height(struct udevice *dev)
 {
 	struct vidconsole_priv *vc_priv = dev_get_uclass_priv(dev);
 
-	if (IS_ENABLED(CONFIG_CONSOLE_TRUETYPE))
+	if (CONFIG(CONSOLE_TRUETYPE))
 		return IF_ENABLED_INT(CONFIG_CONSOLE_TRUETYPE,
 				      CONFIG_CONSOLE_TRUETYPE_SIZE);
 
@@ -449,7 +449,7 @@ static int video_post_probe(struct udevice *dev)
 
 	priv->fb_size = priv->line_length * priv->ysize;
 
-	if (IS_ENABLED(CONFIG_VIDEO_COPY) && plat->copy_base)
+	if (CONFIG(VIDEO_COPY) && plat->copy_base)
 		priv->copy_fb = map_sysmem(plat->copy_base, plat->size);
 
 	/* Set up colors  */
@@ -471,7 +471,7 @@ static int video_post_probe(struct udevice *dev)
 	 * TrueType does not support rotation at present so fall back to the
 	 * rotated console in that case.
 	 */
-	if (!priv->rot && IS_ENABLED(CONFIG_CONSOLE_TRUETYPE)) {
+	if (!priv->rot && CONFIG(CONSOLE_TRUETYPE)) {
 		snprintf(name, sizeof(name), "%s.vidconsole_tt", dev->name);
 		strcpy(drv, "vidconsole_tt");
 	} else {
@@ -497,8 +497,8 @@ static int video_post_probe(struct udevice *dev)
 		return ret;
 	}
 
-	if (IS_ENABLED(CONFIG_VIDEO_LOGO) &&
-	    !IS_ENABLED(CONFIG_SPLASH_SCREEN) && !plat->hide_logo) {
+	if (CONFIG(VIDEO_LOGO) &&
+	    !CONFIG(SPLASH_SCREEN) && !plat->hide_logo) {
 		ret = show_splash(dev);
 		if (ret) {
 			log_debug("Cannot show splash screen\n");

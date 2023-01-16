@@ -80,7 +80,7 @@ void board_init_f(ulong dummy)
 	rockchip_stimer_init();
 
 	/* Init ARM arch timer */
-	if (IS_ENABLED(CONFIG_SYS_ARCH_TIMER))
+	if (CONFIG(SYS_ARCH_TIMER))
 		timer_init();
 
 	ret = uclass_get_device(UCLASS_RAM, 0, &dev);

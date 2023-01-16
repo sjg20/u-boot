@@ -1683,19 +1683,19 @@ static const struct eqos_config __maybe_unused eqos_stm32_config = {
 };
 
 static const struct udevice_id eqos_ids[] = {
-#if IS_ENABLED(CONFIG_DWC_ETH_QOS_TEGRA186)
+#if CONFIG(DWC_ETH_QOS_TEGRA186)
 	{
 		.compatible = "nvidia,tegra186-eqos",
 		.data = (ulong)&eqos_tegra186_config
 	},
 #endif
-#if IS_ENABLED(CONFIG_DWC_ETH_QOS_STM32)
+#if CONFIG(DWC_ETH_QOS_STM32)
 	{
 		.compatible = "st,stm32mp1-dwmac",
 		.data = (ulong)&eqos_stm32_config
 	},
 #endif
-#if IS_ENABLED(CONFIG_DWC_ETH_QOS_IMX)
+#if CONFIG(DWC_ETH_QOS_IMX)
 	{
 		.compatible = "nxp,imx8mp-dwmac-eqos",
 		.data = (ulong)&eqos_imx_config

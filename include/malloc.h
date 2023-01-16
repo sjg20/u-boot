@@ -899,7 +899,7 @@ void malloc_disable_testing(void);
 #define malloc malloc_simple
 #define realloc realloc_simple
 #define memalign memalign_simple
-#if IS_ENABLED(CONFIG_VALGRIND)
+#if CONFIG(VALGRIND)
 #define free free_simple
 #else
 static inline void free(void *ptr) {}

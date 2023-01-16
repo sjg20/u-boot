@@ -20,7 +20,7 @@ static u64 notrace riscv_timer_get_count(struct udevice *dev)
 {
 	__maybe_unused u32 hi, lo;
 
-	if (IS_ENABLED(CONFIG_64BIT))
+	if (CONFIG(64BIT))
 		return csr_read(CSR_TIME);
 
 	do {
@@ -31,7 +31,7 @@ static u64 notrace riscv_timer_get_count(struct udevice *dev)
 	return ((u64)hi << 32) | lo;
 }
 
-#if CONFIG(RISCV_SMODE) && IS_ENABLED(CONFIG_TIMER_EARLY)
+#if CONFIG(RISCV_SMODE) && CONFIG(TIMER_EARLY)
 /**
  * timer_early_get_rate() - Get the timer rate before driver model
  */

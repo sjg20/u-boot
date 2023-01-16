@@ -164,7 +164,7 @@ int net_set_ack_options(union tcp_build_pkt *b)
 	b->sack.sack_v.kind = TCP_1_NOP;
 	b->sack.sack_v.len = 0;
 
-	if (IS_ENABLED(CONFIG_PROT_TCP_SACK)) {
+	if (CONFIG(PROT_TCP_SACK)) {
 		if (tcp_lost.len > TCP_OPT_LEN_2) {
 			debug_cond(DEBUG_DEV_PKT, "TCP ack opt lost.len %x\n",
 				   tcp_lost.len);
@@ -210,7 +210,7 @@ int net_set_ack_options(union tcp_build_pkt *b)
  */
 void net_set_syn_options(union tcp_build_pkt *b)
 {
-	if (IS_ENABLED(CONFIG_PROT_TCP_SACK))
+	if (CONFIG(PROT_TCP_SACK))
 		tcp_lost.len = 0;
 
 	b->ip.hdr.tcp_hlen = 0xa0;
@@ -221,7 +221,7 @@ void net_set_syn_options(union tcp_build_pkt *b)
 	b->ip.scale.kind = TCP_O_SCL;
 	b->ip.scale.scale = TCP_SCALE;
 	b->ip.scale.len = TCP_OPT_LEN_3;
-	if (IS_ENABLED(CONFIG_PROT_TCP_SACK)) {
+	if (CONFIG(PROT_TCP_SACK)) {
 		b->ip.sack_p.kind = TCP_P_SACK;
 		b->ip.sack_p.len = TCP_OPT_LEN_2;
 	} else {
@@ -392,7 +392,7 @@ void tcp_hole(u32 tcp_seq_num, u32 len, u32 tcp_seq_max)
 	hol_l = tcp_seq_num - tcp_seq_init;
 	hol_r = hol_l + len;
 
-	if (IS_ENABLED(CONFIG_PROT_TCP_SACK))
+	if (CONFIG(PROT_TCP_SACK))
 		tcp_lost.len = TCP_OPT_LEN_2;
 
 	debug_cond(DEBUG_DEV_PKT,
@@ -409,7 +409,7 @@ void tcp_hole(u32 tcp_seq_num, u32 len, u32 tcp_seq_max)
 				break;
 			case PKT:
 				debug_cond(DEBUG_INT_STATE, "n");
-				if (IS_ENABLED(CONFIG_PROT_TCP_SACK)) {
+				if (CONFIG(PROT_TCP_SACK)) {
 					tcp_lost.hill[hill].l =
 						edge_a[sack_in].se.l;
 					tcp_lost.hill[hill].r =
@@ -426,7 +426,7 @@ void tcp_hole(u32 tcp_seq_num, u32 len, u32 tcp_seq_max)
 				if (sack_in > sack_idx &&
 				    hill < TCP_SACK_HILLS) {
 					hill++;
-					if (IS_ENABLED(CONFIG_PROT_TCP_SACK))
+					if (CONFIG(PROT_TCP_SACK))
 						tcp_lost.len += TCP_OPT_LEN_8;
 				}
 				expect = NOPKT;
@@ -439,11 +439,11 @@ void tcp_hole(u32 tcp_seq_num, u32 len, u32 tcp_seq_max)
 					edge_a[sack_in].st = NOPKT;
 					sack_idx++;
 				} else {
-					if (IS_ENABLED(CONFIG_PROT_TCP_SACK) &&
+					if (CONFIG(PROT_TCP_SACK) &&
 					    hill < TCP_SACK_HILLS)
 						tcp_lost.hill[hill].r =
 							edge_a[sack_in].se.r;
-				if (IS_ENABLED(CONFIG_PROT_TCP_SACK) &&
+				if (CONFIG(PROT_TCP_SACK) &&
 				    sack_in == sack_end - 1)
 					tcp_lost.hill[hill].r =
 						edge_a[sack_in].se.r;
@@ -454,7 +454,7 @@ void tcp_hole(u32 tcp_seq_num, u32 len, u32 tcp_seq_max)
 		}
 	}
 	debug_cond(DEBUG_INT_STATE, "\n");
-	if (!IS_ENABLED(CONFIG_PROT_TCP_SACK) || tcp_lost.len <= TCP_OPT_LEN_2)
+	if (!CONFIG(PROT_TCP_SACK) || tcp_lost.len <= TCP_OPT_LEN_2)
 		sack_idx = 0;
 }
 
@@ -571,7 +571,7 @@ static u8 tcp_state_machine(u8 tcp_flags, u32 *tcp_seq_num, int payload_len)
 		}
 
 		if ((tcp_fin) &&
-		    (!IS_ENABLED(CONFIG_PROT_TCP_SACK) ||
+		    (!CONFIG(PROT_TCP_SACK) ||
 		     tcp_lost.len <= TCP_OPT_LEN_2)) {
 			action = action | TCP_FIN | TCP_PUSH | TCP_ACK;
 			current_tcp_state = TCP_CLOSE_WAIT;

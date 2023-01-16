@@ -46,7 +46,7 @@ __weak bool board_should_run_oprom(struct udevice *dev)
 {
 #if defined(CONFIG_X86) && defined(CONFIG_HAVE_ACPI_RESUME)
 	if (gd->arch.prev_sleep_state == ACPI_S3) {
-		if (IS_ENABLED(CONFIG_S3_VGA_ROM_RUN))
+		if (CONFIG(S3_VGA_ROM_RUN))
 			return true;
 		else
 			return false;
@@ -347,7 +347,7 @@ int vesa_setup_video_priv(struct vesa_mode_info *vesa,
 	}
 
 	/* Use double buffering if enabled */
-	if (IS_ENABLED(CONFIG_VIDEO_COPY) && plat->base)
+	if (CONFIG(VIDEO_COPY) && plat->base)
 		plat->copy_base = vesa->phys_base_ptr;
 	else
 		plat->base = vesa->phys_base_ptr;

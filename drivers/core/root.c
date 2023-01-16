@@ -181,7 +181,7 @@ int dm_init(bool of_live)
 		INIT_LIST_HEAD(DM_UCLASS_ROOT_NON_CONST);
 	}
 
-	if (IS_ENABLED(CONFIG_NEEDS_MANUAL_RELOC)) {
+	if (CONFIG(NEEDS_MANUAL_RELOC)) {
 		fix_drivers();
 		fix_uclass();
 		fix_devices();

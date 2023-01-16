@@ -526,7 +526,7 @@ static void fdt_fixup_pcie_ls(void *blob)
 			break;
 	}
 
-	if (!IS_ENABLED(CONFIG_PCI_IOMMU_EXTRA_MAPPINGS))
+	if (!CONFIG(PCI_IOMMU_EXTRA_MAPPINGS))
 		return;
 
 	list_for_each_entry(pcie_rc, &ls_pcie_list, list) {

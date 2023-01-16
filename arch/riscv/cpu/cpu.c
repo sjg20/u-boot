@@ -155,7 +155,7 @@ int arch_early_init_r(void)
 	if (ret)
 		return ret;
 
-	if (IS_ENABLED(CONFIG_SYSRESET_SBI))
+	if (CONFIG(SYSRESET_SBI))
 		device_bind_driver(gd->dm_root, "sbi-sysreset",
 				   "sbi-sysreset", NULL);
 

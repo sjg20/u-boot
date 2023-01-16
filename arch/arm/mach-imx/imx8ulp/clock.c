@@ -167,9 +167,9 @@ void clock_init_early(void)
 void clock_init_late(void)
 {
 
-	if (IS_ENABLED(CONFIG_IMX8ULP_LD_MODE))
+	if (CONFIG(IMX8ULP_LD_MODE))
 		cgc1_init_core_clk(MHZ(500));
-	else if (IS_ENABLED(CONFIG_IMX8ULP_ND_MODE))
+	else if (CONFIG(IMX8ULP_ND_MODE))
 		cgc1_init_core_clk(MHZ(750));
 	else
 		cgc1_init_core_clk(MHZ(960));
@@ -182,7 +182,7 @@ void clock_init_late(void)
 	 */
 	cgc1_pll3_init(540672000);
 
-	if (IS_ENABLED(CONFIG_IMX8ULP_LD_MODE) || IS_ENABLED(CONFIG_IMX8ULP_ND_MODE)) {
+	if (CONFIG(IMX8ULP_LD_MODE) || CONFIG(IMX8ULP_ND_MODE)) {
 		pcc_clock_enable(4, SDHC0_PCC4_SLOT, false);
 		pcc_clock_sel(4, SDHC0_PCC4_SLOT, PLL3_PFD2_DIV2);
 		pcc_clock_enable(4, SDHC0_PCC4_SLOT, true);
@@ -223,7 +223,7 @@ void clock_init_late(void)
 	 */
 }
 
-#if IS_ENABLED(CONFIG_SYS_I2C_IMX_LPI2C)
+#if CONFIG(SYS_I2C_IMX_LPI2C)
 int enable_i2c_clk(unsigned char enable, u32 i2c_num)
 {
 	/* Set parent to FIRC DIV2 clock */
@@ -276,7 +276,7 @@ u32 imx_get_i2cclk(u32 i2c_num)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_SYS_I2C_IMX_I3C)
+#if CONFIG(SYS_I2C_IMX_I3C)
 int enable_i3c_clk(unsigned char enable, u32 i3c_num)
 {
 	if (enable) {

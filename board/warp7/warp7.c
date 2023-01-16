@@ -78,7 +78,7 @@ int checkboard(void)
 {
 	char *mode;
 
-	if (IS_ENABLED(CONFIG_ARMV7_BOOT_SEC_DEFAULT))
+	if (CONFIG(ARMV7_BOOT_SEC_DEFAULT))
 		mode = "secure";
 	else
 		mode = "non-secure";

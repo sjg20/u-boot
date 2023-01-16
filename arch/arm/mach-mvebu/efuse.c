@@ -74,7 +74,7 @@ static int enable_efuse_program(void)
 			return -EOPNOTSUPP;
 		}
 		if (gpio_direction_output(vhv_gpio,
-		    IS_ENABLED(CONFIG_MVEBU_EFUSE_VHV_GPIO_ACTIVE_LOW) ? 0 : 1)) {
+		    CONFIG(MVEBU_EFUSE_VHV_GPIO_ACTIVE_LOW) ? 0 : 1)) {
 			printf("Error: VHV gpio enable failed\n");
 			return -EINVAL;
 		}
@@ -94,7 +94,7 @@ static void disable_efuse_program(void)
 
 	if (CONFIG_MVEBU_EFUSE_VHV_GPIO[0]) {
 		if (gpio_direction_output(vhv_gpio,
-		    IS_ENABLED(CONFIG_MVEBU_EFUSE_VHV_GPIO_ACTIVE_LOW) ? 1 : 0))
+		    CONFIG(MVEBU_EFUSE_VHV_GPIO_ACTIVE_LOW) ? 1 : 0))
 			printf("Error: VHV gpio disable failed\n");
 		gpio_free(vhv_gpio);
 		vhv_gpio = 0;

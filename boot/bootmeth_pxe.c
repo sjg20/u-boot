@@ -158,7 +158,7 @@ static int distro_bootmeth_pxe_bind(struct udevice *dev)
 {
 	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
 
-	plat->desc = IS_ENABLED(CONFIG_BOOTSTD_FULL) ?
+	plat->desc = CONFIG(BOOTSTD_FULL) ?
 		"PXE boot from a network device" : "PXE";
 
 	return 0;

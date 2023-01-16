@@ -101,7 +101,7 @@ int mtd_search_alternate_name(const char *mtdname, char *altname,
 	return -EINVAL;
 }
 
-#if IS_ENABLED(CONFIG_DM_MTD)
+#if CONFIG(DM_MTD)
 static void mtd_probe_uclass_mtd_devs(void)
 {
 	struct udevice *dev;
@@ -113,7 +113,7 @@ static void mtd_probe_uclass_mtd_devs(void)
 static void mtd_probe_uclass_mtd_devs(void) { }
 #endif
 
-#if IS_ENABLED(CONFIG_DM_SPI_FLASH) && IS_ENABLED(CONFIG_SPI_FLASH_MTD)
+#if CONFIG(DM_SPI_FLASH) && CONFIG(SPI_FLASH_MTD)
 static void mtd_probe_uclass_spi_nor_devs(void)
 {
 	struct udevice *dev;

@@ -164,7 +164,7 @@ static efi_status_t efi_fill_image_desc_array(
 				IMAGE_ATTRIBUTE_IMAGE_UPDATABLE;
 
 		/* Check if the capsule authentication is enabled */
-		if (IS_ENABLED(CONFIG_EFI_CAPSULE_AUTHENTICATE))
+		if (CONFIG(EFI_CAPSULE_AUTHENTICATE))
 			image_info[0].attributes_setting |=
 				IMAGE_ATTRIBUTE_AUTHENTICATION_REQUIRED;
 
@@ -200,7 +200,7 @@ efi_status_t efi_firmware_capsule_authenticate(const void **p_image,
 	efi_status_t status;
 	efi_uintn_t capsule_payload_size;
 
-	if (IS_ENABLED(CONFIG_EFI_CAPSULE_AUTHENTICATE)) {
+	if (CONFIG(EFI_CAPSULE_AUTHENTICATE)) {
 		capsule_payload = NULL;
 		capsule_payload_size = 0;
 		status = efi_capsule_authenticate(image, image_size,
@@ -403,7 +403,7 @@ efi_status_t EFIAPI efi_firmware_raw_set_image(
 	if (status != EFI_SUCCESS)
 		return EFI_EXIT(status);
 
-	if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
+	if (CONFIG(FWU_MULTI_BANK_UPDATE)) {
 		/*
 		 * Based on the value of update bank, derive the
 		 * image index value.

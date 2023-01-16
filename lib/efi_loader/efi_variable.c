@@ -247,7 +247,7 @@ efi_status_t efi_set_variable_int(const u16 *variable_name,
 		if (ro_check && (var->attr & EFI_VARIABLE_READ_ONLY))
 			return EFI_WRITE_PROTECTED;
 
-		if (IS_ENABLED(CONFIG_EFI_VARIABLES_PRESEED)) {
+		if (CONFIG(EFI_VARIABLES_PRESEED)) {
 			if (var_type >= EFI_AUTH_VAR_PK)
 				return EFI_WRITE_PROTECTED;
 		}
@@ -280,7 +280,7 @@ efi_status_t efi_set_variable_int(const u16 *variable_name,
 	}
 
 	/* authenticate a variable */
-	if (IS_ENABLED(CONFIG_EFI_SECURE_BOOT)) {
+	if (CONFIG(EFI_SECURE_BOOT)) {
 		if (attributes & EFI_VARIABLE_AUTHENTICATED_WRITE_ACCESS)
 			return EFI_INVALID_PARAMETER;
 		if (attributes &
@@ -428,7 +428,7 @@ efi_status_t efi_init_variables(void)
 	ret = efi_var_from_file();
 	if (ret != EFI_SUCCESS)
 		return ret;
-	if (IS_ENABLED(CONFIG_EFI_VARIABLES_PRESEED)) {
+	if (CONFIG(EFI_VARIABLES_PRESEED)) {
 		ret = efi_var_restore((struct efi_var_file *)
 				      __efi_var_file_begin, true);
 		if (ret != EFI_SUCCESS)

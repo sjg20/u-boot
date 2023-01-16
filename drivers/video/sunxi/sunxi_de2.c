@@ -257,7 +257,7 @@ static int sunxi_de2_probe(struct udevice *dev)
 					  DM_DRIVER_GET(sunxi_dw_hdmi), &disp);
 	if (!ret) {
 		int mux;
-		if (IS_ENABLED(CONFIG_MACH_SUNXI_H3_H5))
+		if (CONFIG(MACH_SUNXI_H3_H5))
 			mux = 0;
 		else
 			mux = 1;
@@ -317,7 +317,7 @@ int sunxi_simplefb_setup(void *blob)
 
 	debug("Setting up simplefb\n");
 
-	if (IS_ENABLED(CONFIG_MACH_SUNXI_H3_H5))
+	if (CONFIG(MACH_SUNXI_H3_H5))
 		mux = 0;
 	else
 		mux = 1;

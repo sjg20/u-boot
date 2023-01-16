@@ -1116,11 +1116,11 @@ static int do_mem_mtest(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		printf("Iteration: %6d\r", iteration + 1);
 		debug("\n");
-		if (IS_ENABLED(CONFIG_SYS_ALT_MEMTEST)) {
+		if (CONFIG(SYS_ALT_MEMTEST)) {
 			errs = mem_test_alt(buf, start, end, dummy);
 			if (errs == -1UL)
 				break;
-			if (IS_ENABLED(CONFIG_SYS_ALT_MEMTEST_BITFLIP)) {
+			if (CONFIG(SYS_ALT_MEMTEST_BITFLIP)) {
 				count += errs;
 				errs = mem_test_bitflip(buf, start, end);
 			}

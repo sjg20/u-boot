@@ -263,7 +263,7 @@ static void sun4i_spi_set_speed_mode(struct udevice *dev)
 	} else {
 		div = fls(div - 1);
 		/* The F1C100s encodes the divider as 2^(n+1) */
-		if (IS_ENABLED(CONFIG_MACH_SUNIV))
+		if (CONFIG(MACH_SUNIV))
 			div--;
 		reg &= ~((SUN4I_CLK_CTL_CDR1_MASK << 8) | SUN4I_CLK_CTL_DRS);
 		reg |= SUN4I_CLK_CTL_CDR1(div);

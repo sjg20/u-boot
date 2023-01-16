@@ -318,7 +318,7 @@ int bootm_find_images(int flag, int argc, char *const argv[], ulong start,
 #endif
 
 #if CONFIG(FIT)
-	if (IS_ENABLED(CONFIG_FPGA)) {
+	if (CONFIG(FPGA)) {
 		/* find bitstreams */
 		ret = boot_get_fpga(argc, argv, &images, IH_ARCH_DEFAULT,
 				    NULL, NULL);
@@ -600,14 +600,14 @@ int bootm_process_cmdline(char *buf, int maxlen, int flags)
 	int ret;
 
 	/* Check config first to enable compiler to eliminate code */
-	if (IS_ENABLED(CONFIG_SILENT_CONSOLE) &&
-	    !IS_ENABLED(CONFIG_SILENT_U_BOOT_ONLY) &&
+	if (CONFIG(SILENT_CONSOLE) &&
+	    !CONFIG(SILENT_U_BOOT_ONLY) &&
 	    (flags & BOOTM_CL_SILENT)) {
 		ret = fixup_silent_linux(buf, maxlen);
 		if (ret)
 			return log_msg_ret("silent", ret);
 	}
-	if (IS_ENABLED(CONFIG_BOOTARGS_SUBST) && IS_ENABLED(CONFIG_CMDLINE) &&
+	if (CONFIG(BOOTARGS_SUBST) && CONFIG(CMDLINE) &&
 	    (flags & BOOTM_CL_SUBST)) {
 		ret = process_subst(buf, maxlen);
 		if (ret)
@@ -626,9 +626,9 @@ int bootm_process_cmdline_env(int flags)
 	int ret;
 
 	/* First check if any action is needed */
-	do_silent = IS_ENABLED(CONFIG_SILENT_CONSOLE) &&
-	    !IS_ENABLED(CONFIG_SILENT_U_BOOT_ONLY) && (flags & BOOTM_CL_SILENT);
-	if (!do_silent && !IS_ENABLED(CONFIG_BOOTARGS_SUBST))
+	do_silent = CONFIG(SILENT_CONSOLE) &&
+	    !CONFIG(SILENT_U_BOOT_ONLY) && (flags & BOOTM_CL_SILENT);
+	if (!do_silent && !CONFIG(BOOTARGS_SUBST))
 		return 0;
 
 	env = env_get("bootargs");

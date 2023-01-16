@@ -36,19 +36,19 @@ static int get_efi_leafname(char *str, int max_len)
 
 	if (max_len < 16)
 		return log_msg_ret("spc", -ENOSPC);
-	if (IS_ENABLED(CONFIG_ARM64))
+	if (CONFIG(ARM64))
 		base = "bootaa64";
-	else if (IS_ENABLED(CONFIG_ARM))
+	else if (CONFIG(ARM))
 		base = "bootarm";
-	else if (IS_ENABLED(CONFIG_X86_RUN_32BIT))
+	else if (CONFIG(X86_RUN_32BIT))
 		base = "bootia32";
-	else if (IS_ENABLED(CONFIG_X86_RUN_64BIT))
+	else if (CONFIG(X86_RUN_64BIT))
 		base = "bootx64";
-	else if (IS_ENABLED(CONFIG_ARCH_RV32I))
+	else if (CONFIG(ARCH_RV32I))
 		base = "bootriscv32";
-	else if (IS_ENABLED(CONFIG_ARCH_RV64I))
+	else if (CONFIG(ARCH_RV64I))
 		base = "bootriscv64";
-	else if (IS_ENABLED(CONFIG_SANDBOX))
+	else if (CONFIG(SANDBOX))
 		base = "bootsbox";
 	else
 		return -EINVAL;
@@ -161,7 +161,7 @@ static int distro_bootmeth_efi_bind(struct udevice *dev)
 {
 	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
 
-	plat->desc = IS_ENABLED(CONFIG_BOOTSTD_FULL) ?
+	plat->desc = CONFIG(BOOTSTD_FULL) ?
 		"EFI boot from an .efi file" : "EFI";
 
 	return 0;

@@ -401,7 +401,7 @@ static void _debug_uart_init(void)
 	struct pl01x_regs *regs = (struct pl01x_regs *)CONFIG_VAL(DEBUG_UART_BASE);
 	enum pl01x_type type;
 
-	if (IS_ENABLED(CONFIG_DEBUG_UART_PL011))
+	if (CONFIG(DEBUG_UART_PL011))
 		type = TYPE_PL011;
 	else
 		type = TYPE_PL010;

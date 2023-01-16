@@ -122,7 +122,7 @@ static int dw_mdio_reset(struct mii_dev *bus)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_DM_MDIO)
+#if CONFIG(DM_MDIO)
 int designware_eth_mdio_read(struct udevice *mdio_dev, int addr, int devad, int reg)
 {
 	struct mdio_perdev_priv *pdata = dev_get_uclass_priv(mdio_dev);
@@ -193,7 +193,7 @@ static int dw_mdio_init(const char *name, void *priv)
 	return mdio_register(bus);
 }
 
-#if IS_ENABLED(CONFIG_DM_MDIO)
+#if CONFIG(DM_MDIO)
 static int dw_dm_mdio_init(const char *name, void *priv)
 {
 	struct udevice *dev = priv;
@@ -567,7 +567,7 @@ static int dw_phy_init(struct dw_eth_dev *priv, void *dev)
 	struct phy_device *phydev;
 	int ret;
 
-#if IS_ENABLED(CONFIG_DM_MDIO)
+#if CONFIG(DM_MDIO)
 	phydev = dm_eth_phy_connect(dev);
 	if (!phydev)
 		return -ENODEV;
@@ -651,7 +651,7 @@ int designware_eth_write_hwaddr(struct udevice *dev)
 
 static int designware_eth_bind(struct udevice *dev)
 {
-	if (IS_ENABLED(CONFIG_PCI)) {
+	if (CONFIG(PCI)) {
 		static int num_cards;
 		char name[20];
 
@@ -730,7 +730,7 @@ int designware_eth_probe(struct udevice *dev)
 	 * If we are on PCI bus, either directly attached to a PCI root port,
 	 * or via a PCI bridge, fill in plat before we probe the hardware.
 	 */
-	if (IS_ENABLED(CONFIG_PCI) && device_is_on_pci_bus(dev)) {
+	if (CONFIG(PCI) && device_is_on_pci_bus(dev)) {
 		dm_pci_read_config32(dev, PCI_BASE_ADDRESS_0, &iobase);
 		iobase &= PCI_BASE_ADDRESS_MEM_MASK;
 		iobase = dm_pci_mem_to_phys(dev, iobase);
@@ -746,7 +746,7 @@ int designware_eth_probe(struct udevice *dev)
 	priv->interface = pdata->phy_interface;
 	priv->max_speed = pdata->max_speed;
 
-#if IS_ENABLED(CONFIG_DM_MDIO)
+#if CONFIG(DM_MDIO)
 	ret = dw_dm_mdio_init(dev->name, dev);
 #else
 	ret = dw_mdio_init(dev->name, dev);

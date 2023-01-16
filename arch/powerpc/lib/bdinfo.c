@@ -46,7 +46,7 @@ void arch_print_bdinfo(void)
 	bdinfo_print_num_l("bootflags", bd->bi_bootflags);
 	bdinfo_print_mhz("intfreq", bd->bi_intfreq);
 #ifdef CONFIG_ENABLE_36BIT_PHYS
-	if (IS_ENABLED(CONFIG_PHYS_64BIT))
+	if (CONFIG(PHYS_64BIT))
 		puts("addressing  = 36-bit\n");
 	else
 		puts("addressing  = 32-bit\n");

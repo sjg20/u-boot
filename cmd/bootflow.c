@@ -108,7 +108,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 	dev = std->cur_bootdev;
 
 	has_args = argc > 1 && *argv[1] == '-';
-	if (IS_ENABLED(CONFIG_CMD_BOOTFLOW_FULL)) {
+	if (CONFIG(CMD_BOOTFLOW_FULL)) {
 		if (has_args) {
 			all = strchr(argv[1], 'a');
 			boot = strchr(argv[1], 'b');
@@ -145,7 +145,7 @@ static int do_bootflow_scan(struct cmd_tbl *cmdtp, int flag, int argc,
 	/*
 	 * If we have a device, just scan for bootflows attached to that device
 	 */
-	if (IS_ENABLED(CONFIG_CMD_BOOTFLOW_FULL) && dev) {
+	if (CONFIG(CMD_BOOTFLOW_FULL) && dev) {
 		if (list) {
 			printf("Scanning for bootflows in bootdev '%s'\n",
 			       dev->name);

@@ -379,7 +379,7 @@ purposes only, like this::
 
 Then add something like this to the devicetree::
 
-  #if IS_ENABLED(CONFIG_HAVE_MRC) || IS_ENABLED(CONFIG_FSP_VERSION2)
+  #if CONFIG(HAVE_MRC) || CONFIG(FSP_VERSION2)
      /* Provide initial contents of the MRC data for faster development */
      rw-mrc-cache {
         type = "blob";

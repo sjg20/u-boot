@@ -69,7 +69,7 @@ static ulong h_spl_load_read(struct spl_load_info *load, ulong sector,
 
 static __maybe_unused unsigned long spl_mmc_raw_uboot_offset(int part)
 {
-#if IS_ENABLED(CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR)
+#if CONFIG(SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR)
 	if (part == 0)
 		return CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_DATA_PART_OFFSET;
 #endif
@@ -97,7 +97,7 @@ int mmc_load_image_raw_sector(struct spl_image_info *spl_image,
 		goto end;
 	}
 
-	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
+	if (CONFIG(SPL_LOAD_FIT) &&
 	    image_get_magic(header) == FDT_MAGIC) {
 		struct spl_load_info load;
 
@@ -108,7 +108,7 @@ int mmc_load_image_raw_sector(struct spl_image_info *spl_image,
 		load.bl_len = mmc->read_bl_len;
 		load.read = h_spl_load_read;
 		ret = spl_load_simple_fit(spl_image, &load, sector, header);
-	} else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER)) {
+	} else if (CONFIG(SPL_LOAD_IMX_CONTAINER)) {
 		struct spl_load_info load;
 
 		load.dev = mmc;

@@ -66,7 +66,7 @@ static int designware_i2c_pci_of_to_plat(struct udevice *dev)
 		return -EINVAL;
 
 	/* Save base address from PCI BAR */
-	if (IS_ENABLED(CONFIG_INTEL_BAYTRAIL))
+	if (CONFIG(INTEL_BAYTRAIL))
 		/* Use BayTrail specific timing values */
 		priv->scl_sda_cfg = &byt_config;
 	if (dev_get_driver_data(dev) == INTEL_APL)

@@ -104,8 +104,8 @@
 #define TAP_DLY_BYPASS_LQSPI_RX_VALUE	0x1
 #define TAP_DLY_BYPASS_LQSPI_RX_SHIFT	2
 #define GQSPI_DATA_DLY_ADJ_OFST		0x000001F8
-#define IOU_TAPDLY_BYPASS_OFST !(IS_ENABLED(CONFIG_ARCH_VERSAL) || \
-				 IS_ENABLED(CONFIG_ARCH_VERSAL_NET)) ? \
+#define IOU_TAPDLY_BYPASS_OFST !(CONFIG(ARCH_VERSAL) || \
+				 CONFIG(ARCH_VERSAL_NET)) ? \
 				0xFF180390 : 0xF103003C
 #define GQSPI_LPBK_DLY_ADJ_LPBK_MASK	0x00000020
 #define GQSPI_FREQ_37_5MHZ		37500000
@@ -309,8 +309,8 @@ static void zynqmp_qspi_set_tapdelay(struct udevice *bus, u32 baudrateval)
 	debug("%s, req_hz:%d, clk_rate:%d, baudrateval:%d\n",
 	      __func__, reqhz, clk_rate, baudrateval);
 
-	if (!(IS_ENABLED(CONFIG_ARCH_VERSAL) ||
-	      IS_ENABLED(CONFIG_ARCH_VERSAL_NET))) {
+	if (!(CONFIG(ARCH_VERSAL) ||
+	      CONFIG(ARCH_VERSAL_NET))) {
 		if (reqhz <= GQSPI_FREQ_40MHZ) {
 			tapdlybypass = TAP_DLY_BYPASS_LQSPI_RX_VALUE <<
 					TAP_DLY_BYPASS_LQSPI_RX_SHIFT;

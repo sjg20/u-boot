@@ -50,9 +50,9 @@ void clock_init_safe(void)
 
 	writel(AHB1_ABP1_DIV_DEFAULT, &ccm->ahb1_apb1_div);
 
-	if (!IS_ENABLED(CONFIG_MACH_SUNIV)) {
+	if (!CONFIG(MACH_SUNIV)) {
 		writel(MBUS_CLK_DEFAULT, &ccm->mbus0_clk_cfg);
-		if (IS_ENABLED(CONFIG_MACH_SUN6I))
+		if (CONFIG(MACH_SUN6I))
 			writel(MBUS_CLK_DEFAULT, &ccm->mbus1_clk_cfg);
 	}
 
@@ -142,7 +142,7 @@ void clock_set_pll1(unsigned int clk)
 	}
 
 	/* Switch to 24MHz clock while changing PLL1 */
-	if (IS_ENABLED(CONFIG_MACH_SUNIV)) {
+	if (CONFIG(MACH_SUNIV)) {
 		writel(CPU_CLK_SRC_OSC24M << CPU_CLK_SRC_SHIFT,
 		       &ccm->cpu_axi_cfg);
 	} else {
@@ -162,7 +162,7 @@ void clock_set_pll1(unsigned int clk)
 	sdelay(200);
 
 	/* Switch CPU to PLL1 */
-	if (IS_ENABLED(CONFIG_MACH_SUNIV)) {
+	if (CONFIG(MACH_SUNIV)) {
 		writel(CPU_CLK_SRC_PLL1 << CPU_CLK_SRC_SHIFT,
 		       &ccm->cpu_axi_cfg);
 	} else {
@@ -344,7 +344,7 @@ unsigned int clock_get_pll6(void)
 	uint32_t rval = readl(&ccm->pll6_cfg);
 	int n = ((rval & CCM_PLL6_CTRL_N_MASK) >> CCM_PLL6_CTRL_N_SHIFT) + 1;
 	int k = ((rval & CCM_PLL6_CTRL_K_MASK) >> CCM_PLL6_CTRL_K_SHIFT) + 1;
-	if (IS_ENABLED(CONFIG_MACH_SUNIV))
+	if (CONFIG(MACH_SUNIV))
 		return 24000000 * n * k;
 	else
 		return 24000000 * n * k / 2;

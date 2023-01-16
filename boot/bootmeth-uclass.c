@@ -104,7 +104,7 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 		return log_msg_ret("order", -ENOMEM);
 
 	/* If we have an ordering, copy it */
-	if (IS_ENABLED(CONFIG_BOOTSTD_FULL) && std->bootmeth_count) {
+	if (CONFIG(BOOTSTD_FULL) && std->bootmeth_count) {
 		int i;
 
 		/*
@@ -116,7 +116,7 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 		memcpy(order, std->bootmeth_order,
 		       count * sizeof(struct bootmeth *));
 
-		if (IS_ENABLED(CONFIG_BOOTMETH_GLOBAL)) {
+		if (CONFIG(BOOTMETH_GLOBAL)) {
 			for (i = 0; i < count; i++) {
 				struct udevice *dev = order[i];
 				struct bootmeth_uc_plat *ucp;
@@ -158,7 +158,7 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 					continue;
 				ucp = dev_get_uclass_plat(dev);
 				is_global =
-					IS_ENABLED(CONFIG_BOOTMETH_GLOBAL) &&
+					CONFIG(BOOTMETH_GLOBAL) &&
 					(ucp->flags & BOOTMETHF_GLOBAL);
 				if (pass ? is_global : !is_global)
 					order[upto++] = dev;
@@ -169,7 +169,7 @@ int bootmeth_setup_iter_order(struct bootflow_iter *iter, bool include_global)
 	if (!count)
 		return log_msg_ret("count2", -ENOENT);
 
-	if (IS_ENABLED(CONFIG_BOOTMETH_GLOBAL) && include_global &&
+	if (CONFIG(BOOTMETH_GLOBAL) && include_global &&
 	    iter->first_glob_method != -1 && iter->first_glob_method != count) {
 		iter->cur_method = iter->first_glob_method;
 		iter->doing_global = true;
@@ -248,7 +248,7 @@ static int setup_fs(struct bootflow *bflow, struct blk_desc *desc)
 		ret = fs_set_blk_dev_with_part(desc, bflow->part);
 		if (ret)
 			return log_msg_ret("set", ret);
-	} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) && bflow->fs_type) {
+	} else if (CONFIG(BOOTSTD_FULL) && bflow->fs_type) {
 		fs_set_type(bflow->fs_type);
 	}
 
@@ -270,7 +270,7 @@ int bootmeth_try_file(struct bootflow *bflow, struct blk_desc *desc,
 	if (!bflow->fname)
 		return log_msg_ret("name", -ENOMEM);
 
-	if (IS_ENABLED(CONFIG_BOOTSTD_FULL) && bflow->fs_type)
+	if (CONFIG(BOOTSTD_FULL) && bflow->fs_type)
 		fs_set_type(bflow->fs_type);
 
 	ret = fs_size(path, &size);

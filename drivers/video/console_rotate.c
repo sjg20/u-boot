@@ -25,7 +25,7 @@ static int console_set_row_1(struct udevice *dev, uint row, int clr)
 	for (j = 0; j < vid_priv->ysize; j++) {
 		switch (vid_priv->bpix) {
 		case VIDEO_BPP8:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP8)) {
+			if (CONFIG(VIDEO_BPP8)) {
 				uint8_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++)
@@ -33,7 +33,7 @@ static int console_set_row_1(struct udevice *dev, uint row, int clr)
 				break;
 			}
 		case VIDEO_BPP16:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP16)) {
+			if (CONFIG(VIDEO_BPP16)) {
 				uint16_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++)
@@ -41,7 +41,7 @@ static int console_set_row_1(struct udevice *dev, uint row, int clr)
 				break;
 			}
 		case VIDEO_BPP32:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP32)) {
+			if (CONFIG(VIDEO_BPP32)) {
 				uint32_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++)
@@ -107,7 +107,7 @@ static int console_putc_xy_1(struct udevice *dev, uint x_frac, uint y, char ch)
 	for (col = 0; col < VIDEO_FONT_HEIGHT; col++) {
 		switch (vid_priv->bpix) {
 		case VIDEO_BPP8:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP8)) {
+			if (CONFIG(VIDEO_BPP8)) {
 				uint8_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++) {
@@ -118,7 +118,7 @@ static int console_putc_xy_1(struct udevice *dev, uint x_frac, uint y, char ch)
 				break;
 			}
 		case VIDEO_BPP16:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP16)) {
+			if (CONFIG(VIDEO_BPP16)) {
 				uint16_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++) {
@@ -129,7 +129,7 @@ static int console_putc_xy_1(struct udevice *dev, uint x_frac, uint y, char ch)
 				break;
 			}
 		case VIDEO_BPP32:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP32)) {
+			if (CONFIG(VIDEO_BPP32)) {
 				uint32_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++) {
@@ -166,7 +166,7 @@ static int console_set_row_2(struct udevice *dev, uint row, int clr)
 	line = start;
 	switch (vid_priv->bpix) {
 	case VIDEO_BPP8:
-		if (IS_ENABLED(CONFIG_VIDEO_BPP8)) {
+		if (CONFIG(VIDEO_BPP8)) {
 			uint8_t *dst = line;
 
 			for (i = 0; i < pixels; i++)
@@ -175,7 +175,7 @@ static int console_set_row_2(struct udevice *dev, uint row, int clr)
 			break;
 		}
 	case VIDEO_BPP16:
-		if (IS_ENABLED(CONFIG_VIDEO_BPP16)) {
+		if (CONFIG(VIDEO_BPP16)) {
 			uint16_t *dst = line;
 
 			for (i = 0; i < pixels; i++)
@@ -184,7 +184,7 @@ static int console_set_row_2(struct udevice *dev, uint row, int clr)
 			break;
 		}
 	case VIDEO_BPP32:
-		if (IS_ENABLED(CONFIG_VIDEO_BPP32)) {
+		if (CONFIG(VIDEO_BPP32)) {
 			uint32_t *dst = line;
 
 			for (i = 0; i < pixels; i++)
@@ -243,7 +243,7 @@ static int console_putc_xy_2(struct udevice *dev, uint x_frac, uint y, char ch)
 
 		switch (vid_priv->bpix) {
 		case VIDEO_BPP8:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP8)) {
+			if (CONFIG(VIDEO_BPP8)) {
 				uint8_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_WIDTH; i++) {
@@ -255,7 +255,7 @@ static int console_putc_xy_2(struct udevice *dev, uint x_frac, uint y, char ch)
 				break;
 			}
 		case VIDEO_BPP16:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP16)) {
+			if (CONFIG(VIDEO_BPP16)) {
 				uint16_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_WIDTH; i++) {
@@ -267,7 +267,7 @@ static int console_putc_xy_2(struct udevice *dev, uint x_frac, uint y, char ch)
 				break;
 			}
 		case VIDEO_BPP32:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP32)) {
+			if (CONFIG(VIDEO_BPP32)) {
 				uint32_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_WIDTH; i++) {
@@ -303,7 +303,7 @@ static int console_set_row_3(struct udevice *dev, uint row, int clr)
 	for (j = 0; j < vid_priv->ysize; j++) {
 		switch (vid_priv->bpix) {
 		case VIDEO_BPP8:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP8)) {
+			if (CONFIG(VIDEO_BPP8)) {
 				uint8_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++)
@@ -311,7 +311,7 @@ static int console_set_row_3(struct udevice *dev, uint row, int clr)
 				break;
 			}
 		case VIDEO_BPP16:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP16)) {
+			if (CONFIG(VIDEO_BPP16)) {
 				uint16_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++)
@@ -319,7 +319,7 @@ static int console_set_row_3(struct udevice *dev, uint row, int clr)
 				break;
 			}
 		case VIDEO_BPP32:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP32)) {
+			if (CONFIG(VIDEO_BPP32)) {
 				uint32_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++)
@@ -381,7 +381,7 @@ static int console_putc_xy_3(struct udevice *dev, uint x_frac, uint y, char ch)
 	for (col = 0; col < VIDEO_FONT_HEIGHT; col++) {
 		switch (vid_priv->bpix) {
 		case VIDEO_BPP8:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP8)) {
+			if (CONFIG(VIDEO_BPP8)) {
 				uint8_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++) {
@@ -392,7 +392,7 @@ static int console_putc_xy_3(struct udevice *dev, uint x_frac, uint y, char ch)
 				break;
 			}
 		case VIDEO_BPP16:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP16)) {
+			if (CONFIG(VIDEO_BPP16)) {
 				uint16_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++) {
@@ -403,7 +403,7 @@ static int console_putc_xy_3(struct udevice *dev, uint x_frac, uint y, char ch)
 				break;
 			}
 		case VIDEO_BPP32:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP32)) {
+			if (CONFIG(VIDEO_BPP32)) {
 				uint32_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_HEIGHT; i++) {

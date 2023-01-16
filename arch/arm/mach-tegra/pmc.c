@@ -15,7 +15,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if IS_ENABLED(CONFIG_TEGRA_PMC_SECURE)
+#if CONFIG(TEGRA_PMC_SECURE)
 static bool tegra_pmc_detect_tz_only(void)
 {
 	static bool initialized = false;
@@ -51,7 +51,7 @@ static bool tegra_pmc_detect_tz_only(void)
 
 uint32_t tegra_pmc_readl(unsigned long offset)
 {
-#if IS_ENABLED(CONFIG_TEGRA_PMC_SECURE)
+#if CONFIG(TEGRA_PMC_SECURE)
 	if (tegra_pmc_detect_tz_only()) {
 		struct arm_smccc_res res;
 
@@ -69,7 +69,7 @@ uint32_t tegra_pmc_readl(unsigned long offset)
 
 void tegra_pmc_writel(u32 value, unsigned long offset)
 {
-#if IS_ENABLED(CONFIG_TEGRA_PMC_SECURE)
+#if CONFIG(TEGRA_PMC_SECURE)
 	if (tegra_pmc_detect_tz_only()) {
 		struct arm_smccc_res res;
 

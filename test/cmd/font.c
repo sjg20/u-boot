@@ -37,7 +37,7 @@ static int font_test_base(struct unit_test_state *uts)
 	ut_asserteq(18, size);
 
 	max_metrics = 1;
-	if (IS_ENABLED(CONFIG_CONSOLE_TRUETYPE))
+	if (CONFIG(CONSOLE_TRUETYPE))
 		max_metrics = IF_ENABLED_INT(CONFIG_CONSOLE_TRUETYPE,
 				     CONFIG_CONSOLE_TRUETYPE_MAX_METRICS);
 

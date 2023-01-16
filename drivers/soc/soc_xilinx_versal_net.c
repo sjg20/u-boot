@@ -52,7 +52,7 @@ static int soc_xilinx_versal_net_probe(struct udevice *dev)
 
 	priv->family = versal_family;
 
-	if (IS_ENABLED(CONFIG_ZYNQMP_FIRMWARE)) {
+	if (CONFIG(ZYNQMP_FIRMWARE)) {
 		ret = xilinx_pm_request(PM_GET_CHIPID, 0, 0, 0, 0,
 					ret_payload);
 		if (ret)

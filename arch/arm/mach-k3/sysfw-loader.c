@@ -207,7 +207,7 @@ static void k3_sysfw_configure_using_fit(void *fit,
 		      ret);
 
 	/* Apply power/clock (PM) specific configuration to SYSFW */
-	if (!IS_ENABLED(CONFIG_K3_DM_FW)) {
+	if (!CONFIG(K3_DM_FW)) {
 		ret = board_ops->board_config_pm(ti_sci,
 						 (u64)(u32)cfg_fragment_addr,
 						 (u32)cfg_fragment_size);

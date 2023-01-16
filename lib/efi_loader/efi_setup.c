@@ -128,7 +128,7 @@ static efi_status_t efi_init_capsule(void)
 {
 	efi_status_t ret = EFI_SUCCESS;
 
-	if (IS_ENABLED(CONFIG_EFI_HAVE_CAPSULE_UPDATE)) {
+	if (CONFIG(EFI_HAVE_CAPSULE_UPDATE)) {
 		ret = efi_set_variable_int(u"CapsuleMax",
 					   &efi_guid_capsule_report,
 					   EFI_VARIABLE_READ_ONLY |
@@ -153,15 +153,15 @@ static efi_status_t efi_init_os_indications(void)
 {
 	u64 os_indications_supported = 0;
 
-	if (IS_ENABLED(CONFIG_EFI_HAVE_CAPSULE_SUPPORT))
+	if (CONFIG(EFI_HAVE_CAPSULE_SUPPORT))
 		os_indications_supported |=
 			EFI_OS_INDICATIONS_CAPSULE_RESULT_VAR_SUPPORTED;
 
-	if (IS_ENABLED(CONFIG_EFI_CAPSULE_ON_DISK))
+	if (CONFIG(EFI_CAPSULE_ON_DISK))
 		os_indications_supported |=
 			EFI_OS_INDICATIONS_FILE_CAPSULE_DELIVERY_SUPPORTED;
 
-	if (IS_ENABLED(CONFIG_EFI_CAPSULE_FIRMWARE_MANAGEMENT))
+	if (CONFIG(EFI_CAPSULE_FIRMWARE_MANAGEMENT))
 		os_indications_supported |=
 			EFI_OS_INDICATIONS_FMP_CAPSULE_SUPPORTED;
 
@@ -254,19 +254,19 @@ efi_status_t efi_init_obj_list(void)
 	if (ret != EFI_SUCCESS)
 		goto out;
 
-	if (IS_ENABLED(CONFIG_EFI_ECPT)) {
+	if (CONFIG(EFI_ECPT)) {
 		ret = efi_ecpt_register();
 		if (ret != EFI_SUCCESS)
 			goto out;
 	}
 
-	if (IS_ENABLED(CONFIG_EFI_ESRT)) {
+	if (CONFIG(EFI_ESRT)) {
 		ret = efi_esrt_register();
 		if (ret != EFI_SUCCESS)
 			goto out;
 	}
 
-	if (IS_ENABLED(CONFIG_EFI_TCG2_PROTOCOL)) {
+	if (CONFIG(EFI_TCG2_PROTOCOL)) {
 		ret = efi_tcg2_register();
 		if (ret != EFI_SUCCESS)
 			goto out;
@@ -277,13 +277,13 @@ efi_status_t efi_init_obj_list(void)
 	}
 
 	/* Install EFI_RNG_PROTOCOL */
-	if (IS_ENABLED(CONFIG_EFI_RNG_PROTOCOL)) {
+	if (CONFIG(EFI_RNG_PROTOCOL)) {
 		ret = efi_rng_register();
 		if (ret != EFI_SUCCESS)
 			goto out;
 	}
 
-	if (IS_ENABLED(CONFIG_EFI_RISCV_BOOT_PROTOCOL)) {
+	if (CONFIG(EFI_RISCV_BOOT_PROTOCOL)) {
 		ret = efi_riscv_register();
 		if (ret != EFI_SUCCESS)
 			goto out;
@@ -299,13 +299,13 @@ efi_status_t efi_init_obj_list(void)
 	if (ret != EFI_SUCCESS)
 		goto out;
 
-	if (IS_ENABLED(CONFIG_EFI_HAVE_CAPSULE_SUPPORT)) {
+	if (CONFIG(EFI_HAVE_CAPSULE_SUPPORT)) {
 		ret = efi_load_capsule_drivers();
 		if (ret != EFI_SUCCESS)
 			goto out;
 	}
 
-	if (IS_ENABLED(CONFIG_VIDEO)) {
+	if (CONFIG(VIDEO)) {
 		ret = efi_gop_register();
 		if (ret != EFI_SUCCESS)
 			goto out;
@@ -339,8 +339,8 @@ efi_status_t efi_init_obj_list(void)
 		goto out;
 
 	/* Execute capsules after reboot */
-	if (IS_ENABLED(CONFIG_EFI_CAPSULE_ON_DISK) &&
-	    !IS_ENABLED(CONFIG_EFI_CAPSULE_ON_DISK_EARLY))
+	if (CONFIG(EFI_CAPSULE_ON_DISK) &&
+	    !CONFIG(EFI_CAPSULE_ON_DISK_EARLY))
 		ret = efi_launch_capsules();
 out:
 	efi_obj_list_initialized = ret;

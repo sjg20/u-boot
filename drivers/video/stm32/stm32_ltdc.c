@@ -580,7 +580,7 @@ static int stm32_ltdc_probe(struct udevice *dev)
 	/* Reset */
 	reset_deassert(&rst);
 
-	if (IS_ENABLED(CONFIG_VIDEO_BRIDGE)) {
+	if (CONFIG(VIDEO_BRIDGE)) {
 		ret = uclass_get_device(UCLASS_VIDEO_BRIDGE, 0, &bridge);
 		if (ret)
 			dev_dbg(dev,
@@ -627,7 +627,7 @@ static int stm32_ltdc_probe(struct udevice *dev)
 				panel->name, ret);
 			return ret;
 		}
-	} else if (IS_ENABLED(CONFIG_VIDEO_BRIDGE)) {
+	} else if (CONFIG(VIDEO_BRIDGE)) {
 		ret = video_bridge_set_backlight(bridge, 80);
 		if (ret) {
 			dev_err(dev, "fail to set backlight\n");

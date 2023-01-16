@@ -215,7 +215,7 @@ static int mctl_channel_init(struct dram_para *para)
 	clrbits_le32(&mctl_ctl->pgcr0, 0x3f << 0);
 
 	/* Set ODT */
-	if ((CONFIG_DRAM_CLK > 400) && IS_ENABLED(CONFIG_DRAM_ODT_EN)) {
+	if ((CONFIG_DRAM_CLK > 400) && CONFIG(DRAM_ODT_EN)) {
 		setbits_le32(DXnGCR0(0), 0x3 << 9);
 		setbits_le32(DXnGCR0(1), 0x3 << 9);
 	} else {

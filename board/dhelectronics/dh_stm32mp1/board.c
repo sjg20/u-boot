@@ -168,7 +168,7 @@ int checkboard(void)
 	const char *fdt_compat;
 	int fdt_compat_len;
 
-	if (IS_ENABLED(CONFIG_TFABOOT))
+	if (CONFIG(TFABOOT))
 		mode = "trusted";
 	else
 		mode = "basic";
@@ -253,13 +253,13 @@ int board_stm32mp1_ddr_config_name_match(struct udevice *dev,
 
 void board_vddcore_init(u32 voltage_mv)
 {
-	if (IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(SPL_BUILD))
 		opp_voltage_mv = voltage_mv;
 }
 
 int board_early_init_f(void)
 {
-	if (IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(SPL_BUILD))
 		stpmic1_init(opp_voltage_mv);
 	board_get_coding_straps();
 

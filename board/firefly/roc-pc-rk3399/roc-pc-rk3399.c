@@ -54,7 +54,7 @@ void led_setup(void)
 	struct rk3399_pmugrf_regs * const pmugrf = (void *)PMUGRF_BASE;
 	bool press_pwr_key = false;
 
-	if (IS_ENABLED(CONFIG_SPL_ENV_SUPPORT)) {
+	if (CONFIG(SPL_ENV_SUPPORT)) {
 		env_init();
 		env_load();
 		if (env_get_yesno("pwr_key") == 1)

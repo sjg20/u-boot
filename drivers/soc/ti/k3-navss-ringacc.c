@@ -334,7 +334,7 @@ static void k3_ringacc_ring_reset_sci(struct k3_nav_ring *ring)
 	struct k3_nav_ringacc *ringacc = ring->parent;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_K3_DM_FW))
+	if (CONFIG(K3_DM_FW))
 		return k3_ringacc_ring_reset_raw(ring);
 
 	ret = ringacc->tisci_ring_ops->config(
@@ -369,7 +369,7 @@ static void k3_ringacc_ring_reconfig_qmode_sci(struct k3_nav_ring *ring,
 	struct k3_nav_ringacc *ringacc = ring->parent;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_K3_DM_FW))
+	if (CONFIG(K3_DM_FW))
 		return k3_ringacc_ring_reconfig_qmode_raw(ring, mode);
 
 	ret = ringacc->tisci_ring_ops->config(
@@ -452,7 +452,7 @@ static void k3_ringacc_ring_free_sci(struct k3_nav_ring *ring)
 	struct k3_nav_ringacc *ringacc = ring->parent;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_K3_DM_FW))
+	if (CONFIG(K3_DM_FW))
 		return k3_ringacc_ring_free_raw(ring);
 
 	ret = ringacc->tisci_ring_ops->config(
@@ -555,7 +555,7 @@ static int k3_nav_ringacc_ring_cfg_sci(struct k3_nav_ring *ring)
 	 * register configuration still has to be done locally in
 	 * absence of RM services.
 	 */
-	if (IS_ENABLED(CONFIG_K3_DM_FW))
+	if (CONFIG(K3_DM_FW))
 		k3_nav_ringacc_ring_cfg_raw(ring);
 
 	return 0;

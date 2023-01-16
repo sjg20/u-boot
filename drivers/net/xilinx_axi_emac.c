@@ -300,7 +300,7 @@ static int axiemac_phy_init(struct udevice *dev)
 	/* Set default MDIO divisor */
 	writel(XAE_MDIO_DIV_DFT | XAE_MDIO_MC_MDIOEN_MASK, &regs->mdio_mc);
 
-	if (IS_ENABLED(CONFIG_DM_ETH_PHY))
+	if (CONFIG(DM_ETH_PHY))
 		priv->phyaddr = eth_phy_get_addr(dev);
 
 	/*
@@ -842,7 +842,7 @@ static int axi_emac_probe(struct udevice *dev)
 		priv->phy_of_handle = plat->phy_of_handle;
 		priv->interface = pdata->phy_interface;
 
-		if (IS_ENABLED(CONFIG_DM_ETH_PHY))
+		if (CONFIG(DM_ETH_PHY))
 			priv->bus = eth_phy_get_mdio_bus(dev);
 
 		if (!priv->bus) {
@@ -856,7 +856,7 @@ static int axi_emac_probe(struct udevice *dev)
 				return ret;
 		}
 
-		if (IS_ENABLED(CONFIG_DM_ETH_PHY))
+		if (CONFIG(DM_ETH_PHY))
 			eth_phy_set_mdio_bus(dev, priv->bus);
 
 		axiemac_phy_init(dev);
@@ -921,7 +921,7 @@ static int axi_emac_of_to_plat(struct udevice *dev)
 		offset = fdtdec_lookup_phandle(gd->fdt_blob, node,
 					       "phy-handle");
 		if (offset > 0) {
-			if (!(IS_ENABLED(CONFIG_DM_ETH_PHY)))
+			if (!(CONFIG(DM_ETH_PHY)))
 				plat->phyaddr = fdtdec_get_int(gd->fdt_blob,
 							       offset,
 							       "reg", -1);

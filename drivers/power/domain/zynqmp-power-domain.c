@@ -25,7 +25,7 @@ static int zynqmp_power_domain_request(struct power_domain *power_domain)
 {
 	dev_dbg(power_domain->dev, "Request for id: %ld\n", power_domain->id);
 
-	if (IS_ENABLED(CONFIG_ARCH_ZYNQMP))
+	if (CONFIG(ARCH_ZYNQMP))
 		return zynqmp_pmufw_node(power_domain->id);
 
 	return 0;

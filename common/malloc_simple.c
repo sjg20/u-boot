@@ -78,7 +78,7 @@ void *calloc(size_t nmemb, size_t elem_size)
 	return ptr;
 }
 
-#if IS_ENABLED(CONFIG_VALGRIND)
+#if CONFIG(VALGRIND)
 void free_simple(void *ptr)
 {
 	VALGRIND_FREELIKE_BLOCK(ptr, 0);

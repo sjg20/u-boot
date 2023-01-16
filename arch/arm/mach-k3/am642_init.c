@@ -100,7 +100,7 @@ void do_dt_magic(void)
 {
 	int ret, rescan;
 
-	if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT))
+	if (CONFIG(TI_I2C_BOARD_DETECT))
 		do_board_detect();
 
 	/*
@@ -108,7 +108,7 @@ void do_dt_magic(void)
 	 * Let us see if another dtb wouldn't be a better match
 	 * for our board
 	 */
-	if (IS_ENABLED(CONFIG_CPU_V7R)) {
+	if (CONFIG(CPU_V7R)) {
 		ret = fdtdec_resetup(&rescan);
 		if (!ret && rescan) {
 			dm_uninit();
@@ -232,7 +232,7 @@ void board_init_f(ulong dummy)
 	if (ret)
 		panic("DRAM init failed: %d\n", ret);
 #endif
-	if (IS_ENABLED(CONFIG_SPL_ETH) && IS_ENABLED(CONFIG_TI_AM65_CPSW_NUSS) &&
+	if (CONFIG(SPL_ETH) && CONFIG(TI_AM65_CPSW_NUSS) &&
 	    spl_boot_device() == BOOT_DEVICE_ETHERNET) {
 		struct udevice *cpswdev;
 

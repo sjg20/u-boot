@@ -175,7 +175,7 @@ extern struct in6_addr net_server_ip6;	/* Server IPv6 addr (0 = unknown) */
 extern struct in6_addr net_ping_ip6; /* the ipv6 address to ping */
 extern bool use_ip6;
 
-#if IS_ENABLED(CONFIG_IPV6)
+#if CONFIG(IPV6)
 /**
  * string_to_ip6() - Convert IPv6 string addr to inner IPV6 addr format
  *
@@ -404,7 +404,7 @@ static inline void net_copy_ip6(void *to, const void *from)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_CMD_PING6)
+#if CONFIG(CMD_PING6)
 /* Send ping requset */
 void ping6_start(void);
 

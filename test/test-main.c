@@ -50,7 +50,7 @@ static enum fdtchk_t fdt_action(void)
 		return FDTCHK_COPY;
 
 	/* For sandbox SPL builds, do nothing */
-	if (IS_ENABLED(CONFIG_SANDBOX))
+	if (CONFIG(SANDBOX))
 		return FDTCHK_NONE;
 
 	/* For all other boards, do a checksum */
@@ -308,7 +308,7 @@ static int test_pre_run(struct unit_test_state *uts, struct unit_test *test)
 	    (test->flags & UT_TESTF_SCAN_FDT))
 		ut_assertok(dm_extended_scan(false));
 
-	if (IS_ENABLED(CONFIG_SANDBOX) && (test->flags & UT_TESTF_OTHER_FDT)) {
+	if (CONFIG(SANDBOX) && (test->flags & UT_TESTF_OTHER_FDT)) {
 		/* make sure the other FDT is available */
 		ut_assertok(test_load_other_fdt(uts));
 
@@ -439,7 +439,7 @@ static int ut_run_test_live_flat(struct unit_test_state *uts,
 {
 	int runs;
 
-	if ((test->flags & UT_TESTF_OTHER_FDT) && !IS_ENABLED(CONFIG_SANDBOX))
+	if ((test->flags & UT_TESTF_OTHER_FDT) && !CONFIG(SANDBOX))
 		return skip_test(uts);
 
 	/* Run with the live tree if possible */
@@ -623,7 +623,7 @@ int ut_run_list(const char *category, const char *prefix,
 	/* Best efforts only...ignore errors */
 	if (has_dm_tests)
 		dm_test_restore(uts.of_root);
-	if (IS_ENABLED(CONFIG_SANDBOX)) {
+	if (CONFIG(SANDBOX)) {
 		os_free(uts.fdt_copy);
 		os_free(uts.other_fdt);
 	}

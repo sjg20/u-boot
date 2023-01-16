@@ -58,7 +58,7 @@ static int spl_ram_load_image(struct spl_image_info *spl_image,
 		spl_dfu_cmd(0, "dfu_alt_info_ram", "ram", "0");
 #endif
 
-	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
+	if (CONFIG(SPL_LOAD_FIT) &&
 	    image_get_magic(header) == FDT_MAGIC) {
 		struct spl_load_info load;
 

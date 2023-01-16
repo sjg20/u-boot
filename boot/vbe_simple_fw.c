@@ -90,7 +90,7 @@ int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 		return log_msg_ret("rd", ret);
 
 	/* figure out the phase to load */
-	phase = IS_ENABLED(CONFIG_VPL_BUILD) ? IH_PHASE_SPL : IH_PHASE_U_BOOT;
+	phase = CONFIG(VPL_BUILD) ? IH_PHASE_SPL : IH_PHASE_U_BOOT;
 
 	/*
 	 * Load the image from the FIT. We ignore any load-address information

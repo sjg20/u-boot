@@ -93,7 +93,7 @@ void check_for_uboot_update(void)
 	ulong bootcount = bootcount_load();
 	ulong ebootcount = 0;
 
-	if (IS_ENABLED(CONFIG_PG_WCOM_UBOOT_BOOTPACKAGE)) {
+	if (CONFIG(PG_WCOM_UBOOT_BOOTPACKAGE)) {
 		/*
 		 * When running in factory burned u-boot move to the updated
 		 * u-boot version only if updateduboot envvar is set to 'yes'
@@ -117,7 +117,7 @@ void check_for_uboot_update(void)
 		}
 		printf("Check update: starting factory image @%08x ...\n",
 		       CONFIG_TEXT_BASE);
-	} else if (IS_ENABLED(CONFIG_PG_WCOM_UBOOT_UPDATE)) {
+	} else if (CONFIG(PG_WCOM_UBOOT_UPDATE)) {
 		/*
 		 * When running in field updated u-boot, make sure that
 		 * bootcount limit is never exceeded. Must never happen!

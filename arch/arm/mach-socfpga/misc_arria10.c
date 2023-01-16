@@ -201,7 +201,7 @@ bool is_regular_boot_valid(void)
 		return false;
 }
 
-#if IS_ENABLED(CONFIG_CADENCE_QSPI)
+#if CONFIG(CADENCE_QSPI)
 /* This function is used to trigger software reset
  * to the QSPI flash. On some boards, the QSPI flash reset may
  * not be connected to the HPS warm reset.

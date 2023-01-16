@@ -803,7 +803,7 @@ static int optee_of_to_plat(struct udevice *dev)
 
 static int optee_bind(struct udevice *dev)
 {
-	if (IS_ENABLED(CONFIG_OPTEE_SERVICE_DISCOVERY))
+	if (CONFIG(OPTEE_SERVICE_DISCOVERY))
 		dev_or_flags(dev, DM_FLAG_PROBE_AFTER_BIND);
 
 	return 0;
@@ -838,11 +838,11 @@ static int optee_probe(struct udevice *dev)
 		return -ENOENT;
 	}
 
-	if (IS_ENABLED(CONFIG_OPTEE_SERVICE_DISCOVERY)) {
+	if (CONFIG(OPTEE_SERVICE_DISCOVERY)) {
 		ret = bind_service_drivers(dev);
 		if (ret)
 			return ret;
-	} else if (IS_ENABLED(CONFIG_RNG_OPTEE)) {
+	} else if (CONFIG(RNG_OPTEE)) {
 		/*
 		 * Discovery of TAs on the TEE bus is not supported in U-Boot:
 		 * only bind the drivers associated to the supported OP-TEE TA

@@ -112,8 +112,8 @@ void ti_secure_image_post_process(void **p_image, size_t *p_size)
 	 * via YMODEM. This is done to avoid disturbing the YMODEM serial
 	 * protocol transactions.
 	 */
-	if (!(IS_ENABLED(CONFIG_SPL_BUILD) &&
-	      IS_ENABLED(CONFIG_SPL_YMODEM_SUPPORT) &&
+	if (!(CONFIG(SPL_BUILD) &&
+	      CONFIG(SPL_YMODEM_SUPPORT) &&
 	      spl_boot_device() == BOOT_DEVICE_UART))
 		printf("Authentication passed\n");
 }

@@ -370,7 +370,7 @@ static int stm32mp1_ddr_probe(struct udevice *dev)
 
 	priv->info.base = STM32_DDR_BASE;
 
-	if (IS_ENABLED(CONFIG_SPL_BUILD)) {
+	if (CONFIG(SPL_BUILD)) {
 		priv->info.size = 0;
 		ret = stm32mp1_ddr_setup(dev);
 

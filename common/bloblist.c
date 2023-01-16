@@ -430,7 +430,7 @@ void bloblist_reloc(void *to, uint to_size, void *from, uint from_size)
 
 int bloblist_init(void)
 {
-	bool fixed = IS_ENABLED(CONFIG_BLOBLIST_FIXED);
+	bool fixed = CONFIG(BLOBLIST_FIXED);
 	int ret = -ENOENT;
 	ulong addr, size;
 	bool expected;
@@ -442,7 +442,7 @@ int bloblist_init(void)
 	 * address.
 	 */
 	expected = fixed && !u_boot_first_phase();
-	if (spl_prev_phase() == PHASE_TPL && !IS_ENABLED(CONFIG_TPL_BLOBLIST))
+	if (spl_prev_phase() == PHASE_TPL && !CONFIG(TPL_BLOBLIST))
 		expected = false;
 	if (fixed)
 		addr = IF_ENABLED_INT(CONFIG_BLOBLIST_FIXED,

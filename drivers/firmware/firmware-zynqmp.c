@@ -243,7 +243,7 @@ int zynqmp_pmufw_load_config_object(const void *cfg_obj, size_t size)
 	int err;
 	u32 ret_payload[PAYLOAD_ARG_CNT];
 
-	if (IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(SPL_BUILD))
 		printf("Loading new PMUFW cfg obj (%ld bytes)\n", size);
 
 	flush_dcache_range((ulong)cfg_obj, (ulong)(cfg_obj + size));
@@ -269,7 +269,7 @@ int zynqmp_pmufw_load_config_object(const void *cfg_obj, size_t size)
 	if (ret_payload[0])
 		printf("PMUFW returned 0x%08x status!\n", ret_payload[0]);
 
-	if ((err || ret_payload[0]) && IS_ENABLED(CONFIG_SPL_BUILD))
+	if ((err || ret_payload[0]) && CONFIG(SPL_BUILD))
 		panic("PMUFW config object loading failed in EL3\n");
 
 	return 0;
@@ -298,7 +298,7 @@ static int zynqmp_power_probe(struct udevice *dev)
 	       ret >> ZYNQMP_PM_VERSION_MAJOR_SHIFT,
 	       ret & ZYNQMP_PM_VERSION_MINOR_MASK);
 
-	if (IS_ENABLED(CONFIG_ARCH_ZYNQMP))
+	if (CONFIG(ARCH_ZYNQMP))
 		zynqmp_pmufw_node(NODE_OCM_BANK_0);
 
 	return 0;
@@ -322,7 +322,7 @@ int __maybe_unused xilinx_pm_request(u32 api_id, u32 arg0, u32 arg1, u32 arg2,
 {
 	debug("%s at EL%d, API ID: 0x%0x\n", __func__, current_el(), api_id);
 
-	if (IS_ENABLED(CONFIG_SPL_BUILD) || current_el() == 3) {
+	if (CONFIG(SPL_BUILD) || current_el() == 3) {
 #if defined(CONFIG_ZYNQMP_IPI)
 		/*
 		 * Use fixed payload and arg size as the EL2 call. The firmware
@@ -384,11 +384,11 @@ static int zynqmp_firmware_bind(struct udevice *dev)
 	int ret;
 	struct udevice *child;
 
-	if ((IS_ENABLED(CONFIG_SPL_BUILD) &&
-	     IS_ENABLED(CONFIG_SPL_POWER_DOMAIN) &&
-	     IS_ENABLED(CONFIG_ZYNQMP_POWER_DOMAIN)) ||
-	     (!IS_ENABLED(CONFIG_SPL_BUILD) &&
-	      IS_ENABLED(CONFIG_ZYNQMP_POWER_DOMAIN))) {
+	if ((CONFIG(SPL_BUILD) &&
+	     CONFIG(SPL_POWER_DOMAIN) &&
+	     CONFIG(ZYNQMP_POWER_DOMAIN)) ||
+	     (!CONFIG(SPL_BUILD) &&
+	      CONFIG(ZYNQMP_POWER_DOMAIN))) {
 		ret = device_bind_driver_to_node(dev, "zynqmp_power_domain",
 						 "zynqmp_power_domain",
 						 dev_ofnode(dev), &child);

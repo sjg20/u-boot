@@ -140,7 +140,7 @@ void do_dt_magic(void)
 	int ret, rescan, mmc_dev = -1;
 	static struct mmc *mmc;
 
-	if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT))
+	if (CONFIG(TI_I2C_BOARD_DETECT))
 		do_board_detect();
 
 	/*
@@ -148,7 +148,7 @@ void do_dt_magic(void)
 	 * Let us see if another dtb wouldn't be a better match
 	 * for our board
 	 */
-	if (IS_ENABLED(CONFIG_CPU_V7R)) {
+	if (CONFIG(CPU_V7R)) {
 		ret = fdtdec_resetup(&rescan);
 		if (!ret && rescan) {
 			dm_uninit();
@@ -240,7 +240,7 @@ void board_init_f(ulong dummy)
 	 * Force probe of clk_k3 driver here to ensure basic default clock
 	 * configuration is always done.
 	 */
-	if (IS_ENABLED(CONFIG_SPL_CLK_K3)) {
+	if (CONFIG(SPL_CLK_K3)) {
 		ret = uclass_get_device_by_driver(UCLASS_CLK,
 						  DM_DRIVER_GET(ti_clk),
 						  &dev);
@@ -268,7 +268,7 @@ void board_init_f(ulong dummy)
 	k3_sysfw_print_ver();
 
 	/* Perform EEPROM-based board detection */
-	if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT))
+	if (CONFIG(TI_I2C_BOARD_DETECT))
 		do_board_detect();
 
 #if defined(CONFIG_CPU_V7R) && defined(CONFIG_K3_AVS0)

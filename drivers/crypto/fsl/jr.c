@@ -658,7 +658,7 @@ static int rng_init(uint8_t sec_idx, ccsr_sec_t *sec)
 		 * if worst case value for ent_dly is identified,
 		 * loop can be skipped for that platform.
 		 */
-		if (IS_ENABLED(CONFIG_MX6SX))
+		if (CONFIG(MX6SX))
 			break;
 
 	} while ((ret == -1) && (ent_delay < RTSDCTL_ENT_DLY_MAX));
@@ -768,7 +768,7 @@ init:
 	}
 #if CONFIG(OF_CONTROL)
 	if (ofnode_valid(scu_node)) {
-		if (IS_ENABLED(CONFIG_DM_RNG)) {
+		if (CONFIG(DM_RNG)) {
 			ret = device_bind_driver(NULL, "caam-rng", "caam-rng", NULL);
 			if (ret)
 				printf("Couldn't bind rng driver (%d)\n", ret);
@@ -791,7 +791,7 @@ init:
 			return -1;
 		}
 
-		if (IS_ENABLED(CONFIG_DM_RNG)) {
+		if (CONFIG(DM_RNG)) {
 			ret = device_bind_driver(NULL, "caam-rng", "caam-rng",
 						 NULL);
 			if (ret)

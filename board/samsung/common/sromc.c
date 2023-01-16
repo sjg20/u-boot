@@ -31,7 +31,7 @@ static int exyno5_sromc_probe(struct udevice *dev)
 	int width;	/* bus width in bytes */
 	int ret;
 
-	if (!IS_ENABLED(CONFIG_SMC911X))
+	if (!CONFIG(SMC911X))
 		return 0;
 
 	bank = dev_read_s32_default(dev, "bank", 0);

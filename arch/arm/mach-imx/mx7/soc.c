@@ -356,7 +356,7 @@ int arch_misc_init(void)
 	env_set("serial#", serial_string);
 #endif
 
-	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+	if (CONFIG(FSL_CAAM)) {
 		struct udevice *dev;
 		int ret;
 		ret = uclass_get_device_by_driver(UCLASS_MISC, DM_DRIVER_GET(caam_jr), &dev);

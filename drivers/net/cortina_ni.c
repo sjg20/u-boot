@@ -320,7 +320,7 @@ static void ca_ni_led(int port, int status)
 	char label[10];
 	struct udevice *led_dev;
 
-	if (IS_ENABLED(CONFIG_LED_CORTINA)) {
+	if (CONFIG(LED_CORTINA)) {
 		snprintf(label, sizeof(label), "led%d", port);
 		debug("%s: set port %d led %s.\n",
 		      __func__, port, status ? "on" : "off");

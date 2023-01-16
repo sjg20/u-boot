@@ -61,7 +61,7 @@ static uint64_t orion_timer_get_count(void *base)
 /* Early (e.g. bootstage etc) timer functions */
 static void notrace timer_early_init(void)
 {
-	if (IS_ENABLED(CONFIG_ARCH_MVEBU))
+	if (CONFIG(ARCH_MVEBU))
 		orion_timer_init((void *)MVEBU_TIMER_BASE, INPUT_CLOCK_25MHZ);
 	else
 		orion_timer_init((void *)MVEBU_TIMER_BASE, INPUT_CLOCK_NON_FIXED);
@@ -74,7 +74,7 @@ unsigned long notrace timer_early_get_rate(void)
 {
 	timer_early_init();
 
-	if (IS_ENABLED(CONFIG_ARCH_MVEBU))
+	if (CONFIG(ARCH_MVEBU))
 		return MVEBU_TIMER_FIXED_RATE_25MHZ;
 	else
 		return CFG_SYS_TCLK;

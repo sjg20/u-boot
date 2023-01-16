@@ -83,7 +83,7 @@ int ddr_calibration(unsigned int fsp_table[3])
 	u32 lock_0, lock_1, lock_2;
 	u32 freq_chg_pt, freq_chg_cnt;
 
-	if (IS_ENABLED(CONFIG_IMX8ULP_DRAM_PHY_PLL_BYPASS)) {
+	if (CONFIG(IMX8ULP_DRAM_PHY_PLL_BYPASS)) {
 		ddr_enable_pll_bypass();
 		freq_chg_cnt = 0;
 		freq_chg_pt = 0;
@@ -228,7 +228,7 @@ int ddr_init(struct dram_timing_info2 *dram_timing)
 {
 	int i;
 
-	if (IS_ENABLED(CONFIG_IMX8ULP_DRAM_PHY_PLL_BYPASS)) {
+	if (CONFIG(IMX8ULP_DRAM_PHY_PLL_BYPASS)) {
 		/* Use PLL bypass for boot freq */
 		/* Since PLL can't generate the double freq, Need ddr clock to generate it. */
 		set_ddr_clk(dram_timing->fsp_table[0]); /* Set to boot freq */

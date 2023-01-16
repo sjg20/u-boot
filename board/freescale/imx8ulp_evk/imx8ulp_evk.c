@@ -16,7 +16,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if IS_ENABLED(CONFIG_FEC_MXC)
+#if CONFIG(FEC_MXC)
 #define ENET_CLK_PAD_CTRL	(PAD_CTL_PUS_UP | PAD_CTL_DSE | PAD_CTL_IBE_ENABLE)
 static iomux_cfg_t const enet_clk_pads[] = {
 	IMX8ULP_PAD_PTE19__ENET0_REFCLK | MUX_PAD_CTRL(ENET_CLK_PAD_CTRL),
@@ -103,7 +103,7 @@ int board_init(void)
 {
 	int sync = -ENODEV;
 
-	if (IS_ENABLED(CONFIG_FEC_MXC))
+	if (CONFIG(FEC_MXC))
 		setup_fec();
 
 	if (m33_image_booted()) {
@@ -112,7 +112,7 @@ int board_init(void)
 	}
 
 	/* When sync with M33 is failed, use local driver to set for video */
-	if (sync != 0 && IS_ENABLED(CONFIG_VIDEO)) {
+	if (sync != 0 && CONFIG(VIDEO)) {
 		mipi_dsi_mux_panel();
 		mipi_dsi_panel_backlight();
 	}

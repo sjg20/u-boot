@@ -179,9 +179,9 @@ static int get_ssusb_rscs(struct udevice *dev, struct ssusb_mtk *ssusb)
 		ssusb->dr_mode == USB_DR_MODE_OTG)
 		ssusb->dr_mode = USB_DR_MODE_PERIPHERAL;
 
-	if (IS_ENABLED(CONFIG_USB_MTU3_GADGET))
+	if (CONFIG(USB_MTU3_GADGET))
 		ssusb->dr_mode = USB_DR_MODE_PERIPHERAL;
-	else if (IS_ENABLED(CONFIG_USB_MTU3_HOST))
+	else if (CONFIG(USB_MTU3_HOST))
 		ssusb->dr_mode = USB_DR_MODE_HOST;
 
 	dev_info(dev, "dr_mode: %d, ippc: 0x%p, mac: 0x%p\n",

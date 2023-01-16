@@ -226,7 +226,7 @@ static int do_efi_mem(struct cmd_tbl *cmdtp, int flag, int argc,
 	bool skip_bs;
 
 	skip_bs = !argc || *argv[0] != 'a';
-	if (IS_ENABLED(CONFIG_EFI_APP)) {
+	if (CONFIG(EFI_APP)) {
 		ret = efi_get_mmap(&orig, &size, &key, &desc_size, &version);
 		if (ret) {
 			printf("Cannot read memory map (err=%d)\n", ret);
@@ -264,7 +264,7 @@ static int do_efi_mem(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	efi_print_mem_table(desc, desc_size, skip_bs);
 	free(desc);
-	if (IS_ENABLED(CONFIG_EFI_APP))
+	if (CONFIG(EFI_APP))
 		free(orig);
 done:
 	if (ret)

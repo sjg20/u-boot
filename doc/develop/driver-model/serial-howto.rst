@@ -145,7 +145,7 @@ is used. You can see the relevant code in putc()
 , for example::
 
    /* if we don't have a console yet, use the debug UART */
-   if (IS_ENABLED(CONFIG_DEBUG_UART) && !(gd->flags & GD_FLG_SERIAL_READY)) {
+   if (CONFIG(DEBUG_UART) && !(gd->flags & GD_FLG_SERIAL_READY)) {
       printch(c);
       return;
    }

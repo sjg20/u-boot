@@ -46,7 +46,7 @@ int do_tftpb(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	return ret;
 }
 
-#if IS_ENABLED(CONFIG_IPV6)
+#if CONFIG(IPV6)
 U_BOOT_CMD(
 	tftpboot,	4,	1,	do_tftpb,
 	"boot image via network using TFTP protocol\n"
@@ -181,7 +181,7 @@ static void netboot_update_env(void)
 	 * Only attempt to change serverip if net/bootp.c:store_net_params()
 	 * could have set it
 	 */
-	if (!IS_ENABLED(CONFIG_BOOTP_SERVERIP) && net_server_ip.s_addr) {
+	if (!CONFIG(BOOTP_SERVERIP) && net_server_ip.s_addr) {
 		ip_to_string(net_server_ip, tmp);
 		env_set("serverip", tmp);
 	}
@@ -317,7 +317,7 @@ static int netboot_common(enum proto_t proto, struct cmd_tbl *cmdtp, int argc,
 	if (s != NULL)
 		image_load_addr = hextoul(s, NULL);
 
-	if (IS_ENABLED(CONFIG_IPV6)) {
+	if (CONFIG(IPV6)) {
 		use_ip6 = false;
 
 		/* IPv6 parameter has to be always *last* */
@@ -335,7 +335,7 @@ static int netboot_common(enum proto_t proto, struct cmd_tbl *cmdtp, int argc,
 
 	bootstage_mark(BOOTSTAGE_ID_NET_START);
 
-	if (IS_ENABLED(CONFIG_IPV6) && !use_ip6) {
+	if (CONFIG(IPV6) && !use_ip6) {
 		char *s, *e;
 		size_t len;
 
@@ -403,7 +403,7 @@ U_BOOT_CMD(
 );
 #endif
 
-#if IS_ENABLED(CONFIG_CMD_PING6)
+#if CONFIG(CMD_PING6)
 int do_ping6(struct cmd_tbl *cmdtp, int flag, int argc, char * const argv[])
 {
 	if (string_to_ip6(argv[1], strlen(argv[1]), &net_ping_ip6))

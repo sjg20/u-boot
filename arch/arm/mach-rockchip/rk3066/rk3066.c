@@ -28,10 +28,10 @@ void board_debug_uart_init(void)
 
 void spl_board_init(void)
 {
-	if (!IS_ENABLED(CONFIG_SPL_BUILD))
+	if (!CONFIG(SPL_BUILD))
 		return;
 
-	if (IS_ENABLED(CONFIG_SPL_DM_MMC)) {
+	if (CONFIG(SPL_DM_MMC)) {
 		struct rk3066_grf * const grf = (void *)GRF_BASE;
 
 		rk_clrsetreg(&grf->gpio3b_iomux,

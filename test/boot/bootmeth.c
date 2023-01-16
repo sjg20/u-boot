@@ -23,10 +23,10 @@ static int bootmeth_cmd_list(struct unit_test_state *uts)
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("    0    0  syslinux            Syslinux boot from a block device");
 	ut_assert_nextline("    1    1  efi                 EFI boot from an .efi file");
-	if (IS_ENABLED(CONFIG_BOOTMETH_GLOBAL))
+	if (CONFIG(BOOTMETH_GLOBAL))
 		ut_assert_nextline(" glob    2  firmware0           VBE simple");
 	ut_assert_nextlinen("---");
-	ut_assert_nextline(IS_ENABLED(CONFIG_BOOTMETH_GLOBAL) ?
+	ut_assert_nextline(CONFIG(BOOTMETH_GLOBAL) ?
 		 "(3 bootmeths)" : "(2 bootmeths)");
 	ut_assert_console_end();
 
@@ -59,10 +59,10 @@ static int bootmeth_cmd_order(struct unit_test_state *uts)
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("    0    0  syslinux            Syslinux boot from a block device");
 	ut_assert_nextline("    -    1  efi                 EFI boot from an .efi file");
-	if (IS_ENABLED(CONFIG_BOOTMETH_GLOBAL))
+	if (CONFIG(BOOTMETH_GLOBAL))
 		ut_assert_nextline(" glob    2  firmware0           VBE simple");
 	ut_assert_nextlinen("---");
-	ut_assert_nextline(IS_ENABLED(CONFIG_BOOTMETH_GLOBAL) ?
+	ut_assert_nextline(CONFIG(BOOTMETH_GLOBAL) ?
 		 "(3 bootmeths)" : "(2 bootmeths)");
 	ut_assert_console_end();
 
@@ -74,10 +74,10 @@ static int bootmeth_cmd_order(struct unit_test_state *uts)
 	ut_assert_nextlinen("---");
 	ut_assert_nextline("    1    0  syslinux            Syslinux boot from a block device");
 	ut_assert_nextline("    0    1  efi                 EFI boot from an .efi file");
-	if (IS_ENABLED(CONFIG_BOOTMETH_GLOBAL))
+	if (CONFIG(BOOTMETH_GLOBAL))
 		ut_assert_nextline(" glob    2  firmware0           VBE simple");
 	ut_assert_nextlinen("---");
-	ut_assert_nextline(IS_ENABLED(CONFIG_BOOTMETH_GLOBAL) ?
+	ut_assert_nextline(CONFIG(BOOTMETH_GLOBAL) ?
 		 "(3 bootmeths)" : "(2 bootmeths)");
 	ut_assert_console_end();
 
@@ -86,7 +86,7 @@ static int bootmeth_cmd_order(struct unit_test_state *uts)
 	ut_assert_console_end();
 	ut_assertnull(env_get("bootmeths"));
 	ut_assertok(run_command("bootmeth list", 0));
-	ut_assert_skip_to_line(IS_ENABLED(CONFIG_BOOTMETH_GLOBAL) ?
+	ut_assert_skip_to_line(CONFIG(BOOTMETH_GLOBAL) ?
 		 "(3 bootmeths)" : "(2 bootmeths)");
 
 	/* Try reverse order */
@@ -110,7 +110,7 @@ BOOTSTD_TEST(bootmeth_cmd_order, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 /* Check 'bootmeth order' command with global bootmeths */
 static int bootmeth_cmd_order_glob(struct unit_test_state *uts)
 {
-	if (!IS_ENABLED(CONFIG_BOOTMETH_GLOBAL))
+	if (!CONFIG(BOOTMETH_GLOBAL))
 		return -EAGAIN;
 
 	console_record_reset_enable();

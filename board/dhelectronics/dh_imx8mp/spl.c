@@ -68,7 +68,7 @@ static int dh_imx8mp_board_power_init(void)
 	pmic_reg_write(dev, PCA9450_BUCK123_DVS, 0x29);
 
 	/* Increase VDD_SOC to typical value 0.95V before first DRAM access. */
-	if (IS_ENABLED(CONFIG_IMX8M_VDD_SOC_850MV))
+	if (CONFIG(IMX8M_VDD_SOC_850MV))
 		/* Set DVS0 to 0.85V for special case. */
 		pmic_reg_write(dev, PCA9450_BUCK1OUT_DVS0, 0x14);
 	else

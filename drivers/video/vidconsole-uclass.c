@@ -177,7 +177,7 @@ static void vidconsole_escape_char(struct udevice *dev, char ch)
 {
 	struct vidconsole_priv *priv = dev_get_uclass_priv(dev);
 
-	if (!IS_ENABLED(CONFIG_VIDEO_ANSI))
+	if (!CONFIG(VIDEO_ANSI))
 		goto error;
 
 	/* Sanity checking for bogus ESC sequences: */

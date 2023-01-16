@@ -417,7 +417,7 @@ static int enetc_write_hwaddr(struct udevice *dev)
 	struct enetc_priv *priv = dev_get_priv(dev);
 	u8 *addr = plat->enetaddr;
 
-	if (IS_ENABLED(CONFIG_ARCH_LS1028A))
+	if (CONFIG(ARCH_LS1028A))
 		return enetc_ls1028a_write_hwaddr(dev);
 
 	u16 lower = *(const u16 *)(addr + 4);

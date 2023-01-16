@@ -727,7 +727,7 @@ static int do_ubi(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 			return ubi_remove_vol(argv[2]);
 	}
 
-	if (IS_ENABLED(CONFIG_CMD_UBI_RENAME) && !strncmp(argv[1], "rename", 6))
+	if (CONFIG(CMD_UBI_RENAME) && !strncmp(argv[1], "rename", 6))
 		return ubi_rename_vol(argv[2], argv[3]);
 
 	if (strncmp(argv[1], "skipcheck", 9) == 0) {
@@ -823,7 +823,7 @@ U_BOOT_CMD(
 		" - Read volume to address with size\n"
 	"ubi remove[vol] volume"
 		" - Remove volume\n"
-#if IS_ENABLED(CONFIG_CMD_UBI_RENAME)
+#if CONFIG(CMD_UBI_RENAME)
 	"ubi rename oldname newname\n"
 #endif
 	"ubi skipcheck volume on/off - Set or clear skip_check flag in volume header\n"

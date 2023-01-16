@@ -26,8 +26,8 @@ int board_init(void)
 
 int dram_init(void)
 {
-	if (IS_ENABLED(CONFIG_TARGET_GXP)) {
-		if (IS_ENABLED(CONFIG_GXP_ECC)) {
+	if (CONFIG(TARGET_GXP)) {
+		if (CONFIG(GXP_ECC)) {
 			/* 0x0f800000 */
 			gd->ram_size = SZ_128M + SZ_64M + SZ_32M + SZ_16M + SZ_8M;
 		} else {
@@ -35,8 +35,8 @@ int dram_init(void)
 			gd->ram_size = SZ_256M + SZ_128M + SZ_64M + SZ_32M + SZ_16M;
 		}
 
-		if (IS_ENABLED(CONFIG_GXP_VROM_64MB)) {
-			if (IS_ENABLED(CONFIG_GXP_ECC)) {
+		if (CONFIG(GXP_VROM_64MB)) {
+			if (CONFIG(GXP_ECC)) {
 				/* 0x0c000000 */
 				gd->ram_size = SZ_128M + SZ_64M;
 			} else {
@@ -45,8 +45,8 @@ int dram_init(void)
 			}
 		}
 
-		if (IS_ENABLED(CONFIG_GXP_VROM_32MB)) {
-			if (IS_ENABLED(CONFIG_GXP_ECC)) {
+		if (CONFIG(GXP_VROM_32MB)) {
+			if (CONFIG(GXP_ECC)) {
 				/* 0x0e000000 */
 				gd->ram_size = SZ_128M + SZ_64M + SZ_32M;
 			} else {
@@ -56,15 +56,15 @@ int dram_init(void)
 		}
 	}
 
-	if (IS_ENABLED(CONFIG_TARGET_GXP2)) {
+	if (CONFIG(TARGET_GXP2)) {
 		/* 0x1b200000 */
 		gd->ram_size = SZ_256M + SZ_128M + SZ_32M + SZ_16M + SZ_2M;
-		if (IS_ENABLED(CONFIG_GXP_VROM_64MB)) {
+		if (CONFIG(GXP_VROM_64MB)) {
 			/* 0x14000000 */
 			gd->ram_size = SZ_256M + SZ_64M;
 		}
 
-		if (IS_ENABLED(CONFIG_GXP_VROM_32MB)) {
+		if (CONFIG(GXP_VROM_32MB)) {
 			/* 0x18000000 */
 			gd->ram_size = SZ_256M + SZ_128M;
 		}

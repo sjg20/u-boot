@@ -43,7 +43,7 @@ static int sandbox_sdl_probe(struct udevice *dev)
 	uc_priv->rot = plat->rot;
 	uc_priv->vidconsole_drv_name = plat->vidconsole_drv_name;
 	uc_priv->font_size = plat->font_size;
-	if (IS_ENABLED(CONFIG_VIDEO_COPY))
+	if (CONFIG(VIDEO_COPY))
 		uc_plat->copy_base = uc_plat->base + uc_plat->size / 2;
 
 	return 0;
@@ -76,7 +76,7 @@ static void set_bpp(struct udevice *dev, enum video_log2_bpp l2bpp)
 	 * If a copy framebuffer is used, double the size and use the last half
 	 * as the copy, with the first half as the normal frame buffer.
 	 */
-	if (IS_ENABLED(CONFIG_VIDEO_COPY))
+	if (CONFIG(VIDEO_COPY))
 		uc_plat->size *= 2;
 }
 

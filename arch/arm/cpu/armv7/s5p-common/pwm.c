@@ -125,7 +125,7 @@ int s5p_pwm_config(int pwm_id, int duty_ns, int period_ns)
 
 	tin_ns = NS_IN_SEC / tin_rate;
 
-	if (IS_ENABLED(CONFIG_ARCH_NEXELL))
+	if (CONFIG(ARCH_NEXELL))
 		/* The counter starts at zero. */
 		tcnt = (period_ns / tin_ns) - 1;
 	else

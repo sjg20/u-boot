@@ -71,7 +71,7 @@ void meson_board_add_reserved_memory(void *fdt, u64 start, u64 size)
 	if (ret)
 		printf("Could not reserve zone @ 0x%llx\n", start);
 
-	if (IS_ENABLED(CONFIG_EFI_LOADER))
+	if (CONFIG(EFI_LOADER))
 		efi_add_memory_map(start, size, EFI_RESERVED_MEMORY_TYPE);
 }
 

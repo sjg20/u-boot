@@ -121,7 +121,7 @@ static int bind_smccc_features(struct udevice *dev, int psci_method)
 	struct arm_smccc_feature *feature;
 	size_t feature_cnt, n;
 
-	if (!IS_ENABLED(CONFIG_ARM_SMCCC_FEATURES))
+	if (!CONFIG(ARM_SMCCC_FEATURES))
 		return 0;
 
 	/*
@@ -182,7 +182,7 @@ static int psci_bind(struct udevice *dev)
 	}
 
 	/* From PSCI v1.0 onward we can discover services through ARM_SMCCC_FEATURE */
-	if (IS_ENABLED(CONFIG_ARM_SMCCC_FEATURES) && device_is_compatible(dev, "arm,psci-1.0"))
+	if (CONFIG(ARM_SMCCC_FEATURES) && device_is_compatible(dev, "arm,psci-1.0"))
 		dev_or_flags(dev, DM_FLAG_PROBE_AFTER_BIND);
 
 	return 0;
@@ -227,7 +227,7 @@ static void __maybe_unused do_psci_probe(void)
 	uclass_get_device_by_name(UCLASS_FIRMWARE, DRIVER_NAME, &dev);
 }
 
-#if IS_ENABLED(CONFIG_EFI_LOADER) && IS_ENABLED(CONFIG_PSCI_RESET)
+#if CONFIG(EFI_LOADER) && CONFIG(PSCI_RESET)
 efi_status_t efi_reset_system_init(void)
 {
 	do_psci_probe();
@@ -249,7 +249,7 @@ void __efi_runtime EFIAPI efi_reset_system(enum efi_reset_type reset_type,
 	while (1)
 		;
 }
-#endif /* IS_ENABLED(CONFIG_EFI_LOADER) && IS_ENABLED(CONFIG_PSCI_RESET) */
+#endif /* CONFIG(EFI_LOADER) && CONFIG(PSCI_RESET) */
 
 #ifdef CONFIG_PSCI_RESET
 void reset_misc(void)
@@ -286,7 +286,7 @@ void psci_sys_poweroff(void)
 	invoke_psci_fn(PSCI_0_2_FN_SYSTEM_OFF, 0, 0, 0);
 }
 
-#if IS_ENABLED(CONFIG_CMD_POWEROFF) && !IS_ENABLED(CONFIG_SYSRESET_CMD_POWEROFF)
+#if CONFIG(CMD_POWEROFF) && !CONFIG(SYSRESET_CMD_POWEROFF)
 int do_poweroff(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	do_psci_probe();

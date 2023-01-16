@@ -103,7 +103,7 @@ int do_bdinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 #endif
 	bdinfo_print_num_l("boot_params", (ulong)bd->bi_boot_params);
 	print_bi_dram(bd);
-	if (IS_ENABLED(CONFIG_SYS_HAS_SRAM)) {
+	if (CONFIG(SYS_HAS_SRAM)) {
 		bdinfo_print_num_l("sramstart", (ulong)bd->bi_sramstart);
 		bdinfo_print_num_l("sramsize", (ulong)bd->bi_sramsize);
 	}
@@ -114,7 +114,7 @@ int do_bdinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	bdinfo_print_num_l("relocaddr", gd->relocaddr);
 	bdinfo_print_num_l("reloc off", gd->reloc_off);
 	printf("%-12s= %u-bit\n", "Build", (uint)sizeof(void *) * 8);
-	if (IS_ENABLED(CONFIG_CMD_NET)) {
+	if (CONFIG(CMD_NET)) {
 		printf("current eth = %s\n", eth_get_name());
 		print_eth(0);
 		printf("IP addr     = %s\n", env_get("ipaddr"));
@@ -122,17 +122,17 @@ int do_bdinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	bdinfo_print_num_l("fdt_blob", (ulong)gd->fdt_blob);
 	bdinfo_print_num_l("new_fdt", (ulong)gd->new_fdt);
 	bdinfo_print_num_l("fdt_size", (ulong)gd->fdt_size);
-	if (IS_ENABLED(CONFIG_VIDEO))
+	if (CONFIG(VIDEO))
 		show_video_info();
 #if CONFIG(MULTI_DTB_FIT)
 	bdinfo_print_num_l("multi_dtb_fit", (ulong)gd->multi_dtb_fit);
 #endif
-	if (IS_ENABLED(CONFIG_LMB) && gd->fdt_blob) {
+	if (CONFIG(LMB) && gd->fdt_blob) {
 		struct lmb lmb;
 
 		lmb_init_and_reserve(&lmb, gd->bd, (void *)gd->fdt_blob);
 		lmb_dump_all_force(&lmb);
-		if (IS_ENABLED(CONFIG_OF_REAL))
+		if (CONFIG(OF_REAL))
 			printf("devicetree  = %s\n", fdtdec_get_srcname());
 	}
 

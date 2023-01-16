@@ -568,7 +568,7 @@ static int label_boot(struct pxe_context *ctx, struct pxe_label *label)
 			env_get("gatewayip"), env_get("netmask"));
 	}
 
-	if (IS_ENABLED(CONFIG_CMD_NET))	{
+	if (CONFIG(CMD_NET))	{
 		if (label->ipappend & 0x2) {
 			int err;
 
@@ -743,16 +743,16 @@ static int label_boot(struct pxe_context *ctx, struct pxe_label *label)
 
 	/* Try bootm for legacy and FIT format image */
 	if (genimg_get_format(buf) != IMAGE_FORMAT_INVALID &&
-            IS_ENABLED(CONFIG_CMD_BOOTM))
+            CONFIG(CMD_BOOTM))
 		do_bootm(ctx->cmdtp, 0, bootm_argc, bootm_argv);
 	/* Try booting an AArch64 Linux kernel image */
-	else if (IS_ENABLED(CONFIG_CMD_BOOTI))
+	else if (CONFIG(CMD_BOOTI))
 		do_booti(ctx->cmdtp, 0, bootm_argc, bootm_argv);
 	/* Try booting a Image */
-	else if (IS_ENABLED(CONFIG_CMD_BOOTZ))
+	else if (CONFIG(CMD_BOOTZ))
 		do_bootz(ctx->cmdtp, 0, bootm_argc, bootm_argv);
 	/* Try booting an x86_64 Linux kernel image */
-	else if (IS_ENABLED(CONFIG_CMD_ZBOOT))
+	else if (CONFIG(CMD_ZBOOT))
 		do_zboot_parent(ctx->cmdtp, 0, zboot_argc, zboot_argv, NULL);
 
 	unmap_sysmem(buf);
@@ -1527,7 +1527,7 @@ void handle_pxe_menu(struct pxe_context *ctx, struct pxe_menu *cfg)
 	struct menu *m;
 	int err;
 
-	if (IS_ENABLED(CONFIG_CMD_BMP)) {
+	if (CONFIG(CMD_BMP)) {
 		/* display BMP if available */
 		if (cfg->bmp) {
 			if (get_relfile(ctx, cfg->bmp, image_load_addr, NULL)) {

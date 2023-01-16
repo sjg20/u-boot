@@ -547,7 +547,7 @@ static efi_status_t efi_capsule_update_firmware(
 	uint update_index;
 	bool fw_accept_os;
 
-	if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
+	if (CONFIG(FWU_MULTI_BANK_UPDATE)) {
 		if (fwu_empty_capsule_checks_pass() &&
 		    fwu_empty_capsule(capsule_data))
 			return fwu_empty_capsule_process(capsule_data);
@@ -621,7 +621,7 @@ static efi_status_t efi_capsule_update_firmware(
 		}
 
 		/* do update */
-		if (IS_ENABLED(CONFIG_EFI_CAPSULE_AUTHENTICATE) &&
+		if (CONFIG(EFI_CAPSULE_AUTHENTICATE) &&
 		    !(image->image_capsule_support &
 				CAPSULE_SUPPORT_AUTHENTICATION)) {
 			/* no signature */
@@ -632,7 +632,7 @@ static efi_status_t efi_capsule_update_firmware(
 		image_binary = (void *)image + sizeof(*image);
 		image_binary_size = image->update_image_size;
 		vendor_code = image_binary + image_binary_size;
-		if (!IS_ENABLED(CONFIG_EFI_CAPSULE_AUTHENTICATE) &&
+		if (!CONFIG(EFI_CAPSULE_AUTHENTICATE) &&
 		    (image->image_capsule_support &
 				CAPSULE_SUPPORT_AUTHENTICATION)) {
 			ret = efi_remove_auth_hdr(&image_binary,
@@ -654,7 +654,7 @@ static efi_status_t efi_capsule_update_firmware(
 			goto out;
 		}
 
-		if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
+		if (CONFIG(FWU_MULTI_BANK_UPDATE)) {
 			image_type_id = &image->update_image_type_id;
 			if (!fw_accept_os) {
 				/*
@@ -751,7 +751,7 @@ efi_status_t EFIAPI efi_update_capsule(
 			goto out;
 	}
 
-	if (IS_ENABLED(CONFIG_EFI_ESRT)) {
+	if (CONFIG(EFI_ESRT)) {
 		/* Rebuild the ESRT to reflect any updated FW images. */
 		ret = efi_esrt_populate();
 		if (ret != EFI_SUCCESS)
@@ -818,7 +818,7 @@ efi_status_t __weak efi_load_capsule_drivers(void)
 	__maybe_unused efi_handle_t handle;
 	efi_status_t ret = EFI_SUCCESS;
 
-	if (IS_ENABLED(CONFIG_EFI_CAPSULE_FIRMWARE_FIT)) {
+	if (CONFIG(EFI_CAPSULE_FIRMWARE_FIT)) {
 		handle = NULL;
 		ret = efi_install_multiple_protocol_interfaces(&handle,
 							       &efi_guid_firmware_management_protocol,
@@ -826,7 +826,7 @@ efi_status_t __weak efi_load_capsule_drivers(void)
 							       NULL);
 	}
 
-	if (IS_ENABLED(CONFIG_EFI_CAPSULE_FIRMWARE_RAW)) {
+	if (CONFIG(EFI_CAPSULE_FIRMWARE_RAW)) {
 		handle = NULL;
 		ret = efi_install_multiple_protocol_interfaces(&handle,
 							       &efi_guid_firmware_management_protocol,
@@ -1253,7 +1253,7 @@ static efi_status_t check_run_capsules(void)
 	size = sizeof(os_indications);
 	r = efi_get_variable_int(u"OsIndications", &efi_global_variable_guid,
 				 NULL, &size, &os_indications, NULL);
-	if (!IS_ENABLED(CONFIG_EFI_IGNORE_OSINDICATIONS) &&
+	if (!CONFIG(EFI_IGNORE_OSINDICATIONS) &&
 	    (r != EFI_SUCCESS || size != sizeof(os_indications)))
 		return EFI_NOT_FOUND;
 
@@ -1271,7 +1271,7 @@ static efi_status_t check_run_capsules(void)
 		if (r != EFI_SUCCESS)
 			log_err("Setting %ls failed\n", L"OsIndications");
 		return EFI_SUCCESS;
-	} else if (IS_ENABLED(CONFIG_EFI_IGNORE_OSINDICATIONS)) {
+	} else if (CONFIG(EFI_IGNORE_OSINDICATIONS)) {
 		return EFI_SUCCESS;
 	} else {
 		return EFI_NOT_FOUND;
@@ -1329,7 +1329,7 @@ efi_status_t efi_launch_capsules(void)
 			} else {
 				log_info("Applying capsule %ls succeeded.\n",
 					 files[i]);
-				if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
+				if (CONFIG(FWU_MULTI_BANK_UPDATE)) {
 					fwu_post_update_checks(capsule,
 							       &fw_accept_os,
 							       &capsule_update);
@@ -1353,7 +1353,7 @@ efi_status_t efi_launch_capsules(void)
 
 	efi_capsule_scan_done();
 
-	if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
+	if (CONFIG(FWU_MULTI_BANK_UPDATE)) {
 		if (capsule_update == true && update_status == true) {
 			ret = fwu_post_update_process(fw_accept_os);
 		} else if (capsule_update == true && update_status == false) {

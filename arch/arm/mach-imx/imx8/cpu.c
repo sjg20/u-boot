@@ -94,7 +94,7 @@ EVENT_SPY(EVT_DM_POST_INIT, imx8_init_mu);
 #if defined(CONFIG_ARCH_MISC_INIT)
 int arch_misc_init(void)
 {
-	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+	if (CONFIG(FSL_CAAM)) {
 		struct udevice *dev;
 		int ret;
 

@@ -110,20 +110,20 @@ static int mmc_resource_init(int sdc_no)
  */
 static bool sunxi_mmc_can_calibrate(void)
 {
-	return IS_ENABLED(CONFIG_MACH_SUN50I) ||
-	       IS_ENABLED(CONFIG_MACH_SUN50I_H5) ||
-	       IS_ENABLED(CONFIG_SUN50I_GEN_H6) ||
-	       IS_ENABLED(CONFIG_MACH_SUN8I_R40);
+	return CONFIG(MACH_SUN50I) ||
+	       CONFIG(MACH_SUN50I_H5) ||
+	       CONFIG(SUN50I_GEN_H6) ||
+	       CONFIG(MACH_SUN8I_R40);
 }
 
 static int mmc_set_mod_clk(struct sunxi_mmc_priv *priv, unsigned int hz)
 {
 	unsigned int pll, pll_hz, div, n, oclk_dly, sclk_dly;
-	bool new_mode = IS_ENABLED(CONFIG_MMC_SUNXI_HAS_NEW_MODE);
+	bool new_mode = CONFIG(MMC_SUNXI_HAS_NEW_MODE);
 	u32 val = 0;
 
 	/* A83T support new mode only on eMMC */
-	if (IS_ENABLED(CONFIG_MACH_SUN8I_A83T) && priv->mmc_no != 2)
+	if (CONFIG(MACH_SUN8I_A83T) && priv->mmc_no != 2)
 		new_mode = false;
 
 	if (hz <= 24000000) {
@@ -170,7 +170,7 @@ static int mmc_set_mod_clk(struct sunxi_mmc_priv *priv, unsigned int hz)
 		oclk_dly = 0;
 		sclk_dly = 5;
 	} else {
-		if (IS_ENABLED(CONFIG_MACH_SUN9I)) {
+		if (CONFIG(MACH_SUN9I)) {
 			if (hz <= 52000000)
 				oclk_dly = 5;
 			else
@@ -557,8 +557,8 @@ struct mmc *sunxi_mmc_init(int sdc_no)
 	cfg->voltages = MMC_VDD_32_33 | MMC_VDD_33_34;
 	cfg->host_caps = MMC_MODE_4BIT;
 
-	if ((IS_ENABLED(CONFIG_MACH_SUN50I) || IS_ENABLED(CONFIG_MACH_SUN8I) ||
-	    IS_ENABLED(CONFIG_SUN50I_GEN_H6)) && (sdc_no == 2))
+	if ((CONFIG(MACH_SUN50I) || CONFIG(MACH_SUN8I) ||
+	    CONFIG(SUN50I_GEN_H6)) && (sdc_no == 2))
 		cfg->host_caps = MMC_MODE_8BIT;
 
 	cfg->host_caps |= MMC_MODE_HS_52MHz | MMC_MODE_HS;
@@ -643,10 +643,10 @@ static const struct dm_mmc_ops sunxi_mmc_ops = {
 
 static unsigned get_mclk_offset(void)
 {
-	if (IS_ENABLED(CONFIG_MACH_SUN9I_A80))
+	if (CONFIG(MACH_SUN9I_A80))
 		return 0x410;
 
-	if (IS_ENABLED(CONFIG_SUN50I_GEN_H6))
+	if (CONFIG(SUN50I_GEN_H6))
 		return 0x830;
 
 	return 0x88;

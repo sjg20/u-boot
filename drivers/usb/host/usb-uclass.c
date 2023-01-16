@@ -280,8 +280,8 @@ int usb_init(void)
 		 * For USB onboard HUB, we need to do some non-trivial init
 		 * like enabling a power regulator, before enumeration.
 		 */
-		if (IS_ENABLED(CONFIG_SANDBOX) ||
-		    IS_ENABLED(CONFIG_USB_ONBOARD_HUB)) {
+		if (CONFIG(SANDBOX) ||
+		    CONFIG(USB_ONBOARD_HUB)) {
 			ret = dm_scan_fdt_dev(bus);
 			if (ret) {
 				printf("USB device scan from fdt failed (%d)", ret);

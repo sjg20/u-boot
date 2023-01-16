@@ -44,7 +44,7 @@ struct in_addr string_to_ip(const char *s)
 	return addr;
 }
 
-#if IS_ENABLED(CONFIG_IPV6)
+#if CONFIG(IPV6)
 int string_to_ip6(const char *str, size_t len, struct in6_addr *addr)
 {
 	int colon_count = 0;

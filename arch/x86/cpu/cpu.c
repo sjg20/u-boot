@@ -170,7 +170,7 @@ int default_print_cpuinfo(void)
 	       cpu_has_64bit() ? "x86_64" : "x86",
 	       cpu_vendor_name(gd->arch.x86_vendor), gd->arch.x86_device);
 
-	if (IS_ENABLED(CONFIG_HAVE_ACPI_RESUME)) {
+	if (CONFIG(HAVE_ACPI_RESUME)) {
 		debug("ACPI previous sleep state: %s\n",
 		      acpi_ss_string(gd->arch.prev_sleep_state));
 	}
@@ -209,7 +209,7 @@ int last_stage_init(void)
 
 	board_final_init();
 
-	if (IS_ENABLED(CONFIG_HAVE_ACPI_RESUME)) {
+	if (CONFIG(HAVE_ACPI_RESUME)) {
 		fadt = acpi_find_fadt();
 
 		if (fadt && gd->arch.prev_sleep_state == ACPI_S3)
@@ -222,7 +222,7 @@ int last_stage_init(void)
 		return log_msg_ret("table", ret);
 	}
 
-	if (IS_ENABLED(CONFIG_GENERATE_ACPI_TABLE)) {
+	if (CONFIG(GENERATE_ACPI_TABLE)) {
 		fadt = acpi_find_fadt();
 
 		/* Don't touch ACPI hardware on HW reduced platforms */
@@ -249,7 +249,7 @@ int last_stage_init(void)
 
 static int x86_init_cpus(void)
 {
-	if (IS_ENABLED(CONFIG_SMP)) {
+	if (CONFIG(SMP)) {
 		debug("Init additional CPUs\n");
 		x86_mp_init();
 	} else {
@@ -303,16 +303,16 @@ int reserve_arch(void)
 	struct udevice *itss;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_ENABLE_MRC_CACHE))
+	if (CONFIG(ENABLE_MRC_CACHE))
 		mrccache_reserve();
 
-	if (IS_ENABLED(CONFIG_SEABIOS))
+	if (CONFIG(SEABIOS))
 		high_table_reserve();
 
-	if (IS_ENABLED(CONFIG_HAVE_ACPI_RESUME)) {
+	if (CONFIG(HAVE_ACPI_RESUME)) {
 		acpi_s3_reserve();
 
-		if (IS_ENABLED(CONFIG_HAVE_FSP)) {
+		if (CONFIG(HAVE_FSP)) {
 			/*
 			 * Save stack address to CMOS so that at next S3 boot,
 			 * we can use it as the stack address for fsp_continue()

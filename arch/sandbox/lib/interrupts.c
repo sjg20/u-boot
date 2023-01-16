@@ -50,7 +50,7 @@ void os_signal_action(int sig, unsigned long pc)
 	printf("pc_reloc = 0x%lx\n\n", pc - gd->reloc_off);
 	efi_print_image_infos((void *)pc);
 
-	if (IS_ENABLED(CONFIG_SANDBOX_CRASH_RESET)) {
+	if (CONFIG(SANDBOX_CRASH_RESET)) {
 		printf("resetting ...\n\n");
 		sandbox_reset();
 	} else {

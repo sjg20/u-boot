@@ -911,7 +911,7 @@ static void sunxi_panel_i2c_init(struct sunxi_display_priv *sunxi_display)
 	if (ret)
 		return;
 
-	if (IS_ENABLED(CONFIG_VIDEO_LCD_PANEL_EDP_4_LANE_1620M_VIA_ANX9804)) {
+	if (CONFIG(VIDEO_LCD_PANEL_EDP_4_LANE_1620M_VIA_ANX9804)) {
 		/*
 		 * The anx9804 needs 1.8V from eldo3, we do this here
 		 * and not via CONFIG_AXP_ELDO3_VOLT from board_init()
@@ -922,7 +922,7 @@ static void sunxi_panel_i2c_init(struct sunxi_display_priv *sunxi_display)
 			     ANX9804_DATA_RATE_1620M,
 			     sunxi_display->depth);
 	}
-	if (IS_ENABLED(CONFIG_VIDEO_LCD_TL059WV5C0)) {
+	if (CONFIG(VIDEO_LCD_TL059WV5C0)) {
 		struct udevice *chip;
 
 		ret = i2c_get_chip(i2c_bus, 0x5c, 1, &chip);
@@ -970,11 +970,11 @@ static void sunxi_mode_set(struct sunxi_display_priv *sunxi_display,
 		break;
 	case sunxi_monitor_lcd:
 		sunxi_lcdc_panel_enable();
-		if (IS_ENABLED(CONFIG_VIDEO_LCD_HITACHI_TX18D42VM)) {
+		if (CONFIG(VIDEO_LCD_HITACHI_TX18D42VM)) {
 			mdelay(50); /* Wait for lcd controller power on */
 			hitachi_tx18d42vm_init();
 		}
-		if (IS_ENABLED(CONFIG_VIDEO_LCD_PANEL_I2C))
+		if (CONFIG(VIDEO_LCD_PANEL_I2C))
 			sunxi_panel_i2c_init(sunxi_display);
 		sunxi_composer_mode_set(mode, address, monitor);
 		sunxi_lcdc_tcon0_mode_set(sunxi_display, mode, false);

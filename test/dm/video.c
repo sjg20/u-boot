@@ -82,7 +82,7 @@ static int compress_frame_buffer(struct unit_test_state *uts,
 		return ret;
 
 	/* Check here that the copy frame buffer is working correctly */
-	if (IS_ENABLED(CONFIG_VIDEO_COPY)) {
+	if (CONFIG(VIDEO_COPY)) {
 		ut_assertf(!memcmp(uc_priv->fb, uc_priv->copy_fb,
 				   uc_priv->fb_size),
 				   "Copy framebuffer does not match fb");

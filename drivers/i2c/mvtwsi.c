@@ -826,9 +826,9 @@ static int mvtwsi_i2c_bind(struct udevice *bus)
 	struct mvtwsi_registers *twsi = dev_read_addr_ptr(bus);
 
 	/* Disable the hidden slave in i2c0 of these platforms */
-	if ((IS_ENABLED(CONFIG_ARMADA_38X) ||
-	     IS_ENABLED(CONFIG_ARCH_KIRKWOOD) ||
-	     IS_ENABLED(CONFIG_ARMADA_8K)) && !dev_seq(bus))
+	if ((CONFIG(ARMADA_38X) ||
+	     CONFIG(ARCH_KIRKWOOD) ||
+	     CONFIG(ARMADA_8K)) && !dev_seq(bus))
 		twsi_disable_i2c_slave(twsi);
 
 	return 0;

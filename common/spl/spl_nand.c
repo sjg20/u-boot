@@ -88,7 +88,7 @@ static int spl_nand_load_element(struct spl_image_info *spl_image,
 	if (err)
 		return err;
 
-	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
+	if (CONFIG(SPL_LOAD_FIT) &&
 	    image_get_magic(header) == FDT_MAGIC) {
 		struct spl_load_info load;
 
@@ -99,7 +99,7 @@ static int spl_nand_load_element(struct spl_image_info *spl_image,
 		load.bl_len = bl_len;
 		load.read = spl_nand_fit_read;
 		return spl_load_simple_fit(spl_image, &load, offset / bl_len, header);
-	} else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER)) {
+	} else if (CONFIG(SPL_LOAD_IMX_CONTAINER)) {
 		struct spl_load_info load;
 
 		load.dev = NULL;
@@ -108,7 +108,7 @@ static int spl_nand_load_element(struct spl_image_info *spl_image,
 		load.bl_len = bl_len;
 		load.read = spl_nand_fit_read;
 		return spl_load_imx_container(spl_image, &load, offset / bl_len);
-	} else if (IS_ENABLED(CONFIG_SPL_LEGACY_IMAGE_FORMAT) &&
+	} else if (CONFIG(SPL_LEGACY_IMAGE_FORMAT) &&
 		   image_get_magic(header) == IH_MAGIC) {
 		struct spl_load_info load;
 

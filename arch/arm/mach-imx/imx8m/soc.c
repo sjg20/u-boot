@@ -566,7 +566,7 @@ int arch_cpu_init(void)
 	 * ROM might disable clock for SCTR,
 	 * enable the clock before timer_init.
 	 */
-	if (IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(SPL_BUILD))
 		clock_enable(CCGR_SCTR, 1);
 	/*
 	 * Init timer at very early state, because sscg pll setting
@@ -574,7 +574,7 @@ int arch_cpu_init(void)
 	 */
 	timer_init();
 
-	if (IS_ENABLED(CONFIG_SPL_BUILD)) {
+	if (CONFIG(SPL_BUILD)) {
 		clock_init();
 		imx_set_wdog_powerdown(false);
 
@@ -1355,7 +1355,7 @@ usb_modify_speed:
 
 	if (fixup_thermal_trips(blob, "cpu-thermal"))
 		printf("Failed to update cpu-thermal trip(s)");
-	if (IS_ENABLED(CONFIG_IMX8MP) &&
+	if (CONFIG(IMX8MP) &&
 	    fixup_thermal_trips(blob, "soc-thermal"))
 		printf("Failed to update soc-thermal trip(s)");
 
@@ -1416,7 +1416,7 @@ void reset_cpu(void)
 #if defined(CONFIG_ARCH_MISC_INIT)
 int arch_misc_init(void)
 {
-	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+	if (CONFIG(FSL_CAAM)) {
 		struct udevice *dev;
 		int ret;
 
@@ -1548,22 +1548,22 @@ enum env_location arch_env_get_location(enum env_operation op, int prio)
 
 	switch (dev) {
 	case USB_BOOT:
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_SPI_FLASH))
+		if (CONFIG(ENV_IS_IN_SPI_FLASH))
 			return ENVL_SPI_FLASH;
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_NAND))
+		if (CONFIG(ENV_IS_IN_NAND))
 			return ENVL_NAND;
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_MMC))
+		if (CONFIG(ENV_IS_IN_MMC))
 			return ENVL_MMC;
-		if (IS_ENABLED(CONFIG_ENV_IS_NOWHERE))
+		if (CONFIG(ENV_IS_NOWHERE))
 			return ENVL_NOWHERE;
 		return ENVL_UNKNOWN;
 	case QSPI_BOOT:
 	case SPI_NOR_BOOT:
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_SPI_FLASH))
+		if (CONFIG(ENV_IS_IN_SPI_FLASH))
 			return ENVL_SPI_FLASH;
 		return ENVL_NOWHERE;
 	case NAND_BOOT:
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_NAND))
+		if (CONFIG(ENV_IS_IN_NAND))
 			return ENVL_NAND;
 		return ENVL_NOWHERE;
 	case SD1_BOOT:
@@ -1572,11 +1572,11 @@ enum env_location arch_env_get_location(enum env_operation op, int prio)
 	case MMC1_BOOT:
 	case MMC2_BOOT:
 	case MMC3_BOOT:
-		if (IS_ENABLED(CONFIG_ENV_IS_IN_MMC))
+		if (CONFIG(ENV_IS_IN_MMC))
 			return ENVL_MMC;
-		else if (IS_ENABLED(CONFIG_ENV_IS_IN_EXT4))
+		else if (CONFIG(ENV_IS_IN_EXT4))
 			return ENVL_EXT4;
-		else if (IS_ENABLED(CONFIG_ENV_IS_IN_FAT))
+		else if (CONFIG(ENV_IS_IN_FAT))
 			return ENVL_FAT;
 		return ENVL_NOWHERE;
 	default:

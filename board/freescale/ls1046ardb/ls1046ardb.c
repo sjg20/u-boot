@@ -31,7 +31,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 struct serial_device *default_serial_console(void)
 {
-#if IS_ENABLED(CONFIG_SEMIHOSTING_SERIAL)
+#if CONFIG(SEMIHOSTING_SERIAL)
 	if (semihosting_enabled())
 		return &serial_smh_device;
 #endif

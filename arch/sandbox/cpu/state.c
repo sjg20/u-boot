@@ -383,7 +383,7 @@ bool autoboot_keyed(void)
 {
 	struct sandbox_state *state = state_get_current();
 
-	return IS_ENABLED(CONFIG_AUTOBOOT_KEYED) && state->autoboot_keyed;
+	return CONFIG(AUTOBOOT_KEYED) && state->autoboot_keyed;
 }
 
 bool autoboot_set_keyed(bool autoboot_keyed)

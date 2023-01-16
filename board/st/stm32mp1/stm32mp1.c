@@ -113,8 +113,8 @@ int checkboard(void)
 	const char *fdt_compat;
 	int fdt_compat_len;
 
-	if (IS_ENABLED(CONFIG_TFABOOT)) {
-		if (IS_ENABLED(CONFIG_STM32MP15x_STM32IMAGE))
+	if (CONFIG(TFABOOT)) {
+		if (CONFIG(STM32MP15x_STM32IMAGE))
 			mode = "trusted - stm32image";
 		else
 			mode = "trusted";
@@ -154,7 +154,7 @@ static void board_key_check(void)
 	struct gpio_desc gpio;
 	enum forced_boot_mode boot_mode = BOOT_NORMAL;
 
-	if (!IS_ENABLED(CONFIG_FASTBOOT) && !IS_ENABLED(CONFIG_CMD_STM32PROG))
+	if (!CONFIG(FASTBOOT) && !CONFIG(CMD_STM32PROG))
 		return;
 
 	node = ofnode_path("/config");
@@ -162,7 +162,7 @@ static void board_key_check(void)
 		log_debug("no /config node?\n");
 		return;
 	}
-	if (IS_ENABLED(CONFIG_FASTBOOT)) {
+	if (CONFIG(FASTBOOT)) {
 		if (gpio_request_by_name_nodev(node, "st,fastboot-gpios", 0,
 					       &gpio, GPIOD_IS_IN)) {
 			log_debug("could not find a /config/st,fastboot-gpios\n");
@@ -176,7 +176,7 @@ static void board_key_check(void)
 			dm_gpio_free(NULL, &gpio);
 		}
 	}
-	if (IS_ENABLED(CONFIG_CMD_STM32PROG)) {
+	if (CONFIG(CMD_STM32PROG)) {
 		if (gpio_request_by_name_nodev(node, "st,stm32prog-gpios", 0,
 					       &gpio, GPIOD_IS_IN)) {
 			log_debug("could not find a /config/st,stm32prog-gpios\n");
@@ -202,7 +202,7 @@ int g_dnl_board_usb_cable_connected(void)
 	struct udevice *dwc2_udc_otg;
 	int ret;
 
-	if (!IS_ENABLED(CONFIG_USB_GADGET_DWC2_OTG))
+	if (!CONFIG(USB_GADGET_DWC2_OTG))
 		return -ENODEV;
 
 	/*
@@ -234,10 +234,10 @@ int g_dnl_board_usb_cable_connected(void)
 
 int g_dnl_bind_fixup(struct usb_device_descriptor *dev, const char *name)
 {
-	if (IS_ENABLED(CONFIG_DFU_OVER_USB) &&
+	if (CONFIG(DFU_OVER_USB) &&
 	    !strcmp(name, "usb_dnl_dfu"))
 		put_unaligned(STM32MP1_G_DNL_DFU_PRODUCT_NUM, &dev->idProduct);
-	else if (IS_ENABLED(CONFIG_FASTBOOT) &&
+	else if (CONFIG(FASTBOOT) &&
 		 !strcmp(name, "usb_dnl_fastboot"))
 		put_unaligned(STM32MP1_G_DNL_FASTBOOT_PRODUCT_NUM,
 			      &dev->idProduct);
@@ -368,7 +368,7 @@ static int board_check_usb_power(void)
 	u32 nb_blink;
 	u8 i;
 
-	if (!IS_ENABLED(CONFIG_ADC))
+	if (!CONFIG(ADC))
 		return -ENODEV;
 
 	node = ofnode_path("/config");
@@ -672,7 +672,7 @@ int board_init(void)
 	 * sysconf initialisation done only when U-Boot is running in secure
 	 * done in TF-A for TFABOOT.
 	 */
-	if (IS_ENABLED(CONFIG_ARMV7_NONSEC))
+	if (CONFIG(ARMV7_NONSEC))
 		sysconf_init();
 
 	setup_led(LEDST_ON);
@@ -698,7 +698,7 @@ int board_late_init(void)
 	char dtb_name[256];
 	int buf_len;
 
-	if (IS_ENABLED(CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
+	if (CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
 		fdt_compat = ofnode_get_property(ofnode_root(), "compatible",
 						 &fdt_compat_len);
 		if (fdt_compat && fdt_compat_len) {
@@ -927,7 +927,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 	boot_device = env_get("boot_device");
 	if (!boot_device ||
 	    (strcmp(boot_device, "serial") && strcmp(boot_device, "usb")))
-		if (IS_ENABLED(CONFIG_FDT_FIXUP_PARTITIONS))
+		if (CONFIG(FDT_FIXUP_PARTITIONS))
 			fdt_fixup_mtdparts(blob, nodes, ARRAY_SIZE(nodes));
 
 	if (CONFIG(FDT_SIMPLEFB))

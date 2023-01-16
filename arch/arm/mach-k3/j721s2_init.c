@@ -51,7 +51,7 @@ static void ctrl_mmr_unlock(void)
 
 void k3_mmc_stop_clock(void)
 {
-	if (IS_ENABLED(CONFIG_K3_LOAD_SYSFW)) {
+	if (CONFIG(K3_LOAD_SYSFW)) {
 		if (spl_boot_device() == BOOT_DEVICE_MMC1) {
 			struct mmc *mmc = find_mmc_device(0);
 
@@ -66,7 +66,7 @@ void k3_mmc_stop_clock(void)
 
 void k3_mmc_restart_clock(void)
 {
-	if (IS_ENABLED(CONFIG_K3_LOAD_SYSFW)) {
+	if (CONFIG(K3_LOAD_SYSFW)) {
 		if (spl_boot_device() == BOOT_DEVICE_MMC1) {
 			struct mmc *mmc = find_mmc_device(0);
 
@@ -106,7 +106,7 @@ void board_init_f(ulong dummy)
 	/* Make all control module registers accessible */
 	ctrl_mmr_unlock();
 
-	if (IS_ENABLED(CONFIG_CPU_V7R)) {
+	if (CONFIG(CPU_V7R)) {
 		disable_linefill_optimization();
 		setup_k3_mpu_regions();
 	}
@@ -117,7 +117,7 @@ void board_init_f(ulong dummy)
 	/* Prepare console output */
 	preloader_console_init();
 
-	if (IS_ENABLED(CONFIG_K3_LOAD_SYSFW)) {
+	if (CONFIG(K3_LOAD_SYSFW)) {
 		/*
 		 * Process pinctrl for the serial0 a.k.a. WKUP_UART0 module and continue
 		 * regardless of the result of pinctrl. Do this without probing the
@@ -139,7 +139,7 @@ void board_init_f(ulong dummy)
 		k3_sysfw_loader(is_rom_loaded_sysfw(&bootdata),
 				k3_mmc_stop_clock, k3_mmc_restart_clock);
 
-		if (IS_ENABLED(CONFIG_SPL_CLK_K3)) {
+		if (CONFIG(SPL_CLK_K3)) {
 			/*
 			 * Force probe of clk_k3 driver here to ensure basic default clock
 			 * configuration is always done for enabling PM services.
@@ -155,7 +155,7 @@ void board_init_f(ulong dummy)
 	/* Output System Firmware version info */
 	k3_sysfw_print_ver();
 
-	if (IS_ENABLED(CONFIG_TARGET_J721S2_R5_EVM)) {
+	if (CONFIG(TARGET_J721S2_R5_EVM)) {
 		ret = uclass_get_device_by_name(UCLASS_MISC, "msmc", &dev);
 		if (ret)
 			panic("Probe of msmc failed: %d\n", ret);
@@ -261,7 +261,7 @@ u32 spl_boot_device(void)
 
 void release_resources_for_core_shutdown(void)
 {
-	if (IS_ENABLED(CONFIG_SYS_K3_SPL_ATF)) {
+	if (CONFIG(SYS_K3_SPL_ATF)) {
 		struct ti_sci_handle *ti_sci;
 		struct ti_sci_dev_ops *dev_ops;
 		struct ti_sci_proc_ops *proc_ops;

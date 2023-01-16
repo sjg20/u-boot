@@ -818,7 +818,7 @@ static int rk3066_dmc_probe(struct udevice *dev)
 
 	priv->pmu = syscon_get_first_range(ROCKCHIP_SYSCON_PMU);
 
-	if (IS_ENABLED(CONFIG_TPL_BUILD)) {
+	if (CONFIG(TPL_BUILD)) {
 		struct rk3066_dmc_sdram_params *plat = dev_get_plat(dev);
 		struct regmap *map;
 		struct udevice *dev_clk;
@@ -886,7 +886,7 @@ U_BOOT_DRIVER(rockchip_rk3066_dmc) = {
 	.probe		= rk3066_dmc_probe,
 	.of_match	= rk3066_dmc_ids,
 	.priv_auto	= sizeof(struct rk3066_dmc_dram_info),
-#if IS_ENABLED(CONFIG_TPL_BUILD)
+#if CONFIG(TPL_BUILD)
 	.plat_auto	= sizeof(struct rk3066_dmc_sdram_params),
 #endif
 };

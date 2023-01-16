@@ -52,7 +52,7 @@ void dram_bank_mmu_setup(int bank)
 	bool use_lmb = false;
 	enum dcache_option option;
 
-	if (IS_ENABLED(CONFIG_SPL_BUILD)) {
+	if (CONFIG(SPL_BUILD)) {
 /* STM32_SYSRAM_BASE exist only when SPL is supported */
 #ifdef CONFIG_SPL
 		start = ALIGN_DOWN(STM32_SYSRAM_BASE, MMU_SECTION_SIZE);
@@ -125,10 +125,10 @@ int mach_cpu_init(void)
 
 	boot_mode = get_bootmode();
 
-	if (IS_ENABLED(CONFIG_CMD_STM32PROG_SERIAL) &&
+	if (CONFIG(CMD_STM32PROG_SERIAL) &&
 	    (boot_mode & TAMP_BOOT_DEVICE_MASK) == BOOT_SERIAL_UART)
 		gd->flags |= GD_FLG_SILENT | GD_FLG_DISABLE_CONSOLE;
-	else if (IS_ENABLED(CONFIG_DEBUG_UART) && IS_ENABLED(CONFIG_SPL_BUILD))
+	else if (CONFIG(DEBUG_UART) && CONFIG(SPL_BUILD))
 		debug_uart_init();
 
 	return 0;
@@ -196,7 +196,7 @@ static void setup_boot_mode(void)
 		sprintf(cmd, "serial@%x", serial_addr[instance]);
 		if (uclass_get_device_by_name(UCLASS_SERIAL, cmd, &dev)) {
 			/* restore console on error */
-			if (IS_ENABLED(CONFIG_CMD_STM32PROG_SERIAL))
+			if (CONFIG(CMD_STM32PROG_SERIAL))
 				gd->flags &= ~(GD_FLG_SILENT |
 					       GD_FLG_DISABLE_CONSOLE);
 			log_err("uart%d = %s not found in device tree!\n",
@@ -208,7 +208,7 @@ static void setup_boot_mode(void)
 		env_set("boot_instance", cmd);
 
 		/* restore console on uart when not used */
-		if (IS_ENABLED(CONFIG_CMD_STM32PROG_SERIAL) && gd->cur_serial_dev != dev) {
+		if (CONFIG(CMD_STM32PROG_SERIAL) && gd->cur_serial_dev != dev) {
 			gd->flags &= ~(GD_FLG_SILENT |
 				       GD_FLG_DISABLE_CONSOLE);
 			log_info("serial boot with console enabled!\n");
@@ -296,7 +296,7 @@ __weak int setup_mac_address(void)
 	struct udevice *dev;
 	int nb_eth, nb_otp, index;
 
-	if (!IS_ENABLED(CONFIG_NET))
+	if (!CONFIG(NET))
 		return 0;
 
 	nb_eth = get_eth_nb();
@@ -396,10 +396,10 @@ static uintptr_t nt_fw_dtb __section(".data");
 void save_boot_params(unsigned long r0, unsigned long r1, unsigned long r2,
 		      unsigned long r3)
 {
-	if (IS_ENABLED(CONFIG_STM32_ECDSA_VERIFY))
+	if (CONFIG(STM32_ECDSA_VERIFY))
 		rom_api_table = r0;
 
-	if (IS_ENABLED(CONFIG_TFABOOT))
+	if (CONFIG(TFABOOT))
 		nt_fw_dtb = r2;
 
 	save_boot_params_ret();

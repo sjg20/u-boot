@@ -152,7 +152,7 @@ int show_board_info(void)
 	if (!eth_env_get_enetaddr("ethaddr", ethaddr))
 		eth_env_set_enetaddr("ethaddr", (u8 *)&tdx_eth_addr);
 
-	if (IS_ENABLED(CONFIG_TDX_CFG_BLOCK_2ND_ETHADDR) &&
+	if (CONFIG(TDX_CFG_BLOCK_2ND_ETHADDR) &&
 	    !eth_env_get_enetaddr("eth1addr", ethaddr)) {
 		/*
 		 * Secondary MAC address is allocated from block

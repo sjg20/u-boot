@@ -115,7 +115,7 @@ static inline int arasan_zynqmp_set_in_tapdelay(u32 node_id, u32 itap_delay)
 {
 	int ret;
 
-	if (IS_ENABLED(CONFIG_SPL_BUILD) || current_el() == 3) {
+	if (CONFIG(SPL_BUILD) || current_el() == 3) {
 		if (node_id == NODE_SD_0) {
 			ret = zynqmp_mmio_write(SD_ITAP_DLY, SD0_ITAPCHGWIN,
 						SD0_ITAPCHGWIN);
@@ -165,7 +165,7 @@ static inline int arasan_zynqmp_set_in_tapdelay(u32 node_id, u32 itap_delay)
 
 static inline int arasan_zynqmp_set_out_tapdelay(u32 node_id, u32 otap_delay)
 {
-	if (IS_ENABLED(CONFIG_SPL_BUILD) || current_el() == 3) {
+	if (CONFIG(SPL_BUILD) || current_el() == 3) {
 		if (node_id == NODE_SD_0)
 			return zynqmp_mmio_write(SD_OTAP_DLY,
 						 SD0_OTAPDLYSEL_MASK,
@@ -182,7 +182,7 @@ static inline int arasan_zynqmp_set_out_tapdelay(u32 node_id, u32 otap_delay)
 
 static inline int zynqmp_dll_reset(u32 node_id, u32 type)
 {
-	if (IS_ENABLED(CONFIG_SPL_BUILD) || current_el() == 3) {
+	if (CONFIG(SPL_BUILD) || current_el() == 3) {
 		if (node_id == NODE_SD_0)
 			return zynqmp_mmio_write(SD_DLL_CTRL, SD0_DLL_RST,
 						 type == PM_DLL_RESET_ASSERT ?
@@ -598,7 +598,7 @@ static int arasan_sdhci_set_tapdelay(struct sdhci_host *host)
 
 	dev_dbg(dev, "%s, host:%s, mode:%d\n", __func__, host->name, timing);
 
-	if (IS_ENABLED(CONFIG_ARCH_ZYNQMP) &&
+	if (CONFIG(ARCH_ZYNQMP) &&
 	    device_is_compatible(dev, "xlnx,zynqmp-8.9a")) {
 		ret = sdhci_zynqmp_sampleclk_set_phase(host, iclk_phase);
 		if (ret)
@@ -607,7 +607,7 @@ static int arasan_sdhci_set_tapdelay(struct sdhci_host *host)
 		ret = sdhci_zynqmp_sdcardclk_set_phase(host, oclk_phase);
 		if (ret)
 			return ret;
-	} else if (IS_ENABLED(CONFIG_ARCH_VERSAL) &&
+	} else if (CONFIG(ARCH_VERSAL) &&
 		   device_is_compatible(dev, "xlnx,versal-8.9a")) {
 		ret = sdhci_versal_sampleclk_set_phase(host, iclk_phase);
 		if (ret)
@@ -657,7 +657,7 @@ static void arasan_dt_parse_clk_phases(struct udevice *dev)
 	struct arasan_sdhci_clk_data *clk_data = &priv->clk_data;
 	int i;
 
-	if (IS_ENABLED(CONFIG_ARCH_ZYNQMP) &&
+	if (CONFIG(ARCH_ZYNQMP) &&
 	    device_is_compatible(dev, "xlnx,zynqmp-8.9a")) {
 		for (i = 0; i <= MMC_TIMING_MMC_HS400; i++) {
 			clk_data->clk_phase_in[i] = zynqmp_iclk_phases[i];
@@ -670,7 +670,7 @@ static void arasan_dt_parse_clk_phases(struct udevice *dev)
 		}
 	}
 
-	if (IS_ENABLED(CONFIG_ARCH_VERSAL) &&
+	if (CONFIG(ARCH_VERSAL) &&
 	    device_is_compatible(dev, "xlnx,versal-8.9a")) {
 		for (i = 0; i <= MMC_TIMING_MMC_HS400; i++) {
 			clk_data->clk_phase_in[i] = versal_iclk_phases[i];
@@ -877,7 +877,7 @@ static int arasan_sdhci_probe(struct udevice *dev)
 	 * causing sd card timeout error. Workaround this by adding a wait for
 	 * 1000msec till the card detect state gets stable.
 	 */
-	if (IS_ENABLED(CONFIG_ARCH_ZYNQMP) || IS_ENABLED(CONFIG_ARCH_VERSAL)) {
+	if (CONFIG(ARCH_ZYNQMP) || CONFIG(ARCH_VERSAL)) {
 		u32 timeout = 1000000;
 
 		while (((sdhci_readl(host, SDHCI_PRESENT_STATE) &

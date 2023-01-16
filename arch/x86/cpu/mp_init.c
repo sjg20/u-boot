@@ -621,7 +621,7 @@ static int run_ap_work(struct mp_callback *callback, struct udevice *bsp,
 	ulong start;
 	int i;
 
-	if (!IS_ENABLED(CONFIG_SMP_AP_WORK)) {
+	if (!CONFIG(SMP_AP_WORK)) {
 		printf("APs already parked. CONFIG_SMP_AP_WORK not enabled\n");
 		return -ENOTSUPP;
 	}
@@ -677,7 +677,7 @@ static int ap_wait_for_instruction(struct udevice *cpu, void *unused)
 	struct mp_callback lcb;
 	struct mp_callback **per_cpu_slot;
 
-	if (!IS_ENABLED(CONFIG_SMP_AP_WORK))
+	if (!CONFIG(SMP_AP_WORK))
 		return 0;
 
 	per_cpu_slot = &ap_callbacks[dev_seq(cpu)];
@@ -740,7 +740,7 @@ int mp_run_on_cpus(int cpu_select, mp_run_func func, void *arg)
 		func(arg);
 	}
 
-	if (!IS_ENABLED(CONFIG_SMP_AP_WORK) ||
+	if (!CONFIG(SMP_AP_WORK) ||
 	    !(gd->flags & GD_FLG_SMP_READY)) {
 		/* Allow use of this function on the BSP only */
 		if (cpu_select == MP_SELECT_BSP || !cpu_select)
@@ -812,7 +812,7 @@ int mp_next_cpu(int cpu_select, int prev_cpu)
 	int bsp;
 
 	/* If we selected the BSP or a particular single CPU, we are done */
-	if (!IS_ENABLED(CONFIG_SMP_AP_WORK) || cpu_select == MP_SELECT_BSP ||
+	if (!CONFIG(SMP_AP_WORK) || cpu_select == MP_SELECT_BSP ||
 	    cpu_select >= 0)
 		return -EFBIG;
 
@@ -842,7 +842,7 @@ int mp_init(void)
 	struct udevice *cpu;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_QFW)) {
+	if (CONFIG(QFW)) {
 		ret = qemu_cpu_fixup();
 		if (ret)
 			return ret;

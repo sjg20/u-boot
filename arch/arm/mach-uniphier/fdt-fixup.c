@@ -24,7 +24,7 @@ static int uniphier_ld20_fdt_mem_rsv(void *fdt, struct bd_info *bd)
 	const unsigned long rsv_size = 64;
 	int i, ret;
 
-	if (!IS_ENABLED(CONFIG_ARCH_UNIPHIER_LD20) ||
+	if (!CONFIG(ARCH_UNIPHIER_LD20) ||
 	    uniphier_get_soc_id() != UNIPHIER_LD20_ID)
 		return 0;
 

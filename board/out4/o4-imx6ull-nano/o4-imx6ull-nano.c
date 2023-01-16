@@ -24,7 +24,7 @@ int board_early_init_f(void)
 
 static int setup_fec_clock(void)
 {
-	if (IS_ENABLED(CONFIG_FEC_MXC) && !IS_ENABLED(CONFIG_CLK_IMX6Q)) {
+	if (CONFIG(FEC_MXC) && !CONFIG(CLK_IMX6Q)) {
 		struct iomuxc *const iomuxc_regs = (struct iomuxc *)IOMUXC_BASE_ADDR;
 		int ret;
 
@@ -39,7 +39,7 @@ static int setup_fec_clock(void)
 		if (ret)
 			return ret;
 
-		if (!IS_ENABLED(CONFIG_EV_IMX280_NANO_X_MB)) {
+		if (!CONFIG(EV_IMX280_NANO_X_MB)) {
 			/*
 			 * Use 50M anatop loopback REF_CLK2 for ENET2,
 			 * clear gpr1[14], set gpr1[18].
@@ -68,10 +68,10 @@ int board_init(void)
 
 int board_late_init(void)
 {
-	if (IS_ENABLED(CONFIG_CMD_BMODE))
+	if (CONFIG(CMD_BMODE))
 		add_board_boot_modes(NULL);
 
-	if (IS_ENABLED(CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
+	if (CONFIG(ENV_VARS_UBOOT_RUNTIME_CONFIG)) {
 		const char *model;
 
 		model = fdt_getprop(gd->fdt_blob, 0, "model", NULL);

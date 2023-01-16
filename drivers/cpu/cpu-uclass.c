@@ -129,7 +129,7 @@ static int uclass_cpu_init(struct uclass *uc)
 
 static int uclass_cpu_post_bind(struct udevice *dev)
 {
-	if (IS_ENABLED(CONFIG_NEEDS_MANUAL_RELOC) &&
+	if (CONFIG(NEEDS_MANUAL_RELOC) &&
 	    (gd->flags & GD_FLG_RELOC)) {
 		struct cpu_ops *ops = cpu_get_ops(dev);
 		static int reloc_done;

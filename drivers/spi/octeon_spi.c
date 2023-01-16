@@ -150,7 +150,7 @@ static int octeon_spi_claim_bus(struct udevice *dev)
 	if (!OCTEON_SPI_CS_VALID(spi_chip_select(dev)))
 		return -EINVAL;
 
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX2))
+	if (CONFIG(ARCH_OCTEONTX2))
 		board_acquire_flash_arb(true);
 
 	mpi_cfg = readq(base + MPI_CFG);
@@ -181,7 +181,7 @@ static int octeon_spi_release_bus(struct udevice *dev)
 	if (!OCTEON_SPI_CS_VALID(spi_chip_select(dev)))
 		return -EINVAL;
 
-	if (IS_ENABLED(CONFIG_ARCH_OCTEONTX2))
+	if (CONFIG(ARCH_OCTEONTX2))
 		board_acquire_flash_arb(false);
 
 	mpi_cfg = readq(base + MPI_CFG);

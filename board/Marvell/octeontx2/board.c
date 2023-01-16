@@ -70,7 +70,7 @@ void board_quiesce_devices(void)
 	if (ret)
 		printf("couldn't remove rvu pf devices\n");
 
-	if (IS_ENABLED(CONFIG_OCTEONTX2_CGX_INTF)) {
+	if (CONFIG(OCTEONTX2_CGX_INTF)) {
 		/* Bring down all cgx lmac links */
 		cgx_intf_shutdown();
 	}
@@ -175,7 +175,7 @@ int board_late_init(void)
 	val = env_get_hex("disable_ooo", 0);
 	smc_configure_ooo(val);
 
-	if (IS_ENABLED(CONFIG_NET_OCTEONTX2))
+	if (CONFIG(NET_OCTEONTX2))
 		board_late_probe_devices();
 
 	if (save_env)

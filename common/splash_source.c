@@ -73,7 +73,7 @@ static int splash_mmc_read_raw(u32 bmp_load_addr, struct splash_location *locati
 	lbaint_t blkcnt;
 	int ret, n;
 
-	if (!IS_ENABLED(CONFIG_CMD_MMC)) {
+	if (!CONFIG(CMD_MMC)) {
 		debug("%s: mmc support not available\n", __func__);
 		return -ENOSYS;
 	}
@@ -208,7 +208,7 @@ static inline int splash_init_sata(void)
 
 static int splash_init_virtio(void)
 {
-	if (!IS_ENABLED(CONFIG_VIRTIO)) {
+	if (!CONFIG(VIRTIO)) {
 		printf("Cannot load splash image: no virtio support\n");
 		return -ENOSYS;
 	} else {

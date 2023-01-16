@@ -140,9 +140,9 @@ void board_debug_uart_init(void)
 	struct rk3399_pmugrf_regs * const pmugrf = (void *)PMUGRF_BASE;
 	struct rockchip_gpio_regs * const gpio = (void *)GPIO0_BASE;
 
-	if (IS_ENABLED(CONFIG_SPL_BUILD) &&
-	    (IS_ENABLED(CONFIG_TARGET_CHROMEBOOK_BOB) ||
-	     IS_ENABLED(CONFIG_TARGET_CHROMEBOOK_KEVIN))) {
+	if (CONFIG(SPL_BUILD) &&
+	    (CONFIG(TARGET_CHROMEBOOK_BOB) ||
+	     CONFIG(TARGET_CHROMEBOOK_KEVIN))) {
 		rk_setreg(&grf->io_vsel, 1 << 0);
 
 		/*
@@ -227,7 +227,7 @@ static void rk3399_force_power_on_reset(void)
 	ofnode node;
 	struct gpio_desc sysreset_gpio;
 
-	if (!IS_ENABLED(CONFIG_SPL_GPIO)) {
+	if (!CONFIG(SPL_GPIO)) {
 		debug("%s: trying to force a power-on reset but no GPIO "
 		      "support in SPL!\n", __func__);
 		return;
@@ -258,7 +258,7 @@ void spl_board_init(void)
 {
 	led_setup();
 
-	if (IS_ENABLED(CONFIG_SPL_GPIO)) {
+	if (CONFIG(SPL_GPIO)) {
 		struct rockchip_cru *cru = rockchip_get_cru();
 
 		/*
@@ -281,7 +281,7 @@ void spl_board_init(void)
 			rk3399_force_power_on_reset();
 	}
 
-	if (IS_ENABLED(CONFIG_SPL_DM_REGULATOR)) {
+	if (CONFIG(SPL_DM_REGULATOR)) {
 		/*
 		 * Turning the eMMC and SPI back on (if disabled via the Qseven
 		 * BIOS_ENABLE) signal is done through a always-on regulator).

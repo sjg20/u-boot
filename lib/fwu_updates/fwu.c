@@ -660,7 +660,7 @@ static int fwu_boottime_checks(void *ctx, struct event *event)
 	struct fwu_mdata mdata = { 0 };
 
 	/* Don't have boot time checks on sandbox */
-	if (IS_ENABLED(CONFIG_SANDBOX)) {
+	if (CONFIG(SANDBOX)) {
 		boottime_check = 1;
 		return 0;
 	}

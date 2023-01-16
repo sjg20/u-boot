@@ -26,10 +26,10 @@
 #include <asm/arch-tegra/gpu.h>
 #include <asm/arch-tegra/usb.h>
 #include <asm/arch-tegra/xusb-padctl.h>
-#if IS_ENABLED(CONFIG_TEGRA_CLKRST)
+#if CONFIG(TEGRA_CLKRST)
 #include <asm/arch/clock.h>
 #endif
-#if IS_ENABLED(CONFIG_TEGRA_PINCTRL)
+#if CONFIG(TEGRA_PINCTRL)
 #include <asm/arch/funcmux.h>
 #include <asm/arch/pinmux.h>
 #endif
@@ -118,7 +118,7 @@ int board_init(void)
 	__maybe_unused int board_id;
 
 	/* Do clocks and UART first so that printf() works */
-#if IS_ENABLED(CONFIG_TEGRA_CLKRST)
+#if CONFIG(TEGRA_CLKRST)
 	clock_init();
 	clock_verify();
 #endif
@@ -198,7 +198,7 @@ void gpio_early_init(void) __attribute__((weak, alias("__gpio_early_init")));
 
 int board_early_init_f(void)
 {
-#if IS_ENABLED(CONFIG_TEGRA_CLKRST)
+#if CONFIG(TEGRA_CLKRST)
 	if (!clock_early_init_done())
 		clock_early_init();
 #endif
@@ -212,7 +212,7 @@ int board_early_init_f(void)
 #endif
 
 	/* Do any special system timer/TSC setup */
-#if IS_ENABLED(CONFIG_TEGRA_CLKRST)
+#if CONFIG(TEGRA_CLKRST)
 #  if defined(CONFIG_TEGRA_SUPPORT_NON_SECURE)
 	if (!tegra_cpu_is_non_secure())
 #  endif

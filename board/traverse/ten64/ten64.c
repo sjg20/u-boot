@@ -148,7 +148,7 @@ void detail_board_ddr_info(void)
 
 void board_quiesce_devices(void)
 {
-	if (IS_ENABLED(CONFIG_FSL_MC_ENET))
+	if (CONFIG(FSL_MC_ENET))
 		fsl_mc_ldpaa_exit(gd->bd);
 }
 

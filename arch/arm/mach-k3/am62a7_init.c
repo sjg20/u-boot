@@ -26,7 +26,7 @@ static void store_boot_info_from_rom(void)
 {
 	bootindex = *(u32 *)(CONFIG_SYS_K3_BOOT_PARAM_TABLE_INDEX);
 
-	if (IS_ENABLED(CONFIG_CPU_V7R)) {
+	if (CONFIG(CPU_V7R)) {
 		memcpy(&bootdata, (uintptr_t *)ROM_ENTENDED_BOOT_DATA_INFO,
 		       sizeof(struct rom_extended_boot_data));
 	}
@@ -139,7 +139,7 @@ void board_init_f(ulong dummy)
 	 * Force probe of clk_k3 driver here to ensure basic default clock
 	 * configuration is always done.
 	 */
-	if (IS_ENABLED(CONFIG_SPL_CLK_K3)) {
+	if (CONFIG(SPL_CLK_K3)) {
 		ret = uclass_get_device_by_driver(UCLASS_CLK,
 						  DM_DRIVER_GET(ti_clk),
 						  &dev);

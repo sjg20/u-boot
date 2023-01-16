@@ -110,7 +110,7 @@ bool soc_detection(void)
 
 int board_early_init_f(void)
 {
-	if (IS_ENABLED(CONFIG_DEBUG_UART)) {
+	if (CONFIG(DEBUG_UART)) {
 		/* Uart debug for sure */
 		debug_uart_init();
 		puts("Debug uart enabled\n"); /* or printch() */

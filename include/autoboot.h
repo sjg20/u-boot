@@ -36,7 +36,7 @@ bool autoboot_set_keyed(bool autoboot_keyed);
 static inline bool autoboot_keyed(void)
 {
 	/* There is no runtime flag, so just use the CONFIG */
-	return IS_ENABLED(CONFIG_AUTOBOOT_KEYED);
+	return CONFIG(AUTOBOOT_KEYED);
 }
 
 static inline bool autoboot_set_keyed(bool autoboot_keyed)

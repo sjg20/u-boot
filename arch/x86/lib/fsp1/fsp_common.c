@@ -49,18 +49,18 @@ int arch_fsp_init(void)
 	int boot_mode = BOOT_FULL_CONFIG;
 	int prev_sleep_state;
 
-	if (IS_ENABLED(CONFIG_HAVE_ACPI_RESUME)) {
+	if (CONFIG(HAVE_ACPI_RESUME)) {
 		prev_sleep_state = chipset_prev_sleep_state();
 		gd->arch.prev_sleep_state = prev_sleep_state;
 	}
 
 	if (!gd->arch.hob_list) {
-		if (IS_ENABLED(CONFIG_ENABLE_MRC_CACHE))
+		if (CONFIG(ENABLE_MRC_CACHE))
 			nvs = fsp_prepare_mrc_cache();
 		else
 			nvs = NULL;
 
-		if (IS_ENABLED(CONFIG_HAVE_ACPI_RESUME) &&
+		if (CONFIG(HAVE_ACPI_RESUME) &&
 		    prev_sleep_state == ACPI_S3) {
 			if (nvs == NULL) {
 				/* If waking from S3 and no cache then */

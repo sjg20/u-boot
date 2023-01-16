@@ -15,7 +15,7 @@ DECLARE_GLOBAL_DATA_PTR;
 int init_cache_f_r(void)
 {
 	bool do_mtrr = CONFIG(X86_32BIT_INIT) ||
-		 IS_ENABLED(CONFIG_FSP_VERSION2);
+		 CONFIG(FSP_VERSION2);
 	int ret;
 
 	/*
@@ -30,9 +30,9 @@ int init_cache_f_r(void)
 	 * Note: if there is an SPL, then it has already set up MTRRs so we
 	 *	don't need to do that here
 	 */
-	do_mtrr &= !IS_ENABLED(CONFIG_SPL) &&
-		!IS_ENABLED(CONFIG_FSP_VERSION1) &&
-		!IS_ENABLED(CONFIG_SYS_SLIMBOOTLOADER);
+	do_mtrr &= !CONFIG(SPL) &&
+		!CONFIG(FSP_VERSION1) &&
+		!CONFIG(SYS_SLIMBOOTLOADER);
 
 	if (do_mtrr) {
 		ret = mtrr_commit(false);

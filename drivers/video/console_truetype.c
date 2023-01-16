@@ -297,7 +297,7 @@ static int console_truetype_putc_xy(struct udevice *dev, uint x, uint y,
 	for (row = 0; row < height; row++) {
 		switch (vid_priv->bpix) {
 		case VIDEO_BPP8:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP8)) {
+			if (CONFIG(VIDEO_BPP8)) {
 				u8 *dst = line + xoff;
 				int i;
 

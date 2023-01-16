@@ -494,7 +494,7 @@ static char *pointer(const char *fmt, char *buf, char *end, void *ptr,
 		flags |= SPECIAL;
 		/* Fallthrough */
 	case 'I':
-		if (IS_ENABLED(CONFIG_IPV6) && fmt[1] == '6')
+		if (CONFIG(IPV6) && fmt[1] == '6')
 			return ip6_addr_string(buf, end, ptr, field_width,
 					       precision, flags);
 		if (fmt[1] == '4')

@@ -1217,12 +1217,12 @@ static void *fdt_find_separate(void)
 {
 	void *fdt_blob = NULL;
 
-	if (IS_ENABLED(CONFIG_SANDBOX))
+	if (CONFIG(SANDBOX))
 		return NULL;
 
 #ifdef CONFIG_SPL_BUILD
 	/* FDT is at end of BSS unless it is in a different memory region */
-	if (IS_ENABLED(CONFIG_SPL_SEPARATE_BSS))
+	if (CONFIG(SPL_SEPARATE_BSS))
 		fdt_blob = (ulong *)&_image_binary_end;
 	else
 		fdt_blob = (ulong *)&__bss_end;
@@ -1636,7 +1636,7 @@ int fdtdec_setup(void)
 	int ret;
 
 	/* The devicetree is typically appended to U-Boot */
-	if (IS_ENABLED(CONFIG_OF_SEPARATE)) {
+	if (CONFIG(OF_SEPARATE)) {
 		gd->fdt_blob = fdt_find_separate();
 		gd->fdt_src = FDTSRC_SEPARATE;
 	} else { /* embed dtb in ELF file for testing / development */
@@ -1645,7 +1645,7 @@ int fdtdec_setup(void)
 	}
 
 	/* Allow the board to override the fdt address. */
-	if (IS_ENABLED(CONFIG_OF_BOARD)) {
+	if (CONFIG(OF_BOARD)) {
 		gd->fdt_blob = board_fdt_blob_setup(&ret);
 		if (ret)
 			return ret;
@@ -1653,7 +1653,7 @@ int fdtdec_setup(void)
 	}
 
 	/* Allow the early environment to override the fdt address */
-	if (!IS_ENABLED(CONFIG_SPL_BUILD)) {
+	if (!CONFIG(SPL_BUILD)) {
 		ulong addr;
 
 		addr = env_get_hex("fdtcontroladdr", 0);

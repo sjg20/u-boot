@@ -73,7 +73,7 @@ static void set_core_data(struct udevice *dev)
 	}
 }
 
-#if IS_ENABLED(CONFIG_IMX_SCU_THERMAL)
+#if CONFIG(IMX_SCU_THERMAL)
 static int cpu_imx_get_temp(struct cpu_imx_plat *plat)
 {
 	struct udevice *thermal_dev;
@@ -112,7 +112,7 @@ int cpu_imx_get_desc(const struct udevice *dev, char *buf, int size)
 	ret = snprintf(buf, size, "NXP i.MX8%s Rev%s %s at %u MHz",
 		       plat->type, plat->rev, plat->name, plat->freq_mhz);
 
-	if (IS_ENABLED(CONFIG_IMX_SCU_THERMAL)) {
+	if (CONFIG(IMX_SCU_THERMAL)) {
 		temp = cpu_imx_get_temp(plat);
 		buf = buf + ret;
 		size = size - ret;

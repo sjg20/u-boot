@@ -472,7 +472,7 @@ int x86_cpu_init_f(void)
 	setup_pci_ram_top();
 
 	/* Set up the i8254 timer if required */
-	if (IS_ENABLED(CONFIG_I8254_TIMER))
+	if (CONFIG(I8254_TIMER))
 		i8254_init();
 
 	return 0;

@@ -82,7 +82,7 @@ int board_early_init_f(void)
 	sc_err_t scierr = 0;
 
 	/* When start u-boot in XEN VM, directly return */
-	/* if (IS_ENABLED(CONFIG_XEN)) */
+	/* if (CONFIG(XEN)) */
 		/* return 0; */
 
 	/* ipcHndl = gd->arch.ipc_channel_handle; */
@@ -109,7 +109,7 @@ int board_early_init_f(void)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_FSL_ESDHC_IMX)
+#if CONFIG(FSL_ESDHC_IMX)
 
 #define USDHC1_CD_GPIO	IMX_GPIO_NR(5, 22)
 #define USDHC2_CD_GPIO	IMX_GPIO_NR(4, 12)
@@ -243,7 +243,7 @@ int board_mmc_getcd(struct mmc *mmc)
 
 #endif /* CONFIG_FSL_ESDHC_IMX */
 
-#if (IS_ENABLED(CONFIG_FEC_MXC))
+#if (CONFIG(FEC_MXC))
 
 #include <miiphy.h>
 
@@ -352,14 +352,14 @@ int checkboard(void)
 
 int board_init(void)
 {
-	if (IS_ENABLED(CONFIG_XEN))
+	if (CONFIG(XEN))
 		return 0;
 
 #ifdef CONFIG_MXC_GPIO
 	board_gpio_init();
 #endif
 
-#if (IS_ENABLED(CONFIG_FEC_MXC))
+#if (CONFIG(FEC_MXC))
 	setup_fec();
 #endif
 
@@ -389,7 +389,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 int board_mmc_get_env_dev(int devno)
 {
 	/* Use EMMC */
-	if (IS_ENABLED(CONFIG_XEN))
+	if (CONFIG(XEN))
 		return 0;
 
 	return devno;
@@ -398,7 +398,7 @@ int board_mmc_get_env_dev(int devno)
 int mmc_map_to_kernel_blk(int dev_no)
 {
 	/* Use EMMC */
-	if (IS_ENABLED(CONFIG_XEN))
+	if (CONFIG(XEN))
 		return 0;
 
 	return dev_no;

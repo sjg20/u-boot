@@ -10,15 +10,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if IS_ENABLED(CONFIG_LZO)
+#if CONFIG(LZO)
 #include <linux/lzo.h>
 #endif
 
-#if IS_ENABLED(CONFIG_ZLIB)
+#if CONFIG(ZLIB)
 #include <u-boot/zlib.h>
 #endif
 
-#if IS_ENABLED(CONFIG_ZSTD)
+#if CONFIG(ZSTD)
 #include <linux/zstd.h>
 #endif
 
@@ -30,15 +30,15 @@ int sqfs_decompressor_init(struct squashfs_ctxt *ctxt)
 	u16 comp_type = get_unaligned_le16(&ctxt->sblk->compression);
 
 	switch (comp_type) {
-#if IS_ENABLED(CONFIG_LZO)
+#if CONFIG(LZO)
 	case SQFS_COMP_LZO:
 		break;
 #endif
-#if IS_ENABLED(CONFIG_ZLIB)
+#if CONFIG(ZLIB)
 	case SQFS_COMP_ZLIB:
 		break;
 #endif
-#if IS_ENABLED(CONFIG_ZSTD)
+#if CONFIG(ZSTD)
 	case SQFS_COMP_ZSTD:
 		ctxt->zstd_workspace = malloc(ZSTD_DCtxWorkspaceBound());
 		if (!ctxt->zstd_workspace)
@@ -58,15 +58,15 @@ void sqfs_decompressor_cleanup(struct squashfs_ctxt *ctxt)
 	u16 comp_type = get_unaligned_le16(&ctxt->sblk->compression);
 
 	switch (comp_type) {
-#if IS_ENABLED(CONFIG_LZO)
+#if CONFIG(LZO)
 	case SQFS_COMP_LZO:
 		break;
 #endif
-#if IS_ENABLED(CONFIG_ZLIB)
+#if CONFIG(ZLIB)
 	case SQFS_COMP_ZLIB:
 		break;
 #endif
-#if IS_ENABLED(CONFIG_ZSTD)
+#if CONFIG(ZSTD)
 	case SQFS_COMP_ZSTD:
 		free(ctxt->zstd_workspace);
 		break;
@@ -74,7 +74,7 @@ void sqfs_decompressor_cleanup(struct squashfs_ctxt *ctxt)
 	}
 }
 
-#if IS_ENABLED(CONFIG_ZLIB)
+#if CONFIG(ZLIB)
 static void zlib_decompression_status(int ret)
 {
 	switch (ret) {
@@ -91,7 +91,7 @@ static void zlib_decompression_status(int ret)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_ZSTD)
+#if CONFIG(ZSTD)
 static int sqfs_zstd_decompress(struct squashfs_ctxt *ctxt, void *dest,
 				unsigned long dest_len, void *source, u32 src_len)
 {
@@ -114,7 +114,7 @@ int sqfs_decompress(struct squashfs_ctxt *ctxt, void *dest,
 	int ret = 0;
 
 	switch (comp_type) {
-#if IS_ENABLED(CONFIG_LZO)
+#if CONFIG(LZO)
 	case SQFS_COMP_LZO: {
 		size_t lzo_dest_len = *dest_len;
 		ret = lzo1x_decompress_safe(source, src_len, dest, &lzo_dest_len);
@@ -126,7 +126,7 @@ int sqfs_decompress(struct squashfs_ctxt *ctxt, void *dest,
 		break;
 	}
 #endif
-#if IS_ENABLED(CONFIG_ZLIB)
+#if CONFIG(ZLIB)
 	case SQFS_COMP_ZLIB:
 		ret = uncompress(dest, dest_len, source, src_len);
 		if (ret) {
@@ -136,7 +136,7 @@ int sqfs_decompress(struct squashfs_ctxt *ctxt, void *dest,
 
 		break;
 #endif
-#if IS_ENABLED(CONFIG_ZSTD)
+#if CONFIG(ZSTD)
 	case SQFS_COMP_ZSTD:
 		ret = sqfs_zstd_decompress(ctxt, dest, *dest_len, source, src_len);
 		if (ret) {

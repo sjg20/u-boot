@@ -147,7 +147,7 @@ int print_hex_dump(const char *prefix_str, int prefix_type, int rowsize,
 		switch (prefix_type) {
 		case DUMP_PREFIX_ADDRESS:
 			printf("%s%0*lx: %s\n", prefix_str,
-			       IS_ENABLED(CONFIG_PHYS_64BIT) ? 16 : 8,
+			       CONFIG(PHYS_64BIT) ? 16 : 8,
 			       (ulong)map_to_sysmem(ptr) + i, linebuf);
 			break;
 		case DUMP_PREFIX_OFFSET:
@@ -157,7 +157,7 @@ int print_hex_dump(const char *prefix_str, int prefix_type, int rowsize,
 			printf("%s%s\n", prefix_str, linebuf);
 			break;
 		}
-		if (!IS_ENABLED(CONFIG_SPL_BUILD) && ctrlc())
+		if (!CONFIG(SPL_BUILD) && ctrlc())
 			return -EINTR;
 	}
 

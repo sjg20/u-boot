@@ -27,7 +27,7 @@ static int bootstd_of_to_plat(struct udevice *dev)
 	struct bootstd_priv *priv = dev_get_priv(dev);
 	int ret;
 
-	if (IS_ENABLED(CONFIG_BOOTSTD_FULL)) {
+	if (CONFIG(BOOTSTD_FULL)) {
 		/* Don't check errors since livetree and flattree are different */
 		ret = dev_read_string_list(dev, "filename-prefixes",
 					   &priv->prefixes);

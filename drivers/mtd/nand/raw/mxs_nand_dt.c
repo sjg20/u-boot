@@ -99,8 +99,8 @@ static int mxs_nand_dt_probe(struct udevice *dev)
 
 	info->use_minimum_ecc = dev_read_bool(dev, "fsl,use-minimum-ecc");
 
-	if (IS_ENABLED(CONFIG_CLK) &&
-	    (IS_ENABLED(CONFIG_IMX8) || IS_ENABLED(CONFIG_IMX8M))) {
+	if (CONFIG(CLK) &&
+	    (CONFIG(IMX8) || CONFIG(IMX8M))) {
 		/* Assigned clock already set clock */
 		struct clk gpmi_clk;
 
@@ -118,7 +118,7 @@ static int mxs_nand_dt_probe(struct udevice *dev)
 			return ret;
 		}
 
-		if (IS_ENABLED(CONFIG_IMX8)) {
+		if (CONFIG(IMX8)) {
 			ret = clk_get_by_name(dev, "gpmi_apb", &gpmi_clk);
 			if (ret < 0) {
 				debug("Can't get gpmi_apb clk: %d\n", ret);

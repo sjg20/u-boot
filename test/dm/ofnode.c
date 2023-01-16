@@ -773,7 +773,7 @@ static int dm_test_ofnode_root_mult(struct unit_test_state *uts)
 	ofnode node;
 
 	/* skip this test if multiple FDTs are not supported */
-	if (!IS_ENABLED(CONFIG_OFNODE_MULTI_TREE))
+	if (!CONFIG(OFNODE_MULTI_TREE))
 		return -EAGAIN;
 
 	ut_assertok(make_ofnode_fdt(uts, fdt, sizeof(fdt), 0));

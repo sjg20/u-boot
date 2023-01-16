@@ -722,7 +722,7 @@ void spl_board_init(void)
 	}
 }
 
-#if IS_ENABLED(CONFIG_OF_BOARD_FIXUP) || IS_ENABLED(CONFIG_OF_BOARD_SETUP)
+#if CONFIG(OF_BOARD_FIXUP) || CONFIG(OF_BOARD_SETUP)
 
 static void disable_sata_node(void *blob)
 {
@@ -916,7 +916,7 @@ static int fixup_mcu_gpio_in_eth_wan_node(void *blob)
 
 #endif
 
-#if IS_ENABLED(CONFIG_OF_BOARD_FIXUP)
+#if CONFIG(OF_BOARD_FIXUP)
 int board_fix_fdt(void *blob)
 {
 	u16 val;

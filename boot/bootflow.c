@@ -123,7 +123,7 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
 	    BOOTFLOWF_SHOW) {
 		if (dev)
 			printf("Scanning bootdev '%s':\n", dev->name);
-		else if (IS_ENABLED(CONFIG_BOOTMETH_GLOBAL) &&
+		else if (CONFIG(BOOTMETH_GLOBAL) &&
 			 ucp->flags & BOOTMETHF_GLOBAL)
 			printf("Scanning global bootmeth '%s':\n",
 			       iter->method->name);
@@ -160,7 +160,7 @@ static int iter_incr(struct bootflow_iter *iter)
 		 * If we have finished scanning the global bootmeths, start the
 		 * normal bootdev scan
 		 */
-		if (IS_ENABLED(CONFIG_BOOTMETH_GLOBAL) && global) {
+		if (CONFIG(BOOTMETH_GLOBAL) && global) {
 			iter->num_methods = iter->first_glob_method;
 			iter->doing_global = false;
 
@@ -229,7 +229,7 @@ static int bootflow_check(struct bootflow_iter *iter, struct bootflow *bflow)
 	struct udevice *dev;
 	int ret;
 
-	if (IS_ENABLED(CONFIG_BOOTMETH_GLOBAL) && iter->doing_global) {
+	if (CONFIG(BOOTMETH_GLOBAL) && iter->doing_global) {
 		bootflow_iter_set_dev(iter, NULL);
 		ret = bootmeth_get_bootflow(iter->method, bflow);
 		if (ret)
@@ -284,7 +284,7 @@ int bootflow_scan_bootdev(struct udevice *dev, struct bootflow_iter *iter,
 
 	/* Find the first bootmeth (there must be at least one!) */
 	iter->method = iter->method_order[iter->cur_method];
-	if (!IS_ENABLED(CONFIG_BOOTMETH_GLOBAL) || !iter->doing_global)
+	if (!CONFIG(BOOTMETH_GLOBAL) || !iter->doing_global)
 		bootflow_iter_set_dev(iter, dev);
 
 	ret = bootflow_check(iter, bflow);
@@ -393,7 +393,7 @@ int bootflow_run_boot(struct bootflow_iter *iter, struct bootflow *bflow)
 	printf("** Booting bootflow '%s' with %s\n", bflow->name,
 	       bflow->method->name);
 	ret = bootflow_boot(bflow);
-	if (!IS_ENABLED(CONFIG_BOOTSTD_FULL)) {
+	if (!CONFIG(BOOTSTD_FULL)) {
 		printf("Boot failed (err=%d)\n", ret);
 		return ret;
 	}

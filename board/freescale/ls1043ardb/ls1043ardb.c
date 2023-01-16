@@ -362,7 +362,7 @@ void nand_fixup(void)
 	if ((csor & CSOR_NAND_SPRZ_MASK) == CSOR_NAND_SPRZ_64)
 		csor = (csor & ~(CSOR_NAND_SPRZ_MASK)) | CSOR_NAND_SPRZ_224;
 
-	if (IS_ENABLED(CONFIG_TFABOOT)) {
+	if (CONFIG(TFABOOT)) {
 		u8 cfg_rcw_src1, cfg_rcw_src2;
 		u16 cfg_rcw_src;
 
@@ -379,14 +379,14 @@ void nand_fixup(void)
 		else
 			printf("Invalid setting\n");
 	} else {
-		if (IS_ENABLED(CONFIG_NAND_BOOT))
+		if (CONFIG(NAND_BOOT))
 			set_ifc_csor(IFC_CS0, csor);
 		else
 			set_ifc_csor(IFC_CS1, csor);
 	}
 }
 
-#if IS_ENABLED(CONFIG_OF_BOARD_FIXUP)
+#if CONFIG(OF_BOARD_FIXUP)
 int board_fix_fdt(void *blob)
 {
 	/* nand driver fix up */

@@ -155,7 +155,7 @@ int acpi_create_gnvs(struct acpi_global_nvs *gnvs)
 	}
 
 	/* determine whether internal uart is on */
-	if (IS_ENABLED(CONFIG_INTERNAL_UART))
+	if (CONFIG(INTERNAL_UART))
 		gnvs->iuart_en = 1;
 	else
 		gnvs->iuart_en = 0;

@@ -679,9 +679,9 @@ static inline int log_init(void)
 static inline int log_get_default_format(void)
 {
 	return BIT(LOGF_MSG) |
-	       (IS_ENABLED(CONFIG_LOGF_FILE) ? BIT(LOGF_FILE) : 0) |
-	       (IS_ENABLED(CONFIG_LOGF_LINE) ? BIT(LOGF_LINE) : 0) |
-	       (IS_ENABLED(CONFIG_LOGF_FUNC) ? BIT(LOGF_FUNC) : 0);
+	       (CONFIG(LOGF_FILE) ? BIT(LOGF_FILE) : 0) |
+	       (CONFIG(LOGF_LINE) ? BIT(LOGF_LINE) : 0) |
+	       (CONFIG(LOGF_FUNC) ? BIT(LOGF_FUNC) : 0);
 }
 
 #endif

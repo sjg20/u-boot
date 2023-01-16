@@ -26,12 +26,12 @@ static void run_preboot_environment_command(void)
 	if (p != NULL) {
 		int prev = 0;
 
-		if (IS_ENABLED(CONFIG_AUTOBOOT_KEYED))
+		if (CONFIG(AUTOBOOT_KEYED))
 			prev = disable_ctrlc(1); /* disable Ctrl-C checking */
 
 		run_command_list(p, -1, 0);
 
-		if (IS_ENABLED(CONFIG_AUTOBOOT_KEYED))
+		if (CONFIG(AUTOBOOT_KEYED))
 			disable_ctrlc(prev);	/* restore Ctrl-C checking */
 	}
 }
@@ -43,18 +43,18 @@ void main_loop(void)
 
 	bootstage_mark_name(BOOTSTAGE_ID_MAIN_LOOP, "main_loop");
 
-	if (IS_ENABLED(CONFIG_VERSION_VARIABLE))
+	if (CONFIG(VERSION_VARIABLE))
 		env_set("ver", version_string);  /* set version variable */
 
 	cli_init();
 
-	if (IS_ENABLED(CONFIG_USE_PREBOOT))
+	if (CONFIG(USE_PREBOOT))
 		run_preboot_environment_command();
 
-	if (IS_ENABLED(CONFIG_UPDATE_TFTP))
+	if (CONFIG(UPDATE_TFTP))
 		update_tftp(0UL, NULL, NULL);
 
-	if (IS_ENABLED(CONFIG_EFI_CAPSULE_ON_DISK_EARLY)) {
+	if (CONFIG(EFI_CAPSULE_ON_DISK_EARLY)) {
 		/* efi_init_early() already called */
 		if (efi_init_obj_list() == EFI_SUCCESS)
 			efi_launch_capsules();

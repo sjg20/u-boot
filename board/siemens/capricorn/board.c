@@ -212,7 +212,7 @@ int setup_gpr_fec(void)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_FEC_MXC)
+#if CONFIG(FEC_MXC)
 #include <miiphy.h>
 int board_phy_config(struct phy_device *phydev)
 {

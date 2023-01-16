@@ -231,7 +231,7 @@ void get_board_serial(struct tag_serialnr *serialnr)
 
 int arch_cpu_init(void)
 {
-	if (IS_ENABLED(CONFIG_SPL_BUILD)) {
+	if (CONFIG(SPL_BUILD)) {
 		/* Disable wdog */
 		init_wdog();
 

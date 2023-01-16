@@ -59,7 +59,7 @@ static void clk_add_map(struct ti_clk_data *data, struct clk *clk,
 }
 
 static const struct soc_attr ti_k3_soc_clk_data[] = {
-#if IS_ENABLED(CONFIG_SOC_K3_J721E)
+#if CONFIG(SOC_K3_J721E)
 	{
 		.family = "J721E",
 		.data = &j721e_clk_platdata,

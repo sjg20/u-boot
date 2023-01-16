@@ -1641,7 +1641,7 @@ __weak int serdes_misc_init(void)
 
 int arch_misc_init(void)
 {
-	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+	if (CONFIG(FSL_CAAM)) {
 		struct udevice *dev;
 		int ret;
 

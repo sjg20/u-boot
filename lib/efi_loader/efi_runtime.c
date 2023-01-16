@@ -516,7 +516,7 @@ void efi_runtime_detach(void)
 	efi_runtime_services.reset_system = efi_reset_system;
 	efi_runtime_services.get_time = efi_get_time;
 	efi_runtime_services.set_time = efi_set_time;
-	if (IS_ENABLED(CONFIG_EFI_RUNTIME_UPDATE_CAPSULE)) {
+	if (CONFIG(EFI_RUNTIME_UPDATE_CAPSULE)) {
 		/* won't support at runtime */
 		efi_runtime_services.update_capsule =
 				efi_update_capsule_unsupported;

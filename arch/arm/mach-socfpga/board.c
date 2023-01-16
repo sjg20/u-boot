@@ -102,23 +102,23 @@ __weak int board_fit_config_name_match(const char *name)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_FIT_IMAGE_POST_PROCESS)
+#if CONFIG(FIT_IMAGE_POST_PROCESS)
 void board_fit_image_post_process(const void *fit, int node, void **p_image,
 				  size_t *p_size)
 {
-	if (IS_ENABLED(CONFIG_SOCFPGA_SECURE_VAB_AUTH)) {
+	if (CONFIG(SOCFPGA_SECURE_VAB_AUTH)) {
 		if (socfpga_vendor_authentication(p_image, p_size))
 			hang();
 	}
 }
 #endif
 
-#if !IS_ENABLED(CONFIG_SPL_BUILD) && IS_ENABLED(CONFIG_FIT)
+#if !CONFIG(SPL_BUILD) && CONFIG(FIT)
 void board_prep_linux(struct bootm_headers *images)
 {
 	if (!images->fit_uname_cfg) {
-		if (IS_ENABLED(CONFIG_SOCFPGA_SECURE_VAB_AUTH) &&
-		    !IS_ENABLED(CONFIG_SOCFPGA_SECURE_VAB_AUTH_ALLOW_NON_FIT_IMAGE)) {
+		if (CONFIG(SOCFPGA_SECURE_VAB_AUTH) &&
+		    !CONFIG(SOCFPGA_SECURE_VAB_AUTH_ALLOW_NON_FIT_IMAGE)) {
 			/*
 			 * Ensure the OS is always booted from FIT and with
 			 * VAB signed certificate
@@ -132,7 +132,7 @@ void board_prep_linux(struct bootm_headers *images)
 		debug("images->ft_addr = 0x%08lx\n", (ulong)images->ft_addr);
 	}
 
-	if (IS_ENABLED(CONFIG_CADENCE_QSPI)) {
+	if (CONFIG(CADENCE_QSPI)) {
 		if (env_get("linux_qspi_enable"))
 			run_command(env_get("linux_qspi_enable"), 0);
 	}

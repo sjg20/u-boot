@@ -118,14 +118,14 @@ static uint esdhc_xfertyp(struct mmc_cmd *cmd, struct mmc_data *data)
 
 	if (data) {
 		xfertyp |= XFERTYP_DPSEL;
-		if (!IS_ENABLED(CONFIG_SYS_FSL_ESDHC_USE_PIO) &&
+		if (!CONFIG(SYS_FSL_ESDHC_USE_PIO) &&
 		    cmd->cmdidx != MMC_CMD_SEND_TUNING_BLOCK &&
 		    cmd->cmdidx != MMC_CMD_SEND_TUNING_BLOCK_HS200)
 			xfertyp |= XFERTYP_DMAEN;
 		if (data->blocks > 1) {
 			xfertyp |= XFERTYP_MSBSEL;
 			xfertyp |= XFERTYP_BCEN;
-			if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_ESDHC111))
+			if (CONFIG(SYS_FSL_ERRATUM_ESDHC111))
 				xfertyp |= XFERTYP_AC12EN;
 		}
 
@@ -248,7 +248,7 @@ static void esdhc_setup_dma(struct fsl_esdhc_priv *priv, struct mmc_data *data)
 	priv->dma_addr = dma_map_single(buf, trans_bytes,
 					mmc_get_dma_dir(data));
 
-	if (IS_ENABLED(CONFIG_FSL_ESDHC_SUPPORT_ADMA2) &&
+	if (CONFIG(FSL_ESDHC_SUPPORT_ADMA2) &&
 	    priv->adma_desc_table) {
 		debug("Using ADMA2\n");
 		/* prefer ADMA2 if it is available */
@@ -257,7 +257,7 @@ static void esdhc_setup_dma(struct fsl_esdhc_priv *priv, struct mmc_data *data)
 
 		adma_addr = virt_to_phys(priv->adma_desc_table);
 		esdhc_write32(&regs->adsaddrl, lower_32_bits(adma_addr));
-		if (IS_ENABLED(CONFIG_DMA_ADDR_T_64BIT))
+		if (CONFIG(DMA_ADDR_T_64BIT))
 			esdhc_write32(&regs->adsaddrh, upper_32_bits(adma_addr));
 		esdhc_clrsetbits32(&regs->proctl, PROCTL_DMAS_MASK,
 				   PROCTL_DMAS_ADMA2);
@@ -285,7 +285,7 @@ static int esdhc_setup_data(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 		return -EINVAL;
 	}
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ESDHC_USE_PIO))
+	if (CONFIG(SYS_FSL_ESDHC_USE_PIO))
 		esdhc_setup_watermark_level(priv, data);
 	else
 		esdhc_setup_dma(priv, data);
@@ -321,7 +321,7 @@ static int esdhc_setup_data(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 	if (timeout < 0)
 		timeout = 0;
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_ESDHC_A001) &&
+	if (CONFIG(SYS_FSL_ERRATUM_ESDHC_A001) &&
 	    (timeout == 4 || timeout == 8 || timeout == 12))
 		timeout++;
 
@@ -347,7 +347,7 @@ static int esdhc_send_cmd_common(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 	struct fsl_esdhc *regs = priv->esdhc_regs;
 	unsigned long start;
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_ESDHC111) &&
+	if (CONFIG(SYS_FSL_ERRATUM_ESDHC111) &&
 	    cmd->cmdidx == MMC_CMD_STOP_TRANSMISSION)
 		return 0;
 
@@ -440,7 +440,7 @@ static int esdhc_send_cmd_common(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 
 	/* Wait until all of the blocks are transferred */
 	if (data) {
-		if (IS_ENABLED(CONFIG_SYS_FSL_ESDHC_USE_PIO)) {
+		if (CONFIG(SYS_FSL_ESDHC_USE_PIO)) {
 			esdhc_pio_read_write(priv, data);
 		} else {
 			flags = DATA_COMPLETE;
@@ -515,7 +515,7 @@ static void set_sysctl(struct fsl_esdhc_priv *priv, struct mmc *mmc, uint clock)
 	while (sdhc_clk / (div * pre_div) > clock && div < 16)
 		div++;
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_A011334) &&
+	if (CONFIG(SYS_FSL_ERRATUM_A011334) &&
 	    clock == 200000000 && mmc->selected_mode == MMC_HS_400) {
 		u32 div_ratio = pre_div * div;
 
@@ -780,7 +780,7 @@ static int esdhc_init_common(struct fsl_esdhc_priv *priv, struct mmc *mmc)
 	/* Set timout to the maximum value */
 	esdhc_clrsetbits32(&regs->sysctl, SYSCTL_TIMEOUT_MASK, 14 << 16);
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ESDHC_UNRELIABLE_PULSE_DETECTION_WORKAROUND))
+	if (CONFIG(SYS_FSL_ESDHC_UNRELIABLE_PULSE_DETECTION_WORKAROUND))
 		esdhc_clrbits32(&regs->dllcfg1, DLL_PD_PULSE_STRETCH_SEL);
 
 	return 0;
@@ -817,10 +817,10 @@ static void fsl_esdhc_get_cfg_common(struct fsl_esdhc_priv *priv,
 	 * if future board does not support 3.3V.
 	 */
 	caps |= HOSTCAPBLT_VS33;
-	if (IS_ENABLED(CONFIG_FSL_ESDHC_VS33_NOT_SUPPORT))
+	if (CONFIG(FSL_ESDHC_VS33_NOT_SUPPORT))
 		caps &= ~HOSTCAPBLT_VS33;
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_ESDHC135))
+	if (CONFIG(SYS_FSL_ERRATUM_ESDHC135))
 		caps &= ~(HOSTCAPBLT_SRS | HOSTCAPBLT_VS18 | HOSTCAPBLT_VS30);
 	if (caps & HOSTCAPBLT_VS18)
 		cfg->voltages |= MMC_VDD_165_195;
@@ -842,7 +842,7 @@ static void fsl_esdhc_get_cfg_common(struct fsl_esdhc_priv *priv,
 #ifdef CONFIG_OF_LIBFDT
 __weak int esdhc_status_fixup(void *blob, const char *compat)
 {
-	if (IS_ENABLED(CONFIG_FSL_ESDHC_PIN_MUX) && !hwconfig("esdhc")) {
+	if (CONFIG(FSL_ESDHC_PIN_MUX) && !hwconfig("esdhc")) {
 		do_fixup_by_compat(blob, compat, "status", "disabled",
 				sizeof("disabled"), 1);
 		return 1;
@@ -885,7 +885,7 @@ void fdt_fixup_esdhc(void *blob, struct bd_info *bd)
 	if (esdhc_status_fixup(blob, compat))
 		return;
 
-	if (IS_ENABLED(CONFIG_FSL_ESDHC_33V_IO_RELIABILITY_WORKAROUND))
+	if (CONFIG(FSL_ESDHC_33V_IO_RELIABILITY_WORKAROUND))
 		esdhc_disable_for_no_card(blob);
 
 	do_fixup_by_compat_u32(blob, compat, "clock-frequency",
@@ -968,7 +968,7 @@ int fsl_esdhc_initialize(struct bd_info *bis, struct fsl_esdhc_cfg *cfg)
 		printf("No max bus width provided. Fallback to 1-bit mode.\n");
 	}
 
-	if (IS_ENABLED(CONFIG_ESDHC_DETECT_8_BIT_QUIRK))
+	if (CONFIG(ESDHC_DETECT_8_BIT_QUIRK))
 		mmc_cfg->host_caps &= ~MMC_MODE_8BIT;
 
 	mmc_cfg->ops = &esdhc_ops;
@@ -1018,7 +1018,7 @@ static int fsl_esdhc_probe(struct udevice *dev)
 #endif
 	priv->dev = dev;
 
-	if (IS_ENABLED(CONFIG_FSL_ESDHC_SUPPORT_ADMA2)) {
+	if (CONFIG(FSL_ESDHC_SUPPORT_ADMA2)) {
 		/*
 		 * Only newer eSDHC controllers can do ADMA2 if the ADMA flag
 		 * is set in the host capabilities register.
@@ -1059,7 +1059,7 @@ static int fsl_esdhc_probe(struct udevice *dev)
 	if (ret)
 		return ret;
 
-	if (IS_ENABLED(CONFIG_FSL_ESDHC_33V_IO_RELIABILITY_WORKAROUND) &&
+	if (CONFIG(FSL_ESDHC_33V_IO_RELIABILITY_WORKAROUND) &&
 	    !fsl_esdhc_get_cd(dev))
 		esdhc_setbits32(&priv->esdhc_regs->proctl, PROCTL_VOLT_SEL);
 
@@ -1112,7 +1112,7 @@ static int fsl_esdhc_execute_tuning(struct udevice *dev, uint32_t opcode)
 	u32 val, irqstaten;
 	int i;
 
-	if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_A011334) &&
+	if (CONFIG(SYS_FSL_ERRATUM_A011334) &&
 	    plat->mmc.hs400_tuning)
 		set_sysctl(priv, mmc, mmc->clock);
 

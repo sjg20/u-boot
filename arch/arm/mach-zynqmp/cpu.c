@@ -186,7 +186,7 @@ int zynqmp_mmio_write(const u32 address,
 		      const u32 mask,
 		      const u32 value)
 {
-	if (IS_ENABLED(CONFIG_SPL_BUILD) || current_el() == 3)
+	if (CONFIG(SPL_BUILD) || current_el() == 3)
 		return zynqmp_mmio_rawwrite(address, mask, value);
 #if defined(CONFIG_ZYNQMP_FIRMWARE)
 	else
@@ -204,7 +204,7 @@ int zynqmp_mmio_read(const u32 address, u32 *value)
 	if (!value)
 		return ret;
 
-	if (IS_ENABLED(CONFIG_SPL_BUILD) || current_el() == 3) {
+	if (CONFIG(SPL_BUILD) || current_el() == 3) {
 		ret = zynqmp_mmio_rawread(address, value);
 	}
 #if defined(CONFIG_ZYNQMP_FIRMWARE)

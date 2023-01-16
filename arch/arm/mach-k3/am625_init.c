@@ -138,7 +138,7 @@ void board_init_f(ulong dummy)
 	 * Force probe of clk_k3 driver here to ensure basic default clock
 	 * configuration is always done.
 	 */
-	if (IS_ENABLED(CONFIG_SPL_CLK_K3)) {
+	if (CONFIG(SPL_CLK_K3)) {
 		ret = uclass_get_device_by_driver(UCLASS_CLK,
 						  DM_DRIVER_GET(ti_clk),
 						  &dev);
@@ -149,7 +149,7 @@ void board_init_f(ulong dummy)
 	/* Output System Firmware version info */
 	k3_sysfw_print_ver();
 
-	if (IS_ENABLED(CONFIG_ESM_K3)) {
+	if (CONFIG(ESM_K3)) {
 		/* Probe/configure ESM0 */
 		ret = uclass_get_device_by_name(UCLASS_MISC, "esm@420000", &dev);
 		if (ret)

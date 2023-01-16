@@ -12,7 +12,7 @@ static u32 opp_voltage_mv __section(".data");
 
 void board_vddcore_init(u32 voltage_mv)
 {
-	if (IS_ENABLED(CONFIG_PMIC_STPMIC1) && CONFIG(POWER))
+	if (CONFIG(PMIC_STPMIC1) && CONFIG(POWER))
 		opp_voltage_mv = voltage_mv;
 }
 

@@ -66,7 +66,7 @@ void board_init_f_r(void)
 
 u32 spl_boot_device(void)
 {
-	return IS_ENABLED(CONFIG_CHROMEOS_VBOOT) ? BOOT_DEVICE_CROS_VBOOT :
+	return CONFIG(CHROMEOS_VBOOT) ? BOOT_DEVICE_CROS_VBOOT :
 		BOOT_DEVICE_SPI_MMAP;
 }
 

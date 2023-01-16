@@ -72,7 +72,7 @@ static void lpsc_write(u32 val, struct ti_lpsc *lpsc, u32 reg)
 }
 
 static const struct soc_attr ti_k3_soc_pd_data[] = {
-#if IS_ENABLED(CONFIG_SOC_K3_J721E)
+#if CONFIG(SOC_K3_J721E)
 	{
 		.family = "J721E",
 		.data = &j721e_pd_platdata,

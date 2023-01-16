@@ -223,7 +223,7 @@ static void setup_serial(void)
 #ifdef CONFIG_BOARD_LATE_INIT
 int board_late_init(void)
 {
-	if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
+	if (CONFIG(TI_I2C_BOARD_DETECT)) {
 		struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
 
 		setup_board_eeprom_env();

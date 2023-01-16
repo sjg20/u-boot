@@ -57,7 +57,7 @@ struct checksum_algo *image_get_checksum_algo(const char *full_name)
 	int i;
 	const char *name;
 
-	if (IS_ENABLED(CONFIG_NEEDS_MANUAL_RELOC)) {
+	if (CONFIG(NEEDS_MANUAL_RELOC)) {
 		static bool done;
 
 		if (!done) {
@@ -87,7 +87,7 @@ struct crypto_algo *image_get_crypto_algo(const char *full_name)
 	struct crypto_algo *crypto, *end;
 	const char *name;
 
-	if (IS_ENABLED(CONFIG_NEEDS_MANUAL_RELOC)) {
+	if (CONFIG(NEEDS_MANUAL_RELOC)) {
 		static bool done;
 
 		if (!done) {

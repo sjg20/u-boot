@@ -464,7 +464,7 @@ int arch_cpu_init(void)
 	 */
 	mvebu_mbus_probe(NULL, 0);
 
-	if (IS_ENABLED(CONFIG_ARMADA_XP)) {
+	if (CONFIG(ARMADA_XP)) {
 		/*
 		 * Now the SDRAM access windows can be reconfigured using
 		 * the information in the SDRAM scratch pad registers
@@ -478,7 +478,7 @@ int arch_cpu_init(void)
 	 */
 	mvebu_mbus_probe(windows, ARRAY_SIZE(windows));
 
-	if (IS_ENABLED(CONFIG_ARMADA_XP)) {
+	if (CONFIG(ARMADA_XP)) {
 		/* Enable GBE0, GBE1, LCD and NFC PUP */
 		clrsetbits_le32(ARMADA_XP_PUP_ENABLE, 0,
 				GE0_PUP_EN | GE1_PUP_EN | LCD_PUP_EN |
@@ -502,9 +502,9 @@ u32 mvebu_get_nand_clock(void)
 {
 	u32 reg;
 
-	if (IS_ENABLED(CONFIG_ARMADA_38X))
+	if (CONFIG(ARMADA_38X))
 		reg = MVEBU_DFX_DIV_CLK_CTRL(1);
-	else if (IS_ENABLED(CONFIG_ARMADA_MSYS))
+	else if (CONFIG(ARMADA_MSYS))
 		reg = MVEBU_DFX_DIV_CLK_CTRL(8);
 	else
 		reg = MVEBU_CORE_DIV_CLK_CTRL(1);
@@ -548,7 +548,7 @@ static void ahci_mvebu_mbus_config(void __iomem *base)
 	int i;
 
 	/* mbus is not initialized in SPL; keep the ROM settings */
-	if (IS_ENABLED(CONFIG_SPL_BUILD))
+	if (CONFIG(SPL_BUILD))
 		return;
 
 	dram = mvebu_mbus_dram_info();
@@ -650,7 +650,7 @@ void enable_caches(void)
 	 * ethernet driver (mvpp2). So lets keep the d-cache disabled
 	 * until this is solved.
 	 */
-	if (!IS_ENABLED(CONFIG_ARMADA_375)) {
+	if (!CONFIG(ARMADA_375)) {
 		/* Enable D-cache. I-cache is already enabled in start.S */
 		dcache_enable();
 	}
@@ -667,10 +667,10 @@ void v7_outer_cache_enable(void)
 	 * For now L2 cache will be enabled only for Armada XP and Armada 38x.
 	 * It can be enabled also for other SoCs after testing that it works fine.
 	 */
-	if (!IS_ENABLED(CONFIG_ARMADA_XP) && !IS_ENABLED(CONFIG_ARMADA_38X))
+	if (!CONFIG(ARMADA_XP) && !CONFIG(ARMADA_38X))
 		return;
 
-	if (IS_ENABLED(CONFIG_ARMADA_XP)) {
+	if (CONFIG(ARMADA_XP)) {
 		u32 u;
 
 		/*

@@ -165,7 +165,7 @@ static void ns16550_writeb(struct ns16550 *port, int offset, int value)
 	offset *= 1 << plat->reg_shift;
 	addr = (unsigned char *)plat->base + offset + plat->reg_offset;
 
-	if (IS_ENABLED(CONFIG_NS16550_DYNAMIC))
+	if (CONFIG(NS16550_DYNAMIC))
 		serial_out_dynamic(plat, addr, value);
 	else
 		serial_out_shift(addr, plat->reg_shift, value);
@@ -179,7 +179,7 @@ static int ns16550_readb(struct ns16550 *port, int offset)
 	offset *= 1 << plat->reg_shift;
 	addr = (unsigned char *)plat->base + offset + plat->reg_offset;
 
-	if (IS_ENABLED(CONFIG_NS16550_DYNAMIC))
+	if (CONFIG(NS16550_DYNAMIC))
 		return serial_in_dynamic(plat, addr);
 	else
 		return serial_in_shift(addr, plat->reg_shift);

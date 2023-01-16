@@ -28,7 +28,7 @@ static int lib_crypt(struct unit_test_state *uts)
 	ut_assertf(equals != 1,
 		   "crypt_compare password hash matched but should not\n");
 
-	if (IS_ENABLED(CONFIG_CRYPT_PW_SHA256)) {
+	if (CONFIG(CRYPT_PW_SHA256)) {
 		err = crypt_compare("$5$", "password", &equals);
 		ut_assertf(err == 0, "crypt-sha256 not successful\n");
 		ut_assertf(
@@ -43,7 +43,7 @@ static int lib_crypt(struct unit_test_state *uts)
 			   "crypt-sha256 password hash didn't match\n");
 	}
 	equals = 0;
-	if (IS_ENABLED(CONFIG_CRYPT_PW_SHA512)) {
+	if (CONFIG(CRYPT_PW_SHA512)) {
 		err = crypt_compare("$6$", "password", &equals);
 		ut_assertf(err == 0, "crypt-sha512 not successful\n");
 		ut_assertf(

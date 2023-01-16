@@ -166,7 +166,7 @@
 	_PAD_CFG_STRUCT(pad, PAD_RESET(rst) | PAD_FUNC(func), PAD_PULL(pull) | \
 		PAD_IOSSTATE(TX_LAST_RXE))
 
-#if IS_ENABLED(CONFIG_INTEL_GPIO_PADCFG_PADTOL)
+#if CONFIG(INTEL_GPIO_PADCFG_PADTOL)
 /*
  * Native 1.8V tolerant pad, only applies to some pads like I2C/I2S. Not
  * applicable to all SOCs. Refer EDS.
