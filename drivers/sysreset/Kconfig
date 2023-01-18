@@ -195,4 +195,25 @@ config SYSRESET_MPC83XX
 
 endif
 
+config SPL_SYSRESET_CMD_RESET
+	bool "sysreset implementation of the reset command (SPL)"
+	depends on SPL_SYSRESET
+	default y
+	help
+	  Enable sysreset implementation of the reset command.
+
+config TPL_SYSRESET_CMD_RESET
+	bool "sysreset implementation of the reset command (TPL)"
+	depends on TPL_SYSRESET
+	default y
+	help
+	  Enable sysreset implementation of the reset command.
+
+config VPL_SYSRESET_CMD_RESET
+	bool "sysreset implementation of the reset command (VPL)"
+	depends on VPL_SYSRESET
+	default y
+	help
+	  Enable sysreset implementation of the reset command.
+
 endmenu
