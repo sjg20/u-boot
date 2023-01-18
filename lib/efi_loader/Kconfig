@@ -41,6 +41,9 @@ config CMD_BOOTEFI_BOOTMGR
 	  via UEFI variables Boot####, BootOrder, and BootNext. This enables the
 	  'bootefi bootmgr' command.
 
+config SPL_CMD_BOOTEFI_BOOTMGR
+	def_bool n # UEFI Boot Manager (SPL)
+
 choice
 	prompt "Store for non-volatile UEFI variables"
 	default EFI_VARIABLE_FILE_STORE

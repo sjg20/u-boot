@@ -614,6 +614,21 @@ config EVENT
 
 	  See doc/develop/event.rst for more information.
 
+config SPL_EVENT
+	bool "General-purpose event-handling mechanism in SPL"
+	depends on EVENT && SPL
+	help
+	  This enables sending and processing of events, to allow interested
+	  parties to be alerted when something happens. This is an attempt to
+	  stem the flow of weak functions, hooks, functions in board_f.c
+	  and board_r.c and the Kconfig options below.
+
+	  See doc/develop/event.rst for more information.
+
+config SPL_EVENT_DYNAMIC
+	def_bool n # Support event registration at runtime (SPL_
+	depends on SPL_EVENT
+
 if EVENT
 
 config EVENT_DYNAMIC
@@ -794,6 +809,10 @@ config AVB_VERIFY
 	    * Helpers to process strings in order to build OS bootargs.
 	    * Helpers to access MMC, similar to drivers/fastboot/fb_mmc.c.
 	    * Helpers to alloc/init/free avb ops.
+
+config SPL_AVB_VERIFY
+	def_bool n # Build Android Verified Boot operations (SPL)
+	depends on SPL
 
 if AVB_VERIFY
 

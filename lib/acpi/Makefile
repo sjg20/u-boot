@@ -9,15 +9,15 @@ obj-y += acpi_writer.o
 
 # With QEMU the ACPI tables come from there, not from U-Boot
 ifndef CONFIG_QEMU
-obj-y += base.o
-obj-y += csrt.o
-obj-y += mcfg.o
+obj-$(CONFIG_ACPI) += base.o
+obj-$(CONFIG_ACPI) += csrt.o
+obj-$(CONFIG_ACPI) += mcfg.o
 
 # Sandbox does not build a .asl file
 ifndef CONFIG_SANDBOX
-obj-y += dsdt.o
+obj-$(CONFIG_ACPI) += dsdt.o
 endif
 
-obj-y += facs.o
-obj-y += ssdt.o
+obj-$(CONFIG_ACPI) += facs.o
+obj-$(CONFIG_ACPI) += ssdt.o
 endif

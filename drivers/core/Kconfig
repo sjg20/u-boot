@@ -274,6 +274,19 @@ config DEVRES
 	  non-managed variants.  For example, devres_alloc() to kzalloc(),
 	  devm_kmalloc() to kmalloc(), etc.
 
+config SPL_DEVRES
+	bool "Managed device resources in SPL"
+	depends on SPL_DM
+	help
+	  This option enables the Managed device resources core support.
+	  Device resources managed by the devres framework are automatically
+	  released whether initialization fails half-way or the device gets
+	  detached.
+
+	  If this option is disabled, devres functions fall back to
+	  non-managed variants.  For example, devres_alloc() to kzalloc(),
+	  devm_kmalloc() to kmalloc(), etc.
+
 config DEBUG_DEVRES
 	bool "Managed device resources debugging functions"
 	depends on DEVRES
@@ -437,6 +450,13 @@ config OFNODE_MULTI_TREE_MAX
 	  Sets the maximum number of device trees which can be used with the
 	  ofnode interface when using flat trees (OF_LIVE). This is only
 	  available in U-Boot proper and only after relocation.
+
+config ACPI
+	bool "Support ACPI"
+	default y
+
+config SPL_ACPI
+	def_bool n # Support ACPI (SPL)
 
 config ACPIGEN
 	bool "Support ACPI table generation in driver model"

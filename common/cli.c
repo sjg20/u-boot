@@ -21,7 +21,7 @@
 #include <asm/global_data.h>
 #include <dm/ofnode.h>
 
-#ifdef CONFIG_CMDLINE
+#if CONFIG_IS_ENABLED(CMDLINE)
 /*
  * Run a command using the selected parser.
  *
