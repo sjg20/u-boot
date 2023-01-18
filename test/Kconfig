@@ -26,10 +26,14 @@ config SPL_UNIT_TEST
 config UT_LIB
 	bool "Unit tests for library functions"
 	depends on UNIT_TEST
-	default y if !SANDBOX_VPL
+	default y if !SUPPORT_VPL
 	help
 	  Enables the 'ut lib' command which tests library functions like
 	  memcat(), memcyp(), memmove() and ASN1 compiler/decoder.
+
+config SPL_UT_LIB
+	def_bool n  # Unit tests for library functions (SPL)
+	depends on SPL_UNIT_TEST
 
 if UT_LIB
 

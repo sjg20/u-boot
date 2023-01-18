@@ -231,6 +231,10 @@ config PMIC_QCOM
 
 	Driver binding info: doc/device-tree-bindings/pmic/qcom,spmi-pmic.txt
 
+config SPL_PMIC_QCOM
+	def_bool n  # Enable Driver Model for Qualcomm generic PMIC (SPL)
+	depends on SPL
+
 config PMIC_RK8XX
 	bool "Enable support for Rockchip PMIC RK8XX"
 	---help---

@@ -78,7 +78,7 @@ static struct cmd_tbl cmd_ut_sub[] = {
 #ifdef CONFIG_UT_OVERLAY
 	U_BOOT_CMD_MKENT(overlay, CONFIG_SYS_MAXARGS, 1, do_ut_overlay, "", ""),
 #endif
-#ifdef CONFIG_UT_LIB
+#if CONFIG(UT_LIB)
 	U_BOOT_CMD_MKENT(lib, CONFIG_SYS_MAXARGS, 1, do_ut_lib, "", ""),
 #endif
 #ifdef CONFIG_UT_LOG

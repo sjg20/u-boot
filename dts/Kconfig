@@ -105,6 +105,13 @@ config OF_EMBED
 
 endchoice
 
+config SPL_OF_SEPARATE
+	bool "Separate DTB for DT control"
+	help
+	  If this option is enabled, the device tree will be built and
+	  placed as a separate u-boot.dtb file alongside the U-Boot image.
+
+
 config OF_BOARD
 	bool "Provided by the board (e.g a previous loader) at runtime"
 	default y if SANDBOX || OF_HAS_PRIOR_STAGE
@@ -118,6 +125,16 @@ config OF_BOARD
 
 	  Note: Boards which use this to handle a device tree passed from an
 	  earlier stage should enable OF_HAS_PRIOR_STAGE.
+
+config SPL_OF_BOARD
+	bool "Provided by the board (e.g a previous loader) at runtime (SPL)"
+	depends on SPL_SANDBOX
+	default y
+
+config VPL_OF_BOARD
+	bool "Provided by the board (e.g a previous loader) at runtime (SPL)"
+	depends on VPL_SANDBOX
+	default y
 
 config OF_HAS_PRIOR_STAGE
 	bool

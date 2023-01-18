@@ -17,7 +17,7 @@ obj-$(CONFIG_CMDLINE) += command_ut.o
 obj-$(CONFIG_UT_COMPRESSION) += compression.o
 obj-y += dm/
 obj-$(CONFIG_FUZZ) += fuzz/
-ifndef CONFIG_SANDBOX_VPL
+ifndef CONFIG_SUPPORT_VPL
 obj-$(CONFIG_UNIT_TEST) += lib/
 endif
 obj-$(CONFIG_CMDLINE) += print_ut.o

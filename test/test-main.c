@@ -45,13 +45,13 @@ enum fdtchk_t {
  */
 static enum fdtchk_t fdt_action(void)
 {
+	/* For sandbox SPL builds, do nothing */
+	if (CONFIG(SANDBOX) && IS_ENABLED(CONFIG_SPL_BUILD))
+		return FDTCHK_NONE;
+
 	/* Do a copy for sandbox (but only the U-Boot build, not SPL) */
 	if (CONFIG(SANDBOX))
 		return FDTCHK_COPY;
-
-	/* For sandbox SPL builds, do nothing */
-	if (CONFIG(SANDBOX))
-		return FDTCHK_NONE;
 
 	/* For all other boards, do a checksum */
 	return FDTCHK_CHECKSUM;
