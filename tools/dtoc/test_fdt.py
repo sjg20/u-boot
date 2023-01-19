@@ -135,7 +135,7 @@ class TestFdt(unittest.TestCase):
         self.assertEqual(['boolval', 'bytearray', 'byteval', 'compatible',
                           'int64val', 'intarray', 'intval', 'longbytearray',
                           'maybe-empty-int', 'notstring', 'stringarray',
-                          'stringval', 'u-boot,dm-pre-reloc'],
+                          'stringval', 'bootph-all'],
                          sorted(props.keys()))
 
     def test_check_error(self):
