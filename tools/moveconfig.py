@@ -1593,6 +1593,50 @@ def prefix_config(cfg):
     return op + cfg
 
 
+def scan_makefiles(fnames):
+    for fname, rest in fnames:
+        print('fname', fname, rest)
+
+        # handle ifdef and indef
+
+
+def do_scan_source(path):
+    print(f'Scanning source in {path}')
+    args = ['git', 'grep', '-E', 'IS_ENABLED|CONFIG']
+    with subprocess.Popen(args, stdout=subprocess.PIPE) as proc:
+        out, err = proc.communicate()
+    lines = out.splitlines()
+    re_fname = re.compile('^([^:]*):(.*)')
+    src_list = []
+    mk_list = []
+    for line in lines:
+        linestr = line.decode('utf-8')
+        m_fname = re_fname.search(linestr)
+        if not m_fname:
+            continue
+        fname, rest = m_fname.groups()
+        dirname, leaf = os.path.split(fname)
+        root, ext = os.path.splitext(leaf)
+        if ext in ['.c', '.h', '.S', '.lds', '.dts', '.dtsi', '.asl', '.cfg',
+                   '.env', '.tmpl']:
+            src_list.append([fname, rest])
+        elif 'Makefile' in root or ext == '.mk':
+            mk_list.append([fname, rest])
+        elif ext in ['.yml', '.sh', '.py', '.awk', '.pl', '.rst', '', '.sed']:
+            pass
+        elif 'Kconfig' in root or 'Kbuild' in root:
+            pass
+        elif 'README' in root:
+            pass
+        elif dirname in ['configs']:
+            pass
+        elif dirname.startswith('doc') or dirname.startswith('scripts/kconfig'):
+            pass
+        else:
+            print(fname)
+    scan_makefiles(mk_list)
+    #process_source(src_list)
+
 def main():
     try:
         cpu_count = multiprocessing.cpu_count()
@@ -1642,6 +1686,8 @@ doc/develop/moveconfig.rst for documentation.'''
                       help='force sync by savedefconfig')
     parser.add_argument('-S', '--spl', action='store_true', default=False,
                       help='parse config options defined for SPL build')
+    parser.add_argument('--scan-source', action='store_true', default=False,
+                      help='scan source for uses of CONFIG options')
     parser.add_argument('-t', '--test', action='store_true', default=False,
                       help='run unit tests')
     parser.add_argument('-y', '--yes', action='store_true', default=False,
@@ -1659,6 +1705,10 @@ doc/develop/moveconfig.rst for documentation.'''
         if fail:
             return 1
         unittest.main()
+
+    if args.scan_source:
+        do_scan_source(os.getcwd())
+        return
 
     if not any((len(configs), args.force_sync, args.build_db, args.imply,
                 args.find)):
