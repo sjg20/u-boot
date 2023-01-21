@@ -18,7 +18,7 @@ obj-$(CONFIG_FSL_LAW) += law.o
 
 else
 obj-$(CONFIG_MPC85XX) += cpu.o
-obj-$(CONFIG_MPC86xx) += cpu.o
+obj-$(CONFIG_MPC86XX) += cpu.o
 
 obj-$(CONFIG_OF_LIBFDT) += fdt.o
 obj-$(CONFIG_FSL_LBC) += fsl_lbc.o

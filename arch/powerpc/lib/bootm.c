@@ -293,7 +293,7 @@ void boot_prep_vxworks(struct bootm_headers *images)
 #if defined(CONFIG_MPC85XX)
 	ft_fixup_cpu(images->ft_addr, base + size);
 	ft_fixup_num_cores(images->ft_addr);
-#elif defined(CONFIG_MPC86xx)
+#elif defined(CONFIG_MPC86XX)
 	off = fdt_add_mem_rsv(images->ft_addr,
 			determine_mp_bootpg(NULL), (u64)4096);
 	if (off < 0)

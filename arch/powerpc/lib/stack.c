@@ -34,7 +34,7 @@ int arch_reserve_stacks(void)
 
 int arch_setup_dest_addr(void)
 {
-#if defined(CONFIG_MP) && (defined(CONFIG_MPC86xx) || defined(CONFIG_E500))
+#if defined(CONFIG_MP) && (defined(CONFIG_MPC86XX) || defined(CONFIG_E500))
 	/*
 	 * We need to make sure the location we intend to put secondary core
 	 * boot code is reserved and not used by any part of u-boot

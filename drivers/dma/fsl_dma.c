@@ -27,8 +27,8 @@
 dma83xx_t *dma_base = (void *)(CFG_SYS_MPC83XX_DMA_ADDR);
 #elif defined(CONFIG_MPC85XX)
 ccsr_dma_t *dma_base = (void *)(CFG_SYS_MPC85XX_DMA_ADDR);
-#elif defined(CONFIG_MPC86xx)
-ccsr_dma_t *dma_base = (void *)(CONFIG_SYS_MPC86xx_DMA_ADDR);
+#elif defined(CONFIG_MPC86XX)
+ccsr_dma_t *dma_base = (void *)(CONFIG_SYS_MPC86XX_DMA_ADDR);
 #else
 #error "Freescale DMA engine not supported on your processor"
 #endif
@@ -37,7 +37,7 @@ static void dma_sync(void)
 {
 #if defined(CONFIG_MPC85XX)
 	asm("sync; isync; msync");
-#elif defined(CONFIG_MPC86xx)
+#elif defined(CONFIG_MPC86XX)
 	asm("sync; isync");
 #endif
 }

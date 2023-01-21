@@ -16,7 +16,7 @@
 
 #ifndef CFG_MAX_MEM_MAPPED
 #if	defined(CONFIG_E500)		|| \
-	defined(CONFIG_MPC86xx)		|| \
+	defined(CONFIG_MPC86XX)		|| \
 	defined(CONFIG_E300)
 #define CFG_MAX_MEM_MAPPED	((phys_size_t)2 << 30)
 #else

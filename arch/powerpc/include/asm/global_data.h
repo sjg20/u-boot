@@ -53,12 +53,12 @@ struct arch_global_data {
 # endif /* CONFIG_ARCH_MPC8360 */
 #endif
 #endif
-#if defined(CONFIG_MPC85XX) || defined(CONFIG_MPC86xx)
+#if defined(CONFIG_MPC85XX) || defined(CONFIG_MPC86XX)
 	u32 lbc_clk;
 	void *cpu;
-#endif /* CONFIG_MPC85XX || CONFIG_MPC86xx */
+#endif /* CONFIG_MPC85XX || CONFIG_MPC86XX */
 #if defined(CONFIG_MPC83XX) || defined(CONFIG_MPC85XX) || \
-		defined(CONFIG_MPC86xx)
+		defined(CONFIG_MPC86XX)
 	u32 i2c1_clk;
 	u32 i2c2_clk;
 #endif

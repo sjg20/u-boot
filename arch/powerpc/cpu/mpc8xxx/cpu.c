@@ -94,7 +94,7 @@ static struct cpu_type cpu_type_list[] = {
 	CPU_TYPE_ENTRY(C291, C291, 1),
 	CPU_TYPE_ENTRY(C292, C292, 1),
 	CPU_TYPE_ENTRY(C293, C293, 1),
-#elif defined(CONFIG_MPC86xx)
+#elif defined(CONFIG_MPC86XX)
 	CPU_TYPE_ENTRY(8610, 8610, 1),
 	CPU_TYPE_ENTRY(8641, 8641, 2),
 	CPU_TYPE_ENTRY(8641D, 8641D, 2),

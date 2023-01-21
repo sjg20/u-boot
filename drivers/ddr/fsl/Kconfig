@@ -96,7 +96,7 @@ config SYS_FSL_DDRC_GEN1
 
 config SYS_FSL_DDRC_GEN2
 	bool
-	depends on !MPC86xx
+	depends on !MPC86XX
 	help
 	  Enable Freescale DDR2 controller.
 
@@ -153,7 +153,7 @@ config SYS_FSL_DDR2
 	bool "Freescale DDR2 controller"
 	depends on SYS_FSL_HAS_DDR2
 	imply DDR_SPD
-	select SYS_FSL_DDRC_GEN2 if (!MPC86xx && !SYS_FSL_DDRC_GEN3)
+	select SYS_FSL_DDRC_GEN2 if (!MPC86XX && !SYS_FSL_DDRC_GEN3)
 
 config SYS_FSL_DDR1
 	bool "Freescale DDR1 controller"

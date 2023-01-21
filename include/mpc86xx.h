@@ -4,8 +4,8 @@
  * Srikanth Srinivasan (srikanth.srinivasan@freescale.com)
  */
 
-#ifndef	__MPC86xx_H__
-#define __MPC86xx_H__
+#ifndef	__MPC86XX_H__
+#define __MPC86XX_H__
 
 #include <asm/fsl_lbc.h>
 
@@ -44,7 +44,7 @@ typedef struct {
 	unsigned long freq_processor;
 	unsigned long freq_systembus;
 	unsigned long freq_localbus;
-} MPC86xx_SYS_INFO;
+} MPC86XX_SYS_INFO;
 
 #define l1icache_enable	icache_enable
 
@@ -87,4 +87,4 @@ void setup_ddr_bat(phys_addr_t dram_size);
 extern void setup_bats(void);
 
 #endif  /* _ASMLANGUAGE */
-#endif	/* __MPC86xx_H__ */
+#endif	/* __MPC86XX_H__ */

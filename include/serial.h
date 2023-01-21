@@ -28,7 +28,7 @@ extern struct serial_device serial_scc_device;
 extern struct serial_device *default_serial_console(void);
 
 #if	defined(CONFIG_MPC83XX) || defined(CONFIG_MPC85XX) || \
-	defined(CONFIG_MPC86xx) || \
+	defined(CONFIG_MPC86XX) || \
 	defined(CONFIG_ARCH_TEGRA) || defined(CONFIG_SYS_COREBOOT) || \
 	defined(CONFIG_MICROBLAZE)
 extern struct serial_device serial0_device;
