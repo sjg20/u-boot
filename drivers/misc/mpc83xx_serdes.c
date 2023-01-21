@@ -3,7 +3,7 @@
  * (C) Copyright 2018
  * Mario Six, Guntermann & Drunck GmbH, mario.six@gdsys.cc
  *
- * base on the MPC83xx serdes initialization, which is
+ * base on the MPC83XX serdes initialization, which is
  *
  * Copyright 2007,2011 Freescale Semiconductor, Inc.
  * Copyright (C) 2008 MontaVista Software, Inc.
@@ -19,7 +19,7 @@
 #include "mpc83xx_serdes.h"
 
 /**
- * struct mpc83xx_serdes_priv - Private structure for MPC83xx serdes
+ * struct mpc83xx_serdes_priv - Private structure for MPC83XX serdes
  * @regs:  The device's register map
  * @rfcks: Variable to keep the serdes reference clock selection set during
  *	   initialization in (is or'd to every value written to SRDSCR4)

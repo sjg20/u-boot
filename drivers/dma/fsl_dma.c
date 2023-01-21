@@ -16,15 +16,15 @@
 /* Controller can only transfer 2^26 - 1 bytes at a time */
 #define FSL_DMA_MAX_SIZE	(0x3ffffff)
 
-#if defined(CONFIG_MPC83xx)
+#if defined(CONFIG_MPC83XX)
 #define FSL_DMA_MR_DEFAULT (FSL_DMA_MR_CTM_DIRECT | FSL_DMA_MR_DMSEN)
 #else
 #define FSL_DMA_MR_DEFAULT (FSL_DMA_MR_BWC_DIS | FSL_DMA_MR_CTM_DIRECT)
 #endif
 
 
-#if defined(CONFIG_MPC83xx)
-dma83xx_t *dma_base = (void *)(CFG_SYS_MPC83xx_DMA_ADDR);
+#if defined(CONFIG_MPC83XX)
+dma83xx_t *dma_base = (void *)(CFG_SYS_MPC83XX_DMA_ADDR);
 #elif defined(CONFIG_MPC85xx)
 ccsr_dma_t *dma_base = (void *)(CFG_SYS_MPC85xx_DMA_ADDR);
 #elif defined(CONFIG_MPC86xx)
@@ -44,7 +44,7 @@ static void dma_sync(void)
 
 static void out_dma32(volatile unsigned *addr, int val)
 {
-#if defined(CONFIG_MPC83xx)
+#if defined(CONFIG_MPC83XX)
 	out_le32(addr, val);
 #else
 	out_be32(addr, val);
@@ -53,7 +53,7 @@ static void out_dma32(volatile unsigned *addr, int val)
 
 static uint in_dma32(volatile unsigned *addr)
 {
-#if defined(CONFIG_MPC83xx)
+#if defined(CONFIG_MPC83XX)
 	return in_le32(addr);
 #else
 	return in_be32(addr);
@@ -79,7 +79,7 @@ static uint dma_check(void) {
 	return status;
 }
 
-#if !defined(CONFIG_MPC83xx)
+#if !defined(CONFIG_MPC83XX)
 void dma_init(void) {
 	volatile fsl_dma_t *dma = &dma_base->dma[0];
 
@@ -99,7 +99,7 @@ int dmacpy(phys_addr_t dest, phys_addr_t src, phys_size_t count) {
 
 		out_dma32(&dma->dar, (u32) (dest & 0xFFFFFFFF));
 		out_dma32(&dma->sar, (u32) (src & 0xFFFFFFFF));
-#if !defined(CONFIG_MPC83xx)
+#if !defined(CONFIG_MPC83XX)
 		out_dma32(&dma->satr,
 			in_dma32(&dma->satr) | (u32)((u64)src >> 32));
 		out_dma32(&dma->datr,
@@ -131,7 +131,7 @@ int dmacpy(phys_addr_t dest, phys_addr_t src, phys_size_t count) {
 /*
  * 85xx/86xx use dma to initialize SDRAM when !CONFIG_ECC_INIT_VIA_DDRCONTROLLER
  */
-#if ((!defined CONFIG_MPC83xx && defined(CONFIG_DDR_ECC) &&	\
+#if ((!defined CONFIG_MPC83XX && defined(CONFIG_DDR_ECC) &&	\
 	!defined(CONFIG_ECC_INIT_VIA_DDRCONTROLLER)))
 void dma_meminit(uint size)
 {

@@ -25,7 +25,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #endif
 
 /**
- * struct mpc83xx_timer_priv - Private data structure for MPC83xx timer driver
+ * struct mpc83xx_timer_priv - Private data structure for MPC83XX timer driver
  * @decrementer_count: Value to which the decrementer register should be re-set
  *		       to when a timer interrupt occurs, thus determines the
  *		       interrupt frequency (value for 1e6/HZ microseconds)

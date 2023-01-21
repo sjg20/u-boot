@@ -84,7 +84,7 @@ static int mpc8xxx_spi_probe(struct udevice *dev)
 	spi8xxx_t *spi = priv->spi;
 
 	/*
-	 * SPI pins on the MPC83xx are not muxed, so all we do is initialize
+	 * SPI pins on the MPC83XX are not muxed, so all we do is initialize
 	 * some registers
 	 */
 	out_be32(&priv->spi->mode, SPI_MODE_REV | SPI_MODE_MS);

@@ -10,7 +10,7 @@
 
 #include <asm/types.h>
 
-#ifdef CONFIG_MPC83xx
+#ifdef CONFIG_MPC83XX
 typedef struct fsl_dma {
 	uint	mr;		/* DMA mode register */
 #define FSL_DMA_MR_CS		0x00000001	/* Channel start */
@@ -111,7 +111,7 @@ typedef struct fsl_dma {
 	uint	dsr;		/* DMA destination stride register */
 	char	res4[56];
 } fsl_dma_t;
-#endif /* !CONFIG_MPC83xx */
+#endif /* !CONFIG_MPC83XX */
 
 #ifdef CONFIG_FSL_DMA
 void dma_init(void);

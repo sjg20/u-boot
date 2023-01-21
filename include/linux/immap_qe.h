@@ -11,7 +11,7 @@
 #ifndef __IMMAP_QE_H__
 #define __IMMAP_QE_H__
 
-#ifdef CONFIG_MPC83xx
+#ifdef CONFIG_MPC83XX
 #if defined(CONFIG_ARCH_MPC8360)
 #define QE_MURAM_SIZE		0xc000UL
 #define MAX_QE_RISC		2

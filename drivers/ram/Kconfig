@@ -38,7 +38,7 @@ config MPC83XX_SDRAM
 	bool "Enable MPC83XX SDRAM support"
 	depends on RAM
 	help
-	  Enable support for the internal DDR Memory Controller of the MPC83xx
+	  Enable support for the internal DDR Memory Controller of the MPC83XX
 	  family of SoCs. Both static configurations, as well as configuring
 	  the RAM through the use of SPD (Serial Presence Detect) is supported
 	  via device tree settings.

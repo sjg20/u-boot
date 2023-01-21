@@ -173,7 +173,7 @@ config DDR_ECC
 
 config DDR_ECC_CMD
 	bool "Access the ECC features of the memory controller"
-	depends on DDR_ECC && MPC83xx
+	depends on DDR_ECC && MPC83XX
 	default y
 
 config ECC_INIT_VIA_DDRCONTROLLER
@@ -199,7 +199,7 @@ config SYS_FSL_DDR_INTLV_256B
 endif
 
 menu "PowerPC / M68K initial memory controller definitions (FLASH, SDRAM, etc)"
-	depends on MCF52x2 || MPC8xx || MPC83xx || MPC85xx
+	depends on MCF52x2 || MPC8xx || MPC83XX || MPC85xx
 
 config SYS_BR0_PRELIM_BOOL
 	bool "Define Bank 0"

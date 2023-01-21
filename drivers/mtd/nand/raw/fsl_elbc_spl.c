@@ -16,7 +16,7 @@
 #include <asm/fsl_lbc.h>
 #include <nand.h>
 
-#ifdef CONFIG_MPC83xx
+#ifdef CONFIG_MPC83XX
 #include "../../../arch/powerpc/cpu/mpc83xx/elbc/elbc.h"
 #endif
 

@@ -20,7 +20,7 @@ int arch_setup_bdinfo(void)
 	bd->bi_immr_base = CONFIG_SYS_IMMR;	/* base  of IMMR register     */
 #endif
 
-#if defined(CONFIG_MPC83xx)
+#if defined(CONFIG_MPC83XX)
 	bd->bi_immrbar = CONFIG_SYS_IMMR;
 #endif
 

@@ -7,7 +7,7 @@
  */
 
 /*
- *  U-Boot - Startup Code for MPC83xx PowerPC based Embedded Boards
+ *  U-Boot - Startup Code for MPC83XX PowerPC based Embedded Boards
  */
 
 #include <asm-offsets.h>

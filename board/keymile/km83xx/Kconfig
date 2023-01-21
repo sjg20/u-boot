@@ -1,5 +1,5 @@
 menu "KM 83xx Options"
-	depends on MPC83xx
+	depends on MPC83XX
 
 config KM_ENABLE_FULL_DM_DTS_SUPPORT
 	bool "enable full DM/DTS support for KM 83xx boards"

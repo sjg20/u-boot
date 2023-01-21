@@ -33,14 +33,14 @@ static const char * const e300_names[] = {
 };
 
 /**
- * enum mpc83xx_cpu_family - Identifiers for MPC83xx CPU families
+ * enum mpc83xx_cpu_family - Identifiers for MPC83XX CPU families
  * @FAMILY_830X:    Identifier for the MPC830x CPU family
  * @FAMILY_831X:    Identifier for the MPC831x CPU family
  * @FAMILY_832X:    Identifier for the MPC832x CPU family
  * @FAMILY_834X:    Identifier for the MPC834x CPU family
  * @FAMILY_836X:    Identifier for the MPC836x CPU family
  * @FAMILY_837X:    Identifier for the MPC837x CPU family
- * @FAMILY_UNKNOWN: Identifier for an unknown MPC83xx CPU family
+ * @FAMILY_UNKNOWN: Identifier for an unknown MPC83XX CPU family
  */
 enum mpc83xx_cpu_family {
 	FAMILY_830X,
@@ -53,7 +53,7 @@ enum mpc83xx_cpu_family {
 };
 
 /**
- * enum mpc83xx_cpu_type - Identifiers for MPC83xx CPU types
+ * enum mpc83xx_cpu_type - Identifiers for MPC83XX CPU types
  * @TYPE_8308:      Identifier for the MPC8308 CPU type
  * @TYPE_8309:      Identifier for the MPC8309 CPU type
  * @TYPE_8311:      Identifier for the MPC8311 CPU type
@@ -76,7 +76,7 @@ enum mpc83xx_cpu_family {
  * @TYPE_8377:      Identifier for the MPC8377 CPU type
  * @TYPE_8378:      Identifier for the MPC8378 CPU type
  * @TYPE_8379:      Identifier for the MPC8379 CPU type
- * @TYPE_UNKNOWN:   Identifier for an unknown MPC83xx CPU type
+ * @TYPE_UNKNOWN:   Identifier for an unknown MPC83XX CPU type
  */
 enum mpc83xx_cpu_type {
 	TYPE_8308,

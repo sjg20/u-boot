@@ -1004,7 +1004,7 @@
 #if defined(CONFIG_MPC85xx)
 #define IS_E_PROCESSOR(svr)	(svr & 0x80000)
 #else
-#if defined(CONFIG_MPC83xx)
+#if defined(CONFIG_MPC83XX)
 #define IS_E_PROCESSOR(spridr)	(!(spridr & 0x00010000))
 #endif
 #endif
@@ -1163,7 +1163,7 @@ int fsl_qoriq_dsp_core_to_cluster(unsigned int core);
 #define CPU_TYPE_ENTRY_MASK(n, v, nc, m) \
 	{ .name = #n, .soc_ver = SVR_##v, .num_cores = (nc), .mask = (m) }
 #else
-#if defined(CONFIG_MPC83xx)
+#if defined(CONFIG_MPC83XX)
 #define CPU_TYPE_ENTRY(x) {#x, SPR_##x}
 #endif
 #endif
