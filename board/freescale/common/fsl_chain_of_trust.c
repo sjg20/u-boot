@@ -27,8 +27,8 @@
 #include <asm/arch/immap_ls102xa.h>
 #endif
 
-#if defined(CONFIG_MPC85xx)
-#define CFG_DCFG_ADDR	CFG_SYS_MPC85xx_GUTS_ADDR
+#if defined(CONFIG_MPC85XX)
+#define CFG_DCFG_ADDR	CFG_SYS_MPC85XX_GUTS_ADDR
 #else
 #define CFG_DCFG_ADDR	CFG_SYS_FSL_GUTS_ADDR
 #endif
@@ -50,17 +50,17 @@ int fsl_check_boot_mode_secure(void)
 	if (val == ITS_MASK)
 		return 1;
 
-#if defined(CONFIG_FSL_CORENET) || !defined(CONFIG_MPC85xx)
+#if defined(CONFIG_FSL_CORENET) || !defined(CONFIG_MPC85XX)
 	/* For PBL based platforms check the SB_EN bit in RCWSR */
 	val = gur_in32(&gur->rcwsr[RCW_SB_EN_REG_INDEX - 1]) & RCW_SB_EN_MASK;
 	if (val == RCW_SB_EN_MASK)
 		return 1;
 #endif
 
-#if defined(CONFIG_MPC85xx) && !defined(CONFIG_FSL_CORENET)
+#if defined(CONFIG_MPC85XX) && !defined(CONFIG_FSL_CORENET)
 	/* For Non-PBL Platforms, check the Device Status register 2*/
-	val = gur_in32(&gur->pordevsr2) & MPC85xx_PORDEVSR2_SBC_MASK;
-	if (val != MPC85xx_PORDEVSR2_SBC_MASK)
+	val = gur_in32(&gur->pordevsr2) & MPC85XX_PORDEVSR2_SBC_MASK;
+	if (val != MPC85XX_PORDEVSR2_SBC_MASK)
 		return 1;
 
 #endif

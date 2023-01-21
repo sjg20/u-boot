@@ -28,7 +28,7 @@ phys_size_t get_effective_memsize(void)
 void board_init_f(ulong bootflag)
 {
 	u32 plat_ratio;
-	ccsr_gur_t *gur = (void *)CFG_SYS_MPC85xx_GUTS_ADDR;
+	ccsr_gur_t *gur = (void *)CFG_SYS_MPC85XX_GUTS_ADDR;
 	struct fsl_ifc ifc = {(void *)CFG_SYS_IFC_ADDR, (void *)NULL};
 
 	console_init_f();
@@ -37,11 +37,11 @@ void board_init_f(ulong bootflag)
 	setbits_be32(&ifc.gregs->ifc_gcr, 1 << IFC_GCR_TBCTL_TRN_TIME_SHIFT);
 
 #ifdef CONFIG_TARGET_P1010RDB_PB
-	setbits_be32(&gur->pmuxcr2, MPC85xx_PMUXCR2_GPIO01_DRVVBUS);
+	setbits_be32(&gur->pmuxcr2, MPC85XX_PMUXCR2_GPIO01_DRVVBUS);
 #endif
 
 	/* initialize selected port with appropriate baud rate */
-	plat_ratio = in_be32(&gur->porpllsr) & MPC85xx_PORPLLSR_PLAT_RATIO;
+	plat_ratio = in_be32(&gur->porpllsr) & MPC85XX_PORPLLSR_PLAT_RATIO;
 	plat_ratio >>= 1;
 	gd->bus_clk = get_board_sys_clk() * plat_ratio;
 

@@ -17,7 +17,7 @@
 #include <phy.h>
 #include <hwconfig.h>
 
-#if defined(CONFIG_MP) && (defined(CONFIG_MPC85xx) || defined(CONFIG_MPC86xx))
+#if defined(CONFIG_MP) && (defined(CONFIG_MPC85XX) || defined(CONFIG_MPC86xx))
 static int ft_del_cpuhandle(void *blob, int cpuhandle)
 {
 	int off, ret = -FDT_ERR_NOTFOUND;
@@ -69,7 +69,7 @@ void ft_fixup_num_cores(void *blob) {
 	debug ("deleted %d extra core entry entries from device tree\n",
 								del_cores);
 }
-#endif /* defined(CONFIG_MPC85xx) || defined(CONFIG_MPC86xx) */
+#endif /* defined(CONFIG_MPC85XX) || defined(CONFIG_MPC86xx) */
 
 int fdt_fixup_phy_connection(void *blob, int offset, phy_interface_t phyc)
 {

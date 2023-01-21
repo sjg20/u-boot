@@ -6,7 +6,7 @@
 /*
  * CPU specific code for the MPC83XX family.
  *
- * Derived from the MPC8260 and MPC85xx.
+ * Derived from the MPC8260 and MPC85XX.
  */
 
 #include <common.h>

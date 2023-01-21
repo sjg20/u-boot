@@ -24,7 +24,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 void get_sys_info(sys_info_t *sys_info)
 {
-	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 #ifdef CONFIG_FSL_CORENET
 	volatile ccsr_clk_t *clk = (void *)(CFG_SYS_FSL_CORENET_CLK_ADDR);
 	unsigned int cpu;
@@ -537,8 +537,8 @@ void get_sys_info(sys_info_t *sys_info)
 
 #if defined(CONFIG_DYNAMIC_DDR_CLK_FREQ) || defined(CONFIG_STATIC_DDR_CLK_FREQ)
 	{
-		u32 ddr_ratio = ((gur->porpllsr) & MPC85xx_PORPLLSR_DDR_RATIO)
-			>> MPC85xx_PORPLLSR_DDR_RATIO_SHIFT;
+		u32 ddr_ratio = ((gur->porpllsr) & MPC85XX_PORPLLSR_DDR_RATIO)
+			>> MPC85XX_PORPLLSR_DDR_RATIO_SHIFT;
 		if (ddr_ratio != 0x7)
 			sys_info->freq_ddrbus = ddr_ratio * get_board_ddr_clk();
 	}
@@ -548,8 +548,8 @@ void get_sys_info(sys_info_t *sys_info)
 #if defined(CONFIG_ARCH_P1021) || defined(CONFIG_ARCH_P1025)
 	sys_info->freq_qe =  sys_info->freq_systembus;
 #else
-	qe_ratio = ((gur->porpllsr) & MPC85xx_PORPLLSR_QE_RATIO)
-			>> MPC85xx_PORPLLSR_QE_RATIO_SHIFT;
+	qe_ratio = ((gur->porpllsr) & MPC85XX_PORPLLSR_QE_RATIO)
+			>> MPC85XX_PORPLLSR_QE_RATIO_SHIFT;
 	sys_info->freq_qe = qe_ratio * get_board_sys_clk();
 #endif
 #endif
@@ -575,7 +575,7 @@ int get_clocks(void)
 {
 	sys_info_t sys_info;
 #ifdef CONFIG_ARCH_MPC8544
-	volatile ccsr_gur_t *gur = (void *) CFG_SYS_MPC85xx_GUTS_ADDR;
+	volatile ccsr_gur_t *gur = (void *) CFG_SYS_MPC85XX_GUTS_ADDR;
 #endif
 	get_sys_info (&sys_info);
 	gd->cpu_clk = sys_info.freq_processor[0];
@@ -604,7 +604,7 @@ int get_clocks(void)
 	 * 85xx, but only the 8544 has cfg_sec_freq, so it's unknown if the
 	 * PORDEVSR2_SEC_CFG bit is 0 on all 85xx boards that are not an 8544.
 	 */
-	if (gur->pordevsr2 & MPC85xx_PORDEVSR2_SEC_CFG)
+	if (gur->pordevsr2 & MPC85XX_PORDEVSR2_SEC_CFG)
 		gd->arch.i2c1_clk = sys_info.freq_systembus / 3;
 	else
 		gd->arch.i2c1_clk = sys_info.freq_systembus / 2;

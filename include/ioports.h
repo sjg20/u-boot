@@ -23,7 +23,7 @@ typedef struct {
  * the internal memory map aligns the above structure on
  * a 0x20 byte boundary
  */
-#ifdef CONFIG_MPC85xx
+#ifdef CONFIG_MPC85XX
 #define ioport_addr(im, idx) (ioport_t *)((uint)&(im->im_cpm_iop) + ((idx)*0x20))
 #else
 #define ioport_addr(im, idx) (ioport_t *)((uint)&(im)->im_ioport + ((idx)*0x20))

@@ -15,17 +15,17 @@ DECLARE_GLOBAL_DATA_PTR;
 ulong cpu_init_f(void)
 {
 #ifdef CFG_SYS_INIT_L2_ADDR
-	ccsr_l2cache_t *l2cache = (void *)CFG_SYS_MPC85xx_L2_ADDR;
+	ccsr_l2cache_t *l2cache = (void *)CFG_SYS_MPC85XX_L2_ADDR;
 
 	out_be32(&l2cache->l2srbar0, CFG_SYS_INIT_L2_ADDR);
 
 	/* set MBECCDIS=1, SBECCDIS=1 */
 	out_be32(&l2cache->l2errdis,
-		(MPC85xx_L2ERRDIS_MBECC | MPC85xx_L2ERRDIS_SBECC));
+		(MPC85XX_L2ERRDIS_MBECC | MPC85XX_L2ERRDIS_SBECC));
 
 	/* set L2E=1 & L2SRAM=001 */
 	out_be32(&l2cache->l2ctl,
-		(MPC85xx_L2CTL_L2E | MPC85xx_L2CTL_L2SRAM_ENTIRE));
+		(MPC85XX_L2CTL_L2E | MPC85XX_L2CTL_L2SRAM_ENTIRE));
 #endif
 
 	return 0;

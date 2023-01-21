@@ -24,7 +24,7 @@ config CHAIN_OF_TRUST
 	select SHA_HW_ACCEL
 	select SHA_PROG_HW_ACCEL
 	select ENV_IS_NOWHERE
-	select SYS_CPC_REINIT_F if MPC85xx && !SYS_RAMBOOT
+	select SYS_CPC_REINIT_F if MPC85XX && !SYS_RAMBOOT
 	select CMD_EXT4 if ARM
 	select CMD_EXT4_WRITE if ARM
 	imply CMD_BLOB
@@ -246,9 +246,9 @@ endif
 
 config SYS_FSL_NUM_CC_PLLS
 	int "Number of clock control PLLs"
-	depends on MPC85xx || FSL_LSCH2 || FSL_LSCH3 || ARCH_LS1021A || ARCH_LS1028A
+	depends on MPC85XX || FSL_LSCH2 || FSL_LSCH3 || ARCH_LS1021A || ARCH_LS1028A
 	default 2 if ARCH_LS1021A || ARCH_LS1028A || FSL_LSCH2
-	default 6 if FSL_LSCH3 || MPC85xx
+	default 6 if FSL_LSCH3 || MPC85XX
 
 config SYS_FSL_ESDHC_BE
 	bool

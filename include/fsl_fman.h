@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
- * MPC85xx Internal Memory Map
+ * MPC85XX Internal Memory Map
  *
  * Copyright 2010-2011 Freescale Semiconductor, Inc.
  */

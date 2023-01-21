@@ -15,8 +15,8 @@ config MPC83XX
 	select SYS_FSL_SEC_BE
 	select SYS_FSL_SEC_COMPAT_2
 
-config MPC85xx
-	bool "MPC85xx"
+config MPC85XX
+	bool "MPC85XX"
 	select CREATE_ARCH_SYMLINK
 	select SYS_FSL_DDR
 	select SYS_FSL_DDR_BE
@@ -36,7 +36,7 @@ endchoice
 
 config FSL_LBC
 	def_bool y
-	depends on (MPC85xx || MPC83XX) && !FSL_IFC
+	depends on (MPC85XX || MPC83XX) && !FSL_IFC
 
 config HIGH_BATS
 	bool "Enable high BAT registers"
@@ -46,7 +46,7 @@ config HIGH_BATS
 
 config SYS_INIT_RAM_LOCK
 	bool "Lock some portion of L1 for initial ram stack"
-	depends on MPC83XX || MPC85xx
+	depends on MPC83XX || MPC85XX
 
 config SYS_SRIO
 	bool "Serial RapidIO support"

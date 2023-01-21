@@ -52,10 +52,10 @@ int is_serdes_configured(enum srds_prtcl device)
 
 void fsl_serdes_init(void)
 {
-	ccsr_gur_t *gur = (void *)CFG_SYS_MPC85xx_GUTS_ADDR;
+	ccsr_gur_t *gur = (void *)CFG_SYS_MPC85XX_GUTS_ADDR;
 	u32 pordevsr = in_be32(&gur->pordevsr);
-	u32 srds_cfg = (pordevsr & MPC85xx_PORDEVSR_IO_SEL) >>
-				MPC85xx_PORDEVSR_IO_SEL_SHIFT;
+	u32 srds_cfg = (pordevsr & MPC85XX_PORDEVSR_IO_SEL) >>
+				MPC85XX_PORDEVSR_IO_SEL_SHIFT;
 	int lane;
 
 	if (serdes1_prtcl_map & (1 << NONE) &&
@@ -86,10 +86,10 @@ void fsl_serdes_init(void)
 		serdes2_prtcl_map |= (1 << lane_prtcl);
 	}
 
-	if (pordevsr & MPC85xx_PORDEVSR_SGMII1_DIS)
+	if (pordevsr & MPC85XX_PORDEVSR_SGMII1_DIS)
 		serdes2_prtcl_map &= ~(1 << SGMII_TSEC1);
 
-	if (pordevsr & MPC85xx_PORDEVSR_SGMII3_DIS)
+	if (pordevsr & MPC85XX_PORDEVSR_SGMII3_DIS)
 		serdes2_prtcl_map &= ~(1 << SGMII_TSEC3);
 
 	/* Set the first bit to indicate serdes has been initialized */

@@ -1,5 +1,5 @@
 menu "mpc85xx CPU"
-	depends on MPC85xx
+	depends on MPC85XX
 
 config PPC_SPINTABLE_COMPATIBLE
 	depends on MP
@@ -19,7 +19,7 @@ config SYS_CPU
 
 config CMD_ERRATA
 	bool "Enable the 'errata' command"
-	depends on MPC85xx
+	depends on MPC85XX
 	default y
 	help
 	  This enables the 'errata' command which displays a list of errata
@@ -27,7 +27,7 @@ config CMD_ERRATA
 
 config FSL_PREPBL_ESDHC_BOOT_SECTOR
 	bool "Generate QorIQ pre-PBL eSDHC boot sector"
-	depends on MPC85xx
+	depends on MPC85XX
 	depends on SDCARD
 	help
 	  With this option final image would have prepended QorIQ pre-PBL eSDHC
@@ -943,7 +943,7 @@ config ARCH_T4240
 
 config MPC85XX_HAVE_RESET_VECTOR
 	bool "Indicate reset vector at CFG_RESET_VECTOR_ADDRESS - 0xffc"
-	depends on MPC85xx
+	depends on MPC85XX
 
 config BTB
 	bool "toggle branch predition"
@@ -986,7 +986,7 @@ config HETROGENOUS_CLUSTERS
 	bool
 
 config MAX_CPUS
-	int "Maximum number of CPUs permitted for MPC85xx"
+	int "Maximum number of CPUs permitted for MPC85XX"
 	default 12 if ARCH_T4240
 	default 8 if ARCH_P4080
 	default 4 if ARCH_B4860 || \
@@ -1506,14 +1506,14 @@ config SYS_FSL_USB_DUAL_PHY_ENABLE
 
 config SYS_MPC85XX_NO_RESETVEC
 	bool "Discard resetvec section and move bootpg section up"
-	depends on MPC85xx && !MPC85XX_HAVE_RESET_VECTOR
+	depends on MPC85XX && !MPC85XX_HAVE_RESET_VECTOR
 	help
 	  If this variable is specified, the section .resetvec is not kept and
 	  the section .bootpg is placed in the previous 4k of the .text section.
 
 config SPL_SYS_MPC85XX_NO_RESETVEC
 	bool "Discard resetvec section and move bootpg section up, in SPL"
-	depends on MPC85xx && SPL && !MPC85XX_HAVE_RESET_VECTOR
+	depends on MPC85XX && SPL && !MPC85XX_HAVE_RESET_VECTOR
 	help
 	  If this variable is specified, the section .resetvec is not kept and
 	  the section .bootpg is placed in the previous 4k of the .text section,
@@ -1521,7 +1521,7 @@ config SPL_SYS_MPC85XX_NO_RESETVEC
 
 config TPL_SYS_MPC85XX_NO_RESETVEC
 	bool "Discard resetvec section and move bootpg section up, in TPL"
-	depends on MPC85xx && TPL && !MPC85XX_HAVE_RESET_VECTOR
+	depends on MPC85XX && TPL && !MPC85XX_HAVE_RESET_VECTOR
 	help
 	  If this variable is specified, the section .resetvec is not kept and
 	  the section .bootpg is placed in the previous 4k of the .text section,

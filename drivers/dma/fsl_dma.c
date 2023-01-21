@@ -25,8 +25,8 @@
 
 #if defined(CONFIG_MPC83XX)
 dma83xx_t *dma_base = (void *)(CFG_SYS_MPC83XX_DMA_ADDR);
-#elif defined(CONFIG_MPC85xx)
-ccsr_dma_t *dma_base = (void *)(CFG_SYS_MPC85xx_DMA_ADDR);
+#elif defined(CONFIG_MPC85XX)
+ccsr_dma_t *dma_base = (void *)(CFG_SYS_MPC85XX_DMA_ADDR);
 #elif defined(CONFIG_MPC86xx)
 ccsr_dma_t *dma_base = (void *)(CONFIG_SYS_MPC86xx_DMA_ADDR);
 #else
@@ -35,7 +35,7 @@ ccsr_dma_t *dma_base = (void *)(CONFIG_SYS_MPC86xx_DMA_ADDR);
 
 static void dma_sync(void)
 {
-#if defined(CONFIG_MPC85xx)
+#if defined(CONFIG_MPC85XX)
 	asm("sync; isync; msync");
 #elif defined(CONFIG_MPC86xx)
 	asm("sync; isync");

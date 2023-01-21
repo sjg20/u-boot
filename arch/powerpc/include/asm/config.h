@@ -6,7 +6,7 @@
 #ifndef _ASM_CONFIG_H_
 #define _ASM_CONFIG_H_
 
-#ifdef CONFIG_MPC85xx
+#ifdef CONFIG_MPC85XX
 #include <asm/config_mpc85xx.h>
 #endif
 

@@ -29,7 +29,7 @@ phys_size_t get_effective_memsize(void)
 void board_init_f(ulong bootflag)
 {
 	u32 plat_ratio, bus_clk;
-	ccsr_gur_t *gur = (void *)CFG_SYS_MPC85xx_GUTS_ADDR;
+	ccsr_gur_t *gur = (void *)CFG_SYS_MPC85XX_GUTS_ADDR;
 
 	/*
 	 * Call board_early_init_f() as early as possible as it workarounds
@@ -42,17 +42,17 @@ void board_init_f(ulong bootflag)
 	/* Set pmuxcr to allow both i2c1 and i2c2 */
 	setbits_be32(&gur->pmuxcr, in_be32(&gur->pmuxcr) | 0x1000);
 	setbits_be32(&gur->pmuxcr,
-		     in_be32(&gur->pmuxcr) | MPC85xx_PMUXCR_SD_DATA);
+		     in_be32(&gur->pmuxcr) | MPC85XX_PMUXCR_SD_DATA);
 
 	/* Read back the register to synchronize the write. */
 	in_be32(&gur->pmuxcr);
 
 #ifdef CONFIG_SPL_SPI_BOOT
-	clrbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_SD_DATA);
+	clrbits_be32(&gur->pmuxcr, MPC85XX_PMUXCR_SD_DATA);
 #endif
 
 	/* initialize selected port with appropriate baud rate */
-	plat_ratio = in_be32(&gur->porpllsr) & MPC85xx_PORPLLSR_PLAT_RATIO;
+	plat_ratio = in_be32(&gur->porpllsr) & MPC85XX_PORPLLSR_PLAT_RATIO;
 	plat_ratio >>= 1;
 	bus_clk = get_board_sys_clk() * plat_ratio;
 	gd->bus_clk = bus_clk;

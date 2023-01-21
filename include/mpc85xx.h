@@ -3,8 +3,8 @@
  * Copyright(c) 2003 Motorola Inc.
  */
 
-#ifndef	__MPC85xx_H__
-#define __MPC85xx_H__
+#ifndef	__MPC85XX_H__
+#define __MPC85XX_H__
 
 #if defined(CONFIG_E500)
 #include <e500.h>
@@ -60,4 +60,4 @@ CFG_SYS_CCSRBAR_PHYS_LOW and/or CFG_SYS_CCSRBAR_PHYS_HIGH instead."
 #define CFG_SYS_CCSRBAR_PHYS ((CFG_SYS_CCSRBAR_PHYS_HIGH * 1ull) << 32 | \
 				 CFG_SYS_CCSRBAR_PHYS_LOW)
 
-#endif	/* __MPC85xx_H__ */
+#endif	/* __MPC85XX_H__ */

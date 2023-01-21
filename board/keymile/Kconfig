@@ -35,7 +35,7 @@ config KM_PHRAM
 config KM_RESERVED_PRAM
 	hex "Reserved RAM"
 	default 0x0 if MPC83XX
-	default 0x1000 if MPC85xx || ARCH_LS1021A
+	default 0x1000 if MPC85XX || ARCH_LS1021A
 	depends on !ARCH_SOCFPGA
 	help
 	  Reserved physical RAM area at the end of memory for special purposes.
@@ -79,7 +79,7 @@ config SYS_CLIPS_BASE
 config KM_COMMON_ETH_INIT
 	bool "Common Ethernet Initialization"
 	default y if MPC83XX
-	default n if MPC85xx || ARCH_SOCFPGA || ARCH_LS1021A
+	default n if MPC85XX || ARCH_SOCFPGA || ARCH_LS1021A
 	help
 	  Use the Ethernet initialization implemented in common code that
 	  detects if a Piggy board is present.

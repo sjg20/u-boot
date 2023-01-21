@@ -15,7 +15,7 @@
 #if defined(CONFIG_MPC8xx)
 #include <asm/immap_8xx.h>
 #endif
-#ifdef CONFIG_MPC85xx
+#ifdef CONFIG_MPC85XX
 #include <mpc85xx.h>
 #include <asm/immap_85xx.h>
 #endif
@@ -50,7 +50,7 @@ static inline uint get_svr(void)
 	return mfspr(SVR);
 }
 
-#if defined(CONFIG_MPC85xx)	|| \
+#if defined(CONFIG_MPC85XX)	|| \
 	defined(CONFIG_MPC86xx)	|| \
 	defined(CONFIG_MPC83XX)
 unsigned char	in8(unsigned int);
@@ -78,8 +78,8 @@ void ddr_enable_ecc(unsigned int dram_size);
 #endif
 #endif
 
-#if defined(CONFIG_MPC85xx)
-typedef MPC85xx_SYS_INFO sys_info_t;
+#if defined(CONFIG_MPC85XX)
+typedef MPC85XX_SYS_INFO sys_info_t;
 void get_sys_info(sys_info_t *);
 void ft_fixup_cpu(void *, u64);
 void ft_fixup_num_cores(void *);

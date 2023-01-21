@@ -770,7 +770,7 @@ int pci_hose_find_ext_capability(struct pci_controller *hose,
 const char * pci_class_str(u8 class);
 int pci_last_busno(void);
 
-#ifdef CONFIG_MPC85xx
+#ifdef CONFIG_MPC85XX
 extern void pci_mpc85xx_init (struct pci_controller *hose);
 #endif
 

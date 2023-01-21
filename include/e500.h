@@ -38,7 +38,7 @@ typedef struct
 #ifdef CONFIG_SYS_FSL_SINGLE_SOURCE_CLK
 	unsigned char diff_sysclk;
 #endif
-} MPC85xx_SYS_INFO;
+} MPC85XX_SYS_INFO;
 
 #endif  /* _ASMLANGUAGE */
 

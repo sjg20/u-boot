@@ -750,7 +750,7 @@
 #define MAS7	SPRN_MAS7
 #define MAS8	SPRN_MAS8
 
-#if defined(CONFIG_MPC85xx)
+#if defined(CONFIG_MPC85XX)
 #define DAR_DEAR DEAR
 #else
 #define DAR_DEAR DAR
@@ -1001,7 +1001,7 @@
 #define SVR_SOC_VER(svr) (((svr) >> 8) & 0xFFF7FF) /* SOC w/o E bit*/
 
 /* whether MPC8xxxE (i.e. has SEC) */
-#if defined(CONFIG_MPC85xx)
+#if defined(CONFIG_MPC85XX)
 #define IS_E_PROCESSOR(svr)	(svr & 0x80000)
 #else
 #if defined(CONFIG_MPC83XX)
@@ -1156,7 +1156,7 @@ int fixup_cpu(void);
 int fsl_qoriq_core_to_cluster(unsigned int core);
 int fsl_qoriq_dsp_core_to_cluster(unsigned int core);
 
-#if defined(CONFIG_MPC85xx) || defined(CONFIG_MPC86xx)
+#if defined(CONFIG_MPC85XX) || defined(CONFIG_MPC86xx)
 #define CPU_TYPE_ENTRY(n, v, nc) \
 	{ .name = #n, .soc_ver = SVR_##v, .num_cores = (nc), \
 	  .mask = (1 << (nc)) - 1 }
@@ -1176,7 +1176,7 @@ int prt_83xx_rsr(void);
 
 #endif /* ndef ASSEMBLY*/
 
-#if defined(CONFIG_MPC85xx)
+#if defined(CONFIG_MPC85XX)
  #define EPAPR_MAGIC	(0x45504150)
 #else
  #define EPAPR_MAGIC	(0x65504150)

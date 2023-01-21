@@ -59,7 +59,7 @@ int checkcpu (void)
 #if defined(CONFIG_DYNAMIC_DDR_CLK_FREQ) || \
 	defined(CONFIG_STATIC_DDR_CLK_FREQ) || defined(CONFIG_FSL_CORENET)
 	ccsr_gur_t __iomem *gur =
-		(void __iomem *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+		(void __iomem *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 #endif
 
 	/*
@@ -76,8 +76,8 @@ int checkcpu (void)
 #endif /* CONFIG_SYS_FSL_QORIQ_CHASSIS2 */
 #else	/* CONFIG_FSL_CORENET */
 #if defined(CONFIG_DYNAMIC_DDR_CLK_FREQ) || defined(CONFIG_STATIC_DDR_CLK_FREQ)
-	u32 ddr_ratio = ((gur->porpllsr) & MPC85xx_PORPLLSR_DDR_RATIO)
-		>> MPC85xx_PORPLLSR_DDR_RATIO_SHIFT;
+	u32 ddr_ratio = ((gur->porpllsr) & MPC85XX_PORPLLSR_DDR_RATIO)
+		>> MPC85XX_PORPLLSR_DDR_RATIO_SHIFT;
 #else
 	u32 ddr_ratio = 0;
 #endif /* CONFIG_DYNAMIC_DDR_CLK_FREQ || CONFIG_STATIC_DDR_CLK_FREQ */
@@ -319,7 +319,7 @@ int do_reset(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	val |= 0x70000000;
 	mtspr(DBCR0,val);
 #else
-	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 
 	/* Call board-specific preparation for reset */
 	board_reset_prepare();
@@ -436,7 +436,7 @@ int dram_init(void)
 
 #if defined(CONFIG_SYS_FSL_ERRATUM_DDR_MSYNC_IN)
 	{
-		ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+		ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 		unsigned int x = 10;
 		unsigned int i;
 

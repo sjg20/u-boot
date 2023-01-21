@@ -130,7 +130,7 @@ static int initr_reloc_global_data(void)
 #elif !defined(CONFIG_SANDBOX) && !defined(CONFIG_NIOS2)
 	monitor_flash_len = (ulong)&__init_end - gd->relocaddr;
 #endif
-#if defined(CONFIG_MPC85xx) || defined(CONFIG_MPC86xx)
+#if defined(CONFIG_MPC85XX) || defined(CONFIG_MPC86xx)
 	/*
 	 * The gd->cpu pointer is set to an address in flash before relocation.
 	 * We need to update it to point to the same CPU entry in RAM.

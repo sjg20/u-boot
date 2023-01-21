@@ -25,9 +25,9 @@
 #include <linux/immap_qe.h>
 #define _POST_WORD_ADDR	(CONFIG_SYS_IMMR + CPM_POST_WORD_ADDR)
 
-#elif defined (CONFIG_MPC85xx)
+#elif defined (CONFIG_MPC85XX)
 #include <asm/immap_85xx.h>
-#define _POST_WORD_ADDR	(CONFIG_SYS_IMMR + CFG_SYS_MPC85xx_PIC_OFFSET + \
+#define _POST_WORD_ADDR	(CONFIG_SYS_IMMR + CFG_SYS_MPC85XX_PIC_OFFSET + \
 				offsetof(ccsr_pic_t, tfrr))
 #endif
 

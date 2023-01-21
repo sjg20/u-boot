@@ -24,7 +24,7 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 static struct cpu_type cpu_type_list[] = {
-#if defined(CONFIG_MPC85xx)
+#if defined(CONFIG_MPC85XX)
 	CPU_TYPE_ENTRY(8533, 8533, 1),
 	CPU_TYPE_ENTRY(8535, 8535, 1),
 	CPU_TYPE_ENTRY(8536, 8536, 1),
@@ -104,7 +104,7 @@ static struct cpu_type cpu_type_list[] = {
 #ifdef CONFIG_SYS_FSL_QORIQ_CHASSIS2
 static inline u32 init_type(u32 cluster, int init_id)
 {
-	ccsr_gur_t *gur = (void __iomem *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void __iomem *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	u32 idx = (cluster >> (init_id * 8)) & TP_CLUSTER_INIT_MASK;
 	u32 type = in_be32(&gur->tp_ityp[idx]);
 
@@ -116,7 +116,7 @@ static inline u32 init_type(u32 cluster, int init_id)
 
 u32 compute_ppc_cpumask(void)
 {
-	ccsr_gur_t *gur = (void __iomem *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void __iomem *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	int i = 0, count = 0;
 	u32 cluster, type, mask = 0;
 
@@ -140,7 +140,7 @@ u32 compute_ppc_cpumask(void)
 #ifdef CONFIG_HETROGENOUS_CLUSTERS
 u32 compute_dsp_cpumask(void)
 {
-	ccsr_gur_t *gur = (void __iomem *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void __iomem *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	int i = CONFIG_DSP_CLUSTER_START, count = 0;
 	u32 cluster, type, dsp_mask = 0;
 
@@ -163,7 +163,7 @@ u32 compute_dsp_cpumask(void)
 
 int fsl_qoriq_dsp_core_to_cluster(unsigned int core)
 {
-	ccsr_gur_t *gur = (void __iomem *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void __iomem *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	int count = 0, i = CONFIG_DSP_CLUSTER_START;
 	u32 cluster;
 
@@ -186,7 +186,7 @@ int fsl_qoriq_dsp_core_to_cluster(unsigned int core)
 
 int fsl_qoriq_core_to_cluster(unsigned int core)
 {
-	ccsr_gur_t *gur = (void __iomem *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void __iomem *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	int i = 0, count = 0;
 	u32 cluster;
 

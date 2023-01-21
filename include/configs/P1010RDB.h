@@ -340,7 +340,7 @@ extern unsigned long get_sdram_size(void);
 #endif
 
 #ifdef CONFIG_MMC
-#define CFG_SYS_FSL_ESDHC_ADDR	CFG_SYS_MPC85xx_ESDHC_ADDR
+#define CFG_SYS_FSL_ESDHC_ADDR	CFG_SYS_MPC85XX_ESDHC_ADDR
 #endif
 
 /*

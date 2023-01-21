@@ -12,7 +12,7 @@
 #include "../mpc83xx/elbc/elbc.h"
 #endif
 
-#ifdef CONFIG_MPC85xx
+#ifdef CONFIG_MPC85XX
 /* Boards should provide their own version of this if they use lbc sdram */
 static void __lbc_sdram_init(void)
 {
@@ -44,7 +44,7 @@ void init_early_memctl_regs(void)
 	clrsetbits_be32(&(LBC_BASE_ADDR)->lbcr, LBCR_BMT|LBCR_BMTPS, 0xf);
 #endif
 
-#ifdef CONFIG_MPC85xx
+#ifdef CONFIG_MPC85XX
 	/* if cs1 is already set via debugger, leave cs0/cs1 alone */
 	if (get_lbc_br(1) & BR_V)
 		init_br1 = 0;

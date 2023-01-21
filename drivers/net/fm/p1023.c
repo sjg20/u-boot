@@ -10,13 +10,13 @@
 #include <asm/fsl_serdes.h>
 
 static u32 port_to_devdisr[] = {
-	[FM1_DTSEC1] = MPC85xx_DEVDISR_TSEC1,
-	[FM1_DTSEC2] = MPC85xx_DEVDISR_TSEC2,
+	[FM1_DTSEC1] = MPC85XX_DEVDISR_TSEC1,
+	[FM1_DTSEC2] = MPC85XX_DEVDISR_TSEC2,
 };
 
 static int is_device_disabled(enum fm_port port)
 {
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	u32 devdisr = in_be32(&gur->devdisr);
 
 	return port_to_devdisr[port] & devdisr;
@@ -24,7 +24,7 @@ static int is_device_disabled(enum fm_port port)
 
 void fman_disable_port(enum fm_port port)
 {
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 
 	/* don't allow disabling of DTSEC1 as its needed for MDIO */
 	if (port == FM1_DTSEC1)
@@ -35,14 +35,14 @@ void fman_disable_port(enum fm_port port)
 
 void fman_enable_port(enum fm_port port)
 {
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 
 	clrbits_be32(&gur->devdisr, port_to_devdisr[port]);
 }
 
 phy_interface_t fman_port_enet_if(enum fm_port port)
 {
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	u32 pordevsr = in_be32(&gur->pordevsr);
 
 	if (is_device_disabled(port))
@@ -52,8 +52,8 @@ phy_interface_t fman_port_enet_if(enum fm_port port)
 	if (port == FM1_DTSEC1) {
 		if (is_serdes_configured(SGMII_FM1_DTSEC1))
 			return PHY_INTERFACE_MODE_SGMII;
-		if (pordevsr & MPC85xx_PORDEVSR_SGMII1_DIS) {
-			if (pordevsr & MPC85xx_PORDEVSR_TSEC1_PRTC)
+		if (pordevsr & MPC85XX_PORDEVSR_SGMII1_DIS) {
+			if (pordevsr & MPC85XX_PORDEVSR_TSEC1_PRTC)
 				return PHY_INTERFACE_MODE_RGMII;
 			else
 				return PHY_INTERFACE_MODE_RMII;
@@ -64,7 +64,7 @@ phy_interface_t fman_port_enet_if(enum fm_port port)
 	if (port == FM1_DTSEC2) {
 		if (is_serdes_configured(SGMII_FM1_DTSEC2))
 			return PHY_INTERFACE_MODE_SGMII;
-		if (pordevsr & MPC85xx_PORDEVSR_SGMII2_DIS)
+		if (pordevsr & MPC85XX_PORDEVSR_SGMII2_DIS)
 			return PHY_INTERFACE_MODE_RGMII;
 	}
 
