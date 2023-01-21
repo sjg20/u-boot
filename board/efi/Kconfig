@@ -6,7 +6,7 @@ choice
 
 config TARGET_EFI_APP32
 	bool "32-bit efi application"
-	select EFI_APP
+	# select EFI_APP
 	help
 	  This target is used for running U-Boot on top of EFI. In
 	  this case EFI does the early initialisation, and U-Boot
@@ -15,7 +15,7 @@ config TARGET_EFI_APP32
 
 config TARGET_EFI_APP64
 	bool "64-bit efi application"
-	select EFI_APP
+	# select EFI_APP
 	select X86_64
 	help
 	  This target is used for running U-Boot on top of EFI in 64-bit mode.

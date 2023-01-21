@@ -394,7 +394,7 @@ config CMD_BOOTEFI_HELLO
 	  for testing that EFI is working at a basic level, and for bringing
 	  up EFI support on a new architecture.
 
-source lib/efi_selftest/Kconfig
+source "lib/efi_selftest/Kconfig"
 
 config CMD_BOOTMENU
 	bool "bootmenu"
@@ -1876,7 +1876,7 @@ config CMD_DNS
 
 config CMD_LINK_LOCAL
 	bool "linklocal"
-	select LIB_RAND
+	# select LIB_RAND
 	help
 	  Acquire a network IP address using the link-local protocol
 

@@ -35,6 +35,6 @@ config BOARD_SPECIFIC_OPTIONS # dummy
 	imply SPL_SMP
 	imply SPL_MMC
 	imply SMP
-	imply SPL_RISCV_MMODE
+	# imply SPL_RISCV_MMODE
 
 endif
