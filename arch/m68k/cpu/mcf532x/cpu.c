@@ -63,7 +63,7 @@ int print_cpuinfo(void)
 		id = 53013;
 		break;
 #endif
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 	case 0x54:
 		id = 5329;
 		break;

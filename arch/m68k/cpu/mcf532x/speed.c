@@ -35,7 +35,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define DEFAULT_LPD	(0)	/* Divider (not encoded) */
 #endif
 
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 #define FREF		16000	/* KHz */
 #define MAX_MFD		135	/* Multiplier */
 #define MIN_MFD		88	/* Multiplier */
@@ -61,7 +61,7 @@ int get_sys_clock(void)
 #ifdef CONFIG_MCF5301X
 		return (FREF / (3 * (1 << divider)));
 #endif
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 		return (FREF / (2 << divider));
 #endif
 	} else {
@@ -72,7 +72,7 @@ int get_sys_clock(void)
 
 		return (((FREF * pfdr) / refdiv) / busdiv);
 #endif
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 		return (FREF * in_8(&pll->pfdr)) / (BUSDIV * 4);
 #endif
 	}
@@ -139,7 +139,7 @@ int clock_exit_limp(void)
  */
 int clock_pll(int fsys, int flags)
 {
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 	u32 *sdram_workaround = (u32 *)(MMAP_SDRAM + 0x80);
 #endif
 	sdram_t *sdram = (sdram_t *)(MMAP_SDRAM);
@@ -157,7 +157,7 @@ int clock_pll(int fsys, int flags)
 
 		return (fref * mfd) / busdiv;
 #endif
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 		mfd = in_8(&pll->pfdr);
 
 		return (fref * mfd / (BUSDIV * 4));
@@ -184,7 +184,7 @@ int clock_pll(int fsys, int flags)
 	/* Determine the output frequency for selected values */
 	fout = ((fref * mfd) / BUSDIV);
 #endif
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 	mfd = (4 * BUSDIV * temp) / 100;
 
 	/* Determine the output frequency for selected values */
@@ -219,7 +219,7 @@ int clock_pll(int fsys, int flags)
 	clrbits_be32(&pll->pcr, ~PLL_PCR_FBDIV_UNMASK);
 	setbits_be32(&pll->pcr, PLL_PCR_FBDIV(mfd - 1));
 #endif
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 	/* Reprogram PLL for desired fsys */
 	out_8(&pll->podr,
 		PLL_PODR_CPUDIV(BUSDIV / 3) | PLL_PODR_BUSDIV(BUSDIV));
@@ -234,7 +234,7 @@ int clock_pll(int fsys, int flags)
 	if (in_be32(&sdram->ctrl) & SDRAMC_SDCR_REF)
 		setbits_be32(&sdram->ctrl, SDRAMC_SDCR_CKE);
 
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 	/*
 	 * software workaround for SDRAM opeartion after exiting LIMP
 	 * mode errata
