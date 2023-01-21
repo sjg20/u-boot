@@ -2003,10 +2003,6 @@ dtbs: prepare3 scripts_dtc
 dtbs_install:
 	$(Q)$(MAKE) $(dtbinst)=$(dtstree)
 
-ifdef CONFIG_OF_EARLY_FLATTREE
-all: dtbs
-endif
-
 endif
 
 # Check dtc and pylibfdt, if DTC is provided, else build them
