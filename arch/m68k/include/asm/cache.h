@@ -15,7 +15,7 @@
 #endif
 
 #if defined(CONFIG_MCF530x) || defined(CONFIG_MCF532x) || \
-    defined(CONFIG_MCF5301x)
+    defined(CONFIG_MCF5301X)
 #define CFG_CF_V3
 #endif
 

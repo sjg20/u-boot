@@ -58,12 +58,12 @@ Changed files:
 - arch/m68k/lib/time.c			Timer functions (Dma timer and PIT)
 - arch/m68k/lib/traps.c			Exception init code
 
-1 MCF5301x specific Options/Settings
+1 MCF5301X specific Options/Settings
 ====================================
 1.1 pre-loader is no longer suppoer in thie coldfire family
 
 1.2 Configuration settings for M53017EVB Development Board
-CONFIG_MCF5301x			-- define for all MCF5301x CPUs
+CONFIG_MCF5301X			-- define for all MCF5301X CPUs
 CONFIG_M53015			-- define for MCF53015 CPUs
 CONFIG_M53017EVB		-- define for M53017EVB board
 
@@ -100,7 +100,7 @@ CFG_SYS_MBAR			-- define MBAR offset
 
 CONFIG_MONITOR_IS_IN_RAM	-- Not support
 
-CFG_SYS_INIT_RAM_ADDR	-- defines the base address of the MCF5301x internal SRAM
+CFG_SYS_INIT_RAM_ADDR	-- defines the base address of the MCF5301X internal SRAM
 
 CONFIG_SYS_CSn_BASE		-- defines the Chip Select Base register
 CONFIG_SYS_CSn_MASK		-- defines the Chip Select Mask register
