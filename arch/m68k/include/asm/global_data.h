@@ -20,7 +20,7 @@ struct arch_global_data {
 	unsigned long vco_clk;
 	unsigned long flb_clk;
 #endif
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	unsigned long sdhc_clk;
 #endif
 };

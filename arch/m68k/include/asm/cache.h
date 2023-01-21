@@ -19,7 +19,7 @@
 #define CFG_CF_V3
 #endif
 
-#if defined(CONFIG_MCF5441x)
+#if defined(CONFIG_MCF5441X)
 #define CFG_CF_V4E		/* Four Extra ACRn */
 #endif
 
@@ -94,7 +94,7 @@
 #define CF_CACR_IDSP		(1 << 7)
 #define CF_CACR_EUSP		(1 << 5)
 
-#if defined(CONFIG_MCF5445x) || defined(CONFIG_MCF5441x)
+#if defined(CONFIG_MCF5445x) || defined(CONFIG_MCF5441X)
 #define CF_CACR_IVO		(1 << 20)
 #define CF_CACR_SPA		(1 << 14)
 #else

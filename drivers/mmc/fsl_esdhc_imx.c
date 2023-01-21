@@ -383,7 +383,7 @@ static int esdhc_setup_data(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_MCF5441x)
+#if IS_ENABLED(CONFIG_MCF5441X)
 /*
  * Swaps 32-bit words to little-endian byte order.
  */
@@ -553,7 +553,7 @@ static int esdhc_send_cmd_common(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 			dma_unmap_single(priv->dma_addr,
 					 data->blocks * data->blocksize,
 					 mmc_get_dma_dir(data));
-			if (IS_ENABLED(CONFIG_MCF5441x) &&
+			if (IS_ENABLED(CONFIG_MCF5441X) &&
 			    (data->flags & MMC_DATA_READ))
 				sd_swap_dma_buff(data);
 		}
@@ -1026,7 +1026,7 @@ static int esdhc_init_common(struct fsl_esdhc_priv *priv, struct mmc *mmc)
 	esdhc_clrbits32(&regs->irqstaten, IRQSTATEN_BRR | IRQSTATEN_BWR);
 
 	/* Put the PROCTL reg back to the default */
-	if (IS_ENABLED(CONFIG_MCF5441x))
+	if (IS_ENABLED(CONFIG_MCF5441X))
 		esdhc_write32(&regs->proctl, PROCTL_INIT | PROCTL_D3CD);
 	else
 		esdhc_write32(&regs->proctl, PROCTL_INIT);
@@ -1168,7 +1168,7 @@ static int fsl_esdhc_init(struct fsl_esdhc_priv *priv,
 		return ret;
 
 	/* ColdFire, using SDHC_DATA[3] for card detection */
-	if (IS_ENABLED(CONFIG_MCF5441x))
+	if (IS_ENABLED(CONFIG_MCF5441X))
 		esdhc_write32(&regs->proctl, PROCTL_INIT | PROCTL_D3CD);
 
 	if (IS_ENABLED(CONFIG_FSL_USDHC)) {
@@ -1194,11 +1194,11 @@ static int fsl_esdhc_init(struct fsl_esdhc_priv *priv,
 	caps = esdhc_read32(&regs->hostcapblt);
 
 	/*
-	 * MCF5441x RM declares in more points that sdhc clock speed must
+	 * MCF5441X RM declares in more points that sdhc clock speed must
 	 * never exceed 25 Mhz. From this, the HS bit needs to be disabled
 	 * from host capabilities.
 	 */
-	if (IS_ENABLED(CONFIG_MCF5441x))
+	if (IS_ENABLED(CONFIG_MCF5441X))
 		caps &= ~HOSTCAPBLT_HSS;
 
 	if (IS_ENABLED(CONFIG_SYS_FSL_ERRATUM_ESDHC135))

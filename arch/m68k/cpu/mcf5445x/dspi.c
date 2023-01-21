@@ -15,7 +15,7 @@ void dspi_chip_select(int cs)
 {
 	struct gpio *gpio = (struct gpio *)MMAP_GPIO;
 
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	switch (cs) {
 	case 0:
 		clrbits_8(&gpio->par_dspi0,
@@ -37,7 +37,7 @@ void dspi_chip_unselect(int cs)
 {
 	struct gpio *gpio = (struct gpio *)MMAP_GPIO;
 
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	if (cs == 1)
 		clrbits_8(&gpio->par_dspiow, GPIO_PAR_DSPIOW_DSPI0PSC1);
 #endif
