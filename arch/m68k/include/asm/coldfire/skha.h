@@ -42,7 +42,7 @@ typedef struct skha_ctrl {
 	u32 c12;		/* 0x9C Context 12 - 5235, 5271, 5272 */
 } skha_t;
 
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 #define	SKHA_MODE_CTRM(x)	(((x) & 0x0F) << 9)
 #define	SKHA_MODE_CTRM_MASK	(0xFFFFE1FF)
 #define	SKHA_MODE_DKP		(0x00000100)

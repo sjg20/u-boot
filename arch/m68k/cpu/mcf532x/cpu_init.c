@@ -209,7 +209,7 @@ int fecpin_setclear(fec_info_t *info, int setclear)
 #endif				/* CONFIG_CMD_NET */
 #endif				/* CONFIG_MCF5301X */
 
-#ifdef CONFIG_MCF532x
+#ifdef CONFIG_MCF532X
 void cpu_init_f(void)
 {
 	scm1_t *scm1 = (scm1_t *) MMAP_SCM1;
@@ -355,4 +355,4 @@ int fecpin_setclear(fec_info_t *info, int setclear)
 	return 0;
 }
 #endif
-#endif				/* CONFIG_MCF532x */
+#endif				/* CONFIG_MCF532X */

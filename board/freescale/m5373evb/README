@@ -62,7 +62,7 @@ Changed files:
 1.1 pre-loader is no longer suppoer in thie coldfire family
 
 1.2 Configuration settings for M5373EVB Development Board
-CONFIG_MCF532x		-- define for all MCF532x CPUs
+CONFIG_MCF532X		-- define for all MCF532X CPUs
 CONFIG_M5373		-- define for all Freescale MCF5373 CPUs
 CONFIG_M5373EVB		-- define for M5373EVB board
 
