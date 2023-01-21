@@ -569,7 +569,7 @@
 #define MCSR_IMPE	0x00800000	/* Imprecise Machine Check Exception */
 #define ESR_ST		0x00800000	/* Store Operation */
 
-#if defined(CONFIG_MPC86xx)
+#if defined(CONFIG_MPC86XX)
 #define SPRN_MSSCR0	0x3f6
 #define SPRN_MSSSR0	0x3f7
 #endif
@@ -646,10 +646,10 @@
 #define L2CR	SPRN_L2CR	/* PPC 750 L2 control register */
 #define LR	SPRN_LR
 #define MBAR	SPRN_MBAR	/* System memory base address */
-#if defined(CONFIG_MPC86xx)
+#if defined(CONFIG_MPC86XX)
 #define MSSCR0	SPRN_MSSCR0
 #endif
-#if defined(CONFIG_E500) || defined(CONFIG_MPC86xx)
+#if defined(CONFIG_E500) || defined(CONFIG_MPC86XX)
 #define PIR	SPRN_PIR
 #endif
 #define SVR	SPRN_SVR	/* System-On-Chip Version Register */
@@ -1156,7 +1156,7 @@ int fixup_cpu(void);
 int fsl_qoriq_core_to_cluster(unsigned int core);
 int fsl_qoriq_dsp_core_to_cluster(unsigned int core);
 
-#if defined(CONFIG_MPC85XX) || defined(CONFIG_MPC86xx)
+#if defined(CONFIG_MPC85XX) || defined(CONFIG_MPC86XX)
 #define CPU_TYPE_ENTRY(n, v, nc) \
 	{ .name = #n, .soc_ver = SVR_##v, .num_cores = (nc), \
 	  .mask = (1 << (nc)) - 1 }

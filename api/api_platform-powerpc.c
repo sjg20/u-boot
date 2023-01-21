@@ -29,7 +29,7 @@ int platform_sys_info(struct sys_info *si)
 	si->clk_bus = gd->bus_clk;
 	si->clk_cpu = gd->cpu_clk;
 
-#if defined(CONFIG_MPC8xx) || defined(CONFIG_E500) || defined(CONFIG_MPC86xx)
+#if defined(CONFIG_MPC8xx) || defined(CONFIG_E500) || defined(CONFIG_MPC86XX)
 #define bi_bar	bi_immr_base
 #elif defined(CONFIG_MPC83XX)
 #define bi_bar	bi_immrbar

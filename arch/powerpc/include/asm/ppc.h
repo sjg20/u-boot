@@ -51,7 +51,7 @@ static inline uint get_svr(void)
 }
 
 #if defined(CONFIG_MPC85XX)	|| \
-	defined(CONFIG_MPC86xx)	|| \
+	defined(CONFIG_MPC86XX)	|| \
 	defined(CONFIG_MPC83XX)
 unsigned char	in8(unsigned int);
 void		out8(unsigned int, unsigned char);
@@ -84,9 +84,9 @@ void get_sys_info(sys_info_t *);
 void ft_fixup_cpu(void *, u64);
 void ft_fixup_num_cores(void *);
 #endif
-#if defined(CONFIG_MPC86xx)
+#if defined(CONFIG_MPC86XX)
 ulong get_bus_freq(ulong);
-typedef MPC86xx_SYS_INFO sys_info_t;
+typedef MPC86XX_SYS_INFO sys_info_t;
 void   get_sys_info(sys_info_t *);
 static inline ulong get_ddr_freq(ulong dummy)
 {

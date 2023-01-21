@@ -258,7 +258,7 @@ int fsl_pcie_init_board(int busno);
 	FT_FSL_PCIE1_SETUP; \
 	FT_FSL_PCIE2_SETUP; \
 	FT_FSL_PCIE3_SETUP;
-#elif defined(CONFIG_MPC86xx)
+#elif defined(CONFIG_MPC86XX)
 #define FSL_PCI_COMPAT	"fsl,mpc8610-pci"
 #define FSL_PCIE_COMPAT	"fsl,mpc8641-pcie"
 #define FT_FSL_PCI_SETUP \

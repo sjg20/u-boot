@@ -14,7 +14,7 @@ unsigned long get_board_sys_clk(void)
 {
 #if defined(CONFIG_MPC85XX)
 	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
-#elif defined(CONFIG_MPC86xx)
+#elif defined(CONFIG_MPC86XX)
 	immap_t *immap = (immap_t *)CONFIG_SYS_IMMR;
 	volatile ccsr_gur_t *gur = &immap->im_gur;
 #endif
