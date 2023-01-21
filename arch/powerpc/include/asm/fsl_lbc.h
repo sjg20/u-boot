@@ -9,7 +9,7 @@
 #include <config.h>
 #include <common.h>
 
-#ifdef CONFIG_MPC85xx
+#ifdef CONFIG_MPC85XX
 void lbc_sdram_init(void);
 #endif
 
@@ -48,7 +48,7 @@ void lbc_sdram_init(void);
 #endif
 #if defined(CONFIG_ARCH_MPC834X) || defined(CONFIG_ARCH_MPC8360)
 #define BR_MS_SDRAM			0x00000060	/* SDRAM */
-#elif defined(CONFIG_MPC85xx)
+#elif defined(CONFIG_MPC85XX)
 #define BR_MS_SDRAM			0x00000000	/* SDRAM */
 #endif
 #define BR_MS_UPMA			0x00000080	/* UPMA */

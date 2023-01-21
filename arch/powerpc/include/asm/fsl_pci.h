@@ -241,7 +241,7 @@ int fsl_pcie_init_board(int busno);
 	FT_FSL_PCIE3_SETUP; \
 	FT_FSL_PCIE4_SETUP;
 #define FT_FSL_PCIE_SETUP FT_FSL_PCI_SETUP
-#elif defined(CONFIG_MPC85xx)
+#elif defined(CONFIG_MPC85XX)
 #define FSL_PCI_COMPAT	"fsl,mpc8540-pci"
 #ifdef CONFIG_SYS_FSL_PCIE_COMPAT
 #define FSL_PCIE_COMPAT	CONFIG_SYS_FSL_PCIE_COMPAT

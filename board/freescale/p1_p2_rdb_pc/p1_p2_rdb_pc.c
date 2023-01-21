@@ -149,7 +149,7 @@ void board_cpld_init(void)
 void board_gpio_init(void)
 {
 #ifdef CONFIG_QE
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	par_io_t *par_io = (par_io_t *) &(gur->qe_par_io);
 
 	/* Enable VSC7385 switch */
@@ -159,7 +159,7 @@ void board_gpio_init(void)
 	setbits_be32(&par_io[GPIO_SLIC_PORT].cpdat, GPIO_SLIC_DATA);
 #else
 
-	ccsr_gpio_t *pgpio = (void *)(CFG_SYS_MPC85xx_GPIO_ADDR);
+	ccsr_gpio_t *pgpio = (void *)(CFG_SYS_MPC85XX_GPIO_ADDR);
 
 	/*
 	 * GPIO10 DDR Reset, open drain
@@ -197,17 +197,17 @@ void board_gpio_init(void)
 
 int board_early_init_f(void)
 {
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 
-	setbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_SDHC_CD);
+	setbits_be32(&gur->pmuxcr, MPC85XX_PMUXCR_SDHC_CD);
 #ifndef SDHC_WP_IS_GPIO
-	setbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_SDHC_WP);
+	setbits_be32(&gur->pmuxcr, MPC85XX_PMUXCR_SDHC_WP);
 #endif
 	clrbits_be32(&gur->sdhcdcr, SDHCDCR_CD_INV);
 
-	clrbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_SD_DATA);
+	clrbits_be32(&gur->pmuxcr, MPC85XX_PMUXCR_SD_DATA);
 #if defined(CONFIG_TARGET_P1020RDB_PD) || defined(CONFIG_TARGET_P1020RDB_PC)
-	setbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_TDM_ENA);
+	setbits_be32(&gur->pmuxcr, MPC85XX_PMUXCR_TDM_ENA);
 #endif
 
 	board_gpio_init();
@@ -227,7 +227,7 @@ int board_early_init_f(void)
 int checkboard(void)
 {
 	struct cpld_data *cpld_data = (void *)(CFG_SYS_CPLD_BASE);
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	u8 in, out, invert, io_config, val;
 	int bus_num = CONFIG_SYS_SPD_BUS_NUM;
 
@@ -306,7 +306,7 @@ int checkboard(void)
 	puts("\n");
 
 	if (val & 0x1) {
-		setbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_SD_DATA);
+		setbits_be32(&gur->pmuxcr, MPC85XX_PMUXCR_SD_DATA);
 		puts("SD/MMC : 8-bit Mode\n");
 		puts("eSPI : Disabled\n");
 	} else {
@@ -368,7 +368,7 @@ int board_early_init_r(void)
 static void fix_max6370_watchdog(void *blob)
 {
 	int off = fdt_node_offset_by_compatible(blob, -1, "maxim,max6370");
-	ccsr_gpio_t *pgpio = (void *)(CFG_SYS_MPC85xx_GPIO_ADDR);
+	ccsr_gpio_t *pgpio = (void *)(CFG_SYS_MPC85XX_GPIO_ADDR);
 	u32 gpioval = in_be32(&pgpio->gpdat);
 
 	/*

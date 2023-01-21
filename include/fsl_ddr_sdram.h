@@ -465,7 +465,7 @@ int fsl_dp_resume(void);
  * The 85xx boards have a common prototype for fixed_sdram so put the
  * declaration here.
  */
-#ifdef CONFIG_MPC85xx
+#ifdef CONFIG_MPC85XX
 extern phys_size_t fixed_sdram(void);
 #endif
 

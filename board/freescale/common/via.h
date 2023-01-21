@@ -1,4 +1,4 @@
-#ifndef _MPC85xx_VIA_H
+#ifndef _MPC85XX_VIA_H
 void mpc85xx_config_via(struct pci_controller* hose, pci_dev_t dev, struct pci_config_table *tab);
 
 /* Function 1, IDE */
@@ -15,4 +15,4 @@ void mpc85xx_config_via_power(struct pci_controller* hose, pci_dev_t dev, struct
 
 /* Function 6, AC97 Interface */
 void mpc85xx_config_via_ac97(struct pci_controller* hose, pci_dev_t dev, struct pci_config_table *tab);
-#endif /* _MPC85xx_VIA_H */
+#endif /* _MPC85XX_VIA_H */

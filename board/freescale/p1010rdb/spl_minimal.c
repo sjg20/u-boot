@@ -20,7 +20,7 @@ DECLARE_GLOBAL_DATA_PTR;
 void board_init_f(ulong bootflag)
 {
 	u32 plat_ratio;
-	ccsr_gur_t *gur = (void *)CFG_SYS_MPC85xx_GUTS_ADDR;
+	ccsr_gur_t *gur = (void *)CFG_SYS_MPC85XX_GUTS_ADDR;
 
 #if defined(CFG_SYS_NAND_BR_PRELIM) && defined(CFG_SYS_NAND_OR_PRELIM)
 	set_lbc_br(0, CFG_SYS_NAND_BR_PRELIM);
@@ -28,7 +28,7 @@ void board_init_f(ulong bootflag)
 #endif
 
 	/* initialize selected port with appropriate baud rate */
-	plat_ratio = in_be32(&gur->porpllsr) & MPC85xx_PORPLLSR_PLAT_RATIO;
+	plat_ratio = in_be32(&gur->porpllsr) & MPC85XX_PORPLLSR_PLAT_RATIO;
 	plat_ratio >>= 1;
 	gd->bus_clk = get_board_sys_clk() * plat_ratio;
 

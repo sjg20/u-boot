@@ -290,7 +290,7 @@ void boot_prep_vxworks(struct bootm_headers *images)
 		fdt_fixup_memory(images->ft_addr, base, size);
 
 #if defined(CONFIG_MP)
-#if defined(CONFIG_MPC85xx)
+#if defined(CONFIG_MPC85XX)
 	ft_fixup_cpu(images->ft_addr, base + size);
 	ft_fixup_num_cores(images->ft_addr);
 #elif defined(CONFIG_MPC86xx)

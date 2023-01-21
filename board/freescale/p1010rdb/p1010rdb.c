@@ -82,7 +82,7 @@ struct cpld_data {
 
 int board_early_init_f(void)
 {
-	ccsr_gpio_t *pgpio = (void *)(CFG_SYS_MPC85xx_GPIO_ADDR);
+	ccsr_gpio_t *pgpio = (void *)(CFG_SYS_MPC85XX_GPIO_ADDR);
 	struct fsl_ifc ifc = {(void *)CFG_SYS_IFC_ADDR, (void *)NULL};
 	/* Clock configuration to access CPLD using IFC(GPCM) */
 	setbits_be32(&ifc.gregs->ifc_gcr, 1 << IFC_GCR_TBCTL_TRN_TIME_SHIFT);
@@ -131,7 +131,7 @@ int board_early_init_r(void)
 
 int config_board_mux(int ctrl_type)
 {
-	ccsr_gur_t __iomem *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t __iomem *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	u8 tmp;
 
 #if CONFIG_IS_ENABLED(DM_I2C)
@@ -625,21 +625,21 @@ void board_reset(void)
 
 int misc_init_r(void)
 {
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 
 	if (hwconfig_subarg_cmp("fsl_p1010mux", "tdm_can", "can")) {
-		clrbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_CAN1_TDM |
-				MPC85xx_PMUXCR_CAN1_UART |
-				MPC85xx_PMUXCR_CAN2_TDM |
-				MPC85xx_PMUXCR_CAN2_UART);
+		clrbits_be32(&gur->pmuxcr, MPC85XX_PMUXCR_CAN1_TDM |
+				MPC85XX_PMUXCR_CAN1_UART |
+				MPC85XX_PMUXCR_CAN2_TDM |
+				MPC85XX_PMUXCR_CAN2_UART);
 		config_board_mux(MUX_TYPE_CAN);
 	} else if (hwconfig_subarg_cmp("fsl_p1010mux", "tdm_can", "tdm")) {
-		clrbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_CAN2_UART |
-				MPC85xx_PMUXCR_CAN1_UART);
-		setbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_CAN2_TDM |
-				MPC85xx_PMUXCR_CAN1_TDM);
-		clrbits_be32(&gur->pmuxcr2, MPC85xx_PMUXCR2_UART_GPIO);
-		setbits_be32(&gur->pmuxcr2, MPC85xx_PMUXCR2_UART_TDM);
+		clrbits_be32(&gur->pmuxcr, MPC85XX_PMUXCR_CAN2_UART |
+				MPC85XX_PMUXCR_CAN1_UART);
+		setbits_be32(&gur->pmuxcr, MPC85XX_PMUXCR_CAN2_TDM |
+				MPC85XX_PMUXCR_CAN1_TDM);
+		clrbits_be32(&gur->pmuxcr2, MPC85XX_PMUXCR2_UART_GPIO);
+		setbits_be32(&gur->pmuxcr2, MPC85XX_PMUXCR2_UART_TDM);
 		config_board_mux(MUX_TYPE_TDM);
 	} else {
 		/* defaultly spi_cs_sel to flash */
@@ -652,7 +652,7 @@ int misc_init_r(void)
 		config_board_mux(MUX_TYPE_IFC);
 
 #ifdef CONFIG_TARGET_P1010RDB_PB
-	setbits_be32(&gur->pmuxcr2, MPC85xx_PMUXCR2_GPIO01_DRVVBUS);
+	setbits_be32(&gur->pmuxcr2, MPC85XX_PMUXCR2_GPIO01_DRVVBUS);
 #endif
 	return 0;
 }

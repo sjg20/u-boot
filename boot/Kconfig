@@ -673,12 +673,12 @@ config SYS_MONITOR_BASE
 	  when booting from flash.
 
 config SPL_SYS_MONITOR_BASE
-	depends on MPC85xx && SPL && HAVE_SYS_MONITOR_BASE
+	depends on MPC85XX && SPL && HAVE_SYS_MONITOR_BASE
 	hex "Physical start address of SPL monitor code"
 	default SPL_TEXT_BASE
 
 config TPL_SYS_MONITOR_BASE
-	depends on MPC85xx && TPL && HAVE_SYS_MONITOR_BASE
+	depends on MPC85XX && TPL && HAVE_SYS_MONITOR_BASE
 	hex "Physical start address of TPL monitor code"
 
 config DYNAMIC_SYS_CLK_FREQ

@@ -40,7 +40,7 @@ int init_func_watchdog_reset(void);
 	void hw_watchdog_init(void);
 #endif
 
-#if defined(CONFIG_MPC85xx)
+#if defined(CONFIG_MPC85XX)
 	void init_85xx_watchdog(void);
 #endif
 #endif /* _WATCHDOG_H_ */

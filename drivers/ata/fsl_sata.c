@@ -78,7 +78,7 @@ static int init_sata(struct fsl_ata_priv *priv, int dev)
 		return -1;
 	}
 
-#ifdef CONFIG_MPC85xx
+#ifdef CONFIG_MPC85XX
 	if ((dev == 0) && (!is_serdes_configured(SATA1))) {
 		printf("SATA%d [dev = %d] is not enabled\n", dev+1, dev);
 		return -1;

@@ -25,7 +25,7 @@
 #include <asm/arch/cpu.h>
 #endif
 
-#define MPC85xx_DEVDISR_QE_DISABLE	0x1
+#define MPC85XX_DEVDISR_QE_DISABLE	0x1
 
 qe_map_t		*qe_immr;
 #ifdef CONFIG_QE
@@ -469,7 +469,7 @@ int qe_upload_firmware(const struct qe_firmware *firmware)
 #ifdef CONFIG_ARCH_LS1021A
 	struct ccsr_gur __iomem *gur = (void *)CFG_SYS_FSL_GUTS_ADDR;
 #else
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 #endif
 #endif
 	if (!firmware) {
@@ -485,7 +485,7 @@ int qe_upload_firmware(const struct qe_firmware *firmware)
 	    (hdr->magic[2] != 'F')) {
 		printf("QE microcode not found\n");
 #ifdef CONFIG_DEEP_SLEEP
-		setbits_be32(&gur->devdisr, MPC85xx_DEVDISR_QE_DISABLE);
+		setbits_be32(&gur->devdisr, MPC85XX_DEVDISR_QE_DISABLE);
 #endif
 		return -EPERM;
 	}
@@ -609,7 +609,7 @@ int u_qe_upload_firmware(const struct qe_firmware *firmware)
 #ifdef CONFIG_ARCH_LS1021A
 	struct ccsr_gur __iomem *gur = (void *)CFG_SYS_FSL_GUTS_ADDR;
 #else
-	ccsr_gur_t __iomem *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t __iomem *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 #endif
 #endif
 	if (!firmware) {
@@ -625,7 +625,7 @@ int u_qe_upload_firmware(const struct qe_firmware *firmware)
 	    (hdr->magic[2] != 'F')) {
 		printf("Not a microcode\n");
 #ifdef CONFIG_DEEP_SLEEP
-		setbits_be32(&gur->devdisr, MPC85xx_DEVDISR_QE_DISABLE);
+		setbits_be32(&gur->devdisr, MPC85XX_DEVDISR_QE_DISABLE);
 #endif
 		return -EPERM;
 	}
@@ -718,7 +718,7 @@ int u_qe_firmware_resume(const struct qe_firmware *firmware, qe_map_t *qe_immrr)
 	const u32 *code;
 #ifdef CONFIG_DEEP_SLEEP
 #ifdef CONFIG_PPC
-	ccsr_gur_t __iomem *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t __iomem *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 #else
 	struct ccsr_gur __iomem *gur = (void *)CFG_SYS_FSL_GUTS_ADDR;
 #endif
@@ -733,7 +733,7 @@ int u_qe_firmware_resume(const struct qe_firmware *firmware, qe_map_t *qe_immrr)
 	if ((hdr->magic[0] != 'Q') || (hdr->magic[1] != 'E') ||
 	    (hdr->magic[2] != 'F')) {
 #ifdef CONFIG_DEEP_SLEEP
-		setbits_be32(&gur->devdisr, MPC85xx_DEVDISR_QE_DISABLE);
+		setbits_be32(&gur->devdisr, MPC85XX_DEVDISR_QE_DISABLE);
 #endif
 		return -EPERM;
 	}

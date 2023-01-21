@@ -87,7 +87,7 @@ int cpu_status(u32 nr)
 #ifdef CONFIG_FSL_CORENET
 int cpu_disable(u32 nr)
 {
-	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 
 	setbits_be32(&gur->coredisrl, 1 << nr);
 
@@ -95,7 +95,7 @@ int cpu_disable(u32 nr)
 }
 
 int is_core_disabled(int nr) {
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	u32 coredisrl = in_be32(&gur->coredisrl);
 
 	return (coredisrl & (1 << nr));
@@ -103,14 +103,14 @@ int is_core_disabled(int nr) {
 #else
 int cpu_disable(u32 nr)
 {
-	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 
 	switch (nr) {
 	case 0:
-		setbits_be32(&gur->devdisr, MPC85xx_DEVDISR_CPU0);
+		setbits_be32(&gur->devdisr, MPC85XX_DEVDISR_CPU0);
 		break;
 	case 1:
-		setbits_be32(&gur->devdisr, MPC85xx_DEVDISR_CPU1);
+		setbits_be32(&gur->devdisr, MPC85XX_DEVDISR_CPU1);
 		break;
 	default:
 		printf("Invalid cpu number for disable %d\n", nr);
@@ -121,14 +121,14 @@ int cpu_disable(u32 nr)
 }
 
 int is_core_disabled(int nr) {
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	u32 devdisr = in_be32(&gur->devdisr);
 
 	switch (nr) {
 	case 0:
-		return (devdisr & MPC85xx_DEVDISR_CPU0);
+		return (devdisr & MPC85XX_DEVDISR_CPU0);
 	case 1:
-		return (devdisr & MPC85xx_DEVDISR_CPU1);
+		return (devdisr & MPC85XX_DEVDISR_CPU1);
 	default:
 		printf("Invalid cpu number for disable %d\n", nr);
 	}
@@ -264,7 +264,7 @@ static void plat_mp_up(unsigned long bootpg, unsigned int pagesize)
 	u32 mask = cpu_mask();
 	struct law_entry e;
 
-	gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	ccm = (void *)(CFG_SYS_FSL_CORENET_CCM_ADDR);
 	rcpm = (void *)(CFG_SYS_FSL_CORENET_RCPM_ADDR);
 	pic = (void *)(CFG_SYS_MPC8xxx_PIC_ADDR);
@@ -336,8 +336,8 @@ static void plat_mp_up(unsigned long bootpg, unsigned int pagesize)
 	u32 up, cpu_up_mask, whoami;
 	u32 *table = (u32 *)&__spin_table;
 	volatile u32 bpcr;
-	volatile ccsr_local_ecm_t *ecm = (void *)(CFG_SYS_MPC85xx_ECM_ADDR);
-	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	volatile ccsr_local_ecm_t *ecm = (void *)(CFG_SYS_MPC85XX_ECM_ADDR);
+	volatile ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	volatile ccsr_pic_t *pic = (void *)(CFG_SYS_MPC8xxx_PIC_ADDR);
 	u32 devdisr;
 	int timeout = 10;
@@ -348,9 +348,9 @@ static void plat_mp_up(unsigned long bootpg, unsigned int pagesize)
 	/* disable time base at the platform */
 	devdisr = in_be32(&gur->devdisr);
 	if (whoami)
-		devdisr |= MPC85xx_DEVDISR_TB0;
+		devdisr |= MPC85XX_DEVDISR_TB0;
 	else
-		devdisr |= MPC85xx_DEVDISR_TB1;
+		devdisr |= MPC85XX_DEVDISR_TB1;
 	out_be32(&gur->devdisr, devdisr);
 
 	/* release the hounds */
@@ -382,9 +382,9 @@ static void plat_mp_up(unsigned long bootpg, unsigned int pagesize)
 
 	/* enable time base at the platform */
 	if (whoami)
-		devdisr |= MPC85xx_DEVDISR_TB1;
+		devdisr |= MPC85XX_DEVDISR_TB1;
 	else
-		devdisr |= MPC85xx_DEVDISR_TB0;
+		devdisr |= MPC85XX_DEVDISR_TB0;
 	out_be32(&gur->devdisr, devdisr);
 
 	/* readback to sync write */
@@ -393,7 +393,7 @@ static void plat_mp_up(unsigned long bootpg, unsigned int pagesize)
 	mtspr(SPRN_TBWU, 0);
 	mtspr(SPRN_TBWL, 0);
 
-	devdisr &= ~(MPC85xx_DEVDISR_TB0 | MPC85xx_DEVDISR_TB1);
+	devdisr &= ~(MPC85XX_DEVDISR_TB0 | MPC85XX_DEVDISR_TB1);
 	out_be32(&gur->devdisr, devdisr);
 
 #ifdef CONFIG_MPC8xxx_DISABLE_BPTR

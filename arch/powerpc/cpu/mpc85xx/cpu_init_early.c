@@ -85,10 +85,10 @@ void cpu_init_early_f(void *fdt)
 {
 	u32 mas0, mas1, mas2, mas3, mas7;
 #ifdef CONFIG_SYS_FSL_ERRATUM_P1010_A003549
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 #endif
 #ifdef CONFIG_A003399_NOR_WORKAROUND
-	ccsr_l2cache_t *l2cache = (void *)CFG_SYS_MPC85xx_L2_ADDR;
+	ccsr_l2cache_t *l2cache = (void *)CFG_SYS_MPC85XX_L2_ADDR;
 	u32  *dst, *src;
 	void (*setup_ifc_sram)(void);
 	int i;
@@ -121,7 +121,7 @@ void cpu_init_early_f(void *fdt)
  * Hence specifically selecting CS3.
  */
 #ifdef CONFIG_SYS_FSL_ERRATUM_P1010_A003549
-	setbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_LCLK_IFC_CS3);
+	setbits_be32(&gur->pmuxcr, MPC85XX_PMUXCR_LCLK_IFC_CS3);
 #endif
 
 #ifdef CONFIG_FSL_LAW
@@ -147,10 +147,10 @@ void cpu_init_early_f(void *fdt)
 	out_be32(&l2cache->l2srbar0, SRAM_BASE_ADDR);
 
 	out_be32(&l2cache->l2errdis,
-		(MPC85xx_L2ERRDIS_MBECC | MPC85xx_L2ERRDIS_SBECC));
+		(MPC85XX_L2ERRDIS_MBECC | MPC85XX_L2ERRDIS_SBECC));
 
 	out_be32(&l2cache->l2ctl,
-		(MPC85xx_L2CTL_L2E | MPC85xx_L2CTL_L2SRAM_ENTIRE));
+		(MPC85XX_L2CTL_L2E | MPC85XX_L2CTL_L2SRAM_ENTIRE));
 
 	/*
 	 * Copy the code in setup_ifc to L2SRAM. Do a word copy
@@ -170,8 +170,8 @@ void cpu_init_early_f(void *fdt)
 
 	/* CLEANUP */
 	clrbits_be32(&l2cache->l2ctl,
-			(MPC85xx_L2CTL_L2E |
-			 MPC85xx_L2CTL_L2SRAM_ENTIRE));
+			(MPC85XX_L2CTL_L2E |
+			 MPC85XX_L2CTL_L2SRAM_ENTIRE));
 	out_be32(&l2cache->l2srbar0, 0x0);
 #endif
 

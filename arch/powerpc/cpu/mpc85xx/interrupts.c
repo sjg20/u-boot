@@ -6,7 +6,7 @@
  * (C) Copyright 2002 (440 port)
  * Scott McNutt, Artesyn Communication Producs, smcnutt@artsyncp.com
  *
- * (C) Copyright 2003 Motorola Inc. (MPC85xx port)
+ * (C) Copyright 2003 Motorola Inc. (MPC85XX port)
  * Xianghua Xiao (X.Xiao@motorola.com)
  */
 
@@ -36,10 +36,10 @@ void interrupt_init_cpu(unsigned *decrementer_count)
 	ulong post_word = post_word_load();
 #endif
 
-	out_be32(&pic->gcr, MPC85xx_PICGCR_RST);
-	while (in_be32(&pic->gcr) & MPC85xx_PICGCR_RST)
+	out_be32(&pic->gcr, MPC85XX_PICGCR_RST);
+	while (in_be32(&pic->gcr) & MPC85XX_PICGCR_RST)
 		;
-	out_be32(&pic->gcr, MPC85xx_PICGCR_M);
+	out_be32(&pic->gcr, MPC85XX_PICGCR_M);
 	in_be32(&pic->gcr);
 
 	*decrementer_count = get_tbclk() / CONFIG_SYS_HZ;

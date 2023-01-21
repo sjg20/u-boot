@@ -20,8 +20,8 @@ void fsl_ddr_set_memctl_regs(const fsl_ddr_cfg_regs_t *regs,
 	struct ccsr_ddr __iomem *ddr =
 		(struct ccsr_ddr __iomem *)CFG_SYS_FSL_DDR_ADDR;
 
-#if defined(CONFIG_SYS_FSL_ERRATUM_NMG_DDR120) && defined(CONFIG_MPC85xx)
-	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+#if defined(CONFIG_SYS_FSL_ERRATUM_NMG_DDR120) && defined(CONFIG_MPC85XX)
+	ccsr_gur_t *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	uint svr;
 #endif
 

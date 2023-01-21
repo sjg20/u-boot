@@ -3,10 +3,10 @@
  * Copyright 2011-2012 Freescale Semiconductor, Inc.
  */
 
-#ifndef _ASM_MPC85xx_CONFIG_H_
-#define _ASM_MPC85xx_CONFIG_H_
+#ifndef _ASM_MPC85XX_CONFIG_H_
+#define _ASM_MPC85XX_CONFIG_H_
 
-/* SoC specific defines for Freescale MPC85xx (PQ3) and QorIQ processors */
+/* SoC specific defines for Freescale MPC85XX (PQ3) and QorIQ processors */
 
 #include <fsl_ddrc_version.h>
 
@@ -174,4 +174,4 @@
 
 #endif
 
-#endif /* _ASM_MPC85xx_CONFIG_H_ */
+#endif /* _ASM_MPC85XX_CONFIG_H_ */

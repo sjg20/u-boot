@@ -73,17 +73,17 @@ static u32 check_ie(struct fsl_secboot_img_priv *img)
 }
 
 /* This function returns the CSF Header Address of uboot
- * For MPC85xx based platforms, the LAW mapping for NOR
+ * For MPC85XX based platforms, the LAW mapping for NOR
  * flash changes in uboot code. Hence the offset needs
  * to be calculated and added to the new NOR flash base
  * address
  */
-#if defined(CONFIG_MPC85xx)
+#if defined(CONFIG_MPC85XX)
 #include <flash.h>
 
 int get_csf_base_addr(u32 *csf_addr, u32 *flash_base_addr)
 {
-	struct ccsr_gur __iomem *gur = (void *)(CFG_SYS_MPC85xx_GUTS_ADDR);
+	struct ccsr_gur __iomem *gur = (void *)(CFG_SYS_MPC85XX_GUTS_ADDR);
 	u32 csf_hdr_addr = in_be32(&gur->scratchrw[0]);
 	u32 csf_flash_offset = csf_hdr_addr & ~(CFG_SYS_PBI_FLASH_BASE);
 	u32 flash_addr, addr;
@@ -168,7 +168,7 @@ static int get_ie_info_addr(uintptr_t *ie_addr)
 #endif
 
 	/* IE Key Table is the first entry in the SG Table */
-#if defined(CONFIG_MPC85xx)
+#if defined(CONFIG_MPC85XX)
 	*ie_addr = (uintptr_t)((sg_tbl->src_addr &
 			~(CFG_SYS_PBI_FLASH_BASE)) +
 			flash_base_addr);

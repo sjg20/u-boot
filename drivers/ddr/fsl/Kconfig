@@ -166,7 +166,7 @@ endchoice
 endmenu
 
 config FSL_DMA
-	def_bool y if DDR_ECC && MPC85xx && !ECC_INIT_VIA_DDRCONTROLLER
+	def_bool y if DDR_ECC && MPC85XX && !ECC_INIT_VIA_DDRCONTROLLER
 
 config DDR_ECC
 	bool "ECC DDR memory support"
@@ -199,7 +199,7 @@ config SYS_FSL_DDR_INTLV_256B
 endif
 
 menu "PowerPC / M68K initial memory controller definitions (FLASH, SDRAM, etc)"
-	depends on MCF52x2 || MPC8xx || MPC83XX || MPC85xx
+	depends on MCF52x2 || MPC8xx || MPC83XX || MPC85XX
 
 config SYS_BR0_PRELIM_BOOL
 	bool "Define Bank 0"

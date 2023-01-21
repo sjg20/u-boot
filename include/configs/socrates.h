@@ -21,7 +21,7 @@
  */
 
 /*
- * sysclk for MPC85xx
+ * sysclk for MPC85XX
  *
  * Two valid values are:
  *    33000000
