@@ -23,7 +23,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define MAX_FSYS	80000	/* KHz */
 #define MIN_FSYS	58333	/* KHz */
 
-#ifdef CONFIG_MCF5301x
+#ifdef CONFIG_MCF5301X
 #define FREF		20000	/* KHz */
 #define MAX_MFD		63	/* Multiplier */
 #define MIN_MFD		0	/* Multiplier */
@@ -58,14 +58,14 @@ int get_sys_clock(void)
 	/* Test to see if device is in LIMP mode */
 	if (in_be16(&ccm->misccr) & CCM_MISCCR_LIMP) {
 		divider = in_be16(&ccm->cdr) & CCM_CDR_LPDIV(0xF);
-#ifdef CONFIG_MCF5301x
+#ifdef CONFIG_MCF5301X
 		return (FREF / (3 * (1 << divider)));
 #endif
 #ifdef CONFIG_MCF532x
 		return (FREF / (2 << divider));
 #endif
 	} else {
-#ifdef CONFIG_MCF5301x
+#ifdef CONFIG_MCF5301X
 		u32 pfdr = (in_be32(&pll->pcr) & 0x3F) + 1;
 		u32 refdiv = (1 << ((in_be32(&pll->pcr) & PLL_PCR_REFDIV(7)) >> 8));
 		u32 busdiv = ((in_be32(&pll->pdr) & 0x00F0) >> 4) + 1;
@@ -151,7 +151,7 @@ int clock_pll(int fsys, int flags)
 
 	if (fsys == 0) {
 		/* Return current PLL output */
-#ifdef CONFIG_MCF5301x
+#ifdef CONFIG_MCF5301X
 		u32 busdiv = ((in_be32(&pll->pdr) >> 4) & 0x0F) + 1;
 		mfd = (in_be32(&pll->pcr) & 0x3F) + 1;
 
@@ -178,7 +178,7 @@ int clock_pll(int fsys, int flags)
 	 * point libraries.
 	 */
 	temp = (100 * fsys) / fref;
-#ifdef CONFIG_MCF5301x
+#ifdef CONFIG_MCF5301X
 	mfd = (BUSDIV * temp) / 100;
 
 	/* Determine the output frequency for selected values */
@@ -209,7 +209,7 @@ int clock_pll(int fsys, int flags)
 	/* Enter LIMP mode */
 	clock_limp(DEFAULT_LPD);
 
-#ifdef CONFIG_MCF5301x
+#ifdef CONFIG_MCF5301X
 	out_be32(&pll->pdr,
 		PLL_PDR_OUTDIV1((BUSDIV / 3) - 1) |
 		PLL_PDR_OUTDIV2(BUSDIV - 1)	|

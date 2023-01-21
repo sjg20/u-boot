@@ -32,7 +32,7 @@ config MCF530x
         select DM_SERIAL
 	bool
 
-config MCF5301x
+config MCF5301X
 	select OF_CONTROL
 	select DM
         select DM_SERIAL
@@ -95,7 +95,7 @@ config M5307
 
 config M53015
 	bool
-	select MCF5301x
+	select MCF5301X
 
 config M5329
 	bool

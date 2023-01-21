@@ -46,7 +46,7 @@ int print_cpuinfo(void)
 	msk = (in_be16(&ccm->cir) >> 6);
 	ver = (in_be16(&ccm->cir) & 0x003f);
 	switch (msk) {
-#ifdef CONFIG_MCF5301x
+#ifdef CONFIG_MCF5301X
 	case 0x78:
 		id = 53010;
 		break;

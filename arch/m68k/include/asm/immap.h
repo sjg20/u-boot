@@ -210,7 +210,7 @@
 #endif
 #endif                          /* CONFIG_M5307 */
 
-#if defined(CONFIG_MCF5301x)
+#if defined(CONFIG_MCF5301X)
 #include <asm/immap_5301x.h>
 #include <asm/m5301x.h>
 

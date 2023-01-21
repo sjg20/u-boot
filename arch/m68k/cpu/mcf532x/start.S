@@ -112,7 +112,7 @@ _start:
 	movec	%d0, %ACR0
 	movec	%d0, %ACR1
 
-#ifdef CONFIG_MCF5301x
+#ifdef CONFIG_MCF5301X
 	move.l	#(0xFC0a0010), %a0
 	move.w	(%a0), %d0
 	and.l	%d0, 0xEFFF
