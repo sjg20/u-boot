@@ -204,7 +204,7 @@ config  TARGET_A5Y17LTE
 	select CLK_EXYNOS
 	select OF_CONTROL
 	select PINCTRL
-	select PINCTRL_EXYNOS78x0
+	select PINCTRL_EXYNOS78X0
 	select SUPPORT_SPL
 
 config  TARGET_A7Y17LTE
@@ -213,7 +213,7 @@ config  TARGET_A7Y17LTE
 	select CLK_EXYNOS
 	select OF_CONTROL
 	select PINCTRL
-	select PINCTRL_EXYNOS78x0
+	select PINCTRL_EXYNOS78X0
 	select SUPPORT_SPL
 
 config  TARGET_A3Y17LTE
@@ -222,7 +222,7 @@ config  TARGET_A3Y17LTE
 	select CLK_EXYNOS
 	select OF_CONTROL
 	select PINCTRL
-	select PINCTRL_EXYNOS78x0
+	select PINCTRL_EXYNOS78X0
 	select SUPPORT_SPL
 
 endchoice
