@@ -50,7 +50,7 @@ config MCF537x
         select DM_SERIAL
 	bool
 
-config MCF5441x
+config MCF5441X
 	select OF_CONTROL
 	select DM
         select DM_SERIAL
@@ -108,7 +108,7 @@ config M5373
 
 config M54418
 	bool
-	select MCF5441x
+	select MCF5441X
 
 # peripherals
 config CF_DSPI

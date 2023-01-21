@@ -73,7 +73,7 @@ void cfspi_port_conf(void)
 {
 	gpio_t *gpio = (gpio_t *)MMAP_GPIO;
 
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	pm_t *pm = (pm_t *)MMAP_PM;
 
 	out_8(&gpio->par_dspi0,
@@ -98,7 +98,7 @@ void cpu_init_f(void)
 {
 	gpio_t *gpio = (gpio_t *) MMAP_GPIO;
 
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	scm_t *scm = (scm_t *) MMAP_SCM;
 	pm_t *pm = (pm_t *) MMAP_PM;
 
@@ -203,7 +203,7 @@ void cpu_init_f(void)
 	out_8(&gpio->par_sdhch, 0xff);
 	out_8(&gpio->par_sdhcl, 0xff);
 #endif
-#endif		/* CONFIG_MCF5441x */
+#endif		/* CONFIG_MCF5441X */
 
 	/* FlexBus Chipselect */
 	init_fbcs();
@@ -240,13 +240,13 @@ int cpu_init_r(void)
 void uart_port_conf(int port)
 {
 	gpio_t *gpio = (gpio_t *) MMAP_GPIO;
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	pm_t *pm = (pm_t *) MMAP_PM;
 #endif
 
 	/* Setup Ports: */
 	switch (port) {
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	case 0:
 		/* UART0 */
 		out_8(&pm->pmcr0, 24);
@@ -340,7 +340,7 @@ int fecpin_setclear(fec_info_t *info, int setclear)
 	if (fec_get_base_addr(0, &fec0_base))
 		return -1;
 
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	if (setclear) {
 		out_8(&gpio->par_fec, 0x03);
 		out_8(&gpio->srcr_fec, 0x0F);

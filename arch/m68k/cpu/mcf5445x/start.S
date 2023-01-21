@@ -167,7 +167,7 @@ asm_dram_init:
 #endif
 #endif /* CONFIG_CF_SBF */
 
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	/* TC: enable all peripherals,
 	in the future only enable certain peripherals */
 	move.l	#0xFC04002D, %a1
@@ -175,7 +175,7 @@ asm_dram_init:
 #if defined(CONFIG_CF_SBF)
 	move.b	#23, (%a1)		/* dspi */
 #endif
-#endif	/* CONFIG_MCF5441x */
+#endif	/* CONFIG_MCF5441X */
 
 	/* mandatory board level ddr-sdram init,
 	 * for both 5441x and 5445x
@@ -193,7 +193,7 @@ asm_dram_init:
 	 */
 	/* Enable pins for DSPI mode - chip-selects are enabled later */
 asm_dspi_init:
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	move.l	#0xEC09404E, %a1
 	move.l	#0xEC09404F, %a2
 	move.b	#0xFF, (%a1)
@@ -205,7 +205,7 @@ asm_dspi_init:
 	move.l	#0x80FF0C00, (%a0)	/* Master, clear TX/RX FIFO */
 
 	move.l	#0xFC05C00C, %a0
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	move.l	#0x3E000016, (%a0)
 #endif
 

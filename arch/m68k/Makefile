@@ -16,12 +16,12 @@ cpuflags-$(CONFIG_M5282)	:= -mcpu=5282
 cpuflags-$(CONFIG_M5307)	:= -mcpu=5307
 cpuflags-$(CONFIG_MCF5301X)	:= -mcpu=53015 -fPIC
 cpuflags-$(CONFIG_MCF532X)	:= -mcpu=5329 -fPIC
-cpuflags-$(CONFIG_MCF5441x)	:= -mcpu=54418 -fPIC
+cpuflags-$(CONFIG_MCF5441X)	:= -mcpu=54418 -fPIC
 
 PLATFORM_CPPFLAGS += $(cpuflags-y)
 
 
-ldflags-$(CONFIG_MCF5441x)	:= --got=single
+ldflags-$(CONFIG_MCF5441X)	:= --got=single
 
 ifneq (,$(findstring -linux-,$(shell $(CC) --version)))
 ifneq (,$(findstring GOT,$(shell $(LD) --help)))

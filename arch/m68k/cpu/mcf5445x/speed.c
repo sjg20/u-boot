@@ -63,7 +63,7 @@ void clock_exit_limp(void)
 		;
 }
 
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 void setup_5441x_clocks(void)
 {
 	ccm_t *ccm = (ccm_t *)MMAP_CCM;
@@ -125,7 +125,7 @@ void setup_5441x_clocks(void)
 /* get_clocks() fills in gd->cpu_clock and gd->bus_clk */
 int get_clocks(void)
 {
-#ifdef CONFIG_MCF5441x
+#ifdef CONFIG_MCF5441X
 	setup_5441x_clocks();
 #endif
 
