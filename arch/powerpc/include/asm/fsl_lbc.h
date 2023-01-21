@@ -324,7 +324,7 @@ void lbc_sdram_init(void);
  */
 #define LCRR_CLKDIV			0x0000001F
 #define LCRR_CLKDIV_SHIFT		0
-#if defined(CONFIG_MPC83xx) || defined(CONFIG_ARCH_MPC8540) || \
+#if defined(CONFIG_MPC83XX) || defined(CONFIG_ARCH_MPC8540) || \
 	defined(CONFIG_ARCH_MPC8560)
 #define LCRR_CLKDIV_2			0x00000002
 #define LCRR_CLKDIV_4			0x00000004

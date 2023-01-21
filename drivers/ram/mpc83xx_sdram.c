@@ -122,7 +122,7 @@ phys_size_t get_effective_memsize(void)
 }
 
 /**
- * struct mpc83xx_sdram_priv - Private data for MPC83xx RAM controllers
+ * struct mpc83xx_sdram_priv - Private data for MPC83XX RAM controllers
  * @total_size: The total size of all RAM modules associated with this RAM
  *		controller in bytes
  */

@@ -581,10 +581,10 @@ config GDSYS_IOEP
 	  Support gdsys FPGA's IO endpoint driver.
 
 config MPC83XX_SERDES
-	bool "Enable MPC83xx serdes driver"
+	bool "Enable MPC83XX serdes driver"
 	depends on MISC
 	help
-	  Support for serdes found on MPC83xx SoCs.
+	  Support for serdes found on MPC83XX SoCs.
 
 config FS_LOADER
 	bool "Enable loader driver for file system"

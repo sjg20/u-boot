@@ -8,8 +8,8 @@ choice
 	prompt "CPU select"
 	optional
 
-config MPC83xx
-	bool "MPC83xx"
+config MPC83XX
+	bool "MPC83XX"
 	select CREATE_ARCH_SYMLINK
 	select SYS_FSL_HAS_SEC
 	select SYS_FSL_SEC_BE
@@ -36,7 +36,7 @@ endchoice
 
 config FSL_LBC
 	def_bool y
-	depends on (MPC85xx || MPC83xx) && !FSL_IFC
+	depends on (MPC85xx || MPC83XX) && !FSL_IFC
 
 config HIGH_BATS
 	bool "Enable high BAT registers"
@@ -46,7 +46,7 @@ config HIGH_BATS
 
 config SYS_INIT_RAM_LOCK
 	bool "Lock some portion of L1 for initial ram stack"
-	depends on MPC83xx || MPC85xx
+	depends on MPC83XX || MPC85xx
 
 config SYS_SRIO
 	bool "Serial RapidIO support"

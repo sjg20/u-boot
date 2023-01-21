@@ -172,12 +172,12 @@ static void set_mode(struct clk_mode *mode, u8 low, u8 high, int type)
  * retrieve_mode() - Get the clock mode description for a specific clock
  * @clk:      The identifier of the clock for which the clock description should
  *	      be retrieved
- * @soc_type: The type of MPC83xx SoC for which the clock description should be
+ * @soc_type: The type of MPC83XX SoC for which the clock description should be
  *	      retrieved
  * @mode:     Pointer to a clk_mode structure to be filled with data for the
  *	      clock
  *
- * Since some clock rate are stored in different places on different MPC83xx
+ * Since some clock rate are stored in different places on different MPC83XX
  * SoCs, the SoC type has to be supplied along with the clock's identifier.
  *
  * Return: 0 if OK, -ve on error
@@ -269,7 +269,7 @@ static int retrieve_mode(int clk, int soc_type, struct clk_mode *mode)
 
 /**
  * get_spmr() - Read the SPMR (System PLL Mode Register)
- * @im: Pointer to the MPC83xx main register map in question
+ * @im: Pointer to the MPC83XX main register map in question
  *
  * Return: The SPMR value as a 32-bit number.
  */
@@ -282,7 +282,7 @@ static inline u32 get_spmr(immap_t *im)
 
 /**
  * get_sccr() - Read the SCCR (System Clock Control Register)
- * @im: Pointer to the MPC83xx main register map in question
+ * @im: Pointer to the MPC83XX main register map in question
  *
  * Return: The SCCR value as a 32-bit number.
  */
@@ -295,7 +295,7 @@ static inline u32 get_sccr(immap_t *im)
 
 /**
  * get_lcrr() - Read the LCRR (Clock Ratio Register)
- * @im: Pointer to the MPC83xx main register map in question
+ * @im: Pointer to the MPC83XX main register map in question
  *
  * Return: The LCRR value as a 32-bit number.
  */
@@ -308,7 +308,7 @@ static inline u32 get_lcrr(immap_t *im)
 
 /**
  * get_pci_sync_in() - Read the PCI synchronization clock speed
- * @im: Pointer to the MPC83xx main register map in question
+ * @im: Pointer to the MPC83XX main register map in question
  *
  * Return: The PCI synchronization clock speed value as a 32-bit number.
  */
@@ -322,7 +322,7 @@ static inline u32 get_pci_sync_in(immap_t *im)
 
 /**
  * get_csb_clk() - Read the CSB (Coheren System Bus) clock speed
- * @im: Pointer to the MPC83xx main register map in question
+ * @im: Pointer to the MPC83XX main register map in question
  *
  * Return: The CSB clock speed value as a 32-bit number.
  */
@@ -336,7 +336,7 @@ static inline u32 get_csb_clk(immap_t *im)
 
 /**
  * spmr_field() - Read a specific SPMR field
- * @im:   Pointer to the MPC83xx main register map in question
+ * @im:   Pointer to the MPC83XX main register map in question
  * @mask: A bitmask that describes the bitfield to be read
  *
  * Return: The value of the bit field as a 32-bit number.
@@ -351,7 +351,7 @@ static inline uint spmr_field(immap_t *im, u32 mask)
 
 /**
  * sccr_field() - Read a specific SCCR field
- * @im:   Pointer to the MPC83xx main register map in question
+ * @im:   Pointer to the MPC83XX main register map in question
  * @mask: A bitmask that describes the bitfield to be read
  *
  * Return: The value of the bit field as a 32-bit number.
@@ -366,7 +366,7 @@ static inline uint sccr_field(immap_t *im, u32 mask)
 
 /**
  * lcrr_field() - Read a specific LCRR field
- * @im:   Pointer to the MPC83xx main register map in question
+ * @im:   Pointer to the MPC83XX main register map in question
  * @mask: A bitmask that describes the bitfield to be read
  *
  * Return: The value of the bit field as a 32-bit number.

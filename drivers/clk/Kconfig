@@ -138,10 +138,10 @@ config CLK_K210_SET_RATE
 	  feature adds around 1K to U-Boot's final size.
 
 config CLK_MPC83XX
-	bool "Enable MPC83xx clock driver"
+	bool "Enable MPC83XX clock driver"
 	depends on CLK
 	help
-	  Support for the clock driver of the MPC83xx series of SoCs.
+	  Support for the clock driver of the MPC83XX series of SoCs.
 
 config CLK_OCTEON
 	bool "Clock controller driver for Marvell MIPS Octeon"

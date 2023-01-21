@@ -1,5 +1,5 @@
 menu "mpc83xx CPU"
-	depends on MPC83xx
+	depends on MPC83XX
 
 config DEFAULT_IMMR
 	hex
@@ -90,7 +90,7 @@ endchoice
 config MPC83XX_QUICC_ENGINE
 	bool
 
-# TODO: Imply MPC83xx PCI driver
+# TODO: Imply MPC83XX PCI driver
 config MPC83XX_PCI_SUPPORT
 	bool
 

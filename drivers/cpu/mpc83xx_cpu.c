@@ -16,10 +16,10 @@
 #include "mpc83xx_cpu.h"
 
 /**
- * struct mpc83xx_cpu_priv - Private data for MPC83xx CPUs
- * @e300_type:      The e300 core type of the MPC83xx CPU
- * @family:         The MPC83xx family the CPU belongs to
- * @type:           The MPC83xx type of the CPU
+ * struct mpc83xx_cpu_priv - Private data for MPC83XX CPUs
+ * @e300_type:      The e300 core type of the MPC83XX CPU
+ * @family:         The MPC83XX family the CPU belongs to
+ * @type:           The MPC83XX type of the CPU
  * @is_e_processor: Flag indicating whether the CPU is a E processor or not
  * @is_a_variant:   Flag indicating whtther the CPU is a A variant or not
  * @revid:          The revision ID of the CPU
@@ -57,7 +57,7 @@ static inline u32 get_spridr(void)
 }
 
 /**
- * determine_type() - Determine CPU family of MPC83xx device
+ * determine_type() - Determine CPU family of MPC83XX device
  * @dev: CPU device from which to read CPU family from
  */
 static inline void determine_family(const struct udevice *dev)
@@ -92,7 +92,7 @@ static inline void determine_family(const struct udevice *dev)
 }
 
 /**
- * determine_type() - Determine CPU type of MPC83xx device
+ * determine_type() - Determine CPU type of MPC83XX device
  * @dev: CPU device from which to read CPU type from
  */
 static inline void determine_type(const struct udevice *dev)
@@ -166,7 +166,7 @@ static inline void determine_type(const struct udevice *dev)
 }
 
 /**
- * determine_e300_type() - Determine e300 core type of MPC83xx device
+ * determine_e300_type() - Determine e300 core type of MPC83XX device
  * @dev: CPU device from which to read e300 core type from
  */
 static inline void determine_e300_type(const struct udevice *dev)

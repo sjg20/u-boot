@@ -8,11 +8,11 @@ config CPU
 	  finding out information about available CPUs and making changes.
 
 config CPU_MPC83XX
-	bool "Enable MPC83xx CPU driver"
-	depends on CPU && MPC83xx
+	bool "Enable MPC83XX CPU driver"
+	depends on CPU && MPC83XX
 	select CLK_MPC83XX
 	help
-	  Support CPU cores for SoCs of the MPC83xx series.
+	  Support CPU cores for SoCs of the MPC83XX series.
 
 config CPU_RISCV
 	bool "Enable RISC-V CPU driver"

@@ -8,4 +8,4 @@ obj-y	+= tests.o
 
 obj-y += drivers/
 obj-$(CONFIG_PPC) += lib_powerpc/
-obj-$(CONFIG_MPC83xx) += cpu/mpc83xx/
+obj-$(CONFIG_MPC83XX) += cpu/mpc83xx/

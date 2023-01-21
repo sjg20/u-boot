@@ -2,7 +2,7 @@
 /*
  * Copyright 2004-2011 Freescale Semiconductor, Inc.
  *
- * MPC83xx Internal Memory Map
+ * MPC83XX Internal Memory Map
  *
  * Contributors:
  *	Dave Liu <daveliu@freescale.com>
@@ -864,12 +864,12 @@ struct ccsr_gpio {
 #define CFG_SYS_MPC8xxx_DDR_OFFSET	(0x2000)
 #define CFG_SYS_FSL_DDR_ADDR \
 			(CONFIG_SYS_IMMR + CFG_SYS_MPC8xxx_DDR_OFFSET)
-#define CFG_SYS_MPC83xx_DMA_OFFSET	(0x8000)
-#define CFG_SYS_MPC83xx_DMA_ADDR \
-			(CONFIG_SYS_IMMR + CFG_SYS_MPC83xx_DMA_OFFSET)
-#define CFG_SYS_MPC83xx_ESDHC_OFFSET	(0x2e000)
-#define CFG_SYS_MPC83xx_ESDHC_ADDR \
-			(CONFIG_SYS_IMMR + CFG_SYS_MPC83xx_ESDHC_OFFSET)
+#define CFG_SYS_MPC83XX_DMA_OFFSET	(0x8000)
+#define CFG_SYS_MPC83XX_DMA_ADDR \
+			(CONFIG_SYS_IMMR + CFG_SYS_MPC83XX_DMA_OFFSET)
+#define CFG_SYS_MPC83XX_ESDHC_OFFSET	(0x2e000)
+#define CFG_SYS_MPC83XX_ESDHC_ADDR \
+			(CONFIG_SYS_IMMR + CFG_SYS_MPC83XX_ESDHC_OFFSET)
 
 #define CFG_SYS_LBC_ADDR (&((immap_t *)CONFIG_SYS_IMMR)->im_lbc)
 

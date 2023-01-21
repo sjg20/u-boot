@@ -19,7 +19,7 @@
 #include <mpc85xx.h>
 #include <asm/immap_85xx.h>
 #endif
-#ifdef CONFIG_MPC83xx
+#ifdef CONFIG_MPC83XX
 #include <mpc83xx.h>
 #include <asm/immap_83xx.h>
 #endif
@@ -52,7 +52,7 @@ static inline uint get_svr(void)
 
 #if defined(CONFIG_MPC85xx)	|| \
 	defined(CONFIG_MPC86xx)	|| \
-	defined(CONFIG_MPC83xx)
+	defined(CONFIG_MPC83XX)
 unsigned char	in8(unsigned int);
 void		out8(unsigned int, unsigned char);
 unsigned short	in16(unsigned int);
@@ -68,7 +68,7 @@ void		ppcDcbi(unsigned long value);
 void		ppcSync(void);
 void		ppcDcbz(unsigned long value);
 #endif
-#if defined(CONFIG_MPC83xx)
+#if defined(CONFIG_MPC83XX)
 void		ppcDWload(unsigned int *addr, unsigned int *ret);
 void		ppcDWstore(unsigned int *addr, unsigned int *value);
 void disable_addr_trans(void);

@@ -43,7 +43,7 @@ struct bd_info {
 #if defined(CONFIG_M68K)
 	unsigned long	bi_mbar_base;	/* base of internal registers */
 #endif
-#if defined(CONFIG_MPC83xx)
+#if defined(CONFIG_MPC83XX)
 	unsigned long	bi_immrbar;
 #endif
 	unsigned long	bi_bootflags;	/* boot / reboot flag (Unused) */

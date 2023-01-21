@@ -22,7 +22,7 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 /**
- * struct mpc83xx_clk_priv - Private data structure for the MPC83xx clock
+ * struct mpc83xx_clk_priv - Private data structure for the MPC83XX clock
  *			     driver
  * @speed: Array containing the speed values of all system clocks (initialized
  *	   once, then only read back)
@@ -286,7 +286,7 @@ static ulong mpc83xx_clk_get_rate(struct clk *clk)
 
 static int mpc83xx_clk_enable(struct clk *clk)
 {
-	/* MPC83xx clocks are always enabled */
+	/* MPC83XX clocks are always enabled */
 	return 0;
 }
 

@@ -4,7 +4,7 @@
  */
 
 /*
- * CPU specific code for the MPC83xx family.
+ * CPU specific code for the MPC83XX family.
  *
  * Derived from the MPC8260 and MPC85xx.
  */

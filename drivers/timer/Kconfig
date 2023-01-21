@@ -153,11 +153,11 @@ config GXP_TIMER
 	  present on HPE GXP SoCs.
 
 config MPC83XX_TIMER
-	bool "MPC83xx timer support"
+	bool "MPC83XX timer support"
 	depends on TIMER
 	help
 	  Select this to enable support for the timer found on
-	  devices based on the MPC83xx family of SoCs.
+	  devices based on the MPC83XX family of SoCs.
 
 config RENESAS_OSTM_TIMER
 	bool "Renesas RZ/A1 R7S72100 OSTM Timer"

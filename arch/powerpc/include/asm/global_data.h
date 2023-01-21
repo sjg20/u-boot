@@ -21,7 +21,7 @@ struct arch_global_data {
 	unsigned long brg_clk;
 #endif
 	/* TODO: sjg@chromium.org: Should these be unslgned long? */
-#if defined(CONFIG_MPC83xx)
+#if defined(CONFIG_MPC83XX)
 #ifdef CONFIG_CLK_MPC83XX
 	u32 core_clk;
 #else
@@ -57,7 +57,7 @@ struct arch_global_data {
 	u32 lbc_clk;
 	void *cpu;
 #endif /* CONFIG_MPC85xx || CONFIG_MPC86xx */
-#if defined(CONFIG_MPC83xx) || defined(CONFIG_MPC85xx) || \
+#if defined(CONFIG_MPC83XX) || defined(CONFIG_MPC85xx) || \
 		defined(CONFIG_MPC86xx)
 	u32 i2c1_clk;
 	u32 i2c2_clk;
@@ -75,7 +75,7 @@ struct arch_global_data {
 	u32 used_tlb_cams[(CONFIG_SYS_NUM_TLBCAMS+31)/32];
 #endif
 	unsigned long reset_status;	/* reset status register at boot */
-#if defined(CONFIG_MPC83xx)
+#if defined(CONFIG_MPC83XX)
 	unsigned long arbiter_event_attributes;
 	unsigned long arbiter_event_address;
 #endif
