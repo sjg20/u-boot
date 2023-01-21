@@ -484,7 +484,7 @@ static int npcm_otp_bind(struct udevice *dev)
 	}
 	otp_priv->regs[0] = regs;
 
-	if (IS_ENABLED(CONFIG_ARCH_NPCM7xx)) {
+	if (IS_ENABLED(CONFIG_ARCH_NPCM7XX)) {
 		regs = dev_remap_addr_index(dev, 1);
 		if (!regs) {
 			printf("Cannot find reg address (arr #1), binding failed\n");

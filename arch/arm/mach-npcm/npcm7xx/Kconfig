@@ -1,4 +1,4 @@
-if ARCH_NPCM7xx
+if ARCH_NPCM7XX
 
 config SYS_CPU
         default "armv7"
