@@ -94,6 +94,13 @@ config VPL_ENV_SUPPORT
 	  control many aspects of U-Boot's operation. Enabling this option will
 	  make env_get() and env_set() available in VSPL.
 
+config VPL_ENV_IS_NOWHERE
+	bool "VPL Environment is not stored"
+	depends on VPL_ENV_SUPPORT
+	default y if ENV_IS_NOWHERE
+	help
+	  Similar to ENV_IS_NOWHERE, used for VPL environment.
+
 config VPL_GPIO
 	bool "Support GPIO in VPL"
 	default y if SPL_GPIO
