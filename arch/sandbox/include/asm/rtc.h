@@ -41,7 +41,7 @@ enum {
  */
 struct sandbox_i2c_rtc_plat_data {
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
-	struct dtd_sandbox_i2c_rtc_emul dtplat;
+	struct dtd_sandbox_rtc dtplat;
 #endif
 	long base_time;
 	long offset;
