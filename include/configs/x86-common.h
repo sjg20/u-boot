@@ -32,7 +32,7 @@
 #define CFG_OTHBOOTARGS	"othbootargs=acpi=off\0"
 #endif
 
-#if defined(CONFIG_DISTRO_DEFAULTS)
+#if CONFIG_IS_ENABLED(DISTRO_DEFAULTS)
 #define DISTRO_BOOTENV		BOOTENV
 #else
 #define DISTRO_BOOTENV
