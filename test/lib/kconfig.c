@@ -33,7 +33,7 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 	 * are detected, since otherwise a build error when building U-Boot may
 	 * cause SPL to not be built.
 	 */
-	if (!IS_ENABLED(CONFIG_SANDBOX_SPL) &&
+	if (!IS_ENABLED(CONFIG_SUPPORT_SPL) &&
 	    IS_ENABLED(CONFIG_TEST_KCONFIG)) {
 		val = IF_ENABLED_INT(CONFIG_TEST_KCONFIG_ENABLE,
 				     CONFIG_TEST_KCONFIG_VALUE);
@@ -46,7 +46,7 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 	 * are detected, since otherwise a build error when building U-Boot may
 	 * cause SPL to not be built.
 	 */
-	if (!IS_ENABLED(CONFIG_SANDBOX_SPL) &&
+	if (!IS_ENABLED(CONFIG_SUPPORT_SPL) &&
 	    CONFIG_IS_ENABLED(TEST_KCONFIG)) {
 		val = CONFIG_IF_ENABLED_INT(TEST_KCONFIG_ENABLE,
 					    TEST_KCONFIG_VALUE);

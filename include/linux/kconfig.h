@@ -114,9 +114,7 @@ long invalid_use_of_IF_ENABLED_INT(void);
  */
 
 #define CONFIG_IS_ENABLED(option, ...) \
-	((IS_ENABLED(CONFIG_ ## option ## _nospl) && IS_ENABLED(CONFIG_SPL_BUILD) ? \
-	(__concat(__CONFIG_NOT_ENABLED_, __count_args(option, ##__VA_ARGS__)) (option, ##__VA_ARGS__)) : \
-	(__concat(__CONFIG_IS_ENABLED_, __count_args(option, ##__VA_ARGS__)) (option, ##__VA_ARGS__))))
+	__concat(__CONFIG_IS_ENABLED_, __count_args(option, ##__VA_ARGS__)) (option, ##__VA_ARGS__)
 
 #ifndef __ASSEMBLY__
 /*

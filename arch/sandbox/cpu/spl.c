@@ -93,7 +93,7 @@ static int load_from_image(struct spl_image_info *spl_image,
 	void *buf;
 	int ret;
 
-	if (!IS_ENABLED(CONFIG_SANDBOX_VPL))
+	if (!IS_ENABLED(CONFIG_SUPPORT_VPL))
 		return -ENOENT;
 
 	next_phase = spl_next_phase();

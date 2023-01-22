@@ -603,9 +603,17 @@ static const char *get_spl_name(const struct symbol *sym, const void *arg)
 	int spl = (long)arg;
 	const char *name = sym->name;
 
-	/* Don't print it if this has an SPL symbol */
+	/*
+	 * Don't print it if this has an SPL symbol because processing of the
+	 * SPL symbol (e.g. SPL_FOO) will output CONFIG_FOO as well as
+	 * CONFIG_SPL_FOO
+	 */
 	if (sym->flags & SYMBOL_HAS_SPL)
 		return NULL;
+
+	/* Don't print it if it has no SPL equivalent */
+// 	if (sym->flags & SYMBOL_NO_SPL)
+// 		return NULL;
 
 	/*
 	 * If it is SPL, only print it if the SPL_ prefix matches
@@ -622,12 +630,13 @@ static const char *get_spl_name(const struct symbol *sym, const void *arg)
 }
 
 /*
- * Kconfig configuration printer for SPL
+ * auto.conf configuration printer for SPL
+ *
+ * This is used for creating auto.conf as well as SPL files like auto_spl.conf
  *
  * This printer is used when generating the resulting configuration after
  * kconfig invocation and `defconfig' files. Unset symbol might be omitted by
  * passing a non-NULL argument to the printer.
- *
  */
 static void spl_kconfig_print_symbol(FILE *fp, struct symbol *sym,
 				     const char *value, void *arg)
@@ -638,8 +647,14 @@ static void spl_kconfig_print_symbol(FILE *fp, struct symbol *sym,
 	if (!name)
 		return;
 
-	print_makefile_sym(fp, name, sym->type, value, false);
-	print_makefile_sym(fp, sym->name, sym->type, value, false);
+	/*
+	 * If this is an SPL symbol, first print the symbol without the SPL
+	 * prefix
+	 */
+	if (name != sym->name)
+		print_makefile_sym(fp, name, sym->type, value, true);
+	if (!(sym->flags & SYMBOL_NO_SPL))
+		print_makefile_sym(fp, sym->name, sym->type, value, true);
 }
 
 static struct conf_printer spl_kconfig_printer_cb = {
@@ -741,13 +756,10 @@ static void spl_header_print_symbol(FILE *fp, struct symbol *sym,
 	if (!name)
 		return;
 
-	if (!(sym->flags & (SYMBOL_SPL | SYMBOL_HAS_SPL))) {
-		/* This symbol cannot be used by CONFIG_IS_ENABLED() */
-		fprintf(fp, "#define %s%s_nospl 1\n", CONFIG_, name);
-	}
-
-	print_header_sym(fp, name, sym->type, value);
-	print_header_sym(fp, sym->name, sym->type, value);
+	if (name != sym->name)
+		print_header_sym(fp, name, sym->type, value);
+	if (!(sym->flags & SYMBOL_NO_SPL))
+		print_header_sym(fp, sym->name, sym->type, value);
 }
 
 static struct conf_printer spl_header_printer_cb = {
@@ -1217,10 +1229,12 @@ int conf_write_autoconf(void)
 		conf_write_symbol(out_h, sym, &header_printer_cb, NULL);
 
 		for (spl = 0; spl < NUM_SPLS; spl++) {
+			/* write make variables to auto_<spl>.conf */
 			conf_write_symbol(out_spl[spl], sym,
 					  &spl_kconfig_printer_cb,
 					  (void *)(long)spl);
 
+			/* write #defines to autoconf_<spl>.h */
 			conf_write_symbol(out_h_spl[spl], sym,
 					  &spl_header_printer_cb,
 					  (void *)(long)spl);
@@ -1545,9 +1559,80 @@ void conf_mark_spl_symbols(void)
 			non_spl = sym_find(sym->name + len + 1);
 			if (non_spl)
 				non_spl->flags |= SYMBOL_HAS_SPL;
-			else
-				sym->flags |= SYMBOL_SPL_ONLY;
 		}
 	}
 }
 
+static int process_file(const char *fname, bool search_spl)
+{
+	static char fullname[PATH_MAX+1];
+	const char *env;
+	char buf[256];
+	FILE *f;
+	char *s;
+
+	env = getenv(SRCTREE);
+	if (!env) {
+		fprintf(stderr, "No %s environment variable\n", SRCTREE);
+		return 1;
+	}
+	snprintf(fullname, sizeof(fullname), "%s/scripts/%s", env, fname);
+	f = fopen(fullname, "r");
+	if (!f) {
+		fprintf(stderr, "Cannot open '%s'\n", fullname);
+		return 1;
+	}
+	while (s = fgets(buf, sizeof(buf), f), s) {
+		struct symbol *sym;
+		int len;
+
+		len = strlen(s);
+		if (len)
+			s[len - 1] = '\0';
+		if (*s == '#' || !*s)
+			continue;
+
+		if (search_spl) {
+			int spl;
+
+			for (spl = 0; spl < NUM_SPLS; spl++) {
+				int slen;
+
+				slen = strlen(spl_name[spl]);
+				if (!strncmp(s, spl_name[spl], slen)) {
+					sym = sym_find(s + slen);
+					if (sym)
+						sym->flags |= SYMBOL_NO_PROPER;
+				}
+			}
+		} else {
+			sym = sym_find(s);
+			if (!sym) {
+				/*
+				 * perhaps we could drop these in config_nospl
+				 *
+				 * fprintf(stderr, "Unknown symbol from '%s': %s\n",
+				 *	fullname, s);
+				 */
+				continue;
+			}
+			sym->flags |= SYMBOL_NO_SPL;
+		}
+	}
+	fclose(f);
+
+	return 0;
+}
+
+int conf_mark_symbols(void)
+{
+	conf_mark_spl_symbols();
+	if (process_file("conf_nospl", false))
+		return 1;
+	if (process_file("conf_noproper", true))
+		return 1;
+
+	return 0;
+}
+
+//
