@@ -4,11 +4,13 @@
  * (C) Copyright 2021 Asherah Connor <ashe@kivikakk.ee>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_QFW
 
 #include <common.h>
 #include <bootdev.h>
 #include <bootflow.h>
+#include <bootmeth.h>
 #include <command.h>
 #include <errno.h>
 #include <log.h>
@@ -326,27 +328,24 @@ static int qfw_post_bind(struct udevice *dev)
 static int qfw_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
 			    struct bootflow *bflow)
 {
-	struct udevice *qfw_dev = dev_get_parent(dev);
-	ulong load, initrd;
+	const struct udevice *media = dev_get_parent(dev);
 	int ret;
 
-	printf("iter->part=%d\n", iter->part);
+	log_debug("media=%s\n", media->name);
+	ret = bootmeth_check(bflow->method, iter);
+	if (ret)
+		return log_msg_ret("check", ret);
+
+	log_debug("iter->part=%d\n", iter->part);
+
 	/* We only support the whole device, not partitions */
 	if (iter->part)
 		return log_msg_ret("max", -ESHUTDOWN);
 
-	load = env_get_hex("kernel_addr_r", 0);
-	initrd = env_get_hex("ramdisk_addr_r", 0);
-	ret = qemu_fwcfg_setup_kernel(qfw_dev, load, initrd);
+	log_debug("reading bootflow with method: %s\n", bflow->method->name);
+	ret = bootmeth_read_bootflow(bflow->method, bflow);
 	if (ret)
-		return log_msg_ret("cmd", -EIO);
-	bflow->state = BOOTFLOWST_MEDIA;
-
-	ret = bootmeth_set_bootflow(bflow->method, bflow, buf, size);
-	if (ret) {
-		free(buf);
 		return log_msg_ret("method", ret);
-	}
 
 	return 0;
 }
