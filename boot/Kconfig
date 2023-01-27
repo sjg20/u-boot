@@ -354,6 +354,15 @@ config BOOTSTD
 	bool "Standard boot support"
 	default y
 	depends on DM && OF_CONTROL && BLK
+	imply USE_BOOTCOMMAND
+	# bootstd does not require the commands, but this is how the filesystems
+	# are enabled
+	imply CMD_EXT2
+	imply CMD_EXT4
+	imply CMD_FAT
+	imply CMD_FS_GENERIC
+	imply CMD_PXE if NET
+	imply USB_STORAGE
 	help
 	  U-Boot supports a standard way of locating something to boot,
 	  typically an Operating System such as Linux, provided by a distro such
