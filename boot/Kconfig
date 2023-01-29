@@ -408,6 +408,10 @@ config VPL_BOOTSTD
 	  boot. It is enabled by default since the main purpose of VPL is to
 	  handle the firmware part of VBE.
 
+config SPL_BOOTSTD_FULL
+	def_bool n  # "Enhanced features for standard boot"
+	depends on BOOTSTD && SPL
+
 if BOOTSTD
 
 config BOOTSTD_BOOTCOMMAND
