@@ -5,6 +5,10 @@ config DM_HWSPINLOCK
 	help
 	  This option enables U-Boot hardware spinlock support
 
+config SPL_DM_HWSPINLOCK
+	def_bool n  # Enable U-Boot hardware spinlock support (SPL)
+	depends on SPL
+
 config HWSPINLOCK_SANDBOX
 	bool "Enable Hardware Spinlock support for Sandbox"
 	depends on SANDBOX && DM_HWSPINLOCK
