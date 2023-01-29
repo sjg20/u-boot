@@ -287,6 +287,10 @@ config GENERATE_ACPI_TABLE
 	  by the operating system. It defines platform-independent interfaces
 	  for configuration and power management monitoring.
 
+config SPL_GENERATE_ACPI_TABLE
+	def_bool n  # Generate an ACPI table (SPL)
+	depends on SPL && SUPPORT_ACPI
+
 config SPL_TINY_MEMSET
 	bool "Use a very small memset() in SPL"
 	depends on SPL
