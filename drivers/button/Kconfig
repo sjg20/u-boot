@@ -9,6 +9,10 @@ config BUTTON
 	  can provide access to board-specific buttons. Use of the device tree
 	  for configuration is encouraged.
 
+config SPL_BUTTON
+	def_bool n  # Enable button support (SPL)
+	depends on SPL
+
 config BUTTON_ADC
 	bool "Button adc"
 	depends on BUTTON
