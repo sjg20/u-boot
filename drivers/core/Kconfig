@@ -275,6 +275,10 @@ config DEVRES
 	  non-managed variants.  For example, devres_alloc() to kzalloc(),
 	  devm_kmalloc() to kmalloc(), etc.
 
+config SPL_DEVRES
+	def_bool n  # Managed device resources (SPL)
+	depends on SPL_DM
+
 config DEBUG_DEVRES
 	bool "Managed device resources debugging functions"
 	depends on DEVRES
