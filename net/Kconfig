@@ -34,6 +34,10 @@ config BOOTDEV_ETH
 	  an operationg system over the network, using the PXE (Preboot
 	  Execution Environment) protocol.
 
+config SPL_BOOTDEV_ETH
+	def_bool n  # "Enable bootdev for ethernet (SPL)"
+	depends on SPL_BOOTSTD
+
 config BOOTP_SEND_HOSTNAME
 	bool "Send hostname to DNS server"
 	help
