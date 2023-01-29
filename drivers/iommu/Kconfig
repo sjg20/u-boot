@@ -14,6 +14,10 @@ config IOMMU
 	  memory if the IOMMU has been programmed to allow access to
 	  that memory.
 
+config SPL_IOMMU
+	def_bool n  # Enable Driver Model for IOMMU drivers (SPL)
+	depends on SPL_DM
+
 config APPLE_DART
 	bool "Apple DART support"
 	depends on IOMMU && ARCH_APPLE
