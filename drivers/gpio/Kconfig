@@ -316,6 +316,10 @@ config QCOM_PMIC_GPIO
 	  Power and reset buttons are placed in "pwkey_qcom" bank and
           have gpio numbers 0 and 1 respectively.
 
+config SPL_QCOM_PMIC_GPIO
+	def_bool n  # Qualcomm generic PMIC GPIO/keypad driver (SPL)
+	depends on SPL_DM_GPIO && SPL_PMIC_QCOM
+
 config PCF8575_GPIO
 	bool "PCF8575 I2C GPIO Expander driver"
 	depends on DM_GPIO && DM_I2C
