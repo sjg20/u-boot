@@ -680,6 +680,10 @@ config CRC32_VERIFY
 	help
 	  Add -v option to verify data against a crc32 checksum.
 
+config SPL_CRC32_VERIFY
+	def_bool n  # crc32 -v (SPL)
+	depends on SPL
+
 config CMD_EEPROM
 	bool "eeprom - EEPROM subsystem"
 	help
