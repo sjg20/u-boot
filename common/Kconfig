@@ -818,6 +818,10 @@ config AVB_VERIFY
 	    * Helpers to access MMC, similar to drivers/fastboot/fb_mmc.c.
 	    * Helpers to alloc/init/free avb ops.
 
+config SPL_AVB_VERIFY
+	def_bool n # Build Android Verified Boot operations (SPL)
+	depends on SPL
+
 if AVB_VERIFY
 
 config AVB_BUF_ADDR
