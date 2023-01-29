@@ -782,6 +782,10 @@ config ERRNO_STR
 	  - if errno is null or positive number - a pointer to "Success" message
 	  - if errno is negative - a pointer to errno related message
 
+config SPL_ERRNO_STR
+	def_bool n  # Enable function for getting errno-related string message (SPL)
+	depends on SPL
+
 config HEXDUMP
 	bool "Enable hexdump"
 	help
