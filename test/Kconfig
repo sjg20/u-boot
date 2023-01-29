@@ -75,6 +75,11 @@ config UT_COMPRESSION
 	  Enables tests for compression and decompression routines for simple
 	  sanity and for buffer overflow conditions.
 
+config SPL_UT_COMPRESSION
+	def_bool n
+	help
+	  Dummy option to ensure that this feature is not enabled in SPL.
+
 config UT_LOG
 	bool "Unit tests for logging functions"
 	depends on UNIT_TEST
