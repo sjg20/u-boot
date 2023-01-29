@@ -99,6 +99,10 @@ config RESET_ROCKCHIP
 	  though is that some reset signals, like I2C or MISC reset multiple
 	  devices.
 
+config SPL_RESET_ROCKCHIP
+	def_bool n  # Reset controller driver for Rockchip SoCs (SPL)
+	depends on SPL_DM_RESET && ARCH_ROCKCHIP && SPL_CLK
+
 config RESET_HSDK
 	bool "Synopsys HSDK Reset Driver"
 	depends on DM_RESET && TARGET_HSDK
