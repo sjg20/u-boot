@@ -88,6 +88,10 @@ config BOOTDEV_SPI_FLASH
 
 	  If unsure, say N
 
+config SPL_BOOTDEV_SPI_FLASH
+	def_bool n  # "SPI Flash bootdev support"
+	depends on SPL_SPI_FLASH_SUPPORT
+
 config SPI_FLASH_SFDP_SUPPORT
 	bool "SFDP table parsing support for SPI NOR flashes"
 	depends on !SPI_FLASH_BAR
