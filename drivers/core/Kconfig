@@ -453,6 +453,9 @@ config ACPIGEN
 	  things like generating device-specific tables and returning the ACPI
 	  name of a device.
 
+config SPL_ACPIGEN
+	def_bool n
+
 config BOUNCE_BUFFER
 	bool "Include bounce buffer API"
 	help
