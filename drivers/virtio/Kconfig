@@ -22,6 +22,10 @@ config VIRTIO
 	  This option is selected by any driver which implements the virtio
 	  transport, such as CONFIG_VIRTIO_MMIO or CONFIG_VIRTIO_PCI.
 
+config SPL_VIRTIO
+	def_bool n
+	depends on SPL
+
 config VIRTIO_MMIO
 	bool "Platform bus driver for memory mapped virtio devices"
 	select VIRTIO
