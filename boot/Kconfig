@@ -103,6 +103,10 @@ config FIT_CIPHER
 	  Enable the feature of data ciphering/unciphering in the tool mkimage
 	  and in the u-boot support of the FIT image.
 
+config SPL_FIT_CIPHER
+	def_bool n  # Enable ciphering data in a FIT uImages (SPL
+	depends on SPL_DM && SPL_FIT
+
 config FIT_VERBOSE
 	bool "Show verbose messages when FIT images fail"
 	depends on FIT
