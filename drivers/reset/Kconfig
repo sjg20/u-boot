@@ -132,6 +132,10 @@ config RESET_MEDIATEK
 	help
 	  Support for reset controller on MediaTek SoCs.
 
+config SPL_RESET_MEDIATEK
+	def_bool n  # Reset controller driver for MediaTek SoCs (SPL)
+	depends on SPL_DM_RESET && ARCH_MEDIATEK && SPL_CLK
+
 config RESET_MTMIPS
 	bool "Reset controller driver for MediaTek MIPS platform"
 	depends on DM_RESET && ARCH_MTMIPS
