@@ -354,6 +354,11 @@ config PXE_UTILS
 	help
 	  Utilities for parsing PXE file formats.
 
+config SPL_PXE_UTILS
+	bool
+	help
+	  Utilities for parsing PXE file formats (SPL)
+
 config BOOTSTD
 	bool "Standard boot support"
 	default y
@@ -445,6 +450,9 @@ config BOOTMETH_DISTRO
 
 	  This provides a way to try out standard boot on an existing boot flow.
 
+config SPL_BOOTMETH_DISTRO
+	def_bool n # Bootdev support for distro boot (SPL)
+
 config BOOTMETH_DISTRO_PXE
 	bool "Bootdev support for distro boot over network"
 	depends on CMD_PXE && CMD_NET && DM_ETH
@@ -454,6 +462,9 @@ config BOOTMETH_DISTRO_PXE
 	  bootdevs look for a 'extlinux/extlinux.conf' on the tftp server.
 
 	  This provides a way to try out standard boot on an existing boot flow.
+
+config SPL_BOOTMETH_DISTRO_PXE
+	def_bool n # Bootdev support for distro boot over network (SPL)
 
 config BOOTMETH_EFILOADER
 	bool "Bootdev support for EFI boot"
@@ -475,6 +486,9 @@ config BOOTMETH_EFILOADER
 	     riscv64   - RISC-V 64-bit
 
 	  This provides a way to try out standard boot on an existing boot flow.
+
+config SPL_BOOTMETH_EFILOADER
+	def_bool n # Bootdev support for EFI boot (SPL)
 
 config BOOTMETH_VBE
 	bool "Bootdev support for Verified Boot for Embedded"
@@ -539,6 +553,9 @@ config BOOTMETH_VBE_SIMPLE_OS
 	  for booting into the OS. This option is only enabled for U-Boot
 	  proper, since it is the phase where device tree fixups happen.
 
+config SPL_BOOTMETH_VBE_SIMPLE_OS
+	def_bool n # Bootdev support for VBE 'simple' method OS phase (SPL)
+
 config SPL_BOOTMETH_VBE_SIMPLE
 	bool "Bootdev support for VBE 'simple' method (SPL)"
 	depends on SPL
@@ -599,6 +616,10 @@ config BOOTMETH_SANDBOX
 	  This is a sandbox bootmeth driver used for testing. It always returns
 	  -ENOTSUPP when attempting to boot.
 
+config SPL_BOOTMETH_SANDBOX
+	def_bool n
+	depends on SANDBOX
+
 config BOOTMETH_SCRIPT
 	bool "Bootdev support for U-Boot scripts"
 	default y if BOOTSTD_FULL
@@ -609,6 +630,9 @@ config BOOTMETH_SCRIPT
 
 	  This provides a way to try out standard boot on an existing boot flow.
 	  It is not enabled by default to save space.
+
+config SPL_BOOTMETH_SCRIPT
+	def_bool n # Bootdev support for U-Boot scripts (SPL)
 
 endif
 
