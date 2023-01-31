@@ -61,32 +61,26 @@
 #define __unwrap1(case1, case0) __unwrap case1
 #define __unwrap0(case1, case0) __unwrap case0
 
-#define __CONFIG_IS_ENABLED_1(option)        __CONFIG_IS_ENABLED_3(option, (1), (0))
-#define __CONFIG_IS_ENABLED_2(option, case1) __CONFIG_IS_ENABLED_3(option, case1, ())
-#define __CONFIG_IS_ENABLED_3(option, case1, case0) \
+#define __IS_ENABLED_1(option)        __IS_ENABLED_3(option, (1), (0))
+#define __IS_ENABLED_2(option, case1) __IS_ENABLED_3(option, case1, ())
+#define __IS_ENABLED_3(option, case1, case0) \
 	__concat(__unwrap, config_enabled(option, 0)) (case1, case0)
 
 /*
- * CONFIG_IS_ENABLED(CONFIG_FOO) returns 1 if CONFIG_FOO is enabled for the
- * phase being built, else 0.
+ * IS_ENABLED(CONFIG_FOO) returns 1 if CONFIG_FOO is enabled for the phase being
+ * built, else 0.
  *
  * The optional second and third arguments must be parenthesized; that
  * allows one to include a trailing comma, e.g. for use in
  *
- * CONFIG_IS_ENABLED(CONFIG_ACME, ({.compatible = "acme,frobnozzle"},))
+ * IS_ENABLED(CONFIG_ACME, ({.compatible = "acme,frobnozzle"},))
  *
  * which adds an entry to the array being defined if CONFIG_ACME is
  * set, and nothing otherwise.
  */
 
-#define CONFIG_IS_ENABLED(option, ...) \
-	__concat(__CONFIG_IS_ENABLED_, __count_args(option, ##__VA_ARGS__)) (option, ##__VA_ARGS__)
-
-/*
- * IS_ENABLED(CONFIG_FOO) evaluates to 1 if CONFIG_FOO is set to 'y',
- * 0 otherwise.
- */
-#define IS_ENABLED(option, ...)  CONFIG_IS_ENABLED(option, ##__VA_ARGS__)
+#define IS_ENABLED(option, ...) \
+	__concat(__IS_ENABLED_, __count_args(option, ##__VA_ARGS__)) (option, ##__VA_ARGS__)
 
 #ifndef __ASSEMBLY__
 /*
