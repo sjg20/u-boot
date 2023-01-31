@@ -880,7 +880,7 @@ static int am654_ddrss_power_on(struct am654_ddrss_desc *ddrss)
 	}
 
 	/* VTT enable */
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	device_get_supply_regulator(ddrss->dev, "vtt-supply",
 				    &ddrss->vtt_supply);
 	ret = regulator_set_value(ddrss->vtt_supply, 3300000);

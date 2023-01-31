@@ -88,7 +88,7 @@ struct mt7628_pinctrl_priv {
 	void __iomem *pcbase;
 };
 
-#if CONFIG_IS_ENABLED(PINMUX)
+#if IS_ENABLED(CONFIG_PINMUX)
 static const struct mtmips_pmx_func ephy4_1_pad_grp[] = {
 	FUNC("digital", 0xf),
 	FUNC("analog", 0),
@@ -377,9 +377,9 @@ static const char *mt7628_get_group_name(struct udevice *dev,
 {
 	return mt7628_pinmux_data[selector].name;
 }
-#endif /* CONFIG_IS_ENABLED(PINMUX) */
+#endif /* IS_ENABLED(CONFIG_PINMUX) */
 
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 static const struct pinconf_param mt7628_conf_params[] = {
 	{ "bias-disable", PIN_CONFIG_BIAS_DISABLE, 0 },
 	{ "bias-pull-up", PIN_CONFIG_BIAS_PULL_UP, 1 },
@@ -527,10 +527,10 @@ static int mt7628_pinctrl_probe(struct udevice *dev)
 	struct mt7628_pinctrl_priv *priv = dev_get_priv(dev);
 	int ret = 0;
 
-#if CONFIG_IS_ENABLED(PINMUX)
+#if IS_ENABLED(CONFIG_PINMUX)
 	ret = mtmips_pinctrl_probe(&priv->mp, ARRAY_SIZE(mt7628_pinmux_data),
 				   mt7628_pinmux_data);
-#endif /* CONFIG_IS_ENABLED(PINMUX) */
+#endif /* IS_ENABLED(CONFIG_PINMUX) */
 
 	return ret;
 }
@@ -553,20 +553,20 @@ static int mt7628_pinctrl_of_to_plat(struct udevice *dev)
 }
 
 static const struct pinctrl_ops mt7628_pinctrl_ops = {
-#if CONFIG_IS_ENABLED(PINMUX)
+#if IS_ENABLED(CONFIG_PINMUX)
 	.get_groups_count = mt7628_get_groups_count,
 	.get_group_name = mt7628_get_group_name,
 	.get_functions_count = mtmips_get_functions_count,
 	.get_function_name = mtmips_get_function_name,
 	.pinmux_group_set = mtmips_pinmux_group_set,
-#endif /* CONFIG_IS_ENABLED(PINMUX) */
-#if CONFIG_IS_ENABLED(PINCONF)
+#endif /* IS_ENABLED(CONFIG_PINMUX) */
+#if IS_ENABLED(CONFIG_PINCONF)
 	.pinconf_num_params = ARRAY_SIZE(mt7628_conf_params),
 	.pinconf_params = mt7628_conf_params,
 	.get_pins_count = mt7628_get_pins_count,
 	.get_pin_name = mt7628_get_pin_name,
 	.pinconf_set = mt7628_pinconf_set,
-#endif /* CONFIG_IS_ENABLED(PINCONF) */
+#endif /* IS_ENABLED(CONFIG_PINCONF) */
 	.set_state = pinctrl_generic_set_state,
 };
 

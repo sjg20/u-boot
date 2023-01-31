@@ -40,7 +40,7 @@
 #endif
 
 #if defined(CONFIG_NAND_SPL) || \
-	(defined(CONFIG_SPL_BUILD) && CONFIG_IS_ENABLED(INIT_MINIMAL))
+	(defined(CONFIG_SPL_BUILD) && IS_ENABLED(CONFIG_INIT_MINIMAL))
 #define MINIMAL_SPL
 #endif
 

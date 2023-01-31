@@ -114,7 +114,7 @@ static bool ich9_can_do_33mhz(struct udevice *dev)
 	struct ich_spi_priv *priv = dev_get_priv(dev);
 	u32 fdod, speed;
 
-	if (!CONFIG_IS_ENABLED(PCI) || !priv->pch)
+	if (!IS_ENABLED(CONFIG_PCI) || !priv->pch)
 		return false;
 	/* Observe SPI Descriptor Component Section 0 */
 	dm_pci_write_config32(priv->pch, 0xb0, 0x1000);
@@ -604,7 +604,7 @@ static int ich_spi_exec_op(struct spi_slave *slave, const struct spi_mem_op *op)
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 /**
  * ich_spi_get_basics() - Get basic information about the ICH device
  *
@@ -672,7 +672,7 @@ static int ich_get_mmap_bus(struct udevice *bus, ulong *map_basep,
 			    uint *map_sizep, uint *offsetp)
 {
 	pci_dev_t spi_bdf;
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	if (device_is_on_pci_bus(bus)) {
 		struct pci_child_plat *pplat;
 
@@ -940,7 +940,7 @@ static int ich_spi_of_to_plat(struct udevice *dev)
 {
 	struct ich_spi_plat *plat = dev_get_plat(dev);
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	struct ich_spi_priv *priv = dev_get_priv(dev);
 	int ret;
 

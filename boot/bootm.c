@@ -126,7 +126,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	/* get image parameters */
 	switch (genimg_get_format(os_hdr)) {
-#if CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)
+#if IS_ENABLED(CONFIG_LEGACY_IMAGE_FORMAT)
 	case IMAGE_FORMAT_LEGACY:
 		images.os.type = image_get_type(os_hdr);
 		images.os.comp = image_get_comp(os_hdr);
@@ -137,7 +137,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 		images.os.arch = image_get_arch(os_hdr);
 		break;
 #endif
-#if CONFIG_IS_ENABLED(FIT)
+#if IS_ENABLED(CONFIG_FIT)
 	case IMAGE_FORMAT_FIT:
 		if (fit_image_get_type(images.fit_hdr_os,
 				       images.fit_noffset_os,
@@ -209,7 +209,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 		/* Kernel entry point is the setup.bin */
 	} else if (images.legacy_hdr_valid) {
 		images.ep = image_get_ep(&images.legacy_hdr_os_copy);
-#if CONFIG_IS_ENABLED(FIT)
+#if IS_ENABLED(CONFIG_FIT)
 	} else if (images.fit_uname_os) {
 		int ret;
 
@@ -293,7 +293,7 @@ int bootm_find_images(int flag, int argc, char *const argv[], ulong start,
 		return 1;
 	}
 
-#if CONFIG_IS_ENABLED(OF_LIBFDT)
+#if IS_ENABLED(CONFIG_OF_LIBFDT)
 	/* find flattened device tree */
 	ret = boot_get_fdt(flag, argc, argv, IH_ARCH_DEFAULT, &images,
 			   &images.ft_addr, &images.ft_len);
@@ -317,7 +317,7 @@ int bootm_find_images(int flag, int argc, char *const argv[], ulong start,
 		set_working_fdt_addr(map_to_sysmem(images.ft_addr));
 #endif
 
-#if CONFIG_IS_ENABLED(FIT)
+#if IS_ENABLED(CONFIG_FIT)
 	if (IS_ENABLED(CONFIG_FPGA)) {
 		/* find bitstreams */
 		ret = boot_get_fpga(argc, argv, &images, IH_ARCH_DEFAULT,
@@ -733,7 +733,7 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 		}
 	}
 #endif
-#if CONFIG_IS_ENABLED(OF_LIBFDT) && defined(CONFIG_LMB)
+#if IS_ENABLED(CONFIG_OF_LIBFDT) && defined(CONFIG_LMB)
 	if (!ret && (states & BOOTM_STATE_FDT)) {
 		boot_fdt_add_mem_rsv_regions(&images->lmb, images->ft_addr);
 		ret = boot_relocate_fdt(&images->lmb, &images->ft_addr,
@@ -809,7 +809,7 @@ err:
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)
+#if IS_ENABLED(CONFIG_LEGACY_IMAGE_FORMAT)
 /**
  * image_get_kernel - verify legacy format kernel image
  * @img_addr: in RAM address of the legacy format image to be verified
@@ -878,14 +878,14 @@ static const void *boot_get_kernel(struct cmd_tbl *cmdtp, int flag, int argc,
 				   char *const argv[], struct bootm_headers *images,
 				   ulong *os_data, ulong *os_len)
 {
-#if CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)
+#if IS_ENABLED(CONFIG_LEGACY_IMAGE_FORMAT)
 	struct legacy_img_hdr	*hdr;
 #endif
 	ulong		img_addr;
 	const void *buf;
 	const char	*fit_uname_config = NULL;
 	const char	*fit_uname_kernel = NULL;
-#if CONFIG_IS_ENABLED(FIT)
+#if IS_ENABLED(CONFIG_FIT)
 	int		os_noffset;
 #endif
 
@@ -902,7 +902,7 @@ static const void *boot_get_kernel(struct cmd_tbl *cmdtp, int flag, int argc,
 	*os_data = *os_len = 0;
 	buf = map_sysmem(img_addr, 0);
 	switch (genimg_get_format(buf)) {
-#if CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)
+#if IS_ENABLED(CONFIG_LEGACY_IMAGE_FORMAT)
 	case IMAGE_FORMAT_LEGACY:
 		printf("## Booting kernel from Legacy Image at %08lx ...\n",
 		       img_addr);
@@ -946,7 +946,7 @@ static const void *boot_get_kernel(struct cmd_tbl *cmdtp, int flag, int argc,
 		bootstage_mark(BOOTSTAGE_ID_DECOMP_IMAGE);
 		break;
 #endif
-#if CONFIG_IS_ENABLED(FIT)
+#if IS_ENABLED(CONFIG_FIT)
 	case IMAGE_FORMAT_FIT:
 		os_noffset = fit_image_load(images, img_addr,
 				&fit_uname_kernel, &fit_uname_config,

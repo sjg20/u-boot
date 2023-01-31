@@ -546,7 +546,7 @@ void enable_caches(void)
 	dcache_enable();
 }
 
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 u64 get_page_table_size(void)
 {
 	u64 one_pt = MAX_PTE_ENTRIES * sizeof(u64);

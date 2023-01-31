@@ -12,7 +12,7 @@
 #include <log.h>
 #include <asm/global_data.h>
 
-#if CONFIG_IS_ENABLED(UNIT_TEST)
+#if IS_ENABLED(CONFIG_UNIT_TEST)
 #define DEBUG
 #endif
 
@@ -1310,7 +1310,7 @@ Void_t* mALLOc(bytes) size_t bytes;
 		return malloc_simple(bytes);
 #endif
 
-  if (CONFIG_IS_ENABLED(UNIT_TEST) && malloc_testing) {
+  if (IS_ENABLED(CONFIG_UNIT_TEST) && malloc_testing) {
     if (--malloc_max_allocs < 0)
       return NULL;
   }

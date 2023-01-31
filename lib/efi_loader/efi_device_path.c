@@ -863,7 +863,7 @@ static void *dp_part_node(void *buf, struct blk_desc *desc, int part)
 			break;
 		case SIG_TYPE_GUID:
 			hddp->signature_type = 2;
-#if CONFIG_IS_ENABLED(PARTITION_UUIDS)
+#if IS_ENABLED(CONFIG_PARTITION_UUIDS)
 			/* info.uuid exists only with PARTITION_UUIDS */
 			if (uuid_str_to_bin(info.uuid,
 					    hddp->partition_signature,

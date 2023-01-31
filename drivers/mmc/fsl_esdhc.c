@@ -103,7 +103,7 @@ struct fsl_esdhc_priv {
 	unsigned int sdhc_clk;
 	bool is_sdhc_per_clk;
 	unsigned int clock;
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 	struct mmc *mmc;
 #endif
 	struct udevice *dev;
@@ -852,7 +852,7 @@ __weak int esdhc_status_fixup(void *blob, const char *compat)
 }
 
 
-#if CONFIG_IS_ENABLED(DM_MMC)
+#if IS_ENABLED(CONFIG_DM_MMC)
 static int fsl_esdhc_get_cd(struct udevice *dev);
 static void esdhc_disable_for_no_card(void *blob)
 {
@@ -893,7 +893,7 @@ void fdt_fixup_esdhc(void *blob, struct bd_info *bd)
 }
 #endif
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 static int esdhc_getcd(struct mmc *mmc)
 {
 	struct fsl_esdhc_priv *priv = mmc->priv;

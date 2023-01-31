@@ -174,7 +174,7 @@
 
 struct phy_meson_axg_mipi_dphy_priv {
 	struct regmap *regmap;
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	struct clk clk;
 #endif
 	struct reset_ctl reset;
@@ -362,7 +362,7 @@ int meson_axg_mipi_dphy_probe(struct udevice *dev)
 		return ret;
 	}
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_get_by_index(dev, 0, &priv->clk);
 	if (ret < 0)
 		return ret;

@@ -96,7 +96,7 @@ static int sandbox_mmc_send_cmd(struct udevice *dev, struct mmc_cmd *cmd,
 	case SD_CMD_ERASE_WR_BLK_END:
 		erase_end = cmd->cmdarg;
 		break;
-#if CONFIG_IS_ENABLED(MMC_WRITE)
+#if IS_ENABLED(CONFIG_MMC_WRITE)
 	case MMC_CMD_ERASE: {
 		struct mmc *mmc = mmc_get_mmc_dev(dev);
 

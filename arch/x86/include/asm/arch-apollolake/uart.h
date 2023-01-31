@@ -18,7 +18,7 @@
  * dev_get_plat() without any offsets or adjustments.
  */
 struct apl_ns16550_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_intel_apl_ns16550 dtplat;
 #endif
 	struct ns16550_plat ns16550;

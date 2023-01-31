@@ -296,7 +296,7 @@ void spl_board_init(void)
 #if defined(CONFIG_SPL_NAND_SUPPORT) || defined(CONFIG_SPL_ONENAND_SUPPORT)
 	gpmc_init();
 #endif
-#if defined(CONFIG_SPL_I2C) && !CONFIG_IS_ENABLED(DM_I2C)
+#if defined(CONFIG_SPL_I2C) && !IS_ENABLED(CONFIG_DM_I2C)
 	i2c_init(CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);
 #endif
 #if defined(CONFIG_AM33XX) && defined(CONFIG_SPL_MUSB_NEW)

@@ -301,7 +301,7 @@ int misc_init_r(void)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(BOOTSTAGE)
+#if IS_ENABLED(CONFIG_BOOTSTAGE)
 void show_boot_progress(int progress)
 {
 	if (progress > 0)

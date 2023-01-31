@@ -160,7 +160,7 @@ static const struct dm_serial_ops xen_serial_ops = {
 	.pending = xen_serial_pending,
 };
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 static const struct udevice_id xen_serial_ids[] = {
 	{ .compatible = "xen,xen" },
 	{ }
@@ -170,13 +170,13 @@ static const struct udevice_id xen_serial_ids[] = {
 U_BOOT_DRIVER(serial_xen) = {
 	.name			= "serial_xen",
 	.id			= UCLASS_SERIAL,
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	.of_match		= xen_serial_ids,
 #endif
 	.priv_auto	= sizeof(struct xen_uart_priv),
 	.probe			= xen_serial_probe,
 	.ops			= &xen_serial_ops,
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 	.flags			= DM_FLAG_PRE_RELOC,
 #endif
 };

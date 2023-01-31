@@ -39,7 +39,7 @@ SPL/TPL and should be tested with:
 
 .. code-block:: c
 
-    #if CONFIG_IS_ENABLED(OF_PLATDATA)
+    #if IS_ENABLED(CONFIG_OF_PLATDATA)
 
 A tool called 'dtoc' converts a devicetree file either into a set of
 struct declarations, one for each compatible node, and a set of
@@ -202,7 +202,7 @@ For example:
     #include <dt-structs.h>
 
     struct mmc_plat {
-    #if CONFIG_IS_ENABLED(OF_PLATDATA)
+    #if IS_ENABLED(CONFIG_OF_PLATDATA)
             /* Put this first since driver model will copy the data here */
             struct dtd_mmc dtplat;
     #endif
@@ -215,7 +215,7 @@ For example:
 
     static int mmc_of_to_plat(struct udevice *dev)
     {
-        if (CONFIG_IS_ENABLED(OF_REAL)) {
+        if (IS_ENABLED(CONFIG_OF_REAL)) {
             /* Decode the devicetree data */
             struct mmc_plat *plat = dev_get_plat(dev);
             const void *blob = gd->fdt_blob;
@@ -231,7 +231,7 @@ For example:
     {
             struct mmc_plat *plat = dev_get_plat(dev);
 
-    #if CONFIG_IS_ENABLED(OF_PLATDATA)
+    #if IS_ENABLED(CONFIG_OF_PLATDATA)
             /* Decode the of-platdata from the C structures */
             struct dtd_mmc *dtplat = &plat->dtplat;
 
@@ -863,7 +863,7 @@ The dt-structs.h file includes the generated file
 `(include/generated/dt-structs.h`) if CONFIG_SPL_OF_PLATDATA is enabled.
 Otherwise (such as in U-Boot proper) these structs are not available. This
 prevents them being used inadvertently. All usage must be bracketed with
-`#if CONFIG_IS_ENABLED(OF_PLATDATA)`.
+`#if IS_ENABLED(CONFIG_OF_PLATDATA)`.
 
 The dt-plat.c file contains the device declarations and is is built in
 spl/dt-plat.c.

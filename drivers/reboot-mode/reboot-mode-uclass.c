@@ -63,7 +63,7 @@ int dm_reboot_mode_pre_probe(struct udevice *dev)
 	if (!plat_data)
 		return -EINVAL;
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	const char *mode_prefix = "mode-";
 	const int mode_prefix_len = strlen(mode_prefix);
 	struct ofprop property;

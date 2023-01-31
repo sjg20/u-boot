@@ -669,7 +669,7 @@ int input_stdio_register(struct stdio_dev *dev)
 	int error;
 
 	error = stdio_register(dev);
-#if !defined(CONFIG_SPL_BUILD) || CONFIG_IS_ENABLED(ENV_SUPPORT)
+#if !defined(CONFIG_SPL_BUILD) || IS_ENABLED(CONFIG_ENV_SUPPORT)
 	/* check if this is the standard input device */
 	if (!error && strcmp(env_get("stdin"), dev->name) == 0) {
 		/* reassign the console */

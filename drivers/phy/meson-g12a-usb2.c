@@ -54,10 +54,10 @@
 
 struct phy_meson_g12a_usb2_priv {
 	struct regmap		*regmap;
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	struct udevice		*phy_supply;
 #endif
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	struct clk		clk;
 #endif
 	struct reset_ctl	reset;
@@ -66,7 +66,7 @@ struct phy_meson_g12a_usb2_priv {
 
 static int phy_meson_g12a_usb2_power_on(struct phy *phy)
 {
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	struct udevice *dev = phy->dev;
 	struct phy_meson_g12a_usb2_priv *priv = dev_get_priv(dev);
 
@@ -82,7 +82,7 @@ static int phy_meson_g12a_usb2_power_on(struct phy *phy)
 
 static int phy_meson_g12a_usb2_power_off(struct phy *phy)
 {
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	struct udevice *dev = phy->dev;
 	struct phy_meson_g12a_usb2_priv *priv = dev_get_priv(dev);
 
@@ -180,7 +180,7 @@ int meson_g12a_usb2_phy_probe(struct udevice *dev)
 		return ret;
 	}
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_get_by_index(dev, 0, &priv->clk);
 	if (ret < 0)
 		return ret;
@@ -193,7 +193,7 @@ int meson_g12a_usb2_phy_probe(struct udevice *dev)
 	}
 #endif
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	ret = device_get_supply_regulator(dev, "phy-supply", &priv->phy_supply);
 	if (ret && ret != -ENOENT) {
 		pr_err("Failed to get PHY regulator\n");

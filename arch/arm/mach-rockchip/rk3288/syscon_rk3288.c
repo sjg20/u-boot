@@ -24,7 +24,7 @@ U_BOOT_DRIVER(syscon_rk3288) = {
 	.of_match = rk3288_syscon_ids,
 };
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 static int rk3288_syscon_bind_of_plat(struct udevice *dev)
 {
 	dev->driver_data = dev->driver->of_match->data;

@@ -1090,7 +1090,7 @@ static int cpsw_eth_probe(struct udevice *dev)
 	return _cpsw_register(priv);
 }
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 static void cpsw_eth_of_parse_slave(struct cpsw_platform_data *data,
 				    int slave_index, ofnode subnode)
 {
@@ -1271,7 +1271,7 @@ int cpsw_get_slave_phy_addr(struct udevice *dev, int slave)
 U_BOOT_DRIVER(eth_cpsw) = {
 	.name	= "eth_cpsw",
 	.id	= UCLASS_ETH,
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	.of_match = cpsw_eth_ids,
 	.of_to_plat = cpsw_eth_of_to_plat,
 	.plat_auto	= sizeof(struct eth_pdata),

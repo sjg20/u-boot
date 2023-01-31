@@ -155,7 +155,7 @@ int board_late_init(void)
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(BOOTSTAGE)
+#if IS_ENABLED(CONFIG_BOOTSTAGE)
 #define GPIO_DR 0x0
 #define GPIO_GDIR 0x4
 #define GPIO_ALT1 0x1

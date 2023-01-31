@@ -139,7 +139,7 @@ enum spi_polarity {
  * @flags:		Indication of SPI flags.
  */
 struct spi_slave {
-#if CONFIG_IS_ENABLED(DM_SPI)
+#if IS_ENABLED(CONFIG_DM_SPI)
 	struct udevice *dev;	/* struct spi_slave is dev->parentdata */
 	uint max_hz;
 #else
@@ -327,7 +327,7 @@ int spi_cs_is_valid(unsigned int bus, unsigned int cs);
  * removed soon as part of the SPI DM migration. Drop them if driver model is
  * enabled for SPI.
  */
-#if !CONFIG_IS_ENABLED(DM_SPI)
+#if !IS_ENABLED(CONFIG_DM_SPI)
 /**
  * Activate a SPI chipselect.
  * This function is provided by the board code when using a driver

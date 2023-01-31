@@ -37,7 +37,7 @@ static void print_mmcinfo(struct mmc *mmc)
 	}
 
 	printf("Bus Speed: %d\n", mmc->clock);
-#if CONFIG_IS_ENABLED(MMC_VERBOSE)
+#if IS_ENABLED(CONFIG_MMC_VERBOSE)
 	printf("Mode: %s\n", mmc_mode_name(mmc->selected_mode));
 	mmc_dump_capabilities("card capabilities", mmc->card_caps);
 	mmc_dump_capabilities("host capabilities", mmc->host_caps);
@@ -58,7 +58,7 @@ static void print_mmcinfo(struct mmc *mmc)
 	printf("Bus Width: %d-bit%s\n", mmc->bus_width,
 			mmc->ddr_mode ? " DDR" : "");
 
-#if CONFIG_IS_ENABLED(MMC_WRITE)
+#if IS_ENABLED(CONFIG_MMC_WRITE)
 	puts("Erase Group Size: ");
 	print_size(((u64)mmc->erase_grp_size) << 9, "\n");
 #endif
@@ -70,7 +70,7 @@ static void print_mmcinfo(struct mmc *mmc)
 		u8 wp;
 		int ret;
 
-#if CONFIG_IS_ENABLED(MMC_HW_PARTITIONING)
+#if IS_ENABLED(CONFIG_MMC_HW_PARTITIONING)
 		puts("HC WP Group Size: ");
 		print_size(((u64)mmc->hc_wp_grp_size) << 9, "\n");
 #endif
@@ -187,7 +187,7 @@ static int do_mmcinfo(struct cmd_tbl *cmdtp, int flag, int argc,
 	return CMD_RET_SUCCESS;
 }
 
-#if CONFIG_IS_ENABLED(CMD_MMC_RPMB)
+#if IS_ENABLED(CONFIG_CMD_MMC_RPMB)
 static int confirm_key_prog(void)
 {
 	puts("Warning: Programming authentication key can be done only once !\n"
@@ -371,7 +371,7 @@ static int do_mmc_read(struct cmd_tbl *cmdtp, int flag,
 	return (n == cnt) ? CMD_RET_SUCCESS : CMD_RET_FAILURE;
 }
 
-#if CONFIG_IS_ENABLED(CMD_MMC_SWRITE)
+#if IS_ENABLED(CONFIG_CMD_MMC_SWRITE)
 static lbaint_t mmc_sparse_write(struct sparse_storage *info, lbaint_t blk,
 				 lbaint_t blkcnt, const void *buffer)
 {
@@ -436,7 +436,7 @@ static int do_mmc_sparse_write(struct cmd_tbl *cmdtp, int flag,
 }
 #endif
 
-#if CONFIG_IS_ENABLED(MMC_WRITE)
+#if IS_ENABLED(CONFIG_MMC_WRITE)
 static int do_mmc_write(struct cmd_tbl *cmdtp, int flag,
 			int argc, char *const argv[])
 {
@@ -603,7 +603,7 @@ static int do_mmc_list(struct cmd_tbl *cmdtp, int flag,
 	return CMD_RET_SUCCESS;
 }
 
-#if CONFIG_IS_ENABLED(MMC_HW_PARTITIONING)
+#if IS_ENABLED(CONFIG_MMC_HW_PARTITIONING)
 static void parse_hwpart_user_enh_size(struct mmc *mmc,
 				       struct mmc_hwpart_conf *pconf,
 				       char *argv)
@@ -1076,18 +1076,18 @@ static struct cmd_tbl cmd_mmc[] = {
 	U_BOOT_CMD_MKENT(info, 1, 0, do_mmcinfo, "", ""),
 	U_BOOT_CMD_MKENT(read, 4, 1, do_mmc_read, "", ""),
 	U_BOOT_CMD_MKENT(wp, 2, 0, do_mmc_boot_wp, "", ""),
-#if CONFIG_IS_ENABLED(MMC_WRITE)
+#if IS_ENABLED(CONFIG_MMC_WRITE)
 	U_BOOT_CMD_MKENT(write, 4, 0, do_mmc_write, "", ""),
 	U_BOOT_CMD_MKENT(erase, 3, 0, do_mmc_erase, "", ""),
 #endif
-#if CONFIG_IS_ENABLED(CMD_MMC_SWRITE)
+#if IS_ENABLED(CONFIG_CMD_MMC_SWRITE)
 	U_BOOT_CMD_MKENT(swrite, 3, 0, do_mmc_sparse_write, "", ""),
 #endif
 	U_BOOT_CMD_MKENT(rescan, 2, 1, do_mmc_rescan, "", ""),
 	U_BOOT_CMD_MKENT(part, 1, 1, do_mmc_part, "", ""),
 	U_BOOT_CMD_MKENT(dev, 4, 0, do_mmc_dev, "", ""),
 	U_BOOT_CMD_MKENT(list, 1, 1, do_mmc_list, "", ""),
-#if CONFIG_IS_ENABLED(MMC_HW_PARTITIONING)
+#if IS_ENABLED(CONFIG_MMC_HW_PARTITIONING)
 	U_BOOT_CMD_MKENT(hwpartition, 28, 0, do_mmc_hwpartition, "", ""),
 #endif
 #ifdef CONFIG_SUPPORT_EMMC_BOOT
@@ -1096,7 +1096,7 @@ static struct cmd_tbl cmd_mmc[] = {
 	U_BOOT_CMD_MKENT(partconf, 5, 0, do_mmc_partconf, "", ""),
 	U_BOOT_CMD_MKENT(rst-function, 3, 0, do_mmc_rst_func, "", ""),
 #endif
-#if CONFIG_IS_ENABLED(CMD_MMC_RPMB)
+#if IS_ENABLED(CONFIG_CMD_MMC_RPMB)
 	U_BOOT_CMD_MKENT(rpmb, CONFIG_SYS_MAXARGS, 1, do_mmcrpmb, "", ""),
 #endif
 	U_BOOT_CMD_MKENT(setdsr, 2, 0, do_mmc_setdsr, "", ""),
@@ -1138,7 +1138,7 @@ U_BOOT_CMD(
 	"info - display info of the current MMC device\n"
 	"mmc read addr blk# cnt\n"
 	"mmc write addr blk# cnt\n"
-#if CONFIG_IS_ENABLED(CMD_MMC_SWRITE)
+#if IS_ENABLED(CONFIG_CMD_MMC_SWRITE)
 	"mmc swrite addr blk#\n"
 #endif
 	"mmc erase blk# cnt\n"
@@ -1154,7 +1154,7 @@ U_BOOT_CMD(
 	"   PART - [0|1]\n"
 	"       : 0 - first boot partition, 1 - second boot partition\n"
 	"         if not assigned, write protect all boot partitions\n"
-#if CONFIG_IS_ENABLED(MMC_HW_PARTITIONING)
+#if IS_ENABLED(CONFIG_MMC_HW_PARTITIONING)
 	"mmc hwpartition <USER> <GP> <MODE> - does hardware partitioning\n"
 	"  arguments (sizes in 512-byte blocks):\n"
 	"   USER - <user> <enh> <start> <cnt> <wrrel> <{on|off}>\n"
@@ -1178,7 +1178,7 @@ U_BOOT_CMD(
 	" - Change the RST_n_FUNCTION field of the specified device\n"
 	"   WARNING: This is a write-once field and 0 / 1 / 2 are the only valid values.\n"
 #endif
-#if CONFIG_IS_ENABLED(CMD_MMC_RPMB)
+#if IS_ENABLED(CONFIG_CMD_MMC_RPMB)
 	"mmc rpmb read addr blk# cnt [address of auth-key] - block size is 256 bytes\n"
 	"mmc rpmb write addr blk# cnt <address of auth-key> - block size is 256 bytes\n"
 	"mmc rpmb key <address of auth-key> - program the RPMB authentication key.\n"

@@ -129,7 +129,7 @@ static int rk8xx_read(struct udevice *dev, uint reg, uint8_t *buff, int len)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(PMIC_CHILDREN)
+#if IS_ENABLED(CONFIG_PMIC_CHILDREN)
 static int rk8xx_bind(struct udevice *dev)
 {
 	ofnode regulators_node;
@@ -144,7 +144,7 @@ static int rk8xx_bind(struct udevice *dev)
 
 	debug("%s: '%s' - found regulators subnode\n", __func__, dev->name);
 
-	if (CONFIG_IS_ENABLED(SYSRESET)) {
+	if (IS_ENABLED(CONFIG_SYSRESET)) {
 		ret = device_bind_driver_to_node(dev, "rk8xx_sysreset",
 						 "rk8xx_sysreset",
 						 dev_ofnode(dev), NULL);
@@ -243,7 +243,7 @@ static int rk8xx_probe(struct udevice *dev)
 		       pmic_reg_read(dev, on_source),
 		       pmic_reg_read(dev, off_source));
 	printf("\n");
-	if (CONFIG_IS_ENABLED(ROCKCHIP_RK8XX_DISABLE_BOOT_ON_POWERON))
+	if (IS_ENABLED(CONFIG_ROCKCHIP_RK8XX_DISABLE_BOOT_ON_POWERON))
 		rk8xx_off_for_plugin(dev);
 
 	return 0;
@@ -269,7 +269,7 @@ U_BOOT_DRIVER(rockchip_rk805) = {
 	.name = "rockchip_rk805",
 	.id = UCLASS_PMIC,
 	.of_match = rk8xx_ids,
-#if CONFIG_IS_ENABLED(PMIC_CHILDREN)
+#if IS_ENABLED(CONFIG_PMIC_CHILDREN)
 	.bind = rk8xx_bind,
 #endif
 	.priv_auto	  = sizeof(struct rk8xx_priv),

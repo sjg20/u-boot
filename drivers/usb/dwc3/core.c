@@ -1010,7 +1010,7 @@ MODULE_AUTHOR("Felipe Balbi <balbi@ti.com>");
 MODULE_LICENSE("GPL v2");
 MODULE_DESCRIPTION("DesignWare USB3 DRD Controller Driver");
 
-#if CONFIG_IS_ENABLED(PHY) && CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_PHY) && IS_ENABLED(CONFIG_DM_USB)
 int dwc3_setup_phy(struct udevice *dev, struct phy_bulk *phys)
 {
 	int ret;
@@ -1040,7 +1040,7 @@ int dwc3_shutdown_phy(struct udevice *dev, struct phy_bulk *phys)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 void dwc3_of_parse(struct dwc3 *dwc)
 {
 	const u8 *tmp;

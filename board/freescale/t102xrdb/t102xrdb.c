@@ -249,7 +249,7 @@ static u32 t1023rdb_ctrl(u32 ctrl_type)
 	u8 tmp;
 	int bus_num = I2C_PCA6408_BUS_NUM;
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	struct udevice *dev;
 	int ret;
 

@@ -229,7 +229,7 @@
 /*
  * I2C
  */
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 #define CFG_SYS_I2C_NOPROBES		{ {0, 0x69} }
 #endif
 

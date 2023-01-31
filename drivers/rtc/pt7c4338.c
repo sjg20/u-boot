@@ -49,7 +49,7 @@
 #define RTC_PT7C4338_RESET_VAL \
 	(RTC_CTL_STAT_BIT_RS0 | RTC_CTL_STAT_BIT_RS1 | RTC_CTL_STAT_BIT_OUT)
 
-#if !CONFIG_IS_ENABLED(DM_RTC)
+#if !IS_ENABLED(CONFIG_DM_RTC)
 /****** Helper functions ****************************************/
 static u8 rtc_read(u8 reg)
 {

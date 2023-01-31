@@ -36,7 +36,7 @@ void clk_fixed_rate_ofdata_to_plat_(struct udevice *dev,
 				    struct clk_fixed_rate *plat)
 {
 	struct clk *clk = &plat->clk;
-	if (CONFIG_IS_ENABLED(OF_REAL))
+	if (IS_ENABLED(CONFIG_OF_REAL))
 		plat->fixed_rate = dev_read_u32_default(dev, "clock-frequency",
 							0);
 
@@ -64,7 +64,7 @@ static int clk_fixed_rate_of_to_plat(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(CLK_CCF)
+#if IS_ENABLED(CONFIG_CLK_CCF)
 struct clk *clk_register_fixed_rate(struct device *dev, const char *name,
 				    ulong rate)
 {

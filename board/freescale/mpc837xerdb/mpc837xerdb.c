@@ -176,7 +176,7 @@ int board_early_init_f(void)
 }
 
 #ifdef CONFIG_FSL_ESDHC
-#if !(CONFIG_IS_ENABLED(DM_MMC) || CONFIG_IS_ENABLED(DM_USB))
+#if !(IS_ENABLED(CONFIG_DM_MMC) || IS_ENABLED(CONFIG_DM_USB))
 int board_mmc_init(struct bd_info *bd)
 {
 	struct immap __iomem *im = (struct immap __iomem *)CONFIG_SYS_IMMR;

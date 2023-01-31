@@ -116,7 +116,7 @@ struct dwc3_meson_gxl {
 	enum usb_dr_mode	otg_mode;
 	enum usb_dr_mode	otg_phy_mode;
 	unsigned int		usb2_ports;
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	struct udevice		*vbus_supply;
 #endif
 };
@@ -215,7 +215,7 @@ int dwc3_meson_gxl_force_mode(struct udevice *dev, enum usb_dr_mode mode)
 	else
 		debug("%s: switching to Device Mode\n", __func__);
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	if (priv->vbus_supply) {
 		int ret = regulator_set_enable(priv->vbus_supply,
 					(mode == USB_DR_MODE_PERIPHERAL));
@@ -282,7 +282,7 @@ static int dwc3_meson_gxl_clk_init(struct dwc3_meson_gxl *priv)
 	if (ret)
 		return ret;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_enable(&priv->clk);
 	if (ret) {
 		clk_free(&priv->clk);
@@ -316,7 +316,7 @@ static int dwc3_meson_gxl_probe(struct udevice *dev)
 	if (ret)
 		return ret;
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	ret = device_get_supply_regulator(dev, "vbus-supply",
 					  &priv->vbus_supply);
 	if (ret && ret != -ENOENT) {

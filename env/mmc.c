@@ -53,7 +53,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define ENV_MMC_HWPART_REDUND	1
 #endif
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 static inline int mmc_offset_try_partition(const char *str, int copy, s64 *val)
 {
 	struct disk_partition info;
@@ -210,7 +210,7 @@ static const char *init_mmc_for_env(struct mmc *mmc)
 	if (!mmc)
 		return "No MMC card found";
 
-#if CONFIG_IS_ENABLED(BLK)
+#if IS_ENABLED(CONFIG_BLK)
 	struct udevice *dev;
 
 	if (blk_get_from_parent(mmc->dev, &dev))

@@ -147,7 +147,7 @@ static int intel_gpio_set_flags(struct udevice *dev, unsigned int offset,
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 static int intel_gpio_get_acpi(const struct gpio_desc *desc,
 			       struct acpi_gpio *gpio)
 {
@@ -199,12 +199,12 @@ static const struct dm_gpio_ops gpio_intel_ops = {
 	.get_function		= intel_gpio_get_function,
 	.xlate			= intel_gpio_xlate,
 	.set_flags		= intel_gpio_set_flags,
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 	.get_acpi		= intel_gpio_get_acpi,
 #endif
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct udevice_id intel_intel_gpio_ids[] = {
 	{ .compatible = "intel,gpio" },
 	{ }

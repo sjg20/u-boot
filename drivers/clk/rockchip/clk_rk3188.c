@@ -33,7 +33,7 @@ enum rk3188_clk_type {
 };
 
 struct rk3188_clk_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_rk3188_cru dtd;
 #endif
 };
@@ -540,7 +540,7 @@ static struct clk_ops rk3188_clk_ops = {
 
 static int rk3188_clk_of_to_plat(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		struct rk3188_clk_priv *priv = dev_get_priv(dev);
 
 		priv->cru = dev_read_addr_ptr(dev);
@@ -560,7 +560,7 @@ static int rk3188_clk_probe(struct udevice *dev)
 	priv->has_bwadj = (type == RK3188A_CRU) ? 1 : 0;
 
 #ifdef CONFIG_SPL_BUILD
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct rk3188_clk_plat *plat = dev_get_plat(dev);
 
 	priv->cru = map_sysmem(plat->dtd.reg[0], plat->dtd.reg[1]);
@@ -596,7 +596,7 @@ static int rk3188_clk_bind(struct udevice *dev)
 		dev_set_priv(sys_child, priv);
 	}
 
-#if CONFIG_IS_ENABLED(RESET_ROCKCHIP)
+#if IS_ENABLED(CONFIG_RESET_ROCKCHIP)
 	ret = offsetof(struct rk3188_cru, cru_softrst_con[0]);
 	ret = rockchip_reset_bind(dev, ret, 9);
 	if (ret)

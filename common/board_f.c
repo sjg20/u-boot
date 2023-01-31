@@ -171,7 +171,7 @@ static int print_resetinfo(void)
 }
 #endif
 
-#if defined(CONFIG_DISPLAY_CPUINFO) && CONFIG_IS_ENABLED(CPU)
+#if defined(CONFIG_DISPLAY_CPUINFO) && IS_ENABLED(CONFIG_CPU)
 static int print_cpuinfo(void)
 {
 	struct udevice *dev;
@@ -269,7 +269,7 @@ __weak int dram_init_banksize(void)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(SYS_I2C_LEGACY)
+#if IS_ENABLED(CONFIG_SYS_I2C_LEGACY)
 static int init_func_i2c(void)
 {
 	puts("I2C:   ");
@@ -307,7 +307,7 @@ static int setup_mon_len(void)
 
 static int setup_spl_handoff(void)
 {
-#if CONFIG_IS_ENABLED(HANDOFF)
+#if IS_ENABLED(CONFIG_HANDOFF)
 	gd->spl_handoff = bloblist_find(BLOBLISTT_U_BOOT_SPL_HANDOFF,
 					sizeof(struct spl_handoff));
 	debug("Found SPL hand-off info %p\n", gd->spl_handoff);
@@ -729,7 +729,7 @@ static int fix_fdt(void)
 
 /* ARM calls relocate_code from its crt0.S */
 #if !defined(CONFIG_ARM) && !defined(CONFIG_SANDBOX) && \
-		!CONFIG_IS_ENABLED(X86_64)
+		!IS_ENABLED(CONFIG_X86_64)
 
 static int jump_to_copy(void)
 {
@@ -888,7 +888,7 @@ static const init_fnc_t init_sequence_f[] = {
 	INIT_FUNC_WATCHDOG_INIT
 	misc_init_f,
 	INIT_FUNC_WATCHDOG_RESET
-#if CONFIG_IS_ENABLED(SYS_I2C_LEGACY)
+#if IS_ENABLED(CONFIG_SYS_I2C_LEGACY)
 	init_func_i2c,
 #endif
 #if defined(CONFIG_VID) && !defined(CONFIG_SPL)
@@ -967,7 +967,7 @@ static const init_fnc_t init_sequence_f[] = {
 	 */
 	cyclic_unregister_all,
 #if !defined(CONFIG_ARM) && !defined(CONFIG_SANDBOX) && \
-		!CONFIG_IS_ENABLED(X86_64)
+		!IS_ENABLED(CONFIG_X86_64)
 	jump_to_copy,
 #endif
 	NULL,
@@ -982,7 +982,7 @@ void board_init_f(ulong boot_flags)
 		hang();
 
 #if !defined(CONFIG_ARM) && !defined(CONFIG_SANDBOX) && \
-		!defined(CONFIG_EFI_APP) && !CONFIG_IS_ENABLED(X86_64) && \
+		!defined(CONFIG_EFI_APP) && !IS_ENABLED(CONFIG_X86_64) && \
 		!defined(CONFIG_ARC)
 	/* NOTREACHED - jump_to_copy() does not return */
 	hang();
@@ -1008,7 +1008,7 @@ void board_init_f(ulong boot_flags)
  * all archs will move to this when generic relocation is implemented.
  */
 static const init_fnc_t init_sequence_f_r[] = {
-#if !CONFIG_IS_ENABLED(X86_64)
+#if !IS_ENABLED(CONFIG_X86_64)
 	init_cache_f_r,
 #endif
 

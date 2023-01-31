@@ -172,7 +172,7 @@ int p2sb_set_port_id(struct udevice *dev, int portid)
 {
 	struct p2sb_child_plat *pplat;
 
-	if (!CONFIG_IS_ENABLED(OF_PLATDATA))
+	if (!IS_ENABLED(CONFIG_OF_PLATDATA))
 		return -ENOSYS;
 
 	pplat = dev_get_parent_plat(dev);
@@ -183,7 +183,7 @@ int p2sb_set_port_id(struct udevice *dev, int portid)
 
 static int p2sb_child_post_bind(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		struct p2sb_child_plat *pplat = dev_get_parent_plat(dev);
 		int ret;
 		u32 pid;
@@ -199,7 +199,7 @@ static int p2sb_child_post_bind(struct udevice *dev)
 
 static int p2sb_post_bind(struct udevice *dev)
 {
-	if (spl_phase() > PHASE_TPL && !CONFIG_IS_ENABLED(OF_PLATDATA))
+	if (spl_phase() > PHASE_TPL && !IS_ENABLED(CONFIG_OF_PLATDATA))
 		return dm_scan_fdt_dev(dev);
 
 	return 0;

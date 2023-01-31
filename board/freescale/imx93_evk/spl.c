@@ -50,7 +50,7 @@ void spl_dram_init(void)
 	ddr_init(&dram_timing);
 }
 
-#if CONFIG_IS_ENABLED(DM_PMIC_PCA9450)
+#if IS_ENABLED(CONFIG_DM_PMIC_PCA9450)
 int power_init_board(void)
 {
 	struct udevice *dev;

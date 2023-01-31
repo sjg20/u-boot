@@ -139,7 +139,7 @@ static int fec_get_clk_rate(void *udev, int idx)
 	int ret;
 
 	if (IS_ENABLED(CONFIG_IMX8) ||
-	    CONFIG_IS_ENABLED(CLK_CCF)) {
+	    IS_ENABLED(CONFIG_CLK_CCF)) {
 		dev = udev;
 		if (!dev) {
 			ret = uclass_get_device_by_seq(UCLASS_ETH, idx, &dev);
@@ -1101,7 +1101,7 @@ static int fec_phy_init(struct fec_priv *priv, struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 /* FEC GPIO reset */
 static void fec_gpio_reset(struct fec_priv *priv)
 {
@@ -1145,7 +1145,7 @@ static int fecmxc_probe(struct udevice *dev)
 		}
 
 		priv->clk_rate = clk_get_rate(&priv->ipg_clk);
-	} else if (CONFIG_IS_ENABLED(CLK_CCF)) {
+	} else if (IS_ENABLED(CONFIG_CLK_CCF)) {
 		ret = clk_get_by_name(dev, "ipg", &priv->ipg_clk);
 		if (ret < 0) {
 			debug("Can't get FEC ipg clk: %d\n", ret);
@@ -1202,7 +1202,7 @@ static int fecmxc_probe(struct udevice *dev)
 	}
 #endif
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	fec_gpio_reset(priv);
 #endif
 	/* Reset chip. */
@@ -1316,7 +1316,7 @@ static int fecmxc_of_to_plat(struct udevice *dev)
 	device_get_supply_regulator(dev, "phy-supply", &priv->phy_supply);
 #endif
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	ret = gpio_request_by_name(dev, "phy-reset-gpios", 0,
 				   &priv->phy_reset_gpio, GPIOD_IS_OUT | GPIOD_IS_OUT_ACTIVE);
 	if (ret < 0)

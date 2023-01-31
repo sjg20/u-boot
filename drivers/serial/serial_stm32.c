@@ -247,7 +247,7 @@ U_BOOT_DRIVER(serial_stm32) = {
 	.plat_auto	= sizeof(struct stm32x7_serial_plat),
 	.ops = &stm32_serial_ops,
 	.probe = stm32_serial_probe,
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 	.flags = DM_FLAG_PRE_RELOC,
 #endif
 };

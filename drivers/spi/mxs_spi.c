@@ -42,7 +42,7 @@
 #define MXS_SSP_IMX28_CLKID_SSP0 46
 
 struct mxs_spi_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_fsl_imx23_spi dtplat;
 #endif
 	s32 frequency;		/* Default clock frequency, -1 for none */
@@ -317,7 +317,7 @@ static int mxs_spi_probe(struct udevice *bus)
 
 	debug("%s: probe\n", __func__);
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_fsl_imx23_spi *dtplat = &plat->dtplat;
 	struct phandle_1_arg *p1a = &dtplat->clocks[0];
 
@@ -440,7 +440,7 @@ static const struct dm_spi_ops mxs_spi_ops = {
 	 */
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static int mxs_of_to_plat(struct udevice *bus)
 {
 	struct mxs_spi_plat *plat = dev_get_plat(bus);
@@ -483,7 +483,7 @@ static const struct udevice_id mxs_spi_ids[] = {
 U_BOOT_DRIVER(fsl_imx23_spi) = {
 	.name = "fsl_imx23_spi",
 	.id	= UCLASS_SPI,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.of_match = mxs_spi_ids,
 	.of_to_plat = mxs_of_to_plat,
 #endif

@@ -113,7 +113,7 @@ int board_init(void)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(BOOTSTAGE)
+#if IS_ENABLED(CONFIG_BOOTSTAGE)
 #define GREEN_LED	BIT(14)
 #define ORANGE_LED	BIT(15)
 #define BOTH_LEDS	(GREEN_LED | ORANGE_LED)

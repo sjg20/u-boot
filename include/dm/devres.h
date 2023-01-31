@@ -30,7 +30,7 @@ struct devres_stats {
 	int total_size;
 };
 
-#if CONFIG_IS_ENABLED(DEVRES)
+#if IS_ENABLED(CONFIG_DEVRES)
 
 #ifdef CONFIG_DEBUG_DEVRES
 void *__devres_alloc(dr_release_t release, size_t size, gfp_t gfp,

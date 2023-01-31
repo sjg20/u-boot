@@ -815,7 +815,7 @@ static int hdmi_read_edid(struct dw_hdmi *hdmi, int block, u8 *buff)
 	u32 trytime = 5;
 	u32 n;
 
-	if (CONFIG_IS_ENABLED(DM_I2C) && hdmi->ddc_bus) {
+	if (IS_ENABLED(CONFIG_DM_I2C) && hdmi->ddc_bus) {
 		struct udevice *chip;
 
 		edid_read_err = i2c_get_chip(hdmi->ddc_bus,

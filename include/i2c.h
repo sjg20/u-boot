@@ -614,7 +614,7 @@ int acpi_i2c_of_to_plat(struct udevice *dev);
 void i2c_early_init_f(void);
 #endif
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 
 /*
  * WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
@@ -750,7 +750,7 @@ extern struct i2c_bus_hose	i2c_bus[];
 void i2c_init(int speed, int slaveaddr);
 void i2c_init_board(void);
 
-#if CONFIG_IS_ENABLED(SYS_I2C_LEGACY)
+#if IS_ENABLED(CONFIG_SYS_I2C_LEGACY)
 /*
  * i2c_get_bus_num:
  *
@@ -930,7 +930,7 @@ unsigned int i2c_get_bus_speed(void);
  * only for backwardcompatibility, should go away if we switched
  * completely to new multibus support.
  */
-#if CONFIG_IS_ENABLED(SYS_I2C_LEGACY) || defined(CFG_I2C_MULTI_BUS)
+#if IS_ENABLED(CONFIG_SYS_I2C_LEGACY) || defined(CFG_I2C_MULTI_BUS)
 # if !defined(CFG_SYS_MAX_I2C_BUS)
 #  define CFG_SYS_MAX_I2C_BUS		2
 # endif

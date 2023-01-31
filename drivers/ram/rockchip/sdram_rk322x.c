@@ -40,7 +40,7 @@ struct dram_info {
 };
 
 struct rk322x_sdram_params {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 		struct dtd_rockchip_rk3228_dmc of_plat;
 #endif
 		struct rk322x_sdram_channel ch[1];
@@ -721,7 +721,7 @@ static int rk322x_dmc_of_to_plat(struct udevice *dev)
 	int node = dev_of_offset(dev);
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(OF_REAL))
+	if (!IS_ENABLED(CONFIG_OF_REAL))
 		return 0;
 
 	params->num_channels = 1;
@@ -755,7 +755,7 @@ static int rk322x_dmc_of_to_plat(struct udevice *dev)
 }
 #endif /* CONFIG_TPL_BUILD */
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 static int conv_of_plat(struct udevice *dev)
 {
 	struct rk322x_sdram_params *plat = dev_get_plat(dev);
@@ -789,7 +789,7 @@ static int rk322x_dmc_probe(struct udevice *dev)
 
 	priv->grf = syscon_get_first_range(ROCKCHIP_SYSCON_GRF);
 #ifdef CONFIG_TPL_BUILD
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	ret = conv_of_plat(dev);
 	if (ret)
 		return ret;

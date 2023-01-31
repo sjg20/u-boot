@@ -63,7 +63,7 @@ int irq_read_and_clear(struct irq *irq)
 	return ops->read_and_clear(irq);
 }
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 int irq_get_by_phandle(struct udevice *dev, const struct phandle_2_arg *cells,
 		       struct irq *irq)
 {
@@ -179,7 +179,7 @@ int irq_first_device_type(enum irq_dev_t type, struct udevice **devp)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 int irq_get_acpi(const struct irq *irq, struct acpi_irq *acpi_irq)
 {
 	struct irq_ops *ops;

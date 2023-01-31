@@ -77,7 +77,7 @@ static int designware_wdt_stop(struct udevice *dev)
 	designware_wdt_reset(dev);
 	writel(0, priv->base + DW_WDT_CR);
 
-	if (CONFIG_IS_ENABLED(DM_RESET) &&
+	if (IS_ENABLED(CONFIG_DM_RESET) &&
 	    ofnode_read_prop(dev_ofnode(dev), "resets", &ret)) {
 		ret = reset_assert_bulk(&priv->resets);
 		if (ret)
@@ -115,7 +115,7 @@ static int designware_wdt_probe(struct udevice *dev)
 	if (!priv->base)
 		return -EINVAL;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	struct clk clk;
 
 	ret = clk_get_by_index(dev, 0, &clk);
@@ -135,7 +135,7 @@ static int designware_wdt_probe(struct udevice *dev)
 	priv->clk_khz = CFG_DW_WDT_CLOCK_KHZ;
 #endif
 
-	if (CONFIG_IS_ENABLED(DM_RESET) &&
+	if (IS_ENABLED(CONFIG_DM_RESET) &&
 	    ofnode_read_prop(dev_ofnode(dev), "resets", &ret)) {
 		ret = reset_get_bulk(dev, &priv->resets);
 		if (ret)
@@ -150,7 +150,7 @@ static int designware_wdt_probe(struct udevice *dev)
 	return designware_wdt_stop(dev);
 
 err:
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	clk_free(&clk);
 #endif
 	return ret;

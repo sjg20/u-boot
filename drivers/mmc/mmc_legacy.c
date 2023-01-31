@@ -14,7 +14,7 @@
 static struct list_head mmc_devices;
 static int cur_dev_num = -1;
 
-#if CONFIG_IS_ENABLED(MMC_TINY)
+#if IS_ENABLED(CONFIG_MMC_TINY)
 static struct mmc mmc_static;
 struct mmc *find_mmc_device(int dev_num)
 {
@@ -127,7 +127,7 @@ void print_mmc_devices(char separator)
 void print_mmc_devices(char separator) { }
 #endif
 
-#if CONFIG_IS_ENABLED(MMC_TINY)
+#if IS_ENABLED(CONFIG_MMC_TINY)
 static struct mmc mmc_static = {
 	.dsr_imp		= 0,
 	.dsr			= 0xffffffff,
@@ -175,7 +175,7 @@ struct mmc *mmc_create(const struct mmc_config *cfg, void *priv)
 	    cfg->f_max == 0 || cfg->b_max == 0)
 		return NULL;
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 	if (cfg->ops == NULL || cfg->ops->send_cmd == NULL)
 		return NULL;
 #endif

@@ -18,10 +18,10 @@
 
 struct bd_info;
 
-#if CONFIG_IS_ENABLED(MMC_HS200_SUPPORT)
+#if IS_ENABLED(CONFIG_MMC_HS200_SUPPORT)
 #define MMC_SUPPORTS_TUNING
 #endif
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+#if IS_ENABLED(CONFIG_MMC_UHS_SUPPORT)
 #define MMC_SUPPORTS_TUNING
 #endif
 
@@ -429,7 +429,7 @@ struct mmc_data {
 /* forward decl. */
 struct mmc;
 
-#if CONFIG_IS_ENABLED(DM_MMC)
+#if IS_ENABLED(CONFIG_DM_MMC)
 struct dm_mmc_ops {
 	/**
 	 * deferred_probe() - Some configurations that need to be deferred
@@ -504,7 +504,7 @@ struct dm_mmc_ops {
 	 */
 	int (*wait_dat0)(struct udevice *dev, int state, int timeout_us);
 
-#if CONFIG_IS_ENABLED(MMC_HS400_ES_SUPPORT)
+#if IS_ENABLED(CONFIG_MMC_HS400_ES_SUPPORT)
 	/* set_enhanced_strobe() - set HS400 enhanced strobe */
 	int (*set_enhanced_strobe)(struct udevice *dev);
 #endif
@@ -576,7 +576,7 @@ static inline int mmc_hs400_prepare_ddr(struct mmc *mmc)
 
 struct mmc_config {
 	const char *name;
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 	const struct mmc_ops *ops;
 #endif
 	uint host_caps;
@@ -620,15 +620,15 @@ static inline bool mmc_is_mode_ddr(enum bus_mode mode)
 {
 	if (mode == MMC_DDR_52)
 		return true;
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+#if IS_ENABLED(CONFIG_MMC_UHS_SUPPORT)
 	else if (mode == UHS_DDR50)
 		return true;
 #endif
-#if CONFIG_IS_ENABLED(MMC_HS400_SUPPORT)
+#if IS_ENABLED(CONFIG_MMC_HS400_SUPPORT)
 	else if (mode == MMC_HS_400)
 		return true;
 #endif
-#if CONFIG_IS_ENABLED(MMC_HS400_ES_SUPPORT)
+#if IS_ENABLED(CONFIG_MMC_HS400_ES_SUPPORT)
 	else if (mode == MMC_HS_400_ES)
 		return true;
 #endif
@@ -642,7 +642,7 @@ static inline bool mmc_is_mode_ddr(enum bus_mode mode)
 
 static inline bool supports_uhs(uint caps)
 {
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+#if IS_ENABLED(CONFIG_MMC_UHS_SUPPORT)
 	return (caps & UHS_CAPS) ? true : false;
 #else
 	return false;
@@ -656,7 +656,7 @@ static inline bool supports_uhs(uint caps)
  * TODO struct mmc should be in mmc_private but it's hard to fix right now
  */
 struct mmc {
-#if !CONFIG_IS_ENABLED(BLK)
+#if !IS_ENABLED(CONFIG_BLK)
 	struct list_head link;
 #endif
 	const struct mmc_config *cfg;	/* provided configuration */
@@ -687,14 +687,14 @@ struct mmc {
 	uint tran_speed;
 	uint legacy_speed; /* speed for the legacy mode provided by the card */
 	uint read_bl_len;
-#if CONFIG_IS_ENABLED(MMC_WRITE)
+#if IS_ENABLED(CONFIG_MMC_WRITE)
 	uint write_bl_len;
 	uint erase_grp_size;	/* in 512-byte sectors */
 #endif
-#if CONFIG_IS_ENABLED(MMC_HW_PARTITIONING)
+#if IS_ENABLED(CONFIG_MMC_HW_PARTITIONING)
 	uint hc_wp_grp_size;	/* in 512-byte sectors */
 #endif
-#if CONFIG_IS_ENABLED(MMC_WRITE)
+#if IS_ENABLED(CONFIG_MMC_WRITE)
 	struct sd_ssr	ssr;	/* SD status register */
 #endif
 	u64 capacity;
@@ -706,16 +706,16 @@ struct mmc {
 	u64 enh_user_start;
 	u64 enh_user_size;
 #endif
-#if !CONFIG_IS_ENABLED(BLK)
+#if !IS_ENABLED(CONFIG_BLK)
 	struct blk_desc block_dev;
 #endif
 	char op_cond_pending;	/* 1 if we are waiting on an op_cond command */
 	char init_in_progress;	/* 1 if we have done mmc_start_init() */
 	char preinit;		/* start init as early as possible */
 	int ddr_mode;
-#if CONFIG_IS_ENABLED(DM_MMC)
+#if IS_ENABLED(CONFIG_DM_MMC)
 	struct udevice *dev;	/* Device for this MMC controller */
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	struct udevice *vmmc_supply;	/* Main voltage regulator (Vcc)*/
 	struct udevice *vqmmc_supply;	/* IO voltage regulator (Vccq)*/
 #endif
@@ -735,7 +735,7 @@ struct mmc {
 	enum bus_mode user_speed_mode; /* input speed mode from user */
 };
 
-#if CONFIG_IS_ENABLED(DM_MMC)
+#if IS_ENABLED(CONFIG_DM_MMC)
 #define mmc_to_dev(_mmc)	_mmc->dev
 #else
 #define mmc_to_dev(_mmc)	NULL
@@ -849,7 +849,7 @@ int mmc_switch_part(struct mmc *mmc, unsigned int part_num);
 int mmc_hwpart_config(struct mmc *mmc, const struct mmc_hwpart_conf *conf,
 		      enum mmc_hwpart_conf_mode mode);
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 int mmc_getcd(struct mmc *mmc);
 int board_mmc_getcd(struct mmc *mmc);
 int mmc_getwp(struct mmc *mmc);

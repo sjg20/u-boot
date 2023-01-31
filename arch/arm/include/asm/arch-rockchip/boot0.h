@@ -26,7 +26,7 @@
 	b 1f	 /* if overwritten, entry-address is at the next word */
 1:
 #endif
-#if CONFIG_IS_ENABLED(ROCKCHIP_EARLYRETURN_TO_BROM)
+#if IS_ENABLED(CONFIG_ROCKCHIP_EARLYRETURN_TO_BROM)
 	adr     r3, entry_counter
 	ldr	r0, [r3]
 	cmp	r0, #1           /* check if entry_counter == 1 */

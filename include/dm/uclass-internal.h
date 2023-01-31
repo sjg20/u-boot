@@ -259,7 +259,7 @@ int uclass_find_device_by_phandle(enum uclass_id id, struct udevice *parent,
  */
 int uclass_bind_device(struct udevice *dev);
 
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 /**
  * uclass_pre_unbind_device() - Prepare to deassociate device with a uclass
  *
@@ -316,7 +316,7 @@ int uclass_post_probe_device(struct udevice *dev);
  * @dev:	Pointer to the device
  * Return: 0 on success, -ve on error
  */
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 int uclass_pre_remove_device(struct udevice *dev);
 #else
 static inline int uclass_pre_remove_device(struct udevice *dev) { return 0; }

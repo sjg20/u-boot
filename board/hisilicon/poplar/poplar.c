@@ -40,7 +40,7 @@ static struct mm_region poplar_mem_map[] = {
 
 struct mm_region *mem_map = poplar_mem_map;
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 static const struct pl01x_serial_plat serial_plat = {
 	.base = REG_BASE_UART0,
 	.type = TYPE_PL010,

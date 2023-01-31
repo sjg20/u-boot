@@ -335,7 +335,7 @@ int dw_i2c_gen_speed_config(const struct udevice *dev, int speed_hz,
 	ulong rate;
 	int ret;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	rate = clk_get_rate(&priv->clk);
 	if (IS_ERR_VALUE(rate))
 		return log_msg_ret("clk", -EINVAL);
@@ -587,7 +587,7 @@ static int __dw_i2c_init(struct i2c_regs *i2c_base, int speed, int slaveaddr)
 	writel(IC_RX_TL, &i2c_base->ic_rx_tl);
 	writel(IC_TX_TL, &i2c_base->ic_tx_tl);
 	writel(IC_STOP_DET, &i2c_base->ic_intr_mask);
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 	_dw_i2c_set_bus_speed(NULL, i2c_base, speed, IC_CLK);
 	writel(slaveaddr, &i2c_base->ic_sar);
 #endif
@@ -600,7 +600,7 @@ static int __dw_i2c_init(struct i2c_regs *i2c_base, int speed, int slaveaddr)
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 /*
  * The legacy I2C functions. These need to get removed once
  * all users of this driver are converted to DM.
@@ -707,7 +707,7 @@ static int designware_i2c_set_bus_speed(struct udevice *bus, unsigned int speed)
 	struct dw_i2c *i2c = dev_get_priv(bus);
 	ulong rate;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	rate = clk_get_rate(&i2c->clk);
 	if (IS_ERR_VALUE(rate))
 		return log_ret(-EINVAL);
@@ -752,7 +752,7 @@ int designware_i2c_of_to_plat(struct udevice *bus)
 		reset_deassert_bulk(&priv->resets);
 	}
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_get_by_index(bus, 0, &priv->clk);
 	if (ret)
 		return ret;
@@ -790,7 +790,7 @@ int designware_i2c_remove(struct udevice *dev)
 {
 	struct dw_i2c *priv = dev_get_priv(dev);
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	clk_disable(&priv->clk);
 	clk_free(&priv->clk);
 #endif

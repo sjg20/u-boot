@@ -58,7 +58,7 @@ static lbaint_t write_sparse_chunk_raw(struct sparse_storage *info,
 	lbaint_t n = blkcnt, write_blks, blks = 0, aligned_buf_blks = 100;
 	uint32_t *aligned_buf = NULL;
 
-	if (CONFIG_IS_ENABLED(SYS_DCACHE_OFF)) {
+	if (IS_ENABLED(CONFIG_SYS_DCACHE_OFF)) {
 		write_blks = info->write(info, blk, n, data);
 		if (write_blks < n)
 			goto write_fail;

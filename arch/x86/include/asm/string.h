@@ -14,7 +14,7 @@ extern char *strrchr(const char *s, int c);
 #undef __HAVE_ARCH_STRCHR
 extern char *strchr(const char *s, int c);
 
-#if CONFIG_IS_ENABLED(X86_64)
+#if IS_ENABLED(CONFIG_X86_64)
 
 #undef __HAVE_ARCH_MEMCPY
 extern void *memcpy(void *, const void *, __kernel_size_t);

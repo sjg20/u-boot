@@ -226,7 +226,7 @@ const struct rproc_att hostmap[] = {
 };
 #endif
 
-#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT)
+#if !IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT)
 /* enable all periherial can be accessed in nosec mode */
 static void init_csu(void)
 {

@@ -88,7 +88,7 @@ int p2sb_of_to_plat(struct udevice *dev)
 	struct p2sb_uc_priv *upriv = dev_get_uclass_priv(dev);
 	struct p2sb_plat *plat = dev_get_plat(dev);
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	int ret;
 	u32 base[2];
 
@@ -133,7 +133,7 @@ static int intel_p2sb_set_hide(struct udevice *dev, bool hide)
 {
 	u16 vendor;
 
-	if (!CONFIG_IS_ENABLED(PCI))
+	if (!IS_ENABLED(CONFIG_PCI))
 		return -EPERM;
 	p2sb_set_hide_bit(dev, hide);
 
@@ -159,7 +159,7 @@ static int p2sb_remove(struct udevice *dev)
 
 static int p2sb_child_post_bind(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		struct p2sb_child_plat *pplat = dev_get_parent_plat(dev);
 		int ret;
 		u32 pid;
@@ -177,7 +177,7 @@ static const struct p2sb_ops p2sb_ops = {
 	.set_hide	= intel_p2sb_set_hide,
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct udevice_id p2sb_ids[] = {
 	{ .compatible = "intel,p2sb" },
 	{ }

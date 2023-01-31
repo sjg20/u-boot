@@ -45,7 +45,7 @@ static int reboot_mode_probe(struct udevice *dev)
 
 	int ret;
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	ret = gpio_get_list_count(dev, "gpios");
 	if (ret < 0)
 		return ret;
@@ -61,7 +61,7 @@ static int reboot_mode_probe(struct udevice *dev)
 	if (!plat_data->gpio_desc)
 		return -ENOMEM;
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	ret = gpio_request_list_by_name(dev, "gpios", plat_data->gpio_desc,
 					plat_data->gpio_count, GPIOD_IS_IN);
 	if (ret < 0)
@@ -104,7 +104,7 @@ static int reboot_mode_remove(struct udevice *dev)
 	return gpio_free_list(dev, plat_data->gpio_desc, plat_data->gpio_count);
 }
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 static const struct udevice_id reboot_mode_ids[] = {
 	{ .compatible = "reboot-mode-gpio", 0 },
 	{ }
@@ -120,7 +120,7 @@ U_BOOT_DRIVER(reboot_mode_gpio) = {
 	.id = UCLASS_REBOOT_MODE,
 	.probe = reboot_mode_probe,
 	.remove = reboot_mode_remove,
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	.of_match = reboot_mode_ids,
 #endif
 	.plat_auto = sizeof(struct reboot_mode_gpio_platdata),

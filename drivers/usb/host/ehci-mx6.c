@@ -285,7 +285,7 @@ static void usb_oc_config(struct usbnc_regs *usbnc, int index)
 }
 #endif
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !IS_ENABLED(CONFIG_DM_USB)
 /**
  * board_usb_phy_mode - override usb phy mode
  * @port:	usb host/otg port
@@ -477,7 +477,7 @@ static int mx6_init_after_reset(struct ehci_ctrl *dev)
 #endif
 #endif
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	if (priv->vbus_supply) {
 		int ret;
 		ret = regulator_set_enable(priv->vbus_supply,
@@ -657,7 +657,7 @@ static int ehci_usb_probe(struct udevice *dev)
 	priv->init_type = type;
 	priv->phy_type = usb_get_phy_mode(dev_ofnode(dev));
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_get_by_index(dev, 0, &priv->clk);
 	if (ret < 0)
 		return ret;
@@ -685,7 +685,7 @@ static int ehci_usb_probe(struct udevice *dev)
 			priv->init_type = plat->init_type;
 	}
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	ret = device_get_supply_regulator(dev, "vbus-supply",
 					  &priv->vbus_supply);
 	if (ret)
@@ -705,7 +705,7 @@ static int ehci_usb_probe(struct udevice *dev)
 #endif
 #endif
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	if (priv->vbus_supply) {
 		ret = regulator_set_enable(priv->vbus_supply,
 					   (type == USB_INIT_DEVICE) ?
@@ -746,12 +746,12 @@ err_phy:
 	generic_shutdown_phy(&priv->phy);
 err_regulator:
 #endif
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	if (priv->vbus_supply)
 		regulator_set_enable(priv->vbus_supply, false);
 #endif
 err_clk:
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	clk_disable(&priv->clk);
 #else
 	/* Compatibility with DM_USB and !CLK */
@@ -770,12 +770,12 @@ int ehci_usb_remove(struct udevice *dev)
 	generic_shutdown_phy(&priv->phy);
 #endif
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	if (priv->vbus_supply)
 		regulator_set_enable(priv->vbus_supply, false);
 #endif
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	clk_disable(&priv->clk);
 #endif
 

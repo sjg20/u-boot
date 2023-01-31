@@ -370,7 +370,7 @@ static int __i2c_write(struct mv_i2c *base, uchar chip, u8 *addr, int alen,
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 
 static struct mv_i2c *base_glob;
 

@@ -347,7 +347,7 @@ struct sdhci_host {
 #define USE_ADMA64	(0x1 << 2)
 #define USE_DMA		(USE_SDMA | USE_ADMA | USE_ADMA64)
 	dma_addr_t adma_addr;
-#if CONFIG_IS_ENABLED(MMC_SDHCI_ADMA)
+#if IS_ENABLED(CONFIG_MMC_SDHCI_ADMA)
 	struct sdhci_adma_desc *adma_desc_table;
 #endif
 };

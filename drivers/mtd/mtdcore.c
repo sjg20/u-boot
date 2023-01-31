@@ -768,7 +768,7 @@ int __get_mtd_device(struct mtd_info *mtd)
 }
 EXPORT_SYMBOL_GPL(__get_mtd_device);
 
-#if CONFIG_IS_ENABLED(DM) && CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_DM) && IS_ENABLED(CONFIG_OF_CONTROL)
 static bool mtd_device_matches_name(struct mtd_info *mtd, const char *name)
 {
 	struct udevice *dev = NULL;

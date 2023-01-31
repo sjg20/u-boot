@@ -409,7 +409,7 @@ U_BOOT_DRIVER(pinctrl_rv1126) = {
 	.of_match	= rv1126_pinctrl_ids,
 	.priv_auto	= sizeof(struct rockchip_pinctrl_priv),
 	.ops		= &rockchip_pinctrl_ops,
-#if !CONFIG_IS_ENABLED(OF_PLATDATA)
+#if !IS_ENABLED(CONFIG_OF_PLATDATA)
 	.bind		= dm_scan_fdt_dev,
 #endif
 	.probe		= rockchip_pinctrl_probe,

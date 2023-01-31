@@ -310,7 +310,7 @@ void board_retimer_init(void)
 	/* Retimer is connected to I2C1_CH7_CH5 */
 	select_i2c_ch_pca9547(I2C_MUX_CH7, bus_num);
 	reg = I2C_MUX_CH5;
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	struct udevice *dev;
 	int ret;
 

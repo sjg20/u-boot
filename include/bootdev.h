@@ -367,7 +367,7 @@ int bootdev_next_label(struct bootflow_iter *iter, struct udevice **devp,
  */
 int bootdev_next_prio(struct bootflow_iter *iter, struct udevice **devp);
 
-#if CONFIG_IS_ENABLED(BOOTSTD)
+#if IS_ENABLED(CONFIG_BOOTSTD)
 /**
  * bootdev_setup_for_dev() - Bind a new bootdev device (deprecated)
  *

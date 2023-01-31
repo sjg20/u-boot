@@ -55,7 +55,7 @@ static int syscon_pre_probe(struct udevice *dev)
 	 * a 'reg' member, and this holds a single address and size. Drivers
 	 * using OF_PLATDATA will need to ensure that this is true.
 	 */
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct syscon_base_plat *plat = dev_get_plat(dev);
 
 	return regmap_init_mem_plat(dev, plat->reg, ARRAY_SIZE(plat->reg),
@@ -186,7 +186,7 @@ static const struct udevice_id generic_syscon_ids[] = {
 U_BOOT_DRIVER(generic_syscon) = {
 	.name	= "syscon",
 	.id	= UCLASS_SYSCON,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.bind           = dm_scan_fdt_dev,
 #endif
 	.of_match = generic_syscon_ids,

@@ -123,7 +123,7 @@ static efi_status_t efi_disk_rw_blocks(struct efi_block_io *this,
 	if (buffer_size & (blksz - 1))
 		return EFI_BAD_BUFFER_SIZE;
 
-	if (CONFIG_IS_ENABLED(PARTITIONS) &&
+	if (IS_ENABLED(CONFIG_PARTITIONS) &&
 	    device_get_uclass_id(diskobj->header.dev) == UCLASS_PARTITION) {
 		if (direction == EFI_DISK_READ)
 			n = disk_blk_read(diskobj->header.dev, lba, blocks,

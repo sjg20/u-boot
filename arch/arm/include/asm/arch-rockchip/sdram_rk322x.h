@@ -23,7 +23,7 @@ struct rk322x_sdram_channel {
 	u8 row_3_4;
 	u8 cs0_row;
 	u8 cs1_row;
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	/*
 	 * For of-platdata, which would otherwise convert this into two
 	 * byte-swapped integers. With a size of 9 bytes, this struct will

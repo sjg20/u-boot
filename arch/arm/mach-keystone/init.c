@@ -208,7 +208,7 @@ void reset_cpu(void)
 
 void enable_caches(void)
 {
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 	/* Enable D-cache. I-cache is already enabled in start.S */
 	dcache_enable();
 #endif

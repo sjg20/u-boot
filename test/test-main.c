@@ -47,7 +47,7 @@ enum fdtchk_t {
 static enum fdtchk_t fdt_action(void)
 {
 	/* Do a copy for sandbox (but only the U-Boot build, not SPL) */
-	if (CONFIG_IS_ENABLED(SANDBOX))
+	if (IS_ENABLED(CONFIG_SANDBOX))
 		return FDTCHK_COPY;
 
 	/* For sandbox SPL builds, do nothing */
@@ -96,7 +96,7 @@ static int dm_test_pre_run(struct unit_test_state *uts)
 				       fdt_totalsize(gd->fdt_blob));
 	gd->dm_root = NULL;
 	malloc_disable_testing();
-	if (CONFIG_IS_ENABLED(UT_DM) && !CONFIG_IS_ENABLED(OF_PLATDATA))
+	if (IS_ENABLED(CONFIG_UT_DM) && !IS_ENABLED(CONFIG_OF_PLATDATA))
 		memset(dm_testdrv_op_count, '\0', sizeof(dm_testdrv_op_count));
 	arch_reset_for_test();
 
@@ -145,7 +145,7 @@ static int dm_test_post_run(struct unit_test_state *uts)
 	 * destroy them we cannot get them back since uclass_add() is not
 	 * supported. So skip this.
 	 */
-	if (!CONFIG_IS_ENABLED(OF_PLATDATA_INST)) {
+	if (!IS_ENABLED(CONFIG_OF_PLATDATA_INST)) {
 		for (id = 0; id < UCLASS_COUNT; id++) {
 			struct uclass *uc;
 
@@ -267,11 +267,11 @@ static int dm_test_restore(struct device_node *of_root)
 
 	gd_set_of_root(of_root);
 	gd->dm_root = NULL;
-	ret = dm_init(CONFIG_IS_ENABLED(OF_LIVE));
+	ret = dm_init(IS_ENABLED(CONFIG_OF_LIVE));
 	if (ret)
 		return ret;
 	dm_scan_plat(false);
-	if (!CONFIG_IS_ENABLED(OF_PLATDATA))
+	if (!IS_ENABLED(CONFIG_OF_PLATDATA))
 		dm_scan_fdt(false);
 
 	return 0;
@@ -303,7 +303,7 @@ static int test_pre_run(struct unit_test_state *uts, struct unit_test *test)
 	if (test->flags & UT_TESTF_PROBE_TEST)
 		ut_assertok(do_autoprobe(uts));
 
-	if (!CONFIG_IS_ENABLED(OF_PLATDATA) &&
+	if (!IS_ENABLED(CONFIG_OF_PLATDATA) &&
 	    (test->flags & UT_TESTF_SCAN_FDT)) {
 		/*
 		 * only set this if we know the ethernet uclass will be created
@@ -456,7 +456,7 @@ static int ut_run_test_live_flat(struct unit_test_state *uts,
 
 	/* Run with the live tree if possible */
 	runs = 0;
-	if (CONFIG_IS_ENABLED(OF_LIVE)) {
+	if (IS_ENABLED(CONFIG_OF_LIVE)) {
 		if (!(test->flags & UT_TESTF_FLAT_TREE)) {
 			uts->of_live = true;
 			ut_assertok(ut_run_test(uts, test, test->name));
@@ -477,7 +477,7 @@ static int ut_run_test_live_flat(struct unit_test_state *uts,
 	 *    boards)
 	 */
 	if (!(test->flags & UT_TESTF_LIVE_TREE) &&
-	    (CONFIG_IS_ENABLED(OFNODE_MULTI_TREE) ||
+	    (IS_ENABLED(CONFIG_OFNODE_MULTI_TREE) ||
 	     !(test->flags & UT_TESTF_OTHER_FDT)) &&
 	    (!runs || ut_test_run_on_flattree(test)) &&
 	    !(gd->flags & GD_FLG_FDT_CHANGED)) {
@@ -600,7 +600,7 @@ int ut_run_list(const char *category, const char *prefix,
 	bool has_dm_tests = false;
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(OF_PLATDATA) &&
+	if (!IS_ENABLED(CONFIG_OF_PLATDATA) &&
 	    ut_list_has_dm_tests(tests, count)) {
 		has_dm_tests = true;
 		/*

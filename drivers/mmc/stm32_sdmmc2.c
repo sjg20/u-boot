@@ -37,7 +37,7 @@ struct stm32_sdmmc2_plat {
 	struct gpio_desc cd_gpio;
 	u32 clk_reg_msk;
 	u32 pwr_reg_msk;
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	bool vqmmc_enabled;
 #endif
 };
@@ -577,7 +577,7 @@ static void stm32_sdmmc2_pwron(struct stm32_sdmmc2_plat *plat)
 
 	/* during the first 74 SDMMC_CK cycles the SDMMC is still disabled. */
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	if (plat->mmc.vqmmc_supply && !plat->vqmmc_enabled) {
 		if (regulator_set_enable_if_allowed(plat->mmc.vqmmc_supply, true))
 			dev_dbg(plat->mmc.dev, "failed to enable vqmmc-supply\n");

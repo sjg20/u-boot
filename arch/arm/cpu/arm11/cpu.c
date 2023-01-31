@@ -54,7 +54,7 @@ static void cache_flush(void)
 	asm volatile("mcr p15, 0, %0, c7, c10, 4" : : "r" (i));
 }
 
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 void invalidate_dcache_all(void)
 {
 	asm volatile("mcr p15, 0, %0, c7, c6, 0" : : "r" (0));
@@ -90,7 +90,7 @@ void flush_dcache_range(unsigned long start, unsigned long stop)
 	asm volatile("mcr p15, 0, %0, c7, c10, 4" : : "r" (0));
 }
 
-#else /* #if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF) */
+#else /* #if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF) */
 void invalidate_dcache_all(void)
 {
 }
@@ -98,15 +98,15 @@ void invalidate_dcache_all(void)
 void flush_dcache_all(void)
 {
 }
-#endif /* #if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF) */
+#endif /* #if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF) */
 
-#if !(CONFIG_IS_ENABLED(SYS_ICACHE_OFF) && CONFIG_IS_ENABLED(SYS_DCACHE_OFF))
+#if !(IS_ENABLED(CONFIG_SYS_ICACHE_OFF) && IS_ENABLED(CONFIG_SYS_DCACHE_OFF))
 void enable_caches(void)
 {
-#if !CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_ICACHE_OFF)
 	icache_enable();
 #endif
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 	dcache_enable();
 #endif
 }

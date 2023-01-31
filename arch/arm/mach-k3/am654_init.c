@@ -81,7 +81,7 @@ static void store_boot_index_from_rom(void)
 	bootindex = *(u32 *)(CONFIG_SYS_K3_BOOT_PARAM_TABLE_INDEX);
 }
 
-#if defined(CONFIG_K3_LOAD_SYSFW) && CONFIG_IS_ENABLED(DM_MMC)
+#if defined(CONFIG_K3_LOAD_SYSFW) && IS_ENABLED(CONFIG_DM_MMC)
 void k3_mmc_stop_clock(void)
 {
 	if (spl_boot_device() == BOOT_DEVICE_MMC1) {
@@ -110,7 +110,7 @@ void k3_mmc_restart_clock(void)
 void k3_mmc_stop_clock(void) {}
 void k3_mmc_restart_clock(void) {}
 #endif
-#if CONFIG_IS_ENABLED(DFU) || CONFIG_IS_ENABLED(USB_STORAGE)
+#if IS_ENABLED(CONFIG_DFU) || IS_ENABLED(CONFIG_USB_STORAGE)
 #define CTRLMMR_SERDES0_CTRL	0x00104080
 #define PCIE_LANE0		0x1
 static int fixup_usb_boot(void)

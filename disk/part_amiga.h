@@ -9,7 +9,7 @@
 #define _DISK_PART_AMIGA_H
 #include <common.h>
 
-#if CONFIG_IS_ENABLED(ISO_PARTITION)
+#if IS_ENABLED(CONFIG_ISO_PARTITION)
 /* Make the buffers bigger if ISO partition support is enabled -- CD-ROMS
    have 2048 byte blocks */
 #define DEFAULT_SECTOR_SIZE   2048

@@ -542,7 +542,7 @@ static void nxp_fspi_prepare_lut(struct nxp_fspi *f,
 	fspi_writel(f, FSPI_LCKER_LOCK, f->iobase + FSPI_LCKCR);
 }
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 static int nxp_fspi_clk_prep_enable(struct nxp_fspi *f)
 {
 	int ret;
@@ -865,7 +865,7 @@ static int nxp_fspi_default_setup(struct nxp_fspi *f)
 	int ret, i;
 	u32 reg;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	/* the default frequency, we will change it later if necessary. */
 	ret = clk_set_rate(&f->clk, 20000000);
 	if (ret < 0)
@@ -963,7 +963,7 @@ static int nxp_fspi_claim_bus(struct udevice *dev)
 
 static int nxp_fspi_set_speed(struct udevice *bus, uint speed)
 {
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	struct nxp_fspi *f = dev_get_priv(bus);
 	int ret;
 
@@ -989,7 +989,7 @@ static int nxp_fspi_set_mode(struct udevice *bus, uint mode)
 static int nxp_fspi_of_to_plat(struct udevice *bus)
 {
 	struct nxp_fspi *f = dev_get_priv(bus);
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	int ret;
 #endif
 
@@ -1015,7 +1015,7 @@ static int nxp_fspi_of_to_plat(struct udevice *bus)
 	f->ahb_addr = map_physmem(ahb_addr, ahb_size, MAP_NOCACHE);
 	f->memmap_phy_size = ahb_size;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_get_by_name(bus, "fspi_en", &f->clk_en);
 	if (ret) {
 		dev_err(bus, "failed to get fspi_en clock\n");

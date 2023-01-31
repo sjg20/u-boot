@@ -98,7 +98,7 @@ static int do_clk_dump(struct cmd_tbl *cmdtp, int flag, int argc,
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(DM) && CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_DM) && IS_ENABLED(CONFIG_CLK)
 static int do_clk_setfreq(struct cmd_tbl *cmdtp, int flag, int argc,
 			  char *const argv[])
 {
@@ -132,7 +132,7 @@ static int do_clk_setfreq(struct cmd_tbl *cmdtp, int flag, int argc,
 
 static struct cmd_tbl cmd_clk_sub[] = {
 	U_BOOT_CMD_MKENT(dump, 1, 1, do_clk_dump, "", ""),
-#if CONFIG_IS_ENABLED(DM) && CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_DM) && IS_ENABLED(CONFIG_CLK)
 	U_BOOT_CMD_MKENT(setfreq, 3, 1, do_clk_setfreq, "", ""),
 #endif
 };

@@ -41,7 +41,7 @@ int stdio_file_to_flags(const int file)
 	}
 }
 
-#if CONFIG_IS_ENABLED(SYS_DEVICE_NULLDEV)
+#if IS_ENABLED(CONFIG_SYS_DEVICE_NULLDEV)
 static void nulldev_putc(struct stdio_dev *dev, const char c)
 {
 	/* nulldev is empty! */
@@ -337,7 +337,7 @@ int stdio_add_devices(void)
 				       __func__, dev->name, ret);
 		}
 	}
-#if CONFIG_IS_ENABLED(SYS_I2C_LEGACY)
+#if IS_ENABLED(CONFIG_SYS_I2C_LEGACY)
 	i2c_init_all();
 #endif
 	if (IS_ENABLED(CONFIG_VIDEO)) {

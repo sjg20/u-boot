@@ -10,7 +10,7 @@
 #include <dt-structs.h>
 
 struct sandbox_serial_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_sandbox_serial dtplat;
 #endif
 	int colour;	/* Text colour to use for output, -1 for none */

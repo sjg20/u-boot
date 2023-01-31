@@ -39,7 +39,7 @@ struct dram_info {
 struct rk3328_sdram_channel sdram_ch;
 
 struct rockchip_dmc_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_rk3328_dmc dtplat;
 #else
 	struct rk3328_sdram_params sdram_params;
@@ -47,7 +47,7 @@ struct rockchip_dmc_plat {
 	struct regmap *map;
 };
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 static int conv_of_plat(struct udevice *dev)
 {
 	struct rockchip_dmc_plat *plat = dev_get_plat(dev);
@@ -517,7 +517,7 @@ static int rk3328_dmc_init(struct udevice *dev)
 	struct rockchip_dmc_plat *plat = dev_get_plat(dev);
 	int ret;
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	struct rk3328_sdram_params *params = &plat->sdram_params;
 #else
 	struct dtd_rockchip_rk3328_dmc *dtplat = &plat->dtplat;
@@ -549,7 +549,7 @@ static int rk3328_dmc_init(struct udevice *dev)
 
 static int rk3328_dmc_of_to_plat(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	struct rockchip_dmc_plat *plat = dev_get_plat(dev);
 	int ret;
 

@@ -27,7 +27,7 @@ SECTIONS
   /* Read-only sections, merged into text segment: */
   .text      :
   {
-#if CONFIG_IS_ENABLED(SYS_MPC85XX_NO_RESETVEC)
+#if IS_ENABLED(CONFIG_SYS_MPC85XX_NO_RESETVEC)
     KEEP(arch/powerpc/cpu/mpc85xx/start.o (.bootpg))
 #endif
     *(.text*)
@@ -82,7 +82,7 @@ SECTIONS
   __init_end = .;
   _end = .;
 
-#if !CONFIG_IS_ENABLED(SYS_MPC85XX_NO_RESETVEC)
+#if !IS_ENABLED(CONFIG_SYS_MPC85XX_NO_RESETVEC)
   .bootpg RESET_VECTOR_ADDRESS - 0xffc :
   {
     arch/powerpc/cpu/mpc85xx/start.o	(.bootpg)

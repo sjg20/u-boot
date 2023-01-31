@@ -55,7 +55,7 @@ void mxs_gpio_init(void)
 	}
 }
 
-#if !CONFIG_IS_ENABLED(DM_GPIO)
+#if !IS_ENABLED(CONFIG_DM_GPIO)
 int gpio_get_value(unsigned gpio)
 {
 	uint32_t bank = PAD_BANK(gpio);
@@ -152,7 +152,7 @@ DECLARE_GLOBAL_DATA_PTR;
  */
 
 struct mxs_gpio_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_fsl_imx23_gpio dtplat;
 #endif
 	unsigned int bank;
@@ -241,7 +241,7 @@ static int mxs_gpio_probe(struct udevice *dev)
 	struct gpio_dev_priv *uc_priv = dev_get_uclass_priv(dev);
 	char name[16], *str;
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_fsl_imx23_gpio *dtplat = &plat->dtplat;
 	priv->bank = (unsigned int)dtplat->reg[0];
 	uc_priv->gpio_count = dtplat->gpio_ranges[3];
@@ -262,7 +262,7 @@ static int mxs_gpio_probe(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static int mxs_of_to_plat(struct udevice *dev)
 {
 	struct mxs_gpio_plat *plat = dev_get_plat(dev);
@@ -301,7 +301,7 @@ U_BOOT_DRIVER(fsl_imx23_gpio) = {
 	.probe	= mxs_gpio_probe,
 	.priv_auto	= sizeof(struct mxs_gpio_priv),
 	.plat_auto	= sizeof(struct mxs_gpio_plat),
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.of_match = mxs_gpio_ids,
 	.of_to_plat = mxs_of_to_plat,
 #endif

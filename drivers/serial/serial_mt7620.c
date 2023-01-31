@@ -20,7 +20,7 @@
 #include <dm/device_compat.h>
 #include <linux/err.h>
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 #include <dt-structs.h>
 #endif
 
@@ -63,7 +63,7 @@ struct mt7620_serial_regs {
 		     UART_FCR_TXSR)
 
 struct mt7620_serial_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_serial_mt7620 dtplat;
 #endif
 
@@ -131,7 +131,7 @@ static int mt7620_serial_probe(struct udevice *dev)
 {
 	struct mt7620_serial_plat *plat = dev_get_plat(dev);
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	plat->regs = (void __iomem *)KSEG1ADDR(plat->dtplat.reg[0]);
 	plat->clock = plat->dtplat.clock_frequency;
 #endif
@@ -145,7 +145,7 @@ static int mt7620_serial_probe(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static int mt7620_serial_of_to_plat(struct udevice *dev)
 {
 	struct mt7620_serial_plat *plat = dev_get_plat(dev);
@@ -200,7 +200,7 @@ static const struct dm_serial_ops mt7620_serial_ops = {
 U_BOOT_DRIVER(serial_mt7620) = {
 	.name = "serial_mt7620",
 	.id = UCLASS_SERIAL,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.of_match = mt7620_serial_ids,
 	.of_to_plat = mt7620_serial_of_to_plat,
 #endif

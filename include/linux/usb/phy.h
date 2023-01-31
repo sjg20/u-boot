@@ -21,7 +21,7 @@ enum usb_phy_interface {
 	USBPHY_INTERFACE_MODE_HSIC,
 };
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 /**
  * usb_get_phy_mode - Get phy mode for given device_node
  * @np:	Pointer to the given device_node

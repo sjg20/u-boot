@@ -244,7 +244,7 @@ static int dwc2_gadget_pullup(struct usb_gadget *g, int is_on)
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if !IS_ENABLED(CONFIG_DM_USB_GADGET)
 /*
   Register entry point for the peripheral controller driver.
 */
@@ -317,7 +317,7 @@ int usb_gadget_unregister_driver(struct usb_gadget_driver *driver)
 	udc_disable(dev);
 	return 0;
 }
-#else /* !CONFIG_IS_ENABLED(DM_USB_GADGET) */
+#else /* !IS_ENABLED(CONFIG_DM_USB_GADGET) */
 
 static int dwc2_gadget_start(struct usb_gadget *g,
 			     struct usb_gadget_driver *driver)
@@ -362,7 +362,7 @@ static int dwc2_gadget_stop(struct usb_gadget *g)
 	return 0;
 }
 
-#endif /* !CONFIG_IS_ENABLED(DM_USB_GADGET) */
+#endif /* !IS_ENABLED(CONFIG_DM_USB_GADGET) */
 
 /*
  *	done - retire a request; caller blocked irqs
@@ -815,7 +815,7 @@ static void dwc2_fifo_flush(struct usb_ep *_ep)
 static const struct usb_gadget_ops dwc2_udc_ops = {
 	.pullup = dwc2_gadget_pullup,
 	/* current versions must always be self-powered */
-#if CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if IS_ENABLED(CONFIG_DM_USB_GADGET)
 	.udc_start		= dwc2_gadget_start,
 	.udc_stop		= dwc2_gadget_stop,
 #endif
@@ -941,14 +941,14 @@ int dwc2_udc_handle_interrupt(void)
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if !IS_ENABLED(CONFIG_DM_USB_GADGET)
 
 int usb_gadget_handle_interrupts(int index)
 {
 	return dwc2_udc_handle_interrupt();
 }
 
-#else /* CONFIG_IS_ENABLED(DM_USB_GADGET) */
+#else /* IS_ENABLED(CONFIG_DM_USB_GADGET) */
 
 struct dwc2_priv_data {
 	struct clk_bulk		clks;
@@ -1117,7 +1117,7 @@ static int dwc2_udc_otg_probe(struct udevice *dev)
 		return ret;
 
 	if (plat->activate_stm_id_vb_detection) {
-		if (CONFIG_IS_ENABLED(DM_REGULATOR) &&
+		if (IS_ENABLED(CONFIG_DM_REGULATOR) &&
 		    (!plat->force_b_session_valid ||
 		     plat->force_vbus_detection)) {
 			ret = device_get_supply_regulator(dev, "usb33d-supply",
@@ -1208,4 +1208,4 @@ int dwc2_udc_B_session_valid(struct udevice *dev)
 
 	return readl(&usbotg_reg->gotgctl) & B_SESSION_VALID;
 }
-#endif /* CONFIG_IS_ENABLED(DM_USB_GADGET) */
+#endif /* IS_ENABLED(CONFIG_DM_USB_GADGET) */

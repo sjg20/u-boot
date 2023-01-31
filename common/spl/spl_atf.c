@@ -195,7 +195,7 @@ static void bl31_entry(uintptr_t bl31_entry, uintptr_t bl32_entry,
 	atf_entry_t  atf_entry = (atf_entry_t)bl31_entry;
 	void *bl31_params;
 
-	if (CONFIG_IS_ENABLED(ATF_LOAD_IMAGE_V2))
+	if (IS_ENABLED(CONFIG_ATF_LOAD_IMAGE_V2))
 		bl31_params = bl2_plat_get_bl31_params_v2(bl32_entry,
 							  bl33_entry,
 							  fdt_addr);
@@ -285,7 +285,7 @@ void spl_invoke_atf(struct spl_image_info *spl_image)
 	 * older ATF versions that have insufficiently robust (or
 	 * overzealous) argument validation.
 	 */
-	if (CONFIG_IS_ENABLED(ATF_NO_PLATFORM_PARAM))
+	if (IS_ENABLED(CONFIG_ATF_NO_PLATFORM_PARAM))
 		platform_param = 0;
 
 	/*

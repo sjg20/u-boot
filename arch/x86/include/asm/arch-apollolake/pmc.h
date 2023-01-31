@@ -7,7 +7,7 @@
 #define ASM_ARCH_PMC_H
 
 struct apl_pmc_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_intel_apl_pmc dtplat;
 #endif
 	pci_dev_t bdf;

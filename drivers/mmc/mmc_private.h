@@ -17,7 +17,7 @@ int mmc_poll_for_busy(struct mmc *mmc, int timeout);
 
 int mmc_set_blocklen(struct mmc *mmc, int len);
 
-#if CONFIG_IS_ENABLED(BLK)
+#if IS_ENABLED(CONFIG_BLK)
 ulong mmc_bread(struct udevice *dev, lbaint_t start, lbaint_t blkcnt,
 		void *dst);
 #else
@@ -25,9 +25,9 @@ ulong mmc_bread(struct blk_desc *block_dev, lbaint_t start, lbaint_t blkcnt,
 		void *dst);
 #endif
 
-#if CONFIG_IS_ENABLED(MMC_WRITE)
+#if IS_ENABLED(CONFIG_MMC_WRITE)
 
-#if CONFIG_IS_ENABLED(BLK)
+#if IS_ENABLED(CONFIG_BLK)
 ulong mmc_bwrite(struct udevice *dev, lbaint_t start, lbaint_t blkcnt,
 		 const void *src);
 ulong mmc_berase(struct udevice *dev, lbaint_t start, lbaint_t blkcnt);
@@ -41,7 +41,7 @@ ulong mmc_berase(struct blk_desc *block_dev, lbaint_t start, lbaint_t blkcnt);
 
 /* declare dummies to reduce code size. */
 
-#if CONFIG_IS_ENABLED(BLK)
+#if IS_ENABLED(CONFIG_BLK)
 static inline unsigned long mmc_berase(struct udevice *dev,
 				       lbaint_t start, lbaint_t blkcnt)
 {

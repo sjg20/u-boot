@@ -63,7 +63,7 @@ struct sandbox_clk_test {
 
 /* Platform data for the sandbox fixed-rate clock driver */
 struct sandbox_clk_fixed_rate_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_sandbox_fixed_clock dtplat;
 #endif
 	struct clk_fixed_rate fixed;

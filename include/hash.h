@@ -16,7 +16,7 @@ struct cmd_tbl;
  * Maximum digest size for all algorithms we support. Having this value
  * avoids a malloc() or C99 local declaration in common/cmd_hash.c.
  */
-#if CONFIG_IS_ENABLED(SHA384) || CONFIG_IS_ENABLED(SHA512)
+#if IS_ENABLED(CONFIG_SHA384) || IS_ENABLED(CONFIG_SHA512)
 #define HASH_MAX_DIGEST_SIZE	64
 #else
 #define HASH_MAX_DIGEST_SIZE	32

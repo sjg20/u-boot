@@ -158,7 +158,7 @@ static int scmi_clk_probe(struct udevice *dev)
 	if (ret)
 		return ret;
 
-	if (!CONFIG_IS_ENABLED(CLK_CCF))
+	if (!IS_ENABLED(CONFIG_CLK_CCF))
 		return 0;
 
 	/* register CCF children: CLK UCLASS, no probed again */

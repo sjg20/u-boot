@@ -24,7 +24,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 #include <dm/platform_data/serial_pl01x.h>
 
 static const struct pl01x_serial_plat serial_plat = {

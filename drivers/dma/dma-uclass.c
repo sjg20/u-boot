@@ -29,7 +29,7 @@ static inline struct dma_ops *dma_dev_ops(struct udevice *dev)
 	return (struct dma_ops *)dev->driver->ops;
 }
 
-# if CONFIG_IS_ENABLED(OF_CONTROL)
+# if IS_ENABLED(CONFIG_OF_CONTROL)
 static int dma_of_xlate_default(struct dma *dma,
 				struct ofnode_phandle_args *args)
 {

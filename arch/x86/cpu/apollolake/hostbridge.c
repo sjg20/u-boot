@@ -42,7 +42,7 @@ enum {
 	TOLUD			= 0xbc,
 };
 
-#if CONFIG_IS_ENABLED(GENERATE_ACPI_TABLE)
+#if IS_ENABLED(CONFIG_GENERATE_ACPI_TABLE)
 static const struct nhlt_format_config dmic_1ch_formats[] = {
 	/* 48 KHz 16-bits per sample. */
 	{
@@ -220,7 +220,7 @@ static int apl_hostbridge_of_to_plat(struct udevice *dev)
 	ret = uclass_first_device_err(UCLASS_PINCTRL, &pinctrl);
 	if (ret)
 		return log_msg_ret("no hostbridge PINCTRL", ret);
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	int root;
 
 	/* Get length of PCI Express Region */
@@ -267,7 +267,7 @@ static int apl_acpi_hb_get_name(const struct udevice *dev, char *out_name)
 	return acpi_copy_name(out_name, "RHUB");
 }
 
-#if CONFIG_IS_ENABLED(GENERATE_ACPI_TABLE)
+#if IS_ENABLED(CONFIG_GENERATE_ACPI_TABLE)
 static int apl_acpi_hb_write_tables(const struct udevice *dev,
 				    struct acpi_ctx *ctx)
 {
@@ -369,13 +369,13 @@ ulong sa_get_tseg_base(struct udevice *dev)
 
 struct acpi_ops apl_hostbridge_acpi_ops = {
 	.get_name	= apl_acpi_hb_get_name,
-#if CONFIG_IS_ENABLED(GENERATE_ACPI_TABLE)
+#if IS_ENABLED(CONFIG_GENERATE_ACPI_TABLE)
 	.write_tables	= apl_acpi_hb_write_tables,
 	.setup_nhlt	= apl_acpi_setup_nhlt,
 #endif
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct udevice_id apl_hostbridge_ids[] = {
 	{ .compatible = "intel,apl-hostbridge" },
 	{ }

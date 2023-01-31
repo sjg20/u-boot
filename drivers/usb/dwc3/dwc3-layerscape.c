@@ -46,7 +46,7 @@ static int dwc3_layerscape_probe(struct udevice *dev,
 	dwc3->dev = dev;
 	dwc3->maximum_speed = plat->maximum_speed;
 	dwc3->dr_mode = plat->dr_mode;
-	if (CONFIG_IS_ENABLED(OF_CONTROL))
+	if (IS_ENABLED(CONFIG_OF_CONTROL))
 		dwc3_of_parse(dwc3);
 
 	rc = dwc3_setup_phy(dev, &priv->phys);
@@ -99,7 +99,7 @@ static int dwc3_layerscape_of_to_plat(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if IS_ENABLED(CONFIG_DM_USB_GADGET)
 int dm_usb_gadget_handle_interrupts(struct udevice *dev)
 {
 	struct dwc3_layerscape_priv *priv = dev_get_priv(dev);
@@ -188,7 +188,7 @@ static int dwc3_layerscape_bind(struct udevice *dev)
 	dr_mode = usb_get_dr_mode(node);
 
 	switch (dr_mode) {
-#if CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if IS_ENABLED(CONFIG_DM_USB_GADGET)
 	case USB_DR_MODE_PERIPHERAL:
 		dev_dbg(dev, "Using peripheral mode\n");
 		driver = "dwc3-layerscape-peripheral";

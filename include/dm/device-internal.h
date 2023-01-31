@@ -204,7 +204,7 @@ int device_probe(struct udevice *dev);
  *	this is a vital device and flags is DM_REMOVE_NON_VITAL, other -ve on
  *	error (such an error here is normally a very bad thing)
  */
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 int device_remove(struct udevice *dev, uint flags);
 #else
 static inline int device_remove(struct udevice *dev, uint flags) { return 0; }
@@ -218,13 +218,13 @@ static inline int device_remove(struct udevice *dev, uint flags) { return 0; }
  * @dev: Pointer to device to unbind
  * Return: 0 if OK, -ve on error
  */
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 int device_unbind(struct udevice *dev);
 #else
 static inline int device_unbind(struct udevice *dev) { return 0; }
 #endif
 
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 void device_free(struct udevice *dev);
 #else
 static inline void device_free(struct udevice *dev) {}
@@ -241,7 +241,7 @@ static inline void device_free(struct udevice *dev) {}
  * @drv:	The targeted driver
  * Return: 0 on success, -ve on error
  */
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 int device_chld_unbind(struct udevice *dev, struct driver *drv);
 #else
 static inline int device_chld_unbind(struct udevice *dev, struct driver *drv)
@@ -266,7 +266,7 @@ static inline int device_chld_unbind(struct udevice *dev, struct driver *drv)
  * Return: 0 on success, -EPROBE_DEFER if any child failed to remove, other
  *	-ve on error
  */
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 int device_chld_remove(struct udevice *dev, struct driver *drv,
 		       uint flags);
 #else
@@ -397,7 +397,7 @@ fdt_addr_t simple_bus_translate(struct udevice *dev, fdt_addr_t addr);
 #define DM_UCLASS_ROOT_S_NON_CONST	(((gd_t *)gd)->uclass_root_s)
 
 /* device resource management */
-#if CONFIG_IS_ENABLED(DEVRES)
+#if IS_ENABLED(CONFIG_DEVRES)
 
 /**
  * devres_release_probe - Release managed resources allocated after probing
@@ -431,7 +431,7 @@ static inline void devres_release_all(struct udevice *dev)
 
 static inline int device_notify(const struct udevice *dev, enum event_t type)
 {
-#if CONFIG_IS_ENABLED(DM_EVENT)
+#if IS_ENABLED(CONFIG_DM_EVENT)
 	return event_notify(type, &dev, sizeof(dev));
 #else
 	return 0;

@@ -647,7 +647,7 @@ static int sh_pfc_pinctrl_group_set(struct udevice *dev, unsigned group_selector
 done:
 	return ret;
 }
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 static const struct pinconf_param sh_pfc_pinconf_params[] = {
 	{ "bias-disable",	PIN_CONFIG_BIAS_DISABLE,	0 },
 	{ "bias-pull-up",	PIN_CONFIG_BIAS_PULL_UP,	1 },
@@ -844,7 +844,7 @@ static struct pinctrl_ops sh_pfc_pinctrl_ops = {
 	.get_functions_count	= sh_pfc_pinctrl_get_functions_count,
 	.get_function_name	= sh_pfc_pinctrl_get_function_name,
 
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 	.pinconf_num_params	= ARRAY_SIZE(sh_pfc_pinconf_params),
 	.pinconf_params		= sh_pfc_pinconf_params,
 	.pinconf_set		= sh_pfc_pinconf_pin_set,

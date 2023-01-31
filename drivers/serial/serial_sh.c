@@ -145,7 +145,7 @@ static int sh_serial_getc_generic(struct uart_port *port)
 	return ch;
 }
 
-#if CONFIG_IS_ENABLED(DM_SERIAL)
+#if IS_ENABLED(CONFIG_DM_SERIAL)
 
 static int sh_serial_pending(struct udevice *dev, bool input)
 {
@@ -200,7 +200,7 @@ static const struct dm_serial_ops sh_serial_ops = {
 	.setbrg = sh_serial_setbrg,
 };
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 static const struct udevice_id sh_serial_id[] ={
 	{.compatible = "renesas,sci", .data = PORT_SCI},
 	{.compatible = "renesas,scif", .data = PORT_SCIF},
@@ -244,7 +244,7 @@ U_BOOT_DRIVER(serial_sh) = {
 	.plat_auto	= sizeof(struct sh_serial_plat),
 	.probe	= sh_serial_probe,
 	.ops	= &sh_serial_ops,
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 	.flags	= DM_FLAG_PRE_RELOC,
 #endif
 	.priv_auto	= sizeof(struct uart_port),

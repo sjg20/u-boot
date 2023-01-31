@@ -12,7 +12,7 @@
 #include <linux/bitops.h>
 #endif
 
-#if CONFIG_IS_ENABLED(RISCV_SMODE)
+#if IS_ENABLED(CONFIG_RISCV_SMODE)
 #define MODE_PREFIX(__suffix)	s##__suffix
 #else
 #define MODE_PREFIX(__suffix)	m##__suffix

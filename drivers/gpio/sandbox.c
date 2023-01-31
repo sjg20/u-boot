@@ -255,7 +255,7 @@ static int sb_gpio_get_flags(struct udevice *dev, uint offset, ulong *flagsp)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 static int sb_gpio_get_acpi(const struct gpio_desc *desc,
 			    struct acpi_gpio *gpio)
 {
@@ -321,14 +321,14 @@ static const struct dm_gpio_ops gpio_sandbox_ops = {
 	.xlate			= sb_gpio_xlate,
 	.set_flags		= sb_gpio_set_flags,
 	.get_flags		= sb_gpio_get_flags,
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 	.get_acpi		= sb_gpio_get_acpi,
 #endif
 };
 
 static int sandbox_gpio_of_to_plat(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		struct gpio_dev_priv *uc_priv = dev_get_uclass_priv(dev);
 
 		uc_priv->gpio_count =
@@ -378,7 +378,7 @@ U_BOOT_DRIVER(sandbox_gpio) = {
 
 DM_DRIVER_ALIAS(sandbox_gpio, sandbox_gpio_alias)
 
-#if CONFIG_IS_ENABLED(PINCTRL)
+#if IS_ENABLED(CONFIG_PINCTRL)
 
 /* pincontrol: used only to check GPIO pin configuration (pinmux command) */
 
@@ -545,7 +545,7 @@ static int sb_pinctrl_get_pin_muxing(struct udevice *dev,
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 static int sb_pinctrl_get_name(const struct udevice *dev, char *out_name)
 {
 	return acpi_copy_name(out_name, "PINC");
@@ -567,7 +567,7 @@ static struct pinctrl_ops sandbox_pinctrl_gpio_ops = {
 	.get_pin_muxing		= sb_pinctrl_get_pin_muxing,
 };
 
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 struct acpi_ops pinctrl_sandbox_acpi_ops = {
 	.get_name	= sb_pinctrl_get_name,
 };

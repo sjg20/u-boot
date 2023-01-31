@@ -18,7 +18,7 @@
 
 struct resource;
 
-#if CONFIG_IS_ENABLED(OF_LIVE)
+#if IS_ENABLED(CONFIG_OF_LIVE)
 static inline const struct device_node *dev_np(const struct udevice *dev)
 {
 	return ofnode_to_np(dev_ofnode(dev));
@@ -30,7 +30,7 @@ static inline const struct device_node *dev_np(const struct udevice *dev)
 }
 #endif
 
-#if !defined(CONFIG_DM_DEV_READ_INLINE) || CONFIG_IS_ENABLED(OF_PLATDATA)
+#if !defined(CONFIG_DM_DEV_READ_INLINE) || IS_ENABLED(CONFIG_OF_PLATDATA)
 /**
  * dev_read_u8() - read a 8-bit integer from a device's DT property
  *
@@ -1096,7 +1096,7 @@ static inline const void *dev_read_prop_by_prop(struct ofprop *prop,
 
 static inline int dev_read_alias_seq(const struct udevice *dev, int *devnump)
 {
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	return fdtdec_get_alias_seq(gd->fdt_blob, dev->uclass->uc_drv->name,
 				    dev_of_offset(dev), devnump);
 #else
@@ -1166,7 +1166,7 @@ static inline int dev_get_dma_range(const struct udevice *dev, phys_addr_t *cpu,
 
 static inline int dev_read_alias_highest_id(const char *stem)
 {
-	if (!CONFIG_IS_ENABLED(OF_LIBFDT) || !gd->fdt_blob)
+	if (!IS_ENABLED(CONFIG_OF_LIBFDT) || !gd->fdt_blob)
 		return -1;
 	return fdtdec_get_alias_highest_id(gd->fdt_blob, stem);
 }

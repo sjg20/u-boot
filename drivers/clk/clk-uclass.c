@@ -35,7 +35,7 @@ struct clk *dev_get_clk_ptr(struct udevice *dev)
 	return (struct clk *)dev_get_uclass_priv(dev);
 }
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 int clk_get_by_phandle(struct udevice *dev, const struct phandle_1_arg *cells,
 		       struct clk *clk)
 {
@@ -50,7 +50,7 @@ int clk_get_by_phandle(struct udevice *dev, const struct phandle_1_arg *cells,
 }
 #endif
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static int clk_of_xlate_default(struct clk *clk,
 				struct ofnode_phandle_args *args)
 {
@@ -190,7 +190,7 @@ static struct clk *clk_set_default_get_by_id(struct clk *clk)
 {
 	struct clk *c = clk;
 
-	if (CONFIG_IS_ENABLED(CLK_CCF)) {
+	if (IS_ENABLED(CONFIG_CLK_CCF)) {
 		int ret = clk_get_by_id(clk->id, &c);
 
 		if (ret) {
@@ -549,7 +549,7 @@ static void clk_get_priv(struct clk *clk, struct clk **clkp)
 	*clkp = clk;
 
 	/* get private clock struct associated to the provided clock */
-	if (CONFIG_IS_ENABLED(CLK_CCF)) {
+	if (IS_ENABLED(CONFIG_CLK_CCF)) {
 		/* Take id 0 as a non-valid clk, such as dummy */
 		if (clk->id)
 			clk_get_by_id(clk->id, clkp);
@@ -611,7 +611,7 @@ int clk_set_parent(struct clk *clk, struct clk *parent)
 	if (ret)
 		return ret;
 
-	if (CONFIG_IS_ENABLED(CLK_CCF))
+	if (IS_ENABLED(CONFIG_CLK_CCF))
 		ret = device_reparent(clk->dev, parent->dev);
 
 	return ret;
@@ -628,7 +628,7 @@ int clk_enable(struct clk *clk)
 		return 0;
 	ops = clk_dev_ops(clk->dev);
 
-	if (CONFIG_IS_ENABLED(CLK_CCF)) {
+	if (IS_ENABLED(CONFIG_CLK_CCF)) {
 		/* Take id 0 as a non-valid clk, such as dummy */
 		if (clk->id && !clk_get_by_id(clk->id, &clkp)) {
 			if (clkp->enable_count) {
@@ -688,7 +688,7 @@ int clk_disable(struct clk *clk)
 		return 0;
 	ops = clk_dev_ops(clk->dev);
 
-	if (CONFIG_IS_ENABLED(CLK_CCF)) {
+	if (IS_ENABLED(CONFIG_CLK_CCF)) {
 		if (clk->id && !clk_get_by_id(clk->id, &clkp)) {
 			if (clkp->flags & CLK_IS_CRITICAL)
 				return 0;

@@ -20,7 +20,7 @@ static u64 notrace sifive_clint_get_count(struct udevice *dev)
 	return readq((void __iomem *)MTIME_REG(dev_get_priv(dev)));
 }
 
-#if CONFIG_IS_ENABLED(RISCV_MMODE) && IS_ENABLED(CONFIG_TIMER_EARLY)
+#if IS_ENABLED(CONFIG_RISCV_MMODE) && IS_ENABLED(CONFIG_TIMER_EARLY)
 /**
  * timer_early_get_rate() - Get the timer rate before driver model
  */

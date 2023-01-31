@@ -113,7 +113,7 @@ static int host_sb_bind(struct udevice *dev)
 	snprintf(desc->product, BLK_PRD_SIZE, "hostfile");
 	snprintf(desc->revision, BLK_REV_SIZE, "1.0");
 
-	if (CONFIG_IS_ENABLED(BOOTSTD)) {
+	if (IS_ENABLED(CONFIG_BOOTSTD)) {
 		ret = bootdev_bind(dev, "host_bootdev", "bootdev", &bdev);
 		if (ret)
 			return log_msg_ret("bd", ret);

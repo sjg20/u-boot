@@ -183,7 +183,7 @@ int rsb_init(void)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 struct sun8i_rsb_priv {
 	struct sunxi_rsb_reg *base;
 };
@@ -283,4 +283,4 @@ U_BOOT_DRIVER(sun8i_rsb) = {
 	.priv_auto		= sizeof(struct sun8i_rsb_priv),
 	.ops			= &sun8i_rsb_ops,
 };
-#endif /* CONFIG_IS_ENABLED(DM_I2C) */
+#endif /* IS_ENABLED(CONFIG_DM_I2C) */

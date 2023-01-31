@@ -21,13 +21,13 @@ static const struct udevice_id rk3399_syscon_ids[] = {
 U_BOOT_DRIVER(syscon_rk3399) = {
 	.name = "rk3399_syscon",
 	.id = UCLASS_SYSCON,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.bind = dm_scan_fdt_dev,
 #endif
 	.of_match = rk3399_syscon_ids,
 };
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 static int rk3399_syscon_bind_of_plat(struct udevice *dev)
 {
 	dev->driver_data = dev->driver->of_match->data;

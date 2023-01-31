@@ -67,7 +67,7 @@ static int pci_mmc_probe(struct udevice *dev)
 
 static int pci_mmc_of_to_plat(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(DM_GPIO)) {
+	if (IS_ENABLED(CONFIG_DM_GPIO)) {
 		struct pci_mmc_priv *priv = dev_get_priv(dev);
 		int ret;
 

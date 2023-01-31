@@ -97,7 +97,7 @@ static const char *imx8mm_usb_core_sels[] = {"clock-osc-24m", "sys_pll1_100m", "
 static const char *imx8mm_usb_phy_sels[] = {"clock-osc-24m", "sys_pll1_100m", "sys_pll1_40m", "sys_pll2_100m",
 					     "sys_pll2_200m", "clk_ext2", "clk_ext3", "audio_pll2_out", };
 
-#if CONFIG_IS_ENABLED(DM_SPI)
+#if IS_ENABLED(CONFIG_DM_SPI)
 static const char *imx8mm_ecspi1_sels[] = {"clock-osc-24m", "sys_pll2_200m", "sys_pll1_40m", "sys_pll1_160m",
 					   "sys_pll1_800m", "sys_pll3_out", "sys_pll2_250m", "audio_pll2_out", };
 
@@ -339,7 +339,7 @@ static int imx8mm_clk_probe(struct udevice *dev)
 	       imx_clk_gate4("pwm4_root_clk", "pwm4", base + 0x42b0, 0));
 #endif
 
-#if CONFIG_IS_ENABLED(DM_SPI)
+#if IS_ENABLED(CONFIG_DM_SPI)
 	clk_dm(IMX8MM_CLK_ECSPI1,
 	       imx8m_clk_composite("ecspi1", imx8mm_ecspi1_sels, base + 0xb280));
 	clk_dm(IMX8MM_CLK_ECSPI2,

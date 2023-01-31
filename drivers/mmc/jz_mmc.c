@@ -138,7 +138,7 @@ static int jz_mmc_clock_rate(void)
 	return 24000000;
 }
 
-#if CONFIG_IS_ENABLED(MMC_WRITE)
+#if IS_ENABLED(CONFIG_MMC_WRITE)
 static inline void jz_mmc_write_data(struct jz_mmc_priv *priv, struct mmc_data *data)
 {
 	int sz = DIV_ROUND_UP(data->blocks * data->blocksize, 4);
@@ -366,7 +366,7 @@ static int jz_mmc_core_init(struct mmc *mmc)
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 
 static int jz_mmc_legacy_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 				  struct mmc_data *data)

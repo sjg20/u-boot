@@ -58,7 +58,7 @@ enum cache_action {
 	FLUSH_INVAL_SET_WAY,	/* d-cache clean & invalidate by set/ways */
 };
 
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 struct dcache_config {
 	u32 ways;
 	u32 sets;
@@ -302,7 +302,7 @@ void mmu_set_region_dcache_behaviour(phys_addr_t start, size_t size,
 
 #endif
 
-#if !CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_ICACHE_OFF)
 
 void invalidate_icache_all(void)
 {
@@ -364,10 +364,10 @@ int icache_status(void)
 
 void enable_caches(void)
 {
-#if !CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_ICACHE_OFF)
 	icache_enable();
 #endif
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 	dcache_enable();
 #endif
 }

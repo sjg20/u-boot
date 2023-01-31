@@ -10,7 +10,7 @@
 #define __DM_ACPI_H__
 
 /* Allow operations to be optional for ACPI */
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 #define ACPI_OPS_PTR(_ptr)	.acpi_ops	= _ptr,
 #else
 #define ACPI_OPS_PTR(_ptr)

@@ -372,7 +372,7 @@ void espi_setup_slave(struct fsl_spi_slave *fsl)
 				* 10), spi_freq);/* Set eSPI BRG clock source */
 }
 
-#if !CONFIG_IS_ENABLED(DM_SPI)
+#if !IS_ENABLED(CONFIG_DM_SPI)
 int spi_cs_is_valid(unsigned int bus, unsigned int cs)
 {
 	return bus == 0 && cs < ESPI_MAX_CS_NUM;
@@ -541,7 +541,7 @@ static const struct dm_spi_ops fsl_espi_ops = {
 	.set_mode	= fsl_espi_set_mode,
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static int fsl_espi_of_to_plat(struct udevice *bus)
 {
 	fdt_addr_t addr;
@@ -572,7 +572,7 @@ static const struct udevice_id fsl_espi_ids[] = {
 U_BOOT_DRIVER(fsl_espi) = {
 	.name	= "fsl_espi",
 	.id	= UCLASS_SPI,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.of_match = fsl_espi_ids,
 	.of_to_plat = fsl_espi_of_to_plat,
 #endif

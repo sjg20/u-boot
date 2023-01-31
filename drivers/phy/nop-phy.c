@@ -14,12 +14,12 @@
 
 struct nop_phy_priv {
 	struct clk_bulk bulk;
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	struct gpio_desc reset_gpio;
 #endif
 };
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 static int nop_phy_reset(struct phy *phy)
 {
 	struct nop_phy_priv *priv = dev_get_priv(phy->dev);
@@ -37,18 +37,18 @@ static int nop_phy_init(struct phy *phy)
 	struct nop_phy_priv *priv = dev_get_priv(phy->dev);
 	int ret = 0;
 
-	if (CONFIG_IS_ENABLED(CLK)) {
+	if (IS_ENABLED(CONFIG_CLK)) {
 		ret = clk_enable_bulk(&priv->bulk);
 		if (ret)
 			return ret;
 	}
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	/* Take phy out of reset */
 	if (dm_gpio_is_valid(&priv->reset_gpio)) {
 		ret = dm_gpio_set_value(&priv->reset_gpio, false);
 		if (ret) {
-			if (CONFIG_IS_ENABLED(CLK))
+			if (IS_ENABLED(CONFIG_CLK))
 				clk_disable_bulk(&priv->bulk);
 			return ret;
 		}
@@ -62,14 +62,14 @@ static int nop_phy_probe(struct udevice *dev)
 	struct nop_phy_priv *priv = dev_get_priv(dev);
 	int ret = 0;
 
-	if (CONFIG_IS_ENABLED(CLK)) {
+	if (IS_ENABLED(CONFIG_CLK)) {
 		ret = clk_get_bulk(dev, &priv->bulk);
 		if (ret < 0) {
 			dev_err(dev, "Failed to get clk: %d\n", ret);
 			return ret;
 		}
 	}
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	ret = gpio_request_by_name(dev, "reset-gpios", 0,
 				   &priv->reset_gpio,
 				   GPIOD_IS_OUT);
@@ -88,7 +88,7 @@ static const struct udevice_id nop_phy_ids[] = {
 
 static struct phy_ops nop_phy_ops = {
 	.init = nop_phy_init,
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	.reset = nop_phy_reset,
 #endif
 };

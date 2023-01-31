@@ -11,7 +11,7 @@
 #include <dm/device-internal.h>
 #include <linux/usb/gadget.h>
 
-#if CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if IS_ENABLED(CONFIG_DM_USB_GADGET)
 #define MAX_UDC_DEVICES 4
 static struct udevice *dev_array[MAX_UDC_DEVICES];
 int usb_gadget_initialize(int index)
@@ -37,7 +37,7 @@ int usb_gadget_initialize(int index)
 
 int usb_gadget_release(int index)
 {
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 	int ret;
 	if (index < 0 || index >= ARRAY_SIZE(dev_array))
 		return -EINVAL;

@@ -18,7 +18,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 struct rockchip_timer_plat {
 	struct dtd_rockchip_rk3368_timer dtd;
 };
@@ -41,7 +41,7 @@ static inline int64_t rockchip_timer_get_curr_value(struct rk_timer *timer)
 	return cntr;
 }
 
-#if CONFIG_IS_ENABLED(BOOTSTAGE)
+#if IS_ENABLED(CONFIG_BOOTSTAGE)
 ulong timer_get_boot_us(void)
 {
 	uint64_t  ticks = 0;
@@ -55,7 +55,7 @@ ulong timer_get_boot_us(void)
 		/* The timer is available */
 		rate = timer_get_rate(gd->timer);
 		timer_get_count(gd->timer, &ticks);
-	} else if (CONFIG_IS_ENABLED(OF_REAL) && ret == -EAGAIN) {
+	} else if (IS_ENABLED(CONFIG_OF_REAL) && ret == -EAGAIN) {
 		/* We have been called so early that the DM is not ready,... */
 		ofnode node = offset_to_ofnode(-1);
 		struct rk_timer *timer = NULL;
@@ -98,7 +98,7 @@ static u64 rockchip_timer_get_count(struct udevice *dev)
 
 static int rockchip_clk_of_to_plat(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		struct rockchip_timer_priv *priv = dev_get_priv(dev);
 
 		priv->timer = dev_read_addr_ptr(dev);
@@ -135,7 +135,7 @@ static int rockchip_timer_start(struct udevice *dev)
 
 static int rockchip_timer_probe(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct timer_dev_priv *uc_priv = dev_get_uclass_priv(dev);
 	struct rockchip_timer_priv *priv = dev_get_priv(dev);
 	struct rockchip_timer_plat *plat = dev_get_plat(dev);
@@ -165,7 +165,7 @@ U_BOOT_DRIVER(rockchip_rk3368_timer) = {
 	.probe = rockchip_timer_probe,
 	.ops	= &rockchip_timer_ops,
 	.priv_auto	= sizeof(struct rockchip_timer_priv),
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	.plat_auto	= sizeof(struct rockchip_timer_plat),
 #endif
 	.of_to_plat = rockchip_clk_of_to_plat,

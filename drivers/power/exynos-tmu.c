@@ -181,7 +181,7 @@ enum tmu_status_t tmu_monitor(int *temp)
  */
 static int get_tmu_fdt_values(struct tmu_info *info, const void *blob)
 {
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	fdt_addr_t addr;
 	int node;
 	int error = 0;

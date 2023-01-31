@@ -13,19 +13,19 @@
 #include <dm/device-internal.h>
 
 struct rockchip_uart_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_uart dtplat;
 #endif
 	struct ns16550_plat plat;
 };
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 struct dtd_rockchip_uart *dtplat, s_dtplat;
 #endif
 
 static int rockchip_serial_probe(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct rockchip_uart_plat *plat = dev_get_plat(dev);
 
 	/* Create some new platform data for the standard driver */

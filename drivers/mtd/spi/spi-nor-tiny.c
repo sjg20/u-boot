@@ -60,7 +60,7 @@ static int spi_nor_read_reg(struct spi_nor *nor, u8 code, u8 *val, int len)
 		 * spi_slave does not have a struct udevice member without DM,
 		 * so use the bus and cs instead.
 		 */
-#if CONFIG_IS_ENABLED(DM_SPI)
+#if IS_ENABLED(CONFIG_DM_SPI)
 		dev_dbg(nor->spi->dev, "error %d reading %x\n", ret,
 			code);
 #else

@@ -22,7 +22,7 @@
 
 #include <asm/arch/cpu.h>
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 
 /* Information about a GPIO bank */
 struct omap_gpio_plat {

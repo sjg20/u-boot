@@ -14,7 +14,7 @@
 static int do_sb_handoff(struct cmd_tbl *cmdtp, int flag, int argc,
 			 char *const argv[])
 {
-#if CONFIG_IS_ENABLED(HANDOFF)
+#if IS_ENABLED(CONFIG_HANDOFF)
 	if (gd->spl_handoff)
 		printf("SPL handoff magic %lx\n", gd->spl_handoff->arch.magic);
 	else

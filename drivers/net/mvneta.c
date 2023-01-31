@@ -280,7 +280,7 @@ struct mvneta_port {
 
 	int init;
 	struct phy_device *phydev;
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	struct gpio_desc phy_reset_gpio;
 	struct gpio_desc sfp_tx_disable_gpio;
 #endif
@@ -1567,7 +1567,7 @@ static int mvneta_recv(struct udevice *dev, int flags, uchar **packetp)
 static int mvneta_probe(struct udevice *dev)
 {
 	struct mvneta_port *pp = dev_get_priv(dev);
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	struct ofnode_phandle_args sfp_args;
 #endif
 	void *bd_space;
@@ -1620,7 +1620,7 @@ static int mvneta_probe(struct udevice *dev)
 	else
 		pp->dma_base = 0;
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	if (!dev_read_phandle_with_args(dev, "sfp", NULL, 0, 0, &sfp_args) &&
 	    ofnode_is_enabled(sfp_args.node))
 		gpio_request_by_name_nodev(sfp_args.node, "tx-disable-gpio", 0,

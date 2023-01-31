@@ -24,8 +24,8 @@ struct iommu_ops {
 	void (*unmap)(struct udevice *dev, dma_addr_t addr, size_t size);
 };
 
-#if (CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)) && \
-	CONFIG_IS_ENABLED(IOMMU)
+#if (IS_ENABLED(CONFIG_OF_CONTROL) && !IS_ENABLED(CONFIG_OF_PLATDATA)) && \
+	IS_ENABLED(CONFIG_IOMMU)
 int dev_iommu_enable(struct udevice *dev);
 #else
 static inline int dev_iommu_enable(struct udevice *dev)

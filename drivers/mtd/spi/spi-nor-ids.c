@@ -13,7 +13,7 @@
 #include "sf_internal.h"
 
 /* Exclude chip names for SPL to save space */
-#if !CONFIG_IS_ENABLED(SPI_FLASH_TINY)
+#if !IS_ENABLED(CONFIG_SPI_FLASH_TINY)
 #define INFO_NAME(_name) .name = _name,
 #else
 #define INFO_NAME(_name)

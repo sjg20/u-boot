@@ -247,7 +247,7 @@ struct spl_image_info {
 	u8 os;
 	uintptr_t load_addr;
 	uintptr_t entry_point;
-#if CONFIG_IS_ENABLED(LOAD_FIT) || CONFIG_IS_ENABLED(LOAD_FIT_FULL)
+#if IS_ENABLED(CONFIG_LOAD_FIT) || IS_ENABLED(CONFIG_LOAD_FIT_FULL)
 	void *fdt_addr;
 #endif
 	u32 boot_device;

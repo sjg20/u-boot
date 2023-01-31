@@ -28,7 +28,7 @@
 #define ED_ALIGNMENT 16
 #endif
 
-#if CONFIG_IS_ENABLED(DM_USB) && ARCH_DMA_MINALIGN > 32
+#if IS_ENABLED(CONFIG_DM_USB) && ARCH_DMA_MINALIGN > 32
 #define TD_ALIGNMENT ARCH_DMA_MINALIGN
 #else
 #define TD_ALIGNMENT 32
@@ -399,7 +399,7 @@ typedef struct ohci {
 	const char	*slot_name;
 } ohci_t;
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 extern struct dm_usb_ops ohci_usb_ops;
 
 int ohci_register(struct udevice *dev, struct ohci_regs *regs);

@@ -92,7 +92,7 @@ ENTRY(_main)
 	mov	x18, x0
 	bl	board_init_f_init_reserve
 
-#if defined(CONFIG_DEBUG_UART) && CONFIG_IS_ENABLED(SERIAL)
+#if defined(CONFIG_DEBUG_UART) && IS_ENABLED(CONFIG_SERIAL)
 	bl	debug_uart_init
 #endif
 
@@ -140,7 +140,7 @@ relocation_return:
  */
 	bl	c_runtime_cpu_setup		/* still call old routine */
 #endif /* !CONFIG_SPL_BUILD */
-#if !defined(CONFIG_SPL_BUILD) || CONFIG_IS_ENABLED(FRAMEWORK)
+#if !defined(CONFIG_SPL_BUILD) || IS_ENABLED(CONFIG_FRAMEWORK)
 #if defined(CONFIG_SPL_BUILD)
 	bl	spl_relocate_stack_gd           /* may return NULL */
 	/* set up gd here, outside any C code, if new stack is returned */

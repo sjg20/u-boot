@@ -23,7 +23,7 @@ int board_early_init_f(void)
 
 int board_early_init_r(void)
 {
-	if (CONFIG_IS_ENABLED(DM_REGULATOR)) {
+	if (IS_ENABLED(CONFIG_DM_REGULATOR)) {
 		/* Check if any existing regulator should be turned down */
 		regulators_enable_boot_off(false);
 	}

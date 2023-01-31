@@ -228,7 +228,7 @@ static int tpm_tis_spi_probe(struct udevice *dev)
 	/* Use the TPM v2 stack */
 	priv->version = TPM_V2;
 
-	if (CONFIG_IS_ENABLED(DM_GPIO)) {
+	if (IS_ENABLED(CONFIG_DM_GPIO)) {
 		struct gpio_desc reset_gpio;
 
 		ret = gpio_request_by_name(dev, "reset-gpios", 0,

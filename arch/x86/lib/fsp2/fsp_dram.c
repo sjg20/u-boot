@@ -59,7 +59,7 @@ int dram_init(void)
 			  gd->arch.mrc[MRC_TYPE_VAR].len);
 #endif
 	} else {
-#if CONFIG_IS_ENABLED(HANDOFF)
+#if IS_ENABLED(CONFIG_HANDOFF)
 		struct spl_handoff *ho = gd->spl_handoff;
 
 		if (!ho) {
@@ -82,7 +82,7 @@ phys_size_t board_get_usable_ram_top(phys_size_t total_size)
 	if (!ll_boot_init())
 		return gd->ram_size;
 
-#if CONFIG_IS_ENABLED(HANDOFF)
+#if IS_ENABLED(CONFIG_HANDOFF)
 	struct spl_handoff *ho = gd->spl_handoff;
 
 	log_debug("usable_ram_top = %lx\n", ho->arch.usable_ram_top);

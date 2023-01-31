@@ -60,7 +60,7 @@ u32 spl_boot_device(void)
 		defined(CONFIG_TARGET_CHROMEBOOK_KEVIN)
 	return BOOT_DEVICE_SPI;
 #endif
-	if (CONFIG_IS_ENABLED(ROCKCHIP_BACK_TO_BROM))
+	if (IS_ENABLED(CONFIG_ROCKCHIP_BACK_TO_BROM))
 		return BOOT_DEVICE_BOOTROM;
 
 	return boot_device;

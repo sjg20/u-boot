@@ -218,7 +218,7 @@ U_BOOT_DRIVER(imx_rgpio2p) = {
 	.bind	= imx_rgpio2p_bind,
 };
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 static const struct imx_rgpio2p_plat imx_plat[] = {
 	{ 0, (struct gpio_regs *)RGPIO2P_GPIO1_BASE_ADDR },
 	{ 1, (struct gpio_regs *)RGPIO2P_GPIO2_BASE_ADDR },

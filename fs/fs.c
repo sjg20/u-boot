@@ -183,7 +183,7 @@ struct fstype_info {
 };
 
 static struct fstype_info fstypes[] = {
-#if CONFIG_IS_ENABLED(FS_FAT)
+#if IS_ENABLED(CONFIG_FS_FAT)
 	{
 		.fstype = FS_TYPE_FAT,
 		.name = "fat",
@@ -194,7 +194,7 @@ static struct fstype_info fstypes[] = {
 		.exists = fat_exists,
 		.size = fat_size,
 		.read = fat_read_file,
-#if CONFIG_IS_ENABLED(FAT_WRITE)
+#if IS_ENABLED(CONFIG_FAT_WRITE)
 		.write = file_fat_write,
 		.unlink = fat_unlink,
 		.mkdir = fat_mkdir,
@@ -211,7 +211,7 @@ static struct fstype_info fstypes[] = {
 	},
 #endif
 
-#if CONFIG_IS_ENABLED(FS_EXT4)
+#if IS_ENABLED(CONFIG_FS_EXT4)
 	{
 		.fstype = FS_TYPE_EXT,
 		.name = "ext4",
@@ -315,7 +315,7 @@ static struct fstype_info fstypes[] = {
 	},
 #endif
 #endif
-#if CONFIG_IS_ENABLED(FS_SQUASHFS)
+#if IS_ENABLED(CONFIG_FS_SQUASHFS)
 	{
 		.fstype = FS_TYPE_SQUASHFS,
 		.name = "squashfs",

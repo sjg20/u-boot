@@ -47,7 +47,7 @@ struct mvebu_spi_plat {
 
 static void spi_cs_activate(struct mvebu_spi_plat *plat, int cs)
 {
-	if (CONFIG_IS_ENABLED(DM_GPIO) && dm_gpio_is_valid(&plat->cs_gpios[cs]))
+	if (IS_ENABLED(CONFIG_DM_GPIO) && dm_gpio_is_valid(&plat->cs_gpios[cs]))
 		dm_gpio_set_value(&plat->cs_gpios[cs], 1);
 	else
 		setbits_le32(&plat->spireg->ctrl, MVEBU_SPI_A3700_SPI_EN_0 << cs);
@@ -55,7 +55,7 @@ static void spi_cs_activate(struct mvebu_spi_plat *plat, int cs)
 
 static void spi_cs_deactivate(struct mvebu_spi_plat *plat, int cs)
 {
-	if (CONFIG_IS_ENABLED(DM_GPIO) && dm_gpio_is_valid(&plat->cs_gpios[cs]))
+	if (IS_ENABLED(CONFIG_DM_GPIO) && dm_gpio_is_valid(&plat->cs_gpios[cs]))
 		dm_gpio_set_value(&plat->cs_gpios[cs], 0);
 	else
 		clrbits_le32(&plat->spireg->ctrl, MVEBU_SPI_A3700_SPI_EN_0 << cs);
@@ -258,7 +258,7 @@ static int mvebu_spi_probe(struct udevice *bus)
 	writel(data, &reg->cfg);
 
 	/* Set up CS GPIOs in device tree, if any */
-	if (CONFIG_IS_ENABLED(DM_GPIO) && gpio_get_list_count(bus, "cs-gpios") > 0) {
+	if (IS_ENABLED(CONFIG_DM_GPIO) && gpio_get_list_count(bus, "cs-gpios") > 0) {
 		int i;
 
 		for (i = 0; i < ARRAY_SIZE(plat->cs_gpios); i++) {

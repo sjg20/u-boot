@@ -13,7 +13,7 @@
 #include <time.h>
 #include <usb.h>
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 struct usb_device *usb_dev_get_parent(struct usb_device *udev)
 {
 	struct udevice *parent = udev->dev->parent;

@@ -36,7 +36,7 @@ struct cadence_ttc_priv {
 	struct cadence_ttc_regs *regs;
 };
 
-#if CONFIG_IS_ENABLED(BOOTSTAGE)
+#if IS_ENABLED(CONFIG_BOOTSTAGE)
 ulong timer_get_boot_us(void)
 {
 	u64 ticks = 0;

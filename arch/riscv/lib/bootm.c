@@ -64,7 +64,7 @@ static void announce_and_cleanup(int fake)
 
 static void boot_prep_linux(struct bootm_headers *images)
 {
-	if (CONFIG_IS_ENABLED(OF_LIBFDT) && IS_ENABLED(CONFIG_LMB) && images->ft_len) {
+	if (IS_ENABLED(CONFIG_OF_LIBFDT) && IS_ENABLED(CONFIG_LMB) && images->ft_len) {
 		debug("using: FDT\n");
 		if (image_setup_linux(images)) {
 			printf("FDT creation failed! hanging...");
@@ -94,7 +94,7 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 	announce_and_cleanup(fake);
 
 	if (!fake) {
-		if (CONFIG_IS_ENABLED(OF_LIBFDT) && images->ft_len) {
+		if (IS_ENABLED(CONFIG_OF_LIBFDT) && images->ft_len) {
 #ifdef CONFIG_SMP
 			ret = smp_call_function(images->ep,
 						(ulong)images->ft_addr, 0, 0);

@@ -1370,7 +1370,7 @@ static ulong px30_clk_set_rate(struct clk *clk, ulong rate)
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static int px30_gmac_set_parent(struct clk *clk, struct clk *parent)
 {
 	struct px30_clk_priv *priv = dev_get_priv(clk->dev);
@@ -1427,7 +1427,7 @@ static int px30_clk_enable(struct clk *clk)
 static struct clk_ops px30_clk_ops = {
 	.get_rate = px30_clk_get_rate,
 	.set_rate = px30_clk_set_rate,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.set_parent = px30_clk_set_parent,
 #endif
 	.enable = px30_clk_enable,
@@ -1504,7 +1504,7 @@ static int px30_clk_bind(struct udevice *dev)
 		dev_set_priv(sys_child, priv);
 	}
 
-#if CONFIG_IS_ENABLED(RESET_ROCKCHIP)
+#if IS_ENABLED(CONFIG_RESET_ROCKCHIP)
 	ret = offsetof(struct px30_cru, softrst_con[0]);
 	ret = rockchip_reset_bind(dev, ret, 12);
 	if (ret)

@@ -342,7 +342,7 @@ static int ivm_populate_env(unsigned char *buf, int len, int mac_address_offset)
 int ivm_read_eeprom(unsigned char *buf, int len, int mac_address_offset)
 {
 	int ret;
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	struct udevice *eedev = NULL;
 
 	ret = i2c_get_chip_for_busnum(CONFIG_KM_IVM_BUS,

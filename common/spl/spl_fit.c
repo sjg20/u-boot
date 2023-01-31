@@ -96,7 +96,7 @@ static int spl_fit_get_image_name(const struct spl_fit_info *ctx,
 		}
 	}
 
-	if (!found && CONFIG_IS_ENABLED(SYSINFO) && !sysinfo_get(&sysinfo)) {
+	if (!found && IS_ENABLED(CONFIG_SYSINFO) && !sysinfo_get(&sysinfo)) {
 		int rc;
 		/*
 		 * no string in the property for this index. Check if the
@@ -310,7 +310,7 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 		src = (void *)data;	/* cast away const */
 	}
 
-	if (CONFIG_IS_ENABLED(FIT_SIGNATURE)) {
+	if (IS_ENABLED(CONFIG_FIT_SIGNATURE)) {
 		printf("## Checking hash(es) for Image %s ... ",
 		       fit_get_name(fit, node, NULL));
 		if (!fit_image_verify_with_data(fit, node, gd_fdt_blob(), src,
@@ -319,7 +319,7 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 		puts("OK\n");
 	}
 
-	if (CONFIG_IS_ENABLED(FIT_IMAGE_POST_PROCESS))
+	if (IS_ENABLED(CONFIG_FIT_IMAGE_POST_PROCESS))
 		board_fit_image_post_process(fit, node, &src, &length);
 
 	load_ptr = map_sysmem(load_addr, length);
@@ -397,10 +397,10 @@ static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 
 	/* Make the load-address of the FDT available for the SPL framework */
 	spl_image->fdt_addr = map_sysmem(image_info.load_addr, 0);
-	if (CONFIG_IS_ENABLED(FIT_IMAGE_TINY))
+	if (IS_ENABLED(CONFIG_FIT_IMAGE_TINY))
 		return 0;
 
-#if CONFIG_IS_ENABLED(LOAD_FIT_APPLY_OVERLAY)
+#if IS_ENABLED(CONFIG_LOAD_FIT_APPLY_OVERLAY)
 		void *tmpbuffer = NULL;
 
 		for (; ; index++) {
@@ -470,7 +470,7 @@ static int spl_fit_record_loadable(const struct spl_fit_info *ctx, int index,
 	const char *name;
 	int node;
 
-	if (CONFIG_IS_ENABLED(FIT_IMAGE_TINY))
+	if (IS_ENABLED(CONFIG_FIT_IMAGE_TINY))
 		return 0;
 
 	ret = spl_fit_get_image_name(ctx, "loadables", index, &name);
@@ -503,7 +503,7 @@ static int spl_fit_image_is_fpga(const void *fit, int node)
 
 static int spl_fit_image_get_os(const void *fit, int noffset, uint8_t *os)
 {
-	if (!CONFIG_IS_ENABLED(FIT_IMAGE_TINY) || CONFIG_IS_ENABLED(OS_BOOT))
+	if (!IS_ENABLED(CONFIG_FIT_IMAGE_TINY) || IS_ENABLED(CONFIG_OS_BOOT))
 		return fit_image_get_os(fit, noffset, os);
 
 	const char *name = fdt_getprop(fit, noffset, FIT_OS_PROP, NULL);
@@ -585,7 +585,7 @@ static int spl_fit_upload_fpga(struct spl_fit_info *ctx, int node,
 	if (!compatible) {
 		warn_deprecated("'fpga' image without 'compatible' property");
 	} else {
-		if (CONFIG_IS_ENABLED(FPGA_LOAD_SECURE))
+		if (IS_ENABLED(CONFIG_FPGA_LOAD_SECURE))
 			flags = fpga_compatible2flag(devnum, compatible);
 		if (strcmp(compatible, "u-boot,fpga-legacy"))
 			debug("Ignoring compatible = %s property\n",

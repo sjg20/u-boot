@@ -52,7 +52,7 @@ struct mt7621_pinctrl_priv {
 	struct mtmips_pinctrl_priv mp;
 };
 
-#if CONFIG_IS_ENABLED(PINMUX)
+#if IS_ENABLED(CONFIG_PINMUX)
 static const struct mtmips_pmx_func esw_int_grp[] = {
 	FUNC("gpio", 1),
 	FUNC("esw int", 0),
@@ -170,9 +170,9 @@ static const char *mt7621_get_group_name(struct udevice *dev,
 {
 	return mt7621_pmx_data[selector].name;
 }
-#endif /* CONFIG_IS_ENABLED(PINMUX) */
+#endif /* IS_ENABLED(CONFIG_PINMUX) */
 
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 static const struct pinconf_param mt7621_conf_params[] = {
 	{ "bias-disable", PIN_CONFIG_BIAS_DISABLE, 0 },
 	{ "bias-pull-up", PIN_CONFIG_BIAS_PULL_UP, 1 },
@@ -254,10 +254,10 @@ static int mt7621_pinctrl_probe(struct udevice *dev)
 	struct mt7621_pinctrl_priv *priv = dev_get_priv(dev);
 	int ret = 0;
 
-#if CONFIG_IS_ENABLED(PINMUX)
+#if IS_ENABLED(CONFIG_PINMUX)
 	ret = mtmips_pinctrl_probe(&priv->mp, ARRAY_SIZE(mt7621_pmx_data),
 				   mt7621_pmx_data);
-#endif /* CONFIG_IS_ENABLED(PINMUX) */
+#endif /* IS_ENABLED(CONFIG_PINMUX) */
 
 	return ret;
 }
@@ -275,18 +275,18 @@ static int mt7621_pinctrl_of_to_plat(struct udevice *dev)
 }
 
 static const struct pinctrl_ops mt7621_pinctrl_ops = {
-#if CONFIG_IS_ENABLED(PINMUX)
+#if IS_ENABLED(CONFIG_PINMUX)
 	.get_groups_count = mt7621_get_groups_count,
 	.get_group_name = mt7621_get_group_name,
 	.get_functions_count = mtmips_get_functions_count,
 	.get_function_name = mtmips_get_function_name,
 	.pinmux_group_set = mtmips_pinmux_group_set,
-#endif /* CONFIG_IS_ENABLED(PINMUX) */
-#if CONFIG_IS_ENABLED(PINCONF)
+#endif /* IS_ENABLED(CONFIG_PINMUX) */
+#if IS_ENABLED(CONFIG_PINCONF)
 	.pinconf_num_params = ARRAY_SIZE(mt7621_conf_params),
 	.pinconf_params = mt7621_conf_params,
 	.pinconf_group_set = mt7621_pinconf_group_set,
-#endif /* CONFIG_IS_ENABLED(PINCONF) */
+#endif /* IS_ENABLED(CONFIG_PINCONF) */
 	.set_state = pinctrl_generic_set_state,
 };
 

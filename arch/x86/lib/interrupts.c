@@ -34,7 +34,7 @@
 #include <irq_func.h>
 #include <asm/interrupt.h>
 
-#if !CONFIG_IS_ENABLED(X86_64)
+#if !IS_ENABLED(CONFIG_X86_64)
 
 struct irq_action {
 	interrupt_handler_t *handler;
@@ -130,7 +130,7 @@ void do_irq(int hw_irq)
 #if defined(CONFIG_CMD_IRQ)
 int do_irqinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
-#if !CONFIG_IS_ENABLED(X86_64)
+#if !IS_ENABLED(CONFIG_X86_64)
 	struct idt_ptr ptr;
 	int irq;
 

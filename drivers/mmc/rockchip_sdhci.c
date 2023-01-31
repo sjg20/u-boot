@@ -271,7 +271,7 @@ static void rk3399_sdhci_set_control_reg(struct sdhci_host *host)
 	 * the device impossible to use. Set the correct value here to
 	 * let reinitialization attempts succeed.
 	 */
-	if (CONFIG_IS_ENABLED(MMC_HS400_ES_SUPPORT))
+	if (IS_ENABLED(CONFIG_MMC_HS400_ES_SUPPORT))
 		rk3399_sdhci_set_enhanced_strobe(host);
 };
 

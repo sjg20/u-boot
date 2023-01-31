@@ -537,7 +537,7 @@ int sandbox_main(int argc, char *argv[])
 #if CONFIG_VAL(SYS_MALLOC_F_LEN)
 	gd->malloc_base = CFG_MALLOC_F_ADDR;
 #endif
-#if CONFIG_IS_ENABLED(LOG)
+#if IS_ENABLED(CONFIG_LOG)
 	gd->default_log_level = state->default_log_level;
 #endif
 	setup_ram_buf(state);

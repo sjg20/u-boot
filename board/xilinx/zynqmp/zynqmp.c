@@ -45,7 +45,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if CONFIG_IS_ENABLED(FPGA) && defined(CONFIG_FPGA_ZYNQMPPL)
+#if IS_ENABLED(CONFIG_FPGA) && defined(CONFIG_FPGA_ZYNQMPPL)
 static xilinx_desc zynqmppl = {
 	xilinx_zynqmp, csu_dma, 1, &zynqmp_op, 0, &zynqmp_op, NULL,
 	ZYNQMP_FPGA_FLAGS
@@ -140,7 +140,7 @@ static void print_secure_boot(void)
 
 int board_init(void)
 {
-#if CONFIG_IS_ENABLED(FPGA) && defined(CONFIG_FPGA_ZYNQMPPL)
+#if IS_ENABLED(CONFIG_FPGA) && defined(CONFIG_FPGA_ZYNQMPPL)
 	struct udevice *soc;
 	char name[SOC_MAX_STR_SIZE];
 	int ret;
@@ -165,16 +165,16 @@ int board_init(void)
 	printf("Silicon version:\t%d\n", zynqmp_get_silicon_version());
 
 	/* the CSU disables the JTAG interface when secure boot is enabled */
-	if (CONFIG_IS_ENABLED(ZYNQMP_RESTORE_JTAG))
+	if (IS_ENABLED(CONFIG_ZYNQMP_RESTORE_JTAG))
 		restore_jtag();
 #else
-	if (CONFIG_IS_ENABLED(DM_I2C) && CONFIG_IS_ENABLED(I2C_EEPROM))
+	if (IS_ENABLED(CONFIG_DM_I2C) && IS_ENABLED(CONFIG_I2C_EEPROM))
 		xilinx_read_eeprom();
 #endif
 
 	printf("EL Level:\tEL%d\n", current_el());
 
-#if CONFIG_IS_ENABLED(FPGA) && defined(CONFIG_FPGA_ZYNQMPPL)
+#if IS_ENABLED(CONFIG_FPGA) && defined(CONFIG_FPGA_ZYNQMPPL)
 	ret = soc_get(&soc);
 	if (!ret) {
 		ret = soc_get_machine(soc, name, sizeof(name));
@@ -278,7 +278,7 @@ int dram_init(void)
 }
 #endif
 
-#if !CONFIG_IS_ENABLED(SYSRESET)
+#if !IS_ENABLED(CONFIG_SYSRESET)
 void reset_cpu(void)
 {
 }

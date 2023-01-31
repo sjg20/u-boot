@@ -587,12 +587,12 @@ static ulong get_image_ivt_offset(ulong img_addr)
 
 	buf = map_sysmem(img_addr, 0);
 	switch (genimg_get_format(buf)) {
-#if CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)
+#if IS_ENABLED(CONFIG_LEGACY_IMAGE_FORMAT)
 	case IMAGE_FORMAT_LEGACY:
 		return (image_get_image_size((struct legacy_img_hdr *)img_addr)
 			+ 0x1000 - 1)  & ~(0x1000 - 1);
 #endif
-#if CONFIG_IS_ENABLED(FIT)
+#if IS_ENABLED(CONFIG_FIT)
 	case IMAGE_FORMAT_FIT:
 		return (fit_get_size(buf) + 0x1000 - 1)  & ~(0x1000 - 1);
 #endif

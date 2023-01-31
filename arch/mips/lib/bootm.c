@@ -149,7 +149,7 @@ static void linux_env_set(const char *env_name, const char *env_val)
 		strcpy(linux_env_p, env_name);
 		linux_env_p += strlen(env_name);
 
-		if (CONFIG_IS_ENABLED(MALTA)) {
+		if (IS_ENABLED(CONFIG_MALTA)) {
 			linux_env_p++;
 			linux_env[++linux_env_idx] = linux_env_p;
 		} else {
@@ -170,7 +170,7 @@ static void linux_env_legacy(struct bootm_headers *images)
 	const char *cp;
 	ulong rd_start, rd_size;
 
-	if (CONFIG_IS_ENABLED(MEMSIZE_IN_BYTES)) {
+	if (IS_ENABLED(CONFIG_MEMSIZE_IN_BYTES)) {
 		sprintf(env_buf, "%lu", (ulong)gd->ram_size);
 		debug("## Giving linux memsize in bytes, %lu\n",
 		      (ulong)gd->ram_size);
@@ -207,7 +207,7 @@ static void linux_env_legacy(struct bootm_headers *images)
 	if (cp)
 		linux_env_set("eth1addr", cp);
 
-	if (CONFIG_IS_ENABLED(MALTA)) {
+	if (IS_ENABLED(CONFIG_MALTA)) {
 		sprintf(env_buf, "%un8r", gd->baudrate);
 		linux_env_set("modetty0", env_buf);
 	}
@@ -224,7 +224,7 @@ static int boot_reloc_fdt(struct bootm_headers *images)
 		return 0;
 	}
 
-#if CONFIG_IS_ENABLED(MIPS_BOOT_FDT) && CONFIG_IS_ENABLED(OF_LIBFDT)
+#if IS_ENABLED(CONFIG_MIPS_BOOT_FDT) && IS_ENABLED(CONFIG_OF_LIBFDT)
 	boot_fdt_add_mem_rsv_regions(&images->lmb, images->ft_addr);
 	return boot_relocate_fdt(&images->lmb, &images->ft_addr,
 		&images->ft_len);
@@ -233,7 +233,7 @@ static int boot_reloc_fdt(struct bootm_headers *images)
 #endif
 }
 
-#if CONFIG_IS_ENABLED(MIPS_BOOT_FDT) && CONFIG_IS_ENABLED(OF_LIBFDT)
+#if IS_ENABLED(CONFIG_MIPS_BOOT_FDT) && IS_ENABLED(CONFIG_OF_LIBFDT)
 int arch_fixup_fdt(void *blob)
 {
 	u64 mem_start = virt_to_phys((void *)gd->ram_base);
@@ -253,20 +253,20 @@ static int boot_setup_fdt(struct bootm_headers *images)
 
 static void boot_prep_linux(struct bootm_headers *images)
 {
-	if (CONFIG_IS_ENABLED(MIPS_BOOT_FDT) && images->ft_len) {
+	if (IS_ENABLED(CONFIG_MIPS_BOOT_FDT) && images->ft_len) {
 		boot_reloc_fdt(images);
 		boot_setup_fdt(images);
 	} else {
-		if (CONFIG_IS_ENABLED(MIPS_BOOT_CMDLINE_LEGACY)) {
+		if (IS_ENABLED(CONFIG_MIPS_BOOT_CMDLINE_LEGACY)) {
 			linux_cmdline_legacy(images);
 
-			if (!CONFIG_IS_ENABLED(MIPS_BOOT_ENV_LEGACY))
+			if (!IS_ENABLED(CONFIG_MIPS_BOOT_ENV_LEGACY))
 				linux_cmdline_append(images);
 
 			linux_cmdline_dump();
 		}
 
-		if (CONFIG_IS_ENABLED(MIPS_BOOT_ENV_LEGACY))
+		if (IS_ENABLED(CONFIG_MIPS_BOOT_ENV_LEGACY))
 			linux_env_legacy(images);
 	}
 }
@@ -281,7 +281,7 @@ static void boot_jump_linux(struct bootm_headers *images)
 
 	bootstage_mark(BOOTSTAGE_ID_RUN_OS);
 
-	if (CONFIG_IS_ENABLED(MALTA))
+	if (IS_ENABLED(CONFIG_MALTA))
 		linux_extra = gd->ram_size;
 
 #if IS_ENABLED(CONFIG_BOOTSTAGE_FDT)
@@ -291,7 +291,7 @@ static void boot_jump_linux(struct bootm_headers *images)
 	bootstage_report();
 #endif
 
-	if (CONFIG_IS_ENABLED(RESTORE_EXCEPTION_VECTOR_BASE))
+	if (IS_ENABLED(CONFIG_RESTORE_EXCEPTION_VECTOR_BASE))
 		trap_restore();
 
 	if (images->ft_len)

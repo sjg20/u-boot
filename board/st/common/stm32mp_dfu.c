@@ -115,7 +115,7 @@ void set_dfu_alt_info(char *interface, char *devstr)
 	snprintf(buf, DFU_ALT_BUF_LEN,
 		 "ram 0=%s", CONFIG_DFU_ALT_RAM0);
 
-	if (CONFIG_IS_ENABLED(MMC)) {
+	if (IS_ENABLED(CONFIG_MMC)) {
 		if (!uclass_get_device(UCLASS_MMC, 0, &dev))
 			board_get_alt_info_mmc(dev, buf);
 

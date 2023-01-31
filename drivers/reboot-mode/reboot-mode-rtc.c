@@ -67,7 +67,7 @@ static int reboot_mode_set(struct udevice *dev, u32 buf)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 static int reboot_mode_ofdata_to_platdata(struct udevice *dev)
 {
 	struct ofnode_phandle_args phandle_args;
@@ -118,7 +118,7 @@ static const struct reboot_mode_ops reboot_mode_rtc_ops = {
 U_BOOT_DRIVER(reboot_mode_rtc) = {
 	.name = "reboot-mode-rtc",
 	.id = UCLASS_REBOOT_MODE,
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	.of_match = reboot_mode_ids,
 	.of_to_plat = reboot_mode_ofdata_to_platdata,
 #endif

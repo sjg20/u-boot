@@ -217,7 +217,7 @@ static int dw_spi_dwc_init(struct udevice *bus, struct dw_spi_priv *priv)
 
 static int request_gpio_cs(struct udevice *bus)
 {
-#if CONFIG_IS_ENABLED(DM_GPIO) && !defined(CONFIG_SPL_BUILD)
+#if IS_ENABLED(CONFIG_DM_GPIO) && !defined(CONFIG_SPL_BUILD)
 	struct dw_spi_priv *priv = dev_get_priv(bus);
 	int ret;
 
@@ -481,7 +481,7 @@ static int poll_transfer(struct dw_spi_priv *priv)
  */
 __weak void external_cs_manage(struct udevice *dev, bool on)
 {
-#if CONFIG_IS_ENABLED(DM_GPIO) && !defined(CONFIG_SPL_BUILD)
+#if IS_ENABLED(CONFIG_DM_GPIO) && !defined(CONFIG_SPL_BUILD)
 	struct dw_spi_priv *priv = dev_get_priv(dev->parent);
 
 	if (!dm_gpio_is_valid(&priv->cs_gpio))
@@ -727,7 +727,7 @@ static int dw_spi_remove(struct udevice *bus)
 	if (ret)
 		return ret;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_disable(&priv->clk);
 	if (ret)
 		return ret;

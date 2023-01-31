@@ -270,7 +270,7 @@ static int _vprintf(struct printf_info *info, const char *fmt, va_list va)
 				}
 				break;
 			case 'p':
-				if (CONFIG_IS_ENABLED(NET) || _DEBUG) {
+				if (IS_ENABLED(CONFIG_NET) || _DEBUG) {
 					pointer(info, fmt, va_arg(va, void *));
 					/*
 					 * Skip this because it pulls in _ctype which is
@@ -327,7 +327,7 @@ abort:
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(PRINTF)
+#if IS_ENABLED(CONFIG_PRINTF)
 static void putc_normal(struct printf_info *info, char ch)
 {
 	putc(ch);
@@ -378,7 +378,7 @@ int sprintf(char *buf, const char *fmt, ...)
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(LOG)
+#if IS_ENABLED(CONFIG_LOG)
 /* Note that size is ignored */
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list va)
 {

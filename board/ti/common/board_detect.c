@@ -22,7 +22,7 @@
 
 #include "board_detect.h"
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 /**
  * ti_i2c_eeprom_init - Initialize an i2c bus and probe for a device
  * @i2c_bus: i2c bus number to initialize
@@ -90,7 +90,7 @@ static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
 	uint8_t offset_test;
 	bool one_byte_addressing = true;
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	struct udevice *dev;
 	struct udevice *bus;
 

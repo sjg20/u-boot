@@ -86,7 +86,7 @@ int usb_cpu_init_fail(void)
 	return usb_cpu_stop();
 }
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 static int ohci_da8xx_probe(struct udevice *dev)
 {
 	struct ohci_regs *regs = dev_read_addr_ptr(dev);

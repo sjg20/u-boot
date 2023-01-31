@@ -32,7 +32,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define OMAP_GPIO_DIR_OUT	0
 #define OMAP_GPIO_DIR_IN	1
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 
 #define GPIO_PER_BANK			32
 
@@ -118,7 +118,7 @@ static int _get_gpio_value(const struct gpio_bank *bank, int gpio)
 	return (__raw_readl(reg) & (1 << gpio)) != 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_GPIO)
+#if !IS_ENABLED(CONFIG_DM_GPIO)
 static inline int get_gpio_index(int gpio)
 {
 	return gpio & 0x1f;
@@ -301,7 +301,7 @@ static int omap_gpio_probe(struct udevice *dev)
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 static int omap_gpio_bind(struct udevice *dev)
 {
 	struct omap_gpio_plat *plat = dev_get_plat(dev);
@@ -336,7 +336,7 @@ static int omap_gpio_bind(struct udevice *dev)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct udevice_id omap_gpio_ids[] = {
 	{ .compatible = "ti,omap3-gpio" },
 	{ .compatible = "ti,omap4-gpio" },
@@ -361,8 +361,8 @@ static int omap_gpio_of_to_plat(struct udevice *dev)
 U_BOOT_DRIVER(gpio_omap) = {
 	.name	= "gpio_omap",
 	.id	= UCLASS_GPIO,
-#if CONFIG_IS_ENABLED(OF_CONTROL)
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.of_match = omap_gpio_ids,
 	.of_to_plat = of_match_ptr(omap_gpio_of_to_plat),
 	.plat_auto	= sizeof(struct omap_gpio_plat),
@@ -373,7 +373,7 @@ U_BOOT_DRIVER(gpio_omap) = {
 	.ops	= &gpio_omap_ops,
 	.probe	= omap_gpio_probe,
 	.priv_auto	= sizeof(struct gpio_bank),
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 	.flags = DM_FLAG_PRE_RELOC,
 #endif
 };

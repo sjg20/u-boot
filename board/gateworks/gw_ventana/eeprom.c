@@ -24,7 +24,7 @@
 struct ventana_board_info ventana_info;
 int board_type;
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 struct udevice *i2c_get_dev(int busno, int slave)
 {
 	struct udevice *dev, *bus;
@@ -53,7 +53,7 @@ int gsc_i2c_read(uchar chip, uint addr, int alen, uchar *buf, int len)
 	int retry = 3;
 	int n = 0;
 	int ret;
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	struct udevice *dev;
 
 	dev = i2c_get_dev(BOARD_EEPROM_BUSNO, chip);
@@ -69,7 +69,7 @@ int gsc_i2c_read(uchar chip, uint addr, int alen, uchar *buf, int len)
 #endif
 
 	while (n++ < retry) {
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 		ret = dm_i2c_read(dev, addr, buf, len);
 #else
 		ret = i2c_read(chip, addr, alen, buf, len);
@@ -90,7 +90,7 @@ int gsc_i2c_write(uchar chip, uint addr, int alen, uchar *buf, int len)
 	int retry = 3;
 	int n = 0;
 	int ret;
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	struct udevice *dev;
 
 	dev = i2c_get_dev(BOARD_EEPROM_BUSNO, chip);
@@ -104,7 +104,7 @@ int gsc_i2c_write(uchar chip, uint addr, int alen, uchar *buf, int len)
 #endif
 
 	while (n++ < retry) {
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 		ret = dm_i2c_write(dev, addr, buf, len);
 #else
 		ret = i2c_write(chip, addr, alen, buf, len);

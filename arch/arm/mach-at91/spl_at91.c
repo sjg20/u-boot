@@ -79,7 +79,7 @@ void __weak spl_board_init(void)
 
 void board_init_f(ulong dummy)
 {
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	int ret;
 
 	ret = spl_early_init();

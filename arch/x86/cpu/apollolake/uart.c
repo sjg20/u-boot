@@ -81,7 +81,7 @@ static int apl_ns16550_probe(struct udevice *dev)
 {
 	struct apl_ns16550_plat *plat = dev_get_plat(dev);
 
-	if (!CONFIG_IS_ENABLED(PCI))
+	if (!IS_ENABLED(CONFIG_PCI))
 		apl_uart_init(plat->ns16550.bdf, plat->ns16550.base);
 
 	return ns16550_serial_probe(dev);
@@ -89,7 +89,7 @@ static int apl_ns16550_probe(struct udevice *dev)
 
 static int apl_ns16550_of_to_plat(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_intel_apl_ns16550 *dtplat;
 	struct apl_ns16550_plat *plat = dev_get_plat(dev);
 	struct ns16550_plat ns;
@@ -123,7 +123,7 @@ static int apl_ns16550_of_to_plat(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct udevice_id apl_ns16550_serial_ids[] = {
 	{ .compatible = "intel,apl-ns16550" },
 	{ },

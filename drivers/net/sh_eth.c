@@ -38,7 +38,7 @@
 #endif
 
 #if defined(CFG_SH_ETHER_CACHE_WRITEBACK) && \
-	!CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+	!IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 #define flush_cache_wback(addr, len)    \
 		flush_dcache_range((unsigned long)addr, \
 		(unsigned long)(addr + ALIGN(len, CFG_SH_ETHER_ALIGNE_SIZE)))
@@ -659,7 +659,7 @@ static int sh_ether_probe(struct udevice *udev)
 
 	priv->iobase = pdata->iobase;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_get_by_index(udev, 0, &priv->clk);
 	if (ret < 0)
 		return ret;
@@ -698,7 +698,7 @@ static int sh_ether_probe(struct udevice *udev)
 	eth->port_info[eth->port].iobase =
 		(void __iomem *)(uintptr_t)(BASE_IO_ADDR + 0x800 * eth->port);
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_enable(&priv->clk);
 	if (ret)
 		goto err_mdio_register;
@@ -717,7 +717,7 @@ static int sh_ether_probe(struct udevice *udev)
 	return 0;
 
 err_phy_config:
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	clk_disable(&priv->clk);
 #endif
 err_mdio_register:
@@ -731,7 +731,7 @@ static int sh_ether_remove(struct udevice *udev)
 	struct sh_eth_dev *eth = &priv->shdev;
 	struct sh_eth_info *port_info = &eth->port_info[eth->port];
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	clk_disable(&priv->clk);
 #endif
 	free(port_info->phydev);

@@ -104,7 +104,7 @@ void board_init_f(ulong dummy)
 	preloader_console_init();
 	spl_set_bd();
 
-#if CONFIG_IS_ENABLED(SYS_I2C_LEGACY)
+#if IS_ENABLED(CONFIG_SYS_I2C_LEGACY)
 #ifdef CONFIG_SPL_I2C
 	i2c_init_all();
 #endif

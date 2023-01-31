@@ -109,7 +109,7 @@ struct fsl_esdhc {
 };
 
 struct fsl_esdhc_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	/* Put this first since driver model will copy the data here */
 	struct dtd_fsl_esdhc dtplat;
 #endif
@@ -150,7 +150,7 @@ struct fsl_esdhc_priv {
 	struct clk per_clk;
 	unsigned int clock;
 	unsigned int mode;
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 	struct mmc *mmc;
 #endif
 	struct udevice *dev;
@@ -166,7 +166,7 @@ struct fsl_esdhc_priv {
 	u32 signal_voltage_switch_extra_delay_ms;
 	struct udevice *vqmmc_dev;
 	struct udevice *vmmc_dev;
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	struct gpio_desc cd_gpio;
 	struct gpio_desc wp_gpio;
 #endif
@@ -326,7 +326,7 @@ static int esdhc_setup_data(struct fsl_esdhc_priv *priv, struct mmc *mmc,
 			printf("Cannot write to locked SD card.\n");
 			return -EINVAL;
 		} else {
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 			if (dm_gpio_is_valid(&priv->wp_gpio) &&
 			    dm_gpio_get_value(&priv->wp_gpio)) {
 				printf("Cannot write to locked SD card.\n");
@@ -761,7 +761,7 @@ static int esdhc_set_voltage(struct mmc *mmc)
 	case MMC_SIGNAL_VOLTAGE_330:
 		if (priv->vs18_enable)
 			return -ENOTSUPP;
-		if (CONFIG_IS_ENABLED(DM_REGULATOR) &&
+		if (IS_ENABLED(CONFIG_DM_REGULATOR) &&
 		    !IS_ERR_OR_NULL(priv->vqmmc_dev)) {
 			ret = regulator_set_value(priv->vqmmc_dev,
 						  3300000);
@@ -779,7 +779,7 @@ static int esdhc_set_voltage(struct mmc *mmc)
 
 		return -EAGAIN;
 	case MMC_SIGNAL_VOLTAGE_180:
-		if (CONFIG_IS_ENABLED(DM_REGULATOR) &&
+		if (IS_ENABLED(CONFIG_DM_REGULATOR) &&
 		    !IS_ERR_OR_NULL(priv->vqmmc_dev)) {
 			ret = regulator_set_value(priv->vqmmc_dev,
 						  1800000);
@@ -1045,10 +1045,10 @@ static int esdhc_getcd_common(struct fsl_esdhc_priv *priv)
 	if (IS_ENABLED(CONFIG_ESDHC_DETECT_QUIRK))
 		return 1;
 
-	if (CONFIG_IS_ENABLED(DM_MMC)) {
+	if (IS_ENABLED(CONFIG_DM_MMC)) {
 		if (priv->broken_cd)
 			return 1;
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 		if (dm_gpio_is_valid(&priv->cd_gpio))
 			return dm_gpio_get_value(&priv->cd_gpio);
 #endif
@@ -1103,7 +1103,7 @@ static int esdhc_reset(struct fsl_esdhc *regs)
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 static int esdhc_getcd(struct mmc *mmc)
 {
 	struct fsl_esdhc_priv *priv = mmc->priv;
@@ -1188,7 +1188,7 @@ static int fsl_esdhc_init(struct fsl_esdhc_priv *priv,
 
 	esdhc_write32(&regs->irqstaten, SDHCI_IRQ_EN_BITS);
 	cfg = &plat->cfg;
-	if (!CONFIG_IS_ENABLED(DM_MMC))
+	if (!IS_ENABLED(CONFIG_DM_MMC))
 		memset(cfg, '\0', sizeof(*cfg));
 
 	caps = esdhc_read32(&regs->hostcapblt);
@@ -1216,7 +1216,7 @@ static int fsl_esdhc_init(struct fsl_esdhc_priv *priv,
 
 	cfg->name = "FSL_SDHC";
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 	cfg->ops = &esdhc_ops;
 #endif
 
@@ -1262,20 +1262,20 @@ static int fsl_esdhc_init(struct fsl_esdhc_priv *priv,
 		 * UHS doesn't have explicit ESDHC flags, so if it's
 		 * not supported, disable it in config.
 		 */
-		if (CONFIG_IS_ENABLED(MMC_UHS_SUPPORT))
+		if (IS_ENABLED(CONFIG_MMC_UHS_SUPPORT))
 			cfg->host_caps |= UHS_CAPS;
 
-		if (CONFIG_IS_ENABLED(MMC_HS200_SUPPORT)) {
+		if (IS_ENABLED(CONFIG_MMC_HS200_SUPPORT)) {
 			if (priv->flags & ESDHC_FLAG_HS200)
 				cfg->host_caps |= MMC_CAP(MMC_HS_200);
 		}
 
-		if (CONFIG_IS_ENABLED(MMC_HS400_SUPPORT)) {
+		if (IS_ENABLED(CONFIG_MMC_HS400_SUPPORT)) {
 			if (priv->flags & ESDHC_FLAG_HS400)
 				cfg->host_caps |= MMC_CAP(MMC_HS_400);
 		}
 
-		if (CONFIG_IS_ENABLED(MMC_HS400_ES_SUPPORT)) {
+		if (IS_ENABLED(CONFIG_MMC_HS400_ES_SUPPORT)) {
 			if (priv->flags & ESDHC_FLAG_HS400_ES)
 				cfg->host_caps |= MMC_CAP(MMC_HS_400_ES);
 		}
@@ -1283,7 +1283,7 @@ static int fsl_esdhc_init(struct fsl_esdhc_priv *priv,
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 int fsl_esdhc_initialize(struct bd_info *bis, struct fsl_esdhc_cfg *cfg)
 {
 	struct fsl_esdhc_plat *plat;
@@ -1357,7 +1357,7 @@ int fsl_esdhc_mmc_init(struct bd_info *bis)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(OF_LIBFDT)
+#if IS_ENABLED(CONFIG_OF_LIBFDT)
 __weak int esdhc_status_fixup(void *blob, const char *compat)
 {
 	if (IS_ENABLED(CONFIG_FSL_ESDHC_PIN_MUX) && !hwconfig("esdhc")) {
@@ -1380,7 +1380,7 @@ void fdt_fixup_esdhc(void *blob, struct bd_info *bd)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(DM_MMC)
+#if IS_ENABLED(CONFIG_DM_MMC)
 #include <asm/arch/clock.h>
 __weak void init_clk_usdhc(u32 index)
 {
@@ -1397,7 +1397,7 @@ static int fsl_esdhc_of_to_plat(struct udevice *dev)
 	fdt_addr_t addr;
 	unsigned int val;
 
-	if (!CONFIG_IS_ENABLED(OF_REAL))
+	if (!IS_ENABLED(CONFIG_OF_REAL))
 		return 0;
 
 	addr = dev_read_addr(dev);
@@ -1427,7 +1427,7 @@ static int fsl_esdhc_of_to_plat(struct udevice *dev)
 		priv->wp_enable = 0;
 	}
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	gpio_request_by_name(dev, "cd-gpios", 0, &priv->cd_gpio,
 			     GPIOD_IS_IN);
 	gpio_request_by_name(dev, "wp-gpios", 0, &priv->wp_gpio,
@@ -1436,7 +1436,7 @@ static int fsl_esdhc_of_to_plat(struct udevice *dev)
 
 	priv->vs18_enable = 0;
 
-	if (!CONFIG_IS_ENABLED(DM_REGULATOR))
+	if (!IS_ENABLED(CONFIG_DM_REGULATOR))
 		return 0;
 
 	/*
@@ -1470,7 +1470,7 @@ static int fsl_esdhc_probe(struct udevice *dev)
 	struct mmc *mmc;
 	int ret;
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_fsl_esdhc *dtplat = &plat->dtplat;
 
 	priv->esdhc_regs = map_sysmem(dtplat->reg[0], dtplat->reg[1]);
@@ -1480,7 +1480,7 @@ static int fsl_esdhc_probe(struct udevice *dev)
 	else
 		plat->cfg.host_caps &= ~MMC_CAP_NONREMOVABLE;
 
-	if (CONFIG_IS_ENABLED(DM_GPIO) && !dtplat->non_removable) {
+	if (IS_ENABLED(CONFIG_DM_GPIO) && !dtplat->non_removable) {
 		struct udevice *gpiodev;
 
 		ret = device_get_by_ofplat_idx(dtplat->cd_gpios->idx, &gpiodev);
@@ -1519,7 +1519,7 @@ static int fsl_esdhc_probe(struct udevice *dev)
 	 * work as expected.
 	 */
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	/* Assigned clock already set clock */
 	ret = clk_get_by_name(dev, "per", &priv->per_clk);
 	if (ret) {
@@ -1549,7 +1549,7 @@ static int fsl_esdhc_probe(struct udevice *dev)
 		return ret;
 	}
 
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		ret = mmc_of_parse(dev, &plat->cfg);
 		if (ret)
 			return ret;
@@ -1620,7 +1620,7 @@ static const struct dm_mmc_ops fsl_esdhc_ops = {
 #ifdef MMC_SUPPORTS_TUNING
 	.execute_tuning	= fsl_esdhc_execute_tuning,
 #endif
-#if CONFIG_IS_ENABLED(MMC_HS400_ES_SUPPORT)
+#if IS_ENABLED(CONFIG_MMC_HS400_ES_SUPPORT)
 	.set_enhanced_strobe = fsl_esdhc_set_enhanced_strobe,
 #endif
 	.wait_dat0 = fsl_esdhc_wait_dat0,

@@ -41,7 +41,7 @@
 #define LPC32XX_I2C_STAT_NAI		0x00000004
 #define LPC32XX_I2C_STAT_TDI		0x00000001
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 static struct lpc32xx_i2c_base *lpc32xx_i2c[] = {
 	(struct lpc32xx_i2c_base *)I2C1_BASE,
 	(struct lpc32xx_i2c_base *)I2C2_BASE,
@@ -223,7 +223,7 @@ static int __i2c_write(struct lpc32xx_i2c_base *base, u8 dev, uint addr,
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 static void lpc32xx_i2c_init(struct i2c_adapter *adap,
 			     int requested_speed, int slaveadd)
 {

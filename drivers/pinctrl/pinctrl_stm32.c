@@ -431,7 +431,7 @@ static int stm32_pinctrl_bind(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(PINCTRL_FULL)
+#if IS_ENABLED(CONFIG_PINCTRL_FULL)
 static int stm32_pinctrl_set_state(struct udevice *dev, struct udevice *config)
 {
 	return stm32_pinctrl_config(dev_ofnode(config));
@@ -472,7 +472,7 @@ static int stm32_pinctrl_set_state_simple(struct udevice *dev,
 #endif /* PINCTRL_FULL */
 
 static struct pinctrl_ops stm32_pinctrl_ops = {
-#if CONFIG_IS_ENABLED(PINCTRL_FULL)
+#if IS_ENABLED(CONFIG_PINCTRL_FULL)
 	.set_state		= stm32_pinctrl_set_state,
 #else /* PINCTRL_FULL */
 	.set_state_simple	= stm32_pinctrl_set_state_simple,

@@ -22,7 +22,7 @@ struct i2c_eeprom {
 	unsigned long size;
 };
 
-#if CONFIG_IS_ENABLED(I2C_EEPROM)
+#if IS_ENABLED(CONFIG_I2C_EEPROM)
 /*
  * i2c_eeprom_read() - read bytes from an I2C EEPROM chip
  *

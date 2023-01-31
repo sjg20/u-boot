@@ -258,7 +258,7 @@ static int fs_loader_of_to_plat(struct udevice *dev)
 
 static int fs_loader_probe(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(DM) && CONFIG_IS_ENABLED(BLK)
+#if IS_ENABLED(CONFIG_DM) && IS_ENABLED(CONFIG_BLK)
 	int ret;
 	struct device_plat *plat = dev_get_plat(dev);
 

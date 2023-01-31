@@ -32,7 +32,7 @@ int eth_env_set_enetaddr_by_index(const char *base_name, int index,
 void eth_common_init(void)
 {
 	bootstage_mark(BOOTSTAGE_ID_NET_ETH_START);
-#if CONFIG_IS_ENABLED(ETH)
+#if IS_ENABLED(CONFIG_ETH)
 #if defined(CONFIG_MII) || defined(CONFIG_CMD_MII) || defined(CONFIG_PHYLIB)
 	miiphy_init();
 #endif

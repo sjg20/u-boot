@@ -30,7 +30,7 @@
 #include <linux/stringify.h>
 
 struct rk3066_clk_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_rk3066a_cru dtd;
 #endif
 };
@@ -636,7 +636,7 @@ static struct clk_ops rk3066_clk_ops = {
 
 static int rk3066_clk_of_to_plat(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		struct rk3066_clk_priv *priv = dev_get_priv(dev);
 
 		priv->cru = dev_read_addr_ptr(dev);
@@ -653,7 +653,7 @@ static int rk3066_clk_probe(struct udevice *dev)
 	if (IS_ERR(priv->grf))
 		return PTR_ERR(priv->grf);
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct rk3066_clk_plat *plat = dev_get_plat(dev);
 
 	priv->cru = map_sysmem(plat->dtd.reg[0], plat->dtd.reg[1]);
@@ -689,7 +689,7 @@ static int rk3066_clk_bind(struct udevice *dev)
 		dev_set_priv(sys_child, priv);
 	}
 
-	if (CONFIG_IS_ENABLED(RESET_ROCKCHIP)) {
+	if (IS_ENABLED(CONFIG_RESET_ROCKCHIP)) {
 		reg_offset = offsetof(struct rk3066_cru, cru_softrst_con[0]);
 		ret = rockchip_reset_bind(dev, reg_offset, 9);
 		if (ret)

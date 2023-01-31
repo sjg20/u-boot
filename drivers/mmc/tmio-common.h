@@ -136,7 +136,7 @@ struct tmio_sd_priv {
 #ifdef CONFIG_DM_REGULATOR
 	struct udevice *vqmmc_dev;
 #endif
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	struct clk			clk;
 #endif
 #if IS_ENABLED(CONFIG_RENESAS_SDHI)

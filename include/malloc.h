@@ -895,7 +895,7 @@ void malloc_enable_testing(int max_allocs);
 /** malloc_disable_testing() - Put malloc() into normal mode */
 void malloc_disable_testing(void);
 
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
+#if IS_ENABLED(CONFIG_SYS_MALLOC_SIMPLE)
 #define malloc malloc_simple
 #define realloc realloc_simple
 #define memalign memalign_simple

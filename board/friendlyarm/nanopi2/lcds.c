@@ -689,7 +689,7 @@ int bd_get_lcd_density(void)
 	return bd_lcd_config[lcd_idx].dpi;
 }
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 int bd_fixup_lcd_fdt(void *blob, struct nxp_lcd *lcd)
 {
 	return 0;

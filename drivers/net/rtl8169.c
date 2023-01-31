@@ -307,7 +307,7 @@ static unsigned char rxdata[RX_BUF_LEN];
  */
 #if RTL8169_DESC_SIZE < ARCH_DMA_MINALIGN
 #if !defined(CONFIG_SYS_NONCACHED_MEMORY) && \
-	!CONFIG_IS_ENABLED(SYS_DCACHE_OFF) && !defined(CONFIG_X86)
+	!IS_ENABLED(CONFIG_SYS_DCACHE_OFF) && !defined(CONFIG_X86)
 #warning cache-line size is larger than descriptor size
 #endif
 #endif

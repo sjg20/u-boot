@@ -28,7 +28,7 @@
 
 long smh_trap(unsigned int sysnum, void *addr);
 
-#if CONFIG_IS_ENABLED(SEMIHOSTING_FALLBACK)
+#if IS_ENABLED(CONFIG_SEMIHOSTING_FALLBACK)
 /**
  * semihosting_enabled() - Determine whether semihosting is supported
  *
@@ -50,7 +50,7 @@ void disable_semihosting(void);
 #else
 static inline bool semihosting_enabled(void)
 {
-	return CONFIG_IS_ENABLED(SEMIHOSTING);
+	return IS_ENABLED(CONFIG_SEMIHOSTING);
 }
 
 static inline void disable_semihosting(void)

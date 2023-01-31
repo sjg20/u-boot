@@ -20,7 +20,7 @@
 #define SYSFLEN		0x0C
 #define SYSERRNO	0x13
 
-#if CONFIG_IS_ENABLED(SEMIHOSTING_FALLBACK)
+#if IS_ENABLED(CONFIG_SEMIHOSTING_FALLBACK)
 static bool _semihosting_enabled = true;
 static bool try_semihosting = true;
 

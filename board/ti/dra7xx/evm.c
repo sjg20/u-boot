@@ -652,7 +652,7 @@ int dram_init_banksize(void)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DM_USB) && CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_DM_USB) && IS_ENABLED(CONFIG_OF_CONTROL)
 static int device_okay(const char *path)
 {
 	int node;
@@ -704,7 +704,7 @@ int board_late_init(void)
 	if (board_is_dra71x_evm())
 		palmas_i2c_write_u8(LP873X_I2C_SLAVE_ADDR, 0x9, 0x7);
 #endif
-#if CONFIG_IS_ENABLED(DM_USB) && CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_DM_USB) && IS_ENABLED(CONFIG_OF_CONTROL)
 	if (device_okay("/ocp/omap_dwc3_1@48880000"))
 		enable_usb_clocks(0);
 	if (device_okay("/ocp/omap_dwc3_2@488c0000"))
@@ -1049,7 +1049,7 @@ int board_fit_config_name_match(const char *name)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_FASTBOOT) && !CONFIG_IS_ENABLED(ENV_IS_NOWHERE)
+#if IS_ENABLED(CONFIG_FASTBOOT) && !IS_ENABLED(CONFIG_ENV_IS_NOWHERE)
 int fastboot_set_reboot_flag(enum fastboot_reboot_reason reason)
 {
 	if (reason != FASTBOOT_REBOOT_REASON_BOOTLOADER)

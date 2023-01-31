@@ -945,7 +945,7 @@ void prcm_init(void)
 		enable_basic_uboot_clocks();
 }
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 void gpi2c_init(void)
 {
 	static int gpi2c = 1;

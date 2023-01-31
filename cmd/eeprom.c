@@ -34,7 +34,7 @@
 #define	EEPROM_PAGE_SIZE	(1 << CONFIG_SYS_EEPROM_PAGE_WRITE_BITS)
 #define	EEPROM_PAGE_OFFSET(x)	((x) & (EEPROM_PAGE_SIZE - 1))
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 static int eeprom_i2c_bus;
 #endif
 
@@ -46,9 +46,9 @@ __weak int eeprom_write_enable(unsigned dev_addr, int state)
 void eeprom_init(int bus)
 {
 	/* I2C EEPROM */
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	eeprom_i2c_bus = bus;
-#elif CONFIG_IS_ENABLED(SYS_I2C_LEGACY)
+#elif IS_ENABLED(CONFIG_SYS_I2C_LEGACY)
 	if (bus >= 0)
 		i2c_set_bus_num(bus);
 	i2c_init(CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);
@@ -112,7 +112,7 @@ static int eeprom_rw_block(unsigned offset, uchar *addr, unsigned alen,
 {
 	int ret = 0;
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	struct udevice *dev;
 
 	ret = i2c_get_chip_for_busnum(eeprom_i2c_bus, addr[0],
@@ -149,7 +149,7 @@ static int eeprom_rw(unsigned dev_addr, unsigned offset, uchar *buffer,
 	int rcode = 0;
 	uchar addr[3];
 
-#if !CONFIG_IS_ENABLED(DM_I2C) && defined(CONFIG_SYS_I2C_EEPROM_BUS)
+#if !IS_ENABLED(CONFIG_DM_I2C) && defined(CONFIG_SYS_I2C_EEPROM_BUS)
 	eeprom_init(CONFIG_SYS_I2C_EEPROM_BUS);
 #endif
 

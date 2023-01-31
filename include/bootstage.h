@@ -224,7 +224,7 @@ enum bootstage_id {
  */
 ulong timer_get_boot_us(void);
 
-#if defined(USE_HOSTCC) || !CONFIG_IS_ENABLED(SHOW_BOOT_PROGRESS)
+#if defined(USE_HOSTCC) || !IS_ENABLED(CONFIG_SHOW_BOOT_PROGRESS)
 #define show_boot_progress(val) do {} while (0)
 #else
 /**
@@ -237,7 +237,7 @@ void show_boot_progress(int val);
 #endif
 
 #if !defined(USE_HOSTCC)
-#if CONFIG_IS_ENABLED(BOOTSTAGE)
+#if IS_ENABLED(CONFIG_BOOTSTAGE)
 #define ENABLE_BOOTSTAGE
 #endif
 #endif

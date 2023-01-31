@@ -479,7 +479,7 @@ enum pin_config_param {
 	PIN_CONFIG_MAX = 255, /* 0xFF */
 };
 
-#if CONFIG_IS_ENABLED(PINCTRL_GENERIC)
+#if IS_ENABLED(CONFIG_PINCTRL_GENERIC)
 /**
  * pinctrl_generic_set_state() - Generic set_state operation
  * @pctldev:	Pinctrl device to use
@@ -501,7 +501,7 @@ static inline int pinctrl_generic_set_state(struct udevice *pctldev,
 }
 #endif
 
-#if CONFIG_IS_ENABLED(PINCTRL)
+#if IS_ENABLED(CONFIG_PINCTRL)
 /**
  * pinctrl_select_state() - Set a device to a given state
  * @dev:	Peripheral device

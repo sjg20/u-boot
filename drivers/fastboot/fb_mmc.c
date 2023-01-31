@@ -525,7 +525,7 @@ void fastboot_mmc_flash_write(const char *cmd, void *download_buffer,
 	}
 #endif
 
-#if CONFIG_IS_ENABLED(EFI_PARTITION)
+#if IS_ENABLED(CONFIG_EFI_PARTITION)
 	if (strcmp(cmd, CONFIG_FASTBOOT_GPT_NAME) == 0) {
 		dev_desc = fastboot_mmc_get_dev(response);
 		if (!dev_desc)
@@ -552,7 +552,7 @@ void fastboot_mmc_flash_write(const char *cmd, void *download_buffer,
 	}
 #endif
 
-#if CONFIG_IS_ENABLED(DOS_PARTITION)
+#if IS_ENABLED(CONFIG_DOS_PARTITION)
 	if (strcmp(cmd, CONFIG_FASTBOOT_MBR_NAME) == 0) {
 		dev_desc = fastboot_mmc_get_dev(response);
 		if (!dev_desc)

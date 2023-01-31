@@ -297,7 +297,7 @@ static void k3_sysfw_configure_using_fit(void *fit,
 		      ret);
 }
 
-#if CONFIG_IS_ENABLED(DFU)
+#if IS_ENABLED(CONFIG_DFU)
 static int k3_sysfw_dfu_download(void *addr)
 {
 	char dfu_str[50];
@@ -318,7 +318,7 @@ exit:
 }
 #endif
 
-#if CONFIG_IS_ENABLED(SPI_LOAD)
+#if IS_ENABLED(CONFIG_SPI_LOAD)
 static void *k3_sysfw_get_spi_addr(void)
 {
 	struct udevice *dev;
@@ -346,7 +346,7 @@ static void k3_sysfw_spi_copy(u32 *dst, u32 *src, size_t len)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(NOR_SUPPORT)
+#if IS_ENABLED(CONFIG_NOR_SUPPORT)
 static void *get_sysfw_hf_addr(void)
 {
 	struct udevice *dev;
@@ -372,7 +372,7 @@ void k3_sysfw_loader(bool rom_loaded_sysfw,
 	struct spl_image_info spl_image = { 0 };
 	struct spl_boot_device bootdev = { 0 };
 	struct ti_sci_handle *ti_sci;
-#if CONFIG_IS_ENABLED(SPI_LOAD)
+#if IS_ENABLED(CONFIG_SPI_LOAD)
 	void *sysfw_spi_base;
 #endif
 	int ret = 0;
@@ -401,7 +401,7 @@ void k3_sysfw_loader(bool rom_loaded_sysfw,
 
 	/* Load combined System Controller firmware and config data image */
 	switch (bootdev.boot_device) {
-#if CONFIG_IS_ENABLED(MMC)
+#if IS_ENABLED(CONFIG_MMC)
 	case BOOT_DEVICE_MMC1:
 	case BOOT_DEVICE_MMC2:
 	case BOOT_DEVICE_MMC2_2:
@@ -423,7 +423,7 @@ void k3_sysfw_loader(bool rom_loaded_sysfw,
 #endif
 		break;
 #endif
-#if CONFIG_IS_ENABLED(SPI_LOAD)
+#if IS_ENABLED(CONFIG_SPI_LOAD)
 	case BOOT_DEVICE_SPI:
 		sysfw_spi_base = k3_sysfw_get_spi_addr();
 		if (!sysfw_spi_base)
@@ -432,7 +432,7 @@ void k3_sysfw_loader(bool rom_loaded_sysfw,
 				  CONFIG_K3_SYSFW_IMAGE_SIZE_MAX);
 		break;
 #endif
-#if CONFIG_IS_ENABLED(NOR_SUPPORT)
+#if IS_ENABLED(CONFIG_NOR_SUPPORT)
 	case BOOT_DEVICE_HYPERFLASH:
 		sysfw_spi_base = get_sysfw_hf_addr();
 		if (!sysfw_spi_base)
@@ -441,7 +441,7 @@ void k3_sysfw_loader(bool rom_loaded_sysfw,
 				  CONFIG_K3_SYSFW_IMAGE_SIZE_MAX);
 		break;
 #endif
-#if CONFIG_IS_ENABLED(YMODEM_SUPPORT)
+#if IS_ENABLED(CONFIG_YMODEM_SUPPORT)
 	case BOOT_DEVICE_UART:
 #ifdef CONFIG_K3_EARLY_CONS
 		/*
@@ -459,12 +459,12 @@ void k3_sysfw_loader(bool rom_loaded_sysfw,
 		ret = spl_ymodem_load_image(&spl_image, &bootdev);
 		break;
 #endif
-#if CONFIG_IS_ENABLED(DFU)
+#if IS_ENABLED(CONFIG_DFU)
 	case BOOT_DEVICE_DFU:
 		ret = k3_sysfw_dfu_download(sysfw_load_address);
 		break;
 #endif
-#if CONFIG_IS_ENABLED(USB_STORAGE)
+#if IS_ENABLED(CONFIG_USB_STORAGE)
 	case BOOT_DEVICE_USB:
 		ret = spl_usb_load(&spl_image, &bootdev,
 				   CONFIG_SYS_USB_FAT_BOOT_PARTITION,

@@ -24,7 +24,7 @@ enum mxc_gpio_direction {
 #define GPIO_PER_BANK			32
 
 struct mxc_gpio_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	/* Put this first since driver model will copy the data here */
 	struct dtd_gpio_mxc dtplat;
 #endif
@@ -36,7 +36,7 @@ struct mxc_bank_info {
 	struct gpio_regs *regs;
 };
 
-#if !CONFIG_IS_ENABLED(DM_GPIO)
+#if !IS_ENABLED(CONFIG_DM_GPIO)
 #define GPIO_TO_PORT(n)		((n) / 32)
 
 /* GPIO port description */
@@ -168,7 +168,7 @@ int gpio_direction_output(unsigned gpio, int value)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 #include <fdtdec.h>
 static int mxc_gpio_is_output(struct gpio_regs *regs, int offset)
 {
@@ -286,7 +286,7 @@ static int mxc_gpio_probe(struct udevice *dev)
 	int banknum;
 	char name[18], *str;
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_gpio_mxc *dtplat = &plat->dtplat;
 
 	plat->regs = map_sysmem(dtplat->reg[0], dtplat->reg[1]);
@@ -310,7 +310,7 @@ static int mxc_gpio_probe(struct udevice *dev)
 static int mxc_gpio_of_to_plat(struct udevice *dev)
 {
 	struct mxc_gpio_plat *plat = dev_get_plat(dev);
-	if (!CONFIG_IS_ENABLED(OF_PLATDATA)) {
+	if (!IS_ENABLED(CONFIG_OF_PLATDATA)) {
 		fdt_addr_t addr;
 		addr = dev_read_addr(dev);
 		if (addr == FDT_ADDR_T_NONE)
@@ -347,7 +347,7 @@ U_BOOT_DRIVER(gpio_mxc) = {
 
 DM_DRIVER_ALIAS(gpio_mxc, fsl_imx6q_gpio)
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 static const struct mxc_gpio_plat mxc_plat[] = {
 	{ 0, (struct gpio_regs *)GPIO1_BASE_ADDR },
 	{ 1, (struct gpio_regs *)GPIO2_BASE_ADDR },

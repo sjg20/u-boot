@@ -148,7 +148,7 @@ void p2wi_init(void)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 struct sun6i_p2wi_priv {
 	struct sunxi_p2wi_reg *base;
 };
@@ -230,4 +230,4 @@ U_BOOT_DRIVER(sun6i_p2wi) = {
 	.priv_auto		= sizeof(struct sun6i_p2wi_priv),
 	.ops			= &sun6i_p2wi_ops,
 };
-#endif /* CONFIG_IS_ENABLED(DM_I2C) */
+#endif /* IS_ENABLED(CONFIG_DM_I2C) */

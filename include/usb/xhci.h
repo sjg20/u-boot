@@ -1204,7 +1204,7 @@ void xhci_hcd_stop(int index);
 #define XHCI_STS_CNR		(1 << 11)
 
 struct xhci_ctrl {
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 	struct udevice *dev;
 #endif
 	struct xhci_hccr *hccr;	/* R/O registers, not need for volatile */
@@ -1230,7 +1230,7 @@ struct xhci_ctrl {
 #define XHCI_MTK_HOST		BIT(0)
 };
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 #define xhci_to_dev(_ctrl)	_ctrl->dev
 #else
 #define xhci_to_dev(_ctrl)	NULL
@@ -1297,7 +1297,7 @@ struct xhci_ctrl *xhci_get_ctrl(struct usb_device *udev);
 static inline dma_addr_t xhci_dma_map(struct xhci_ctrl *ctrl, void *addr,
 				      size_t size)
 {
-#if CONFIG_IS_ENABLED(IOMMU)
+#if IS_ENABLED(CONFIG_IOMMU)
 	return dev_iommu_dma_map(xhci_to_dev(ctrl), addr, size);
 #else
 	return dev_phys_to_bus(xhci_to_dev(ctrl), virt_to_phys(addr));
@@ -1307,7 +1307,7 @@ static inline dma_addr_t xhci_dma_map(struct xhci_ctrl *ctrl, void *addr,
 static inline void xhci_dma_unmap(struct xhci_ctrl *ctrl, dma_addr_t addr,
 				  size_t size)
 {
-#if CONFIG_IS_ENABLED(IOMMU)
+#if IS_ENABLED(CONFIG_IOMMU)
 	dev_iommu_dma_unmap(xhci_to_dev(ctrl), addr, size);
 #endif
 }

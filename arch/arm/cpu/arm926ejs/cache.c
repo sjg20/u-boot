@@ -8,7 +8,7 @@
 #include <linux/types.h>
 #include <common.h>
 
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 void invalidate_dcache_all(void)
 {
 	asm volatile("mcr p15, 0, %0, c7, c6, 0\n" : : "r"(0));
@@ -48,7 +48,7 @@ void flush_dcache_range(unsigned long start, unsigned long stop)
 
 	asm volatile("mcr p15, 0, %0, c7, c10, 4\n" : : "r"(0));
 }
-#else /* #if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF) */
+#else /* #if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF) */
 void invalidate_dcache_all(void)
 {
 }
@@ -56,7 +56,7 @@ void invalidate_dcache_all(void)
 void flush_dcache_all(void)
 {
 }
-#endif /* #if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF) */
+#endif /* #if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF) */
 
 /*
  * Stub implementations for l2 cache operations
@@ -64,11 +64,11 @@ void flush_dcache_all(void)
 
 __weak void l2_cache_disable(void) {}
 
-#if CONFIG_IS_ENABLED(SYS_THUMB_BUILD)
+#if IS_ENABLED(CONFIG_SYS_THUMB_BUILD)
 __weak void invalidate_l2_cache(void) {}
 #endif
 
-#if !CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_ICACHE_OFF)
 /* Invalidate entire I-cache and branch predictor array */
 void invalidate_icache_all(void)
 {
@@ -82,10 +82,10 @@ void invalidate_icache_all(void) {}
 
 void enable_caches(void)
 {
-#if !CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_ICACHE_OFF)
 	icache_enable();
 #endif
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 	dcache_enable();
 #endif
 }

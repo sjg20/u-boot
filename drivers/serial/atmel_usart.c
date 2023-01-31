@@ -18,7 +18,7 @@
 #include <linux/delay.h>
 
 #include <asm/io.h>
-#if CONFIG_IS_ENABLED(DM_SERIAL)
+#if IS_ENABLED(CONFIG_DM_SERIAL)
 #include <asm/arch/atmel_serial.h>
 #endif
 #include <asm/arch/clk.h>
@@ -28,7 +28,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if !CONFIG_IS_ENABLED(DM_SERIAL)
+#if !IS_ENABLED(CONFIG_DM_SERIAL)
 static void atmel_serial_setbrg_internal(atmel_usart3_t *usart, int id,
 					 int baudrate)
 {
@@ -264,7 +264,7 @@ static int atmel_serial_probe(struct udevice *dev)
 	struct atmel_serial_plat *plat = dev_get_plat(dev);
 	struct atmel_serial_priv *priv = dev_get_priv(dev);
 	int ret;
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	fdt_addr_t addr_base;
 
 	addr_base = dev_read_addr(dev);
@@ -284,7 +284,7 @@ static int atmel_serial_probe(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 static const struct udevice_id atmel_serial_ids[] = {
 	{
 		.compatible = "atmel,at91sam9260-dbgu",
@@ -301,13 +301,13 @@ static const struct udevice_id atmel_serial_ids[] = {
 U_BOOT_DRIVER(serial_atmel) = {
 	.name	= "serial_atmel",
 	.id	= UCLASS_SERIAL,
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	.of_match = atmel_serial_ids,
 	.plat_auto	= sizeof(struct atmel_serial_plat),
 #endif
 	.probe = atmel_serial_probe,
 	.ops	= &atmel_serial_ops,
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 	.flags = DM_FLAG_PRE_RELOC,
 #endif
 	.priv_auto	= sizeof(struct atmel_serial_priv),

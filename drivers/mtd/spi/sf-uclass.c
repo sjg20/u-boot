@@ -55,7 +55,7 @@ struct spi_flash *spi_flash_probe(unsigned int busnum, unsigned int cs,
 	struct udevice *bus;
 	char *str;
 
-#if defined(CONFIG_SPL_BUILD) && CONFIG_IS_ENABLED(USE_TINY_PRINTF)
+#if defined(CONFIG_SPL_BUILD) && IS_ENABLED(CONFIG_USE_TINY_PRINTF)
 	str = "spi_flash";
 #else
 	char name[30];
@@ -90,7 +90,7 @@ static int spi_flash_post_bind(struct udevice *dev)
 {
 	int ret;
 
-	if (CONFIG_IS_ENABLED(BOOTDEV_SPI_FLASH) && test_sf_bootdev_enabled()) {
+	if (IS_ENABLED(CONFIG_BOOTDEV_SPI_FLASH) && test_sf_bootdev_enabled()) {
 		ret = bootdev_setup_for_dev(dev, "sf_bootdev");
 		if (ret)
 			return log_msg_ret("bd", ret);

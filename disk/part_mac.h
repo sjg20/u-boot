@@ -72,7 +72,7 @@ typedef struct mac_partition {
 	__u32	boot_cksum;	/* boot code checksum			*/
 	uchar	processor[16];	/* Type of Processor			*/
 	__u16	part_pad[188];	/* reserved				*/
-#if CONFIG_IS_ENABLED(ISO_PARTITION)
+#if IS_ENABLED(CONFIG_ISO_PARTITION)
 	uchar   iso_dummy[2048];/* Reservere enough room for an ISO partition block to fit */
 #endif
 } mac_partition_t;

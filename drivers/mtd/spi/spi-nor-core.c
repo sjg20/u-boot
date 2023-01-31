@@ -371,7 +371,7 @@ static ssize_t spi_nor_read_data(struct spi_nor *nor, loff_t from, size_t len,
 	while (remaining) {
 		op.data.nbytes = remaining < UINT_MAX ? remaining : UINT_MAX;
 
-		if (CONFIG_IS_ENABLED(SPI_DIRMAP) && nor->dirmap.rdesc) {
+		if (IS_ENABLED(CONFIG_SPI_DIRMAP) && nor->dirmap.rdesc) {
 			/*
 			 * Record current operation information which may be used
 			 * when the address or data length exceeds address mapping.
@@ -417,7 +417,7 @@ static ssize_t spi_nor_write_data(struct spi_nor *nor, loff_t to, size_t len,
 
 	spi_nor_setup_op(nor, &op, nor->write_proto);
 
-	if (CONFIG_IS_ENABLED(SPI_DIRMAP) && nor->dirmap.wdesc) {
+	if (IS_ENABLED(CONFIG_SPI_DIRMAP) && nor->dirmap.wdesc) {
 		memcpy(&nor->dirmap.wdesc->info.op_tmpl, &op,
 		       sizeof(struct spi_mem_op));
 		op.data.nbytes = spi_mem_dirmap_write(nor->dirmap.wdesc, op.addr.val,
@@ -1942,7 +1942,7 @@ static int spansion_read_cr_quad_enable(struct spi_nor *nor)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(SPI_FLASH_SFDP_SUPPORT)
+#if IS_ENABLED(CONFIG_SPI_FLASH_SFDP_SUPPORT)
 /**
  * spansion_no_read_cr_quad_enable() - set QE bit in Configuration Register.
  * @nor:	pointer to a 'struct spi_nor'
@@ -1998,7 +1998,7 @@ spi_nor_set_pp_settings(struct spi_nor_pp_command *pp,
 	pp->proto = proto;
 }
 
-#if CONFIG_IS_ENABLED(SPI_FLASH_SFDP_SUPPORT)
+#if IS_ENABLED(CONFIG_SPI_FLASH_SFDP_SUPPORT)
 /*
  * Serial Flash Discoverable Parameters (SFDP) parsing.
  */
@@ -2707,7 +2707,7 @@ static int spi_nor_init_params(struct spi_nor *nor,
 		params->hwcaps.mask |= SNOR_HWCAPS_READ_FAST;
 
 		/* Mask out Fast Read if not requested at DT instantiation. */
-#if CONFIG_IS_ENABLED(DM_SPI)
+#if IS_ENABLED(CONFIG_DM_SPI)
 		if (!ofnode_read_bool(dev_ofnode(nor->spi->dev),
 				      "m25p,fast-read"))
 			params->hwcaps.mask &= ~SNOR_HWCAPS_READ_FAST;
@@ -3821,7 +3821,7 @@ static int spi_nor_soft_reset(struct spi_nor *nor)
 	ext = nor->cmd_ext_type;
 	if (nor->cmd_ext_type == SPI_NOR_EXT_NONE) {
 		nor->cmd_ext_type = SPI_NOR_EXT_REPEAT;
-#if CONFIG_IS_ENABLED(SPI_NOR_BOOT_SOFT_RESET_EXT_INVERT)
+#if IS_ENABLED(CONFIG_SPI_NOR_BOOT_SOFT_RESET_EXT_INVERT)
 		nor->cmd_ext_type = SPI_NOR_EXT_INVERT;
 #endif /* SPI_NOR_BOOT_SOFT_RESET_EXT_INVERT */
 	}

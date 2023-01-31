@@ -129,7 +129,7 @@ static uint8_t i2c_imx_get_clk(struct mxc_i2c_bus *i2c_bus, unsigned int rate)
 #endif
 
 	/* Divider value calculation */
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	i2c_clk_rate = clk_get_rate(&i2c_bus->per_clk);
 #else
 	i2c_clk_rate = mxc_get_clock(MXC_I2C_CLK);
@@ -368,7 +368,7 @@ static struct mxc_i2c_bus mxc_i2c_buses[] = {
 #endif
 };
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 int i2c_idle_bus(struct mxc_i2c_bus *i2c_bus)
 {
 	if (i2c_bus && i2c_bus->idle_bus_fn)
@@ -620,7 +620,7 @@ int __enable_i2c_clk(unsigned char enable, unsigned int i2c_num)
 int enable_i2c_clk(unsigned char enable, unsigned int i2c_num)
 	__attribute__((weak, alias("__enable_i2c_clk")));
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 /*
  * Read data from I2C device
  *
@@ -891,7 +891,7 @@ static int mxc_i2c_probe(struct udevice *bus)
 	i2c_bus->bus = bus;
 
 	/* Enable clk */
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_get_by_index(bus, 0, &i2c_bus->per_clk);
 	if (ret) {
 		printf("Failed to get i2c clk\n");

@@ -314,7 +314,7 @@
  * shorted - index 1
  * Retain non-DM serial port for debug purposes.
  */
-#if !CONFIG_IS_ENABLED(DM_SERIAL)
+#if !IS_ENABLED(CONFIG_DM_SERIAL)
 #define CFG_SYS_NS16550_CLK		(get_bus_freq(0) / 2)
 #define CFG_SYS_NS16550_COM1	(CFG_SYS_CCSRBAR + 0x11C500)
 #endif

@@ -526,7 +526,7 @@ __used void * memset(void * s,int c,size_t count)
 	unsigned long *sl = (unsigned long *) s;
 	char *s8;
 
-#if !CONFIG_IS_ENABLED(TINY_MEMSET)
+#if !IS_ENABLED(CONFIG_TINY_MEMSET)
 	unsigned long cl = 0;
 	int i;
 

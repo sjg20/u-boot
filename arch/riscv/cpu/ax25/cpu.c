@@ -46,7 +46,7 @@ int cleanup_before_linux(void)
 
 void harts_early_init(void)
 {
-	if (CONFIG_IS_ENABLED(RISCV_MMODE)) {
+	if (IS_ENABLED(CONFIG_RISCV_MMODE)) {
 		unsigned long long mcache_ctl_val = csr_read(CSR_MCACHE_CTL);
 
 		if (!(mcache_ctl_val & V5_MCACHE_CTL_DC_COHEN_EN))

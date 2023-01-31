@@ -477,7 +477,7 @@ static int run_tests(void)
 	CHECKP(buf + 7, out);
 	CHECKP(buf + 13, end);
 
-	strcpy(buf, "CONFIG_IS_ENABLED(FRED)");
+	strcpy(buf, "IS_ENABLED(CONFIG_FRED)");
 	out = parse_config_line(buf, &end);
 	CHECKP(buf + 18, out);
 	CHECKP(buf + 22, end);

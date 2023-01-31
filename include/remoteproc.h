@@ -506,7 +506,7 @@ struct dm_rproc_ops {
 /* Accessor */
 #define rproc_get_ops(dev) ((struct dm_rproc_ops *)(dev)->driver->ops)
 
-#if CONFIG_IS_ENABLED(REMOTEPROC)
+#if IS_ENABLED(CONFIG_REMOTEPROC)
 /**
  * rproc_init() - Initialize all bound remote proc devices
  * Return: 0 if all ok, else appropriate error value.

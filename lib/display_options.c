@@ -189,7 +189,7 @@ int hexdump_line(ulong addr, const void *data, uint width, uint count,
 			x = lb.us[i] = *(volatile uint16_t *)data;
 		else
 			x = lb.uc[i] = *(volatile uint8_t *)data;
-		if (CONFIG_IS_ENABLED(USE_TINY_PRINTF))
+		if (IS_ENABLED(CONFIG_USE_TINY_PRINTF))
 			out += sprintf(out, " %x", (uint)x);
 		else
 			out += sprintf(out, " %0*lx", width * 2, x);

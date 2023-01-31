@@ -20,12 +20,12 @@ DECLARE_GLOBAL_DATA_PTR;
 
 fdt_addr_t devfdt_get_addr_index(const struct udevice *dev, int index)
 {
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	int offset = dev_of_offset(dev);
 	int parent = dev_of_offset(dev->parent);
 	fdt_addr_t addr;
 
-	if (CONFIG_IS_ENABLED(OF_TRANSLATE)) {
+	if (IS_ENABLED(CONFIG_OF_TRANSLATE)) {
 		const fdt32_t *reg;
 		int len = 0;
 		int na, ns;
@@ -69,7 +69,7 @@ fdt_addr_t devfdt_get_addr_index(const struct udevice *dev, int index)
 		addr = fdtdec_get_addr_size_auto_parent(gd->fdt_blob, parent,
 							offset, "reg", index,
 							NULL, false);
-		if (CONFIG_IS_ENABLED(SIMPLE_BUS) && addr != FDT_ADDR_T_NONE) {
+		if (IS_ENABLED(CONFIG_SIMPLE_BUS) && addr != FDT_ADDR_T_NONE) {
 			if (device_get_uclass_id(dev->parent) ==
 			    UCLASS_SIMPLE_BUS)
 				addr = simple_bus_translate(dev->parent, addr);
@@ -103,7 +103,7 @@ void *devfdt_get_addr_index_ptr(const struct udevice *dev, int index)
 fdt_addr_t devfdt_get_addr_size_index(const struct udevice *dev, int index,
 				      fdt_size_t *size)
 {
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	/*
 	 * Only get the size in this first call. We'll get the addr in the
 	 * next call to the exisiting dev_get_xxx function which handles
@@ -124,7 +124,7 @@ fdt_addr_t devfdt_get_addr_size_index(const struct udevice *dev, int index,
 
 fdt_addr_t devfdt_get_addr_name(const struct udevice *dev, const char *name)
 {
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	int index;
 
 	index = fdt_stringlist_search(gd->fdt_blob, dev_of_offset(dev),
@@ -141,7 +141,7 @@ fdt_addr_t devfdt_get_addr_name(const struct udevice *dev, const char *name)
 fdt_addr_t devfdt_get_addr_size_name(const struct udevice *dev,
 				     const char *name, fdt_size_t *size)
 {
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	int index;
 
 	index = fdt_stringlist_search(gd->fdt_blob, dev_of_offset(dev),
@@ -205,7 +205,7 @@ fdt_addr_t devfdt_get_addr_pci(const struct udevice *dev)
 	ulong addr;
 
 	addr = devfdt_get_addr(dev);
-	if (CONFIG_IS_ENABLED(PCI) && addr == FDT_ADDR_T_NONE) {
+	if (IS_ENABLED(CONFIG_PCI) && addr == FDT_ADDR_T_NONE) {
 		struct fdt_pci_addr pci_addr;
 		u32 bar;
 		int ret;

@@ -233,7 +233,7 @@ void video_set_default_colors(struct udevice *dev, bool invert)
 	struct video_priv *priv = dev_get_uclass_priv(dev);
 	int fore, back;
 
-	if (CONFIG_IS_ENABLED(SYS_WHITE_ON_BLACK)) {
+	if (IS_ENABLED(CONFIG_SYS_WHITE_ON_BLACK)) {
 		/* White is used when switching to bold, use light gray here */
 		fore = VID_LIGHT_GRAY;
 		back = VID_BLACK;
@@ -271,7 +271,7 @@ int video_sync(struct udevice *vid, bool force)
 	 * architectures do not actually implement it. Is there a way to find
 	 * out whether it exists? For now, ARM is safe.
 	 */
-#if defined(CONFIG_ARM) && !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if defined(CONFIG_ARM) && !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 	struct video_priv *priv = dev_get_uclass_priv(vid);
 
 	if (priv->flush_dcache) {
@@ -455,7 +455,7 @@ static int video_post_probe(struct udevice *dev)
 	/* Set up colors  */
 	video_set_default_colors(dev, false);
 
-	if (!CONFIG_IS_ENABLED(NO_FB_CLEAR))
+	if (!IS_ENABLED(CONFIG_NO_FB_CLEAR))
 		video_clear(dev);
 
 	/*

@@ -62,7 +62,7 @@
 
 struct phy_g12a_usb3_pcie_priv {
 	struct regmap		*regmap;
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	struct clk		clk;
 #endif
 	struct reset_ctl_bulk	resets;
@@ -389,7 +389,7 @@ int meson_g12a_usb3_pcie_phy_probe(struct udevice *dev)
 	else if (ret)
 		return ret;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_get_by_index(dev, 0, &priv->clk);
 	if (ret < 0)
 		return ret;

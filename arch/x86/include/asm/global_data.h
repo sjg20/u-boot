@@ -130,7 +130,7 @@ struct arch_global_data {
 #include <asm-generic/global_data.h>
 
 #ifndef __ASSEMBLY__
-# if defined(CONFIG_EFI_APP) || CONFIG_IS_ENABLED(X86_64)
+# if defined(CONFIG_EFI_APP) || IS_ENABLED(CONFIG_X86_64)
 
 /* TODO(sjg@chromium.org): Consider using a fixed register for gd on x86_64 */
 #define gd global_data_ptr
@@ -141,7 +141,7 @@ static inline notrace gd_t *get_fs_gd_ptr(void)
 {
 	gd_t *gd_ptr;
 
-#if CONFIG_IS_ENABLED(X86_64)
+#if IS_ENABLED(CONFIG_X86_64)
 	asm volatile("fs mov 0, %0\n" : "=r" (gd_ptr));
 #else
 	asm volatile("fs movl 0, %0\n" : "=r" (gd_ptr));

@@ -152,7 +152,7 @@ ulong handle_trap(ulong cause, ulong epc, ulong tval, struct pt_regs *regs)
 	efi_restore_gd();
 
 	if (cause == CAUSE_BREAKPOINT &&
-	    CONFIG_IS_ENABLED(SEMIHOSTING_FALLBACK)) {
+	    IS_ENABLED(CONFIG_SEMIHOSTING_FALLBACK)) {
 		ulong pre_addr = epc - 4, post_addr = epc + 4;
 
 		/* Check for prior and post addresses to be in same page. */

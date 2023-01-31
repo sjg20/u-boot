@@ -13,7 +13,7 @@
 #include <linux/compiler.h>
 #include <asm/armv7_mpu.h>
 
-#if !(CONFIG_IS_ENABLED(SYS_ICACHE_OFF) && CONFIG_IS_ENABLED(SYS_DCACHE_OFF))
+#if !(IS_ENABLED(CONFIG_SYS_ICACHE_OFF) && IS_ENABLED(CONFIG_SYS_DCACHE_OFF))
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -258,7 +258,7 @@ static void cache_disable(uint32_t cache_bit)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+#if IS_ENABLED(CONFIG_SYS_ICACHE_OFF)
 void icache_enable(void)
 {
 	return;
@@ -290,7 +290,7 @@ int icache_status(void)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 void dcache_enable(void)
 {
 	return;

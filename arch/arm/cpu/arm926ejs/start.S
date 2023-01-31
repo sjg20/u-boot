@@ -52,7 +52,7 @@ save_boot_params_ret:
 	 * we do sys-critical inits only at reboot,
 	 * not when booting from ram!
 	 */
-#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT)
+#if !IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT)
 	bl	cpu_init_crit
 #endif
 
@@ -75,7 +75,7 @@ c_runtime_cpu_setup:
  *
  *************************************************************************
  */
-#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT)
+#if !IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT)
 cpu_init_crit:
 	/*
 	 * flush D cache before disabling it
@@ -101,12 +101,12 @@ flush_dcache:
 	bic	r0, r0, #0x00002000	/* clear bit 13 (--V- ----) */
 #endif
 	orr	r0, r0, #0x00000002	/* set bit 1 (A) Align */
-#if !CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_ICACHE_OFF)
 	orr	r0, r0, #0x00001000	/* set bit 12 (I) I-Cache */
 #endif
 	mcr	p15, 0, r0, c1, c0, 0
 
-#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT_ONLY)
+#if !IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT_ONLY)
 	/*
 	 * Go setup Memory and board specific bits prior to relocation.
 	 */
@@ -115,7 +115,7 @@ flush_dcache:
 	mov	lr, r4		/* restore link */
 #endif
 	mov	pc, lr		/* back to my caller */
-#endif /* CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT) */
+#endif /* IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT) */
 
 /*************************************************************************
  *

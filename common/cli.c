@@ -168,7 +168,7 @@ int do_run(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 }
 #endif
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 bool cli_process_fdt(const char **cmdp)
 {
 	/* Allow the fdt to override the boot command */
@@ -236,7 +236,7 @@ err:
 	 */
 	hang();
 }
-#endif /* CONFIG_IS_ENABLED(OF_CONTROL) */
+#endif /* IS_ENABLED(CONFIG_OF_CONTROL) */
 
 void cli_loop(void)
 {

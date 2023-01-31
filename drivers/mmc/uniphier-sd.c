@@ -35,7 +35,7 @@ static const struct udevice_id uniphier_sd_match[] = {
 
 static ulong uniphier_sd_clk_get_rate(struct tmio_sd_priv *priv)
 {
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	return clk_get_rate(&priv->clk);
 #elif CONFIG_SPL_BUILD
 	return 100000000;

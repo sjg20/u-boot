@@ -146,7 +146,7 @@ static int spl_nand_load_image(struct spl_image_info *spl_image,
 
 	header = spl_get_load_buffer(0, sizeof(*header));
 
-#if CONFIG_IS_ENABLED(OS_BOOT)
+#if IS_ENABLED(CONFIG_OS_BOOT)
 	if (!spl_start_uboot()) {
 		/*
 		 * load parameter image

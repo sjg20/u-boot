@@ -766,7 +766,7 @@ int blk_unbind_all(int uclass_id)
 
 static int blk_post_probe(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(PARTITIONS) && blk_enabled()) {
+	if (IS_ENABLED(CONFIG_PARTITIONS) && blk_enabled()) {
 		struct blk_desc *desc = dev_get_uclass_plat(dev);
 
 		part_init(desc);

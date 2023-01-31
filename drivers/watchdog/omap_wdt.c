@@ -50,7 +50,7 @@
 /* Hardware timeout in seconds */
 #define WDT_HW_TIMEOUT 60
 
-#if !CONFIG_IS_ENABLED(WDT)
+#if !IS_ENABLED(CONFIG_WDT)
 static unsigned int wdt_trgr_pattern = 0x1234;
 
 void hw_watchdog_reset(void)
@@ -265,4 +265,4 @@ U_BOOT_DRIVER(omap3_wdt) = {
 	.probe = omap3_wdt_probe,
 	.priv_auto	= sizeof(struct omap3_wdt_priv),
 };
-#endif /* !CONFIG_IS_ENABLED(WDT) */
+#endif /* !IS_ENABLED(CONFIG_WDT) */

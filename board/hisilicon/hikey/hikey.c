@@ -76,7 +76,7 @@ U_BOOT_DRVINFOS(hi6220_gpios) = {
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 
 static const struct pl01x_serial_plat serial_plat = {
 #if CONFIG_CONS_INDEX == 1

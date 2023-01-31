@@ -480,7 +480,7 @@ int board_eth_init(struct bd_info *bis)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(BOOTSTAGE)
+#if IS_ENABLED(CONFIG_BOOTSTAGE)
 static void bosch_check_reset_pin(void)
 {
 	if (readl(GPIO1_BASE + OMAP_GPIO_IRQSTATUS_SET_0) & RESET_MASK) {

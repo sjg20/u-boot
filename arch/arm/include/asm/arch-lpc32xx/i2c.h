@@ -22,7 +22,7 @@ struct lpc32xx_i2c_base {
 	u32 stxfl;
 };
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 enum {
 	I2C_0, I2C_1, I2C_2,
 };

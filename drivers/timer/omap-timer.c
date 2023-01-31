@@ -84,7 +84,7 @@ static int omap_timer_of_to_plat(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(BOOTSTAGE)
+#if IS_ENABLED(CONFIG_BOOTSTAGE)
 ulong timer_get_boot_us(void)
 {
 	u64 ticks = 0;

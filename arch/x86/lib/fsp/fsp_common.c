@@ -61,7 +61,7 @@ void board_final_init(void)
 		debug("OK\n");
 }
 
-#if CONFIG_IS_ENABLED(DM_RTC)
+#if IS_ENABLED(CONFIG_DM_RTC)
 int fsp_save_s3_stack(void)
 {
 	struct udevice *dev;

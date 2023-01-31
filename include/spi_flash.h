@@ -39,7 +39,7 @@ struct dm_spi_flash_ops {
 /* Access the serial operations for a device */
 #define sf_get_ops(dev) ((struct dm_spi_flash_ops *)(dev)->driver->ops)
 
-#if CONFIG_IS_ENABLED(DM_SPI_FLASH)
+#if IS_ENABLED(CONFIG_DM_SPI_FLASH)
 /**
  * spi_flash_read_dm() - Read data from SPI flash
  *

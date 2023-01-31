@@ -22,7 +22,7 @@ struct udevice *testbus_get_clear_removed(void)
 
 static int testbus_drv_probe(struct udevice *dev)
 {
-	if (!CONFIG_IS_ENABLED(OF_PLATDATA)) {
+	if (!IS_ENABLED(CONFIG_OF_PLATDATA)) {
 		int ret;
 
 		ret = dm_scan_fdt_dev(dev);

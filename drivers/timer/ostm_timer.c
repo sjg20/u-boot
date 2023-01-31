@@ -40,7 +40,7 @@ static int ostm_probe(struct udevice *dev)
 {
 	struct timer_dev_priv *uc_priv = dev_get_uclass_priv(dev);
 	struct ostm_priv *priv = dev_get_priv(dev);
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	struct clk clk;
 	int ret;
 

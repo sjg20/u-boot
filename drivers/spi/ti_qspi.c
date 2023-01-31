@@ -417,7 +417,7 @@ static int ti_qspi_probe(struct udevice *bus)
 
 static void *map_syscon_chipselects(struct udevice *bus)
 {
-#if CONFIG_IS_ENABLED(SYSCON)
+#if IS_ENABLED(CONFIG_SYSCON)
 	struct udevice *syscon;
 	struct regmap *regmap;
 	const fdt32_t *cell;

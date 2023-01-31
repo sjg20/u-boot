@@ -154,8 +154,8 @@ static int route_pmc_gpio_gpe(struct udevice *dev, uint pmc_gpe_num)
 static int itss_bind(struct udevice *dev)
 {
 	/* This is not set with basic of-platdata, so set it manually */
-	if (CONFIG_IS_ENABLED(OF_PLATDATA) &&
-	    !CONFIG_IS_ENABLED(OF_PLATDATA_INST))
+	if (IS_ENABLED(CONFIG_OF_PLATDATA) &&
+	    !IS_ENABLED(CONFIG_OF_PLATDATA_INST))
 		dev->driver_data = X86_IRQT_ITSS;
 
 	return 0;
@@ -166,7 +166,7 @@ static int itss_of_to_plat(struct udevice *dev)
 	struct itss_priv *priv = dev_get_priv(dev);
 	int ret;
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct itss_plat *plat = dev_get_plat(dev);
 	struct dtd_intel_itss *dtplat = &plat->dtplat;
 
@@ -213,7 +213,7 @@ static const struct irq_ops itss_ops = {
 #endif
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct udevice_id itss_ids[] = {
 	{ .compatible = "intel,itss", .data = X86_IRQT_ITSS },
 	{ }

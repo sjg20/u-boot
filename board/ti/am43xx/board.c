@@ -54,7 +54,7 @@ void do_board_detect(void)
 }
 #endif
 
-#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT)
+#if !IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT)
 
 const struct dpll_params dpll_mpu[NUM_CRYSTAL_FREQ][NUM_OPPS] = {
 	{	/* 19.2 MHz */
@@ -681,7 +681,7 @@ int board_init(void)
 }
 
 #ifdef CONFIG_BOARD_LATE_INIT
-#if CONFIG_IS_ENABLED(DM_USB) && CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_DM_USB) && IS_ENABLED(CONFIG_OF_CONTROL)
 static int device_okay(const char *path)
 {
 	int node;
@@ -708,7 +708,7 @@ int board_late_init(void)
 		env_set("boot_fit", "1");
 #endif
 
-#if CONFIG_IS_ENABLED(DM_USB) && CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_DM_USB) && IS_ENABLED(CONFIG_OF_CONTROL)
 	if (device_okay("/ocp/omap_dwc3@48380000"))
 		enable_usb_clocks(0);
 	if (device_okay("/ocp/omap_dwc3@483c0000"))
@@ -722,7 +722,7 @@ int board_late_init(void)
 }
 #endif
 
-#if !CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if !IS_ENABLED(CONFIG_DM_USB_GADGET)
 #ifdef CONFIG_USB_DWC3
 static struct dwc3_device usb_otg_ss1 = {
 	.maximum_speed = USB_SPEED_HIGH,
@@ -825,7 +825,7 @@ int board_usb_cleanup(int index, enum usb_init_type init)
 	return 0;
 }
 #endif /* defined(CONFIG_USB_DWC3) || defined(CONFIG_USB_XHCI_OMAP) */
-#endif /* !CONFIG_IS_ENABLED(DM_USB_GADGET) */
+#endif /* !IS_ENABLED(CONFIG_DM_USB_GADGET) */
 
 #if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
 int ft_board_setup(void *blob, struct bd_info *bd)

@@ -16,7 +16,7 @@
 
 #include "ehci.h"
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !IS_ENABLED(CONFIG_DM_USB)
 
 int ehci_hcd_init(int index, enum usb_init_type init,
 		struct ehci_hccr **hccr, struct ehci_hcor **hcor)

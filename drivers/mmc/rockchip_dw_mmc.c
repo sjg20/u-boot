@@ -20,7 +20,7 @@
 #include <linux/err.h>
 
 struct rockchip_mmc_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_rk3288_dw_mshc dtplat;
 #endif
 	struct mmc_config cfg;
@@ -55,7 +55,7 @@ static int rockchip_dwmmc_of_to_plat(struct udevice *dev)
 	struct rockchip_dwmmc_priv *priv = dev_get_priv(dev);
 	struct dwmci_host *host = &priv->host;
 
-	if (!CONFIG_IS_ENABLED(OF_REAL))
+	if (!IS_ENABLED(CONFIG_OF_REAL))
 		return 0;
 
 	host->name = dev->name;
@@ -109,7 +109,7 @@ static int rockchip_dwmmc_probe(struct udevice *dev)
 	struct dwmci_host *host = &priv->host;
 	int ret;
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_rk3288_dw_mshc *dtplat = &plat->dtplat;
 
 	host->name = dev->name;

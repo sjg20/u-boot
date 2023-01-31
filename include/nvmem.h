@@ -33,7 +33,7 @@ struct nvmem_cell {
 
 struct udevice;
 
-#if CONFIG_IS_ENABLED(NVMEM)
+#if IS_ENABLED(CONFIG_NVMEM)
 
 /**
  * nvmem_cell_read() - Read the value of an nvmem cell

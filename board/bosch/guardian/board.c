@@ -40,7 +40,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT)
+#if !IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT)
 static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 
 static const struct ddr_data ddr3_data = {

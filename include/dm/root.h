@@ -155,7 +155,7 @@ int dm_init(bool of_live);
  */
 int dm_uninit(void);
 
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 /**
  * dm_remove_devices_flags - Call remove function of all drivers with
  *                           specific removal flags set to selectively

@@ -8,7 +8,7 @@
 #ifndef __HANDOFF_H
 #define __HANDOFF_H
 
-#if CONFIG_IS_ENABLED(HANDOFF)
+#if IS_ENABLED(CONFIG_HANDOFF)
 
 #include <asm/handoff.h>
 

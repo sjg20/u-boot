@@ -881,7 +881,7 @@ int add_mtd_partitions(struct mtd_info *master,
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DM) && CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_DM) && IS_ENABLED(CONFIG_OF_CONTROL)
 int add_mtd_partitions_of(struct mtd_info *master)
 {
 	ofnode parts, child;
@@ -947,7 +947,7 @@ int add_mtd_partitions_of(struct mtd_info *master)
 
 	return 0;
 }
-#endif /* CONFIG_IS_ENABLED(DM) && CONFIG_IS_ENABLED(OF_CONTROL) */
+#endif /* IS_ENABLED(CONFIG_DM) && IS_ENABLED(CONFIG_OF_CONTROL) */
 
 #ifndef __UBOOT__
 static DEFINE_SPINLOCK(part_parser_lock);

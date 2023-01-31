@@ -26,7 +26,7 @@
 	EXPORT_FUNC(dummy, void, free_hdlr, void)
 #endif
 	EXPORT_FUNC(malloc, void *, malloc, size_t)
-#if !CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
+#if !IS_ENABLED(CONFIG_SYS_MALLOC_SIMPLE)
 	EXPORT_FUNC(free, void, free, void *)
 #endif
 	EXPORT_FUNC(udelay, void, udelay, unsigned long)
@@ -43,7 +43,7 @@
 	EXPORT_FUNC(simple_strtol, long, simple_strtol,
 		    const char *, char **, unsigned int)
 	EXPORT_FUNC(strcmp, int, strcmp, const char *cs, const char *ct)
-#if defined(CONFIG_CMD_I2C) && !CONFIG_IS_ENABLED(DM_I2C)
+#if defined(CONFIG_CMD_I2C) && !IS_ENABLED(CONFIG_DM_I2C)
 	EXPORT_FUNC(i2c_write, int, i2c_write, uchar, uint, int , uchar * , int)
 	EXPORT_FUNC(i2c_read, int, i2c_read, uchar, uint, int , uchar * , int)
 #else

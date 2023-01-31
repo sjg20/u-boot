@@ -31,7 +31,7 @@
 #define GM4_MASK			3
 #define GM8_MASK			7
 
-#if CONFIG_IS_ENABLED(PINMUX)
+#if IS_ENABLED(CONFIG_PINMUX)
 static const struct mtmips_pmx_func sutif_grp[] = {
 	FUNC("i2c", 2),
 	FUNC("uartl", 1),
@@ -146,17 +146,17 @@ static const char *mt7620_get_group_name(struct udevice *dev,
 {
 	return mt7620_pinmux_data[selector].name;
 }
-#endif /* CONFIG_IS_ENABLED(PINMUX) */
+#endif /* IS_ENABLED(CONFIG_PINMUX) */
 
 static int mt7620_pinctrl_probe(struct udevice *dev)
 {
 	struct mtmips_pinctrl_priv *priv = dev_get_priv(dev);
 	int ret = 0;
 
-#if CONFIG_IS_ENABLED(PINMUX)
+#if IS_ENABLED(CONFIG_PINMUX)
 	ret = mtmips_pinctrl_probe(priv, ARRAY_SIZE(mt7620_pinmux_data),
 				   mt7620_pinmux_data);
-#endif /* CONFIG_IS_ENABLED(PINMUX) */
+#endif /* IS_ENABLED(CONFIG_PINMUX) */
 
 	return ret;
 }
@@ -173,13 +173,13 @@ static int mt7620_pinctrl_of_to_plat(struct udevice *dev)
 }
 
 static const struct pinctrl_ops mt7620_pinctrl_ops = {
-#if CONFIG_IS_ENABLED(PINMUX)
+#if IS_ENABLED(CONFIG_PINMUX)
 	.get_groups_count = mt7620_get_groups_count,
 	.get_group_name = mt7620_get_group_name,
 	.get_functions_count = mtmips_get_functions_count,
 	.get_function_name = mtmips_get_function_name,
 	.pinmux_group_set = mtmips_pinmux_group_set,
-#endif /* CONFIG_IS_ENABLED(PINMUX) */
+#endif /* IS_ENABLED(CONFIG_PINMUX) */
 	.set_state = pinctrl_generic_set_state,
 };
 

@@ -65,7 +65,7 @@ static void store_boot_info_from_rom(void)
 	       sizeof(struct rom_extended_boot_data));
 }
 
-#if defined(CONFIG_K3_LOAD_SYSFW) && CONFIG_IS_ENABLED(DM_MMC)
+#if defined(CONFIG_K3_LOAD_SYSFW) && IS_ENABLED(CONFIG_DM_MMC)
 void k3_mmc_stop_clock(void)
 {
 	if (spl_boot_device() == BOOT_DEVICE_MMC1) {
@@ -118,7 +118,7 @@ void do_dt_magic(void)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(USB_STORAGE)
+#if IS_ENABLED(CONFIG_USB_STORAGE)
 static int fixup_usb_boot(const void *fdt_blob)
 {
 	int ret = 0;

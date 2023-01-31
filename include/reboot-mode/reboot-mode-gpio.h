@@ -13,7 +13,7 @@
  * we can use this struct to declare the pins used.
  */
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 struct reboot_mode_gpio_config {
 	int gpio_dev_offset;
 	int gpio_offset;
@@ -23,7 +23,7 @@ struct reboot_mode_gpio_config {
 
 struct reboot_mode_gpio_platdata {
 	struct gpio_desc *gpio_desc;
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 	struct reboot_mode_gpio_config *gpios_config;
 #endif
 	int gpio_count;

@@ -80,7 +80,7 @@ static unsigned long noncached_next;
 
 void noncached_set_region(void)
 {
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 	mmu_set_region_dcache_behaviour(noncached_start,
 					noncached_end - noncached_start,
 					DCACHE_OFF);
@@ -122,7 +122,7 @@ phys_addr_t noncached_alloc(size_t size, size_t align)
 }
 #endif /* CONFIG_SYS_NONCACHED_MEMORY */
 
-#if CONFIG_IS_ENABLED(SYS_THUMB_BUILD)
+#if IS_ENABLED(CONFIG_SYS_THUMB_BUILD)
 void invalidate_l2_cache(void)
 {
 	unsigned int val = 0;
@@ -140,7 +140,7 @@ int arch_reserve_mmu(void)
 
 __weak int arm_reserve_mmu(void)
 {
-#if !(CONFIG_IS_ENABLED(SYS_ICACHE_OFF) && CONFIG_IS_ENABLED(SYS_DCACHE_OFF))
+#if !(IS_ENABLED(CONFIG_SYS_ICACHE_OFF) && IS_ENABLED(CONFIG_SYS_DCACHE_OFF))
 	/* reserve TLB table */
 	gd->arch.tlb_size = PGTABLE_SIZE;
 	gd->relocaddr -= gd->arch.tlb_size;

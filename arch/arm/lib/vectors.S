@@ -24,7 +24,7 @@
 #else
 	b	reset
 #endif
-#if !CONFIG_IS_ENABLED(SYS_NO_VECTOR_TABLE)
+#if !IS_ENABLED(CONFIG_SYS_NO_VECTOR_TABLE)
 	ldr	pc, _undefined_instruction
 	ldr	pc, _software_interrupt
 	ldr	pc, _prefetch_abort
@@ -89,7 +89,7 @@ _start:
 	ARM_VECTORS
 #endif /* !defined(CONFIG_ENABLE_ARM_SOC_BOOT0_HOOK) */
 
-#if !CONFIG_IS_ENABLED(SYS_NO_VECTOR_TABLE)
+#if !IS_ENABLED(CONFIG_SYS_NO_VECTOR_TABLE)
 /*
  *************************************************************************
  *
@@ -135,7 +135,7 @@ _fiq:			.word fiq
 
 #ifdef CONFIG_SPL_BUILD
 
-#if !CONFIG_IS_ENABLED(SYS_NO_VECTOR_TABLE)
+#if !IS_ENABLED(CONFIG_SYS_NO_VECTOR_TABLE)
 	.align	5
 undefined_instruction:
 software_interrupt:

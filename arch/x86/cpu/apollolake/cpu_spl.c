@@ -118,7 +118,7 @@ static int arch_cpu_init_tpl(void)
 	ret = uclass_first_device_err(UCLASS_SERIAL, &serial);
 	if (ret)
 		return log_msg_ret("serial", ret);
-	if (CONFIG_IS_ENABLED(SPI_FLASH_SUPPORT)) {
+	if (IS_ENABLED(CONFIG_SPI_FLASH_SUPPORT)) {
 		ret = uclass_first_device_err(UCLASS_SPI, &spi);
 		if (ret)
 			return log_msg_ret("SPI", ret);

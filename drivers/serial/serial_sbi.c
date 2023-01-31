@@ -9,7 +9,7 @@ static inline void _debug_uart_init(void)
 
 static inline void _debug_uart_putc(int c)
 {
-	if (CONFIG_IS_ENABLED(RISCV_SMODE))
+	if (IS_ENABLED(CONFIG_RISCV_SMODE))
 		sbi_console_putchar(c);
 }
 

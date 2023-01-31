@@ -46,7 +46,7 @@ struct arch_global_data {
 	unsigned int tbl;
 	unsigned long lastinc;
 	unsigned long long timer_reset_value;
-#if !(CONFIG_IS_ENABLED(SYS_ICACHE_OFF) && CONFIG_IS_ENABLED(SYS_DCACHE_OFF))
+#if !(IS_ENABLED(CONFIG_SYS_ICACHE_OFF) && IS_ENABLED(CONFIG_SYS_DCACHE_OFF))
 	unsigned long tlb_addr;
 	unsigned long tlb_size;
 #if defined(CONFIG_ARM64)

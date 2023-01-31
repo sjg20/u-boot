@@ -116,7 +116,7 @@ static int as3722_probe(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(PMIC_CHILDREN)
+#if IS_ENABLED(CONFIG_PMIC_CHILDREN)
 static const struct pmic_child_info pmic_children_info[] = {
 	{ .prefix = "sd", .driver = "as3722_stepdown"},
 	{ .prefix = "ldo", .driver = "as3722_ldo"},
@@ -170,7 +170,7 @@ U_BOOT_DRIVER(pmic_as3722) = {
 	.name = "as3722_pmic",
 	.id = UCLASS_PMIC,
 	.of_match = as3722_ids,
-#if CONFIG_IS_ENABLED(PMIC_CHILDREN)
+#if IS_ENABLED(CONFIG_PMIC_CHILDREN)
 	.bind = as3722_bind,
 #endif
 	.probe = as3722_probe,

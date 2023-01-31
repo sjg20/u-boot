@@ -176,7 +176,7 @@ int atmel_pio4_get_pio_input(u32 port, u32 pin)
 	return (readl(&port_base->pdsr) & mask) ? 1 : 0;
 }
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 
 /**
  * struct atmel_pioctrl_data - Atmel PIO controller (pinmux + gpio) data struct

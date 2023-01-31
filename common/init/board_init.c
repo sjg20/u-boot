@@ -27,7 +27,7 @@ __weak void arch_setup_gd(struct global_data *gd_ptr)
  */
 __weak void board_init_f_init_stack_protection_addr(ulong base)
 {
-#if CONFIG_IS_ENABLED(SYS_REPORT_STACK_F_USAGE)
+#if IS_ENABLED(CONFIG_SYS_REPORT_STACK_F_USAGE)
 	/* set up stack pointer for stack usage if not set yet */
 	if (!gd->start_addr_sp)
 		gd->start_addr_sp = base;
@@ -41,7 +41,7 @@ __weak void board_init_f_init_stack_protection_addr(ulong base)
  */
 __weak void board_init_f_init_stack_protection(void)
 {
-#if CONFIG_IS_ENABLED(SYS_REPORT_STACK_F_USAGE)
+#if IS_ENABLED(CONFIG_SYS_REPORT_STACK_F_USAGE)
 	ulong stack_bottom = gd->start_addr_sp -
 		CONFIG_VAL(SIZE_LIMIT_PROVIDE_STACK);
 
@@ -148,7 +148,7 @@ void board_init_f_init_reserve(ulong base)
 	arch_setup_gd(gd_ptr);
 #endif
 
-	if (CONFIG_IS_ENABLED(SYS_REPORT_STACK_F_USAGE))
+	if (IS_ENABLED(CONFIG_SYS_REPORT_STACK_F_USAGE))
 		board_init_f_init_stack_protection_addr(base);
 
 	/* next alloc will be higher by one GD plus 16-byte alignment */
@@ -164,11 +164,11 @@ void board_init_f_init_reserve(ulong base)
 	gd->malloc_base = base;
 #endif
 
-	if (CONFIG_IS_ENABLED(SYS_REPORT_STACK_F_USAGE))
+	if (IS_ENABLED(CONFIG_SYS_REPORT_STACK_F_USAGE))
 		board_init_f_init_stack_protection();
 }
 
-#if CONFIG_IS_ENABLED(SHOW_BOOT_PROGRESS)
+#if IS_ENABLED(CONFIG_SHOW_BOOT_PROGRESS)
 /*
  * Board-specific Platform code can reimplement show_boot_progress () if needed
  */

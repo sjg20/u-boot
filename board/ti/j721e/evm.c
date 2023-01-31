@@ -104,7 +104,7 @@ int board_fit_config_name_match(const char *name)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(DM_GPIO) && CONFIG_IS_ENABLED(OF_LIBFDT)
+#if IS_ENABLED(CONFIG_DM_GPIO) && IS_ENABLED(CONFIG_OF_LIBFDT)
 /* Returns 1, if onboard mux is set to hyperflash */
 static void __maybe_unused detect_enable_hyperflash(void *blob)
 {

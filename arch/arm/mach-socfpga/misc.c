@@ -58,10 +58,10 @@ int dram_init(void)
 
 void enable_caches(void)
 {
-#if !CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_ICACHE_OFF)
 	icache_enable();
 #endif
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 	dcache_enable();
 #endif
 }

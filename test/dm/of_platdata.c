@@ -149,7 +149,7 @@ static int dm_test_of_plat_dev(struct unit_test_state *uts)
 	uint i;
 
 	/* Skip this test if there is no platform data */
-	if (!CONFIG_IS_ENABLED(OF_PLATDATA_DRIVER_RT))
+	if (!IS_ENABLED(CONFIG_OF_PLATDATA_DRIVER_RT))
 		return -EAGAIN;
 
 	/* Record the indexes that are found */
@@ -209,7 +209,7 @@ static int dm_test_of_plat_phandle(struct unit_test_state *uts)
 }
 DM_TEST(dm_test_of_plat_phandle, UT_TESTF_SCAN_PDATA);
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA_PARENT)
+#if IS_ENABLED(CONFIG_OF_PLATDATA_PARENT)
 /* Test that device parents are correctly set up */
 static int dm_test_of_plat_parent(struct unit_test_state *uts)
 {

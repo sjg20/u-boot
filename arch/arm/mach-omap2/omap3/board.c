@@ -35,8 +35,8 @@ extern omap3_sysinfo sysinfo;
 static void omap3_invalidate_l2_cache_secure(void);
 #endif
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_DM_GPIO)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 /* Manually initialize GPIO banks when OF_CONTROL doesn't */
 static const struct omap_gpio_plat omap34xx_gpio[] = {
 	{ 0, OMAP34XX_GPIO1_BASE },
@@ -76,8 +76,8 @@ void early_system_init(void)
 	hw_data_init();
 }
 
-#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT) && \
-	!CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT_ONLY)
+#if !IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT) && \
+	!IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT_ONLY)
 
 /******************************************************************************
  * Routine: secure_unlock

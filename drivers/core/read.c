@@ -314,7 +314,7 @@ int dev_read_alias_seq(const struct udevice *dev, int *devnump)
 			ret = 0;
 		}
 	} else {
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 		ret = fdtdec_get_alias_seq(gd->fdt_blob, uc_name,
 					   ofnode_to_offset(node), devnump);
 #endif

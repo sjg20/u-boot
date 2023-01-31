@@ -41,7 +41,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 static int setup_flash_device(struct spi_flash **env_flash)
 {
-#if CONFIG_IS_ENABLED(DM_SPI_FLASH)
+#if IS_ENABLED(CONFIG_DM_SPI_FLASH)
 	struct udevice *new;
 	int	ret;
 

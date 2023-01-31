@@ -182,27 +182,27 @@ struct udevice {
 	struct list_head uclass_node;
 	struct list_head child_head;
 	struct list_head sibling_node;
-#if !CONFIG_IS_ENABLED(OF_PLATDATA_RT)
+#if !IS_ENABLED(CONFIG_OF_PLATDATA_RT)
 	u32 flags_;
 #endif
 	int seq_;
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	ofnode node_;
 #endif
-#if CONFIG_IS_ENABLED(DEVRES)
+#if IS_ENABLED(CONFIG_DEVRES)
 	struct list_head devres_head;
 #endif
-#if CONFIG_IS_ENABLED(DM_DMA)
+#if IS_ENABLED(CONFIG_DM_DMA)
 	ulong dma_offset;
 #endif
-#if CONFIG_IS_ENABLED(IOMMU)
+#if IS_ENABLED(CONFIG_IOMMU)
 	struct udevice *iommu;
 #endif
 };
 
 static inline int dm_udevice_size(void)
 {
-	if (CONFIG_IS_ENABLED(OF_PLATDATA_RT))
+	if (IS_ENABLED(CONFIG_OF_PLATDATA_RT))
 		return ALIGN(sizeof(struct udevice), CONFIG_LINKER_LIST_ALIGN);
 
 	return sizeof(struct udevice);
@@ -230,7 +230,7 @@ struct udevice_rt {
 /* Returns the operations for a device */
 #define device_get_ops(dev)	((dev)->driver->ops)
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA_RT)
+#if IS_ENABLED(CONFIG_OF_PLATDATA_RT)
 u32 dev_get_flags(const struct udevice *dev);
 void dev_or_flags(const struct udevice *dev, u32 or);
 void dev_bic_flags(const struct udevice *dev, u32 bic);
@@ -259,7 +259,7 @@ static inline void dev_bic_flags(struct udevice *dev, u32 bic)
  */
 static inline __attribute_const__ ofnode dev_ofnode(const struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	return dev->node_;
 #else
 	return ofnode_null();
@@ -269,7 +269,7 @@ static inline __attribute_const__ ofnode dev_ofnode(const struct udevice *dev)
 /* Returns non-zero if the device is active (probed and not removed) */
 #define device_active(dev)	(dev_get_flags(dev) & DM_FLAG_ACTIVATED)
 
-#if CONFIG_IS_ENABLED(DM_DMA)
+#if IS_ENABLED(CONFIG_DM_DMA)
 #define dev_set_dma_offset(_dev, _offset)	_dev->dma_offset = _offset
 #define dev_get_dma_offset(_dev)		_dev->dma_offset
 #else
@@ -279,7 +279,7 @@ static inline __attribute_const__ ofnode dev_ofnode(const struct udevice *dev)
 
 static inline __attribute_const__ int dev_of_offset(const struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	return ofnode_to_offset(dev_ofnode(dev));
 #else
 	return -1;
@@ -288,7 +288,7 @@ static inline __attribute_const__ int dev_of_offset(const struct udevice *dev)
 
 static inline __attribute_const__ bool dev_has_ofnode(const struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	return ofnode_valid(dev_ofnode(dev));
 #else
 	return false;
@@ -297,7 +297,7 @@ static inline __attribute_const__ bool dev_has_ofnode(const struct udevice *dev)
 
 static inline void dev_set_ofnode(struct udevice *dev, ofnode node)
 {
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	dev->node_ = node;
 #endif
 }
@@ -317,11 +317,11 @@ struct udevice_id {
 	ulong data;
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 #define of_match_ptr(_ptr)	(_ptr)
 #else
 #define of_match_ptr(_ptr)	NULL
-#endif /* CONFIG_IS_ENABLED(OF_CONTROL) */
+#endif /* IS_ENABLED(CONFIG_OF_CONTROL) */
 
 /**
  * struct driver - A driver for a feature or peripheral
@@ -389,7 +389,7 @@ struct driver {
 	int per_child_plat_auto;
 	const void *ops;	/* driver-specific operations */
 	uint32_t flags;
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 	struct acpi_ops *acpi_ops;
 #endif
 };

@@ -21,7 +21,7 @@ int arch_cpu_init(void)
 
 /* R-Car Gen3 D-cache is enabled in memmap-gen3.c */
 #ifndef CONFIG_RCAR_GEN3
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF)
 void enable_caches(void)
 {
 	dcache_enable();

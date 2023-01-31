@@ -9,7 +9,7 @@
 #include <linux/mtd/mtd.h>
 #include <spi_flash.h>
 
-#if CONFIG_IS_ENABLED(DM_SPI_FLASH)
+#if IS_ENABLED(CONFIG_DM_SPI_FLASH)
 
 int spi_flash_mtd_register(struct spi_flash *flash)
 {
@@ -21,7 +21,7 @@ void spi_flash_mtd_unregister(struct spi_flash *flash)
 	del_mtd_device(&flash->mtd);
 }
 
-#else /* !CONFIG_IS_ENABLED(DM_SPI_FLASH) */
+#else /* !IS_ENABLED(CONFIG_DM_SPI_FLASH) */
 
 static struct mtd_info sf_mtd_info;
 static bool sf_mtd_registered;
@@ -160,4 +160,4 @@ void spi_flash_mtd_unregister(struct spi_flash *flash)
 	       sf_mtd_info.name);
 }
 
-#endif /* !CONFIG_IS_ENABLED(DM_SPI_FLASH) */
+#endif /* !IS_ENABLED(CONFIG_DM_SPI_FLASH) */

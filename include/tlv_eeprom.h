@@ -65,7 +65,7 @@ struct __attribute__ ((__packed__)) tlvinfo_tlv {
 #define TLV_CODE_VENDOR_EXT     0xFD
 #define TLV_CODE_CRC_32         0xFE
 
-#if CONFIG_IS_ENABLED(CMD_TLV_EEPROM)
+#if IS_ENABLED(CONFIG_CMD_TLV_EEPROM)
 
 /**
  * read_tlv_eeprom - Read the EEPROM binary data from the hardware
@@ -110,7 +110,7 @@ int write_tlv_eeprom(void *eeprom, int len);
 int read_tlvinfo_tlv_eeprom(void *eeprom, struct tlvinfo_header **hdr,
 			    struct tlvinfo_tlv **first_entry, int dev);
 
-#else /* !CONFIG_IS_ENABLED(CMD_TLV_EEPROM) */
+#else /* !IS_ENABLED(CONFIG_CMD_TLV_EEPROM) */
 
 static inline int read_tlv_eeprom(void *eeprom, int offset, int len, int dev)
 {
@@ -129,7 +129,7 @@ read_tlvinfo_tlv_eeprom(void *eeprom, struct tlvinfo_header **hdr,
 	return -ENOSYS;
 }
 
-#endif /* CONFIG_IS_ENABLED(CMD_TLV_EEPROM) */
+#endif /* IS_ENABLED(CONFIG_CMD_TLV_EEPROM) */
 
 /**
  *  is_valid_tlvinfo_header

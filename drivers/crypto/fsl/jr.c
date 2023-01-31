@@ -38,7 +38,7 @@ uint32_t sec_offset[CONFIG_SYS_FSL_MAX_NUM_OF_SEC] = {
 #endif
 };
 
-#if CONFIG_IS_ENABLED(DM)
+#if IS_ENABLED(CONFIG_DM)
 struct udevice *caam_dev;
 #else
 #define SEC_ADDR(idx)	\
@@ -114,7 +114,7 @@ static void jr_initregs(uint8_t sec_idx, struct caam_regs *caam)
 static int jr_init(uint8_t sec_idx, struct caam_regs *caam)
 {
 	struct jobring *jr = &caam->jr[sec_idx];
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	ofnode scu_node = ofnode_by_compatible(ofnode_null(), "fsl,imx8-mu");
 #endif
 	memset(jr, 0, sizeof(struct jobring));
@@ -141,7 +141,7 @@ static int jr_init(uint8_t sec_idx, struct caam_regs *caam)
 	memset(jr->input_ring, 0, JR_SIZE * sizeof(caam_dma_addr_t));
 	memset(jr->output_ring, 0, jr->op_size);
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	if (!ofnode_valid(scu_node))
 #endif
 	start_jr(caam);
@@ -322,7 +322,7 @@ static void desc_done(uint32_t status, void *arg)
 static inline int run_descriptor_jr_idx(uint32_t *desc, uint8_t sec_idx)
 {
 	struct caam_regs *caam;
-#if CONFIG_IS_ENABLED(DM)
+#if IS_ENABLED(CONFIG_DM)
 	caam = dev_get_priv(caam_dev);
 #else
 	caam = &caam_st;
@@ -418,7 +418,7 @@ static int jr_hw_reset(struct jr_regs *regs)
 static inline int jr_reset_sec(uint8_t sec_idx)
 {
 	struct caam_regs *caam;
-#if CONFIG_IS_ENABLED(DM)
+#if IS_ENABLED(CONFIG_DM)
 	caam = dev_get_priv(caam_dev);
 #else
 	caam = &caam_st;
@@ -440,7 +440,7 @@ int jr_reset(void)
 int sec_reset(void)
 {
 	struct caam_regs *caam;
-#if CONFIG_IS_ENABLED(DM)
+#if IS_ENABLED(CONFIG_DM)
 	caam = dev_get_priv(caam_dev);
 #else
 	caam = &caam_st;
@@ -677,7 +677,7 @@ int sec_init_idx(uint8_t sec_idx)
 {
 	int ret = 0;
 	struct caam_regs *caam;
-#if CONFIG_IS_ENABLED(DM)
+#if IS_ENABLED(CONFIG_DM)
 	if (!caam_dev) {
 		printf("caam_jr: caam not found\n");
 		return -1;
@@ -689,7 +689,7 @@ int sec_init_idx(uint8_t sec_idx)
 	caam_st.jrid = 0;
 	caam = &caam_st;
 #endif
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	ofnode scu_node = ofnode_by_compatible(ofnode_null(), "fsl,imx8-mu");
 
 	if (ofnode_valid(scu_node))
@@ -758,7 +758,7 @@ int sec_init_idx(uint8_t sec_idx)
 	liodn_s = (liodnr & JRSLIODN_MASK) >> JRSLIODN_SHIFT;
 #endif
 #endif
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 init:
 #endif
 	ret = jr_init(sec_idx, caam);
@@ -766,7 +766,7 @@ init:
 		printf("SEC%u:  initialization failed\n", sec_idx);
 		return -1;
 	}
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	if (ofnode_valid(scu_node)) {
 		if (IS_ENABLED(CONFIG_DM_RNG)) {
 			ret = device_bind_driver(NULL, "caam-rng", "caam-rng", NULL);
@@ -808,10 +808,10 @@ int sec_init(void)
 	return sec_init_idx(0);
 }
 
-#if CONFIG_IS_ENABLED(DM)
+#if IS_ENABLED(CONFIG_DM)
 static int jr_power_on(ofnode node)
 {
-#if CONFIG_IS_ENABLED(POWER_DOMAIN)
+#if IS_ENABLED(CONFIG_POWER_DOMAIN)
 	struct udevice __maybe_unused jr_dev;
 	struct power_domain pd;
 

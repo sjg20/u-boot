@@ -69,7 +69,7 @@ enum env_location env_get_location(enum env_operation op, int prio)
 	if (prio)
 		return ENVL_UNKNOWN;
 
-	if (!CONFIG_IS_ENABLED(ENV_IS_IN_SPI_FLASH))
+	if (!IS_ENABLED(CONFIG_ENV_IS_IN_SPI_FLASH))
 		return ENVL_NOWHERE;
 
 	/* write and erase always operate on the environment */

@@ -232,7 +232,7 @@ static int rockchip_sfc_ofdata_to_platdata(struct udevice *bus)
 	else
 		sfc->use_dma = true;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	int ret;
 
 	ret = clk_get_by_index(bus, 0, &sfc->clk);
@@ -256,7 +256,7 @@ static int rockchip_sfc_probe(struct udevice *bus)
 	struct rockchip_sfc *sfc = dev_get_plat(bus);
 	int ret;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_enable(&sfc->hclk);
 	if (ret)
 		dev_dbg(sfc->dev, "sfc Enable ahb clock fail %s: %d\n", bus->name, ret);
@@ -278,7 +278,7 @@ static int rockchip_sfc_probe(struct udevice *bus)
 	return 0;
 
 err_init:
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	clk_disable(&sfc->clk);
 	clk_disable(&sfc->hclk);
 #endif
@@ -599,7 +599,7 @@ static int rockchip_sfc_set_speed(struct udevice *bus, uint speed)
 	if (speed == sfc->speed)
 		return 0;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	int ret = clk_set_rate(&sfc->clk, speed);
 
 	if (ret < 0) {

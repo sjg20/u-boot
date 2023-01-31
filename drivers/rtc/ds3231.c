@@ -55,7 +55,7 @@
 #define RTC_STAT_BIT_EN32KHZ	0x8	/* Enable 32KHz Output  */
 
 
-#if !CONFIG_IS_ENABLED(DM_RTC)
+#if !IS_ENABLED(CONFIG_DM_RTC)
 static uchar rtc_read (uchar reg);
 static void rtc_write (uchar reg, uchar val);
 

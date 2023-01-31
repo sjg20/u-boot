@@ -215,7 +215,7 @@ int fpga_fsload(int devnum, const void *buf, size_t size,
 }
 #endif
 
-#if CONFIG_IS_ENABLED(FPGA_LOAD_SECURE)
+#if IS_ENABLED(CONFIG_FPGA_LOAD_SECURE)
 int fpga_loads(int devnum, const void *buf, size_t size,
 	       struct fpga_secure_info *fpga_sec_info)
 {
@@ -353,7 +353,7 @@ int fpga_info(int devnum)
 	return fpga_dev_info(devnum);
 }
 
-#if CONFIG_IS_ENABLED(FPGA_LOAD_SECURE)
+#if IS_ENABLED(CONFIG_FPGA_LOAD_SECURE)
 int fpga_compatible2flag(int devnum, const char *compatible)
 {
 	const fpga_desc * const desc = fpga_get_desc(devnum);

@@ -202,7 +202,7 @@ struct dw_i2c {
 	u32 scl_fall_time_ns;
 	u32 sda_hold_time_ns;
 	bool has_spk_cnt;
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	struct clk clk;
 #endif
 	struct dw_i2c_speed_config config;

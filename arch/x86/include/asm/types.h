@@ -10,7 +10,7 @@ typedef unsigned short umode_t;
  */
 #ifdef __KERNEL__
 
-#if CONFIG_IS_ENABLED(X86_64)
+#if IS_ENABLED(CONFIG_X86_64)
 #define BITS_PER_LONG 64
 #else
 #define BITS_PER_LONG 32

@@ -112,7 +112,7 @@ struct global_data {
 	 * not be called.
 	 */
 	unsigned long have_console;
-#if CONFIG_IS_ENABLED(PRE_CONSOLE_BUFFER)
+#if IS_ENABLED(CONFIG_PRE_CONSOLE_BUFFER)
 	/**
 	 * @precon_buf_idx: pre-console buffer index
 	 *
@@ -217,11 +217,11 @@ struct global_data {
 	 * @uclass_root_s.
 	 */
 	struct list_head *uclass_root;
-# if CONFIG_IS_ENABLED(OF_PLATDATA_DRIVER_RT)
+# if IS_ENABLED(CONFIG_OF_PLATDATA_DRIVER_RT)
 	/** @dm_driver_rt: Dynamic info about the driver */
 	struct driver_rt *dm_driver_rt;
 # endif
-#if CONFIG_IS_ENABLED(OF_PLATDATA_RT)
+#if IS_ENABLED(CONFIG_OF_PLATDATA_RT)
 	/** @dm_udevice_rt: Dynamic info about the udevice */
 	struct udevice_rt *dm_udevice_rt;
 	/**
@@ -254,14 +254,14 @@ struct global_data {
 	 * @fdt_src: Source of FDT
 	 */
 	enum fdt_source_t fdt_src;
-#if CONFIG_IS_ENABLED(OF_LIVE)
+#if IS_ENABLED(CONFIG_OF_LIVE)
 	/**
 	 * @of_root: root node of the live tree
 	 */
 	struct device_node *of_root;
 #endif
 
-#if CONFIG_IS_ENABLED(MULTI_DTB_FIT)
+#if IS_ENABLED(CONFIG_MULTI_DTB_FIT)
 	/**
 	 * @multi_dtb_fit: pointer to uncompressed multi-dtb FIT image
 	 */
@@ -287,7 +287,7 @@ struct global_data {
 	 */
 	void *trace_buff;
 #endif
-#if CONFIG_IS_ENABLED(SYS_I2C_LEGACY)
+#if IS_ENABLED(CONFIG_SYS_I2C_LEGACY)
 	/**
 	 * @cur_i2c_bus: currently used I2C bus
 	 */
@@ -433,7 +433,7 @@ struct global_data {
 	 */
 	bool log_cont;
 #endif
-#if CONFIG_IS_ENABLED(BLOBLIST)
+#if IS_ENABLED(CONFIG_BLOBLIST)
 	/**
 	 * @bloblist: blob list information
 	 */
@@ -443,7 +443,7 @@ struct global_data {
 	 */
 	struct bloblist_hdr *new_bloblist;
 #endif
-#if CONFIG_IS_ENABLED(HANDOFF)
+#if IS_ENABLED(CONFIG_HANDOFF)
 	/**
 	 * @spl_handoff: SPL hand-off information
 	 */
@@ -473,7 +473,7 @@ struct global_data {
 	 */
 	char *smbios_version;
 #endif
-#if CONFIG_IS_ENABLED(EVENT)
+#if IS_ENABLED(CONFIG_EVENT)
 	/**
 	 * @event_state: Points to the current state of events
 	 */
@@ -506,7 +506,7 @@ static_assert(sizeof(struct global_data) == GD_SIZE);
 #endif
 
 /* These macros help avoid #ifdefs in the code */
-#if CONFIG_IS_ENABLED(OF_LIVE)
+#if IS_ENABLED(CONFIG_OF_LIVE)
 #define gd_of_root()		gd->of_root
 #define gd_of_root_ptr()	&gd->of_root
 #define gd_set_of_root(_root)	gd->of_root = (_root)
@@ -516,7 +516,7 @@ static_assert(sizeof(struct global_data) == GD_SIZE);
 #define gd_set_of_root(_root)
 #endif
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA_DRIVER_RT)
+#if IS_ENABLED(CONFIG_OF_PLATDATA_DRIVER_RT)
 #define gd_set_dm_driver_rt(dyn)	gd->dm_driver_rt = dyn
 #define gd_dm_driver_rt()		gd->dm_driver_rt
 #else
@@ -524,7 +524,7 @@ static_assert(sizeof(struct global_data) == GD_SIZE);
 #define gd_dm_driver_rt()		NULL
 #endif
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA_RT)
+#if IS_ENABLED(CONFIG_OF_PLATDATA_RT)
 #define gd_set_dm_udevice_rt(dyn)	gd->dm_udevice_rt = dyn
 #define gd_dm_udevice_rt()		gd->dm_udevice_rt
 #define gd_set_dm_priv_base(dyn)	gd->dm_priv_base = dyn
@@ -546,7 +546,7 @@ static_assert(sizeof(struct global_data) == GD_SIZE);
 #define gd_set_acpi_start(addr)
 #endif
 
-#if CONFIG_IS_ENABLED(MULTI_DTB_FIT)
+#if IS_ENABLED(CONFIG_MULTI_DTB_FIT)
 #define gd_multi_dtb_fit()	gd->multi_dtb_fit
 #define gd_set_multi_dtb_fit(_dtb)	gd->multi_dtb_fit = _dtb
 #else
@@ -554,7 +554,7 @@ static_assert(sizeof(struct global_data) == GD_SIZE);
 #define gd_set_multi_dtb_fit(_dtb)
 #endif
 
-#if CONFIG_IS_ENABLED(EVENT_DYNAMIC)
+#if IS_ENABLED(CONFIG_EVENT_DYNAMIC)
 #define gd_event_state()	((struct event_state *)&gd->event_state)
 #else
 #define gd_event_state()	NULL

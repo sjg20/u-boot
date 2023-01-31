@@ -21,7 +21,7 @@
  * 'voltage-table' property.
  */
 #ifndef CONFIG_SPL_BUILD
-#if !CONFIG_IS_ENABLED(ROCKCHIP_BACK_TO_BROM)
+#if !IS_ENABLED(CONFIG_ROCKCHIP_BACK_TO_BROM)
 static int veyron_init(void)
 {
 	struct udevice *dev;
@@ -77,7 +77,7 @@ int board_early_init_r(void)
 	struct udevice *dev;
 	int ret;
 
-#if !CONFIG_IS_ENABLED(ROCKCHIP_BACK_TO_BROM)
+#if !IS_ENABLED(CONFIG_ROCKCHIP_BACK_TO_BROM)
 	if (!fdt_node_check_compatible(gd->fdt_blob, 0, "google,veyron")) {
 		ret = veyron_init();
 		if (ret)

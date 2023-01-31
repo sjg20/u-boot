@@ -37,7 +37,7 @@ int board_init(void)
 	if (IS_ENABLED(CONFIG_SPL_BUILD))
 		printf("Silicon version:\t%d\n", zynq_get_silicon_version());
 
-	if (CONFIG_IS_ENABLED(DM_I2C) && CONFIG_IS_ENABLED(I2C_EEPROM))
+	if (IS_ENABLED(CONFIG_DM_I2C) && IS_ENABLED(CONFIG_I2C_EEPROM))
 		xilinx_read_eeprom();
 
 	return 0;

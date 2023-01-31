@@ -23,7 +23,7 @@ SECTIONS
 	. = IMAGE_TEXT_BASE;
 	.text : {
 /* For ifc, elbc, esdhc, espi, all need the SPL without section .resetvec */
-#if CONFIG_IS_ENABLED(SYS_MPC85XX_NO_RESETVEC)
+#if IS_ENABLED(CONFIG_SYS_MPC85XX_NO_RESETVEC)
 		KEEP(*(.bootpg))
 #endif
 		*(.text*)
@@ -63,7 +63,7 @@ SECTIONS
 	__init_end = .;
 	_end = .;
 
-#if CONFIG_IS_ENABLED(SYS_MPC85XX_NO_RESETVEC)
+#if IS_ENABLED(CONFIG_SYS_MPC85XX_NO_RESETVEC)
 #if defined(CONFIG_SDCARD) && !defined(CFG_SYS_MMC_U_BOOT_OFFS)
 	mmc_u_boot_offs = .;
 #endif
@@ -81,7 +81,7 @@ SECTIONS
 #endif
 
 /* For nor and nand is needed the SPL with section .resetvec */
-#if !CONFIG_IS_ENABLED(SYS_MPC85XX_NO_RESETVEC)
+#if !IS_ENABLED(CONFIG_SYS_MPC85XX_NO_RESETVEC)
 #if defined(CONFIG_FSL_IFC) /* Restrict bootpg at 4K boundry for IFC */
 #ifndef BOOT_PAGE_OFFSET
 #define BOOT_PAGE_OFFSET 0x1000

@@ -585,7 +585,7 @@ static int meson_saradc_init(struct meson_saradc_priv *priv)
 	if (ret)
 		return ret;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_enable(&priv->core_clk);
 	if (ret)
 		return ret;
@@ -605,7 +605,7 @@ static int meson_saradc_init(struct meson_saradc_priv *priv)
 
 	udelay(5);
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_enable(&priv->adc_clk);
 	if (ret)
 		return ret;
@@ -667,7 +667,7 @@ static int meson_saradc_probe(struct udevice *dev)
 	if (ret)
 		return ret;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	ret = clk_get_by_name(dev, "core", &priv->core_clk);
 	if (ret)
 		return ret;

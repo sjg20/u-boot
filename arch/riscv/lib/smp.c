@@ -45,7 +45,7 @@ static int send_ipi_many(struct ipi_data *ipi, int wait)
 			continue;
 		}
 
-#if !CONFIG_IS_ENABLED(XIP)
+#if !IS_ENABLED(CONFIG_XIP)
 #ifdef CONFIG_AVAILABLE_HARTS
 		/* skip if hart is not available */
 		if (!(gd->arch.available_harts & (1 << reg)))

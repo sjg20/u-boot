@@ -16,7 +16,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 static void __invalidate_icache(ulong addr, ulong size)
 {
-	if (CONFIG_IS_ENABLED(XILINX_MICROBLAZE0_USE_WIC)) {
+	if (IS_ENABLED(CONFIG_XILINX_MICROBLAZE0_USE_WIC)) {
 		for (int i = 0; i < size;
 		     i += gd_cpuinfo()->icache_line_length) {
 			asm volatile (
@@ -36,7 +36,7 @@ void invalidate_icache_all(void)
 
 static void __flush_dcache(ulong addr, ulong size)
 {
-	if (CONFIG_IS_ENABLED(XILINX_MICROBLAZE0_USE_WDC)) {
+	if (IS_ENABLED(CONFIG_XILINX_MICROBLAZE0_USE_WDC)) {
 		for (int i = 0; i < size;
 		     i += gd_cpuinfo()->dcache_line_length) {
 			asm volatile (

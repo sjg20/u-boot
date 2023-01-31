@@ -257,7 +257,7 @@ void board_init_uart_f(void)
 #endif
 }
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 static struct ns16550_plat ns16550_com1_pdata = {
 	.base = CFG_SYS_NS16550_COM1,
 	.reg_shift = 2,
@@ -270,7 +270,7 @@ U_BOOT_DRVINFO(ns16550_com1) = {
 };
 #endif
 
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF) && !defined(CONFIG_ARM64)
+#if !IS_ENABLED(CONFIG_SYS_DCACHE_OFF) && !defined(CONFIG_ARM64)
 void enable_caches(void)
 {
 	/* Enable D-cache. I-cache is already enabled in start.S */

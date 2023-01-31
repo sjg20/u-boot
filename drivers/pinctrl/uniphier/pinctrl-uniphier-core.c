@@ -143,7 +143,7 @@ static int uniphier_pinconf_input_enable(struct udevice *dev,
 		return uniphier_pinconf_input_enable_legacy(dev, pin, enable);
 }
 
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 
 static const struct pinconf_param uniphier_pinconf_params[] = {
 	{ "bias-disable", PIN_CONFIG_BIAS_DISABLE, 0 },
@@ -333,7 +333,7 @@ static int uniphier_pinconf_group_set(struct udevice *dev,
 	return 0;
 }
 
-#endif /* CONFIG_IS_ENABLED(PINCONF) */
+#endif /* IS_ENABLED(CONFIG_PINCONF) */
 
 static void uniphier_pinmux_set_one(struct udevice *dev, unsigned pin,
 				    int muxval)
@@ -410,7 +410,7 @@ const struct pinctrl_ops uniphier_pinctrl_ops = {
 	.get_functions_count = uniphier_pinmux_get_functions_count,
 	.get_function_name = uniphier_pinmux_get_function_name,
 	.pinmux_group_set = uniphier_pinmux_group_set,
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 	.pinconf_num_params = ARRAY_SIZE(uniphier_pinconf_params),
 	.pinconf_params = uniphier_pinconf_params,
 	.pinconf_set = uniphier_pinconf_set,

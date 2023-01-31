@@ -27,7 +27,7 @@ struct ofnode_phandle_args {
 	uint32_t args[OF_MAX_PHANDLE_ARGS];
 };
 
-#if CONFIG_IS_ENABLED(OFNODE_MULTI_TREE)
+#if IS_ENABLED(CONFIG_OFNODE_MULTI_TREE)
 /**
  * oftree_reset() - reset the state of the oftree list
  *
@@ -549,7 +549,7 @@ bool ofnode_read_bool(ofnode node, const char *propname);
  */
 ofnode ofnode_find_subnode(ofnode node, const char *subnode_name);
 
-#if CONFIG_IS_ENABLED(DM_INLINE_OFNODE)
+#if IS_ENABLED(CONFIG_DM_INLINE_OFNODE)
 #include <asm/global_data.h>
 
 static inline bool ofnode_is_enabled(ofnode node)
@@ -1436,7 +1436,7 @@ ofnode ofnode_get_phy_node(ofnode eth_node);
  */
 phy_interface_t ofnode_read_phy_mode(ofnode mac_node);
 
-#if CONFIG_IS_ENABLED(DM)
+#if IS_ENABLED(CONFIG_DM)
 /**
  * ofnode_conf_read_bool() - Read a boolean value from the U-Boot config
  *

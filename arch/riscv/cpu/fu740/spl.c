@@ -33,6 +33,6 @@ void harts_early_init(void)
 	 * Clear feature disable CSR to '0' to turn on all features for
 	 * each core. This operation must be in M-mode.
 	 */
-	if (CONFIG_IS_ENABLED(RISCV_MMODE))
+	if (IS_ENABLED(CONFIG_RISCV_MMODE))
 		csr_write(CSR_U74_FEATURE_DISABLE, 0);
 }

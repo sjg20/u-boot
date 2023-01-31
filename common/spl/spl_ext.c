@@ -65,7 +65,7 @@ end:
 	return err < 0;
 }
 
-#if CONFIG_IS_ENABLED(OS_BOOT)
+#if IS_ENABLED(CONFIG_OS_BOOT)
 int spl_load_image_ext_os(struct spl_image_info *spl_image,
 			  struct spl_boot_device *bootdev,
 			  struct blk_desc *block_dev, int partition)

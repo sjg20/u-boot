@@ -25,7 +25,7 @@ static void _back_to_bootrom(enum rockchip_bootrom_cmd brom_cmd)
 
 void back_to_bootrom(enum rockchip_bootrom_cmd brom_cmd)
 {
-#if CONFIG_IS_ENABLED(LIBCOMMON_SUPPORT)
+#if IS_ENABLED(CONFIG_LIBCOMMON_SUPPORT)
 	puts("Returning to boot ROM...\n");
 #endif
 	_back_to_bootrom(brom_cmd);
@@ -100,7 +100,7 @@ int save_boot_params(void)
 		ret = 1;
 		break;
 	default:
-#if CONFIG_IS_ENABLED(LIBCOMMON_SUPPORT)
+#if IS_ENABLED(CONFIG_LIBCOMMON_SUPPORT)
 		puts("FATAL: unexpected command to back_to_bootrom()\n");
 #endif
 		hang();

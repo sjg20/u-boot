@@ -177,7 +177,7 @@ static ulong get_load_addr(void)
 /********************************************************************
  *     eMMC services
  ********************************************************************/
-#if CONFIG_IS_ENABLED(DM_MMC) && CONFIG_IS_ENABLED(MMC_WRITE)
+#if IS_ENABLED(CONFIG_DM_MMC) && IS_ENABLED(CONFIG_MMC_WRITE)
 static int mmc_burn_image(size_t image_size)
 {
 	struct mmc	*mmc;

@@ -68,7 +68,7 @@ static struct i2c_pads_info i2c_pad_info1 = {
 	},
 };
 
-#if CONFIG_IS_ENABLED(MMC)
+#if IS_ENABLED(CONFIG_MMC)
 #define USDHC2_CD_GPIO	IMX_GPIO_NR(2, 12)
 #define USDHC1_PWR_GPIO IMX_GPIO_NR(2, 10)
 #define USDHC2_PWR_GPIO IMX_GPIO_NR(2, 19)
@@ -181,7 +181,7 @@ const char *spl_board_loader_name(u32 boot_device)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(POWER_LEGACY)
+#if IS_ENABLED(CONFIG_POWER_LEGACY)
 #define I2C_PMIC	0
 
 static int pfuze_mode_init(struct pmic *p, u32 mode)
@@ -288,7 +288,7 @@ void board_init_f(ulong dummy)
 
 	setup_i2c(0, 100000, 0x7f, &i2c_pad_info1);
 
-#if CONFIG_IS_ENABLED(POWER_LEGACY)
+#if IS_ENABLED(CONFIG_POWER_LEGACY)
 	power_init_board();
 #endif
 

@@ -500,7 +500,7 @@ static int eth_post_bind(struct udevice *dev)
 #ifdef CONFIG_DM_ETH_PHY
 	eth_phy_binds_nodes(dev);
 #endif
-	if (CONFIG_IS_ENABLED(BOOTDEV_ETH) && !priv->no_bootdevs) {
+	if (IS_ENABLED(CONFIG_BOOTDEV_ETH) && !priv->no_bootdevs) {
 		ret = bootdev_setup_for_dev(dev, "eth_bootdev");
 		if (ret)
 			return log_msg_ret("bootdev", ret);
@@ -520,7 +520,7 @@ static int eth_pre_unbind(struct udevice *dev)
 
 static bool eth_dev_get_mac_address(struct udevice *dev, u8 mac[ARP_HLEN])
 {
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	const uint8_t *p;
 	struct nvmem_cell mac_cell;
 

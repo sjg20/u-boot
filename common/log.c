@@ -60,7 +60,7 @@ const char *log_get_cat_name(enum log_category_t cat)
 	if (cat >= LOGC_NONE)
 		return log_cat_name[cat - LOGC_NONE];
 
-#if CONFIG_IS_ENABLED(DM)
+#if IS_ENABLED(CONFIG_DM)
 	name = uclass_get_name((enum uclass_id)cat);
 #else
 	name = NULL;

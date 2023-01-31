@@ -16,7 +16,7 @@
 #include <cavium/atf.h>
 #include <asm/armv8/mmu.h>
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 #include <dm/platform_data/serial_pl01x.h>
 
 static const struct pl01x_serial_plat serial0 = {

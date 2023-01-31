@@ -46,7 +46,7 @@ struct rk3066_dmc_dram_info {
 };
 
 struct rk3066_dmc_sdram_params {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_rk3066_dmc of_plat;
 #endif
 	struct rk3288_sdram_channel ch[2];
@@ -789,7 +789,7 @@ static int rk3066_dmc_setup_sdram(struct udevice *dev)
 
 static int rk3066_dmc_conv_of_plat(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct rk3066_dmc_sdram_params *plat = dev_get_plat(dev);
 	struct dtd_rockchip_rk3066_dmc *of_plat = &plat->of_plat;
 	int ret;

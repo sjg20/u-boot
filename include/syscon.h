@@ -25,7 +25,7 @@ struct syscon_ops {
 
 #define syscon_get_ops(dev)        ((struct syscon_ops *)(dev)->driver->ops)
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 /*
  * We don't support 64-bit machines. If they are so resource-contrained that
  * they need to use OF_PLATDATA, something is horribly wrong with the

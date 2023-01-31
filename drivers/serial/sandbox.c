@@ -85,7 +85,7 @@ static void sandbox_print_color(struct udevice *dev)
 	struct sandbox_serial_plat *plat = dev_get_plat(dev);
 
 	/* With of-platdata we don't real the colour correctly, so disable it */
-	if (!CONFIG_IS_ENABLED(OF_PLATDATA) && priv->start_of_line &&
+	if (!IS_ENABLED(CONFIG_OF_PLATDATA) && priv->start_of_line &&
 	    plat->colour != -1) {
 		priv->start_of_line = false;
 		output_ansi_colour(plat->colour);
@@ -236,7 +236,7 @@ static int sandbox_serial_of_to_plat(struct udevice *dev)
 	const char *colour;
 	int i;
 
-	if (CONFIG_IS_ENABLED(OF_PLATDATA))
+	if (IS_ENABLED(CONFIG_OF_PLATDATA))
 		return 0;
 	plat->colour = -1;
 	colour = dev_read_string(dev, "sandbox,text-colour");
@@ -280,7 +280,7 @@ U_BOOT_DRIVER(sandbox_serial) = {
 	.flags = DM_FLAG_PRE_RELOC,
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct sandbox_serial_plat platdata_non_fdt = {
 	.colour = -1,
 };

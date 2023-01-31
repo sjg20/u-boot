@@ -602,7 +602,7 @@ static int broadwell_pch_init(struct udevice *dev)
 
 static int broadwell_pch_probe(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(X86_32BIT_INIT)) {
+	if (IS_ENABLED(CONFIG_X86_32BIT_INIT)) {
 		if (!(gd->flags & GD_FLG_RELOC))
 			return broadwell_pch_early_init(dev);
 		else

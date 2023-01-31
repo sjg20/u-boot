@@ -459,7 +459,7 @@ int bloblist_init(void)
 		}
 	}
 	if (ret) {
-		if (CONFIG_IS_ENABLED(BLOBLIST_ALLOC)) {
+		if (IS_ENABLED(CONFIG_BLOBLIST_ALLOC)) {
 			void *ptr = memalign(BLOBLIST_ALIGN, size);
 
 			if (!ptr)

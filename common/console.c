@@ -46,7 +46,7 @@ static int on_console(const char *name, const char *value, enum env_op op,
 	case env_op_create:
 	case env_op_overwrite:
 
-		if (CONFIG_IS_ENABLED(CONSOLE_MUX)) {
+		if (IS_ENABLED(CONFIG_CONSOLE_MUX)) {
 			if (iomux_doenv(console, value))
 				return 1;
 		} else {
@@ -72,11 +72,11 @@ U_BOOT_ENV_CALLBACK(console, on_console);
 static int on_silent(const char *name, const char *value, enum env_op op,
 	int flags)
 {
-	if (!CONFIG_IS_ENABLED(SILENT_CONSOLE_UPDATE_ON_SET))
+	if (!IS_ENABLED(CONFIG_SILENT_CONSOLE_UPDATE_ON_SET))
 		if (flags & H_INTERACTIVE)
 			return 0;
 
-	if (!CONFIG_IS_ENABLED(SILENT_CONSOLE_UPDATE_ON_RELOC))
+	if (!IS_ENABLED(CONFIG_SILENT_CONSOLE_UPDATE_ON_RELOC))
 		if ((flags & H_INTERACTIVE) == 0)
 			return 0;
 
@@ -154,7 +154,7 @@ static int console_record_tstc(void)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(SYS_CONSOLE_IS_IN_ENV)
+#if IS_ENABLED(CONFIG_SYS_CONSOLE_IS_IN_ENV)
 /*
  * if overwrite_console returns 1, the stdin, stderr and stdout
  * are switched to the serial port, else the settings in the
@@ -167,7 +167,7 @@ extern int overwrite_console(void);
 #define OVERWRITE_CONSOLE 0
 #endif /* CONFIG_SYS_CONSOLE_OVERWRITE_ROUTINE */
 
-#endif /* CONFIG_IS_ENABLED(SYS_CONSOLE_IS_IN_ENV) */
+#endif /* IS_ENABLED(CONFIG_SYS_CONSOLE_IS_IN_ENV) */
 
 static int console_setfile(int file, struct stdio_dev * dev)
 {
@@ -233,7 +233,7 @@ static bool console_dev_is_serial(struct stdio_dev *sdev)
 	return is_serial;
 }
 
-#if CONFIG_IS_ENABLED(CONSOLE_MUX)
+#if IS_ENABLED(CONFIG_CONSOLE_MUX)
 /** Console I/O multiplexing *******************************************/
 
 /* tstcdev: save the last stdio device with pending characters, with tstc != 0 */
@@ -378,7 +378,7 @@ static void console_flush(int file)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(SYS_CONSOLE_IS_IN_ENV)
+#if IS_ENABLED(CONFIG_SYS_CONSOLE_IS_IN_ENV)
 static inline void console_doenv(int file, struct stdio_dev *dev)
 {
 	iomux_doenv(file, dev->name);
@@ -435,7 +435,7 @@ static inline void console_flush(int file)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(SYS_CONSOLE_IS_IN_ENV)
+#if IS_ENABLED(CONFIG_SYS_CONSOLE_IS_IN_ENV)
 static inline void console_doenv(int file, struct stdio_dev *dev)
 {
 	console_setfile(file, dev);
@@ -503,7 +503,7 @@ int fgetc(int file)
 		 */
 		for (;;) {
 			schedule();
-			if (CONFIG_IS_ENABLED(CONSOLE_MUX)) {
+			if (IS_ENABLED(CONFIG_CONSOLE_MUX)) {
 				/*
 				 * Upper layer may have already called tstc() so
 				 * check for that first.
@@ -623,7 +623,7 @@ int tstc(void)
 #define PRE_CONSOLE_FLUSHPOINT1_SERIAL			0
 #define PRE_CONSOLE_FLUSHPOINT2_EVERYTHING_BUT_SERIAL	1
 
-#if CONFIG_IS_ENABLED(PRE_CONSOLE_BUFFER)
+#if IS_ENABLED(CONFIG_PRE_CONSOLE_BUFFER)
 #define CIRC_BUF_IDX(idx) ((idx) % (unsigned long)CONFIG_VAL(PRE_CON_BUF_SZ))
 
 static void pre_console_putc(const char c)
@@ -987,7 +987,7 @@ static bool console_update_silent(void)
 
 int console_announce_r(void)
 {
-#if !CONFIG_IS_ENABLED(PRE_CONSOLE_BUFFER)
+#if !IS_ENABLED(CONFIG_PRE_CONSOLE_BUFFER)
 	char buf[DISPLAY_OPTIONS_BANNER_LENGTH];
 
 	display_options_get_banner(false, buf, sizeof(buf));
@@ -1035,7 +1035,7 @@ void stdio_print_current_devices(void)
 	}
 }
 
-#if CONFIG_IS_ENABLED(SYS_CONSOLE_IS_IN_ENV)
+#if IS_ENABLED(CONFIG_SYS_CONSOLE_IS_IN_ENV)
 /* Called after the relocation - use desired console functions */
 int console_init_r(void)
 {
@@ -1068,7 +1068,7 @@ int console_init_r(void)
 		inputdev  = console_search_dev(DEV_FLAGS_INPUT,  stdinname);
 		outputdev = console_search_dev(DEV_FLAGS_OUTPUT, stdoutname);
 		errdev    = console_search_dev(DEV_FLAGS_OUTPUT, stderrname);
-		if (CONFIG_IS_ENABLED(CONSOLE_MUX)) {
+		if (IS_ENABLED(CONFIG_CONSOLE_MUX)) {
 			iomux_err = iomux_doenv(stdin, stdinname);
 			iomux_err += iomux_doenv(stdout, stdoutname);
 			iomux_err += iomux_doenv(stderr, stderrname);
@@ -1124,7 +1124,7 @@ done:
 	return 0;
 }
 
-#else /* !CONFIG_IS_ENABLED(SYS_CONSOLE_IS_IN_ENV) */
+#else /* !IS_ENABLED(CONFIG_SYS_CONSOLE_IS_IN_ENV) */
 
 /* Called after the relocation - use desired console functions */
 int console_init_r(void)
@@ -1191,4 +1191,4 @@ int console_init_r(void)
 	return 0;
 }
 
-#endif /* CONFIG_IS_ENABLED(SYS_CONSOLE_IS_IN_ENV) */
+#endif /* IS_ENABLED(CONFIG_SYS_CONSOLE_IS_IN_ENV) */

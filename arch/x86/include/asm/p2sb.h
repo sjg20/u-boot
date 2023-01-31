@@ -8,7 +8,7 @@
 
 /* Platform data for the P2SB */
 struct p2sb_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_intel_p2sb dtplat;
 #endif
 	ulong mmio_base;

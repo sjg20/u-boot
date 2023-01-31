@@ -572,8 +572,8 @@ static inline int del_mtd_partitions(struct mtd_info *mtd)
 }
 #endif
 
-#if defined(CONFIG_MTD_PARTITIONS) && CONFIG_IS_ENABLED(DM) && \
-    CONFIG_IS_ENABLED(OF_CONTROL)
+#if defined(CONFIG_MTD_PARTITIONS) && IS_ENABLED(CONFIG_DM) && \
+    IS_ENABLED(CONFIG_OF_CONTROL)
 int add_mtd_partitions_of(struct mtd_info *master);
 #else
 static inline int add_mtd_partitions_of(struct mtd_info *master)

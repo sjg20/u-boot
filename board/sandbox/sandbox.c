@@ -73,7 +73,7 @@ struct efi_capsule_update_info update_info = {
 u8 num_image_type_guids = ARRAY_SIZE(fw_images);
 #endif /* EFI_HAVE_CAPSULE_SUPPORT */
 
-#if !CONFIG_IS_ENABLED(OF_PLATDATA)
+#if !IS_ENABLED(CONFIG_OF_PLATDATA)
 /*
  * Add a simple GPIO device (don't use with of-platdata as it interferes with
  * the auto-generated devices)

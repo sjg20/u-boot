@@ -37,7 +37,7 @@
 #define	MXSMMC_MAX_TIMEOUT	10000
 #define MXSMMC_SMALL_TRANSFER	512
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 struct mxsmmc_priv {
 	int			id;
 	int			(*mmc_is_wp)(int);
@@ -47,13 +47,13 @@ struct mxsmmc_priv {
 	uint32_t		buswidth;
 	struct mxs_ssp_regs	*regs;
 };
-#else /* CONFIG_IS_ENABLED(DM_MMC) */
+#else /* IS_ENABLED(CONFIG_DM_MMC) */
 #include <dm/device.h>
 #include <dm/read.h>
 #include <dt-structs.h>
 
 struct mxsmmc_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_fsl_imx23_mmc dtplat;
 #endif
 	struct mmc_config cfg;
@@ -74,7 +74,7 @@ struct mxsmmc_priv {
 };
 #endif
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 static int mxsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 			   struct mmc_data *data);
 
@@ -213,7 +213,7 @@ int mxsmmc_initialize(struct bd_info *bis, int id, int (*wp)(int),
 	}
 	return 0;
 }
-#endif /* CONFIG_IS_ENABLED(DM_MMC) */
+#endif /* IS_ENABLED(CONFIG_DM_MMC) */
 
 static int mxsmmc_send_cmd_pio(struct mxsmmc_priv *priv, struct mmc_data *data)
 {
@@ -280,7 +280,7 @@ static int mxsmmc_send_cmd_dma(struct mxsmmc_priv *priv, struct mmc_data *data)
 	priv->desc->cmd.data |= MXS_DMA_DESC_IRQ | MXS_DMA_DESC_DEC_SEM |
 				(data_count << MXS_DMA_DESC_BYTES_OFFSET);
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 	dmach = MXS_DMA_CHANNEL_AHB_APBH_SSP0 + priv->id;
 #else
 	dmach = priv->dma_channel;
@@ -296,7 +296,7 @@ static int mxsmmc_send_cmd_dma(struct mxsmmc_priv *priv, struct mmc_data *data)
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 /*
  * Sends a command out on the bus.  Takes the mmc pointer,
  * a command pointer, and an optional data pointer.
@@ -319,7 +319,7 @@ mxsmmc_send_cmd(struct udevice *dev, struct mmc_cmd *cmd, struct mmc_data *data)
 	int timeout;
 	uint32_t ctrl0;
 	int ret;
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 	int devnum = mmc->block_dev.devnum;
 #else
 	int devnum = mmc_get_blk_desc(mmc)->devnum;
@@ -342,7 +342,7 @@ mxsmmc_send_cmd(struct udevice *dev, struct mmc_cmd *cmd, struct mmc_data *data)
 		printf("MMC%d: Bus busy timeout!\n", devnum);
 		return -ETIMEDOUT;
 	}
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 	/* See if card is present */
 	if (!mxsmmc_cd(priv)) {
 		printf("MMC%d: No card detected!\n", devnum);
@@ -381,7 +381,7 @@ mxsmmc_send_cmd(struct udevice *dev, struct mmc_cmd *cmd, struct mmc_data *data)
 		/* READ or WRITE */
 		if (data->flags & MMC_DATA_READ) {
 			ctrl0 |= SSP_CTRL0_READ;
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 		} else if (priv->mmc_is_wp &&
 			priv->mmc_is_wp(devnum)) {
 			printf("MMC%d: Can not write a locked card!\n", devnum);
@@ -483,7 +483,7 @@ mxsmmc_send_cmd(struct udevice *dev, struct mmc_cmd *cmd, struct mmc_data *data)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DM_MMC)
+#if IS_ENABLED(CONFIG_DM_MMC)
 /* Base numbers of i.MX2[38] clk for ssp0 IP block */
 #define MXS_SSP_IMX23_CLKID_SSP0 33
 #define MXS_SSP_IMX28_CLKID_SSP0 46
@@ -575,7 +575,7 @@ static int mxsmmc_probe(struct udevice *dev)
 
 	debug("%s: probe\n", __func__);
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_fsl_imx23_mmc *dtplat = &plat->dtplat;
 	struct phandle_1_arg *p1a = &dtplat->clocks[0];
 
@@ -650,7 +650,7 @@ static int mxsmmc_probe(struct udevice *dev)
 	return 0;
 };
 
-#if CONFIG_IS_ENABLED(BLK)
+#if IS_ENABLED(CONFIG_BLK)
 static int mxsmmc_bind(struct udevice *dev)
 {
 	struct mxsmmc_plat *plat = dev_get_plat(dev);
@@ -665,7 +665,7 @@ static const struct dm_mmc_ops mxsmmc_ops = {
 	.set_ios	= mxsmmc_set_ios,
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static int mxsmmc_of_to_plat(struct udevice *bus)
 {
 	struct mxsmmc_plat *plat = dev_get_plat(bus);
@@ -709,12 +709,12 @@ static const struct udevice_id mxsmmc_ids[] = {
 U_BOOT_DRIVER(fsl_imx23_mmc) = {
 	.name = "fsl_imx23_mmc",
 	.id	= UCLASS_MMC,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.of_match = mxsmmc_ids,
 	.of_to_plat = mxsmmc_of_to_plat,
 #endif
 	.ops	= &mxsmmc_ops,
-#if CONFIG_IS_ENABLED(BLK)
+#if IS_ENABLED(CONFIG_BLK)
 	.bind	= mxsmmc_bind,
 #endif
 	.probe	= mxsmmc_probe,

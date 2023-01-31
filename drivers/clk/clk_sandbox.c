@@ -177,7 +177,7 @@ int clk_fixed_rate_of_to_plat(struct udevice *dev)
 {
 	struct clk_fixed_rate *cplat;
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct sandbox_clk_fixed_rate_plat *plat = dev_get_plat(dev);
 
 	cplat = &plat->fixed;

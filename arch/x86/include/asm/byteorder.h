@@ -19,7 +19,7 @@ static __inline__ __u32 ___arch__swab32(__u32 x)
 
 static __inline__ __u16 ___arch__swab16(__u16 x)
 {
-#if CONFIG_IS_ENABLED(X86_64)
+#if IS_ENABLED(CONFIG_X86_64)
 	return _constant_swab16(x);
 #else
 	__asm__("xchgb %b0,%h0"		/* swap bytes		*/ \

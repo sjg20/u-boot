@@ -68,7 +68,7 @@ static int sandbox_rtc_write8(struct udevice *dev, unsigned int reg, int val)
 	return dm_i2c_reg_write(dev, reg, val);
 }
 
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 static int sandbox_rtc_get_name(const struct udevice *dev, char *out_name)
 {
 	return acpi_copy_name(out_name, "RTCC");
@@ -81,7 +81,7 @@ struct acpi_ops sandbox_rtc_acpi_ops = {
 
 static int sandbox_rtc_bind(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(PLATDATA)
+#if IS_ENABLED(CONFIG_PLATDATA)
 	struct sandbox_i2c_rtc_plat_data *plat = dev_get_plat(dev);
 
 	/* Set up the emul_idx for i2c_emul_find() */

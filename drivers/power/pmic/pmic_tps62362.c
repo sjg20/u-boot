@@ -10,7 +10,7 @@
 #include <power/pmic.h>
 #include <power/tps62362.h>
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 struct udevice *tps62362_dev __section(".data") = NULL;
 #endif
 
@@ -26,7 +26,7 @@ int tps62362_voltage_update(unsigned char reg, unsigned char volt_sel)
 	if (reg > TPS62362_NUM_REGS)
 		return 1;
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 	return i2c_write(TPS62362_I2C_ADDR, reg, 1, &volt_sel, 1);
 #else
 	if (!tps62362_dev)
@@ -35,7 +35,7 @@ int tps62362_voltage_update(unsigned char reg, unsigned char volt_sel)
 #endif
 }
 
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 int power_tps62362_init(unsigned char bus)
 {
 	static const char name[] = "TPS62362";

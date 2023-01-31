@@ -17,7 +17,7 @@
 #define SPI_NOR_MAX_ADDR_WIDTH	4
 
 struct flash_info {
-#if !CONFIG_IS_ENABLED(SPI_FLASH_TINY)
+#if !IS_ENABLED(CONFIG_SPI_FLASH_TINY)
 	char		*name;
 #endif
 
@@ -80,7 +80,7 @@ extern const struct flash_info spi_nor_ids[];
 int spi_flash_cmd_get_sw_write_prot(struct spi_flash *flash);
 
 
-#if CONFIG_IS_ENABLED(SPI_FLASH_MTD)
+#if IS_ENABLED(CONFIG_SPI_FLASH_MTD)
 int spi_flash_mtd_register(struct spi_flash *flash);
 void spi_flash_mtd_unregister(struct spi_flash *flash);
 #else

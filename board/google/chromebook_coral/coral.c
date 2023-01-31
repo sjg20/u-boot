@@ -37,7 +37,7 @@ static int coral_check_ll_boot(void *ctx, struct event *event)
 {
 	if (!ll_boot_init()) {
 		printf("Running as secondary loader");
-		if (CONFIG_IS_ENABLED(COREBOOT_SYSINFO) &&
+		if (IS_ENABLED(CONFIG_COREBOOT_SYSINFO) &&
 		    gd->arch.coreboot_table) {
 			int ret;
 
@@ -303,7 +303,7 @@ struct sysinfo_ops coral_sysinfo_ops = {
 	.get_str	= coral_get_str,
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct udevice_id coral_ids[] = {
 	{ .compatible = "google,coral" },
 	{ }

@@ -1262,7 +1262,7 @@ int fit_image_verify_with_data(const void *fit, int image_noffset,
 			       size_t size);
 
 int fit_image_verify(const void *fit, int noffset);
-#if CONFIG_IS_ENABLED(FIT_SIGNATURE)
+#if IS_ENABLED(CONFIG_FIT_SIGNATURE)
 int fit_config_verify(const void *fit, int conf_noffset);
 #else
 static inline int fit_config_verify(const void *fit, int conf_noffset)
@@ -1398,7 +1398,7 @@ int calculate_hash(const void *data, int data_len, const char *algo,
 # endif
 #else
 # define IMAGE_ENABLE_SIGN	0
-# define FIT_IMAGE_ENABLE_VERIFY	CONFIG_IS_ENABLED(FIT_SIGNATURE)
+# define FIT_IMAGE_ENABLE_VERIFY	IS_ENABLED(CONFIG_FIT_SIGNATURE)
 #endif
 
 #ifdef USE_HOSTCC
@@ -1691,7 +1691,7 @@ static inline int fit_image_check_target_arch(const void *fdt, int node)
 # endif
 #else
 # define IMAGE_ENABLE_ENCRYPT	0
-# define IMAGE_ENABLE_DECRYPT	CONFIG_IS_ENABLED(FIT_CIPHER)
+# define IMAGE_ENABLE_DECRYPT	IS_ENABLED(CONFIG_FIT_CIPHER)
 #endif
 
 /* Information passed to the ciphering routines */

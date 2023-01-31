@@ -149,7 +149,7 @@ const struct musb_platform_ops omap2430_ops = {
 	.disable	= omap2430_musb_disable,
 };
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 
 struct omap2430_musb_plat {
 	void *base;
@@ -244,7 +244,7 @@ static int omap2430_musb_probe(struct udevice *dev)
 			return -EIO;
 
 		return musb_lowlevel_init(host);
-	} else if (CONFIG_IS_ENABLED(DM_USB_GADGET)) {
+	} else if (IS_ENABLED(CONFIG_DM_USB_GADGET)) {
 		struct musb_host_data *host = dev_get_priv(dev);
 
 		host->host = musb_init_controller(&plat->plat,
@@ -297,4 +297,4 @@ U_BOOT_DRIVER(omap2430_musb) = {
 	.priv_auto	= sizeof(struct musb_host_data),
 };
 
-#endif /* CONFIG_IS_ENABLED(DM_USB) */
+#endif /* IS_ENABLED(CONFIG_DM_USB) */

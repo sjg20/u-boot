@@ -127,7 +127,7 @@ struct atf_image_info {
 	struct param_header h;
 	uintptr_t image_base;   /* physical address of base of image */
 	uint32_t image_size;    /* bytes read from image file */
-#if CONFIG_IS_ENABLED(ATF_LOAD_IMAGE_V2)
+#if IS_ENABLED(CONFIG_ATF_LOAD_IMAGE_V2)
 	uint32_t image_max_size;
 #endif
 };

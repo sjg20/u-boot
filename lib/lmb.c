@@ -191,10 +191,10 @@ static void lmb_reserve_common(struct lmb *lmb, void *fdt_blob)
 	arch_lmb_reserve(lmb);
 	board_lmb_reserve(lmb);
 
-	if (CONFIG_IS_ENABLED(OF_LIBFDT) && fdt_blob)
+	if (IS_ENABLED(CONFIG_OF_LIBFDT) && fdt_blob)
 		boot_fdt_add_mem_rsv_regions(lmb, fdt_blob);
 
-	if (CONFIG_IS_ENABLED(EFI_LOADER))
+	if (IS_ENABLED(CONFIG_EFI_LOADER))
 		efi_lmb_reserve(lmb);
 }
 

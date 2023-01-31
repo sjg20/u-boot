@@ -215,7 +215,7 @@ static int initr_malloc(void)
 
 static int initr_of_live(void)
 {
-	if (CONFIG_IS_ENABLED(OF_LIVE)) {
+	if (IS_ENABLED(CONFIG_OF_LIVE)) {
 		int ret;
 
 		bootstage_start(BOOTSTAGE_ID_ACCUM_OF_LIVE, "of_live");
@@ -307,7 +307,7 @@ static int initr_binman(void)
 {
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(BINMAN_FDT))
+	if (!IS_ENABLED(CONFIG_BINMAN_FDT))
 		return 0;
 
 	ret = binman_init();
@@ -560,7 +560,7 @@ static int dm_announce(void)
 		dm_get_stats(&device_count, &uclass_count);
 		printf("Core:  %d devices, %d uclasses", device_count,
 		       uclass_count);
-		if (CONFIG_IS_ENABLED(OF_REAL))
+		if (IS_ENABLED(CONFIG_OF_REAL))
 			printf(", devicetree: %s", fdtdec_get_srcname());
 		printf("\n");
 		if (IS_ENABLED(CONFIG_OF_HAS_PRIOR_STAGE) &&
@@ -609,7 +609,7 @@ static init_fnc_t init_sequence_r[] = {
 	 */
 #endif
 	initr_reloc_global_data,
-#if IS_ENABLED(CONFIG_NEEDS_MANUAL_RELOC) && CONFIG_IS_ENABLED(EVENT)
+#if IS_ENABLED(CONFIG_NEEDS_MANUAL_RELOC) && IS_ENABLED(CONFIG_EVENT)
 	event_manual_reloc,
 #endif
 #if defined(CONFIG_SYS_INIT_RAM_LOCK) && defined(CONFIG_E500)
@@ -656,7 +656,7 @@ static init_fnc_t init_sequence_r[] = {
 	serial_initialize,
 	initr_announce,
 	dm_announce,
-#if CONFIG_IS_ENABLED(WDT)
+#if IS_ENABLED(CONFIG_WDT)
 	initr_watchdog,
 #endif
 	INIT_FUNC_WATCHDOG_RESET
@@ -802,7 +802,7 @@ void board_init_r(gd_t *new_gd, ulong dest_addr)
 	 * TODO(sjg@chromium.org): Consider doing this for all archs, or
 	 * dropping the new_gd parameter.
 	 */
-	if (CONFIG_IS_ENABLED(X86_64) && !IS_ENABLED(CONFIG_EFI_APP))
+	if (IS_ENABLED(CONFIG_X86_64) && !IS_ENABLED(CONFIG_EFI_APP))
 		arch_setup_gd(new_gd);
 
 #if !defined(CONFIG_X86) && !defined(CONFIG_ARM) && !defined(CONFIG_ARM64)

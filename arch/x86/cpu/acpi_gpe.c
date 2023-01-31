@@ -72,7 +72,7 @@ static int acpi_gpe_of_xlate(struct irq *irq, struct ofnode_phandle_args *args)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 static int acpi_gpe_get_acpi(const struct irq *irq, struct acpi_irq *acpi_irq)
 {
 	memset(acpi_irq, '\0', sizeof(*acpi_irq));
@@ -94,7 +94,7 @@ static int acpi_gpe_get_acpi(const struct irq *irq, struct acpi_irq *acpi_irq)
 static const struct irq_ops acpi_gpe_ops = {
 	.read_and_clear		= acpi_gpe_read_and_clear,
 	.of_xlate		= acpi_gpe_of_xlate,
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 	.get_acpi		= acpi_gpe_get_acpi,
 #endif
 };

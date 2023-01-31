@@ -224,12 +224,12 @@ ulong genimg_get_kernel_addr_fit(char * const img_addr,
 		kernel_addr = image_load_addr;
 		debug("*  kernel: default image load address = 0x%08lx\n",
 		      image_load_addr);
-	} else if (CONFIG_IS_ENABLED(FIT) &&
+	} else if (IS_ENABLED(CONFIG_FIT) &&
 		   fit_parse_conf(img_addr, image_load_addr, &kernel_addr,
 				  fit_uname_config)) {
 		debug("*  kernel: config '%s' from image at 0x%08lx\n",
 		      *fit_uname_config, kernel_addr);
-	} else if (CONFIG_IS_ENABLED(FIT) &&
+	} else if (IS_ENABLED(CONFIG_FIT) &&
 		   fit_parse_subimage(img_addr, image_load_addr, &kernel_addr,
 				      fit_uname_kernel)) {
 		debug("*  kernel: subimage '%s' from image at 0x%08lx\n",
@@ -272,14 +272,14 @@ ulong genimg_get_kernel_addr(char * const img_addr)
  */
 int genimg_get_format(const void *img_addr)
 {
-	if (CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)) {
+	if (IS_ENABLED(CONFIG_LEGACY_IMAGE_FORMAT)) {
 		const struct legacy_img_hdr *hdr;
 
 		hdr = (const struct legacy_img_hdr *)img_addr;
 		if (image_check_magic(hdr))
 			return IMAGE_FORMAT_LEGACY;
 	}
-	if (CONFIG_IS_ENABLED(FIT) || CONFIG_IS_ENABLED(OF_LIBFDT)) {
+	if (IS_ENABLED(CONFIG_FIT) || IS_ENABLED(CONFIG_OF_LIBFDT)) {
 		if (!fdt_check_header(img_addr))
 			return IMAGE_FORMAT_FIT;
 	}
@@ -303,7 +303,7 @@ int genimg_get_format(const void *img_addr)
  */
 int genimg_has_config(struct bootm_headers *images)
 {
-	if (CONFIG_IS_ENABLED(FIT) && images->fit_uname_cfg)
+	if (IS_ENABLED(CONFIG_FIT) && images->fit_uname_cfg)
 		return 1;
 
 	return 0;
@@ -331,7 +331,7 @@ static int select_ramdisk(struct bootm_headers *images, const char *select, u8 a
 	ulong rd_addr;
 	char *buf;
 
-	if (CONFIG_IS_ENABLED(FIT)) {
+	if (IS_ENABLED(CONFIG_FIT)) {
 		fit_uname_config = images->fit_uname_cfg;
 		fit_uname_ramdisk = NULL;
 
@@ -366,7 +366,7 @@ static int select_ramdisk(struct bootm_headers *images, const char *select, u8 a
 		rd_addr = hextoul(select, NULL);
 		debug("*  ramdisk: cmdline image address = 0x%08lx\n", rd_addr);
 	}
-	if (CONFIG_IS_ENABLED(FIT) && !select) {
+	if (IS_ENABLED(CONFIG_FIT) && !select) {
 		/* use FIT configuration provided in first bootm
 		 * command argument. If the property is not defined,
 		 * quit silently (with -ENOPKG)
@@ -388,7 +388,7 @@ static int select_ramdisk(struct bootm_headers *images, const char *select, u8 a
 	buf = map_sysmem(rd_addr, 0);
 	switch (genimg_get_format(buf)) {
 	case IMAGE_FORMAT_LEGACY:
-		if (CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)) {
+		if (IS_ENABLED(CONFIG_LEGACY_IMAGE_FORMAT)) {
 			const struct legacy_img_hdr *rd_hdr;
 
 			printf("## Loading init Ramdisk from Legacy Image at %08lx ...\n",
@@ -407,7 +407,7 @@ static int select_ramdisk(struct bootm_headers *images, const char *select, u8 a
 		}
 		break;
 	case IMAGE_FORMAT_FIT:
-		if (CONFIG_IS_ENABLED(FIT)) {
+		if (IS_ENABLED(CONFIG_FIT)) {
 			rd_noffset = fit_image_load(images, rd_addr,
 						    &fit_uname_ramdisk,
 						    &fit_uname_config,
@@ -649,7 +649,7 @@ error:
 int boot_get_setup(struct bootm_headers *images, u8 arch,
 		   ulong *setup_start, ulong *setup_len)
 {
-	if (!CONFIG_IS_ENABLED(FIT))
+	if (!IS_ENABLED(CONFIG_FIT))
 		return -ENOENT;
 
 	return boot_get_setup_fit(images, arch, setup_start, setup_len);
@@ -929,7 +929,7 @@ int image_setup_linux(struct bootm_headers *images)
 	/* This function cannot be called without lmb support */
 	if (!IS_ENABLED(CONFIG_LMB))
 		return -EFAULT;
-	if (CONFIG_IS_ENABLED(OF_LIBFDT))
+	if (IS_ENABLED(CONFIG_OF_LIBFDT))
 		boot_fdt_add_mem_rsv_regions(lmb, *of_flat_tree);
 
 	if (IS_ENABLED(CONFIG_SYS_BOOT_GET_CMDLINE)) {
@@ -941,13 +941,13 @@ int image_setup_linux(struct bootm_headers *images)
 		}
 	}
 
-	if (CONFIG_IS_ENABLED(OF_LIBFDT)) {
+	if (IS_ENABLED(CONFIG_OF_LIBFDT)) {
 		ret = boot_relocate_fdt(lmb, of_flat_tree, &of_size);
 		if (ret)
 			return ret;
 	}
 
-	if (CONFIG_IS_ENABLED(OF_LIBFDT) && of_size) {
+	if (IS_ENABLED(CONFIG_OF_LIBFDT) && of_size) {
 		ret = image_setup_libfdt(images, *of_flat_tree, of_size, lmb);
 		if (ret)
 			return ret;

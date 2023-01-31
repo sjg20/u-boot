@@ -47,7 +47,7 @@ int spl_usb_load(struct spl_image_info *spl_image,
 
 	debug("boot mode - FAT\n");
 
-#if CONFIG_IS_ENABLED(OS_BOOT)
+#if IS_ENABLED(CONFIG_OS_BOOT)
 	if (spl_start_uboot() ||
 	    spl_load_image_fat_os(spl_image, bootdev, stor_dev, partition))
 #endif

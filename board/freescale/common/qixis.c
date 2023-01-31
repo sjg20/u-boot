@@ -32,7 +32,7 @@
 #ifdef CFG_SYS_I2C_FPGA_ADDR
 u8 qixis_read_i2c(unsigned int reg)
 {
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 	return i2c_reg_read(CFG_SYS_I2C_FPGA_ADDR, reg);
 #else
 	struct udevice *dev;
@@ -47,7 +47,7 @@ u8 qixis_read_i2c(unsigned int reg)
 void qixis_write_i2c(unsigned int reg, u8 value)
 {
 	u8 val = value;
-#if !CONFIG_IS_ENABLED(DM_I2C)
+#if !IS_ENABLED(CONFIG_DM_I2C)
 	i2c_reg_write(CFG_SYS_I2C_FPGA_ADDR, reg, val);
 #else
 	struct udevice *dev;

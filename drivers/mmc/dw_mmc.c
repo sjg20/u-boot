@@ -505,7 +505,7 @@ static int dwmci_set_ios(struct mmc *mmc)
 			return ret;
 	}
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	if (mmc->vqmmc_supply) {
 		int ret;
 

@@ -98,7 +98,7 @@
 #define invalidate_dcache_iso_td(addr) invalidate_dcache_buffer(addr, 32)
 #define invalidate_dcache_hcca(addr) invalidate_dcache_buffer(addr, 256)
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 /*
  * The various ohci_mdelay(1) calls in the code seem unnecessary. We keep
  * them around when building for older boards not yet converted to the dm
@@ -109,7 +109,7 @@
 #define ohci_mdelay(x) mdelay(x)
 #endif
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !IS_ENABLED(CONFIG_DM_USB)
 /* global ohci_t */
 static ohci_t gohci;
 /* this must be aligned to a 256 byte boundary */
@@ -1667,7 +1667,7 @@ static int _ohci_destroy_int_queue(ohci_t *ohci, struct usb_device *dev,
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !IS_ENABLED(CONFIG_DM_USB)
 /* submit routines called from usb.c */
 int submit_bulk_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
 		int transfer_len)
@@ -1956,7 +1956,7 @@ static int hc_interrupt(ohci_t *ohci)
 
 /*-------------------------------------------------------------------------*/
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !IS_ENABLED(CONFIG_DM_USB)
 
 /*-------------------------------------------------------------------------*/
 
@@ -2044,7 +2044,7 @@ int submit_control_msg(struct usb_device *dev, unsigned long pipe,
 }
 #endif
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 static int ohci_submit_control_msg(struct udevice *dev, struct usb_device *udev,
 				   unsigned long pipe, void *buffer, int length,
 				   struct devrequest *setup)

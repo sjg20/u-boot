@@ -197,7 +197,7 @@ struct mtk_function_desc {
  */
 struct mtk_io_type_desc {
 	const char *name;
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 	/* Specific pinconfig operations */
 	int (*bias_set)(struct udevice *dev, u32 pin, bool disable,
 			bool pullup, u32 val);
@@ -244,7 +244,7 @@ void mtk_i_rmw(struct udevice *dev, u8 i, u32 reg, u32 mask, u32 set);
 int mtk_pinctrl_common_probe(struct udevice *dev,
 			     struct mtk_pinctrl_soc *soc);
 
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 
 int mtk_pinconf_bias_set_pu_pd(struct udevice *dev, u32 pin, bool disable,
 			       bool pullup, u32 val);

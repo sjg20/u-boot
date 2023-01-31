@@ -28,7 +28,7 @@ struct dw_apb_timer_priv {
 };
 
 struct dw_apb_timer_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_snps_dw_apb_timer dtplat;
 #endif
 };
@@ -51,7 +51,7 @@ static int dw_apb_timer_probe(struct udevice *dev)
 	struct dw_apb_timer_priv *priv = dev_get_priv(dev);
 	struct clk clk;
 	int ret;
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dw_apb_timer_plat *plat = dev_get_plat(dev);
 	struct dtd_snps_dw_apb_timer *dtplat = &plat->dtplat;
 
@@ -63,7 +63,7 @@ static int dw_apb_timer_probe(struct udevice *dev)
 
 	uc_priv->clock_rate = dtplat->clock_frequency;
 #endif
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		ret = reset_get_bulk(dev, &priv->resets);
 		if (ret)
 			dev_warn(dev, "Can't get reset: %d\n", ret);
@@ -89,7 +89,7 @@ static int dw_apb_timer_probe(struct udevice *dev)
 
 static int dw_apb_timer_of_to_plat(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		struct dw_apb_timer_priv *priv = dev_get_priv(dev);
 
 		priv->regs = dev_read_addr(dev);

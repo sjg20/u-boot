@@ -41,7 +41,7 @@ struct rockchip_spi_params {
 };
 
 struct rockchip_spi_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_rk3288_spi of_plat;
 #endif
 	s32 frequency;		/* Default clock frequency, -1 for none */
@@ -173,7 +173,7 @@ static void spi_cs_deactivate(struct udevice *dev, uint cs)
 		priv->last_transaction_us = timer_get_us();
 }
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 static int conv_of_plat(struct udevice *dev)
 {
 	struct rockchip_spi_plat *plat = dev_get_plat(dev);
@@ -197,7 +197,7 @@ static int rockchip_spi_of_to_plat(struct udevice *bus)
 	struct rockchip_spi_priv *priv = dev_get_priv(bus);
 	int ret;
 
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		plat->base = dev_read_addr(bus);
 
 		ret = clk_get_by_index(bus, 0, &priv->clk);
@@ -257,7 +257,7 @@ static int rockchip_spi_probe(struct udevice *bus)
 	int ret;
 
 	debug("%s: probe\n", __func__);
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	ret = conv_of_plat(bus);
 	if (ret)
 		return ret;

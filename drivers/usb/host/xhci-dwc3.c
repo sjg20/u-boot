@@ -115,7 +115,7 @@ void dwc3_set_fladj(struct dwc3 *dwc3_reg, u32 val)
 			GFLADJ_30MHZ(val));
 }
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 static int xhci_dwc3_reset_init(struct udevice *dev,
 				struct xhci_dwc3_plat *plat)
 {

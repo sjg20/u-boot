@@ -64,7 +64,7 @@ void *memalign_simple(size_t align, size_t bytes)
 	return ptr;
 }
 
-#if CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
+#if IS_ENABLED(CONFIG_SYS_MALLOC_SIMPLE)
 void *calloc(size_t nmemb, size_t elem_size)
 {
 	size_t size = nmemb * elem_size;

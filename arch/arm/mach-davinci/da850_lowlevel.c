@@ -289,7 +289,7 @@ int arch_cpu_init(void)
 	/* GPIO setup */
 	board_gpio_init();
 
-#if !CONFIG_IS_ENABLED(DM_SERIAL)
+#if !IS_ENABLED(CONFIG_DM_SERIAL)
 	ns16550_init((struct ns16550 *)(CFG_SYS_NS16550_COM1),
 		     CFG_SYS_NS16550_CLK / 16 / CONFIG_BAUDRATE);
 #endif

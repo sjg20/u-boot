@@ -104,7 +104,7 @@ U_BOOT_DRIVER(rockchip_rk3066a_pinctrl) = {
 	.id		= UCLASS_PINCTRL,
 	.ops		= &rockchip_pinctrl_ops,
 	.probe		= rockchip_pinctrl_probe,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.bind		= dm_scan_fdt_dev,
 #endif
 	.of_match	= rk3066_pinctrl_ids,

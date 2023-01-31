@@ -36,7 +36,7 @@ struct dram_info {
 };
 
 struct rk3368_sdram_params {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_rk3368_dmc of_plat;
 #endif
 	struct rk3288_sdram_pctl_timing pctl_timing;
@@ -883,7 +883,7 @@ static int rk3368_dmc_of_to_plat(struct udevice *dev)
 {
 	int ret = 0;
 
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		struct rk3368_sdram_params *plat = dev_get_plat(dev);
 
 		ret = regmap_init_mem(dev_ofnode(dev), &plat->map);
@@ -894,7 +894,7 @@ static int rk3368_dmc_of_to_plat(struct udevice *dev)
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 static int conv_of_plat(struct udevice *dev)
 {
 	struct rk3368_sdram_params *plat = dev_get_plat(dev);
@@ -922,7 +922,7 @@ static int rk3368_dmc_probe(struct udevice *dev)
 #endif
 	struct dram_info *priv = dev_get_priv(dev);
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	ret = conv_of_plat(dev);
 	if (ret)
 		return ret;

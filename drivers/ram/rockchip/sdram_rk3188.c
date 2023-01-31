@@ -45,7 +45,7 @@ struct dram_info {
 };
 
 struct rk3188_sdram_params {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_rk3188_dmc of_plat;
 #endif
 	struct rk3288_sdram_channel ch[2];
@@ -819,7 +819,7 @@ static int rk3188_dmc_of_to_plat(struct udevice *dev)
 	struct rk3188_sdram_params *params = dev_get_plat(dev);
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(OF_REAL))
+	if (!IS_ENABLED(CONFIG_OF_REAL))
 		return 0;
 
 	/* rk3188 supports only one-channel */
@@ -853,7 +853,7 @@ static int rk3188_dmc_of_to_plat(struct udevice *dev)
 }
 #endif /* CONFIG_SPL_BUILD */
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 static int conv_of_plat(struct udevice *dev)
 {
 	struct rk3188_sdram_params *plat = dev_get_plat(dev);
@@ -889,7 +889,7 @@ static int rk3188_dmc_probe(struct udevice *dev)
 	priv->pmu = syscon_get_first_range(ROCKCHIP_SYSCON_PMU);
 
 #ifdef CONFIG_SPL_BUILD
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	ret = conv_of_plat(dev);
 	if (ret)
 		return ret;

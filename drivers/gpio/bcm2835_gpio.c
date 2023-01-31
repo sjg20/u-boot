@@ -115,7 +115,7 @@ static int bcm2835_gpio_probe(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 static int bcm2835_gpio_of_to_plat(struct udevice *dev)
 {
 	struct bcm2835_gpio_plat *plat = dev_get_plat(dev);

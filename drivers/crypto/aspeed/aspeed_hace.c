@@ -288,7 +288,7 @@ static int aspeed_hace_digest_wd(struct udevice *dev, enum HASH_ALGO algo,
 	if (rc)
 		return rc;
 
-	if (IS_ENABLED(CONFIG_HW_WATCHDOG) || CONFIG_IS_ENABLED(WATCHDOG)) {
+	if (IS_ENABLED(CONFIG_HW_WATCHDOG) || IS_ENABLED(CONFIG_WATCHDOG)) {
 		cur = ibuf;
 		end = ibuf + ilen;
 

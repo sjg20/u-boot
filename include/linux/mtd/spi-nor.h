@@ -636,7 +636,7 @@ void spi_nor_setup_op(const struct spi_nor *nor,
  */
 int spi_nor_scan(struct spi_nor *nor);
 
-#if CONFIG_IS_ENABLED(SPI_FLASH_TINY)
+#if IS_ENABLED(CONFIG_SPI_FLASH_TINY)
 static inline int spi_nor_remove(struct spi_nor *nor)
 {
 	return 0;

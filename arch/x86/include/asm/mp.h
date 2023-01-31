@@ -111,7 +111,7 @@ int x86_mp_init(void);
  */
 typedef void (*mp_run_func)(void *arg);
 
-#if CONFIG_IS_ENABLED(SMP) && !CONFIG_IS_ENABLED(X86_64)
+#if IS_ENABLED(CONFIG_SMP) && !IS_ENABLED(CONFIG_X86_64)
 /**
  * mp_run_on_cpus() - Run a function on one or all CPUs
  *

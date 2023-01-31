@@ -43,7 +43,7 @@ void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 	void *fdt_blob;
 	__maybe_unused int ret;
 
-#if CONFIG_IS_ENABLED(LOAD_FIT) || CONFIG_IS_ENABLED(LOAD_FIT_FULL)
+#if IS_ENABLED(CONFIG_LOAD_FIT) || IS_ENABLED(CONFIG_LOAD_FIT_FULL)
 	fdt_blob = spl_image->fdt_addr;
 #else
 	fdt_blob = (void *)gd->fdt_blob;

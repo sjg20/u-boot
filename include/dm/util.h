@@ -8,7 +8,7 @@
 
 struct dm_stats;
 
-#if CONFIG_IS_ENABLED(DM_WARN)
+#if IS_ENABLED(CONFIG_DM_WARN)
 #define dm_warn(fmt...) log(LOGC_DM, LOGL_WARNING, ##fmt)
 #else
 static inline void dm_warn(const char *fmt, ...)
@@ -61,7 +61,7 @@ void dm_dump_static_driver_info(void);
  */
 void dm_dump_mem(struct dm_stats *stats);
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA_INST) && CONFIG_IS_ENABLED(READ_ONLY)
+#if IS_ENABLED(CONFIG_OF_PLATDATA_INST) && IS_ENABLED(CONFIG_READ_ONLY)
 void *dm_priv_to_rw(void *priv);
 #else
 static inline void *dm_priv_to_rw(void *priv)

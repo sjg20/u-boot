@@ -177,7 +177,7 @@ UCLASS_DRIVER(tpm) = {
 	.id			= UCLASS_TPM,
 	.name			= "tpm",
 	.flags			= DM_UC_FLAG_SEQ_ALIAS,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.post_bind		= dm_scan_fdt_dev,
 #endif
 	.post_probe		= tpm_uclass_post_probe,

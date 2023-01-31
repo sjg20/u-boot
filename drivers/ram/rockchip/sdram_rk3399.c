@@ -97,7 +97,7 @@ struct sdram_rk3399_ops {
 	(!defined(CONFIG_TPL) && defined(CONFIG_SPL_BUILD))
 
 struct rockchip_dmc_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_rockchip_rk3399_dmc dtplat;
 #else
 	struct rk3399_sdram_params sdram_params;
@@ -3023,7 +3023,7 @@ static int rk3399_dmc_of_to_plat(struct udevice *dev)
 	struct rockchip_dmc_plat *plat = dev_get_plat(dev);
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(OF_REAL))
+	if (!IS_ENABLED(CONFIG_OF_REAL))
 		return 0;
 
 	ret = dev_read_u32_array(dev, "rockchip,sdram-params",
@@ -3041,7 +3041,7 @@ static int rk3399_dmc_of_to_plat(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 static int conv_of_plat(struct udevice *dev)
 {
 	struct rockchip_dmc_plat *plat = dev_get_plat(dev);
@@ -3076,7 +3076,7 @@ static int rk3399_dmc_init(struct udevice *dev)
 	struct dram_info *priv = dev_get_priv(dev);
 	struct rockchip_dmc_plat *plat = dev_get_plat(dev);
 	int ret;
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	struct rk3399_sdram_params *params = &plat->sdram_params;
 #else
 	struct dtd_rockchip_rk3399_dmc *dtplat = &plat->dtplat;
@@ -3113,7 +3113,7 @@ static int rk3399_dmc_init(struct udevice *dev)
 	debug("cru %p, cic %p, grf %p, sgrf %p, pmucru %p, pmu %p\n", priv->cru,
 	      priv->cic, priv->pmugrf, priv->pmusgrf, priv->pmucru, priv->pmu);
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	ret = clk_get_by_phandle(dev, dtplat->clocks, &priv->ddr_clk);
 #else
 	ret = clk_get_by_index(dev, 0, &priv->ddr_clk);

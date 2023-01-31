@@ -798,7 +798,7 @@ static int r8a66597_usb_probe(struct udevice *dev)
 
 	bus_priv->desc_before_addr = true;
 
-	if (CONFIG_IS_ENABLED(DM_REGULATOR)) {
+	if (IS_ENABLED(CONFIG_DM_REGULATOR)) {
 		ret = device_get_supply_regulator(dev, "vbus-supply",
 						  &priv->vbus_supply);
 		if (ret) {
@@ -836,7 +836,7 @@ static int r8a66597_usb_remove(struct udevice *dev)
 
 	disable_controller(priv);
 
-	if (CONFIG_IS_ENABLED(DM_REGULATOR)) {
+	if (IS_ENABLED(CONFIG_DM_REGULATOR)) {
 		ret = regulator_set_enable(priv->vbus_supply, false);
 		if (ret) {
 			dev_err(dev,

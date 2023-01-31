@@ -177,7 +177,7 @@ parse_num (char *s, unsigned long *val, char **es, char *delim)
 }
 
 
-#if defined(DEBUG) && !CONFIG_IS_ENABLED(USE_TINY_PRINTF)
+#if defined(DEBUG) && !IS_ENABLED(CONFIG_USE_TINY_PRINTF)
 /*
  * Note: this debug setup works by storing the strings in a fixed buffer
  */
@@ -417,7 +417,7 @@ ulong
 xyzModem_get_initial_timeout (void)
 {
   /* timeout is in seconds, non-positive timeout value is infinity */
-#if CONFIG_IS_ENABLED(ENV_SUPPORT)
+#if IS_ENABLED(CONFIG_ENV_SUPPORT)
   const char *timeout_str = env_get("loadxy_timeout");
   if (timeout_str)
     return 1000 * simple_strtol(timeout_str, NULL, 10);

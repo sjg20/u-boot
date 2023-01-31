@@ -39,7 +39,7 @@ static char *const dp_dev_str[] = {
 	[DP_DEVICE_DP1] = "DP1",
 };
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 static void nx_display_parse_dp_sync(ofnode node, struct dp_sync_info *sync)
 {
 	sync->h_active_len = ofnode_read_s32_default(node, "h_active_len", 0);
@@ -416,7 +416,7 @@ static struct nx_display_dev *nx_display_setup(void)
 	}
 	node = dev_ofnode(dev).of_offset;
 
-	if (CONFIG_IS_ENABLED(OF_CONTROL)) {
+	if (IS_ENABLED(CONFIG_OF_CONTROL)) {
 		ret = nx_display_parse_dt(dev, dp, plat);
 		if (ret)
 			goto err_setup;

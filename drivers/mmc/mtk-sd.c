@@ -386,7 +386,7 @@ struct msdc_host {
 	bool cd_active_high;
 
 	/* card detection / write protection GPIOs */
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	struct gpio_desc gpio_wp;
 	struct gpio_desc gpio_cd;
 #endif
@@ -986,7 +986,7 @@ static int msdc_ops_get_cd(struct udevice *dev)
 		return !val ^ host->cd_active_high;
 	}
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	if (!host->gpio_cd.dev)
 		return 1;
 
@@ -998,7 +998,7 @@ static int msdc_ops_get_cd(struct udevice *dev)
 
 static int msdc_ops_get_wp(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	struct msdc_host *host = dev_get_priv(dev);
 
 	if (!host->gpio_wp.dev)
@@ -1716,7 +1716,7 @@ static int msdc_of_to_plat(struct udevice *dev)
 
 	clk_get_by_name(dev, "source_cg", &host->src_clk_cg); /* optional */
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	gpio_request_by_name(dev, "wp-gpios", 0, &host->gpio_wp, GPIOD_IS_IN);
 	gpio_request_by_name(dev, "cd-gpios", 0, &host->gpio_cd, GPIOD_IS_IN);
 #endif

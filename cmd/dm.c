@@ -35,7 +35,7 @@ static int do_dm_dump_drivers(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DM_STATS)
+#if IS_ENABLED(CONFIG_DM_STATS)
 static int do_dm_dump_mem(struct cmd_tbl *cmdtp, int flag, int argc,
 			  char *const argv[])
 {
@@ -76,7 +76,7 @@ static int do_dm_dump_uclass(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DM_STATS)
+#if IS_ENABLED(CONFIG_DM_STATS)
 #define DM_MEM_HELP	"dm mem           Provide a summary of memory usage\n"
 #define DM_MEM		U_BOOT_SUBCMD_MKENT(mem, 1, 1, do_dm_dump_mem),
 #else

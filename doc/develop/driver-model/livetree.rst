@@ -74,7 +74,7 @@ tree will be used in SPL and before relocation in U-Boot proper. Just
 before relocation a livetree is built, and this is used for U-Boot proper
 after relocation.
 
-Most checks for livetree use CONFIG_IS_ENABLED(OF_LIVE). This means that
+Most checks for livetree use IS_ENABLED(CONFIG_OF_LIVE). This means that
 for SPL, the CONFIG_SPL_OF_LIVE option is checked. At present this does
 not exist, since SPL does not support livetree.
 

@@ -60,7 +60,7 @@ void spl_board_init(void)
 		printf("Failed to find clock node. Check device tree\n");
 }
 
-#if CONFIG_IS_ENABLED(DM_PMIC_PCA9450)
+#if IS_ENABLED(CONFIG_DM_PMIC_PCA9450)
 int power_init_board(void)
 {
 	struct udevice *dev;

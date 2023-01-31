@@ -69,7 +69,7 @@ int board_fit_config_name_match(const char *name)
 #endif
 
 #if defined(CONFIG_SPL_BUILD)
-#if CONFIG_IS_ENABLED(USB_STORAGE)
+#if IS_ENABLED(CONFIG_USB_STORAGE)
 static int fixup_usb_boot(const void *fdt_blob)
 {
 	int ret = 0;
@@ -142,7 +142,7 @@ void spl_perform_fixups(struct spl_image_info *spl_image)
 	fixup_memory_node(spl_image);
 #endif
 
-#if CONFIG_IS_ENABLED(USB_STORAGE)
+#if IS_ENABLED(CONFIG_USB_STORAGE)
 	fixup_usb_boot(spl_image->fdt_addr);
 #endif
 }

@@ -14,7 +14,7 @@
 #include <i2c.h>
 #include <log.h>
 #include <asm/io.h>
-#if !CONFIG_IS_ENABLED(TARGET_GIEDI) && !CONFIG_IS_ENABLED(TARGET_DENEB)
+#if !IS_ENABLED(CONFIG_TARGET_GIEDI) && !IS_ENABLED(CONFIG_TARGET_DENEB)
 #include <asm/arch/cpu.h>
 #endif
 #include <asm/arch/sys_proto.h>
@@ -148,7 +148,7 @@ int factoryset_read_eeprom(int i2c_addr)
 	int i, pages = 0, size = 0;
 	unsigned char eeprom_buf[0x3c00], hdr[4], buf[MAX_STRING_LENGTH];
 	unsigned char *cp, *cp1;
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	struct udevice *bus, *dev;
 	int ret;
 #endif
@@ -158,7 +158,7 @@ int factoryset_read_eeprom(int i2c_addr)
 	factory_dat.usb_product_id = CONFIG_USB_GADGET_PRODUCT_NUM;
 #endif
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	ret = uclass_get_device_by_seq(UCLASS_I2C, EEPROM_I2C_BUS, &bus);
 	if (ret)
 		goto err;
@@ -202,7 +202,7 @@ int factoryset_read_eeprom(int i2c_addr)
 	 */
 	debug("Read eeprom page :\n");
 	for (i = 0; i < pages; i++) {
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 		ret = dm_i2c_read(dev, (OFF_PG + i) * EEPR_PG_SZ,
 				  eeprom_buf + (i * EEPR_PG_SZ), EEPR_PG_SZ);
 		if (ret)
@@ -215,7 +215,7 @@ int factoryset_read_eeprom(int i2c_addr)
 	}
 
 	if (size % EEPR_PG_SZ) {
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 		ret = dm_i2c_read(dev, (OFF_PG + pages) * EEPR_PG_SZ,
 				  eeprom_buf + (pages * EEPR_PG_SZ),
 				  size % EEPR_PG_SZ);
@@ -247,7 +247,7 @@ int factoryset_read_eeprom(int i2c_addr)
 		cp1 += 3;
 	}
 
-#if CONFIG_IS_ENABLED(TARGET_GIEDI) || CONFIG_IS_ENABLED(TARGET_DENEB)
+#if IS_ENABLED(CONFIG_TARGET_GIEDI) || IS_ENABLED(CONFIG_TARGET_DENEB)
 	/* get mac address for WLAN */
 	ret = get_factory_record_val(cp, size, (uchar *)"WLAN1", (uchar *)"mac",
 				     buf, MAX_STRING_LENGTH);
@@ -355,7 +355,7 @@ static int factoryset_mac_env_set(void)
 
 	eth_env_set_enetaddr("ethaddr", mac_addr);
 
-#if CONFIG_IS_ENABLED(TARGET_GIEDI) || CONFIG_IS_ENABLED(TARGET_DENEB)
+#if IS_ENABLED(CONFIG_TARGET_GIEDI) || IS_ENABLED(CONFIG_TARGET_DENEB)
 	eth_env_set_enetaddr("eth1addr", mac_addr);
 
 	/* wlan mac */

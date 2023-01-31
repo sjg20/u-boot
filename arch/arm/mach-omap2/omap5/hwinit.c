@@ -27,7 +27,7 @@
 
 u32 *const omap_si_rev = (u32 *)OMAP_SRAM_SCRATCH_OMAP_REV;
 
-#if !CONFIG_IS_ENABLED(DM_GPIO)
+#if !IS_ENABLED(CONFIG_DM_GPIO)
 static struct gpio_bank gpio_bank_54xx[8] = {
 	{ (void *)OMAP54XX_GPIO1_BASE },
 	{ (void *)OMAP54XX_GPIO2_BASE },

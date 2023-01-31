@@ -970,7 +970,7 @@ extern void usb_ep_autoconfig_reset(struct usb_gadget *);
 
 extern int usb_gadget_handle_interrupts(int index);
 
-#if CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if IS_ENABLED(CONFIG_DM_USB_GADGET)
 int usb_gadget_initialize(int index);
 int usb_gadget_release(int index);
 int dm_usb_gadget_handle_interrupts(struct udevice *dev);

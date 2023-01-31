@@ -40,7 +40,7 @@ void lpc32xx_uart_init(unsigned int uart_id)
 	       &clk->u3clk + (uart_id - 3));
 }
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 static const struct ns16550_plat lpc32xx_uart[] = {
 	{ .base = UART3_BASE, .reg_shift = 2,
 	  .clock = CFG_SYS_NS16550_CLK, .fcr = UART_FCR_DEFVAL, },

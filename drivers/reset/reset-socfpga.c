@@ -47,7 +47,7 @@ struct socfpga_reset_data {
  */
 static bool socfpga_reset_keep_enabled(void)
 {
-#if !defined(CONFIG_SPL_BUILD) || CONFIG_IS_ENABLED(ENV_SUPPORT)
+#if !defined(CONFIG_SPL_BUILD) || IS_ENABLED(CONFIG_ENV_SUPPORT)
 	const char *env_str;
 	long val;
 

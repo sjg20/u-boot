@@ -130,7 +130,7 @@ int exynos_init(void)
 
 int exynos_power_init(void)
 {
-#if !CONFIG_IS_ENABLED(DM_I2C) /* TODO(maintainer): Convert to driver model */
+#if !IS_ENABLED(CONFIG_DM_I2C) /* TODO(maintainer): Convert to driver model */
 	int chrg;
 	struct power_battery *pb;
 	struct pmic *p_chrg, *p_muic, *p_fg, *p_bat;
@@ -193,7 +193,7 @@ int exynos_power_init(void)
 #ifdef CONFIG_USB_GADGET
 static int s5pc210_phy_control(int on)
 {
-#if !CONFIG_IS_ENABLED(DM_I2C) /* TODO(maintainer): Convert to driver model */
+#if !IS_ENABLED(CONFIG_DM_I2C) /* TODO(maintainer): Convert to driver model */
 	int ret = 0;
 	unsigned int val;
 	struct pmic *p, *p_pmic, *p_muic;
@@ -270,7 +270,7 @@ int board_usb_init(int index, enum usb_init_type init)
 
 int g_dnl_board_usb_cable_connected(void)
 {
-#if !CONFIG_IS_ENABLED(DM_I2C) /* TODO(maintainer): Convert to driver model */
+#if !IS_ENABLED(CONFIG_DM_I2C) /* TODO(maintainer): Convert to driver model */
 	struct pmic *muic = pmic_get("MAX77693_MUIC");
 	if (!muic)
 		return 0;

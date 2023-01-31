@@ -939,7 +939,7 @@ static ulong rk3308_clk_set_rate(struct clk *clk, ulong rate)
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static int __maybe_unused rk3308_mac_set_parent(struct clk *clk, struct clk *parent)
 {
 	struct rk3308_clk_priv *priv = dev_get_priv(clk->dev);
@@ -976,7 +976,7 @@ static int __maybe_unused rk3308_clk_set_parent(struct clk *clk, struct clk *par
 static struct clk_ops rk3308_clk_ops = {
 	.get_rate = rk3308_clk_get_rate,
 	.set_rate = rk3308_clk_set_rate,
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.set_parent = rk3308_clk_set_parent,
 #endif
 };
@@ -1050,7 +1050,7 @@ static int rk3308_clk_bind(struct udevice *dev)
 		dev_set_priv(sys_child, priv);
 	}
 
-#if CONFIG_IS_ENABLED(RESET_ROCKCHIP)
+#if IS_ENABLED(CONFIG_RESET_ROCKCHIP)
 	ret = offsetof(struct rk3308_cru, softrst_con[0]);
 	ret = rockchip_reset_bind(dev, ret, 12);
 	if (ret)

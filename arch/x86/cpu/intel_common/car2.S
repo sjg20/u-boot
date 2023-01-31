@@ -434,7 +434,7 @@ find_llc_subleaf:
 	jmp	car_init_ret
 #endif
 
-#if CONFIG_IS_ENABLED(X86_16BIT_INIT)
+#if IS_ENABLED(CONFIG_X86_16BIT_INIT)
 _dt_ucode_base_size:
 	/* These next two fields are filled in by binman */
 .globl ucode_base

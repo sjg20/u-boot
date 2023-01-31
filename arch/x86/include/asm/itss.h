@@ -45,7 +45,7 @@
 #define PCR_ITSS_ITSSPRC	0x3300
 
 struct itss_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	/* Put this first since driver model will copy the data here */
 	struct dtd_intel_itss dtplat;
 #endif

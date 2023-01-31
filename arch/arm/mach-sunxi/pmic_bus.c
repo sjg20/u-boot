@@ -25,7 +25,7 @@
 
 #define AXP221_CHIP_ADDR		0x68
 
-#if CONFIG_IS_ENABLED(PMIC_AXP)
+#if IS_ENABLED(CONFIG_PMIC_AXP)
 static struct udevice *pmic;
 #else
 static int pmic_i2c_address(void)
@@ -49,7 +49,7 @@ int pmic_bus_init(void)
 	if (!needs_init)
 		return 0;
 
-#if CONFIG_IS_ENABLED(PMIC_AXP)
+#if IS_ENABLED(CONFIG_PMIC_AXP)
 	ret = uclass_get_device_by_driver(UCLASS_PMIC, DM_DRIVER_GET(axp_pmic),
 					  &pmic);
 #else
@@ -75,7 +75,7 @@ int pmic_bus_init(void)
 
 int pmic_bus_read(u8 reg, u8 *data)
 {
-#if CONFIG_IS_ENABLED(PMIC_AXP)
+#if IS_ENABLED(CONFIG_PMIC_AXP)
 	return pmic_read(pmic, reg, data, 1);
 #else
 	if (IS_ENABLED(CONFIG_SYS_I2C_SUN6I_P2WI))
@@ -89,7 +89,7 @@ int pmic_bus_read(u8 reg, u8 *data)
 
 int pmic_bus_write(u8 reg, u8 data)
 {
-#if CONFIG_IS_ENABLED(PMIC_AXP)
+#if IS_ENABLED(CONFIG_PMIC_AXP)
 	return pmic_write(pmic, reg, &data, 1);
 #else
 	if (IS_ENABLED(CONFIG_SYS_I2C_SUN6I_P2WI))

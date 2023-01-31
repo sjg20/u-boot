@@ -165,7 +165,7 @@ U_BOOT_DRIVER(uniphier_pro5_pinctrl) = {
 	.probe = uniphier_pro5_pinctrl_probe,
 	.priv_auto	= sizeof(struct uniphier_pinctrl_priv),
 	.ops = &uniphier_pinctrl_ops,
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 	.flags = DM_FLAG_PRE_RELOC,
 #endif
 };

@@ -745,7 +745,7 @@ static int fsl_elbc_chip_init(int devnum, u8 *addr, struct udevice *dev)
 
 	/* If nand_scan_ident() has not selected ecc.mode, do it now */
 	if (nand->ecc.mode == 0
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	    && !ofnode_read_string(nand->flash_node, "nand-ecc-mode")
 #endif
 	   ) {

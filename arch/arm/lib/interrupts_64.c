@@ -161,7 +161,7 @@ void do_bad_error(struct pt_regs *pt_regs)
  */
 void do_sync(struct pt_regs *pt_regs)
 {
-	if (CONFIG_IS_ENABLED(SEMIHOSTING_FALLBACK) &&
+	if (IS_ENABLED(CONFIG_SEMIHOSTING_FALLBACK) &&
 	    smh_emulate_trap(pt_regs))
 		return;
 	efi_restore_gd();

@@ -21,7 +21,7 @@ static inline unsigned long bus_to_phys(unsigned long bus)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(DM)
+#if IS_ENABLED(CONFIG_DM)
 #include <dm/device.h>
 
 static inline dma_addr_t dev_phys_to_bus(struct udevice *dev, phys_addr_t phys)

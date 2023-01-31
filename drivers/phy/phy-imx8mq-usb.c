@@ -76,7 +76,7 @@ enum imx8mpq_phy_type {
 };
 
 struct imx8mq_usb_phy {
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	struct clk phy_clk;
 #endif
 	void __iomem *base;
@@ -174,7 +174,7 @@ static int imx8mq_usb_phy_power_on(struct phy *usb_phy)
 	struct imx8mq_usb_phy *imx_phy = dev_get_priv(dev);
 	u32 value;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	int ret;
 	ret = clk_enable(&imx_phy->phy_clk);
 	if (ret) {
@@ -202,7 +202,7 @@ static int imx8mq_usb_phy_power_off(struct phy *usb_phy)
 	value |= PHY_CTRL6_RXTERM_OVERRIDE_SEL;
 	writel(value, imx_phy->base + PHY_CTRL6);
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	clk_disable(&imx_phy->phy_clk);
 #endif
 
@@ -231,7 +231,7 @@ int imx8mq_usb_phy_probe(struct udevice *dev)
 	if (!priv->base)
 		return -EINVAL;
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	int ret;
 
 	/* Assigned clock already set clock */

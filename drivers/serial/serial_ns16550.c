@@ -11,7 +11,7 @@
 #include <asm/global_data.h>
 #include <linux/compiler.h>
 
-#if !CONFIG_IS_ENABLED(NS16550_MIN_FUNCTIONS)
+#if !IS_ENABLED(CONFIG_NS16550_MIN_FUNCTIONS)
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -251,4 +251,4 @@ void ns16550_serial_initialize(void)
 #endif
 }
 
-#endif /* !CONFIG_IS_ENABLED(NS16550_MIN_FUNCTIONS) */
+#endif /* !IS_ENABLED(CONFIG_NS16550_MIN_FUNCTIONS) */

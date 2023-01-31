@@ -88,7 +88,7 @@ int spl_net_load_image_usb(struct spl_image_info *spl_image,
 			   struct spl_boot_device *bootdev)
 {
 	bootdev->boot_device_name = "usb_ether";
-#if CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if IS_ENABLED(CONFIG_DM_USB_GADGET)
 	usb_ether_init();
 #endif
 	return spl_net_load_image(spl_image, bootdev);

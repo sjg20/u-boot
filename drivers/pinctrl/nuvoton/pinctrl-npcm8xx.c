@@ -733,7 +733,7 @@ static const char *npcm8xx_get_function_name(struct udevice *dev,
 	return npcm8xx_groups[selector].name;
 }
 
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 #define PIN_CONFIG_PERSIST_STATE (PIN_CONFIG_END + 1)
 #define PIN_CONFIG_POLARITY_STATE (PIN_CONFIG_END + 2)
 #define PIN_CONFIG_EVENT_CLEAR (PIN_CONFIG_END + 3)
@@ -973,7 +973,7 @@ static struct pinctrl_ops npcm8xx_pinctrl_ops = {
 	.get_function_name = npcm8xx_get_function_name,
 	.pinmux_set = npcm8xx_pinmux_set,
 	.pinmux_group_set = npcm8xx_pinmux_group_set,
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 	.pinconf_num_params = ARRAY_SIZE(npcm8xx_conf_params),
 	.pinconf_params = npcm8xx_conf_params,
 	.pinconf_set = npcm8xx_pinconf_set,

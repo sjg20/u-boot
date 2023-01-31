@@ -5,7 +5,7 @@
 #include <linux/sizes.h>
 #include <asm/system.h>
 
-#if CONFIG_IS_ENABLED(SYS_THUMB_BUILD)
+#if IS_ENABLED(CONFIG_SYS_THUMB_BUILD)
 #define ARM(x...)
 #define THUMB(x...)	x
 #else

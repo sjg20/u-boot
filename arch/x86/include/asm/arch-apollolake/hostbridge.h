@@ -16,7 +16,7 @@
  * @bdf: Bus/device/function of hostbridge
  */
 struct apl_hostbridge_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct dtd_intel_apl_hostbridge dtplat;
 #endif
 	u32 *early_pads;

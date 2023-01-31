@@ -169,7 +169,7 @@ void host_set_cur_dev(struct udevice *dev)
 UCLASS_DRIVER(host) = {
 	.id		= UCLASS_HOST,
 	.name		= "host",
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	.post_bind	= dm_scan_fdt_dev,
 #endif
 	.priv_auto	= sizeof(struct host_priv),

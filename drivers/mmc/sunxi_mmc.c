@@ -439,7 +439,7 @@ out:
 
 /* non-DM code here is used by the (ARM) SPL only */
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 /* support 4 mmc hosts */
 struct sunxi_mmc_priv mmc_host[4];
 

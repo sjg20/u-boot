@@ -268,7 +268,7 @@ struct dm_regulator_ops {
 	int (*set_mode)(struct udevice *dev, int mode_id);
 };
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 /**
  * regulator_mode: returns a pointer to the array of regulator mode info
  *

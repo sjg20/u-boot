@@ -33,7 +33,7 @@
 #define CFG_CMD_TIMEOUT (CONFIG_SYS_HZ >> 2) /* 250 ms */
 #define CFG_RST_TIMEOUT CONFIG_SYS_HZ /* 1 sec reset timeout */
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 struct ftsdc010 {
 	fdt32_t		bus_width;
 	bool		cap_mmc_highspeed;
@@ -46,7 +46,7 @@ struct ftsdc010 {
 #endif
 
 struct ftsdc010_plat {
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	struct ftsdc010 dtplat;
 #endif
 	struct mmc_config cfg;
@@ -393,7 +393,7 @@ static int ftsdc010_mmc_of_to_plat(struct udevice *dev)
 	struct ftsdc_priv *priv = dev_get_priv(dev);
 	struct ftsdc010_chip *chip = &priv->chip;
 
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		chip->name = dev->name;
 		chip->ioaddr = dev_read_addr_ptr(dev);
 		chip->buswidth = dev_read_u32_default(dev, "bus-width", 4);
@@ -424,7 +424,7 @@ static int ftsdc010_mmc_probe(struct udevice *dev)
 	struct ftsdc010_chip *chip = &priv->chip;
 	struct udevice *pwr_dev __maybe_unused;
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	int ret;
 	struct ftsdc010 *dtplat = &plat->dtplat;
 	chip->name = dev->name;

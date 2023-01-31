@@ -228,7 +228,7 @@ static int ehci_usb_probe(struct udevice *dev)
 	      type == USB_INIT_HOST ? "HOST" : "DEVICE", port->usb_regs,
 	      (uint32_t *)port->phy_regs);
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	ret = device_get_supply_regulator(dev, "vbus-supply",
 					  &priv->vbus_supply);
 	if (ret)
@@ -262,7 +262,7 @@ static int ehci_usb_remove(struct udevice *dev)
 	if (ret)
 		return ret;
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	if (priv->vbus_supply) {
 		ret = regulator_set_enable(priv->vbus_supply, false);
 		if (ret) {

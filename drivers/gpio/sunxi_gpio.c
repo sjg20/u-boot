@@ -18,7 +18,7 @@
 #include <asm/gpio.h>
 #include <dt-bindings/gpio/gpio.h>
 
-#if !CONFIG_IS_ENABLED(DM_GPIO)
+#if !IS_ENABLED(CONFIG_DM_GPIO)
 static int sunxi_gpio_output(u32 pin, u32 val)
 {
 	u32 dat;
@@ -108,7 +108,7 @@ int sunxi_name_to_gpio(const char *name)
 }
 #endif /* DM_GPIO */
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 /* TODO(sjg@chromium.org): Remove this function and use device tree */
 int sunxi_name_to_gpio(const char *name)
 {

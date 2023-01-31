@@ -91,7 +91,7 @@ enum usb_device_speed usb_get_maximum_speed(ofnode node)
 	return USB_SPEED_UNKNOWN;
 }
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 static const char *const usbphy_modes[] = {
 	[USBPHY_INTERFACE_MODE_UNKNOWN]	= "",
 	[USBPHY_INTERFACE_MODE_UTMI]	= "utmi",

@@ -21,7 +21,7 @@ struct smh_serial_priv {
 	unsigned counter;
 };
 
-#if CONFIG_IS_ENABLED(DM_SERIAL)
+#if IS_ENABLED(CONFIG_DM_SERIAL)
 static int smh_serial_getc(struct udevice *dev)
 {
 	char ch = 0;

@@ -132,7 +132,7 @@ static int rproc_pre_probe(struct udevice *dev)
 	/* See if we need to populate via fdt */
 
 	if (!dev_get_plat(dev)) {
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 		bool tmp;
 		debug("'%s': using fdt\n", dev->name);
 		uc_pdata->name = dev_read_string(dev, "remoteproc-name");

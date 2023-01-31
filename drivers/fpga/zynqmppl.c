@@ -200,7 +200,7 @@ static int zynqmp_validate_bitstream(xilinx_desc *desc, const void *buf,
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(FPGA_LOAD_SECURE)
+#if IS_ENABLED(CONFIG_FPGA_LOAD_SECURE)
 static int zynqmp_check_compatible(xilinx_desc *desc, int flags)
 {
 	/*
@@ -235,7 +235,7 @@ static int zynqmp_load(xilinx_desc *desc, const void *buf, size_t bsize,
 	u32 buf_lo, buf_hi;
 	u32 bsize_req = (u32)bsize;
 	u32 ret_payload[PAYLOAD_ARG_CNT];
-#if CONFIG_IS_ENABLED(FPGA_LOAD_SECURE)
+#if IS_ENABLED(CONFIG_FPGA_LOAD_SECURE)
 	struct fpga_secure_info info = { 0 };
 
 	ret = zynqmp_check_compatible(desc, flags);
@@ -251,7 +251,7 @@ static int zynqmp_load(xilinx_desc *desc, const void *buf, size_t bsize,
 	switch (flags) {
 	case FPGA_LEGACY:
 		break;	/* Handle the legacy image later in this function */
-#if CONFIG_IS_ENABLED(FPGA_LOAD_SECURE)
+#if IS_ENABLED(CONFIG_FPGA_LOAD_SECURE)
 	case FPGA_XILINX_ZYNQMP_DDRAUTH:
 		/* DDR authentication */
 		info.authflag = ZYNQMP_FPGA_AUTH_DDR;
@@ -299,7 +299,7 @@ static int zynqmp_load(xilinx_desc *desc, const void *buf, size_t bsize,
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(FPGA_LOAD_SECURE)
+#if IS_ENABLED(CONFIG_FPGA_LOAD_SECURE)
 static int zynqmp_loads(xilinx_desc *desc, const void *buf, size_t bsize,
 			struct fpga_secure_info *fpga_sec_info)
 {
@@ -362,7 +362,7 @@ static int __maybe_unused zynqmp_str2flag(xilinx_desc *desc, const char *str)
 {
 	if (!strncmp(str, "u-boot,fpga-legacy", 18))
 		return FPGA_LEGACY;
-#if CONFIG_IS_ENABLED(FPGA_LOAD_SECURE)
+#if IS_ENABLED(CONFIG_FPGA_LOAD_SECURE)
 	if (!strncmp(str, "u-boot,zynqmp-fpga-ddrauth", 26))
 		return FPGA_XILINX_ZYNQMP_DDRAUTH;
 
@@ -375,7 +375,7 @@ static int __maybe_unused zynqmp_str2flag(xilinx_desc *desc, const char *str)
 struct xilinx_fpga_op zynqmp_op = {
 	.load = zynqmp_load,
 	.info = zynqmp_pcap_info,
-#if CONFIG_IS_ENABLED(FPGA_LOAD_SECURE)
+#if IS_ENABLED(CONFIG_FPGA_LOAD_SECURE)
 	.loads = zynqmp_loads,
 	.str2flag = zynqmp_str2flag,
 #endif

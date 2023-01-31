@@ -1328,7 +1328,7 @@ static int npcm7xx_pinmux_set(struct udevice *dev,
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 
 #define PIN_CONFIG_PERSIST_STATE (PIN_CONFIG_END + 1)
 #define PIN_CONFIG_POLARITY_STATE (PIN_CONFIG_END + 2)
@@ -1604,7 +1604,7 @@ static struct pinctrl_ops npcm7xx_pinctrl_ops = {
 	.get_function_name = npcm7xx_get_function_name,
 	.pinmux_set = npcm7xx_pinmux_set,
 	.pinmux_group_set = npcm7xx_pinmux_set,
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 	.pinconf_num_params = ARRAY_SIZE(npcm7xx_conf_params),
 	.pinconf_params = npcm7xx_conf_params,
 	.pinconf_set = npcm7xx_pinconf_set,

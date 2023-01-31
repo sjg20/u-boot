@@ -47,7 +47,7 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 	bool auto_seq = true;
 	void *ptr;
 
-	if (CONFIG_IS_ENABLED(OF_PLATDATA_NO_BIND))
+	if (IS_ENABLED(CONFIG_OF_PLATDATA_NO_BIND))
 		return -ENOSYS;
 
 	if (devp)
@@ -68,7 +68,7 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 	INIT_LIST_HEAD(&dev->sibling_node);
 	INIT_LIST_HEAD(&dev->child_head);
 	INIT_LIST_HEAD(&dev->uclass_node);
-#if CONFIG_IS_ENABLED(DEVRES)
+#if IS_ENABLED(CONFIG_DEVRES)
 	INIT_LIST_HEAD(&dev->devres_head);
 #endif
 	dev_set_plat(dev, plat);
@@ -80,14 +80,14 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 	dev->uclass = uc;
 
 	dev->seq_ = -1;
-	if (CONFIG_IS_ENABLED(DM_SEQ_ALIAS) &&
+	if (IS_ENABLED(CONFIG_DM_SEQ_ALIAS) &&
 	    (uc->uc_drv->flags & DM_UC_FLAG_SEQ_ALIAS)) {
 		/*
 		 * Some devices, such as a SPI bus, I2C bus and serial ports
 		 * are numbered using aliases.
 		 */
-		if (CONFIG_IS_ENABLED(OF_CONTROL) &&
-		    !CONFIG_IS_ENABLED(OF_PLATDATA)) {
+		if (IS_ENABLED(CONFIG_OF_CONTROL) &&
+		    !IS_ENABLED(CONFIG_OF_PLATDATA)) {
 			if (uc->uc_drv->name && ofnode_valid(node)) {
 				if (!dev_read_alias_seq(dev, &dev->seq_)) {
 					auto_seq = false;
@@ -107,7 +107,7 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 		 * For of-platdata, we try use the existing data, but if
 		 * plat_auto is larger, we must allocate a new space
 		 */
-		if (CONFIG_IS_ENABLED(OF_PLATDATA)) {
+		if (IS_ENABLED(CONFIG_OF_PLATDATA)) {
 			if (of_plat_size)
 				dev_or_flags(dev, DM_FLAG_OF_PLATDATA);
 			if (of_plat_size < drv->plat_auto)
@@ -125,7 +125,7 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 			 * For of-platdata, copy the old plat into the new
 			 * space
 			 */
-			if (CONFIG_IS_ENABLED(OF_PLATDATA) && plat)
+			if (IS_ENABLED(CONFIG_OF_PLATDATA) && plat)
 				memcpy(ptr, plat, of_plat_size);
 			dev_set_plat(dev, ptr);
 		}
@@ -192,7 +192,7 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 fail_uclass_post_bind:
 	/* There is no child unbind() method, so no clean-up required */
 fail_child_post_bind:
-	if (CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)) {
+	if (IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)) {
 		if (drv->unbind && drv->unbind(dev)) {
 			dm_warn("unbind() method failed on dev '%s' on error path\n",
 				dev->name);
@@ -200,14 +200,14 @@ fail_child_post_bind:
 	}
 
 fail_bind:
-	if (CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)) {
+	if (IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)) {
 		if (uclass_unbind_device(dev)) {
 			dm_warn("Failed to unbind dev '%s' on error path\n",
 				dev->name);
 		}
 	}
 fail_uclass_bind:
-	if (CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)) {
+	if (IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)) {
 		list_del(&dev->sibling_node);
 		if (dev_get_flags(dev) & DM_FLAG_ALLOC_PARENT_PDATA) {
 			free(dev_get_parent_plat(dev));
@@ -215,14 +215,14 @@ fail_uclass_bind:
 		}
 	}
 fail_alloc3:
-	if (CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)) {
+	if (IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)) {
 		if (dev_get_flags(dev) & DM_FLAG_ALLOC_UCLASS_PDATA) {
 			free(dev_get_uclass_plat(dev));
 			dev_set_uclass_plat(dev, NULL);
 		}
 	}
 fail_alloc2:
-	if (CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)) {
+	if (IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)) {
 		if (dev_get_flags(dev) & DM_FLAG_ALLOC_PDATA) {
 			free(dev_get_plat(dev));
 			dev_set_plat(dev, NULL);
@@ -266,7 +266,7 @@ int device_bind_by_name(struct udevice *parent, bool pre_reloc_only,
 	if (pre_reloc_only && !(drv->flags & DM_FLAG_PRE_RELOC))
 		return -EPERM;
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 	plat_size = info->plat_size;
 #endif
 	ret = device_bind_common(parent, drv, info->name, (void *)info->plat, 0,
@@ -400,7 +400,7 @@ int device_of_to_plat(struct udevice *dev)
 	 * This is not needed if binding is disabled, since data is allocated
 	 * at build time.
 	 */
-	if (!CONFIG_IS_ENABLED(OF_PLATDATA_NO_BIND)) {
+	if (!IS_ENABLED(CONFIG_OF_PLATDATA_NO_BIND)) {
 		/* Ensure all parents have ofdata */
 		if (dev->parent) {
 			ret = device_of_to_plat(dev->parent);
@@ -425,7 +425,7 @@ int device_of_to_plat(struct udevice *dev)
 	assert(drv);
 
 	if (drv->of_to_plat &&
-	    (CONFIG_IS_ENABLED(OF_PLATDATA) || dev_has_ofnode(dev))) {
+	    (IS_ENABLED(CONFIG_OF_PLATDATA) || dev_has_ofnode(dev))) {
 		ret = drv->of_to_plat(dev);
 		if (ret)
 			goto fail;
@@ -458,7 +458,7 @@ static int device_get_dma_constraints(struct udevice *dev)
 	u64 size = 0;
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(DM_DMA) || !parent || !dev_has_ofnode(parent))
+	if (!IS_ENABLED(CONFIG_DM_DMA) || !parent || !dev_has_ofnode(parent))
 		return 0;
 
 	/*
@@ -517,7 +517,7 @@ int device_probe(struct udevice *dev)
 
 	dev_or_flags(dev, DM_FLAG_ACTIVATED);
 
-	if (CONFIG_IS_ENABLED(POWER_DOMAIN) && dev->parent &&
+	if (IS_ENABLED(CONFIG_POWER_DOMAIN) && dev->parent &&
 	    (device_get_uclass_id(dev) != UCLASS_POWER_DOMAIN) &&
 	    !(drv->flags & DM_FLAG_DEFAULT_PD_CTRL_OFF)) {
 		ret = dev_power_domain_on(dev);
@@ -547,7 +547,7 @@ int device_probe(struct udevice *dev)
 				  dev->name, ret, errno_str(ret));
 	}
 
-	if (CONFIG_IS_ENABLED(IOMMU) && dev->parent &&
+	if (IS_ENABLED(CONFIG_IOMMU) && dev->parent &&
 	    (device_get_uclass_id(dev) != UCLASS_IOMMU)) {
 		ret = dev_iommu_enable(dev);
 		if (ret)
@@ -754,7 +754,7 @@ static int device_get_device_tail(struct udevice *dev, int ret,
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 /**
  * device_find_by_ofnode() - Return device associated with given ofnode
  *
@@ -907,12 +907,12 @@ int device_get_global_by_ofnode(ofnode ofnode, struct udevice **devp)
 	return device_get_device_tail(dev, dev ? 0 : -ENOENT, devp);
 }
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_PLATDATA)
 int device_get_by_ofplat_idx(uint idx, struct udevice **devp)
 {
 	struct udevice *dev;
 
-	if (CONFIG_IS_ENABLED(OF_PLATDATA_INST)) {
+	if (IS_ENABLED(CONFIG_OF_PLATDATA_INST)) {
 		struct udevice *base = ll_entry_start(struct udevice, udevice);
 
 		dev = base + idx;
@@ -1176,7 +1176,7 @@ void dev_set_uclass_plat(struct udevice *dev, void *uclass_plat)
 	dev->uclass_plat_ = uclass_plat;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 bool device_is_compatible(const struct udevice *dev, const char *compat)
 {
 	return ofnode_device_is_compatible(dev_ofnode(dev), compat);
@@ -1239,7 +1239,7 @@ int dev_enable_by_path(const char *path)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(OF_PLATDATA_RT)
+#if IS_ENABLED(CONFIG_OF_PLATDATA_RT)
 static struct udevice_rt *dev_get_rt(const struct udevice *dev)
 {
 	struct udevice *base = ll_entry_start(struct udevice, udevice);

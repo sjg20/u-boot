@@ -35,7 +35,7 @@ int printf(const char* fmt, ...);
 void install_hdlr(int, interrupt_handler_t, void*);
 void free_hdlr(int);
 void *malloc(size_t);
-#if !CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)
+#if !IS_ENABLED(CONFIG_SYS_MALLOC_SIMPLE)
 void free(void*);
 #endif
 void __udelay(unsigned long);
@@ -49,7 +49,7 @@ long simple_strtol(const char *cp, char **endp, unsigned int base);
 int strcmp(const char *cs, const char *ct);
 unsigned long ustrtoul(const char *cp, char **endp, unsigned int base);
 unsigned long long ustrtoull(const char *cp, char **endp, unsigned int base);
-#if defined(CONFIG_CMD_I2C) && !CONFIG_IS_ENABLED(DM_I2C)
+#if defined(CONFIG_CMD_I2C) && !IS_ENABLED(CONFIG_DM_I2C)
 int i2c_write (uchar, uint, int , uchar* , int);
 int i2c_read (uchar, uint, int , uchar* , int);
 #endif

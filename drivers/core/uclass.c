@@ -152,7 +152,7 @@ int uclass_get(enum uclass_id id, struct uclass **ucp)
 	*ucp = NULL;
 	uc = uclass_find(id);
 	if (!uc) {
-		if (CONFIG_IS_ENABLED(OF_PLATDATA_INST))
+		if (IS_ENABLED(CONFIG_OF_PLATDATA_INST))
 			return -ENOENT;
 		return uclass_add(id, ucp);
 	}
@@ -311,7 +311,7 @@ int uclass_find_next_free_seq(struct uclass *uc)
 	int max = -1;
 
 	/* If using aliases, start with the highest alias value */
-	if (CONFIG_IS_ENABLED(DM_SEQ_ALIAS) &&
+	if (IS_ENABLED(CONFIG_DM_SEQ_ALIAS) &&
 	    (uc->uc_drv->flags & DM_UC_FLAG_SEQ_ALIAS))
 		max = dev_read_alias_highest_id(uc->uc_drv->name);
 
@@ -410,7 +410,7 @@ done:
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 int uclass_find_device_by_phandle(enum uclass_id id, struct udevice *parent,
 				  const char *name, struct udevice **devp)
 {
@@ -535,7 +535,7 @@ int uclass_get_device_by_ofnode(enum uclass_id id, ofnode node,
 	return uclass_get_device_tail(dev, ret, devp);
 }
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 int uclass_get_device_by_phandle_id(enum uclass_id id, uint phandle_id,
 				    struct udevice **devp)
 {
@@ -713,7 +713,7 @@ err:
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 int uclass_pre_unbind_device(struct udevice *dev)
 {
 	struct uclass *uc;
@@ -785,7 +785,7 @@ int uclass_post_probe_device(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DM_DEVICE_REMOVE)
+#if IS_ENABLED(CONFIG_DM_DEVICE_REMOVE)
 int uclass_pre_remove_device(struct udevice *dev)
 {
 	struct uclass *uc;

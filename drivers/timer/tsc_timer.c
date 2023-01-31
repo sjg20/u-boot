@@ -54,7 +54,7 @@ static unsigned long native_calibrate_tsc(void)
 		return 0;
 
 	crystal_freq = tsc_info.ecx / 1000;
-	if (!CONFIG_IS_ENABLED(X86_TSC_TIMER_NATIVE) && !crystal_freq) {
+	if (!IS_ENABLED(CONFIG_X86_TSC_TIMER_NATIVE) && !crystal_freq) {
 		switch (gd->arch.x86_model) {
 		case INTEL_FAM6_SKYLAKE_MOBILE:
 		case INTEL_FAM6_SKYLAKE_DESKTOP:
@@ -376,7 +376,7 @@ void __udelay(unsigned long usec)
 	stop = now + (u64)usec * get_tbclk_mhz();
 
 	while ((int64_t)(stop - get_ticks()) > 0)
-#if defined(CONFIG_QEMU) && CONFIG_IS_ENABLED_PPL(SMP)
+#if defined(CONFIG_QEMU) && IS_ENABLED(CONFIG_PPL_SMP)
 		/*
 		 * Add a 'pause' instruction on qemu target,
 		 * to give other VCPUs a chance to run.
@@ -409,7 +409,7 @@ static void tsc_timer_ensure_setup(bool early)
 			goto done;
 
 		/* Reduce code size by dropping other methods */
-		if (CONFIG_IS_ENABLED(X86_TSC_TIMER_NATIVE))
+		if (IS_ENABLED(CONFIG_X86_TSC_TIMER_NATIVE))
 			panic("no timer");
 
 		fast_calibrate = cpu_mhz_from_cpuid();
@@ -479,7 +479,7 @@ static const struct timer_ops tsc_timer_ops = {
 	.get_count = tsc_timer_get_count,
 };
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct udevice_id tsc_timer_ids[] = {
 	{ .compatible = "x86,tsc-timer", },
 	{ }

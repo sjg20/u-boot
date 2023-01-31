@@ -303,7 +303,7 @@ UCLASS_DRIVER(w1) = {
 	.flags		= DM_UC_FLAG_SEQ_ALIAS,
 	.per_device_auto	= sizeof(struct w1_bus),
 	.post_probe	= w1_post_probe,
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	.post_bind	= dm_scan_fdt_dev,
 #endif
 	.per_child_plat_auto	    = sizeof(struct w1_device),

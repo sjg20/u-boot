@@ -109,7 +109,7 @@ void board_init_r(gd_t *gd, ulong dest_addr)
 #endif
 #endif
 
-#if CONFIG_IS_ENABLED(SYS_I2C_LEGACY)
+#if IS_ENABLED(CONFIG_SYS_I2C_LEGACY)
 	i2c_init_all();
 #else
 	i2c_init(CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);

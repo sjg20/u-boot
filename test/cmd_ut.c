@@ -93,7 +93,7 @@ static struct cmd_tbl cmd_ut_sub[] = {
 #ifdef CONFIG_UT_TIME
 	U_BOOT_CMD_MKENT(time, CONFIG_SYS_MAXARGS, 1, do_ut_time, "", ""),
 #endif
-#if CONFIG_IS_ENABLED(UT_UNICODE) && !defined(API_BUILD)
+#if IS_ENABLED(CONFIG_UT_UNICODE) && !defined(API_BUILD)
 	U_BOOT_CMD_MKENT(unicode, CONFIG_SYS_MAXARGS, 1, do_ut_unicode, "", ""),
 #endif
 #ifdef CONFIG_SANDBOX

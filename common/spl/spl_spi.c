@@ -18,7 +18,7 @@
 #include <asm/global_data.h>
 #include <dm/ofnode.h>
 
-#if CONFIG_IS_ENABLED(OS_BOOT)
+#if IS_ENABLED(CONFIG_OS_BOOT)
 /*
  * Load the kernel, check for a valid header we can parse, and if found load
  * the kernel and then device tree.
@@ -113,12 +113,12 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 
 	header = spl_get_load_buffer(-sizeof(*header), sizeof(*header));
 
-	if (CONFIG_IS_ENABLED(OF_REAL)) {
+	if (IS_ENABLED(CONFIG_OF_REAL)) {
 		payload_offs = ofnode_conf_read_int("u-boot,spl-payload-offset",
 						    payload_offs);
 	}
 
-#if CONFIG_IS_ENABLED(OS_BOOT)
+#if IS_ENABLED(CONFIG_OS_BOOT)
 	if (spl_start_uboot() || spi_load_image_os(spl_image, bootdev, flash, header))
 #endif
 	{

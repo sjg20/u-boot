@@ -23,7 +23,7 @@
 	.set noreorder
 
 LEAF(mips_sram_init)
-#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT)
+#if !IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT)
 	/* Setup CPU PLL */
 	li	t0, DELAY_USEC(1000000)
 	li	t1, KSEG1ADDR(SYSCTL_BASE + SYSCTL_ROM_STATUS_REG)
@@ -111,7 +111,7 @@ _cpu_pll_done:
 	sub	a1, CONFIG_SYS_DCACHE_LINE_SIZE
 	bnez	a1, 3b
 	 nop
-#endif /* CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT) */
+#endif /* IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT) */
 
 	jr	ra
 	 nop
@@ -127,7 +127,7 @@ NESTED(lowlevel_init, 0, ra)
 
 	move	ra, s0
 
-#if CONFIG_IS_ENABLED(INIT_STACK_WITHOUT_MALLOC_F)
+#if IS_ENABLED(CONFIG_INIT_STACK_WITHOUT_MALLOC_F)
 	/* Set malloc base */
 	li	t0, (SYS_INIT_SP_ADDR + 15) & (~15)
 	PTR_S	t0, GD_MALLOC_BASE(k0)	# gd->malloc_base offset

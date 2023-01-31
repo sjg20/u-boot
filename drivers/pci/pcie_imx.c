@@ -543,7 +543,7 @@ int imx6_pcie_toggle_power(struct udevice *vpcie)
 	gpio_free(CFG_PCIE_IMX_POWER_GPIO);
 #endif
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	if (vpcie) {
 		regulator_set_enable(vpcie, false);
 		mdelay(20);
@@ -722,7 +722,7 @@ static int imx_pcie_dm_probe(struct udevice *dev)
 {
 	struct imx_pcie_priv *priv = dev_get_priv(dev);
 
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
+#if IS_ENABLED(CONFIG_DM_REGULATOR)
 	device_get_supply_regulator(dev, "vpcie-supply", &priv->vpcie);
 #endif
 

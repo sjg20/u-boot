@@ -499,7 +499,7 @@ static int rv1126_pmuclk_of_to_plat(struct udevice *dev)
 
 static int rv1126_pmuclk_bind(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(RESET_ROCKCHIP)
+#if IS_ENABLED(CONFIG_RESET_ROCKCHIP)
 	int ret;
 
 	ret = offsetof(struct rv1126_pmucru, pmu_softrst_con[0]);
@@ -1622,7 +1622,7 @@ static ulong rv1126_clk_set_rate(struct clk *clk, ulong rate)
 	return ret;
 };
 
-#if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_CONTROL) && !IS_ENABLED(CONFIG_OF_PLATDATA)
 static int rv1126_gmac_src_set_parent(struct clk *clk, struct clk *parent)
 {
 	struct rv1126_clk_priv *priv = dev_get_priv(clk->dev);
@@ -1705,7 +1705,7 @@ static int rv1126_clk_set_parent(struct clk *clk, struct clk *parent)
 static struct clk_ops rv1126_clk_ops = {
 	.get_rate = rv1126_clk_get_rate,
 	.set_rate = rv1126_clk_set_rate,
-#if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
+#if IS_ENABLED(CONFIG_OF_CONTROL) && !IS_ENABLED(CONFIG_OF_PLATDATA)
 	.set_parent = rv1126_clk_set_parent,
 #endif
 };
@@ -1863,7 +1863,7 @@ static int rv1126_clk_bind(struct udevice *dev)
 		dev_set_priv(sys_child, priv);
 	}
 
-#if CONFIG_IS_ENABLED(RESET_ROCKCHIP)
+#if IS_ENABLED(CONFIG_RESET_ROCKCHIP)
 	ret = offsetof(struct rv1126_cru, softrst_con[0]);
 	ret = rockchip_reset_bind(dev, ret, 15);
 	if (ret)

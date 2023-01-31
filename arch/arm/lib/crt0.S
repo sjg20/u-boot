@@ -92,7 +92,7 @@ clbss_l:cmp	r0, r1			/* while not at end of BSS */
 ENTRY(_main)
 
 /* Call arch_very_early_init before initializing C runtime environment. */
-#if CONFIG_IS_ENABLED(ARCH_VERY_EARLY_INIT)
+#if IS_ENABLED(CONFIG_ARCH_VERY_EARLY_INIT)
 	bl	arch_very_early_init
 #endif
 
@@ -115,7 +115,7 @@ ENTRY(_main)
 	mov	r9, r0
 	bl	board_init_f_init_reserve
 
-#if defined(CONFIG_DEBUG_UART) && CONFIG_IS_ENABLED(SERIAL)
+#if defined(CONFIG_DEBUG_UART) && IS_ENABLED(CONFIG_SERIAL)
 	bl	debug_uart_init
 #endif
 
@@ -171,7 +171,7 @@ here:
 
 	bl	c_runtime_cpu_setup	/* we still call old routine here */
 #endif
-#if !defined(CONFIG_SPL_BUILD) || CONFIG_IS_ENABLED(FRAMEWORK)
+#if !defined(CONFIG_SPL_BUILD) || IS_ENABLED(CONFIG_FRAMEWORK)
 
 #if !defined(CONFIG_SPL_BUILD) || !defined(CONFIG_SPL_EARLY_BSS)
 	CLEAR_BSS
@@ -193,7 +193,7 @@ here:
 	mov     r0, r9                  /* gd_t */
 	ldr	r1, [r9, #GD_RELOCADDR]	/* dest_addr */
 	/* call board_init_r */
-#if CONFIG_IS_ENABLED(SYS_THUMB_BUILD)
+#if IS_ENABLED(CONFIG_SYS_THUMB_BUILD)
 	ldr	lr, =board_init_r	/* this is auto-relocated! */
 	bx	lr
 #else

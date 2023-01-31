@@ -160,7 +160,7 @@ static int cdns3_core_init_role(struct cdns3 *cdns)
 	}
 #endif
 
-#if CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if IS_ENABLED(CONFIG_DM_USB_GADGET)
 	if (dr_mode == USB_DR_MODE_OTG || dr_mode == USB_DR_MODE_PERIPHERAL) {
 		ret = cdns3_gadget_init(cdns);
 		if (ret) {
@@ -410,7 +410,7 @@ int cdns3_bind(struct udevice *parent)
 		driver = "cdns-usb3-host";
 		break;
 #endif
-#if CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if IS_ENABLED(CONFIG_DM_USB_GADGET)
 	case USB_DR_MODE_PERIPHERAL:
 		debug("%s: dr_mode: PERIPHERAL\n", __func__);
 		driver = "cdns-usb3-peripheral";
@@ -436,7 +436,7 @@ fail:
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DM_USB_GADGET)
+#if IS_ENABLED(CONFIG_DM_USB_GADGET)
 static int cdns3_gadget_probe(struct udevice *dev)
 {
 	struct cdns3_gadget_priv *priv = dev_get_priv(dev);

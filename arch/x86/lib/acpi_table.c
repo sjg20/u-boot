@@ -179,7 +179,7 @@ int acpi_write_tcpa(struct acpi_ctx *ctx, const struct acpi_writer *entry)
 
 	if (!IS_ENABLED(CONFIG_TPM_V1))
 		return -ENOENT;
-	if (!CONFIG_IS_ENABLED(BLOBLIST))
+	if (!IS_ENABLED(CONFIG_BLOBLIST))
 		return -ENXIO;
 
 	tcpa = ctx->current;

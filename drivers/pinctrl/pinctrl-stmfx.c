@@ -282,7 +282,7 @@ U_BOOT_DRIVER(stmfx_gpio) = {
 	.ops	= &stmfx_gpio_ops,
 };
 
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 static const struct pinconf_param stmfx_pinctrl_conf_params[] = {
 	{ "bias-disable", PIN_CONFIG_BIAS_DISABLE, 0 },
 	{ "bias-pull-up", PIN_CONFIG_BIAS_PULL_UP, 0 },
@@ -432,7 +432,7 @@ const struct pinctrl_ops stmfx_pinctrl_ops = {
 	.get_pin_name = stmfx_pinctrl_get_pin_name,
 	.set_state = pinctrl_generic_set_state,
 	.get_pin_muxing	= stmfx_pinctrl_get_pin_muxing,
-#if CONFIG_IS_ENABLED(PINCONF)
+#if IS_ENABLED(CONFIG_PINCONF)
 	.pinconf_set = stmfx_pinctrl_conf_set,
 	.pinconf_num_params = ARRAY_SIZE(stmfx_pinctrl_conf_params),
 	.pinconf_params = stmfx_pinctrl_conf_params,

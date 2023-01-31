@@ -48,7 +48,7 @@
 	if ((_DEBUG && level == LOGL_DEBUG) || \
 	    (_VERBOSE_DEBUG && level == LOGL_DEBUG_CONTENT)) \
 		printf(fmt, ##__VA_ARGS__); \
-	else if (CONFIG_IS_ENABLED(LOG)) \
+	else if (IS_ENABLED(CONFIG_LOG)) \
 		log(cat, level, fmt, ##__VA_ARGS__); \
 	else if (level < CONFIG_VAL(LOGLEVEL)) \
 		printf(fmt, ##__VA_ARGS__); \

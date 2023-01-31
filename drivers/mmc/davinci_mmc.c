@@ -36,7 +36,7 @@ struct davinci_mmc_priv {
 #endif
 
 /* Set davinci clock prescalar value based on the required clock in HZ */
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 static void dmmc_set_clock(struct mmc *mmc, uint clock)
 {
 	struct davinci_mmc *host = mmc->priv;
@@ -143,7 +143,7 @@ static int dmmc_check_status(volatile struct davinci_mmc_regs *regs,
  * Sends a command out on the bus.  Takes the device pointer,
  * a command pointer, and an optional data pointer.
  */
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 static int dmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd, struct mmc_data *data)
 {
 	struct davinci_mmc *host = mmc->priv;
@@ -337,7 +337,7 @@ davinci_mmc_send_cmd(struct udevice *dev, struct mmc_cmd *cmd, struct mmc_data *
 }
 
 /* Initialize Davinci MMC controller */
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 static int dmmc_init(struct mmc *mmc)
 {
 	struct davinci_mmc *host = mmc->priv;
@@ -378,7 +378,7 @@ static int davinci_dm_mmc_init(struct udevice *dev)
 }
 
 /* Set buswidth or clock as indicated by the MMC framework */
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 static int dmmc_set_ios(struct mmc *mmc)
 {
 	struct davinci_mmc *host = mmc->priv;
@@ -399,7 +399,7 @@ static int davinci_mmc_set_ios(struct udevice *dev)
 
 	/* Set clock speed */
 	if (mmc->clock) {
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 		dmmc_set_clock(mmc, mmc->clock);
 #else
 		davinci_mmc_set_clock(dev, mmc->clock);
@@ -408,7 +408,7 @@ static int davinci_mmc_set_ios(struct udevice *dev)
 	return 0;
 }
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 static const struct mmc_ops dmmc_ops = {
        .send_cmd       = dmmc_send_cmd,
        .set_ios        = dmmc_set_ios,
@@ -419,7 +419,7 @@ static const struct mmc_ops dmmc_ops = {
 static int davinci_mmc_getcd(struct udevice *dev)
 {
 	int value = -1;
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	struct davinci_mmc_priv *priv = dev_get_priv(dev);
 	value = dm_gpio_get_value(&priv->cd_gpio);
 #endif
@@ -433,7 +433,7 @@ static int davinci_mmc_getcd(struct udevice *dev)
 static int davinci_mmc_getwp(struct udevice *dev)
 {
 	int value = -1;
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	struct davinci_mmc_priv *priv = dev_get_priv(dev);
 
 	value = dm_gpio_get_value(&priv->wp_gpio);
@@ -453,7 +453,7 @@ static const struct dm_mmc_ops davinci_mmc_ops = {
 };
 #endif
 
-#if !CONFIG_IS_ENABLED(DM_MMC)
+#if !IS_ENABLED(CONFIG_DM_MMC)
 /* Called from board_mmc_init during startup. Can be called multiple times
 * depending on the number of slots available on board and controller
 */
@@ -483,7 +483,7 @@ static int davinci_mmc_probe(struct udevice *dev)
 
 	priv->reg_base = plat->reg_base;
 	priv->input_clk = clk_get(DAVINCI_MMCSD_CLKID);
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 	/* These GPIOs are optional */
 	gpio_request_by_name(dev, "cd-gpios", 0, &priv->cd_gpio, GPIOD_IS_IN);
 	gpio_request_by_name(dev, "wp-gpios", 0, &priv->wp_gpio, GPIOD_IS_IN);
@@ -500,7 +500,7 @@ static int davinci_mmc_bind(struct udevice *dev)
 	return mmc_bind(dev, &plat->mmc, &plat->cfg);
 }
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 static int davinci_mmc_of_to_plat(struct udevice *dev)
 {
 	struct davinci_mmc_plat *plat = dev_get_plat(dev);
@@ -525,7 +525,7 @@ static const struct udevice_id davinci_mmc_ids[] = {
 U_BOOT_DRIVER(ti_da830_mmc) = {
 	.name = "davinci_mmc",
 	.id		= UCLASS_MMC,
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_OF_CONTROL)
 	.of_match	= davinci_mmc_ids,
 	.plat_auto	= sizeof(struct davinci_mmc_plat),
 	.of_to_plat = davinci_mmc_of_to_plat,
@@ -536,7 +536,7 @@ U_BOOT_DRIVER(ti_da830_mmc) = {
 	.probe = davinci_mmc_probe,
 	.ops = &davinci_mmc_ops,
 	.priv_auto	= sizeof(struct davinci_mmc_priv),
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 	.flags	= DM_FLAG_PRE_RELOC,
 #endif
 };

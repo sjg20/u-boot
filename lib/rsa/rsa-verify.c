@@ -90,7 +90,7 @@ U_BOOT_PADDING_ALGO(pkcs_15) = {
 };
 #endif
 
-#if CONFIG_IS_ENABLED(FIT_RSASSA_PSS)
+#if IS_ENABLED(CONFIG_FIT_RSASSA_PSS)
 static void u32_i2osp(uint32_t val, uint8_t *buf)
 {
 	buf[0] = (uint8_t)((val >> 24) & 0xff);
@@ -400,7 +400,7 @@ int rsa_verify_with_pkey(struct image_sign_info *info,
 	struct key_prop *prop;
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(RSA_VERIFY_WITH_PKEY))
+	if (!IS_ENABLED(CONFIG_RSA_VERIFY_WITH_PKEY))
 		return -EACCES;
 
 	/* Public key is self-described to fill key_prop */
@@ -418,7 +418,7 @@ int rsa_verify_with_pkey(struct image_sign_info *info,
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(FIT_SIGNATURE)
+#if IS_ENABLED(CONFIG_FIT_SIGNATURE)
 /**
  * rsa_verify_with_keynode() - Verify a signature against some data using
  * information in node with prperties of RSA Key like modulus, exponent etc.
@@ -499,7 +499,7 @@ int rsa_verify_hash(struct image_sign_info *info,
 	 * RSA encryption, rsa_verify_with_pkey()/rsa_gen_key_prop() are
 	 * of no use and should not be compiled in.
 	 */
-	if (!tools_build() && CONFIG_IS_ENABLED(RSA_VERIFY_WITH_PKEY) &&
+	if (!tools_build() && IS_ENABLED(CONFIG_RSA_VERIFY_WITH_PKEY) &&
 			!info->fdt_blob) {
 		/* don't rely on fdt properties */
 		ret = rsa_verify_with_pkey(info, hash, sig, sig_len);
@@ -508,7 +508,7 @@ int rsa_verify_hash(struct image_sign_info *info,
 		return ret;
 	}
 
-	if (CONFIG_IS_ENABLED(FIT_SIGNATURE)) {
+	if (IS_ENABLED(CONFIG_FIT_SIGNATURE)) {
 		const void *blob = info->fdt_blob;
 		int ndepth, noffset;
 		int sig_node, node;

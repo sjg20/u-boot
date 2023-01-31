@@ -211,7 +211,7 @@ static int bootmeth_vbe_simple_bind(struct udevice *dev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct udevice_id generic_simple_vbe_simple_ids[] = {
 	{ .compatible = "fwupd,vbe-simple" },
 	{ }

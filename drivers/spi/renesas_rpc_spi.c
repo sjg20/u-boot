@@ -412,7 +412,7 @@ static int rpc_spi_probe(struct udevice *dev)
 
 	priv->regs = plat->regs;
 	priv->extr = plat->extr;
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	clk_enable(&priv->clk);
 #endif
 	return 0;
@@ -425,7 +425,7 @@ static int rpc_spi_of_to_plat(struct udevice *bus)
 	plat->regs = dev_read_addr_index(bus, 0);
 	plat->extr = dev_read_addr_index(bus, 1);
 
-#if CONFIG_IS_ENABLED(CLK)
+#if IS_ENABLED(CONFIG_CLK)
 	struct rpc_spi_priv *priv = dev_get_priv(bus);
 	int ret;
 

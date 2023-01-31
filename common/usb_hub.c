@@ -70,7 +70,7 @@ static inline bool usb_hub_is_superspeed(struct usb_device *hdev)
 	return hdev->descriptor.bDeviceProtocol == 3;
 }
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 bool usb_hub_is_root_hub(struct udevice *hub)
 {
 	if (device_get_uclass_id(hub->parent) != UCLASS_USB_HUB)
@@ -131,7 +131,7 @@ int usb_get_port_status(struct usb_device *dev, int port, void *data)
 			USB_REQ_GET_STATUS, USB_DIR_IN | USB_RT_PORT, 0, port,
 			data, sizeof(struct usb_port_status), USB_CNTL_TIMEOUT);
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 	if (ret < 0)
 		return ret;
 
@@ -193,7 +193,7 @@ static void usb_hub_power_on(struct usb_hub_device *hub)
 	 * but allow this time to be increased via env variable as some
 	 * devices break the spec and require longer warm-up times
 	 */
-#if CONFIG_IS_ENABLED(ENV_SUPPORT)
+#if IS_ENABLED(CONFIG_ENV_SUPPORT)
 	env = env_get("usb_pgood_delay");
 	if (env)
 		pgood_delay = max(pgood_delay,
@@ -218,7 +218,7 @@ static void usb_hub_power_on(struct usb_hub_device *hub)
 	      max(100, (int)pgood_delay) + HUB_DEBOUNCE_TIMEOUT);
 }
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !IS_ENABLED(CONFIG_DM_USB)
 static struct usb_hub_device hub_dev[USB_MAX_HUB];
 static int usb_hub_index;
 
@@ -274,7 +274,7 @@ static int usb_hub_port_reset(struct usb_device *dev, int port,
 	unsigned short portstatus, portchange;
 	int delay = HUB_SHORT_RESET_TIME; /* start with short reset delay */
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 	debug("%s: resetting '%s' port %d...\n", __func__, dev->dev->name,
 	      port + 1);
 #else
@@ -395,7 +395,7 @@ int usb_hub_port_connect_change(struct usb_device *dev, int port)
 		break;
 	}
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 	struct udevice *child;
 
 	ret = usb_scan_device(dev->dev, port + 1, speed, &child);
@@ -587,7 +587,7 @@ static struct usb_hub_device *usb_get_hub_device(struct usb_device *dev)
 {
 	struct usb_hub_device *hub;
 
-#if !CONFIG_IS_ENABLED(DM_USB)
+#if !IS_ENABLED(CONFIG_DM_USB)
 	/* "allocate" Hub device */
 	hub = usb_hub_allocate();
 #else
@@ -771,7 +771,7 @@ static int usb_hub_configure(struct usb_device *dev)
 	      (le16_to_cpu(hubsts->wHubStatus) & HUB_STATUS_OVERCURRENT) ? \
 	      "" : "no ");
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 	/*
 	 * Update USB host controller's internal representation of this hub
 	 * after the hub descriptor is fetched.
@@ -913,7 +913,7 @@ int usb_hub_probe(struct usb_device *dev, int ifnum)
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(DM_USB)
+#if IS_ENABLED(CONFIG_DM_USB)
 int usb_hub_scan(struct udevice *hub)
 {
 	struct usb_device *udev = dev_get_parent_priv(hub);

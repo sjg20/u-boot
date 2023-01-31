@@ -88,7 +88,7 @@ u8 spd_i2c_addr[CONFIG_SYS_NUM_DDR_CTLRS][CONFIG_DIMM_SLOTS_PER_CTLR] = {
 
 #endif
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 #define DEV_TYPE struct udevice
 #else
 /* Local udevice */
@@ -108,7 +108,7 @@ static int ddr_i2c_read(DEV_TYPE *dev, unsigned int addr,
 {
 	int ret;
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	ret = dm_i2c_read(dev, 0, buf, len);
 #else
 	ret = i2c_read(dev->chip, addr, alen, buf, len);
@@ -122,7 +122,7 @@ static int ddr_i2c_dummy_write(unsigned int chip_addr)
 {
 	uint8_t buf = 0;
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	struct udevice *dev;
 	int ret;
 
@@ -148,7 +148,7 @@ static void __get_spd(generic_spd_eeprom_t *spd, u8 i2c_address)
 	int ret;
 	DEV_TYPE *dev;
 
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	ret = i2c_get_chip_for_busnum(CONFIG_SYS_SPD_BUS_NUM, i2c_address,
 				      1, &dev);
 	if (ret) {

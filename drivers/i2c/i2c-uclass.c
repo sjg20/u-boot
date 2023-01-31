@@ -16,7 +16,7 @@
 #include <dm/device-internal.h>
 #include <dm/lists.h>
 #include <dm/pinctrl.h>
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 #include <asm/gpio.h>
 #endif
 #include <linux/delay.h>
@@ -501,7 +501,7 @@ uint i2c_get_chip_addr_offset_mask(struct udevice *dev)
 	return chip->chip_addr_offset_mask;
 }
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
+#if IS_ENABLED(CONFIG_DM_GPIO)
 static void i2c_gpio_set_pin(struct gpio_desc *pin, int bit)
 {
 	if (bit)
@@ -627,7 +627,7 @@ int i2c_deblock(struct udevice *bus)
 	return ops->deblock(bus);
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 int i2c_chip_of_to_plat(struct udevice *dev, struct dm_i2c_chip *chip)
 {
 	int addr;
@@ -649,7 +649,7 @@ int i2c_chip_of_to_plat(struct udevice *dev, struct dm_i2c_chip *chip)
 
 static int i2c_pre_probe(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	struct dm_i2c_bus *i2c = dev_get_uclass_priv(dev);
 	unsigned int max = 0;
 	ofnode node;
@@ -672,7 +672,7 @@ static int i2c_pre_probe(struct udevice *dev)
 
 static int i2c_post_probe(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	struct dm_i2c_bus *i2c = dev_get_uclass_priv(dev);
 
 	i2c->speed_hz = dev_read_u32_default(dev, "clock-frequency",
@@ -686,7 +686,7 @@ static int i2c_post_probe(struct udevice *dev)
 
 static int i2c_child_post_bind(struct udevice *dev)
 {
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	struct dm_i2c_chip *plat = dev_get_parent_plat(dev);
 
 	if (!dev_has_ofnode(dev))
@@ -703,7 +703,7 @@ static int i2c_post_bind(struct udevice *dev)
 
 	debug("%s: %s, seq=%d\n", __func__, dev->name, dev_seq(dev));
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 	ret = dm_scan_fdt_dev(dev);
 #endif
 	return ret;
@@ -728,7 +728,7 @@ UCLASS_DRIVER(i2c_generic) = {
 
 static const struct udevice_id generic_chip_i2c_ids[] = {
 	{ .compatible = "i2c-chip", .data = I2C_DEVICE_GENERIC },
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 	{ .compatible = "hid-over-i2c", .data = I2C_DEVICE_HID_OVER_I2C },
 #endif
 	{ }
@@ -738,7 +738,7 @@ U_BOOT_DRIVER(i2c_generic_chip_drv) = {
 	.name		= "i2c_generic_chip_drv",
 	.id		= UCLASS_I2C_GENERIC,
 	.of_match	= generic_chip_i2c_ids,
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 	.of_to_plat	= acpi_i2c_of_to_plat,
 	.priv_auto	= sizeof(struct acpi_i2c_priv),
 #endif

@@ -23,8 +23,8 @@
 void hang(void)
 {
 #if !defined(CONFIG_SPL_BUILD) || \
-		(CONFIG_IS_ENABLED(LIBCOMMON_SUPPORT) && \
-		 CONFIG_IS_ENABLED(SERIAL))
+		(IS_ENABLED(CONFIG_LIBCOMMON_SUPPORT) && \
+		 IS_ENABLED(CONFIG_SERIAL))
 	puts("### ERROR ### Please RESET the board ###\n");
 #endif
 	bootstage_error(BOOTSTAGE_ID_NEED_RESET);

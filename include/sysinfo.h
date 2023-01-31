@@ -122,7 +122,7 @@ struct sysinfo_ops {
 
 #define sysinfo_get_ops(dev)	((struct sysinfo_ops *)(dev)->driver->ops)
 
-#if CONFIG_IS_ENABLED(SYSINFO)
+#if IS_ENABLED(CONFIG_SYSINFO)
 /**
  * sysinfo_detect() - Run the hardware info detection procedure for this device.
  *

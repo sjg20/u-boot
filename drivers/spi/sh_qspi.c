@@ -70,7 +70,7 @@ struct sh_qspi_regs {
 };
 
 struct sh_qspi_slave {
-#if !CONFIG_IS_ENABLED(DM_SPI)
+#if !IS_ENABLED(CONFIG_DM_SPI)
 	struct spi_slave	slave;
 #endif
 	struct sh_qspi_regs	*regs;
@@ -225,7 +225,7 @@ static int sh_qspi_xfer_common(struct sh_qspi_slave *ss, unsigned int bitlen,
 	return ret;
 }
 
-#if !CONFIG_IS_ENABLED(DM_SPI)
+#if !IS_ENABLED(CONFIG_DM_SPI)
 static inline struct sh_qspi_slave *to_sh_qspi(struct spi_slave *slave)
 {
 	return container_of(slave, struct sh_qspi_slave, slave);

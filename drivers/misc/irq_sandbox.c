@@ -83,7 +83,7 @@ static const struct irq_ops sandbox_irq_ops = {
 	.restore_polarities	= sandbox_restore_polarities,
 	.read_and_clear		= sandbox_irq_read_and_clear,
 	.of_xlate		= sandbox_irq_of_xlate,
-#if CONFIG_IS_ENABLED(ACPIGEN)
+#if IS_ENABLED(CONFIG_ACPIGEN)
 	.get_acpi		= sandbox_get_acpi,
 #endif
 };

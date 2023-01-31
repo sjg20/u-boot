@@ -73,13 +73,13 @@ static int bind_drivers_pass(struct udevice *parent, bool pre_reloc_only)
 		struct udevice *dev;
 		int ret;
 
-		if (CONFIG_IS_ENABLED(OF_PLATDATA)) {
+		if (IS_ENABLED(CONFIG_OF_PLATDATA)) {
 			int parent_idx = driver_info_parent_id(entry);
 
 			if (drt->dev)
 				continue;
 
-			if (CONFIG_IS_ENABLED(OF_PLATDATA_PARENT) &&
+			if (IS_ENABLED(CONFIG_OF_PLATDATA_PARENT) &&
 			    parent_idx != -1) {
 				struct driver_rt *parent_drt;
 
@@ -94,7 +94,7 @@ static int bind_drivers_pass(struct udevice *parent, bool pre_reloc_only)
 		}
 		ret = device_bind_by_name(par, pre_reloc_only, entry, &dev);
 		if (!ret) {
-			if (CONFIG_IS_ENABLED(OF_PLATDATA))
+			if (IS_ENABLED(CONFIG_OF_PLATDATA))
 				drt->dev = dev;
 		} else if (ret != -EPERM) {
 			dm_warn("No match for driver '%s'\n", entry->name);
@@ -154,7 +154,7 @@ int device_bind_driver_to_node(struct udevice *parent, const char *drv_name,
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 /**
  * driver_check_compatible() - Check if a driver matches a compatible string
  *

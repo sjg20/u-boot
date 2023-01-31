@@ -117,7 +117,7 @@ void spl_board_init(void)
 	preloader_console_init();
 }
 
-#if !CONFIG_IS_ENABLED(PCI)
+#if !IS_ENABLED(CONFIG_PCI)
 /*
  * This is a fake PCI bus for TPL when it doesn't have proper PCI. It is enough
  * to bind the devices on the PCI bus, some of which have early-regs properties
@@ -129,7 +129,7 @@ void spl_board_init(void)
  * for devices, so the TPL BARs continue to be used. Once U-Boot starts it does
  * the auto allocation (after relocation).
  */
-#if CONFIG_IS_ENABLED(OF_REAL)
+#if IS_ENABLED(CONFIG_OF_REAL)
 static const struct udevice_id tpl_fake_pci_ids[] = {
 	{ .compatible = "pci-x86" },
 	{ }

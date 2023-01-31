@@ -384,7 +384,7 @@ int fm_init_common(int index, struct ccsr_fman *reg, const char *firmware_name)
 		addr = malloc(CONFIG_SYS_QE_FMAN_FW_LENGTH);
 		int ret = 0;
 
-#if CONFIG_IS_ENABLED(DM_SPI_FLASH)
+#if IS_ENABLED(CONFIG_DM_SPI_FLASH)
 		struct udevice *new;
 
 		/* speed and mode will be read from DT */
@@ -493,7 +493,7 @@ int fm_init_common(int index, struct ccsr_fman *reg, const char *firmware_name)
 	void *addr = malloc(CONFIG_SYS_QE_FMAN_FW_LENGTH);
 	int ret = 0;
 
-#if CONFIG_IS_ENABLED(DM_SPI_FLASH)
+#if IS_ENABLED(CONFIG_DM_SPI_FLASH)
 	struct udevice *new;
 
 	/* speed and mode will be read from DT */
@@ -545,7 +545,7 @@ int fm_init_common(int index, struct ccsr_fman *reg, const char *firmware_name)
 		if (rc)
 			return rc;
 		addr = (void *)new_addr;
-	} else if (CONFIG_IS_ENABLED(FIT_SIGNATURE)) {
+	} else if (IS_ENABLED(CONFIG_FIT_SIGNATURE)) {
 		/*
 		 * Using a (signed) FIT wrapper is mandatory if we are
 		 * doing verified boot.

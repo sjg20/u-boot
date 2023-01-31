@@ -40,7 +40,7 @@ secondary_harts_relocation_error:
 .section .text
 .globl _start
 _start:
-#if CONFIG_IS_ENABLED(RISCV_MMODE)
+#if IS_ENABLED(CONFIG_RISCV_MMODE)
 	csrr	a0, CSR_MHARTID
 #endif
 
@@ -72,14 +72,14 @@ _start:
 	 */
 	csrw	MODE_PREFIX(ie), zero
 
-#if CONFIG_IS_ENABLED(SMP)
+#if IS_ENABLED(CONFIG_SMP)
 	/* check if hart is within range */
 	/* tp: hart id */
 	li	t0, CONFIG_NR_CPUS
 	bge	tp, t0, hart_out_of_bounds_loop
 
 	/* set xSIE bit to receive IPIs */
-#if CONFIG_IS_ENABLED(RISCV_MMODE)
+#if IS_ENABLED(CONFIG_RISCV_MMODE)
 	li	t0, MIE_MSIE
 #else
 	li	t0, SIE_SSIE
@@ -110,7 +110,7 @@ call_board_init_f_0:
 	mv	s0, a0
 
 	/* setup stack */
-#if CONFIG_IS_ENABLED(SMP)
+#if IS_ENABLED(CONFIG_SMP)
 	/* tp: hart id */
 	slli	t0, tp, CONFIG_STACK_SIZE_SHIFT
 	sub	sp, a0, t0
@@ -122,7 +122,7 @@ call_board_init_f_0:
 call_harts_early_init:
 	jal	harts_early_init
 
-#if !CONFIG_IS_ENABLED(XIP)
+#if !IS_ENABLED(CONFIG_XIP)
 	/*
 	 * Pick hart to initialize global data and run U-Boot. The other harts
 	 * wait for initialization to complete.
@@ -140,7 +140,7 @@ call_harts_early_init:
 	 * accesses gd).
 	 */
 	mv	gp, s0
-#if CONFIG_IS_ENABLED(RISCV_MMODE)
+#if IS_ENABLED(CONFIG_RISCV_MMODE)
 	bnez	tp, secondary_hart_loop
 #endif
 #endif
@@ -152,7 +152,7 @@ call_harts_early_init:
 	/* save the boot hart id to global_data */
 	SREG	tp, GD_BOOT_HART(gp)
 
-#if !CONFIG_IS_ENABLED(XIP)
+#if !IS_ENABLED(CONFIG_XIP)
 #ifdef CONFIG_AVAILABLE_HARTS
 	la	t0, available_harts_lock
 	amoswap.w.rl zero, zero, 0(t0)
@@ -219,7 +219,7 @@ spl_stack_gd_setup:
 	mv	s0, a0
 
 	/* setup stack on main hart */
-#if CONFIG_IS_ENABLED(SMP)
+#if IS_ENABLED(CONFIG_SMP)
 	/* tp: hart id */
 	slli	t0, tp, CONFIG_STACK_SIZE_SHIFT
 	sub	sp, s0, t0
@@ -227,7 +227,7 @@ spl_stack_gd_setup:
 	mv	sp, s0
 #endif
 
-#if CONFIG_IS_ENABLED(SMP)
+#if IS_ENABLED(CONFIG_SMP)
 	/* set new stack and global data pointer on secondary harts */
 spl_secondary_hart_stack_gd_setup:
 	la	a0, secondary_hart_relocate
@@ -270,7 +270,7 @@ relocate_code:
  *Set up the stack
  */
 stack_setup:
-#if CONFIG_IS_ENABLED(SMP)
+#if IS_ENABLED(CONFIG_SMP)
 	/* tp: hart id */
 	slli	t0, tp, CONFIG_STACK_SIZE_SHIFT
 	sub	sp, s2, t0
@@ -365,7 +365,7 @@ clbss_l:
 	blt	t0, t1, clbss_l
 
 relocate_secondary_harts:
-#if CONFIG_IS_ENABLED(SMP)
+#if IS_ENABLED(CONFIG_SMP)
 	/* send relocation IPI */
 	la	t0, secondary_hart_relocate
 	add	a0, t0, t6
@@ -409,7 +409,7 @@ call_board_init_r:
  */
 	jr	t4			/* jump to board_init_r() */
 
-#if CONFIG_IS_ENABLED(SMP)
+#if IS_ENABLED(CONFIG_SMP)
 hart_out_of_bounds_loop:
 	/* Harts in this loop are out of bounds, increase CONFIG_NR_CPUS. */
 	wfi
@@ -436,9 +436,9 @@ secondary_hart_relocate:
 secondary_hart_loop:
 	wfi
 
-#if CONFIG_IS_ENABLED(SMP)
+#if IS_ENABLED(CONFIG_SMP)
 	csrr	t0, MODE_PREFIX(ip)
-#if CONFIG_IS_ENABLED(RISCV_MMODE)
+#if IS_ENABLED(CONFIG_RISCV_MMODE)
 	andi	t0, t0, MIE_MSIE
 #else
 	andi	t0, t0, SIE_SSIE

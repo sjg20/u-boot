@@ -96,7 +96,7 @@ struct serial_device *default_serial_console(void)
 }
 #endif
 
-#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT)
+#if !IS_ENABLED(CONFIG_SKIP_LOWLEVEL_INIT)
 static const struct ddr_data ddr2_data = {
 	.datardsratio0 = MT47H128M16RT25E_RD_DQS,
 	.datafwsratio0 = MT47H128M16RT25E_PHY_FIFO_WE,
@@ -901,7 +901,7 @@ int board_late_init(void)
 #endif
 
 /* CPSW plat */
-#if CONFIG_IS_ENABLED(NET) && !CONFIG_IS_ENABLED(OF_CONTROL)
+#if IS_ENABLED(CONFIG_NET) && !IS_ENABLED(CONFIG_OF_CONTROL)
 struct cpsw_slave_data slave_data[] = {
 	{
 		.slave_reg_ofs  = CPSW_SLAVE0_OFFSET,
@@ -982,7 +982,7 @@ int board_fit_config_name_match(const char *name)
 }
 #endif
 
-#if !CONFIG_IS_ENABLED(OF_CONTROL)
+#if !IS_ENABLED(CONFIG_OF_CONTROL)
 static const struct omap_hsmmc_plat am335x_mmc0_plat = {
 	.base_addr = (struct hsmmc *)OMAP_HSMMC1_BASE,
 	.cfg.host_caps = MMC_MODE_HS_52MHz | MMC_MODE_HS | MMC_MODE_4BIT,

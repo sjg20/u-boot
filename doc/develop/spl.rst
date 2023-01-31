@@ -69,10 +69,10 @@ CONFIG_SPL_WATCHDOG (drivers/watchdog/libwatchdog.o)
 Adding SPL-specific code
 ------------------------
 
-To check whether a feature is enabled, use CONFIG_IS_ENABLED()::
+To check whether a feature is enabled, use IS_ENABLED()::
 
-  if (CONFIG_IS_ENABLED(CLK))
-      ...
+    if (IS_ENABLED(CONFIG_CLK))
+        ...
 
 This checks CONFIG_CLK for the main build, CONFIG_SPL_CLK for the SPL build,
 CONFIG_TPL_CLK for the TPL build, etc.

@@ -216,7 +216,7 @@ int board_init(void)
 	select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT, 0);
 
 #ifdef CONFIG_RTC_ENABLE_32KHZ_OUTPUT
-#if CONFIG_IS_ENABLED(DM_I2C)
+#if IS_ENABLED(CONFIG_DM_I2C)
 	rtc_enable_32khz_output(0, CFG_SYS_I2C_RTC_ADDR);
 #else
 	rtc_enable_32khz_output();
