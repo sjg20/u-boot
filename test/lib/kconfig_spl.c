@@ -29,16 +29,6 @@ static int lib_test_spl_is_enabled(struct unit_test_state *uts)
 		printf("value %ld\n", val);
 	}
 
-	/*
-	 * This fails if CONFIG_TEST_KCONFIG_ENABLE is not enabled, since the
-	 * value is used.
-	 */
-	if (IS_ENABLED(CONFIG_TEST_KCONFIG)) {
-		val = CONFIG_IF_ENABLED_INT(CONFIG_TEST_KCONFIG_ENABLE,
-					    CONFIG_TEST_KCONFIG_VALUE);
-		printf("value2 %ld\n", val);
-	}
-
 	return 0;
 }
 LIB_TEST(lib_test_spl_is_enabled, 0);

@@ -47,19 +47,6 @@
 	___config_opt_enabled(arg1_or_junk arg2, def_val)
 #define ___config_opt_enabled(__ignored, val, ...) val
 
-#ifndef __ASSEMBLY__
-/*
- * Detect usage of a the value when the conditional is not enabled. When used
- * in assembly context, this likely produces a assembly error, or hopefully at
- * least something recognisable.
- */
-long invalid_use_of_IF_ENABLED_INT(void);
-#endif
-
-/* Evaluates to int_option if option is defined, otherwise a build error */
-#define IF_ENABLED_INT(option, int_option) \
-	config_opt_enabled(option, int_option, invalid_use_of_IF_ENABLED_INT())
-
 /*
  * Count number of arguments to a variadic macro. Currently only need
  * it for 1, 2 or 3 arguments.
@@ -103,22 +90,15 @@ long invalid_use_of_IF_ENABLED_INT(void);
 
 #ifndef __ASSEMBLY__
 /*
- * Detect usage of a the value when the conditional is not enabled. When used
- * in assembly context, this likely produces a assembly error, or hopefully at
+ * Detect usage of the value when the conditional is not enabled. When used
+ * in assembly context, this likely produces an assembly error, or hopefully at
  * least something recognisable.
  */
-long invalid_use_of_CONFIG_IF_ENABLED_INT(void);
+long invalid_use_of_IF_ENABLED_INT(void);
 #endif
 
-/*
- * Evaluates to SPL_/TPL_int_option if SPL_/TPL_/option is not defined,
- * otherwise build error
- */
-#define CONFIG_IF_ENABLED_INT(option, int_option) \
-	CONFIG_IS_ENABLED(option, (int_option), \
-		(invalid_use_of_CONFIG_IF_ENABLED_INT()))
-
-#define CONFIG_IF_INT(option, int_option) \
-	CONFIG_IF_ENABLED_INT(option, int_option)
+/* Evaluates to int_option if option is defined, otherwise build error */
+#define IF_ENABLED_INT(option, int_option) \
+	IS_ENABLED(option, (int_option), (invalid_use_of_IF_ENABLED_INT()))
 
 #endif /* __LINUX_KCONFIG_H */

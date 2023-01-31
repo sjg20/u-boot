@@ -24,8 +24,6 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 
 	ut_asserteq(0xc000,
 		    IF_ENABLED_INT(CONFIG_BLOBLIST_FIXED, CONFIG_BLOBLIST_ADDR));
-	ut_asserteq(0xc000,
-		    CONFIG_IF_ENABLED_INT(CONFIG_BLOBLIST_FIXED, CONFIG_BLOBLIST_ADDR));
 
 	/*
 	 * This fails if CONFIG_TEST_KCONFIG_ENABLE is not enabled, since the
@@ -38,19 +36,6 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 		val = IF_ENABLED_INT(CONFIG_TEST_KCONFIG_ENABLE,
 				     CONFIG_TEST_KCONFIG_VALUE);
 		printf("value %ld\n", val);
-	}
-
-	/*
-	 * This fails if CONFIG_TEST_KCONFIG_ENABLE is not enabled, since the
-	 * value is used. Disable for SPL so that the errors in kconfig_spl.c
-	 * are detected, since otherwise a build error when building U-Boot may
-	 * cause SPL to not be built.
-	 */
-	if (!IS_ENABLED(CONFIG_SANDBOX_SPL) &&
-	    IS_ENABLED(CONFIG_TEST_KCONFIG)) {
-		val = CONFIG_IF_ENABLED_INT(CONFIG_TEST_KCONFIG_ENABLE,
-					    CONFIG_TEST_KCONFIG_VALUE);
-		printf("value2 %ld\n", val);
 	}
 
 	return 0;
