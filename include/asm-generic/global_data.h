@@ -301,7 +301,7 @@ struct global_data {
 	 * @timebase_l: low 32 bits of timer
 	 */
 	unsigned int timebase_l;
-#if CONFIG_VAL(SYS_MALLOC_F_LEN)
+#if CONFIG_SYS_MALLOC_F_LEN
 	/**
 	 * @malloc_base: base address of early malloc()
 	 */

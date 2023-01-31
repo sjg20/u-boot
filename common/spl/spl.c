@@ -525,12 +525,12 @@ static int spl_common_init(bool setup_malloc)
 {
 	int ret;
 
-#if CONFIG_VAL(SYS_MALLOC_F_LEN)
+#if CONFIG_SYS_MALLOC_F_LEN
 	if (setup_malloc) {
 #ifdef CFG_MALLOC_F_ADDR
 		gd->malloc_base = CFG_MALLOC_F_ADDR;
 #endif
-		gd->malloc_limit = CONFIG_VAL(SYS_MALLOC_F_LEN);
+		gd->malloc_limit = CONFIG_SYS_MALLOC_F_LEN;
 		gd->malloc_ptr = 0;
 	}
 #endif
@@ -877,7 +877,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	default:
 		debug("Unsupported OS image.. Jumping nevertheless..\n");
 	}
-#if CONFIG_VAL(SYS_MALLOC_F_LEN) && !defined(CONFIG_SYS_SPL_MALLOC_SIZE)
+#if CONFIG_SYS_MALLOC_F_LEN && !defined(CONFIG_SYS_SPL_MALLOC_SIZE)
 	debug("SPL malloc() used 0x%lx bytes (%ld KB)\n", gd->malloc_ptr,
 	      gd->malloc_ptr / 1024);
 #endif
@@ -924,17 +924,17 @@ __weak void spl_relocate_stack_check(void)
 {
 #if IS_ENABLED(CONFIG_SYS_REPORT_STACK_F_USAGE)
 	ulong init_sp = gd->start_addr_sp;
-	ulong stack_bottom = init_sp - CONFIG_VAL(SIZE_LIMIT_PROVIDE_STACK);
+	ulong stack_bottom = init_sp - CONFIG_SIZE_LIMIT_PROVIDE_STACK;
 	u8 *ptr = (u8 *)stack_bottom;
 	ulong i;
 
-	for (i = 0; i < CONFIG_VAL(SIZE_LIMIT_PROVIDE_STACK); i++) {
-		if (*ptr != CONFIG_VAL(SYS_STACK_F_CHECK_BYTE))
+	for (i = 0; i < CONFIG_SIZE_LIMIT_PROVIDE_STACK; i++) {
+		if (*ptr != CONFIG_SYS_STACK_F_CHECK_BYTE)
 			break;
 		ptr++;
 	}
 	printf("SPL initial stack usage: %lu bytes\n",
-	       CONFIG_VAL(SIZE_LIMIT_PROVIDE_STACK) - i);
+	       CONFIG_SIZE_LIMIT_PROVIDE_STACK - i);
 #endif
 }
 
@@ -965,7 +965,7 @@ ulong spl_relocate_stack_gd(void)
 	if (IS_ENABLED(CONFIG_SYS_REPORT_STACK_F_USAGE))
 		spl_relocate_stack_check();
 
-#if defined(CONFIG_SPL_SYS_MALLOC_SIMPLE) && CONFIG_VAL(SYS_MALLOC_F_LEN)
+#if defined(CONFIG_SPL_SYS_MALLOC_SIMPLE) && CONFIG_SYS_MALLOC_F_LEN
 	if (CONFIG_SPL_STACK_R_MALLOC_SIMPLE_LEN) {
 		debug("SPL malloc() before relocation used 0x%lx bytes (%ld KB)\n",
 		      gd->malloc_ptr, gd->malloc_ptr / 1024);

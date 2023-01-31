@@ -71,7 +71,7 @@ static int fit_image_setup_verify(struct image_sign_info *info,
 	const char *algo_name;
 	const char *padding_name;
 
-	if (fdt_totalsize(fit) > CONFIG_VAL(FIT_SIGNATURE_MAX_SIZE)) {
+	if (fdt_totalsize(fit) > CONFIG_FIT_SIGNATURE_MAX_SIZE) {
 		*err_msgp = "Total size too large";
 		return 1;
 	}

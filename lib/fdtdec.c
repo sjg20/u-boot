@@ -1160,7 +1160,7 @@ static int uncompress_blob(const void *src, ulong sz_src, void **dstp)
 {
 #if IS_ENABLED(CONFIG_MULTI_DTB_FIT_GZIP) ||\
 	IS_ENABLED(CONFIG_MULTI_DTB_FIT_LZO)
-	size_t sz_out = CONFIG_VAL(MULTI_DTB_FIT_UNCOMPRESS_SZ);
+	size_t sz_out = CONFIG_MULTI_DTB_FIT_UNCOMPRESS_SZ;
 	bool gzip = 0, lzo = 0;
 	ulong sz_in = sz_src;
 	void *dst;
@@ -1185,7 +1185,7 @@ static int uncompress_blob(const void *src, ulong sz_src, void **dstp)
 		}
 	} else  {
 # if IS_ENABLED(CONFIG_MULTI_DTB_FIT_USER_DEFINED_AREA)
-		dst = (void *)CONFIG_VAL(MULTI_DTB_FIT_USER_DEF_ADDR);
+		dst = (void *)CONFIG_MULTI_DTB_FIT_USER_DEF_ADDR;
 # else
 		return -ENOTSUPP;
 # endif

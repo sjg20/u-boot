@@ -534,7 +534,7 @@ int sandbox_main(int argc, char *argv[])
 			goto err;
 	}
 
-#if CONFIG_VAL(SYS_MALLOC_F_LEN)
+#if CONFIG_SYS_MALLOC_F_LEN
 	gd->malloc_base = CFG_MALLOC_F_ADDR;
 #endif
 #if IS_ENABLED(CONFIG_LOG)

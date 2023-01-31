@@ -80,7 +80,7 @@ int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 	 * Load the FIT into the SPL memory. This is typically a FIT with
 	 * external data, so this is quite small, perhaps a few KB.
 	 */
-	addr = CONFIG_VAL(TEXT_BASE);
+	addr = CONFIG_TEXT_BASE;
 	buf = map_sysmem(addr, size);
 	num_blks = DIV_ROUND_UP(size, desc->blksz);
 	log_debug("read %lx, %lx blocks to %lx / %p\n", size, num_blks, addr,

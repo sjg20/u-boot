@@ -32,10 +32,6 @@
 #define __config_enabled(arg1_or_junk, def_val) ___config_enabled(arg1_or_junk 1, def_val)
 #define ___config_enabled(__ignored, val, ...) val
 
-#define __config_val(cfg) CONFIG_ ## cfg
-
-#define CONFIG_VAL(option)  __config_val(option)
-
 /*
  * Count number of arguments to a variadic macro. Currently only need
  * it for 1, 2 or 3 arguments.

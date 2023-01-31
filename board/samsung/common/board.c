@@ -106,7 +106,7 @@ int board_init(void)
 	}
 	boot_temp_check();
 #endif
-#if CONFIG_VAL(SYS_MEM_TOP_HIDE)
+#if CONFIG_SYS_MEM_TOP_HIDE
 	/* The last few MB of memory can be reserved for secure firmware */
 	ulong size = CONFIG_SYS_MEM_TOP_HIDE;
 

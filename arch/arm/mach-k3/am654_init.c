@@ -204,7 +204,7 @@ void board_init_f(ulong dummy)
 	 * new malloc area inside the currently active pre-relocation "first"
 	 * malloc pool of which we use all that's left.
 	 */
-	pool_size = CONFIG_VAL(SYS_MALLOC_F_LEN) - gd->malloc_ptr;
+	pool_size = CONFIG_SYS_MALLOC_F_LEN - gd->malloc_ptr;
 	pool_addr = malloc(pool_size);
 	if (!pool_addr)
 		panic("ERROR: Can't allocate full malloc pool!\n");

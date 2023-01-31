@@ -347,8 +347,8 @@ struct mem_timings mem_timings[] = {
 			DMC_MEMCONFIGX_CHIP_COL_10 |
 			DMC_MEMCONFIGX_CHIP_ROW_15 |
 			DMC_MEMCONFIGX_CHIP_BANK_8,
-		.membaseconfig0 = DMC_MEMBASECONFIG_VAL(0x40),
-		.membaseconfig1 = DMC_MEMBASECONFIG_VAL(0x80),
+		.membaseconfig0 = DMC_MEMBASECONFIG_0x40,
+		.membaseconfig1 = DMC_MEMBASECONFIG_0x80,
 		.prechconfig_tp_cnt = 0xff,
 		.dpwrdn_cyc = 0xff,
 		.dsref_cyc = 0xffff,
@@ -450,8 +450,8 @@ struct mem_timings mem_timings[] = {
 			DMC_MEMCONFIGX_CHIP_COL_10 |
 			DMC_MEMCONFIGX_CHIP_ROW_15 |
 			DMC_MEMCONFIGX_CHIP_BANK_8,
-		.membaseconfig0 = DMC_MEMBASECONFIG_VAL(0x40),
-		.membaseconfig1 = DMC_MEMBASECONFIG_VAL(0x80),
+		.membaseconfig0 = DMC_MEMBASECONFIG_0x40,
+		.membaseconfig1 = DMC_MEMBASECONFIG_0x80,
 		.prechconfig_tp_cnt = 0xff,
 		.dpwrdn_cyc = 0xff,
 		.dsref_cyc = 0xffff,

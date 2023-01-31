@@ -50,7 +50,7 @@
 		printf(fmt, ##__VA_ARGS__); \
 	else if (IS_ENABLED(CONFIG_LOG)) \
 		log(cat, level, fmt, ##__VA_ARGS__); \
-	else if (level < CONFIG_VAL(LOGLEVEL)) \
+	else if (level < CONFIG_LOGLEVEL) \
 		printf(fmt, ##__VA_ARGS__); \
 })
 

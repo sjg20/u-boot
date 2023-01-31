@@ -89,5 +89,5 @@ void free_simple(void *ptr)
 void malloc_simple_info(void)
 {
 	log_info("malloc_simple: %lx bytes used, %lx remain\n", gd->malloc_ptr,
-		 CONFIG_VAL(SYS_MALLOC_F_LEN) - gd->malloc_ptr);
+		 CONFIG_SYS_MALLOC_F_LEN - gd->malloc_ptr);
 }

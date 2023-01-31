@@ -356,7 +356,7 @@ static int setup_dest_addr(void)
 	 * Ram is setup, size stored in gd !!
 	 */
 	debug("Ram size: %08llX\n", (unsigned long long)gd->ram_size);
-#if CONFIG_VAL(SYS_MEM_TOP_HIDE)
+#if CONFIG_SYS_MEM_TOP_HIDE
 	/*
 	 * Subtract specified amount of memory to hide so that it won't
 	 * get "touched" at all by U-Boot. By fixing up gd->ram_size
@@ -788,7 +788,7 @@ static int initf_bootstage(void)
 
 static int initf_dm(void)
 {
-#if defined(CONFIG_DM) && CONFIG_VAL(SYS_MALLOC_F_LEN)
+#if defined(CONFIG_DM) && CONFIG_SYS_MALLOC_F_LEN
 	int ret;
 
 	bootstage_start(BOOTSTAGE_ID_ACCUM_DM_F, "dm_f");

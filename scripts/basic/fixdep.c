@@ -482,7 +482,7 @@ static int run_tests(void)
 	CHECKP(buf + 18, out);
 	CHECKP(buf + 22, end);
 
-	strcpy(buf, "CONFIG_VAL(MARY)");
+	strcpy(buf, "CONFIG_MARY");
 	out = parse_config_line(buf, &end);
 	CHECKP(buf + 11, out);
 	CHECKP(buf + 15, end);

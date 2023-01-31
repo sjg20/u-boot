@@ -163,7 +163,7 @@ int _log_buffer(enum log_category_t cat, enum log_level_t level,
  * CONFIG_LOG_MAX_LEVEL is not defined. Add a check for this.
  */
 #if IS_ENABLED(CONFIG_LOG)
-#define _LOG_MAX_LEVEL CONFIG_VAL(LOG_MAX_LEVEL)
+#define _LOG_MAX_LEVEL CONFIG_LOG_MAX_LEVEL
 #else
 #define _LOG_MAX_LEVEL LOGL_INFO
 #endif
