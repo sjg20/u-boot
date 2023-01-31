@@ -56,11 +56,11 @@ static const struct {
 	},
 	[FASTBOOT_COMMAND_FLASH] =  {
 		.command = "flash",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_FLASH, (flash), (NULL))
+		.dispatch = IS_ENABLED(CONFIG_FASTBOOT_FLASH, (flash), (NULL))
 	},
 	[FASTBOOT_COMMAND_ERASE] =  {
 		.command = "erase",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_FLASH, (erase), (NULL))
+		.dispatch = IS_ENABLED(CONFIG_FASTBOOT_FLASH, (erase), (NULL))
 	},
 	[FASTBOOT_COMMAND_BOOT] =  {
 		.command = "boot",
@@ -92,27 +92,27 @@ static const struct {
 	},
 	[FASTBOOT_COMMAND_OEM_FORMAT] = {
 		.command = "oem format",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_CMD_OEM_FORMAT, (oem_format), (NULL))
+		.dispatch = IS_ENABLED(CONFIG_FASTBOOT_CMD_OEM_FORMAT, (oem_format), (NULL))
 	},
 	[FASTBOOT_COMMAND_OEM_PARTCONF] = {
 		.command = "oem partconf",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_CMD_OEM_PARTCONF, (oem_partconf), (NULL))
+		.dispatch = IS_ENABLED(CONFIG_FASTBOOT_CMD_OEM_PARTCONF, (oem_partconf), (NULL))
 	},
 	[FASTBOOT_COMMAND_OEM_BOOTBUS] = {
 		.command = "oem bootbus",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_CMD_OEM_BOOTBUS, (oem_bootbus), (NULL))
+		.dispatch = IS_ENABLED(CONFIG_FASTBOOT_CMD_OEM_BOOTBUS, (oem_bootbus), (NULL))
 	},
 	[FASTBOOT_COMMAND_OEM_RUN] = {
 		.command = "oem run",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_OEM_RUN, (run_ucmd), (NULL))
+		.dispatch = IS_ENABLED(CONFIG_FASTBOOT_OEM_RUN, (run_ucmd), (NULL))
 	},
 	[FASTBOOT_COMMAND_UCMD] = {
 		.command = "UCmd",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_UUU_SUPPORT, (run_ucmd), (NULL))
+		.dispatch = IS_ENABLED(CONFIG_FASTBOOT_UUU_SUPPORT, (run_ucmd), (NULL))
 	},
 	[FASTBOOT_COMMAND_ACMD] = {
 		.command = "ACmd",
-		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_UUU_SUPPORT, (run_acmd), (NULL))
+		.dispatch = IS_ENABLED(CONFIG_FASTBOOT_UUU_SUPPORT, (run_acmd), (NULL))
 	},
 };
 

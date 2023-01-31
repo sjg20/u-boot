@@ -25,7 +25,7 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 	ut_asserteq(0xc000,
 		    IF_ENABLED_INT(CONFIG_BLOBLIST_FIXED, CONFIG_BLOBLIST_ADDR));
 	ut_asserteq(0xc000,
-		    CONFIG_IF_ENABLED_INT(BLOBLIST_FIXED, BLOBLIST_ADDR));
+		    CONFIG_IF_ENABLED_INT(CONFIG_BLOBLIST_FIXED, CONFIG_BLOBLIST_ADDR));
 
 	/*
 	 * This fails if CONFIG_TEST_KCONFIG_ENABLE is not enabled, since the
@@ -48,8 +48,8 @@ static int lib_test_is_enabled(struct unit_test_state *uts)
 	 */
 	if (!IS_ENABLED(CONFIG_SANDBOX_SPL) &&
 	    IS_ENABLED(CONFIG_TEST_KCONFIG)) {
-		val = CONFIG_IF_ENABLED_INT(TEST_KCONFIG_ENABLE,
-					    TEST_KCONFIG_VALUE);
+		val = CONFIG_IF_ENABLED_INT(CONFIG_TEST_KCONFIG_ENABLE,
+					    CONFIG_TEST_KCONFIG_VALUE);
 		printf("value2 %ld\n", val);
 	}
 

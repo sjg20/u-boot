@@ -1148,7 +1148,7 @@ DM_TEST(dm_test_ofnode_get_name, UT_TESTF_SCAN_FDT);
 /* try to access more FDTs than is supported */
 static int dm_test_ofnode_too_many(struct unit_test_state *uts)
 {
-	const int max_trees = CONFIG_IS_ENABLED(OFNODE_MULTI_TREE,
+	const int max_trees = IS_ENABLED(CONFIG_OFNODE_MULTI_TREE,
 					(CONFIG_OFNODE_MULTI_TREE_MAX), (1));
 	const int fdt_size = 256;
 	const int num_trees = max_trees + 1;

@@ -152,7 +152,7 @@ unsigned int install_e820_map(unsigned int max_entries,
 	if (IS_ENABLED(CONFIG_HAVE_ACPI_RESUME)) {
 		ulong stack_size;
 
-		stack_size = CONFIG_IS_ENABLED(HAVE_ACPI_RESUME,
+		stack_size = IS_ENABLED(CONFIG_HAVE_ACPI_RESUME,
 					       (CONFIG_STACK_SIZE_RESUME), (0));
 		/*
 		 * Everything between U-Boot's stack and ram top needs to be
