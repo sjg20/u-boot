@@ -2654,12 +2654,6 @@ sub u_boot_line {
 		     "Avoid setting skip_board_fixup env variable\n" . $herecurr);
 	}
 
-	# Do not use CONFIG_ prefix in CONFIG_IS_ENABLED() calls
-	if ($line =~ /^\+.*CONFIG_IS_ENABLED\(CONFIG_\w*\).*/) {
-		ERROR("CONFIG_IS_ENABLED_CONFIG",
-		      "CONFIG_IS_ENABLED() takes values without the CONFIG_ prefix\n" . $herecurr);
-	}
-
 	# Use _priv as a suffix for the device-private data struct
 	if ($line =~ /^\+\s*\.priv_auto\s*=\s*sizeof\(struct\((\w+)\).*/) {
 		my $struct_name = $1;
@@ -7195,16 +7189,6 @@ sub process {
 		if ($rawline =~ /\bIS_ENABLED\s*\(\s*(\w+)\s*\)/ && $1 !~ /^${CONFIG_}/) {
 			WARN("IS_ENABLED_CONFIG",
 			     "IS_ENABLED($1) is normally used as IS_ENABLED(${CONFIG_}$1)\n" . $herecurr);
-		}
-
-# check for #if defined CONFIG_<FOO> || defined CONFIG_<FOO>_MODULE
-		if ($line =~ /^\+\s*#\s*if\s+defined(?:\s*\(?\s*|\s+)(${CONFIG_}[A-Z_]+)\s*\)?\s*\|\|\s*defined(?:\s*\(?\s*|\s+)\1_MODULE\s*\)?\s*$/) {
-			my $config = $1;
-			if (WARN("PREFER_IS_ENABLED",
-				 "Prefer IS_ENABLED(<FOO>) to ${CONFIG_}<FOO> || ${CONFIG_}<FOO>_MODULE\n" . $herecurr) &&
-			    $fix) {
-				$fixed[$fixlinenr] = "\+#if IS_ENABLED($config)";
-			}
 		}
 
 # check for /* fallthrough */ like comment, prefer fallthrough;
