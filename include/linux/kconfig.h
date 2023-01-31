@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __LINUX_KCONFIG_H
 #define __LINUX_KCONFIG_H
 
@@ -13,6 +14,21 @@
 #include <generated/autoconf.h>
 #endif
 
+#define __ARG_PLACEHOLDER_1 0,
+#define __take_second_arg(__ignored, val, ...) val
+
+/*
+ * The use of "&&" / "||" is limited in certain expressions.
+ * The following enable to calculate "and" / "or" with macro expansion only.
+ */
+#define __and(x, y)			___and(x, y)
+#define ___and(x, y)			____and(__ARG_PLACEHOLDER_##x, y)
+#define ____and(arg1_or_junk, y)	__take_second_arg(arg1_or_junk y, 0)
+
+#define __or(x, y)			___or(x, y)
+#define ___or(x, y)			____or(__ARG_PLACEHOLDER_##x, y)
+#define ____or(arg1_or_junk, y)		__take_second_arg(arg1_or_junk 1, y)
+
 /*
  * Helper macros to use CONFIG_ options in C/CPP expressions. Note that
  * these only work with boolean and tristate options.
@@ -26,11 +42,9 @@
  * When CONFIG_BOOGER is not defined, we generate a (... 1, 0) pair, and when
  * the last step cherry picks the 2nd arg, we get a zero.
  */
-#define __ARG_PLACEHOLDER_1 0,
-#define config_enabled(cfg, def_val) _config_enabled(cfg, def_val)
-#define _config_enabled(value, def_val) __config_enabled(__ARG_PLACEHOLDER_##value, def_val)
-#define __config_enabled(arg1_or_junk, def_val) ___config_enabled(arg1_or_junk 1, def_val)
-#define ___config_enabled(__ignored, val, ...) val
+#define __is_defined(cfg, def_val) ___is_defined(cfg, def_val)
+#define ___is_defined(value, def_val) ____is_defined(__ARG_PLACEHOLDER_##value, def_val)
+#define ____is_defined(arg1_or_junk, def_val) __take_second_arg(arg1_or_junk 1, def_val)
 
 /*
  * Count number of arguments to a variadic macro. Currently only need
@@ -49,7 +63,7 @@
 #define __IS_ENABLED_1(option)        __IS_ENABLED_3(option, (1), (0))
 #define __IS_ENABLED_2(option, case1) __IS_ENABLED_3(option, case1, ())
 #define __IS_ENABLED_3(option, case1, case0) \
-	__concat(__unwrap, config_enabled(option, 0)) (case1, case0)
+	__concat(__unwrap, __is_defined(option, 0)) (case1, case0)
 
 /*
  * IS_ENABLED(CONFIG_FOO) returns 1 if CONFIG_FOO is enabled for the phase being
