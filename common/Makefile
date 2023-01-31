@@ -18,7 +18,7 @@ obj-$(CONFIG_DISPLAY_BOARDINFO) += board_info.o
 obj-$(CONFIG_DISPLAY_BOARDINFO_LATE) += board_info.o
 
 obj-$(CONFIG_FDT_SIMPLEFB) += fdt_simplefb.o
-obj-$(CONFIG_$(SPL_TPL_)OF_LIBFDT) += fdt_support.o
+obj-$(CONFIG_OF_LIBFDT) += fdt_support.o
 obj-$(CONFIG_MII) += miiphyutil.o
 obj-$(CONFIG_CMD_MII) += miiphyutil.o
 obj-$(CONFIG_PHYLIB) += miiphyutil.o
@@ -43,15 +43,15 @@ obj-$(CONFIG_CMDLINE) += cli_getch.o cli_readline.o cli_simple.o
 
 endif # !CONFIG_SPL_BUILD
 
-obj-$(CONFIG_$(SPL_TPL_)BOOTSTAGE) += bootstage.o
-obj-$(CONFIG_$(SPL_TPL_)BLOBLIST) += bloblist.o
+obj-$(CONFIG_BOOTSTAGE) += bootstage.o
+obj-$(CONFIG_BLOBLIST) += bloblist.o
 
 ifdef CONFIG_SPL_BUILD
 ifdef CONFIG_SPL_DFU
 obj-$(CONFIG_DFU_OVER_USB) += dfu.o
 endif
 obj-$(CONFIG_SPL_NET) += miiphyutil.o
-obj-$(CONFIG_$(SPL_TPL_)OF_LIBFDT) += fdt_support.o
+obj-$(CONFIG_OF_LIBFDT) += fdt_support.o
 
 obj-$(CONFIG_SPL_USB_HOST) += usb.o usb_hub.o
 obj-$(CONFIG_SPL_USB_STORAGE) += usb_storage.o
@@ -76,15 +76,15 @@ endif # CONFIG_SPL_BUILD
 obj-$(CONFIG_CROS_EC) += cros_ec.o
 obj-y += dlmalloc.o
 ifdef CONFIG_SYS_MALLOC_F
-ifneq ($(CONFIG_$(SPL_TPL_)SYS_MALLOC_F_LEN),0)
+ifneq ($(CONFIG_SYS_MALLOC_F_LEN),0)
 obj-y += malloc_simple.o
 endif
 endif
 
 obj-$(CONFIG_CYCLIC) += cyclic.o
-obj-$(CONFIG_$(SPL_TPL_)EVENT) += event.o
+obj-$(CONFIG_EVENT) += event.o
 
-obj-$(CONFIG_$(SPL_TPL_)HASH) += hash.o
+obj-$(CONFIG_HASH) += hash.o
 obj-$(CONFIG_IO_TRACE) += iotrace.o
 obj-y += memsize.o
 obj-y += stdio.o
@@ -98,15 +98,15 @@ obj-$(CONFIG_FSL_DDR_INTERACTIVE) += cli_getch.o cli_simple.o cli_readline.o
 obj-$(CONFIG_STM32MP1_DDR_INTERACTIVE) += cli_getch.o cli_simple.o cli_readline.o
 obj-$(CONFIG_DFU_OVER_USB) += dfu.o
 obj-y += command.o
-obj-$(CONFIG_$(SPL_TPL_)LOG) += log.o
-obj-$(CONFIG_$(SPL_TPL_)LOG_CONSOLE) += log_console.o
-obj-$(CONFIG_$(SPL_TPL_)LOG_SYSLOG) += log_syslog.o
+obj-$(CONFIG_LOG) += log.o
+obj-$(CONFIG_LOG_CONSOLE) += log_console.o
+obj-$(CONFIG_LOG_SYSLOG) += log_syslog.o
 obj-y += s_record.o
 obj-$(CONFIG_CMD_LOADB) += xyzModem.o
-obj-$(CONFIG_$(SPL_TPL_)YMODEM_SUPPORT) += xyzModem.o
+obj-$(CONFIG_YMODEM_SUPPORT) += xyzModem.o
 
-obj-$(CONFIG_$(SPL_TPL_)AVB_VERIFY) += avb_verify.o
-obj-$(CONFIG_$(SPL_TPL_)STACKPROTECTOR) += stackprot.o
+obj-$(CONFIG_AVB_VERIFY) += avb_verify.o
+obj-$(CONFIG_STACKPROTECTOR) += stackprot.o
 obj-$(CONFIG_SCP03) += scp03.o
 
 obj-$(CONFIG_QFW) += qfw.o

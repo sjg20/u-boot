@@ -18,7 +18,7 @@ obj-$(CONFIG_SAM9X60)		+= sam9x60_devices.o
 obj-$(CONFIG_AT91_EFLASH)	+= eflash.o
 obj-y += clock.o
 obj-y += cpu.o
-ifndef CONFIG_$(SPL_TPL_)SYSRESET
+ifndef CONFIG_SYSRESET
 obj-y	+= reset.o
 endif
 ifneq ($(CONFIG_ATMEL_PIT_TIMER),y)
@@ -34,7 +34,7 @@ obj-y	+= lowlevel_init.o
 endif
 endif
 
-ifdef CONFIG_$(SPL_)SYS_THUMB_BUILD
+ifdef CONFIG_SYS_THUMB_BUILD
 ifndef CONFIG_HAS_THUMB2
 
 CFLAGS_cache.o := -marm

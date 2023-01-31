@@ -9,7 +9,7 @@ obj-$(CONFIG_SCSI) += scsi.o
 
 ifdef CONFIG_SCSI
 ifdef CONFIG_DM_SCSI
-obj-$(CONFIG_$(SPL_TPL_)BOOTSTD) += scsi_bootdev.o
+obj-$(CONFIG_BOOTSTD) += scsi_bootdev.o
 endif
 endif
 

@@ -319,8 +319,3 @@ endif
 
 # do not delete intermediate files automatically
 .SECONDARY:
-
-# The SPL_ and SPL_TPL_ vars resolve to nothing so they can be used in
-# Makefiles
-SPL_ :=
-SPL_TPL_ :=

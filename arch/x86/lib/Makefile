@@ -4,7 +4,7 @@
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 
 obj-y	+= bdinfo.o
-ifndef CONFIG_$(SPL_TPL_)X86_64
+ifndef CONFIG_X86_64
 ifndef CONFIG_TPL_BUILD
 obj-y += bios.o
 obj-y += bios_asm.o
@@ -16,7 +16,7 @@ ifndef CONFIG_SPL_BUILD
 obj-$(CONFIG_CMD_BOOTM) += bootm.o
 endif
 obj-y	+= cmd_boot.o
-obj-$(CONFIG_$(SPL_)COREBOOT_SYSINFO)	+= coreboot/
+obj-$(CONFIG_COREBOOT_SYSINFO)	+= coreboot/
 obj-$(CONFIG_SEABIOS) += coreboot_table.o
 obj-y	+= early_cmos.o
 obj-y	+= e820.o
@@ -24,7 +24,7 @@ obj-y	+= init_helpers.o
 obj-y	+= interrupts.o
 obj-y	+= lpc-uclass.o
 obj-y	+= mpspec.o
-obj-$(CONFIG_$(SPL_TPL_)ACPIGEN) += acpi_nhlt.o
+obj-$(CONFIG_ACPIGEN) += acpi_nhlt.o
 obj-y	+= northbridge-uclass.o
 obj-$(CONFIG_I8259_PIC) += i8259.o
 obj-$(CONFIG_I8254_TIMER) += i8254.o
@@ -41,7 +41,7 @@ obj-y	+= acpi.o
 obj-$(CONFIG_HAVE_ACPI_RESUME) += acpi_s3.o
 ifndef CONFIG_QEMU
 obj-y += acpigen.o
-obj-$(CONFIG_$(SPL_TPL_)GENERATE_ACPI_TABLE) += acpi_table.o
+obj-$(CONFIG_GENERATE_ACPI_TABLE) += acpi_table.o
 endif
 obj-y	+= tables.o
 ifndef CONFIG_SPL_BUILD
@@ -87,7 +87,7 @@ endif
 
 ifdef CONFIG_EFI_STUB
 
-ifeq ($(CONFIG_$(SPL_)X86_64),)
+ifeq ($(CONFIG_X86_64),)
 extra-y += $(EFI_CRT0) $(EFI_RELOC)
 endif
 

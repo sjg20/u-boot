@@ -3,9 +3,9 @@
 # (C) Copyright 2000-2007
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 
-obj-$(CONFIG_$(SPL_TPL_)CROS_EC_KEYB) += cros_ec_keyb.o
-obj-$(CONFIG_$(SPL_TPL_)OF_CONTROL) += key_matrix.o
-obj-$(CONFIG_$(SPL_TPL_)DM_KEYBOARD) += input.o keyboard-uclass.o
+obj-$(CONFIG_CROS_EC_KEYB) += cros_ec_keyb.o
+obj-$(CONFIG_OF_CONTROL) += key_matrix.o
+obj-$(CONFIG_DM_KEYBOARD) += input.o keyboard-uclass.o
 
 ifndef CONFIG_SPL_BUILD
 

@@ -4,18 +4,18 @@
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 #
 
-obj-$(CONFIG_$(SPL_TPL_)CLK) += clk-uclass.o
-obj-$(CONFIG_$(SPL_TPL_)CLK) += clk_fixed_rate.o
-obj-$(CONFIG_$(SPL_TPL_)CLK) += clk_fixed_factor.o
-obj-$(CONFIG_$(SPL_TPL_)CLK_CCF) += clk.o clk-divider.o clk-mux.o clk-gate.o
-obj-$(CONFIG_$(SPL_TPL_)CLK_CCF) += clk-fixed-factor.o
-obj-$(CONFIG_$(SPL_TPL_)CLK_COMPOSITE_CCF) += clk-composite.o
+obj-$(CONFIG_CLK) += clk-uclass.o
+obj-$(CONFIG_CLK) += clk_fixed_rate.o
+obj-$(CONFIG_CLK) += clk_fixed_factor.o
+obj-$(CONFIG_CLK_CCF) += clk.o clk-divider.o clk-mux.o clk-gate.o
+obj-$(CONFIG_CLK_CCF) += clk-fixed-factor.o
+obj-$(CONFIG_CLK_COMPOSITE_CCF) += clk-composite.o
 
 obj-y += analogbits/
 obj-y += imx/
 obj-y += tegra/
 obj-y += ti/
-obj-$(CONFIG_$(SPL_TPL_)CLK_INTEL) += intel/
+obj-$(CONFIG_CLK_INTEL) += intel/
 obj-$(CONFIG_ARCH_ASPEED) += aspeed/
 obj-$(CONFIG_ARCH_MEDIATEK) += mediatek/
 obj-$(CONFIG_ARCH_MESON) += meson/
