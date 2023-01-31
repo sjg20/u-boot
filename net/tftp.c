@@ -728,7 +728,8 @@ static void sanitize_tftp_block_size_option(enum proto_t protocol)
 
 	switch (protocol) {
 	case TFTPGET:
-		max_defrag = config_opt_enabled(CONFIG_IP_DEFRAG, CONFIG_NET_MAXDEFRAG, 0);
+		max_defrag = IS_ENABLED(CONFIG_IP_DEFRAG,
+					(CONFIG_NET_MAXDEFRAG), (0));
 		if (max_defrag) {
 			/* Account for IP, UDP and TFTP headers. */
 			cap = max_defrag - (20 + 8 + 4);

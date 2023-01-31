@@ -96,8 +96,8 @@ int __weak fastboot_set_reboot_flag(enum fastboot_reboot_reason reason)
 		[FASTBOOT_REBOOT_REASON_FASTBOOTD] = "boot-fastboot",
 		[FASTBOOT_REBOOT_REASON_RECOVERY] = "boot-recovery"
 	};
-	const int mmc_dev = config_opt_enabled(CONFIG_FASTBOOT_FLASH_MMC,
-					       CONFIG_FASTBOOT_FLASH_MMC_DEV, -1);
+	const int mmc_dev = IS_ENABLED(CONFIG_FASTBOOT_FLASH_MMC,
+				       (CONFIG_FASTBOOT_FLASH_MMC_DEV), (-1));
 
 	if (!IS_ENABLED(CONFIG_FASTBOOT_FLASH_MMC))
 		return -EINVAL;

@@ -37,17 +37,6 @@
 #define CONFIG_VAL(option)  __config_val(option)
 
 /*
- * This uses a similar mechanism to config_enabled() above. If cfg is enabled,
- * it resolves to the value of opt_cfg, otherwise it resolves to def_val
- */
-#define config_opt_enabled(cfg, opt_cfg, def_val) _config_opt_enabled(cfg, opt_cfg, def_val)
-#define _config_opt_enabled(cfg_val, opt_value, def_val) \
-	__config_opt_enabled(__ARG_PLACEHOLDER_##cfg_val, opt_value, def_val)
-#define __config_opt_enabled(arg1_or_junk, arg2, def_val) \
-	___config_opt_enabled(arg1_or_junk arg2, def_val)
-#define ___config_opt_enabled(__ignored, val, ...) val
-
-/*
  * Count number of arguments to a variadic macro. Currently only need
  * it for 1, 2 or 3 arguments.
  */
