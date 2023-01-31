@@ -2054,7 +2054,7 @@ def do_scan_source(path, do_update, show_conflicts, do_commit):
             print(f'   {item}')
 
     def write_update(spl_not_found, proper_not_found):
-        with open(os.path.join(path, 'scripts', 'conf_nospl'),
+        with open(os.path.join(path, 'scripts', 'conf_nospl'), 'w',
                   encoding='utf-8') as out:
             print('# These options should not be enabled in SPL builds\n',
                   file=out)
