@@ -25,6 +25,8 @@ endif
 # We need this, in case the user has it in its environment
 unexport CONFIG_
 
+$(obj)/conf: $(srctree)/scripts/conf_nospl $(srctree)/scripts/conf_noproper
+
 xconfig: $(obj)/qconf
 	$< $(silent) $(Kconfig)
 

@@ -540,6 +540,16 @@ static void print_makefile_sym(FILE *fp, const char *name,
 	fprintf(fp, "%s%s=%s\n", CONFIG_, name, value);
 }
 
+static const char *get_proper_name(const struct symbol *sym, char *str)
+{
+	if (sym->flags & SYMBOL_SPL)
+		return NULL;
+
+	snprintf(str, SYMBOL_MAXLENGTH, "PPL_%s", sym->name);
+
+	return str;
+}
+
 /*
  * Kconfig configuration printer
  *
@@ -551,6 +561,13 @@ static void print_makefile_sym(FILE *fp, const char *name,
 static void
 kconfig_print_symbol(FILE *fp, struct symbol *sym, const char *value, void *arg)
 {
+	char str[SYMBOL_MAXLENGTH];
+	const char *name;
+
+	name = get_proper_name(sym, str);
+	if (name)
+		print_makefile_sym(fp, name, sym->type, value, arg != NULL);
+
 	print_makefile_sym(fp, sym->name, sym->type, value, arg != NULL);
 }
 
@@ -637,7 +654,12 @@ static const char *get_spl_name(const struct symbol *sym, const void *arg)
 static void spl_kconfig_print_symbol(FILE *fp, struct symbol *sym,
 				     const char *value, void *arg)
 {
+	char str[SYMBOL_MAXLENGTH];
 	const char *name;
+
+	name = get_proper_name(sym, str);
+	if (name)
+		print_makefile_sym(fp, name, sym->type, value, true);
 
 	name = get_spl_name(sym, arg);
 	if (!name)
@@ -706,6 +728,13 @@ static void print_header_sym(FILE *fp, const char *name, enum symbol_type type,
 static void
 header_print_symbol(FILE *fp, struct symbol *sym, const char *value, void *arg)
 {
+	char str[SYMBOL_MAXLENGTH];
+	const char *name;
+
+	name = get_proper_name(sym, str);
+	if (name)
+		print_header_sym(fp, name, sym->type, value);
+
 	print_header_sym(fp, sym->name, sym->type, value);
 }
 
@@ -746,7 +775,12 @@ static struct conf_printer header_printer_cb =
 static void spl_header_print_symbol(FILE *fp, struct symbol *sym,
 				    const char *value, void *arg)
 {
+	char str[SYMBOL_MAXLENGTH];
 	const char *name;
+
+	name = get_proper_name(sym, str);
+	if (name)
+		print_header_sym(fp, name, sym->type, value);
 
 	name = get_spl_name(sym, arg);
 	if (!name)

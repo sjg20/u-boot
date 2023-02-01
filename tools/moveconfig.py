@@ -1617,17 +1617,17 @@ def prefix_config(cfg):
     return op + cfg
 
 
-RE_MK_CONFIGS = re.compile(r'CONFIG_(\$\(SPL_(?:TPL_)?\))?([A-Z0-9_]*)')
+RE_MK_CONFIGS = re.compile(r'CONFIG_(\$\(SPL_(?:TPL_)?\))?([A-Za-z0-9_]*)')
 
 # Makefile ifdefs: this only handles 'else' on its own line, so not
 # 'else ifeq ...', for example
 RE_IF = re.compile(r'^(ifdef|ifndef|endif|ifeq|ifneq|else)([^,]*,([^,]*)\))?.*$')
 
 # Normal CONFIG options in C
-RE_C_CONFIGS = re.compile(r'CONFIG_([A-Z0-9_]*)')
+RE_C_CONFIGS = re.compile(r'CONFIG_([A-Za-z0-9_]*)')
 
 # CONFIG_IS_ENABLED() construct
-RE_CONFIG_IS = re.compile(r'CONFIG_IS_ENABLED\(([A-Z0-9_]*)\)')
+RE_CONFIG_IS = re.compile(r'CONFIG_IS_ENABLED\(([A-Za-z0-9_]*)\)')
 
 # Preprocessor #if/#ifdef directives, etc.
 RE_IFDEF = re.compile(r'^\s*#\s*(ifdef|ifndef|endif|if|elif|else)\s*(?:#.*)?(.*)$')
@@ -1977,9 +1977,9 @@ def do_scan_source(path, do_update, show_conflicts, do_commit):
 
             dirname, leaf = os.path.split(fname)
             root, ext = os.path.splitext(leaf)
-            #if dirname != '' or root != 'Makefile':
+            #if dirname != 'test' or root != 'Makefile':
                 #continue
-            if (dirname.startswith('test') or
+            if (dirname.startswith('test/') or
                 dirname.startswith('lib/efi_selftest')):
                 # Ignore test code since it is mostly only for sandbox
                 pass
@@ -2011,38 +2011,25 @@ def do_scan_source(path, do_update, show_conflicts, do_commit):
         finish_file(last_fname, rest_list)
         return mk_dict, src_dict
 
-    def check_mk_missing(all_uses, spl_not_found, proper_not_found):
+    def check_missing(all_uses, spl_not_found, proper_not_found,
+                      show_conflicts):
         # Make sure we know about all the options in Makefiles
-        print('\nCONFIG options present in Makefiles but not Kconfig:')
         not_found = check_not_found(all_uses, MODE_NORMAL)
-        show_uses(not_found)
+        if show_conflicts:
+            print('\nCONFIG options present in source but not Kconfig:')
+            show_uses(not_found)
 
-        print('\nCONFIG options present in Makefiles but not Kconfig (SPL):')
         not_found = check_not_found(all_uses, MODE_SPL)
-        show_uses(not_found)
         spl_not_found |= set(is_not_proper(key) or key for key in not_found.keys())
+        if show_conflicts:
+            print('\nCONFIG options present in source but not Kconfig (SPL):')
+            show_uses(not_found)
 
-        print('\nCONFIG options used as Proper in Makefiles but without a non-SPL_ variant:')
         not_found = check_not_found(all_uses, MODE_PROPER)
-        show_uses(not_found)
         proper_not_found |= set(key for key in not_found.keys())
-
-    def check_src_missing(all_uses, spl_not_found, proper_not_found):
-        # Make sure we know about all the options in source files
-        print('\nCONFIG options present in source but not Kconfig:')
-        not_found = check_not_found(all_uses, MODE_NORMAL)
-        show_uses(not_found)
-
-        print('\nCONFIG options present in source but not Kconfig (SPL):')
-        not_found = check_not_found(all_uses, MODE_SPL)
-        show_uses(not_found)
-        spl_not_found |= set(is_not_proper(key) or key
-                             for key in not_found.keys())
-
-        print('\nCONFIG options used as Proper in source but without a non-SPL_ variant:')
-        not_found = check_not_found(all_uses, MODE_PROPER)
-        show_uses(not_found)
-        proper_not_found |= set(key for key in not_found.keys())
+        if show_conflicts:
+            print('\nCONFIG options used as Proper in source but without a non-SPL_ variant:')
+            show_uses(not_found)
 
     def show_summary(spl_not_found, proper_not_found):
         print('\nCONFIG options used as SPL but without an SPL_ variant:')
@@ -2218,11 +2205,7 @@ def do_scan_source(path, do_update, show_conflicts, do_commit):
     # Look for CONFIG options that are not found
     spl_not_found = set()
     proper_not_found = set()
-    check_mk_missing(all_uses, spl_not_found, proper_not_found)
-
-    # Scan the source code
-    scan_src_files(src_dict, all_uses, fname_uses)
-    check_src_missing(all_uses, spl_not_found, proper_not_found)
+    check_missing(all_uses, spl_not_found, proper_not_found, show_conflicts)
 
     show_summary(spl_not_found, proper_not_found)
 

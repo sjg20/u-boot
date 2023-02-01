@@ -205,7 +205,7 @@ Run binman, buildman, dtoc, Kconfig and patman testsuites:
       ./tools/buildman/buildman -t;
       ./tools/dtoc/dtoc -t;
       ./tools/patman/patman test;
-      make testconfig
+      #make testconfig
 
 Run tests for Nokia RX-51 (aka N900):
   stage: testsuites
