@@ -55,7 +55,7 @@
 	BOOT_TARGET_DEVICES_references_HOST_without_CONFIG_SANDBOX
 #endif
 
-#ifdef CONFIG_CMD_MMC
+#if CONFIG_IS_ENABLED_PPL(CMD_MMC)
 #define BOOTENV_SHARED_MMC	BOOTENV_SHARED_BLKDEV(mmc)
 #define BOOTENV_DEV_MMC		BOOTENV_DEV_BLKDEV
 #define BOOTENV_DEV_NAME_MMC	BOOTENV_DEV_NAME_BLKDEV
@@ -67,7 +67,7 @@
 	BOOT_TARGET_DEVICES_references_MMC_without_CONFIG_CMD_MMC
 #endif
 
-#ifdef CONFIG_CMD_UBIFS
+#if CONFIG_IS_ENABLED_PPL(CMD_UBIFS)
 #define BOOTENV_SHARED_UBIFS \
 	"ubifs_boot=" \
 		"if ubi part ${bootubipart} ${bootubioff} && " \
@@ -97,7 +97,7 @@
 	BOOT_TARGET_DEVICES_references_UBIFS_without_CONFIG_CMD_UBIFS
 #endif
 
-#ifdef CONFIG_EFI_LOADER
+#if CONFIG_IS_ENABLED_PPL(EFI_LOADER)
 #if defined(CONFIG_ARM64)
 #define BOOTEFI_NAME "bootaa64.efi"
 #elif defined(CONFIG_ARM)
@@ -130,7 +130,7 @@
 #endif
 #endif
 
-#ifdef CONFIG_CMD_BOOTEFI_BOOTMGR
+#if CONFIG_IS_ENABLED_PPL(CMD_BOOTEFI_BOOTMGR)
 #define BOOTENV_EFI_BOOTMGR                                               \
 	"boot_efi_bootmgr="                                               \
 		"if fdt addr -q ${fdt_addr_r}; then "                     \
@@ -186,7 +186,7 @@
 #define SCAN_DEV_FOR_EFI
 #endif
 
-#ifdef CONFIG_SATA
+#if CONFIG_IS_ENABLED_PPL(SATA)
 #define BOOTENV_SHARED_SATA	BOOTENV_SHARED_BLKDEV(sata)
 #define BOOTENV_DEV_SATA	BOOTENV_DEV_BLKDEV
 #define BOOTENV_DEV_NAME_SATA	BOOTENV_DEV_NAME_BLKDEV
@@ -198,7 +198,7 @@
 	BOOT_TARGET_DEVICES_references_SATA_without_CONFIG_SATA
 #endif
 
-#ifdef CONFIG_NVME
+#if CONFIG_IS_ENABLED_PPL(NVME)
 #define BOOTENV_RUN_NVME_INIT "run nvme_init; "
 #define BOOTENV_SET_NVME_NEED_INIT "setenv nvme_need_init; "
 #define BOOTENV_SHARED_NVME \
@@ -224,7 +224,7 @@
 	BOOT_TARGET_DEVICES_references_NVME_without_CONFIG_NVME
 #endif
 
-#ifdef CONFIG_SCSI
+#if CONFIG_IS_ENABLED_PPL(SCSI)
 #define BOOTENV_RUN_SCSI_INIT "run scsi_init; "
 #define BOOTENV_SET_SCSI_NEED_INIT "scsi_need_init=; "
 #define BOOTENV_SHARED_SCSI \
@@ -250,7 +250,7 @@
 	BOOT_TARGET_DEVICES_references_SCSI_without_CONFIG_SCSI
 #endif
 
-#ifdef CONFIG_IDE
+#if CONFIG_IS_ENABLED_PPL(IDE)
 #define BOOTENV_RUN_IDE_INIT "run ide_init; "
 #define BOOTENV_SET_IDE_NEED_INIT "setenv ide_need_init; "
 #define BOOTENV_SHARED_IDE \
@@ -275,7 +275,7 @@
 	BOOT_TARGET_DEVICES_references_IDE_without_CONFIG_IDE
 #endif
 
-#if defined(CONFIG_PCI)
+#if CONFIG_IS_ENABLED_PPL(PCI)
 #define BOOTENV_RUN_PCI_ENUM "run boot_pci_enum; "
 #define BOOTENV_SHARED_PCI \
 	"boot_pci_enum=pci enum\0"
@@ -284,7 +284,7 @@
 #define BOOTENV_SHARED_PCI
 #endif
 
-#ifdef CONFIG_CMD_USB
+#if CONFIG_IS_ENABLED_PPL(CMD_USB)
 #define BOOTENV_RUN_NET_USB_START "run boot_net_usb_start; "
 #define BOOTENV_SHARED_USB \
 	"boot_net_usb_start=usb start\0" \
@@ -302,7 +302,7 @@
 	BOOT_TARGET_DEVICES_references_USB_without_CONFIG_CMD_USB
 #endif
 
-#ifdef CONFIG_CMD_VIRTIO
+#if CONFIG_IS_ENABLED_PPL(CMD_VIRTIO)
 #define BOOTENV_RUN_VIRTIO_INIT "run virtio_init; "
 #define BOOTENV_SET_VIRTIO_NEED_INIT "virtio_need_init=; "
 #define BOOTENV_SHARED_VIRTIO \
@@ -328,8 +328,8 @@
 	BOOT_TARGET_DEVICES_references_VIRTIO_without_CONFIG_CMD_VIRTIO
 #endif
 
-#if defined(CONFIG_CMD_DHCP)
-#if defined(CONFIG_EFI_LOADER)
+#if CONFIG_IS_ENABLED_PPL(CMD_DHCP)
+#if CONFIG_IS_ENABLED_PPL(EFI_LOADER)
 /* http://www.iana.org/assignments/dhcpv6-parameters/dhcpv6-parameters.xml */
 #if defined(CONFIG_ARM64) || defined(__aarch64__)
 #define BOOTENV_EFI_PXE_ARCH "0xb"
@@ -402,7 +402,7 @@
 	BOOT_TARGET_DEVICES_references_DHCP_without_CONFIG_CMD_DHCP
 #endif
 
-#if defined(CONFIG_CMD_DHCP) && defined(CONFIG_CMD_PXE)
+#if CONFIG_IS_ENABLED_PPL(CMD_DHCP) && CONFIG_IS_ENABLED_PPL(CMD_PXE)
 #define BOOTENV_DEV_PXE(devtypeu, devtypel, instance) \
 	"bootcmd_pxe=" \
 		BOOTENV_RUN_NET_USB_START \
@@ -420,7 +420,7 @@
 	BOOT_TARGET_DEVICES_references_PXE_without_CONFIG_CMD_DHCP_or_PXE
 #endif
 
-#if defined(CONFIG_CMD_EXTENSION)
+#if CONFIG_IS_ENABLED_PPL(CMD_EXTENSION)
 #define BOOTENV_RUN_EXTENSION_INIT "run extension_init; "
 #define BOOTENV_RUN_EXTENSION_APPLY "run extension_apply; "
 #define BOOTENV_SET_EXTENSION_NEED_INIT \

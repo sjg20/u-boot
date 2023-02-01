@@ -46,5 +46,11 @@ int main(void)
 
 	DEFINE(GD_ENV_ADDR, offsetof(struct global_data, env_addr));
 
+	DEFINE(GD_FDT_BLOB, offsetof(struct global_data, fdt_blob));
+	DEFINE(GD_JT, offsetof(struct global_data, jt));
+	DEFINE(GD_TIMEBASE_H, offsetof(struct global_data, timebase_h));
+	DEFINE(GD_CUR_SERIAL_DEV, offsetof(struct global_data, cur_serial_dev));
+	DEFINE(GD_DMTAG_LIST, offsetof(struct global_data, dmtag_list));
+
 	return 0;
 }
