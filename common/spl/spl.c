@@ -251,7 +251,7 @@ void spl_set_header_raw_uboot(struct spl_image_info *spl_image)
 		spl_image->load_addr = u_boot_pos;
 	} else {
 		spl_image->entry_point = CFG_SYS_UBOOT_START;
-		spl_image->load_addr = CONFIG_TEXT_BASE;
+		spl_image->load_addr = CONFIG_PPL_TEXT_BASE;
 	}
 	spl_image->os = IH_OS_U_BOOT;
 	spl_image->name = "U-Boot";
