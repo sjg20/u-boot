@@ -446,7 +446,8 @@ def ReplaceEntries(image_fname, input_fname, indir, entry_paths,
     AfterReplace(image, allow_resize=allow_resize, write_map=write_map)
     return image
 
-def SignEntries(image_fname, input_fname, privatekey_fname, algo, entry_paths):
+def SignEntries(image_fname, input_fname, privatekey_fname, algo, entry_paths,
+                write_map=False):
     """Sign and replace the data from one or more entries from input files
 
     Args:
@@ -454,21 +455,23 @@ def SignEntries(image_fname, input_fname, privatekey_fname, algo, entry_paths):
         input_fname: Single input filename to use if replacing one file, None
             otherwise
         algo: Hashing algorithm
+        entry_paths: List of entry paths to sign
         privatekey_fname: Private key filename
-
+        write_map (bool): True to write the map file
     """
     image_fname = os.path.abspath(image_fname)
     image = Image.FromFile(image_fname)
-    image.CollectBintools()
-    state.PrepareFromLoadedData(image)
-    image.LoadData()
+
+    BeforeReplace(image, allow_resize=True)
+    #image.CollectBintools()
+    #state.PrepareFromLoadedData(image)
+    #image.LoadData()
 
     for entry_path in entry_paths:
         entry = image.FindEntryPath(entry_path)
         entry.UpdateSignatures(privatekey_fname, algo, input_fname)
 
-    ProcessImage(image, update_fdt=True, write_map=False,
-                 get_contents=False, allow_resize=True)
+    AfterReplace(image, allow_resize=True, write_map=write_map)
 
 def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt, use_expanded):
     """Prepare the images to be processed and select the device tree

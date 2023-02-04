@@ -6462,14 +6462,13 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
                 DTB
                 Path to directory with extracted image and keys
         """
-
         data = self._DoReadFileRealDtb(dts)
 
         updated_fname = tools.get_output_filename('image-updated.bin')
         tools.write_file(updated_fname, data)
 
-        outdir = os.path.join(self._indir, 'extract')
-        einfos = control.ExtractEntries(updated_fname, None, outdir, [])
+        #outdir = os.path.join(self._indir, 'extract')
+        #einfos = control.ExtractEntries(updated_fname, None, outdir, [])
 
         dtb = tools.get_output_filename('source.dtb')
         private_key = tools.get_output_filename('test_key.key')
@@ -6483,35 +6482,32 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         tools.run('fdt_add_pubkey', '-a', 'sha256,rsa4096', '-k', key_dir,
                   '-n', 'test_key', dtb)
 
-        return fit, updated_fname, private_key, dtb, key_dir
+        return fit, updated_fname, private_key, dtb
 
     def testSignSimple(self):
         """Test that a FIT container can be signed in image"""
         is_signed = False
-        try:
-            fit, updated_fname, private_key, dtb, key_dir = self._PrepareSignEnv()
-            with test_util.capture_sys_output() as (stdout, stderr):
-                # do sign with private key
-                self._DoBinman('sign', '-i', updated_fname, '-k', private_key,
-                               '-a', 'sha256,rsa4096', 'fit')
-                is_signed = self._CheckSign(fit, dtb)
-        finally:
-            shutil.rmtree(key_dir)
+        fit, updated_fname, private_key, dtb = self._PrepareSignEnv()
+        # do sign with private key
+        self._DoBinman('sign', '-i', updated_fname, '-k', private_key,
+                       '-a', 'sha256,rsa4096', 'fit')
+
+        # Call control.SignEntries() directly so that output dir is not affected
+        #control.SignEntries(updated_fname, None, private_key, 'sha256,rsa4096',
+                            #['fit'])
+        is_signed = self._CheckSign(fit, dtb)
+        print('fit', fit, updated_fname)
 
         self.assertEqual(is_signed, True)
 
-    def testSignExactFIT(self):
+    def testSignExactFit(self):
         """Test that a FIT container can be signed and replaced in image"""
         is_signed = False
-        try:
-            fit, updated_fname, private_key, dtb, key_dir = self._PrepareSignEnv()
-            with test_util.capture_sys_output() as (stdout, stderr):
-                # do sign with private key
-                self._DoBinman('sign', '-i', updated_fname, '-k', private_key,
-                               '-a', 'sha256,rsa4096', '-f', fit, 'fit')
-                is_signed = self._CheckSign(fit, dtb)
-        finally:
-            shutil.rmtree(key_dir)
+        fit, updated_fname, private_key, dtb = self._PrepareSignEnv()
+        # do sign with private key
+        self._DoBinman('sign', '-i', updated_fname, '-k', private_key,
+                       '-a', 'sha256,rsa4096', '-f', fit, 'fit')
+        is_signed = self._CheckSign(fit, dtb)
 
         self.assertEqual(is_signed, True)
 
