@@ -5819,13 +5819,61 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertEqual(expected_fdtmap, fdtmap)
 
     def testReplaceSectionSimple(self):
-        """Test replacing a simple section with arbitrary data"""
+        """Test replacing a simple section with same-sized data"""
         new_data = b'w' * len(COMPRESS_DATA + U_BOOT_DATA)
-        with self.assertRaises(ValueError) as exc:
-            self._RunReplaceCmd('section', new_data,
-                                dts='241_replace_section_simple.dts')
+        data, expected_fdtmap, image = self._RunReplaceCmd('section',
+            new_data, dts='241_replace_section_simple.dts')
+        self.assertEqual(new_data, data)
+
+        entries = image.GetEntries()
+        self.assertIn('section', entries)
+        entry = entries['section']
+        self.assertEqual(len(new_data), entry.size)
+
+    def testReplaceSectionLarger(self):
+        """Test replacing a simple section with larger data"""
+        new_data = b'w' * (len(COMPRESS_DATA + U_BOOT_DATA) + 1)
+        data, expected_fdtmap, image = self._RunReplaceCmd('section',
+            new_data, dts='241_replace_section_simple.dts')
+        self.assertEqual(new_data, data)
+
+        entries = image.GetEntries()
+        self.assertIn('section', entries)
+        entry = entries['section']
+        self.assertEqual(len(new_data), entry.size)
+        fentry = entries['fdtmap']
+        self.assertEqual(entry.offset + entry.size, fentry.offset)
+
+    def testReplaceSectionSmaller(self):
+        """Test replacing a simple section with smaller data"""
+        new_data = b'w' * (len(COMPRESS_DATA + U_BOOT_DATA) - 1) + b'\0'
+        data, expected_fdtmap, image = self._RunReplaceCmd('section',
+            new_data, dts='241_replace_section_simple.dts')
+        self.assertEqual(new_data, data)
+
+        # The new size is the same as the old, just with a pad byte at the end
+        entries = image.GetEntries()
+        self.assertIn('section', entries)
+        entry = entries['section']
+        self.assertEqual(len(new_data), entry.size)
+
+    def testReplaceSectionSmallerAllow(self):
+        """Test failing to replace a simple section with smaller data"""
+        new_data = b'w' * (len(COMPRESS_DATA + U_BOOT_DATA) - 1)
+        try:
+            state.SetAllowEntryContraction(True)
+            with self.assertRaises(ValueError) as exc:
+                self._RunReplaceCmd('section', new_data,
+                                    dts='241_replace_section_simple.dts')
+        finally:
+            state.SetAllowEntryContraction(False)
+
+        # Since we have no information about the position of things within the
+        # section, we cannot adjust the position of /section-u-boot so it ends
+        # up outside the section
         self.assertIn(
-            "Node '/section': Replacing sections is not implemented yet",
+            "Node '/section/u-boot': Offset 0x24 (36) size 0x4 (4) is outside "
+            "the section '/section' starting at 0x0 (0) of size 0x27 (39)",
             str(exc.exception))
 
     def testMkimageImagename(self):
