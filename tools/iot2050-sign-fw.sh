@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 if [ -z "$1" ]; then
 	echo "Usage: $0 KEY"
 	exit 1
@@ -40,8 +42,8 @@ CERT_X509=$(mktemp XXXXXXXX.crt)
 openssl req -new -x509 -key $1 -nodes -outform DER -out $CERT_X509 -config $TEMP_X509 -sha512
 cat $CERT_X509 tispl.bin > tispl.bin_signed
 # currently broken in upstream
-#source/tools/binman/binman replace -i flash.bin -f tispl.bin_signed blob@0x180000
-dd if=tispl.bin_signed of=flash.bin bs=$((0x1000)) seek=$((0x180000/0x1000)) conv=notrunc
+source/tools/binman/binman replace -i flash.bin -f tispl.bin_signed blob@0x180000
+#dd if=tispl.bin_signed of=flash.bin bs=$((0x1000)) seek=$((0x180000/0x1000)) conv=notrunc
 
 rm $TEMP_X509 $CERT_X509
 

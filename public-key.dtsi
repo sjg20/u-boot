@@ -1,0 +1,15 @@
+/ {
+	signature {
+		key-docker {
+			key-name-hint = "docker";
+			algo = "sha256,rsa2048";
+			rsa,num-bits = <2048>;
+			rsa,modulus = [ab 51 d4 44 f4 b8 7a ca ce 38 a6 70 07 61 a4 aa 0e c5 79 ed 27 fc e1 30 f4 02 1d e2 5d f9 73 9f 5f d6 bb e6 d8 02 c4 fa 84 60 60 13 7c 08 5e 0d e5 81 9b 0a 47 53 7b d1 ad 0e 04 13 fc 2d e5 f7 01 f2 0f 76 f9 38 47 f1 cc 4c 1a 2f 82 35 31 cf 3a 09 16 06 e5 76 45 b5 50 8b 5a 96 02 e4 48 9d b4 1a db 7d c2 42 64 75 65 83 15 9e a8 60 30 59 30 a8 4f 8d 63 f1 76 cb e8 b5 38 a9 fa 8e b3 15 cd aa 05 41 aa 76 7f 67 a2 dd 13 fb 56 60 50 29 aa 64 96 b4 44 6a fd 63 40 c0 2e 8e f4 61 50 04 3a 8f c5 95 43 ec c9 c8 5b c5 e8 c6 29 04 12 74 8b 88 9b aa 36 ba 3d e0 58 cb 06 b7 72 07 97 4a e4 f6 14 60 76 0d 26 d2 9e 89 3f b4 30 b9 d7 49 41 30 dd 0d 91 17 3f 7f da 0f bf 0b 3b 45 24 f7 96 a5 ab af 66 d3 1e 02 85 86 77 d9 8d 76 42 ad 38 5f 84 57 c8 57 72 17 89 d2 ce 08 8c fa d2 fb];
+			rsa,exponent = [00 00 00 00 00 01 00 01];
+			rsa,r-squared = [45 c9 3c 09 a5 44 e9 9a 28 c4 2f 95 36 ed 18 6a 36 b5 0d e9 d3 06 c9 18 38 fd a6 0c 2c 03 a6 c2 5b bd 25 23 ec 71 65 f2 0e 97 61 78 e1 41 c9 05 74 9f 96 0f 3a b1 21 a9 68 dd c6 1a ea d9 c2 b5 55 18 ea 7c 14 94 4e 56 51 dd 85 85 01 78 a1 b2 0c a6 f2 d3 2b 54 70 a9 03 c2 5b 2c b6 62 17 b8 bc 45 52 ad f8 85 b0 53 c6 03 2b 88 13 b0 63 ab 68 91 be 2a c1 58 2a 3c 35 9d 26 4b ea 08 0a 24 d5 f7 6f 05 07 f2 50 7f 2c ee f5 c6 c4 5d f4 ba 12 4c a2 d9 41 1a 2c c5 e0 81 6e 04 f9 94 c4 25 60 13 99 36 ad 4c ca c6 9e 94 2f 32 e4 b7 1f 3c 85 1e 39 31 12 1b 06 ce 31 7b c9 68 e2 72 c2 7f 50 e4 df 28 60 db b7 7c 74 b8 86 89 f6 9c ce c2 66 da 0b 1a e0 df 04 03 17 8e e0 58 03 f0 30 80 e3 4e b9 72 0c 00 e5 44 5b dc ba 52 79 9e 6c 7a 6d 6b 0a 95 4c f6 cf 6f 7d 1f 4e 43 18 9e 0c 10];
+			rsa,n0-inverse = <0xd3a997cd>;
+			required = "conf";
+			u-boot,dm-spl;
+		};
+	};
+};
