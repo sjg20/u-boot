@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-2.0
+     # SPDX-License-Identifier: GPL-2.0
 # Copyright 2023 Google LLC
 # Written by Simon Glass <sjg@chromium.org>
 
@@ -21,21 +21,25 @@ def test_of_migrate(u_boot_console):
     srcdir = cons.config.source_dir
     build_dir = cons.config.build_dir
 
-    dts_dir = os.path.join(build_dir, 'arch', 'sandbox', 'dts')
-    dtb_fname = os.path.join(dts_dir, 'sandbox.dtb')
-    util.run_and_log(cons, ['dtc', dts_fname, '-I', 'dtb', 'O', 'dts',
-                            '-o', new_dts])
+    dt_dir = os.path.join(build_dir, 'arch', 'sandbox', 'dts')
+    dtb_fname = os.path.join(dt_dir, 'sandbox.dtb')
+    out_dts = os.path.join(dt_dir, 'sandbox_out.dts')
+    util.run_and_log(cons, ['dtc', dtb_fname, '-I', 'dtb', '-O', 'dts',
+                            '-o', out_dts])
 
-    dts_fname = os.path.join(dts_dir, 'sandbox_new.dts')
+    with open(out_dts) as inf:
+        data = inf.read()
+
+    dts_fname = os.path.join(dt_dir, 'sandbox_new.dts')
     with open(dts_fname, 'w') as outf:
         print(data, file=outf)
     new_dtb = os.path.join(dts_dir, 'sandbox_new.dtb')
     util.run_and_log(cons, ['dtc', dts_fname, '-o', new_dtb])
 
-
     env = dict(os.environ)
     env['EXT_DTB'] = dtb_fname
-    # env['DEVICE_TREE'] = 'sandbox_new'
+    env['DEVICE_TREE'] = 'sandbox_new'
+    env['NO_LTO'] = '1'
     out = util.run_and_log(
         cons, ['./tools/buildman/buildman', '-m', '--board', 'sandbox',
                '-o', TMPDIR], ignore_errors=True, env=env)
