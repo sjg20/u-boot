@@ -20,18 +20,21 @@ def test_of_migrate(u_boot_console):
 
     srcdir = cons.config.source_dir
     build_dir = cons.config.build_dir
-    fname = os.path.join(srcdir, 'arch', 'sandbox', 'dts', 'sandbox.dts')
-    with open(fname, 'r') as inf:
-        data = inf.read()
-    out = data.replace('bootph-all', 'u-boot,dm-pre-proper')
 
-    out_fname = os.path.join(build_dir, 'arch', 'sandbox', 'dts', 'sandbox_new.dts')
-    with open(out_fname, 'w') as outf:
+    dts_dir = os.path.join(build_dir, 'arch', 'sandbox', 'dts')
+    dtb_fname = os.path.join(dts_dir, 'sandbox.dtb')
+    util.run_and_log(cons, ['dtc', dts_fname, '-I', 'dtb', 'O', 'dts',
+                            '-o', new_dts])
+
+    dts_fname = os.path.join(dts_dir, 'sandbox_new.dts')
+    with open(dts_fname, 'w') as outf:
         print(data, file=outf)
-        print('fred', file=outf)
+    new_dtb = os.path.join(dts_dir, 'sandbox_new.dtb')
+    util.run_and_log(cons, ['dtc', dts_fname, '-o', new_dtb])
+
 
     env = dict(os.environ)
-    env['EXT_DTB'] = out_fname
+    env['EXT_DTB'] = dtb_fname
     # env['DEVICE_TREE'] = 'sandbox_new'
     out = util.run_and_log(
         cons, ['./tools/buildman/buildman', '-m', '--board', 'sandbox',
