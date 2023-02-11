@@ -6,7 +6,7 @@
 #ifndef __CROS_CROSSYSTEM_H__
 #define __CROS_CROSSYSTEM_H__
 
-struct vboot_info *vboot;
+extern struct vboot_info *vboot;
 
 /**
  * enum cros_fw_type_t - typet of firmware we can selected to boot
