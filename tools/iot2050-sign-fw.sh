@@ -42,12 +42,14 @@ CERT_X509=$(mktemp XXXXXXXX.crt)
 openssl req -new -x509 -key $1 -nodes -outform DER -out $CERT_X509 -config $TEMP_X509 -sha512
 cat $CERT_X509 tispl.bin > tispl.bin_signed
 # currently broken in upstream
+ls -l  tispl.bin  tispl.bin_signed
+source/tools/binman/binman ls -i flash.bin
 source/tools/binman/binman replace -i flash.bin -f tispl.bin_signed blob@0x180000
-#dd if=tispl.bin_signed of=flash.bin bs=$((0x1000)) seek=$((0x180000/0x1000)) conv=notrunc
+# dd if=tispl.bin_signed of=flash.bin bs=$((0x1000)) seek=$((0x180000/0x1000)) conv=notrunc
 
 rm $TEMP_X509 $CERT_X509
 
 tools/mkimage -G $1 -r -o sha256,rsa4096 -F fit@0x380000.fit
 # currently broken in upstream
-#source/tools/binman/binman replace -i flash.bin -f fit@0x380000.fit fit@0x380000
-dd if=fit@0x380000.fit of=flash.bin bs=$((0x1000)) seek=$((0x380000/0x1000)) conv=notrunc
+source/tools/binman/binman replace -i flash.bin -f fit@0x380000.fit fit@0x380000
+# dd if=fit@0x380000.fit of=flash.bin bs=$((0x1000)) seek=$((0x380000/0x1000)) conv=notrunc

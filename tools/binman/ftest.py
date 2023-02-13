@@ -6444,7 +6444,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testReplaceFitSibling(self):
         """Test an image with a FIT inside where we replace its sibling"""
-        new_data = b'w' * (len(COMPRESS_DATA + U_BOOT_DATA) + 1)
+        new_data = b'w' * 4000
 
         data, expected_fdtmap, image = self._RunReplaceCmd('blob',
             new_data, dts='277_replace_fit_sibling.dts')
@@ -6456,6 +6456,17 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertEqual(len(new_data), entry.size)
         fentry = entries['fdtmap']
         self.assertEqual(entry.offset + entry.size, fentry.offset)
+
+    def testX509Cert(self):
+        """Test creating an X509 certificate"""
+        keyfile = self.TestFile('key.key')
+        entry_args = {
+            'keyfile': keyfile,
+        }
+        data = self._DoReadFileDtb('277_x509_cert.dts',
+                                   entry_args=entry_args)[0]
+        cert = data[:-4]
+        self.assertEqual(U_BOOT_DATA, data[-4:])
 
 
 if __name__ == "__main__":
