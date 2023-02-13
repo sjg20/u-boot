@@ -6442,6 +6442,21 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         self.assertEqual(['u-boot', 'atf-2'],
                          fdt_util.GetStringList(node, 'loadables'))
 
+    def testReplaceFitSibling(self):
+        """Test an image with a FIT inside where we replace its sibling"""
+        new_data = b'w' * (len(COMPRESS_DATA + U_BOOT_DATA) + 1)
+
+        data, expected_fdtmap, image = self._RunReplaceCmd('blob',
+            new_data, dts='277_replace_fit_sibling.dts')
+        self.assertEqual(new_data, data)
+
+        entries = image.GetEntries()
+        self.assertIn('blob', entries)
+        entry = entries['blob']
+        self.assertEqual(len(new_data), entry.size)
+        fentry = entries['fdtmap']
+        self.assertEqual(entry.offset + entry.size, fentry.offset)
+
 
 if __name__ == "__main__":
     unittest.main()
