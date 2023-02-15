@@ -14,6 +14,8 @@
 /include/ "rtc.dtsi"
 
 #include "tsc_timer.dtsi"
+#include <dt-bindings/pci/pci.h>
+#include <pci_ids.h>
 
 / {
 	model = "coreboot x86 payload";
@@ -33,7 +35,9 @@
 
 	pci {
 		compatible = "pci-x86";
-		u-boot,dm-pre-reloc;
+		bootph-all;
+		u-boot,pci-pre-reloc = <
+			PCI_VENDEV(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ADP_P_UART0) >;
 	};
 
 	serial: serial {
