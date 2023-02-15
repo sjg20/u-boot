@@ -13,6 +13,7 @@
 #include <env.h>
 #include <errno.h>
 #include <i8042.h>
+#include <init.h>
 #include <input.h>
 #include <keyboard.h>
 #include <log.h>
@@ -154,10 +155,12 @@ static int kbd_reset(int quirk)
 
 	/* keyboard reset */
 	log_debug("reset\n");
-	if (kbd_write(I8042_DATA_REG, CMD_RESET_KBD) ||
-	    kbd_read(I8042_DATA_REG) != KBD_ACK ||
-	    kbd_read(I8042_DATA_REG) != KBD_POR)
-		goto err;
+	if (ll_boot_init()) {
+		if (kbd_write(I8042_DATA_REG, CMD_RESET_KBD) ||
+		    kbd_read(I8042_DATA_REG) != KBD_ACK ||
+		    kbd_read(I8042_DATA_REG) != KBD_POR)
+			goto err;
+	}
 
 	log_debug("drain\n");
 	if (kbd_write(I8042_DATA_REG, CMD_DRAIN_OUTPUT) ||
