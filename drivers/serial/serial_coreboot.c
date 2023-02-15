@@ -17,6 +17,12 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+static const struct pci_device_id ids[] = {
+	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_APL_UART2) },
+	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ADP_P_UART0) },
+	{},
+};
+
 static int read_dbg2(struct ns16550_plat *plat)
 {
 	struct acpi_table_header *tab;
@@ -94,6 +100,39 @@ static int read_dbg2(struct ns16550_plat *plat)
 	return 0;
 }
 
+/*
+ * Coreboot only sets up the UART if it uses it and doesn't bother to put the
+ * details in sysinfo if it doesn't. Try to guess in that case, using devices
+ * we know about
+ *
+ * @plat: Platform data to fill in
+ * @return 0 if found, -ve if no UART was found
+ */
+static int guess_uart(struct ns16550_plat *plat)
+{
+	struct udevice *bus, *dev;
+	ulong addr;
+	int index;
+	int ret;
+
+	ret = uclass_first_device_err(UCLASS_PCI, &bus);
+	if (ret)
+		return ret;
+	index = 0;
+	ret = pci_bus_find_devices(bus, ids, &index, &dev);
+	if (ret)
+		return ret;
+	addr = dm_pci_read_bar32(dev, 0);
+	plat->base = addr;
+	plat->reg_shift = 2;
+	plat->reg_width = 4;
+	plat->clock = 1843200;
+	plat->fcr = UART_FCR_DEFVAL;
+	plat->flags = 0;
+
+	return 0;
+}
+
 static int coreboot_of_to_plat(struct udevice *dev)
 {
 	struct ns16550_plat *plat = dev_get_plat(dev);
@@ -113,6 +152,8 @@ static int coreboot_of_to_plat(struct udevice *dev)
 	} else if (IS_ENABLED(CONFIG_COREBOOT_SERIAL_FROM_DBG2)) {
 		ret = read_dbg2(plat);
 	}
+	if (ret && CONFIG_IS_ENABLED(PCI))
+		ret = guess_uart(plat);
 
 	if (ret) {
 		/*
