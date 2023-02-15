@@ -145,10 +145,12 @@ static int do_mtrr(struct cmd_tbl *cmdtp, int flag, int argc,
 		for (; i >= 0; i = mp_next_cpu(cpu_select, i)) {
 			if (!first)
 				printf("\n");
-			printf("CPU %d:\n", i);
+			if (i < MP_SELECT_ALL)
+				printf("CPU %d:\n", i);
 			ret = do_mtrr_list(reg_count, i);
 			if (ret) {
-				printf("Failed to read CPU %d (err=%d)\n", i,
+				printf("Failed to read CPU %s (err=%d)\n",
+				       i < MP_SELECT_ALL ? simple_itoa(i) : "",
 				       ret);
 				return CMD_RET_FAILURE;
 			}
