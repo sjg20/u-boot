@@ -14,7 +14,7 @@ import queue
 import shutil
 import tempfile
 
-from patman import command
+from u_boot_pylib import command
 from patman import commit
 from patman import gitutil
 from patman.series import Series

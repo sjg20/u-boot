@@ -30,8 +30,8 @@ from dtoc import fdt_util
 from dtoc.fdt_util import fdt32_to_cpu, fdt64_to_cpu
 from dtoc.fdt import Type, BytesToValue
 import libfdt
-from patman import test_util
-from patman import tools
+from u_boot_pylib import test_util
+from u_boot_pylib import tools
 
 #pylint: disable=protected-access
 

@@ -7,7 +7,7 @@ import os
 import shlex
 import shutil
 
-from patman import command
+from u_boot_pylib import command
 from patman import gitutil
 
 

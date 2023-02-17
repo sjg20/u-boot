@@ -35,7 +35,7 @@ sys.path.insert(0, os.path.join(our_path,
                 '../../build-sandbox_spl/scripts/dtc/pylibfdt'))
 
 from dtoc import dtb_platdata
-from patman import test_util
+from u_boot_pylib import test_util
 
 def run_tests(processes, args):
     """Run all the test we have for dtoc

@@ -20,8 +20,8 @@ OUR_PATH = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(2, os.path.join(OUR_PATH, '..'))
 
 # pylint: disable=C0413
-from patman import test_util
-from patman import tools
+from u_boot_pylib import test_util
+from u_boot_pylib import tools
 from binman import bintool
 from binman import fip_util
 

@@ -34,7 +34,7 @@ sys.pycache_prefix = os.path.relpath(our_path, srctree)
 sys.path.insert(2, our1_path)
 
 from binman import bintool
-from patman import test_util
+from u_boot_pylib import test_util
 
 # Bring in the libfdt module
 sys.path.insert(2, 'scripts/dtc/pylibfdt')
@@ -44,7 +44,7 @@ sys.path.insert(2, os.path.join(srctree, 'build-sandbox_spl/scripts/dtc/pylibfdt
 
 from binman import cmdline
 from binman import control
-from patman import test_util
+from u_boot_pylib import test_util
 
 def RunTests(debug, verbosity, processes, test_preserve_dirs, args, toolpath):
     """Run the functional tests and any embedded doctests
