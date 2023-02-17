@@ -145,6 +145,7 @@ class TestBintool(unittest.TestCase):
             with unittest.mock.patch.object(tools, 'download',
                                             side_effect=handle_download):
                 Bintool.fetch_tools(bintool.FETCH_ANY, ['_testing'] * 2)
+        print('dest_fname', dest_fname)
         self.assertTrue(os.path.exists(dest_fname))
         data = tools.read_file(dest_fname)
         self.assertEqual(expected, data)
