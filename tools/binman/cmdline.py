@@ -7,6 +7,7 @@
 
 import argparse
 from argparse import ArgumentParser
+import os
 from binman import state
 
 def make_extract_parser(subparsers):
@@ -78,6 +79,9 @@ controlled by a description in the board device tree.'''
         help='Directory containing the build output')
     parser.add_argument('-D', '--debug', action='store_true',
         help='Enabling debugging (provides a full traceback on error)')
+    parser.add_argument('--tooldir', type=str,
+        default=os.path.join(os.getenv('HOME'), '.binman-tools'),
+        help='Set the directory to store tools')
     parser.add_argument('-H', '--full-help', action='store_true',
         default=False, help='Display the README file')
     parser.add_argument('--toolpath', type=str, action='append',

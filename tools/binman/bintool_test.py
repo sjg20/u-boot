@@ -128,7 +128,6 @@ class TestBintool(unittest.TestCase):
                 raise urllib.error.URLError('not found')
             self.seq += 1
             tools.write_file(fname, expected)
-            print('fname', fname)
             return fname, dirname
 
         expected = b'this is a test'
@@ -140,10 +139,10 @@ class TestBintool(unittest.TestCase):
         dest_fname = os.path.join(destdir, '_testing')
         self.seq = 0
 
-        with unittest.mock.patch.object(bintool.Bintool, 'tooldir',
-                                        self._indir):
-            with unittest.mock.patch.object(tools, 'download',
-                                            side_effect=handle_download):
+        bintool.Bintool.tooldir = destdir
+        with unittest.mock.patch.object(tools, 'download',
+                                        side_effect=handle_download):
+            with test_util.capture_sys_output() as (stdout, _):
                 Bintool.fetch_tools(bintool.FETCH_ANY, ['_testing'] * 2)
         print('dest_fname', dest_fname)
         self.assertTrue(os.path.exists(dest_fname))
@@ -252,11 +251,10 @@ class TestBintool(unittest.TestCase):
         btest = Bintool.create('_testing')
         col = terminal.Color()
         self.fname = None
-        with unittest.mock.patch.object(bintool.Bintool, 'tooldir',
-                                        self._indir):
-            with unittest.mock.patch.object(tools, 'run', side_effect=fake_run):
-                with test_util.capture_sys_output() as (stdout, _):
-                    btest.fetch_tool(bintool.FETCH_BUILD, col, False)
+        bintool.Bintool.tooldir = self._indir
+        with unittest.mock.patch.object(tools, 'run', side_effect=fake_run):
+            with test_util.capture_sys_output() as (stdout, _):
+                btest.fetch_tool(bintool.FETCH_BUILD, col, False)
         fname = os.path.join(self._indir, '_testing')
         return fname if write_file else self.fname, stdout.getvalue()
 

@@ -52,7 +52,7 @@ class Bintool:
     missing_list = []
 
     # Directory to store tools
-    tooldir = os.path.join(os.getenv('HOME'), 'bin')
+    tooldir = None
 
     def __init__(self, name, desc, version_regex=None, version_args='-V'):
         self.name = name
@@ -112,6 +112,10 @@ class Bintool:
         # Call its constructor to get the object we want.
         obj = cls(name)
         return obj
+
+    @classmethod
+    def set_tool_dir(cls, pathname):
+        cls.tooldir = pathname
 
     def show(self):
         """Show a line of information about a bintool"""
@@ -210,6 +214,8 @@ class Bintool:
         if result is not True:
             fname, tmpdir = result
             dest = os.path.join(self.tooldir, self.name)
+            if not os.path.exists(self.tooldir):
+                os.makedirs(self.tooldir)
             print(f"- writing to '{dest}'")
             shutil.move(fname, dest)
             if tmpdir:
@@ -279,6 +285,8 @@ class Bintool:
         if self.name in self.missing_list:
             return None
         name = os.path.expanduser(self.name)  # Expand paths containing ~
+        if not shutil.which(name):
+            name = os.path.join(self.tooldir, self.name)
         all_args = (name,) + args
         env = tools.get_env_with_path()
         tout.detail(f"bintool: {' '.join(all_args)}")
