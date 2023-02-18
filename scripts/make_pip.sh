@@ -22,7 +22,7 @@ cat ${readme} | sed -E 's/:(doc|ref):`.*`//; /sectionauthor/d; /toctree::/d' \
 
 dest=${dir}/src/${name}
 mkdir -p ${dest}
-cp -v tools/$tool/*.py ${dest}
+cp -v tools/$tool/{*.py,*.rst} ${dest}
 pushd tools/${tool}
 for subdir in $(find . -maxdepth 1 -type d | grep -vE "(__pycache__|home|usr|scratch|\.$|pyproject)"); do
 	pathname="${dest}/${subdir}"
