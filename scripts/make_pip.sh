@@ -18,9 +18,11 @@ readme="tools/${tool}/README.*"
 
 cat ${readme} | sed 's/:doc:`.*`//; /sectionauthor/d' > ${dir}/$(basename ${readme})
 
-
 mkdir -p ${dir}/src/${tool}
 cp -v tools/$tool/*.py ${dir}/src/${tool}
+for subdir in $(find tools/${tool} -type d -maxdepth 1 | grep -v __pycache__); do
+	echo "copy ${subdir}"
+done
 mkdir ${dir}/tests
 cd ${dir}
 
