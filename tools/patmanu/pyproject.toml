@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "patmanu"
-version = "1.0.11"
+version = "1.0.15"
 authors = [
   { name="Simon Glass", email="sjg@chromium.org" },
 ]
@@ -24,3 +24,6 @@ classifiers = [
 
 [project.scripts]
 patman = "patmanu.__main__:run_patman"
+
+[tool.setuptools.package-data]
+patmanu = ["*.rst"]

@@ -3,7 +3,7 @@
 set -xe
 
 tool=$1
-name=${2:-1}
+name=${2:-$1}
 
 echo "Building dist package for tool ${tool} with name ${name}"
 
