@@ -18,17 +18,18 @@ readme="tools/${tool}/README.*"
 
 cat ${readme} | sed -E 's/:(doc|ref):`.*`//; /sectionauthor/d; /toctree::/d' > ${dir}/$(basename ${readme})
 
-mkdir -p ${dir}/src/${tool}
-cp -v tools/$tool/*.py ${dir}/src
+dest=${dir}/src/${tool}
+mkdir -p ${dest}
+cp -v tools/$tool/*.py ${dest}
 pushd tools/${tool}
 for subdir in $(find . -maxdepth 1 -type d | grep -vE "(__pycache__|home|usr|scratch|\.$|pyproject)"); do
-	pathname="${dir}/src/${subdir}"
+	pathname="${dest}/${subdir}"
 	echo "Copy ${pathname}"
 	cp -a ${subdir} ${pathname}
 done
 popd
-find ${dir}/src -name __pycache__ -type f -exec rm {} \;
-find ${dir}/src -depth -name __pycache__ -exec rmdir {} \;
+find ${dest} -name __pycache__ -type f -exec rm {} \;
+find ${dest} -depth -name __pycache__ -exec rmdir {} \;
 mkdir ${dir}/tests
 cd ${dir}
 
