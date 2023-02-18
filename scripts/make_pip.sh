@@ -12,7 +12,12 @@ if [ -z "${TWINE_PASSWORD}" ]; then
 fi
 
 dir=$(mktemp -d)
-cp -v tools/${tool}/{LICENSE,pyproject.toml,README.md} ${dir}
+cp -v tools/${tool}/pyproject.toml ${dir}
+cp -v Licenses/gpl-2.0.txt ${dir}/LICENSE
+readme="tools/${tool}/README.*"
+
+cat ${readme} | sed 's/:doc:`.*`//; /sectionauthor/d' > ${dir}/$(basename ${readme})
+
 
 mkdir -p ${dir}/src/${tool}
 cp -v tools/$tool/*.py ${dir}/src/${tool}
@@ -24,4 +29,5 @@ python3 -m pip install --upgrade twine
 python3 -m build
 python3 -m twine upload --repository testpypi -u __token__ dist/*
 
-echo "Output in ${dir}"
+echo "Completed build and upload of ${tool}"
+echo
