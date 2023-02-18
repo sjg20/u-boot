@@ -14,8 +14,8 @@ fi
 dir=$(mktemp -d)
 cp -v tools/${tool}/{LICENSE,pyproject.toml,README.md} ${dir}
 
-mkdir ${dir}/src
-cp -v tools/$tool/*.py ${dir}/src
+mkdir -p ${dir}/src/${tool}
+cp -v tools/$tool/*.py ${dir}/src/${tool}
 mkdir ${dir}/tests
 cd ${dir}
 

@@ -2,12 +2,9 @@
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where = [""]
-
 [project]
 name = "u_boot_pylib"
-version = "1.0.3"
+version = "1.0.6"
 authors = [
   { name="Simon Glass", email="sjg@chromium.org" },
 ]
