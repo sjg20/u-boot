@@ -6,7 +6,7 @@ import os
 import sys
 
 from u_boot_pylib import command
-from patman import settings
+from patmanu import settings
 from u_boot_pylib import terminal
 
 # True to use --no-decorate - we check this in setup()
@@ -621,7 +621,7 @@ def get_top_level():
     This test makes sure that we are running tests in the right subdir
 
     >>> os.path.realpath(os.path.dirname(__file__)) == \
-            os.path.join(get_top_level(), 'tools', 'patman')
+            os.path.join(get_top_level(), 'tools', 'patmanu')
     True
     """
     return command.output_one_line('git', 'rev-parse', '--show-toplevel')

@@ -14,19 +14,19 @@ import sys
 import traceback
 
 if __name__ == "__main__":
-    # Allow 'from patman import xxx to work'
+    # Allow 'from patmanu import xxx to work'
     our_path = os.path.dirname(os.path.realpath(__file__))
     sys.path.append(os.path.join(our_path, '..'))
 
 # Our modules
-from patman import control
-from patman import func_test
-from patman import gitutil
-from patman import project
-from patman import settings
+from patmanu import control
+from patmanu import func_test
+from patmanu import gitutil
+from patmanu import project
+from patmanu import settings
 from u_boot_pylib import terminal
 from u_boot_pylib import test_util
-from patman import test_checkpatch
+from patmanu import test_checkpatch
 from u_boot_pylib import tools
 
 def run_patman():

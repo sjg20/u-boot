@@ -8,7 +8,7 @@ import re
 import sys
 
 from u_boot_pylib import command
-from patman import gitutil
+from patmanu import gitutil
 from u_boot_pylib import terminal
 
 EMACS_PREFIX = r'(?:[0-9]{4}.*\.patch:[0-9]+: )?'

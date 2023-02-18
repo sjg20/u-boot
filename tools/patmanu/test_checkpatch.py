@@ -10,11 +10,11 @@ import os
 import tempfile
 import unittest
 
-from patman import checkpatch
-from patman import gitutil
-from patman import patchstream
-from patman import series
-from patman import commit
+from patmanu import checkpatch
+from patmanu import gitutil
+from patmanu import patchstream
+from patmanu import series
+from patmanu import commit
 
 
 class Line:

@@ -15,7 +15,7 @@ from buildman import cmdline
 from buildman import control
 from buildman import toolchain
 from u_boot_pylib import command
-from patman import gitutil
+from patmanu import gitutil
 from u_boot_pylib import terminal
 from u_boot_pylib import test_util
 from u_boot_pylib import tools

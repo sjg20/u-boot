@@ -15,9 +15,9 @@ import shutil
 import tempfile
 
 from u_boot_pylib import command
-from patman import commit
-from patman import gitutil
-from patman.series import Series
+from patmanu import commit
+from patmanu import gitutil
+from patmanu.series import Series
 
 # Tags that we detect and remove
 RE_REMOVE = re.compile(r'^BUG=|^TEST=|^BRANCH=|^Review URL:'

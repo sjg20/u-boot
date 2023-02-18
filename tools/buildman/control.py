@@ -14,8 +14,8 @@ from buildman import cfgutil
 from buildman import toolchain
 from buildman.builder import Builder
 from u_boot_pylib import command
-from patman import gitutil
-from patman import patchstream
+from patmanu import gitutil
+from patmanu import patchstream
 from u_boot_pylib import terminal
 from u_boot_pylib import tools
 from u_boot_pylib.terminal import tprint

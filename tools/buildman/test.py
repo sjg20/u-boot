@@ -16,7 +16,7 @@ from buildman import builder
 from buildman import cfgutil
 from buildman import control
 from buildman import toolchain
-from patman import commit
+from patmanu import commit
 from u_boot_pylib import command
 from u_boot_pylib import terminal
 from u_boot_pylib import test_util

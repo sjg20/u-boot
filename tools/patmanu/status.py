@@ -16,8 +16,8 @@ import re
 import pygit2
 import requests
 
-from patman import patchstream
-from patman.patchstream import PatchStream
+from patmanu import patchstream
+from patmanu.patchstream import PatchStream
 from u_boot_pylib import terminal
 from u_boot_pylib import tout
 

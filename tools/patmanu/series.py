@@ -8,9 +8,9 @@ import collections
 import itertools
 import os
 
-from patman import get_maintainer
-from patman import gitutil
-from patman import settings
+from patmanu import get_maintainer
+from patmanu import gitutil
+from patmanu import settings
 from u_boot_pylib import terminal
 from u_boot_pylib import tools
 

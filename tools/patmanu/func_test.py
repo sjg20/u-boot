@@ -16,19 +16,19 @@ import tempfile
 import unittest
 
 
-from patman.commit import Commit
-from patman import control
-from patman import gitutil
-from patman import patchstream
-from patman.patchstream import PatchStream
-from patman.series import Series
-from patman import settings
+from patmanu.commit import Commit
+from patmanu import control
+from patmanu import gitutil
+from patmanu import patchstream
+from patmanu.patchstream import PatchStream
+from patmanu.series import Series
+from patmanu import settings
 from u_boot_pylib import terminal
 from u_boot_pylib import tools
 from u_boot_pylib.test_util import capture_sys_output
 
 import pygit2
-from patman import status
+from patmanu import status
 
 PATMAN_DIR = pathlib.Path(__file__).parent
 TEST_DATA_DIR = PATMAN_DIR / 'test/'

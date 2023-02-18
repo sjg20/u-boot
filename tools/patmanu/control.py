@@ -11,9 +11,9 @@ the features of patman.
 import os
 import sys
 
-from patman import checkpatch
-from patman import gitutil
-from patman import patchstream
+from patmanu import checkpatch
+from patmanu import gitutil
+from patmanu import patchstream
 from u_boot_pylib import terminal
 
 def setup():
@@ -235,6 +235,6 @@ def patchwork_status(branch, count, start, end, dest_branch, force,
 
     # Import this here to avoid failing on other commands if the dependencies
     # are not present
-    from patman import status
+    from patmanu import status
     status.check_patchwork_status(series, found[0], branch, dest_branch, force,
                                   show_comments, url)

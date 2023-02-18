@@ -12,12 +12,12 @@ import argparse
 import os
 import re
 
-from patman import gitutil
+from patmanu import gitutil
 
 """Default settings per-project.
 
 These are used by _ProjectConfigParser.  Settings names should match
-the "dest" of the option parser from patman.py.
+the "dest" of the option parser from patmanu.py.
 """
 _default_settings = {
     "u-boot": {},

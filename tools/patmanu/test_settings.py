@@ -9,7 +9,7 @@ import os
 import sys
 import tempfile
 
-from patman import settings
+from patmanu import settings
 from u_boot_pylib import tools
 
 
