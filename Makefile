@@ -2274,10 +2274,10 @@ backup:
 
 PHONY += pip
 pip:
-	# scripts/make_pip.sh u_boot_pylib
+	scripts/make_pip.sh u_boot_pylib
 	# scripts/make_pip.sh patman
 	# scripts/make_pip.sh buildman
-	scripts/make_pip.sh binman
+	# scripts/make_pip.sh binman
 
 help:
 	@echo  'Cleaning targets:'

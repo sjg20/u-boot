@@ -40,3 +40,5 @@ echo "Uploading from ${dir}"
 python3 -m twine upload --repository testpypi -u __token__ dist/*
 
 echo "Completed build and upload of ${tool}"
+
+# remove tmpdir
