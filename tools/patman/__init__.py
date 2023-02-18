@@ -3,3 +3,6 @@
 __all__ = ['checkpatch', 'commit', 'control', 'func_test', 'get_maintainer',
            'gitutil', '__main__', 'patchstream', 'project', 'series',
            'settings','setup', 'status', 'test_checkpatch', 'test_settings']
+
+def run_patman():
+    print("Hello world")

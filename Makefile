@@ -2275,7 +2275,7 @@ backup:
 PHONY += pip
 pip:
 	# scripts/make_pip.sh u_boot_pylib
-	scripts/make_pip.sh patman
+	scripts/make_pip.sh patman patman_patch
 	# scripts/make_pip.sh buildman
 	# scripts/make_pip.sh binman
 

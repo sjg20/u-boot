@@ -3,8 +3,9 @@
 set -xe
 
 tool=$1
+name=${2:-1}
 
-echo "Building dist package for tool ${tool}"
+echo "Building dist package for tool ${tool} with name ${name}"
 
 if [ -z "${TWINE_PASSWORD}" ]; then
 	echo "Please set TWINE_PASSWORD to your password and retry"
@@ -16,9 +17,10 @@ cp -v tools/${tool}/pyproject.toml ${dir}
 cp -v Licenses/gpl-2.0.txt ${dir}/LICENSE
 readme="tools/${tool}/README.*"
 
-cat ${readme} | sed -E 's/:(doc|ref):`.*`//; /sectionauthor/d; /toctree::/d' > ${dir}/$(basename ${readme})
+cat ${readme} | sed -E 's/:(doc|ref):`.*`//; /sectionauthor/d; /toctree::/d' \
+	> ${dir}/$(basename ${readme})
 
-dest=${dir}/src/${tool}
+dest=${dir}/src/${name}
 mkdir -p ${dest}
 cp -v tools/$tool/*.py ${dest}
 pushd tools/${tool}

@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "patman-patch"
-version = "0.0.1"
+name = "patman_patch"
+version = "1.0.11"
 authors = [
   { name="Simon Glass", email="sjg@chromium.org" },
 ]
@@ -21,3 +21,6 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://u-boot.readthedocs.io/en/latest/develop/patman.html"
 "Bug Tracker" = "https://source.denx.de/groups/u-boot/-/issues"
+
+[project.scripts]
+patman = "patman_patch.__main__:run_patman"
