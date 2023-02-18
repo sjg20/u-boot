@@ -522,7 +522,7 @@ env_h := include/generated/environment.h
 no-dot-config-targets := clean clobber mrproper distclean \
 			 help %docs check% coccicheck \
 			 ubootversion backup tests check pcheck qcheck tcheck \
-			 pylint pylint_err
+			 pylint pylint_err pip
 
 config-targets := 0
 mixed-targets  := 0
@@ -2271,6 +2271,10 @@ pylint_err:
 backup:
 	F=`basename $(srctree)` ; cd .. ; \
 	gtar --force-local -zcvf `LC_ALL=C date "+$$F-%Y-%m-%d-%T.tar.gz"` $$F
+
+PHONY += pip
+pip:
+	scripts/make_pip.sh u_boot_pylib
 
 help:
 	@echo  'Cleaning targets:'
