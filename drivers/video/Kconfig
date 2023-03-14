@@ -14,7 +14,17 @@ config VIDEO
 	  option compiles in the video uclass and routes all LCD/video access
 	  through this.
 
-if VIDEO
+config SPL_VIDEO
+	bool "Enable driver model support for LCD/video"
+	depends on SPL_DM
+	help
+	  The video subsystem adds a small amount of overhead to the image.
+	  If this is acceptable and you have a need to use video drivers in
+	  SPL, enable this option. It might provide a cleaner interface to
+	  setting up video within SPL, and allows the same drivers to be
+	  used as U-Boot proper.
+
+if VIDEO || SPL_VIDEO
 
 config VIDEO_FONT_4X6
 	bool "4 x 6 font size"
@@ -222,6 +232,14 @@ config SYS_WHITE_ON_BLACK
 	 option to invert this, i.e. white on a black background. This can be
 	 better in low-light situations or to reduce eye strain in some
 	 cases.
+
+config SPL_SYS_WHITE_ON_BLACK
+	bool "Display console as white on a black background"
+	help
+	 Normally the display is black on a white background, Enable this
+	 option to invert this, i.e. white on a black background at spl stage.
+	 This can be better in low-light situations or to reduce eye strain in
+	 some cases.
 
 config NO_FB_CLEAR
 	bool "Skip framebuffer clear"
@@ -825,7 +843,13 @@ config SPLASH_SCREEN
 	  image data before it is processed and sent to the frame buffer by
 	  U-Boot. Define your own version to use this feature.
 
-if SPLASH_SCREEN
+config SPL_SPLASH_SCREEN
+	bool "Show a splash-screen image"
+	help
+	  If this option is set, the environment is checked for a variable
+	  "splashimage" at spl stage.
+
+if SPLASH_SCREEN || SPL_SPLASH_SCREEN
 
 config SPLASH_SCREEN_ALIGN
 	bool "Allow positioning the splash image anywhere on the display"
@@ -893,7 +917,7 @@ endif # SPLASH_SCREEN
 
 config VIDEO_BMP_GZIP
 	bool "Gzip compressed BMP image support"
-	depends on CMD_BMP || SPLASH_SCREEN
+	depends on CMD_BMP || SPLASH_SCREEN || SPL_SPLASH_SCREEN || SPL_CMD_BMP
 	help
 	  If this option is set, additionally to standard BMP
 	  images, gzipped BMP images can be displayed via the
