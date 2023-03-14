@@ -514,7 +514,7 @@ static int video_post_probe(struct udevice *dev)
 	}
 
 	if (IS_ENABLED(CONFIG_VIDEO_LOGO) &&
-	    !IS_ENABLED(CONFIG_SPLASH_SCREEN) && !plat->hide_logo) {
+	    !CONFIG_IS_ENABLED(SPLASH_SCREEN) && !plat->hide_logo) {
 		ret = show_splash(dev);
 		if (ret) {
 			log_debug("Cannot show splash screen\n");
