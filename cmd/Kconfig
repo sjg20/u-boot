@@ -1415,6 +1415,11 @@ config CMD_READ
 	help
 	  Provides low-level access to the data in a partition.
 
+config SPL_CMD_READ
+	bool "read - Read binary data from a partition"
+	help
+	  Provides low-level access to the data in a partition at SPL stage.
+
 config CMD_REMOTEPROC
 	bool "remoteproc"
 	depends on REMOTEPROC
@@ -1930,6 +1935,18 @@ config CMD_BMP
 	help
 	  This provides a way to obtain information about a BMP-format image
 	  and to display it. BMP (which presumably stands for BitMaP) is a
+	  file format defined by Microsoft which supports images of various
+	  depths, formats and compression methods. Headers on the file
+	  determine the formats used. This command can be used by first loading
+	  the image into RAM, then using this command to look at it or display
+	  it.
+
+config SPL_CMD_BMP
+	bool "Enable 'bmp' command"
+	depends on SPL_VIDEO
+	help
+	  This provides a way to obtain information about a BMP-format image
+	  and to display it in spl stage.BMP (which presumably stands for BitMaP) is a
 	  file format defined by Microsoft which supports images of various
 	  depths, formats and compression methods. Headers on the file
 	  determine the formats used. This command can be used by first loading
