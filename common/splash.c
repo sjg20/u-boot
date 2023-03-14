@@ -157,7 +157,7 @@ void splash_display_banner(void)
  * Common function to show a splash image if env("splashimage") is set.
  * For additional details please refer to doc/README.splashprepare.
  */
-#if defined(CONFIG_SPLASH_SCREEN) && defined(CONFIG_CMD_BMP)
+#if CONFIG_IS_ENABLED(SPLASH_SCREEN) && CONFIG_IS_ENABLED(CMD_BMP)
 int splash_display(void)
 {
 	ulong addr;
