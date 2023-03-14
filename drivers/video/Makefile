@@ -72,4 +72,5 @@ obj-y += sunxi/
 ifdef CONFIG_SPL_BUILD
 obj-$(CONFIG_$(SPL_)VIDEO) += video-uclass.o vidconsole-uclass.o
 obj-$(CONFIG_$(SPL_)VIDEO) += video_bmp.o
+obj-${CONFIG_$(SPL_)VIDEO_TIDSS} += tidss/
 endif

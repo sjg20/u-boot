@@ -10,3 +10,4 @@
 
 
 obj-${CONFIG_VIDEO_TIDSS} = tidss_drv.o
+obj-${CONFIG_$(SPL_)VIDEO_TIDSS} = tidss_drv.o
