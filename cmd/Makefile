@@ -232,6 +232,8 @@ obj-$(CONFIG_ARCH_MVEBU) += mvebu/
 endif # !CONFIG_SPL_BUILD
 
 obj-$(CONFIG_$(SPL_)CMD_TLV_EEPROM) += tlv_eeprom.o
+obj-$(CONFIG_$(SPL_)CMD_BMP) += bmp.o
+obj-$(CONFIG_$(SPL_)CMD_READ) += read.o
 
 # core command
 obj-y += nvedit.o
