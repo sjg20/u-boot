@@ -1,6 +1,6 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-# U-Boot Python Library
+U-Boot Python Library
 =====================
 
 This is a Python library used by various U-Boot tools, including patman,
