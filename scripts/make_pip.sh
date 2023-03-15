@@ -91,7 +91,12 @@ find ${dest} -name __pycache__ -type f -exec rm {} \;
 find ${dest} -depth -name __pycache__ -exec rmdir 112 \;
 
 # Remove test files
-rm -rf ${dest}/*test*
+for path in ${dest}/*test*; do
+	echo ${path}
+	if ! [[ "${path}" =~ .*test_util.* ]]; then
+		rm -rf ${path}
+	fi
+done
 
 mkdir ${dir}/tests
 cd ${dir}
@@ -108,7 +113,7 @@ echo "Completed build of ${tool}"
 # Use --skip-existing to work even if the version is already present
 if [ -n "${upload}" ]; then
 	echo "Uploading from ${dir}"
-	python3 -m twine upload ${repo} -u __token__ dist/*
+	python3 -m twine upload ${repo} --verbose -u __token__ dist/*
 	echo "Completed upload of ${tool}"
 fi
 
