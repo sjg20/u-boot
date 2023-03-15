@@ -16,11 +16,17 @@ progress information and filter output in real time.
 
 import errno
 import os
-import pty
 import select
 import subprocess
 import sys
 import unittest
+
+try:
+    import pty
+    HAVE_PTY = True
+except:
+    # For Windows
+    HAVE_PTY = False
 
 
 # Import these here so the caller does not need to import subprocess also.
@@ -74,11 +80,17 @@ class Popen(subprocess.Popen):
         stderr_pty = None
 
         if stdout == PIPE_PTY:
-            stdout_pty = pty.openpty()
-            stdout = os.fdopen(stdout_pty[1])
+            if HAVE_PTY:
+                stdout_pty = pty.openpty()
+                stdout = os.fdopen(stdout_pty[1])
+            else:
+                stdout = PIPE
         if stderr == PIPE_PTY:
-            stderr_pty = pty.openpty()
-            stderr = os.fdopen(stderr_pty[1])
+            if HAVE_PTY:
+                stderr_pty = pty.openpty()
+                stderr = os.fdopen(stderr_pty[1])
+            else:
+                stderr = PIPE
 
         super(Popen, self).__init__(args, stdin=stdin,
                 stdout=stdout, stderr=stderr, shell=shell, cwd=cwd, env=env,
@@ -156,6 +168,12 @@ class Popen(subprocess.Popen):
             Note also that if you set stderr to STDOUT, then stderr will be empty
             and the combined output will just be the same as stdout.
         """
+        if not HAVE_PTY:
+            stdout, stderr = self.communicate(input_buf)
+            stdout = self.convert_data(stdout)
+            stderr = self.convert_data(stderr)
+            combined = self.convert_data(stdout + stderr)
+            return (stdout, stderr, combined)
 
         read_set = []
         write_set = []
