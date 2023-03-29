@@ -137,8 +137,21 @@ static int x86_spl_init(void)
 	 */
 	gd->new_gd = (struct global_data *)ptr;
 	memcpy(gd->new_gd, gd, sizeof(*gd));
+
+	/*
+	 * Make sure logging is disabled when we switch, since the log system
+	 * list head will move
+	 */
+	gd->new_gd->flags &= ~GD_FLG_LOG_READY;
 	arch_setup_gd(gd->new_gd);
 	gd->start_addr_sp = (ulong)ptr;
+
+	/* start up logging again, with the new list-head location */
+	ret = log_init();
+	if (ret) {
+		log_debug("Log setup failed (err=%d)\n", ret);
+		return ret;
+	}
 
 	/* Cache the SPI flash. Otherwise copying the code to RAM takes ages */
 	ret = mtrr_add_request(MTRR_TYPE_WRBACK,
