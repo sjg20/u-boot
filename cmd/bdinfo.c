@@ -145,6 +145,11 @@ int do_bdinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 			printf("devicetree  = %s\n", fdtdec_get_srcname());
 	}
 
+	if (IS_ENABLED(CONFIG_CMD_BDINFO_EXTRA)) {
+		bdinfo_print_num_ll("stack ptr", (ulong)&bd);
+		bdinfo_print_num_ll("ram_top ptr", (ulong)gd->ram_top);
+	}
+
 	arch_print_bdinfo();
 
 	return 0;
