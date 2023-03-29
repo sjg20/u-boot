@@ -73,7 +73,6 @@ static void set_var_mtrr(uint reg, uint type, uint64_t start, uint64_t size)
 
 	wrmsrl(MTRR_PHYS_BASE_MSR(reg), start | type);
 	mask = ~(size - 1);
-	mask &= (1ULL << CONFIG_CPU_ADDR_BITS) - 1;
 	wrmsrl(MTRR_PHYS_MASK_MSR(reg), mask | MTRR_PHYS_MASK_VALID);
 }
 
