@@ -102,8 +102,14 @@ int video_bios_init(void);
  */
 int fsp_save_s3_stack(void);
 
-void	board_init_f_r_trampoline(ulong) __attribute__ ((noreturn));
-void	board_init_f_r(void) __attribute__ ((noreturn));
+/**
+ * board_init_f_r_trampoline() - jump to relocated address with new stack
+ *
+ * @sp: New stack pointer to use
+ */
+void __noreturn board_init_f_r_trampoline(ulong sp);
+
+void __noreturn board_init_f_r(void);
 
 int arch_misc_init(void);
 
