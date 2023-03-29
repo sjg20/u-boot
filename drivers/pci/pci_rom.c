@@ -141,6 +141,49 @@ static int pci_rom_probe(struct udevice *dev, struct pci_rom_header **hdrp)
 	return 0;
 }
 
+#define Q35_HOST_BRIDGE_PAM0	0x90
+#define I440FX_PAM0		0x59
+
+/**
+ * intel_set_writable_ram() - Set RAM to be writable
+ *
+ * This is needed for QEMU when using Q35 or I440FX emulation, since otherwise
+ * there is no RAM available at c0000
+ *
+ * See Intel 82945G/82945G/82945GC GMCH and 82945P/82945PL MCH Datasheet for
+ * information about the PAM0-PAM6 registers
+ */
+static void intel_set_writable_ram(void)
+{
+	struct udevice *dev;
+	int pam0 = -1;
+	int i;
+
+	for (pci_find_first_device(&dev); dev; pci_find_next_device(&dev)) {
+		const struct pci_child_plat *pdata = dev_get_parent_plat(dev);
+
+		if (pdata->vendor == PCI_VENDOR_ID_INTEL) {
+			if (pdata->device == PCI_DEVICE_ID_INTEL_Q35_MCH) {
+				pam0 = Q35_HOST_BRIDGE_PAM0;
+				break;
+			} else if (pdata->device == PCI_DEVICE_ID_INTEL_82441) {
+				pam0 = I440FX_PAM0;
+				break;
+			}
+		}
+	}
+
+	if (!dev)
+		return;
+
+	// Adjust RAM to be writable from c0000 to f0000
+	for (i = 1; i <= 6; i++)
+		dm_pci_write_config8(dev, pam0 + i, 0x33);
+
+	// Also f0000-100000
+	dm_pci_write_config8(dev, pam0, 0x30);
+}
+
 /**
  * pci_rom_load() - Load a ROM image and return a pointer to it
  *
@@ -185,6 +228,9 @@ static int pci_rom_load(struct pci_rom_header *rom_header,
 		return -ENOMEM;
 	*allocedp = true;
 #endif
+	/* QEMU hacks */
+	intel_set_writable_ram();
+
 	if (target != rom_header) {
 		ulong start = get_timer(0);
 
