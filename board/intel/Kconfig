@@ -64,6 +64,7 @@ config TARGET_GALILEO
 
 config TARGET_MINNOWMAX
 	bool "Minnowboard MAX"
+	select BIOSEMU
 	help
 	  This is the Intel Minnowboard MAX. It contains an Atom E3800
 	  processor in a small form factor with Ethernet, micro-SD, USB 2,
