@@ -477,7 +477,7 @@ static int set_fatent_value(fsdata *mydata, __u32 entry, __u32 entry_value)
 
 		startblock += mydata->fat_sect;
 
-		if (disk_read(startblock, getsize, bufptr) < 0) {
+		if (disk_read(NULL, startblock, getsize, bufptr) < 0) {
 			debug("Error reading FAT blocks\n");
 			return -1;
 		}
@@ -712,7 +712,8 @@ get_set_cluster(fsdata *mydata, __u32 clustnum, loff_t pos, __u8 *buffer,
 	/* partial write at beginning */
 	if (pos) {
 		wsize = min(bytesperclust - pos, size);
-		ret = disk_read(startsect, mydata->clust_size, tmpbuf_cluster);
+		ret = disk_read(NULL, startsect, mydata->clust_size,
+				tmpbuf_cluster);
 		if (ret != mydata->clust_size) {
 			debug("Error reading data (got %d)\n", ret);
 			return -1;
@@ -778,7 +779,8 @@ get_set_cluster(fsdata *mydata, __u32 clustnum, loff_t pos, __u8 *buffer,
 	/* partial write at end */
 	if (size) {
 		wsize = size;
-		ret = disk_read(startsect, mydata->clust_size, tmpbuf_cluster);
+		ret = disk_read(NULL, startsect, mydata->clust_size,
+				tmpbuf_cluster);
 		if (ret != mydata->clust_size) {
 			debug("Error reading data (got %d)\n", ret);
 			return -1;
