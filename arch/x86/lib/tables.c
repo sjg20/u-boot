@@ -79,17 +79,18 @@ void table_fill_string(char *dest, const char *src, size_t n, char pad)
 int write_tables(void)
 {
 	u32 rom_table_start;
-	u32 rom_table_end;
 	u32 high_table, table_size;
 	struct memory_area cfg_tables[ARRAY_SIZE(table_list) + 1];
 	int i;
 
 	rom_table_start = ROM_TABLE_ADDR;
+	gd->arch.table_start = rom_table_start;
 
 	debug("Writing tables to %x:\n", rom_table_start);
 	for (i = 0; i < ARRAY_SIZE(table_list); i++) {
 		const struct table_info *table = &table_list[i];
 		int size = table->size ? : CONFIG_ROM_TABLE_SIZE;
+		u32 rom_table_end;
 
 		if (IS_ENABLED(CONFIG_BLOBLIST_TABLES) && table->tag) {
 			rom_table_start = (ulong)bloblist_add(table->tag, size,
@@ -131,6 +132,7 @@ int write_tables(void)
 		}
 		rom_table_start = rom_table_end;
 	}
+	gd->arch.table_end = rom_table_start;
 
 	if (IS_ENABLED(CONFIG_SEABIOS)) {
 		/* make sure the last item is zero */
