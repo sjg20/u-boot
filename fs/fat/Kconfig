@@ -22,3 +22,16 @@ config FS_FAT_MAX_CLUSTSIZE
 	  is the smallest amount of disk space that can be used to hold a
 	  file. Unless you have an extremely tight memory memory constraints,
 	  leave the default.
+
+config FAT_BLK_XLATE
+	bool "Enable FAT filesystem on a device with a larger block size"
+	depends on FS_FAT
+	help
+	  This provides a simple translation mechanism for reading FAT
+	  filesystems which don't use the same sector size as the underlying
+	  media. For example, the FAT filesystem may use 512 bytes but the
+	  media uses 2048, e.g. on a CDROM drive.
+
+	  This only supports the case where the FAT filesystem's sector size is
+	  smaller than the media's block size. It does not support creating or
+	  writing files.
