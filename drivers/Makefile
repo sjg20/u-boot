@@ -38,6 +38,8 @@ obj-$(CONFIG_$(SPL_)SYSINFO) += sysinfo/
 obj-$(CONFIG_$(SPL_TPL_)TPM) += tpm/
 obj-$(CONFIG_XEN) += xen/
 obj-$(CONFIG_$(SPL_)FPGA) += fpga/
+obj-$(CONFIG_$(SPL_TPL_)VIDEO) += video/
+
 obj-y += bus/
 
 ifndef CONFIG_TPL_BUILD
@@ -96,7 +98,6 @@ obj-y += rtc/
 obj-y += scsi/
 obj-y += sound/
 obj-y += spmi/
-obj-y += video/
 obj-y += watchdog/
 obj-$(CONFIG_QE) += qe/
 obj-$(CONFIG_U_QE) += qe/
