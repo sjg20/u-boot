@@ -161,7 +161,7 @@ static int x86_spl_init(void)
 		debug("%s: SPI cache setup failed (err=%d)\n", __func__, ret);
 		return ret;
 	}
-	mtrr_commit(true);
+// 	mtrr_commit(true);
 # else
 	ret = syscon_get_by_driver_data(X86_SYSCON_PUNIT, &punit);
 	if (ret)

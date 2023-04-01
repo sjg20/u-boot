@@ -445,7 +445,7 @@ int log_init(void)
 		ldev = calloc(1, sizeof(*ldev));
 		if (!ldev) {
 			debug("%s: Cannot allocate memory\n", __func__);
-			return -ENOMEM;
+			return log_ret(-ENOMEM);
 		}
 		INIT_LIST_HEAD(&ldev->filter_head);
 		ldev->drv = drv;

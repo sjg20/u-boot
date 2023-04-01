@@ -28,6 +28,8 @@ obj-$(CONFIG_VIDEO_LOGO) += u_boot_logo.o
 
 endif
 
+obj-$(CONFIG_VIDEO_BOCHS) += bochs.o
+
 obj-${CONFIG_EXYNOS_FB} += exynos/
 obj-${CONFIG_VIDEO_ROCKCHIP} += rockchip/
 obj-${CONFIG_VIDEO_STM32} += stm32/

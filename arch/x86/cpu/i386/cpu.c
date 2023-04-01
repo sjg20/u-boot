@@ -649,6 +649,8 @@ int cpu_jump_to_64bit_uboot(ulong target)
 
 	func = (func_t)ptr;
 
+	printf("jump to %lx\n", target);
+
 	/* Jump to U-Boot */
 	func((ulong)pgtable, 0, (ulong)target);
 
