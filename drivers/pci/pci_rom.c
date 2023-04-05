@@ -22,6 +22,7 @@
  * Copyright 1997 -- 1999 Martin Mares <mj@atrey.karlin.mff.cuni.cz>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_PCI
 
 #include <common.h>
