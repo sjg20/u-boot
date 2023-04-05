@@ -167,7 +167,6 @@ static void intel_set_writable_ram(void)
 		const struct pci_child_plat *pdata = dev_get_parent_plat(dev);
 
 		if (pdata->vendor == PCI_VENDOR_ID_INTEL) {
-			printf("device %x\n", pdata->device);
 			if (pdata->device == PCI_DEVICE_ID_INTEL_Q35_MCH) {
 				pam0 = Q35_HOST_BRIDGE_PAM0;
 				break;
@@ -178,7 +177,6 @@ static void intel_set_writable_ram(void)
 		}
 	}
 
-	printf("dev=%p\n", dev);
 	if (!dev)
 		return;
 
@@ -421,8 +419,6 @@ int vesa_setup_video(struct udevice *dev, int (*int15_handler)(void))
 	struct video_priv *uc_priv = dev_get_uclass_priv(dev);
 	int ret;
 
-	printf("video\n");
-		return -EPERM;
 	/* If we are running from EFI or coreboot, this can't work */
 	if (!ll_boot_init()) {
 		printf("Not available (previous bootloader prevents it)\n");
