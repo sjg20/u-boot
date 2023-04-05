@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2016 Alexander Graf
  */
-#define LOG_DEBUG
+//#define LOG_DEBUG
 
 #include <common.h>
 #include <bootm.h>

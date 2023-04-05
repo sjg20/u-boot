@@ -3,7 +3,7 @@
  * Copyright (c) 2014 Google, Inc
  * Written by Simon Glass <sjg@chromium.org>
  */
-
+#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_PCI
 
 #include <common.h>
