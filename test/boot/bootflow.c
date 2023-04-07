@@ -677,7 +677,7 @@ static int bootflow_menu_theme(struct unit_test_state *uts)
 		ut_assertok(check_font(uts, scn, ITEM_LABEL + i, font_size));
 	}
 
-	expo_destroy(exp);
+// 	expo_destroy(exp);
 
 	return 0;
 }
