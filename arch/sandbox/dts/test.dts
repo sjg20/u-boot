@@ -84,7 +84,6 @@
 		compatible = "u-boot,boot-std";
 
 		filename-prefixes = "/", "/boot/";
-		bootdev-order = "mmc2", "mmc1";
 
 		extlinux {
 			compatible = "u-boot,extlinux";
@@ -92,6 +91,10 @@
 
 		efi {
 			compatible = "u-boot,distro-efi";
+		};
+
+		script {
+			compatible = "u-boot,script";
 		};
 
 		theme {
@@ -1039,7 +1042,6 @@
 
 	/* This is used for bootstd bootmenu tests */
 	mmc4 {
-		status = "disabled";
 		compatible = "sandbox,mmc";
 		filename = "mmc4.img";
 	};
