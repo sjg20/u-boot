@@ -11,16 +11,14 @@
 #include <fdtdec.h>
 #include <linux/libfdt.h>
 
-const char *lookup_str(void *ldtb, const char *find_name)
+int lookup_str(void *ldtb, const char *find_name, const char **strp)
 {
 	int strings;
 	int node;
 
 	strings = fdt_subnode_offset(ldtb, 0, "strings");
-	if (strings < 0) {
-		log_msg_ret("str", -EINVAL);
-		return NULL;
-	}
+	if (strings < 0)
+		return log_msg_ret("str", -EINVAL);
 
 	fdt_for_each_subnode(node, ldtb, strings) {
 		const char *val, *name;
@@ -31,23 +29,54 @@ const char *lookup_str(void *ldtb, const char *find_name)
 			continue;
 
 		id = fdtdec_get_int(ldtb, node, "id", 0);
-		if (!id) {
-			log_msg_ret("id", -EINVAL);
-			return NULL;
-		}
+		if (!id)
+			return log_msg_ret("id", -EINVAL);
 		val = fdt_getprop(ldtb, node, "value", NULL);
-		if (!val) {
-			log_msg_ret("val", -EINVAL);
-			return NULL;
-		}
+		if (!val)
+			return log_msg_ret("val", -EINVAL);
+		*strp = val;
 
-		return val;
+		return id;
 	}
 
 	printf("string '%s' not found\n", find_name);
-	log_msg_ret("lo", -ENOENT);
+	return log_msg_ret("lo", -ENOENT);
+}
 
-	return NULL;
+int add_expo_str(void *ldtb, struct expo *exp, const char *name)
+{
+	const char *text;
+	uint str_id;
+	int ret;
+
+	ret = lookup_str(ldtb, name, &text);
+	if (ret < 0)
+		return log_msg_ret("lu", ret);
+	str_id = ret;
+
+	ret = expo_str(exp, name, str_id, text);
+	if (ret < 0)
+		return log_msg_ret("add", ret);
+
+	return ret;
+}
+
+int add_txt_str(void *ldtb, struct scene *scn, const char *name, uint obj_id)
+{
+	const char *text;
+	uint str_id;
+	int ret;
+
+	ret = lookup_str(ldtb, name, &text);
+	if (ret < 0)
+		return log_msg_ret("lu", ret);
+	str_id = ret;
+
+	ret = scene_txt_str(scn, name, obj_id, str_id, text, NULL);
+	if (ret < 0)
+		return log_msg_ret("add", ret);
+
+	return ret;
 }
 
 int expo_build(void *ldtb, struct expo **expp)
@@ -65,28 +94,30 @@ int expo_build(void *ldtb, struct expo **expp)
 		return log_msg_ret("scn", -EINVAL);
 
 	fdt_for_each_subnode(node, ldtb, scenes) {
-		const char *title_name, *name;
+		const char *name;
 		struct scene *scn;
-		int id;
+		uint id, title_id;
 
 		name = fdt_get_name(ldtb, node, NULL);
 		id = fdtdec_get_int(ldtb, node, "scene-id", 0);
 		if (!id)
 			return log_msg_ret("id", -EINVAL);
-		title_name = fdt_getprop(ldtb, node, "title", NULL);
-		if (!title_name)
-			return log_msg_ret("tit", -EINVAL);
 
-		ret = scene_new(exp, lookup_str(ldtb, title_name), id, &scn);
+		ret = add_expo_str(ldtb, exp, "title");
+		if (ret < 0)
+			return log_msg_ret("tit", -EINVAL);
+		title_id = ret;
+
+		ret = scene_new(exp, name, id, title_id, &scn);
 		if (ret < 0)
 			return log_msg_ret("scn", ret);
 
-		ret = scene_title_set(scn, title_name);
+		ret = add_txt_str(scn, "prompt", OBJ_PROMPT);
 		if (ret < 0)
-			return log_msg_ret("sc", ret);
+			return log_msg_ret("pr", ret);
 
-// 		ret |= scene_txt_str(scn, "prompt", OBJ_PROMPT, STR_PROMPT,
-// 				"UP and DOWN to choose, ENTER to select", NULL);
+		prompt = lookup_str(ldtb, title_name, &id);
+		ret = scene_txt_str(scn, "prompt", OBJ_PROMPT, STR_PROMPT);
 	}
 #if 0
 	ret = scene_menu(scn, "main", OBJ_MENU, &menu);

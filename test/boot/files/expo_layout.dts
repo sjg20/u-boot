@@ -10,6 +10,7 @@
 		main {
 			scene-id = <SCENE1>;
 			title = "title";
+			prompt = "prompt";
 		};
 	};
 
@@ -17,6 +18,11 @@
 		title {
 			id = <45>;
 			value = "Test Configuration";
+		};
+
+		prompt {
+			id = <STR_PROMPT>;
+			value = "UP and DOWN to choose, ENTER to select";
 		};
 	};
 };
