@@ -103,21 +103,19 @@ int expo_build(void *ldtb, struct expo **expp)
 		if (!id)
 			return log_msg_ret("id", -EINVAL);
 
-		ret = add_expo_str(ldtb, exp, "title");
-		if (ret < 0)
-			return log_msg_ret("tit", -EINVAL);
-		title_id = ret;
-
-		ret = scene_new(exp, name, id, title_id, &scn);
+		ret = scene_new(exp, name, id, &scn);
 		if (ret < 0)
 			return log_msg_ret("scn", ret);
 
-		ret = add_txt_str(scn, "prompt", OBJ_PROMPT);
+		ret = add_txt_str(ldtb, scn, "title", 0);
+		if (ret < 0)
+			return log_msg_ret("tit", -EINVAL);
+		title_id = ret;
+		scene_title_set(scn, title_id);
+
+		ret = add_txt_str(ldtb, scn, "prompt", 0);
 		if (ret < 0)
 			return log_msg_ret("pr", ret);
-
-		prompt = lookup_str(ldtb, title_name, &id);
-		ret = scene_txt_str(scn, "prompt", OBJ_PROMPT, STR_PROMPT);
 	}
 #if 0
 	ret = scene_menu(scn, "main", OBJ_MENU, &menu);
