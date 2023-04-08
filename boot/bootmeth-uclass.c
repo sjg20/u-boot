@@ -338,7 +338,7 @@ int bootmeth_alloc_file(struct bootflow *bflow, uint size_limit, uint align)
 	if (size > size_limit)
 		return log_msg_ret("chk", -E2BIG);
 
-	ret = alloc_file(bflow->fname, bflow->size, &buf);
+	ret = fs_read_alloc(bflow->fname, bflow->size, align, &buf);
 	if (ret)
 		return log_msg_ret("all", ret);
 
@@ -374,7 +374,7 @@ int bootmeth_alloc_other(struct bootflow *bflow, const char *fname,
 	if (ret)
 		return log_msg_ret("fs", ret);
 
-	ret = alloc_file(path, size, &buf);
+	ret = fs_read_alloc(path, size, 0, &buf);
 	if (ret)
 		return log_msg_ret("all", ret);
 
