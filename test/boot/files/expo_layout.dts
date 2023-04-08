@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Sample expo screen layout
+ */
+
+/dts-v1/;
+
+/ {
+	scenes {
+		main {
+			scene-id = <SCENE1>;
+			title = "title";
+		};
+	};
+
+	strings {
+		title {
+			id = <45>;
+			value = "Test Configuration";
+		};
+	};
+};

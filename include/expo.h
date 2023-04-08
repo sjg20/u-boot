@@ -519,4 +519,13 @@ int expo_send_key(struct expo *exp, int key);
  */
 int expo_action_get(struct expo *exp, struct expo_action *act);
 
+/**
+ * expo_build() - Build an expo from an FDT description
+ *
+ * @ldtb: Expo layout FDT blob
+ * @expp: Returns the new expo
+ * Return: 0 if OK, -ve on error
+ */
+int expo_build(void *ldtb, struct expo **expp);
+
 #endif /*__SCENE_H */
