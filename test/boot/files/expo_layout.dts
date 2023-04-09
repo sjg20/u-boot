@@ -11,6 +11,13 @@
 			scene-id = <SCENE1>;
 			title = "title";
 			prompt = "prompt";
+
+			cpu-speed {
+				type = "menu";
+				title = "Test menu";
+
+				items = "one", "two", "three";
+			};
 		};
 	};
 
@@ -23,6 +30,18 @@
 		prompt {
 			id = <STR_PROMPT>;
 			value = "UP and DOWN to choose, ENTER to select";
+		};
+
+		one {
+			value = "item one";
+		};
+
+		two {
+			value = "item one";
+		};
+
+		three {
+			value = "item one";
 		};
 	};
 };
