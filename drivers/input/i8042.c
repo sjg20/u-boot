@@ -143,24 +143,29 @@ static int kbd_reset(int quirk)
 {
 	int config;
 
+	log_debug("empty\n");
 	if (!kbd_input_empty())
 		goto err;
 
 	/* controller self test */
+	log_debug("self test\n");
 	if (kbd_cmd_read(CMD_SELF_TEST) != KBC_TEST_OK)
 		goto err;
 
 	/* keyboard reset */
+	log_debug("reset\n");
 	if (kbd_write(I8042_DATA_REG, CMD_RESET_KBD) ||
 	    kbd_read(I8042_DATA_REG) != KBD_ACK ||
 	    kbd_read(I8042_DATA_REG) != KBD_POR)
 		goto err;
 
+	log_debug("drain\n");
 	if (kbd_write(I8042_DATA_REG, CMD_DRAIN_OUTPUT) ||
 	    kbd_read(I8042_DATA_REG) != KBD_ACK)
 		goto err;
 
 	/* set AT translation and disable irq */
+	log_debug("read config\n");
 	config = kbd_cmd_read(CMD_RD_CONFIG);
 	if (config == -1)
 		goto err;
@@ -169,19 +174,21 @@ static int kbd_reset(int quirk)
 	else if ((quirk & QUIRK_DUP_POR) && config == KBD_POR)
 		config = kbd_cmd_read(CMD_RD_CONFIG);
 
+	log_debug("write config\n");
 	config |= CFG_AT_TRANS;
 	config &= ~(CFG_KIRQ_EN | CFG_MIRQ_EN);
 	if (kbd_cmd_write(CMD_WR_CONFIG, config))
 		goto err;
 
 	/* enable keyboard */
+	log_debug("enable\n");
 	if (kbd_write(I8042_CMD_REG, CMD_KBD_EN) ||
 	    !kbd_input_empty())
 		goto err;
 
 	return 0;
 err:
-	debug("%s: Keyboard failure\n", __func__);
+	log_warning("Keyboard failure\n");
 	return -1;
 }
 
