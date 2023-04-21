@@ -39,6 +39,17 @@ else ifeq ("riscv64", $(MK_ARCH))
 endif
 undefine MK_ARCH
 
+# Building on Windows with MSYS2
+export MSYS_VERSION = $(if $(findstring Msys, $(shell uname -o)),$(word 1, $(subst ., ,$(shell uname -r))),0)
+# $(info The version of MSYS you are running is $(MSYS_VERSION) (0 meaning not MSYS at all))
+
+# Sets the extension to use for shared-object files
+ifeq ($(MSYS_VERSION),0)
+export LIBEXT := so
+else
+export LIBEXT := dll
+endif
+
 # Avoid funny character set dependencies
 unexport LC_ALL
 LC_COLLATE=C
