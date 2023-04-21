@@ -375,6 +375,8 @@ out:
 	return EFI_EXIT(EFI_UNSUPPORTED);
 #endif
 }
+
+#ifndef __CYGWIN__
 /**
  * efi_reset_system() - reset system
  *
@@ -399,6 +401,7 @@ void __weak __efi_runtime EFIAPI efi_reset_system(
 {
 	return;
 }
+#endif /* __CYGWIN__ */
 
 /**
  * efi_reset_system_init() - initialize the reset driver

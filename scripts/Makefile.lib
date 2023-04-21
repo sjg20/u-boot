@@ -425,7 +425,10 @@ cmd_efi_objcopy = $(OBJCOPY) -j .header -j .text -j .sdata -j .data -j \
 $(obj)/%.efi: $(obj)/%_efi.so
 	$(call cmd,efi_objcopy)
 
-KBUILD_EFILDFLAGS = -nostdlib -zexecstack -znocombreloc -znorelro
+KBUILD_EFILDFLAGS = -nostdlib
+ifneq ($(OS),Windows_NT)
+KBUILD_EFILDFLAGS += -zexecstack -znocombreloc -znorelro
+endif
 KBUILD_EFILDFLAGS += $(call ld-option,--no-warn-rwx-segments)
 quiet_cmd_efi_ld = LD      $@
 cmd_efi_ld = $(LD) $(KBUILD_EFILDFLAGS) -T $(EFI_LDS_PATH) \

@@ -347,10 +347,12 @@ int dm_extended_scan(bool pre_reloc_only)
 }
 #endif
 
+#ifndef __CYGWIN__
 __weak int dm_scan_other(bool pre_reloc_only)
 {
 	return 0;
 }
+#endif
 
 #if CONFIG_IS_ENABLED(OF_PLATDATA_INST) && CONFIG_IS_ENABLED(READ_ONLY)
 void *dm_priv_to_rw(void *priv)

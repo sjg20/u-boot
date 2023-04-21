@@ -41,12 +41,14 @@ struct sandbox_spi_priv {
 	uint mode;
 };
 
+#ifndef __CYGWIN__
 __weak int sandbox_spi_get_emul(struct sandbox_state *state,
 				struct udevice *bus, struct udevice *slave,
 				struct udevice **emulp)
 {
 	return -ENOENT;
 }
+#endif
 
 uint sandbox_spi_get_speed(struct udevice *dev)
 {

@@ -15,12 +15,12 @@
 _start:
 	subq $8, %rsp
 
+#ifndef __CYGWIN__
 	pushq %rcx
 	pushq %rdx
 
 	lea image_base(%rip), %rcx
 	lea _DYNAMIC(%rip), %rdx
-
 	call _relocate
 
 	popq %rdx
@@ -28,6 +28,7 @@ _start:
 
 	testq %rax, %rax
 	jnz .exit
+#endif
 
 	call efi_main
 .exit:

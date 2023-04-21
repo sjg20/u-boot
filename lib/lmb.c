@@ -148,9 +148,10 @@ void arch_lmb_reserve_generic(struct lmb *lmb, ulong sp, ulong end, ulong align)
 
 		lmb_reserve(lmb, sp, bank_end - sp + 1);
 
+#ifndef __CYGWIN__
 		if (gd->flags & GD_FLG_SKIP_RELOC)
 			lmb_reserve(lmb, (phys_addr_t)(uintptr_t)_start, gd->mon_len);
-
+#endif
 		break;
 	}
 }
