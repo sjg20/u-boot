@@ -2,7 +2,9 @@
 # Copyright (c) 2011 The Chromium OS Authors.
 
 PLATFORM_CPPFLAGS += -D__SANDBOX__ -U_FORTIFY_SOURCE
+ifneq ($(OS),Windows_NT)
 PLATFORM_CPPFLAGS += -fPIC
+endif
 PLATFORM_LIBS += -lrt
 SDL_CONFIG ?= sdl2-config
 
@@ -12,6 +14,8 @@ ifeq ($(CONFIG_SANDBOX_SDL),y)
 PLATFORM_LIBS += $(shell $(SDL_CONFIG) --libs)
 PLATFORM_CPPFLAGS += $(shell $(SDL_CONFIG) --cflags)
 endif
+
+$(warning PLATFORM_CPPFLAGS $(PLATFORM_CPPFLAGS))
 
 SANITIZERS :=
 ifdef CONFIG_ASAN
@@ -44,7 +48,9 @@ cmd_u-boot-spl = (cd $(obj) && $(CC) -o $(SPL_BIN) -Wl,-T u-boot-spl.lds \
 	-Wl,--no-whole-archive \
 	$(PLATFORM_LIBS) -Wl,-Map -Wl,u-boot-spl.map -Wl,--gc-sections)
 
-ifeq ($(HOST_ARCH),$(HOST_ARCH_X86_64))
+ifeq ($(OS),Windows_NT)
+EFI_LDS := ${SRCDIR}/../../../arch/x86/lib/pe_x86_64_efi.lds
+else ifeq ($(HOST_ARCH),$(HOST_ARCH_X86_64))
 EFI_LDS := ${SRCDIR}/../../../arch/x86/lib/elf_x86_64_efi.lds
 EFI_TARGET := --target=efi-app-x86_64
 else ifeq ($(HOST_ARCH),$(HOST_ARCH_X86))

@@ -184,8 +184,40 @@ Important ones are
 * clean - remove most generated files but keep the configuration
 * mrproper - remove all generated files + config + various backup files
 
+Building for Windows
+--------------------
+
+Limited support is available for Windows, including building sandbox.
+
+It is best to use an out-of-tree build, so you can build multiple boards,
+with the output in a temporary directory like `/tmp/b`.
+
+First enable Windows developer mode with devmode_. Then run the MSYS2 shell and
+add the following to your .bashrc file::
+
+   echo "export MSYS=winsymlinks:nativestrict" >>.bashrc
+
+Close all MSYS2 shells so that the setting takes effect.
+
+To build sandbox::
+
+    pacman install bison diffutils flex gcc libgnutls-devel libutil-linux-devel \
+      make openssl-devel python python-setuptools swig
+    make O=/tmp/b/sandbox -j$(nproc) sandbox_defconfig all
+
+Note that it currently only gets as far as running binman, since this doesn't
+fully work on Windows.
+
+You can also build sandbox_spl::
+
+        make O=/tmp/b/sandbox -j$(nproc) sandbox_defconfig all
+
+
+
 Installation
 ------------
 
 The process for installing U-Boot on the target device is device specific.
 Please, refer to the board specific documentation :doc:`../board/index`.
+
+.. _devmode: https://msdn.microsoft.com/en-us/windows/uwp/get-started/enable-your-device-for-development

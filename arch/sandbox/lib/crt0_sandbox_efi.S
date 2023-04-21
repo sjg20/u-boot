@@ -8,10 +8,12 @@
 #include <host_arch.h>
 
 #if HOST_ARCH == HOST_ARCH_X86_64
+#warning "crt x86_64"
 #include "../../../arch/x86/lib/crt0_x86_64_efi.S"
 #endif
 
 #if HOST_ARCH == HOST_ARCH_X86
+#warning "x86"
 #include "../../../arch/x86/lib/crt0_ia32_efi.S"
 #endif
 

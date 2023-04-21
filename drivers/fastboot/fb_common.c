@@ -89,7 +89,7 @@ void fastboot_okay(const char *reason, char *response)
  * which sets whatever flag your board specific Android bootloader flow
  * requires in order to re-enter the bootloader.
  */
-int __weak fastboot_set_reboot_flag(enum fastboot_reboot_reason reason)
+__weak int fastboot_set_reboot_flag(enum fastboot_reboot_reason reason)
 {
 	static const char * const boot_cmds[] = {
 		[FASTBOOT_REBOOT_REASON_BOOTLOADER] = "bootonce-bootloader",

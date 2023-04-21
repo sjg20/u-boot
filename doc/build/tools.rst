@@ -49,3 +49,4 @@ Launch the MSYS2 shell of the MSYS2 environment, and do the following::
    $ pacman -S bison diffutils flex gcc libgnutls-devel libutil-linux-devel \
       make openssl-devel
    $ make tools-only_defconfig tools-only
+
