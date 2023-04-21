@@ -38,6 +38,7 @@ int fit_verify_header(unsigned char *ptr, int image_size,
 
 	ret = fit_check_format(ptr, IMAGE_SIZE_INVAL);
 	if (ret) {
+		printf("ret=%d\n", ret);
 		if (ret != -EADDRNOTAVAIL)
 			return EXIT_FAILURE;
 		fprintf(stderr, "Image contains unit addresses @, this will break signing\n");
