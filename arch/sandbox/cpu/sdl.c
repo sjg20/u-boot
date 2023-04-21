@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <linux/input.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <asm/state.h>
 
 /**

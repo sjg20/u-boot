@@ -92,7 +92,11 @@ long get_ram_size(long *base, long maxsize)
 	return (maxsize);
 }
 
+#ifdef __CYGWIN__
+phys_size_t get_effective_memsize(void)
+#else
 phys_size_t __weak get_effective_memsize(void)
+#endif
 {
 	phys_size_t ram_size = gd->ram_size;
 

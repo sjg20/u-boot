@@ -9,7 +9,9 @@ obj-y	:= cache.o cpu.o state.o
 extra-y	:= start.o os.o
 extra-$(CONFIG_SANDBOX_SDL)    += sdl.o
 obj-$(CONFIG_SPL_BUILD)	+= spl.o
+ifneq ($(OS),Windows_NT)
 obj-$(CONFIG_ETH_SANDBOX_RAW)	+= eth-raw-os.o
+endif
 
 # os.c is build in the system environment, so needs standard includes
 # CFLAGS_REMOVE_os.o cannot be used to drop header include path
@@ -35,3 +37,7 @@ cmd_cc_sdl.o = $(CC) $(filter-out -nostdinc -fshort-wchar, \
 
 $(obj)/sdl.o: $(src)/sdl.c FORCE
 	$(call if_changed_dep,cc_sdl.o)
+
+ifneq ($(OS),Windows_NT)
+LDSCRIPT := "arch/sandbox/cpu/u-boot-pe.lds"
+endif

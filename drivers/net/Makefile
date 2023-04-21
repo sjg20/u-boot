@@ -30,8 +30,10 @@ obj-$(CONFIG_ETH_DESIGNWARE_MESON8B) += dwmac_meson8b.o
 obj-$(CONFIG_ETH_DESIGNWARE_S700) += dwmac_s700.o
 obj-$(CONFIG_ETH_DESIGNWARE_SOCFPGA) += dwmac_socfpga.o
 obj-$(CONFIG_ETH_SANDBOX) += sandbox.o
+ifneq ($(OS),Windows_NT)
 obj-$(CONFIG_ETH_SANDBOX_RAW) += sandbox-raw-bus.o
 obj-$(CONFIG_ETH_SANDBOX_RAW) += sandbox-raw.o
+endif
 obj-$(CONFIG_FEC_MXC) += fec_mxc.o
 obj-$(CONFIG_FMAN_ENET) += fm/
 obj-$(CONFIG_FMAN_ENET) += fsl_mdio.o

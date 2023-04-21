@@ -8,6 +8,7 @@
 #ifndef __ASM_TEST_H
 #define __ASM_TEST_H
 
+#include <errno.h>
 #include <video.h>
 #include <pci_ids.h>
 
