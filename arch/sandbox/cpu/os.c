@@ -26,7 +26,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <linux/compiler_attributes.h>
-#include <linux/types.h>
 
 #include <asm/fuzzing_engine.h>
 #include <asm/getopt.h>
