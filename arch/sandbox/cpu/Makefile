@@ -9,7 +9,9 @@ obj-y	:= cache.o cpu.o state.o
 extra-y	:= start.o os.o
 extra-$(CONFIG_SANDBOX_SDL)    += sdl.o
 obj-$(CONFIG_SPL_BUILD)	+= spl.o
+ifeq ($(MSYS_VERSION),0)
 obj-$(CONFIG_ETH_SANDBOX_RAW)	+= eth-raw-os.o
+endif
 
 # os.c is build in the system environment, so needs standard includes
 # CFLAGS_REMOVE_os.o cannot be used to drop header include path
