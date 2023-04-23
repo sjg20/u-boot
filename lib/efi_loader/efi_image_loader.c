@@ -174,10 +174,13 @@ static efi_status_t efi_loader_relocate(const IMAGE_BASE_RELOCATION *rel,
 	return EFI_SUCCESS;
 }
 
+#ifdef CONFIG_WEAK_SYMBOLS
+
 void __weak invalidate_icache_all(void)
 {
 	/* If the system doesn't support icache_all flush, cross our fingers */
 }
+#endif
 
 /**
  * efi_set_code_and_data_type() - determine the memory types to be used for code

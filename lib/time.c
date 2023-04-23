@@ -179,6 +179,8 @@ uint64_t usec_to_tick(unsigned long usec)
 	return tick;
 }
 
+#ifdef CONFIG_WEAK_SYMBOLS
+
 void __weak __udelay(unsigned long usec)
 {
 	uint64_t tmp;
@@ -188,6 +190,7 @@ void __weak __udelay(unsigned long usec)
 	while (get_ticks() < tmp+1)	/* loop till event */
 		 /*NOP*/;
 }
+#endif
 
 /* ------------------------------------------------------------------------- */
 
