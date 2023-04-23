@@ -44,7 +44,9 @@ cmd_u-boot-spl = (cd $(obj) && $(CC) -o $(SPL_BIN) -Wl,-T u-boot-spl.lds \
 	-Wl,--no-whole-archive \
 	$(PLATFORM_LIBS) -Wl,-Map -Wl,u-boot-spl.map -Wl,--gc-sections)
 
-ifeq ($(HOST_ARCH),$(HOST_ARCH_X86_64))
+ifneq ($(MSYS_VERSION),0)
+EFI_LDS := ${SRCDIR}/../../../arch/x86/lib/pe_x86_64_efi.lds
+else ifeq ($(HOST_ARCH),$(HOST_ARCH_X86_64))
 EFI_LDS := ${SRCDIR}/../../../arch/x86/lib/elf_x86_64_efi.lds
 EFI_TARGET := --target=efi-app-x86_64
 else ifeq ($(HOST_ARCH),$(HOST_ARCH_X86))

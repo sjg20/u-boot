@@ -15,6 +15,7 @@
 _start:
 	subq $8, %rsp
 
+#ifndef __CYGWIN__
 	pushq %rcx
 	pushq %rdx
 
@@ -28,6 +29,7 @@ _start:
 
 	testq %rax, %rax
 	jnz .exit
+#endif
 
 	call efi_main
 .exit:
