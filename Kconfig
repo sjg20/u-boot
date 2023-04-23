@@ -72,6 +72,21 @@ config CLANG_VERSION
 	int
 	default $(shell,$(srctree)/scripts/clang-version.sh $(CC))
 
+config CC_IS_MSYS
+	def_bool $(success,uname -o | grep -q Msys)
+
+config WEAK_SYMBOLS
+	bool "Enable use of weak symbols"
+	default y if !CC_IS_MSYS
+	help
+	  The Portable Executable (PE) format used by Windows does not support
+	  weak symbols very well. Even where it can be made to work, the __weak
+	  function attribute cannot be made to work with PE. Supporting weak
+	  symbols would involve changing the source code in undesirable ways.
+
+	  This option controls whether weak symbols are used, or not. When
+	  disabled, the __weak function attribute does nothing.
+
 choice
 	prompt "Optimization level"
 	default CC_OPTIMIZE_FOR_SIZE

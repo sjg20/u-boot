@@ -268,6 +268,10 @@
  *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-weak-function-attribute
  *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-weak-variable-attribute
  */
+#ifdef CONFIG_WEAK_SYMBOLS
 #define __weak                          __attribute__((__weak__))
+#else
+#define __weak
+#endif
 
 #endif /* __LINUX_COMPILER_ATTRIBUTES_H */
