@@ -126,9 +126,9 @@ struct unit_test {
 #define UNIT_TEST_SUITE_COUNT(_suite) \
 	ll_entry_count(struct unit_test, ut_ ## _suite)
 
-/* Use ! and ~ so that all tests will be sorted between these two values */
-#define UNIT_TEST_ALL_START()	ll_entry_start(struct unit_test, ut_!)
-#define UNIT_TEST_ALL_END()	ll_entry_start(struct unit_test, ut_~)
+/* Use $ and zz so that all tests will be sorted between these two values */
+#define UNIT_TEST_ALL_START()	ll_entry_start(struct unit_test, ut_$)
+#define UNIT_TEST_ALL_END()	ll_entry_start(struct unit_test, ut_zz)
 #define UNIT_TEST_ALL_COUNT()	(UNIT_TEST_ALL_END() - UNIT_TEST_ALL_START())
 
 /* Sizes for devres tests */
