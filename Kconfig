@@ -72,6 +72,9 @@ config CLANG_VERSION
 	int
 	default $(shell,$(srctree)/scripts/clang-version.sh $(CC))
 
+config CC_IS_MSYS
+	def_bool $(success,uname -o | grep -q Msys)
+
 choice
 	prompt "Optimization level"
 	default CC_OPTIMIZE_FOR_SIZE
@@ -121,6 +124,8 @@ config ARCH_SUPPORTS_LTO
 config LTO
 	bool "Enable Link Time Optimizations"
 	depends on ARCH_SUPPORTS_LTO
+	depends on CC_IS_GCC || (CC_IS_CLANG && SANDBOX)
+	depends on !CC_IS_MSYS
 	help
 	  This option enables Link Time Optimization (LTO), a mechanism which
 	  allows the compiler to optimize between different compilation units.
