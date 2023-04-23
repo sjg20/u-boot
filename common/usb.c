@@ -1220,6 +1220,8 @@ int usb_new_device(struct usb_device *dev)
 }
 #endif
 
+#ifdef CONFIG_WEAK_SYMBOLS
+
 __weak
 int board_usb_init(int index, enum usb_init_type init)
 {
@@ -1231,6 +1233,7 @@ int board_usb_cleanup(int index, enum usb_init_type init)
 {
 	return 0;
 }
+#endif /* CONFIG_WEAK_SYMBOLS */
 
 bool usb_device_has_child_on_port(struct usb_device *parent, int port)
 {

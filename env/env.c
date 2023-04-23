@@ -53,6 +53,8 @@ static struct env_driver *_env_driver_lookup(enum env_location loc)
 	return NULL;
 }
 
+#ifdef CONFIG_WEAK_SYMBOLS
+
 static enum env_location env_locations[] = {
 #ifdef CONFIG_ENV_IS_IN_EEPROM
 	ENVL_EEPROM,
@@ -88,6 +90,7 @@ static enum env_location env_locations[] = {
 	ENVL_NOWHERE,
 #endif
 };
+#endif /* CONFIG_WEAK_SYMBOLS */
 
 static bool env_has_inited(enum env_location location)
 {
@@ -105,6 +108,8 @@ static void env_set_inited(enum env_location location)
 
 	gd->env_has_init |= BIT(location);
 }
+
+#ifdef CONFIG_WEAK_SYMBOLS
 
 /**
  * arch_env_get_location() - Returns the best env location for an arch
@@ -155,6 +160,7 @@ __weak enum env_location env_get_location(enum env_operation op, int prio)
 {
 	return arch_env_get_location(op, prio);
 }
+#endif /* CONFIG_WEAK_SYMBOLS */
 
 /**
  * env_driver_lookup() - Finds the most suited environment location

@@ -358,7 +358,8 @@ static efi_status_t do_bootefi_exec(efi_handle_t handle, void *load_options)
 	u16 *exit_data = NULL;
 
 	/* On ARM switch from EL3 or secure mode to EL2 or non-secure mode */
-	switch_to_non_secure_mode();
+	if (IS_ENABLED(CONFIG_WEAK_SYMBOLS))
+		switch_to_non_secure_mode();
 
 	/*
 	 * The UEFI standard requires that the watchdog timer is set to five

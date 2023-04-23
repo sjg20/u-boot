@@ -13,6 +13,8 @@
 #include <log.h>
 #include <linux/compiler.h>
 
+#ifdef CONFIG_WEAK_SYMBOLS
+
 int __weak bootz_setup(ulong image, ulong *start, ulong *end)
 {
 	/* Please define bootz_setup() for your platform */
@@ -20,6 +22,7 @@ int __weak bootz_setup(ulong image, ulong *start, ulong *end)
 	puts("Your platform's zImage format isn't supported yet!\n");
 	return -1;
 }
+#endif
 
 /*
  * zImage booting support
