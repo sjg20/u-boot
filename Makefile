@@ -48,6 +48,7 @@ ifeq ($(MSYS_VERSION),0)
 export SOEXT := so
 else
 export SOEXT := dll
+export ELFEXT := .exe
 endif
 
 # Avoid funny character set dependencies
