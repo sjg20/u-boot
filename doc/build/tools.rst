@@ -28,6 +28,9 @@ installed all required packages below in order to build these host tools::
    * make (4.4.1-1)
    * bison (3.8.2-4)
    * diffutils (3.9-1)
+   * flex (2.6.4-3)
+   * libgnutls-devel (3.8.0-1)
+   * libutil-linux-devel (2.35.2)
    * openssl-devel (3.1.0-1)
 
 Note the version numbers in these parentheses above are the package versions
@@ -43,5 +46,6 @@ applications using a linux toolchain (gcc, bash, etc), targeting respectively
 
 Launch the MSYS2 shell of the MSYS2 environment, and do the following::
 
-   $ make tools-only_defconfig
-   $ make tools-only
+   $ pacman -S bison diffutils flex gcc libgnutls-devel libutil-linux-devel \
+      make openssl-devel
+   $ make tools-only_defconfig tools-only
