@@ -658,8 +658,10 @@ export EFI_TARGET	# binutils target if EFI is natively supported
 export LTO_ENABLE
 
 # This is y if LTO is enabled for this build. See NO_LTO=1 to disable LTO
+ifeq ($(MSYS_VERSION),0)
 ifeq ($(NO_LTO),)
 LTO_ENABLE=$(if $(CONFIG_LTO),y)
+endif
 endif
 
 # If board code explicitly specified LDSCRIPT or CONFIG_SYS_LDSCRIPT, use
