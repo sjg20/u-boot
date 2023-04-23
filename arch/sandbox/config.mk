@@ -71,3 +71,7 @@ EFI_CRT0 := crt0_sandbox_efi.o
 EFI_RELOC := reloc_sandbox_efi.o
 AFLAGS_crt0_sandbox_efi.o += -DHOST_ARCH="$(HOST_ARCH)"
 CFLAGS_reloc_sandbox_efi.o += -DHOST_ARCH="$(HOST_ARCH)"
+
+ifneq ($(MSYS_VERSION),0)
+LDSCRIPT = $(srctree)/arch/sandbox/cpu/u-boot-pe.lds
+endif

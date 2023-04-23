@@ -39,6 +39,10 @@ else ifeq ("riscv64", $(MK_ARCH))
 endif
 undefine MK_ARCH
 
+# Building on Windows with MSYS2
+export MSYS_VERSION = $(if $(findstring Msys, $(shell uname -o)),$(word 1, $(subst ., ,$(shell uname -r))),0)
+# $(info The version of MSYS you are running is $(MSYS_VERSION) (0 meaning not MSYS at all))
+
 # Avoid funny character set dependencies
 unexport LC_ALL
 LC_COLLATE=C
@@ -1719,6 +1723,13 @@ else
 u-boot-keep-syms-lto :=
 endif
 
+ifeq ($(MSYS_VERSION),0)
+add_ld_script := -T u-boot.lds
+else
+add_ld_script := u-boot.lds
+$(warning msys)
+endif
+
 # Rule to link u-boot
 # May be overridden by arch/$(ARCH)/config.mk
 ifeq ($(LTO_ENABLE),y)
@@ -1727,7 +1738,7 @@ quiet_cmd_u-boot__ ?= LTO     $@
 		$(CC) -nostdlib -nostartfiles					\
 		$(LTO_FINAL_LDFLAGS) $(c_flags)					\
 		$(KBUILD_LDFLAGS:%=-Wl,%) $(LDFLAGS_u-boot:%=-Wl,%) -o $@	\
-		-T u-boot.lds $(u-boot-init)					\
+		$(add_ld_script) $(u-boot-init)					\
 		-Wl,--whole-archive						\
 			$(u-boot-main)						\
 			$(u-boot-keep-syms-lto)					\
@@ -1738,7 +1749,7 @@ quiet_cmd_u-boot__ ?= LTO     $@
 else
 quiet_cmd_u-boot__ ?= LD      $@
       cmd_u-boot__ ?= $(LD) $(KBUILD_LDFLAGS) $(LDFLAGS_u-boot) -o $@		\
-		-T u-boot.lds $(u-boot-init)					\
+		$(add_ld_script) $(u-boot-init)					\
 		--whole-archive							\
 			$(u-boot-main)						\
 		--no-whole-archive						\
