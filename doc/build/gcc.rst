@@ -201,8 +201,8 @@ Close all MSYS2 shells so that the setting takes effect.
 
 To build sandbox::
 
-    pacman install bison diffutils flex gcc libgnutls-devel libutil-linux-devel \
-      make openssl-devel python python-setuptools swig
+    pacman install bc bison diffutils flex gcc libgnutls-devel \
+      libutil-linux-devel make openssl-devel python python-setuptools swig
     make O=/tmp/b/sandbox -j$(nproc) sandbox_defconfig all
 
 Note that it currently only gets as far as running binman, since this doesn't

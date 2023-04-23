@@ -38,6 +38,6 @@ cmd_cc_sdl.o = $(CC) $(filter-out -nostdinc -fshort-wchar, \
 $(obj)/sdl.o: $(src)/sdl.c FORCE
 	$(call if_changed_dep,cc_sdl.o)
 
-ifneq ($(OS),Windows_NT)
-LDSCRIPT := "arch/sandbox/cpu/u-boot-pe.lds"
+ifneq ($(msys_version),0)
+LDSCRIPT := arch/sandbox/cpu/u-boot-pe.lds
 endif

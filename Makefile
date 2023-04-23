@@ -39,6 +39,11 @@ else ifeq ("riscv64", $(MK_ARCH))
 endif
 undefine MK_ARCH
 
+# Building on Windows with MSYS2
+msys_version := $(if $(findstring Msys, $(shell uname -o)),$(word 1, $(subst ., ,$(shell uname -r))),0)
+export msys_version
+# $(info The version of MSYS you are running is $(msys_version) (0 meaning not MSYS at all))
+
 # Avoid funny character set dependencies
 unexport LC_ALL
 LC_COLLATE=C
