@@ -1336,8 +1336,10 @@ int fit_check_sign(const void *fit, const void *key,
 	int ret;
 
 	cfg_noffset = fit_conf_get_node(fit, fit_uname_config);
-	if (!cfg_noffset)
+	if (cfg_noffset < 0) {
+		fprintf(stderr, "Configuration node not found\n");
 		return -1;
+	}
 
 	printf("Verifying Hash Integrity for node '%s'... ",
 	       fdt_get_name(fit, cfg_noffset, NULL));
