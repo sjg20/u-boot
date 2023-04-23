@@ -1730,6 +1730,13 @@ else
 u-boot-keep-syms-lto :=
 endif
 
+ifeq ($(msys_version),0)
+ld_script := -T u-boot.lds
+else
+ld_script := u-boot.lds
+$(warning msys)
+endif
+
 # Rule to link u-boot
 # May be overridden by arch/$(ARCH)/config.mk
 ifeq ($(LTO_ENABLE),y)
@@ -1738,7 +1745,7 @@ quiet_cmd_u-boot__ ?= LTO     $@
 		$(CC) -nostdlib -nostartfiles					\
 		$(LTO_FINAL_LDFLAGS) $(c_flags)					\
 		$(KBUILD_LDFLAGS:%=-Wl,%) $(LDFLAGS_u-boot:%=-Wl,%) -o $@	\
-		-T u-boot.lds $(u-boot-init)					\
+		$(add_ld_script) $(u-boot-init)					\
 		-Wl,--whole-archive						\
 			$(u-boot-main)						\
 			$(u-boot-keep-syms-lto)					\
@@ -1749,7 +1756,7 @@ quiet_cmd_u-boot__ ?= LTO     $@
 else
 quiet_cmd_u-boot__ ?= LD      $@
       cmd_u-boot__ ?= $(LD) $(KBUILD_LDFLAGS) $(LDFLAGS_u-boot) -o $@		\
-		-T u-boot.lds $(u-boot-init)					\
+		$(add_ld_script) $(u-boot-init)					\
 		--whole-archive							\
 			$(u-boot-main)						\
 		--no-whole-archive						\
