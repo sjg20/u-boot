@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-2.0+
+	# SPDX-License-Identifier: GPL-2.0+
 # Copyright (c) 2011 The Chromium OS Authors.
 
 PLATFORM_CPPFLAGS += -D__SANDBOX__ -U_FORTIFY_SOURCE
@@ -71,3 +71,17 @@ EFI_CRT0 := crt0_sandbox_efi.o
 EFI_RELOC := reloc_sandbox_efi.o
 AFLAGS_crt0_sandbox_efi.o += -DHOST_ARCH="$(HOST_ARCH)"
 CFLAGS_reloc_sandbox_efi.o += -DHOST_ARCH="$(HOST_ARCH)"
+
+ifneq ($(MSYS_VERSION),0)
+LDSCRIPT := u-boot-pe.lds
+
+AWK_RDATA := ${srctree}/scripts/add_to_rdata.awk
+LDSCRIPT_IN := ${srctree}/arch/sandbox/cpu/$(LDSCRIPT).in
+
+# Write out the contents of INFILE immediately before the close of the .rdata
+# block
+$(LDSCRIPT): $(LDSCRIPT_IN) $(AWK_RDATA)
+	echo "int main() { return 0; }" | $(CC) -x c - -Wl,-verbose | \
+		awk -f $(AWK_RDATA) -v INFILE=$< >$@
+
+endif

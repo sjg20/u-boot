@@ -1,0 +1,25 @@
+	/* U-Boot additions from here on */
+	. = ALIGN(4);
+	KEEP(*(SORT(__u_boot_list*)));
+
+	*(_u_boot_sandbox_getopt_start)
+	*(_u_boot_sandbox_getopt)
+	*(_u_boot_sandbox_getopt_end)
+
+	*(___efi_runtime_start)
+	*(efi_runtime_text)
+	*(efi_runtime_data)
+	*(___efi_runtime_stop)
+
+	*(___efi_runtime_rel_start)
+	*(.relefi_runtime_text)
+	*(.relefi_runtime_data)
+	*(___efi_runtime_rel_stop)
+
+	. = ALIGN(4);
+	*(.rodata.ttf.init)
+	*(.rodata.splash.init)
+	*(.rodata.helloworld.init)
+	*(.dtb.init.rodata)
+
+	/* U-Boot additions end */
