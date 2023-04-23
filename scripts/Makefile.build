@@ -309,7 +309,7 @@ quiet_cmd_asn1_compiler = ASN.1   $@
       cmd_asn1_compiler = $(objtree)/tools/asn1_compiler $< \
 				$(subst .h,.c,$@) $(subst .c,.h,$@)
 
-$(obj)/%.asn1.c $(obj)/%.asn1.h: $(src)/%.asn1 $(objtree)/tools/asn1_compiler
+$(obj)/%.asn1.c $(obj)/%.asn1.h: $(src)/%.asn1 $(objtree)/tools/asn1_compiler.exe
 	$(call cmd,asn1_compiler)
 
 # Build the compiled-in targets

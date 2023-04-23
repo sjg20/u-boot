@@ -2,7 +2,9 @@
 # Copyright (c) 2011 The Chromium OS Authors.
 
 PLATFORM_CPPFLAGS += -D__SANDBOX__ -U_FORTIFY_SOURCE
+ifneq ($(MSYS_VERSION),0)
 PLATFORM_CPPFLAGS += -fPIC
+endif
 PLATFORM_LIBS += -lrt
 SDL_CONFIG ?= sdl2-config
 
@@ -12,6 +14,8 @@ ifeq ($(CONFIG_SANDBOX_SDL),y)
 PLATFORM_LIBS += $(shell $(SDL_CONFIG) --libs)
 PLATFORM_CPPFLAGS += $(shell $(SDL_CONFIG) --cflags)
 endif
+
+$(warning PLATFORM_CPPFLAGS $(PLATFORM_CPPFLAGS))
 
 SANITIZERS :=
 ifdef CONFIG_ASAN

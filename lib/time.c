@@ -139,6 +139,7 @@ static uint64_t notrace tick_to_time(uint64_t tick)
 int __weak timer_init(void)
 {
 	return 0;
+
 }
 
 /* Returns time in milliseconds */
@@ -166,7 +167,11 @@ unsigned long __weak get_timer_us_long(unsigned long base)
 	return timer_get_us() - base;
 }
 
+#ifdef __CYGWIN__
+unsigned long notrace timer_get_us(void)
+#else
 unsigned long __weak notrace timer_get_us(void)
+#endif
 {
 	return tick_to_time(get_ticks() * 1000);
 }
@@ -179,6 +184,7 @@ uint64_t usec_to_tick(unsigned long usec)
 	return tick;
 }
 
+#ifndef __CYGWIN__
 void __weak __udelay(unsigned long usec)
 {
 	uint64_t tmp;
@@ -188,6 +194,7 @@ void __weak __udelay(unsigned long usec)
 	while (get_ticks() < tmp+1)	/* loop till event */
 		 /*NOP*/;
 }
+#endif
 
 /* ------------------------------------------------------------------------- */
 

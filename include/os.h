@@ -11,8 +11,6 @@
 #ifndef __OS_H__
 #define __OS_H__
 
-#include <linux/types.h>
-
 struct rtc_time;
 struct sandbox_state;
 

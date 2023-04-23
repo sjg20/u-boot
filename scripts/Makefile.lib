@@ -425,7 +425,10 @@ cmd_efi_objcopy = $(OBJCOPY) -j .header -j .text -j .sdata -j .data -j \
 $(obj)/%.efi: $(obj)/%_efi.so
 	$(call cmd,efi_objcopy)
 
-KBUILD_EFILDFLAGS = -nostdlib -zexecstack -znocombreloc -znorelro
+KBUILD_EFILDFLAGS = -nostdlib
+ifneq ($(MSYS_VERSION),0)
+KBUILD_EFILDFLAGS += -zexecstack -znocombreloc -znorelro
+endif
 KBUILD_EFILDFLAGS += $(call ld-option,--no-warn-rwx-segments)
 quiet_cmd_efi_ld = LD      $@
 cmd_efi_ld = $(LD) $(KBUILD_EFILDFLAGS) -T $(EFI_LDS_PATH) \
@@ -447,6 +450,10 @@ targets += $(obj)/efi_crt0.o $(obj)/efi_reloc.o $(obj)/efi_freestanding.o
 
 CFLAGS_REMOVE_efi_reloc.o := $(LTO_CFLAGS)
 CFLAGS_REMOVE_efi_freestanding.o := $(LTO_CFLAGS)
+ifeq ($(OS),Windows_NT)
+CFLAGS_efi_reloc.o += -fno-asynchronous-unwind-tables -fno-unwind-tables
+CFLAGS_efi_freestanding.o += -fno-asynchronous-unwind-tables -fno-unwind-tables
+endif
 
 # ACPI
 # ---------------------------------------------------------------------------

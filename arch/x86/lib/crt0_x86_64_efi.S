@@ -21,7 +21,6 @@ _start:
 
 	lea image_base(%rip), %rcx
 	lea _DYNAMIC(%rip), %rdx
-
 	call _relocate
 
 	popq %rdx

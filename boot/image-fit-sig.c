@@ -470,7 +470,7 @@ error:
 static int fit_config_verify_required_keys(const void *fit, int conf_noffset,
 					   const void *key_blob)
 {
-	const char *name = fit_get_name(fit, conf_noffset, NULL);
+	const char *name;
 	int noffset;
 	int key_node;
 	int verified = 0;
@@ -478,6 +478,8 @@ static int fit_config_verify_required_keys(const void *fit, int conf_noffset,
 	bool reqd_policy_all = true;
 	const char *reqd_mode;
 
+	printf("offset %d\n", conf_noffset);
+	name = fit_get_name(fit, conf_noffset, NULL);
 	/*
 	 * We don't support this since libfdt considers names with the
 	 * name root but different @ suffix to be equal

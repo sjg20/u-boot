@@ -47,7 +47,7 @@ static const void *boot_get_kernel(struct cmd_tbl *cmdtp, int flag, int argc,
 				   char *const argv[], struct bootm_headers *images,
 				   ulong *os_data, ulong *os_len);
 
-__weak void board_quiesce_devices(void)
+void __weak board_quiesce_devices(void)
 {
 }
 
@@ -1014,9 +1014,11 @@ static const void *boot_get_kernel(struct cmd_tbl *cmdtp, int flag, int argc,
  *
  * This routine is overridden by architectures requiring this feature.
  */
-void __weak switch_to_non_secure_mode(void)
+void __switch_to_non_secure_mode(void)
 {
 }
+void switch_to_non_secure_mode(void)
+	__attribute__((weak, alias("__switch_to_non_secure_mode")));
 
 #else /* USE_HOSTCC */
 

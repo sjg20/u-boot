@@ -455,8 +455,10 @@ KBUILD_AFLAGS += $(call cc-option, -no-integrated-as)
 endif
 
 # Don't generate position independent code
+ifneq ($(MSYS_VERSION),0)
 KBUILD_CFLAGS	+= $(call cc-option,-fno-PIE)
 KBUILD_AFLAGS	+= $(call cc-option,-fno-PIE)
+endif
 
 # Read UBOOTRELEASE from include/config/uboot.release (if it exists)
 UBOOTRELEASE = $(shell cat include/config/uboot.release 2> /dev/null)
@@ -650,8 +652,10 @@ export EFI_TARGET	# binutils target if EFI is natively supported
 export LTO_ENABLE
 
 # This is y if LTO is enabled for this build. See NO_LTO=1 to disable LTO
+ifneq ($(MSYS_VERSION),0)
 ifeq ($(NO_LTO),)
 LTO_ENABLE=$(if $(CONFIG_LTO),y)
+endif
 endif
 
 # If board code explicitly specified LDSCRIPT or CONFIG_SYS_LDSCRIPT, use
@@ -811,7 +815,9 @@ KBUILD_CPPFLAGS += $(KCPPFLAGS)
 KBUILD_AFLAGS += $(KAFLAGS)
 KBUILD_CFLAGS += $(KCFLAGS)
 
+ifneq ($(MSYS_VERSION),0)
 KBUILD_LDFLAGS  += -z noexecstack
+endif
 KBUILD_LDFLAGS  += $(call ld-option,--no-warn-rwx-segments)
 
 KBUILD_HOSTCFLAGS += $(if $(CONFIG_TOOLS_DEBUG),-g)

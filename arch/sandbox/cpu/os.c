@@ -26,7 +26,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <linux/compiler_attributes.h>
-#include <linux/types.h>
 
 #include <asm/fuzzing_engine.h>
 #include <asm/getopt.h>
@@ -285,7 +284,7 @@ static void os_signal_handler(int sig, siginfo_t *info, void *con)
 	ucontext_t __maybe_unused *context = con;
 	unsigned long pc;
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(__linux)
 	pc = context->uc_mcontext.gregs[REG_RIP];
 #elif defined(__aarch64__)
 	pc = context->uc_mcontext.pc;
