@@ -1731,9 +1731,9 @@ u-boot-keep-syms-lto :=
 endif
 
 ifeq ($(msys_version),0)
-ld_script := -T u-boot.lds
+add_ld_script := -T u-boot.lds
 else
-ld_script := u-boot.lds
+add_ld_script := u-boot.lds
 $(warning msys)
 endif
 
