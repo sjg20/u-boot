@@ -24,15 +24,15 @@ you can use MSYS2, a software distro and building platform for Windows.
 Download the MSYS2 installer from https://www.msys2.org. Make sure you have
 installed all required packages below in order to build these host tools::
 
-   * gcc (9.1.0)
-   * make (4.2.1)
-   * bison (3.4.2)
-   * diffutils (3.7)
-   * openssl-devel (1.1.1.d)
+   * gcc (11.3.0-3)
+   * make (4.4.1-1)
+   * bison (3.8.2-4)
+   * diffutils (3.9-1)
+   * openssl-devel (3.1.0-1)
 
 Note the version numbers in these parentheses above are the package versions
 at the time being when writing this document. The MSYS2 installer tested is
-http://repo.msys2.org/distrib/x86_64/msys2-x86_64-20190524.exe.
+https://github.com/msys2/msys2-installer/releases/download/2023-03-18/msys2-x86_64-20230318.exe
 
 There are 3 MSYS subsystems installed: MSYS2, MinGW32 and MinGW64. Each
 subsystem provides an environment to build Windows applications. The MSYS2
