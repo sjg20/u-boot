@@ -24,11 +24,13 @@ you can use MSYS2, a software distro and building platform for Windows.
 Download the MSYS2 installer from https://www.msys2.org. Make sure you have
 installed all required packages below in order to build these host tools::
 
-   * gcc (9.1.0)
-   * make (4.2.1)
-   * bison (3.4.2)
-   * diffutils (3.7)
-   * openssl-devel (1.1.1.d)
+   * gcc (11.3.0-3)
+   * make (4.4.1-1)
+   * flex (2.6.4-3)
+   * bison (3.8.2-4)
+   * diffutils (3.9-1)
+   * openssl-devel (3.1.0-1)
+   libuuid
 
 Note the version numbers in these parentheses above are the package versions
 at the time being when writing this document. The MSYS2 installer tested is
