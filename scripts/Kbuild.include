@@ -205,9 +205,10 @@ clean := -f $(srctree)/scripts/Makefile.clean obj
 hdr-inst := -f $(srctree)/scripts/Makefile.headersinst obj
 
 # Prefix -I with $(srctree) if it is not an absolute path.
+# Detect C: (C drive) with MSYS2
 # skip if -I has no parameter
 addtree = $(if $(patsubst -I%,%,$(1)), \
-$(if $(filter-out -I/% -I./% -I../%,$(1)),$(patsubst -I%,-I$(srctree)/%,$(1)),$(1)),$(1))
+$(if $(filter-out -I/% -I./% -I../% -IC:%,$(1)),$(patsubst -I%,-I$(srctree)/%,$(1)),$(1)),$(1))
 
 # Find all -I options and call addtree
 flags = $(foreach o,$($(1)),$(if $(filter -I%,$(o)),$(call addtree,$(o)),$(o)))
