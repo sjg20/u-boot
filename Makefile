@@ -48,6 +48,7 @@ ifeq ($(MSYS_VERSION),0)
 export LIBEXT := so
 else
 export LIBEXT := dll
+export EXEEXT := .exe
 endif
 
 # Avoid funny character set dependencies
