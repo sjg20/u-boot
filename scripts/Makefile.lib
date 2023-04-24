@@ -450,6 +450,10 @@ targets += $(obj)/efi_crt0.o $(obj)/efi_reloc.o $(obj)/efi_freestanding.o
 
 CFLAGS_REMOVE_efi_reloc.o := $(LTO_CFLAGS)
 CFLAGS_REMOVE_efi_freestanding.o := $(LTO_CFLAGS)
+ifneq ($(MSYS_VERSION),0)
+CFLAGS_efi_reloc.o += -fno-asynchronous-unwind-tables -fno-unwind-tables
+CFLAGS_efi_freestanding.o += -fno-asynchronous-unwind-tables -fno-unwind-tables
+endif
 
 # ACPI
 # ---------------------------------------------------------------------------
