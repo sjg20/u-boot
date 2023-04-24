@@ -15,11 +15,19 @@ CFLAGS_efi_boottime.o += \
 CFLAGS_boothart.o := $(CFLAGS_EFI) -Os -ffreestanding
 CFLAGS_REMOVE_boothart.o := $(CFLAGS_NON_EFI)
 CFLAGS_helloworld.o := $(CFLAGS_EFI) -Os -ffreestanding
+
+ifneq ($(MSYS_VERSION),0)
+CFLAGS_helloworld.o += -fno-asynchronous-unwind-tables -fno-unwind-tables
+endif
+
 CFLAGS_REMOVE_helloworld.o := $(CFLAGS_NON_EFI)
 CFLAGS_dtbdump.o := $(CFLAGS_EFI) -Os -ffreestanding
 CFLAGS_REMOVE_dtbdump.o := $(CFLAGS_NON_EFI)
 CFLAGS_initrddump.o := $(CFLAGS_EFI) -Os -ffreestanding
 CFLAGS_REMOVE_initrddump.o := $(CFLAGS_NON_EFI)
+ifneq ($(MSYS_VERSION),0)
+CFLAGS_initrddump.o += -fno-asynchronous-unwind-tables -fno-unwind-tables
+endif
 
 ifdef CONFIG_RISCV
 always += boothart.efi
