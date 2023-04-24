@@ -1,1 +1,10 @@
-main.py
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0+
+
+import os
+
+our_path = os.path.dirname(os.path.realpath(__file__))
+
+import main
+
+main.start_binman()
