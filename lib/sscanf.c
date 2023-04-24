@@ -17,7 +17,6 @@
 
 #if !defined HAVE_LIBC
 
-#include <os.h>
 #include <linux/kernel.h>
 #include <linux/ctype.h>
 #include <vsprintf.h>
