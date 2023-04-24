@@ -81,6 +81,8 @@ enum bootflow_flags_t {
  * @fdt_size: Size of FDT file
  * @fdt_addr: Address of loaded fdt
  * @flags: Flags for the bootflow (see enum bootflow_flags_t)
+ * @cmdline: OS command line, or NULL it not known (allocated)
+ * @x86_setup: Pointer to x86 setup block inside @buf, NULL if not present
  */
 struct bootflow {
 	struct list_head bm_node;
@@ -104,6 +106,8 @@ struct bootflow {
 	int fdt_size;
 	ulong fdt_addr;
 	int flags;
+	char *cmdline;
+	char *x86_setup;
 };
 
 /**
@@ -439,5 +443,13 @@ int bootflow_menu_apply_theme(struct expo *exp, ofnode node);
  */
 int bootflow_menu_run(struct bootstd_priv *std, bool text_mode,
 		      struct bootflow **bflowp);
+
+/**
+ * bootflow_set_cmdline() - Set the command line for the current bootflow
+ *
+ * @value: New command-line string
+ * Returns 0 if OK, -ENOENT if no current bootflow, -ENOMEM if out of memory
+ */
+int bootflow_set_cmdline(const char *value);
 
 #endif

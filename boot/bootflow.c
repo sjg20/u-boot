@@ -12,6 +12,7 @@
 #include <bootmeth.h>
 #include <bootstd.h>
 #include <dm.h>
+#include <env_internal.h>
 #include <malloc.h>
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
@@ -212,6 +213,7 @@ static int iter_incr(struct bootflow_iter *iter)
 	 * bootdev, so set max_part to 0 until we discover otherwise. See
 	 * bootdev_find_in_blk() for where this is set.
 	 */
+	log_debug("reset max_part\n");
 	iter->max_part = 0;
 
 	/* ...select next bootdev */
@@ -551,4 +553,55 @@ int bootflow_iter_check_system(const struct bootflow_iter *iter)
 		return 0;
 
 	return -ENOTSUPP;
+}
+
+#ifdef CONFIG_BOOTSTD_FULL
+/**
+ * on_bootargs() - Update the cmdline of a bootflow
+ */
+static int on_bootargs(const char *name, const char *value, enum env_op op,
+			int flags)
+{
+	int ret;
+
+	switch (op) {
+	case env_op_create:
+	case env_op_overwrite:
+		ret = bootflow_set_cmdline(value);
+		if (ret && ret != ENOENT)
+			return 1;
+		return 0;
+	case env_op_delete:
+		bootflow_set_cmdline(NULL);
+		fallthrough;
+	default:
+		return 0;
+	}
+}
+U_BOOT_ENV_CALLBACK(bootargs, on_bootargs);
+#endif
+
+int bootflow_set_cmdline(const char *value)
+{
+	struct bootstd_priv *std;
+	struct bootflow *bflow;
+	char *cmdline;
+	int ret;
+
+	ret = bootstd_get_priv(&std);
+	if (ret)
+		return -ENOENT;
+
+	bflow = std->cur_bootflow;
+	if (!bflow)
+		return -ENOENT;
+
+	cmdline = strdup(value);
+	if (!cmdline)
+		return -ENOMEM;
+
+	free(bflow->cmdline);
+	bflow->cmdline = cmdline;
+
+	return 0;
 }

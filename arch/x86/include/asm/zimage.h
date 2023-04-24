@@ -72,4 +72,20 @@ int setup_zimage(struct boot_params *setup_base, char *cmd_line, int auto_boot,
  */
 void zimage_dump(struct boot_params *base_ptr);
 
+/**
+ * zimage_get_kernel_version() - Get the version string from a kernel
+ *
+ * @params: boot_params pointer
+ * @kernel_base: base address of kernel
+ * Return: Kernel version as a NUL-terminated string
+ */
+const char *zimage_get_kernel_version(struct boot_params *params,
+				      void *kernel_base);
+
+void zboot_start(ulong addr, ulong size, ulong initrd, ulong initrd_size,
+		 ulong base, char *cmdline);
+int zboot_load(void);
+int zboot_setup(void);
+int zboot_go(void);
+
 #endif
