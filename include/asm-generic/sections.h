@@ -8,8 +8,6 @@
 #ifndef _ASM_GENERIC_SECTIONS_H_
 #define _ASM_GENERIC_SECTIONS_H_
 
-#include <linux/types.h>
-
 /* References to section boundaries */
 
 extern char _text[], _stext[], _etext[];
@@ -71,7 +69,7 @@ extern char __image_copy_end[];
 extern void _start(void);
 
 /*
- * ARM defines its symbols as char[]. Other arches define them as ulongs.
+ * ARM defines its symbols as char[]. Other archs define them as unsigned long
  */
 #ifdef CONFIG_ARM
 
@@ -86,13 +84,13 @@ extern char __rel_dyn_end[];
 #else /* don't use offsets: */
 
 /* Exports from the Linker Script */
-extern ulong __data_end;
-extern ulong __rel_dyn_start;
-extern ulong __rel_dyn_end;
-extern ulong __bss_end;
-extern ulong _image_binary_end;
+extern unsigned long __data_end;
+extern unsigned long __rel_dyn_start;
+extern unsigned long __rel_dyn_end;
+extern unsigned long __bss_end;
+extern unsigned long _image_binary_end;
 
-extern ulong _TEXT_BASE;	/* code start */
+extern unsigned long _TEXT_BASE;	/* code start */
 
 #endif
 
