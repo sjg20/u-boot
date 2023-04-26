@@ -673,9 +673,11 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 
 		/* if this is the target arg, update it */
 		if (!strncmp(from, set_arg, set_arg_len)) {
+			found_arg = true;
 			if (!new_val) {
 				/* delete this arg */
 				from = val_end + (*val_end == ' ');
+				printf("delete from: %s\n", from);
 				continue;
 			}
 
@@ -683,7 +685,6 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 			if (ret < 0)
 				return ret;
 			to += ret;
-			found_arg = true;
 
 		/* if not the target arg, copy it unchanged */
 		} else {

@@ -729,6 +729,9 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	ut_asserteq_str("arg=1234", buf);
 
 	/* update an arg at the end */
+	ut_asserteq(6, cmdline_set_arg(buf, size, "mary arg=123", "arg", NULL));
+	ut_asserteq_str("mary ", buf);
+
 	ut_asserteq(9, cmdline_set_arg(buf, size, "mary arg=123", "arg",
 				       BOOTFLOWCL_EMPTY));
 	ut_asserteq_str("mary arg", buf);
