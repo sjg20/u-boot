@@ -453,6 +453,15 @@ int bootflow_menu_run(struct bootstd_priv *std, bool text_mode,
 int bootflow_cmdline_set(const char *value);
 
 #define BOOTFLOWCL_EMPTY	((void *)1)
+
+/**
+ * cmdline_set_arg() - Update an argument in a cmdline string
+ *
+ * Return:
+ *	length of new buffer (including \0 terminator) on success, -ENOENT if
+ *	@new_val is NULL and @set_arg does not exist in @from, -EINVAL if a
+ *	quoted arg-value is not terminated with a quote
+ */
 int cmdline_set_arg(char *buf, int maxlen, const char *from,
 		    const char *set_arg, const char *new_val);
 

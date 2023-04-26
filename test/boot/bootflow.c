@@ -688,7 +688,7 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 {
 	char buf[200];
 	const int size = sizeof(buf);
-// do quotes too
+
 	/* add an arg that doesn't already exist, starting from empty */
 	ut_asserteq(-ENOENT, cmdline_set_arg(buf, size, NULL, "me", NULL));
 
@@ -780,10 +780,12 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 					"arg", NULL));
 	ut_asserteq_str("mary=\"abc def\" john", buf);
 
-	ut_asserteq(20, cmdline_set_arg(buf, size,
+	ut_asserteq(34, cmdline_set_arg(buf, size,
 					"mary=\"abc def\" arg=123 john",
 					"def", "4"));
-	ut_asserteq_str("mary=\"abc def\" john def=4", buf);
+	ut_asserteq_str("mary=\"abc def\" arg=123 john def=4", buf);
+
+	/* handle updating a quoted arg */
 
 	return 0;
 }

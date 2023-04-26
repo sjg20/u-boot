@@ -646,6 +646,7 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 	set_arg_len = strlen(set_arg);
 	for (to = buf, end = buf + maxlen - 1; *from;) {
 		const char *val, *arg_end, *val_end, *p;
+		bool in_quote;
 
 		if (to >= end)
 			return -E2BIG;
@@ -659,10 +660,20 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 		val = NULL;
 		arg_end = NULL;
 		val_end = NULL;
+		in_quote = false;
 		for (p = from;; p++) {
+			if (in_quote) {
+				if (!*p)
+					return -EINVAL;
+				if (*p == '"')
+					in_quote = false;
+				continue;
+			}
 			if (*p == '=') {
 				arg_end = p;
 				val = p + 1;
+			} else if (*p == '"') {
+				in_quote = true;
 			} else if (!*p || *p == ' ') {
 				val_end = p;
 				break;
