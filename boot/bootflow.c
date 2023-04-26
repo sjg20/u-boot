@@ -659,7 +659,7 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 	}
 
 	set_arg_len = strlen(set_arg);
-	for (to = buf, end = buf + maxlen - 1; *from;) {
+	for (to = buf, end = buf + maxlen; *from;) {
 		const char *val, *arg_end, *val_end, *p;
 		bool in_quote;
 
@@ -695,7 +695,7 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 		       arg_end - from, val - from, val_end - from);
 
 		if (to != buf) {
-			if (to + 1 >= end)
+			if (to >= end)
 				return -E2BIG;
 			*to++ = ' ';
 		}
