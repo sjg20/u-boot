@@ -690,6 +690,9 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	const int size = sizeof(buf);
 // do quotes too
 	/* add an arg that doesn't already exist, starting from empty */
+// 	ut_asserteq(3, cmdline_set_arg(buf, size, NULL, "me", NULL));
+// 	ut_asserteq_str("me", buf);
+
 	ut_asserteq(3, cmdline_set_arg(buf, size, NULL, "me",
 				       BOOTFLOWCL_EMPTY));
 	ut_asserteq_str("me", buf);
@@ -729,8 +732,8 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	ut_asserteq_str("arg=1234", buf);
 
 	/* update an arg at the end */
-	ut_asserteq(6, cmdline_set_arg(buf, size, "mary arg=123", "arg", NULL));
-	ut_asserteq_str("mary ", buf);
+	ut_asserteq(5, cmdline_set_arg(buf, size, "mary arg=123", "arg", NULL));
+	ut_asserteq_str("mary", buf);
 
 	ut_asserteq(9, cmdline_set_arg(buf, size, "mary arg=123", "arg",
 				       BOOTFLOWCL_EMPTY));
@@ -742,10 +745,30 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	ut_asserteq(11, cmdline_set_arg(buf, size, "mary arg=123", "arg", "1"));
 	ut_asserteq_str("mary arg=1", buf);
 
-	printf("\n");
 	ut_asserteq(14, cmdline_set_arg(buf, size, "mary arg=123", "arg",
 					"1234"));
 	ut_asserteq_str("mary arg=1234", buf);
+
+	/* update an arg in the middle */
+	ut_asserteq(16, cmdline_set_arg(buf, size, "mary=abc arg=123 john=2",
+					"arg", NULL));
+	ut_asserteq_str("mary=abc john=2", buf);
+
+	ut_asserteq(20, cmdline_set_arg(buf, size, "mary=abc arg=123 john=2",
+					"arg", BOOTFLOWCL_EMPTY));
+	ut_asserteq_str("mary=abc arg john=2", buf);
+
+	ut_asserteq(21, cmdline_set_arg(buf, size, "mary=abc arg=123 john=2",
+					"arg", ""));
+	ut_asserteq_str("mary=abc arg= john=2", buf);
+
+	ut_asserteq(22, cmdline_set_arg(buf, size, "mary=abc arg=123 john=2",
+					"arg", "1"));
+	ut_asserteq_str("mary=abc arg=1 john=2", buf);
+
+	ut_asserteq(25, cmdline_set_arg(buf, size, "mary=abc arg=123 john=2",
+					"arg", "1234"));
+	ut_asserteq_str("mary=abc arg=1234 john=2", buf);
 
 	return 0;
 }

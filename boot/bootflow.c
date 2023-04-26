@@ -710,6 +710,10 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 		to += ret;
 	}
 
+	/* delete any trailing space */
+	if (to > buf && to[-1] == ' ')
+		to--;
+
 	if (to >= end)
 		return -E2BIG;
 	*to++ = '\0';
