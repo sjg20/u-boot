@@ -824,16 +824,10 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	ut_assertok(check_arg(uts, 8, "arg=123", buf, "   ", "arg", "123"));
 	ut_assertok(check_arg(uts, 13, "john arg=123", buf, " john  ", "arg",
 			      "123"));
-	printf("\n");
 	ut_assertok(check_arg(uts, 13, "john arg=123", buf, " john  arg=123  ",
 			      "arg", "123"));
-
-	ut_asserteq(13, cmdline_set_arg(buf, size, " john  arg=123  ",
-					"arg", "123"));
-	ut_asserteq_str("john arg=123", buf);
-	ut_asserteq(18, cmdline_set_arg(buf, size, " john  arg=123 mary ",
-					"arg", "123"));
-	ut_asserteq_str("john arg=123 mary", buf);
+	ut_assertok(check_arg(uts, 18, "john arg=123 mary", buf,
+			      " john  arg=123 mary ", "arg", "123"));
 
 	return 0;
 }
