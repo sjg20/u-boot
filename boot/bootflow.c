@@ -606,18 +606,44 @@ int bootflow_cmdline_set(const char *value)
 	return 0;
 }
 
-int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
-			     const char *new_val)
+static int copy_in(char *buf, char *end, const char *arg, int len,
+		   const char *new_val)
 {
-	const int maxlen = 2048;
-	char buf[maxlen];
-	const char *from;
-	char *to, *end, *cmd;
+	char *to = buf;
+
+	/* copy the arg name */
+	if (to + len >= end)
+		return -E2BIG;
+	memcpy(to, arg, len);
+	to += len;
+
+	if (new_val == BOOTFLOWCL_EMPTY) {
+		/* no value */
+	} else {
+		len = strlen(new_val);
+
+		if (to + 1 + len >= end)
+			return -E2BIG;
+		*to++ = '=';
+		memcpy(to, new_val, len);
+		to += len;
+	}
+
+	return to - buf;
+}
+
+int cmdline_set_arg(char *buf, int maxlen, const char *from,
+		    const char *set_arg, const char *new_val)
+{
+	bool found_arg = false;
+	char *to, *end;
 	int set_arg_len;
 	char empty = '\0';
+	int ret;
 
+	if (!from)
+		from = &empty;
 	set_arg_len = strlen(set_arg);
-	from = bflow->cmdline ?: &empty;
 	for (to = buf, end = buf + maxlen - 1; *from;) {
 		const char *val, *arg_end, *val_end, *p;
 		int len;
@@ -638,28 +664,34 @@ int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
 			if (*p == '=') {
 				arg_end = p;
 				val = p + 1;
-			} else if (!p || *p == ' ') {
+			} else if (!*p || *p == ' ') {
 				val_end = p;
 				break;
 			}
 		}
-		printf("from=%s, arg_end=%s, val_end=%s\n", from, arg_end,
-		       val_end);
+		printf("from %s arg_end %ld val %ld val_end %ld\n", from,
+		       arg_end - from, val - from, val_end - from);
 		len = val_end - from;
 		if (strncmp(from, set_arg, set_arg_len)) {
+
 			if (!new_val) {
 				/* delete this arg */
 				from = val_end;
 				continue;
 			}
 
+			ret = copy_in(to, end, from, len, new_val);
+			if (ret < 0)
+				return ret;
+			to += ret;
+#if 0
 			/* copy the arg name */
 			if (to + len >= end)
 				return -E2BIG;
 			memcpy(to, from, len);
 			to += len;
 
-			if (new_val == (void *)1) {
+			if (new_val == BOOTFLOWCL_EMPTY) {
 				/* no value */
 			} else {
 				len = strlen(new_val);
@@ -670,6 +702,7 @@ int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
 				memcpy(to, new_val, len);
 				to += len;
 			}
+#endif
 		} else {
 			/* copy the arg unchanged */
 			if (to + len >= end)
@@ -678,9 +711,32 @@ int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
 		}
 		from = val_end;
 	}
+	if (!found_arg) {
+		ret = copy_in(to, end, set_arg, strlen(set_arg), new_val);
+		if (ret < 0)
+			return ret;
+		to += ret;
+	}
+
 	if (to >= end)
 		return -E2BIG;
-	*to = '\0';
+	*to++ = '\0';
+
+	return to - buf;
+}
+
+int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
+			     const char *new_val)
+{
+	const int maxlen = 2048;
+	char buf[maxlen];
+	char *cmd;
+	int ret;
+
+	ret = cmdline_set_arg(buf, sizeof(buf), bflow->cmdline, set_arg,
+			      new_val);
+	if (ret < 0)
+		return ret;
 	cmd = strdup(buf);
 	if (!cmd)
 		return -ENOMEM;

@@ -452,14 +452,18 @@ int bootflow_menu_run(struct bootstd_priv *std, bool text_mode,
  */
 int bootflow_cmdline_set(const char *value);
 
+#define BOOTFLOWCL_EMPTY	((void *)1)
+int cmdline_set_arg(char *buf, int maxlen, const char *from,
+		    const char *set_arg, const char *new_val);
+
 /**
  * bootflow_cmdline_set_arg() - Set a single argument for a bootflow
  *
  * @bflow: Bootflow to update
  * @arg: Argument to update (e.g. "console")
  * @val: Value to set (e.g. "ttyS2") or NULL to delete the argument if present,
- * "" to set it to an empty value (e.g. "console=") and (void *)1 to add it
- * without any value ("initrd")
+ * "" to set it to an empty value (e.g. "console=") and BOOTFLOWCL_EMPTY to add
+ * it without any value ("initrd")
  *
  * Return: 0 if OK, -ENOMEM if out of memory
  */

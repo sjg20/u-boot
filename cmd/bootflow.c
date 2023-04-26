@@ -437,7 +437,6 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 	struct bootstd_priv *std;
 	struct bootflow *bflow;
 	const char *op, *arg, *val = NULL;
-	int len;
 	int ret;
 
 	if (argc < 3)
@@ -470,12 +469,12 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 		ret = bootflow_cmdline_set_arg(bflow, arg, val);
 		break;
 	case 'g':	/* get */
-		ret = bootflow_cmdline_get_arg(bflow, arg, &val, &len);
-		if (!ret)
-			printf("%.*s\n", len, val);
+// 		ret = bootflow_cmdline_get_arg(bflow, arg, &val, &len);
+// 		if (!ret)
+// 			printf("%.*s\n", len, val);
 		break;
 	case 'a':	/* auto */
-		ret = bootflow_cmdline_auto(bflow, arg);
+// 		ret = bootflow_cmdline_auto(bflow, arg);
 		break;
 	}
 	if (ret) {

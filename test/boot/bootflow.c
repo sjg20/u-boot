@@ -682,3 +682,34 @@ static int bootflow_menu_theme(struct unit_test_state *uts)
 	return 0;
 }
 BOOTSTD_TEST(bootflow_menu_theme, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
+
+/* Test of bootflow_cmdline_set_arg() */
+static int bootflow_cmdline(struct unit_test_state *uts)
+{
+	char buf[200];
+#if 0
+	/* adding an arg that doesn't already exist, starting from empty */
+	ut_asserteq(3, cmdline_set_arg(buf, sizeof(buf), NULL, "me",
+				       BOOTFLOWCL_EMPTY));
+	ut_asserteq_str("me", buf);
+
+	ut_asserteq(4, cmdline_set_arg(buf, sizeof(buf), NULL, "me", ""));
+	ut_asserteq_str("me=", buf);
+
+	ut_asserteq(8, cmdline_set_arg(buf, sizeof(buf), NULL, "me", "fred"));
+	ut_asserteq_str("me=fred", buf);
+#endif
+	/* adding an arg that doesn't already exist, starting from non-empty */
+	ut_asserteq(11, cmdline_set_arg(buf, sizeof(buf), "arg=123", "me",
+					BOOTFLOWCL_EMPTY));
+	ut_asserteq_str("arg123 me", buf);
+
+// 	ut_asserteq(4, cmdline_set_arg(buf, sizeof(buf), "arg=123", "me", ""));
+// 	ut_asserteq_str("me=", buf);
+
+// 	ut_asserteq(8, cmdline_set_arg(buf, sizeof(buf), "arg=123", "me", "fred"));
+// 	ut_asserteq_str("me=fred", buf);
+
+	return 0;
+}
+BOOTSTD_TEST(bootflow_cmdline, 0);
