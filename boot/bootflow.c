@@ -646,7 +646,6 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 	set_arg_len = strlen(set_arg);
 	for (to = buf, end = buf + maxlen - 1; *from;) {
 		const char *val, *arg_end, *val_end, *p;
-		int len;
 
 		if (to >= end)
 			return -E2BIG;
@@ -671,48 +670,39 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 		}
 		printf("from %s arg_end %ld val %ld val_end %ld\n", from,
 		       arg_end - from, val - from, val_end - from);
-		len = val_end - from;
-		if (strncmp(from, set_arg, set_arg_len)) {
 
+		/* if this is the target arg, update it */
+		if (!strncmp(from, set_arg, set_arg_len)) {
 			if (!new_val) {
 				/* delete this arg */
-				from = val_end;
 				continue;
 			}
 
-			ret = copy_in(to, end, from, len, new_val);
+			ret = copy_in(to, end, from, arg_end - from, new_val);
 			if (ret < 0)
 				return ret;
 			to += ret;
-#if 0
-			/* copy the arg name */
+			found_arg = true;
+
+		/* if not the target arg, copy it unchanged */
+		} else {
+			int len;
+
+			len = val_end - from;
 			if (to + len >= end)
 				return -E2BIG;
 			memcpy(to, from, len);
 			to += len;
-
-			if (new_val == BOOTFLOWCL_EMPTY) {
-				/* no value */
-			} else {
-				len = strlen(new_val);
-
-				if (to + 1 + len >= end)
-					return -E2BIG;
-				*to++ = '=';
-				memcpy(to, new_val, len);
-				to += len;
-			}
-#endif
-		} else {
-			/* copy the arg unchanged */
-			if (to + len >= end)
-				return -E2BIG;
-			memcpy(to, from, len);
 		}
 		from = val_end;
 	}
 	if (!found_arg) {
-		ret = copy_in(to, end, set_arg, strlen(set_arg), new_val);
+		if (to >= end)
+			return -E2BIG;
+		if (to != buf && to[-1] != ' ')
+			*to++ = ' ';
+		ret = copy_in(to, end, set_arg, set_arg_len, new_val);
+		printf("ret=%d, to: %s buf: %s\n", ret, to, buf);
 		if (ret < 0)
 			return ret;
 		to += ret;

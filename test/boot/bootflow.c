@@ -687,28 +687,60 @@ BOOTSTD_TEST(bootflow_menu_theme, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 static int bootflow_cmdline(struct unit_test_state *uts)
 {
 	char buf[200];
-#if 0
-	/* adding an arg that doesn't already exist, starting from empty */
-	ut_asserteq(3, cmdline_set_arg(buf, sizeof(buf), NULL, "me",
+	const int size = sizeof(buf);
+// do quotes too
+	/* add an arg that doesn't already exist, starting from empty */
+	ut_asserteq(3, cmdline_set_arg(buf, size, NULL, "me",
 				       BOOTFLOWCL_EMPTY));
 	ut_asserteq_str("me", buf);
 
-	ut_asserteq(4, cmdline_set_arg(buf, sizeof(buf), NULL, "me", ""));
+	ut_asserteq(4, cmdline_set_arg(buf, size, NULL, "me", ""));
 	ut_asserteq_str("me=", buf);
 
-	ut_asserteq(8, cmdline_set_arg(buf, sizeof(buf), NULL, "me", "fred"));
+	ut_asserteq(8, cmdline_set_arg(buf, size, NULL, "me", "fred"));
 	ut_asserteq_str("me=fred", buf);
-#endif
-	/* adding an arg that doesn't already exist, starting from non-empty */
-	ut_asserteq(11, cmdline_set_arg(buf, sizeof(buf), "arg=123", "me",
+
+	/* add an arg that doesn't already exist, starting from non-empty */
+	ut_asserteq(11, cmdline_set_arg(buf, size, "arg=123", "me",
 					BOOTFLOWCL_EMPTY));
-	ut_asserteq_str("arg123 me", buf);
+	ut_asserteq_str("arg=123 me", buf);
 
-// 	ut_asserteq(4, cmdline_set_arg(buf, sizeof(buf), "arg=123", "me", ""));
-// 	ut_asserteq_str("me=", buf);
+	ut_asserteq(12, cmdline_set_arg(buf, size, "arg=123", "me", ""));
+	ut_asserteq_str("arg=123 me=", buf);
 
-// 	ut_asserteq(8, cmdline_set_arg(buf, sizeof(buf), "arg=123", "me", "fred"));
-// 	ut_asserteq_str("me=fred", buf);
+	ut_asserteq(16, cmdline_set_arg(buf, size, "arg=123", "me", "fred"));
+	ut_asserteq_str("arg=123 me=fred", buf);
+
+	/* update an arg at the start */
+	printf("\n");
+	ut_asserteq(4, cmdline_set_arg(buf, size, "arg=123", "arg",
+				       BOOTFLOWCL_EMPTY));
+	ut_asserteq_str("arg", buf);
+
+	ut_asserteq(5, cmdline_set_arg(buf, size, "arg=123", "arg", ""));
+	ut_asserteq_str("arg=", buf);
+
+	ut_asserteq(6, cmdline_set_arg(buf, size, "arg=123", "arg", "1"));
+	ut_asserteq_str("arg=1", buf);
+
+	ut_asserteq(9, cmdline_set_arg(buf, size, "arg=123", "arg", "1234"));
+	ut_asserteq_str("arg=1234", buf);
+
+	/* update an arg at the end */
+	ut_asserteq(9, cmdline_set_arg(buf, size, "mary arg=123", "arg",
+				       BOOTFLOWCL_EMPTY));
+	ut_asserteq_str("mary arg", buf);
+
+	ut_asserteq(10, cmdline_set_arg(buf, size, "mary arg=123", "arg", ""));
+	ut_asserteq_str("mary arg=", buf);
+
+	ut_asserteq(11, cmdline_set_arg(buf, size, "mary arg=123", "arg", "1"));
+	ut_asserteq_str("mary arg=1", buf);
+
+	printf("\n");
+	ut_asserteq(14, cmdline_set_arg(buf, size, "mary arg=123", "arg",
+					"1234"));
+	ut_asserteq_str("mary arg=1234", buf);
 
 	return 0;
 }
