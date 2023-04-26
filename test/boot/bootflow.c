@@ -785,7 +785,47 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 					"def", "4"));
 	ut_asserteq_str("mary=\"abc def\" arg=123 john def=4", buf);
 
+	/* handle updating a quoted arg, but quotes are missing in arg */
+	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
+					"mary=\"abc def\" arg=\"123 456\"",
+					"arg", "4 5 6"));
+
+	/* quote only at the start */
+	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
+					"mary=\"abc def\" arg=\"123 456\"",
+					"arg", "\"4 5 6"));
+
+	/* quote only at the end */
+	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
+					"mary=\"abc def\" arg=\"123 456\"",
+					"arg", "4 5 6\""));
+
+	/* quote in the middle */
+	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
+					"mary=\"abc def\" arg=\"123 456\"",
+					"arg", "\"4 \"5 6\""));
+
 	/* handle updating a quoted arg */
+	ut_asserteq(27, cmdline_set_arg(buf, size,
+					"mary=\"abc def\" arg=\"123 456\"",
+					"arg", "\"4 5 6\""));
+	ut_asserteq_str("mary=\"abc def\" arg=\"4 5 6\"", buf);
+
+	/* changing a quoted arg to a non-quoted arg */
+	ut_asserteq(23, cmdline_set_arg(buf, size,
+					"mary=\"abc def\" arg=\"123 456\"",
+					"arg", "789"));
+	ut_asserteq_str("mary=\"abc def\" arg=789", buf);
+
+	/* changing a non-quoted arg to a quoted arg */
+	ut_asserteq(29, cmdline_set_arg(buf, size,
+					"mary=\"abc def\" arg=123",
+					"arg", "\"456 789\""));
+	ut_asserteq_str("mary=\"abc def\" arg=\"456 789\"", buf);
+
+	/* handling of spaces */
+	ut_asserteq(8, cmdline_set_arg(buf, size, " ", "arg", "123"));
+	ut_asserteq_str("arg=123", buf);
 
 	return 0;
 }

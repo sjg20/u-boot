@@ -460,7 +460,9 @@ int bootflow_cmdline_set(const char *value);
  * Return:
  *	length of new buffer (including \0 terminator) on success, -ENOENT if
  *	@new_val is NULL and @set_arg does not exist in @from, -EINVAL if a
- *	quoted arg-value is not terminated with a quote
+ *	quoted arg-value in @from is not terminated with a quote, -EBADF if
+ *	@new_val has spaces but does not start and end with quotes (or it has
+ *	quotes in the middle of the string), -E2BIG if @maxlen is too small
  */
 int cmdline_set_arg(char *buf, int maxlen, const char *from,
 		    const char *set_arg, const char *new_val);

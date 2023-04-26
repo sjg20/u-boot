@@ -643,6 +643,21 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 
 	if (!from)
 		from = &empty;
+
+	/* check that a value with spaces has quoting */
+	if (new_val && new_val != BOOTFLOWCL_EMPTY) {
+		bool has_space = strchr(new_val, ' ');
+
+		if (has_space) {
+			int len = strlen(new_val);
+
+			if (*new_val != '"' || new_val[len - 1] != '"')
+				return -EBADF;
+			if (strchr(new_val + 1, '"') != &new_val[len - 1])
+				return -EBADF;
+		}
+	}
+
 	set_arg_len = strlen(set_arg);
 	for (to = buf, end = buf + maxlen - 1; *from;) {
 		const char *val, *arg_end, *val_end, *p;
@@ -717,6 +732,8 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 			return -ENOENT;
 		if (to >= end)
 			return -E2BIG;
+
+		/* add a space to separate it from the previous arg */
 		if (to != buf && to[-1] != ' ')
 			*to++ = ' ';
 		ret = copy_in(to, end, set_arg, set_arg_len, new_val);
