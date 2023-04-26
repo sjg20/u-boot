@@ -698,7 +698,12 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 		}
 		from = val_end;
 	}
+
+	/* If we didn't find the arg, add it */
 	if (!found_arg) {
+		/* trying to delete something that is not there */
+		if (!new_val)
+			return -ENOENT;
 		if (to >= end)
 			return -E2BIG;
 		if (to != buf && to[-1] != ' ')
