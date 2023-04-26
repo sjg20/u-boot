@@ -767,16 +767,18 @@ int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
 {
 	const int maxlen = 2048;
 	char buf[maxlen];
-	char *cmd;
+	char *cmd = NULL;
 	int ret;
 
 	ret = cmdline_set_arg(buf, sizeof(buf), bflow->cmdline, set_arg,
 			      new_val);
 	if (ret < 0)
 		return ret;
-	cmd = strdup(buf);
-	if (!cmd)
-		return -ENOMEM;
+	if (*buf) {
+		cmd = strdup(buf);
+		if (!cmd)
+			return -ENOMEM;
+	}
 	free(bflow->cmdline);
 	bflow->cmdline = cmd;
 

@@ -700,6 +700,7 @@ static int check_arg(struct unit_test_state *uts, int expect_ret,
 		     const char *expect_str, char *buf, const char *from,
 		     const char *arg, const char *val)
 {
+	/* check for writing outside the reported bounds */
 	buf[expect_ret] = '[';
 	ut_asserteq(expect_ret,
 		    cmdline_set_arg(buf, expect_ret, from, arg, val));
@@ -716,7 +717,7 @@ static int check_arg(struct unit_test_state *uts, int expect_ret,
 /* Test of bootflow_cmdline_set_arg() */
 static int bootflow_cmdline(struct unit_test_state *uts)
 {
-	char buf[200];
+	char buf[50];
 	const int size = sizeof(buf);
 
 	/*
@@ -832,3 +833,30 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	return 0;
 }
 BOOTSTD_TEST(bootflow_cmdline, 0);
+
+/* Test of bootflow_cmdline_set_arg() */
+static int bootflow_set_arg(struct unit_test_state *uts)
+{
+	struct bootflow s_bflow, *bflow = &s_bflow;
+	ulong mem_start;
+
+	mem_start = ut_check_delta(0);
+
+	/* Do a simple sanity check. Rely on bootflow_cmdline() for the rest */
+	bflow->cmdline = NULL;
+	ut_assertok(bootflow_cmdline_set_arg(bflow, "fred", "123"));
+	ut_asserteq_str(bflow->cmdline, "fred=123");
+
+	ut_assertok(bootflow_cmdline_set_arg(bflow, "mary", "\"and here\""));
+	ut_asserteq_str(bflow->cmdline, "fred=123 mary=\"and here\"");
+
+	ut_assertok(bootflow_cmdline_set_arg(bflow, "mary", NULL));
+	ut_asserteq_str(bflow->cmdline, "fred=123");
+	ut_assertok(bootflow_cmdline_set_arg(bflow, "fred", NULL));
+	ut_asserteq_ptr(bflow->cmdline, NULL);
+
+	ut_asserteq(0, ut_check_delta(mem_start));
+
+	return 0;
+}
+BOOTSTD_TEST(bootflow_set_arg, 0);
