@@ -683,15 +683,30 @@ static int bootflow_menu_theme(struct unit_test_state *uts)
 }
 BOOTSTD_TEST(bootflow_menu_theme, UT_TESTF_DM | UT_TESTF_SCAN_FDT);
 
+/**
+ * check_arg() - Check both the normal case and the buffer-overflow case
+ *
+ * @uts: Unit-test state
+ * @expect_ret: Expected return value (i.e. buffer length)
+ * @expect_str: String expected to be returned
+ * @buf: Buffer to use
+ * @from: Original cmdline to update
+ * @arg: Argument to update (e.g. "console")
+ * @val: Value to set (e.g. "ttyS2") or NULL to delete the argument if present,
+ * "" to set it to an empty value (e.g. "console=") and BOOTFLOWCL_EMPTY to add
+ * it without any value ("initrd")
+ */
 static int check_arg(struct unit_test_state *uts, int expect_ret,
 		     const char *expect_str, char *buf, const char *from,
-		     const char *set_arg, const char *new_val)
+		     const char *arg, const char *val)
 {
 	ut_asserteq(expect_ret,
-		    cmdline_set_arg(buf, expect_ret, from, set_arg, new_val));
+		    cmdline_set_arg(buf, expect_ret, from, arg, val));
 	ut_asserteq_str(expect_str, buf);
-	ut_asserteq(-E2BIG, cmdline_set_arg(buf, expect_ret - 1, from, set_arg,
-					    new_val));
+
+	/* do the test again but with one less byte in the buffer */
+	ut_asserteq(-E2BIG, cmdline_set_arg(buf, expect_ret - 1, from, arg,
+					    val));
 
 	return 0;
 }
@@ -711,58 +726,27 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	ut_asserteq(-ENOENT, cmdline_set_arg(buf, size, NULL, "me", NULL));
 
 	ut_assertok(check_arg(uts, 3, "me", buf, NULL, "me", BOOTFLOWCL_EMPTY));
-// 	ut_assertok(check_arg(uts, 4, "me=", buf, "", "me", BOOTFLOWCL_EMPTY));
-// 	ut_assertok(check_arg(uts, 8, "me=fred", buf, "me", "fred",
-// 			      BOOTFLOWCL_EMPTY));
-
-	ut_asserteq(3, cmdline_set_arg(buf, size, NULL, "me",
-				       BOOTFLOWCL_EMPTY));
-	ut_asserteq_str("me", buf);
-
-	ut_asserteq(4, cmdline_set_arg(buf, size, NULL, "me", ""));
-	ut_asserteq_str("me=", buf);
-
-	ut_asserteq(8, cmdline_set_arg(buf, size, NULL, "me", "fred"));
-	ut_asserteq_str("me=fred", buf);
+	ut_assertok(check_arg(uts, 4, "me=", buf, NULL, "me", ""));
+	ut_assertok(check_arg(uts, 8, "me=fred", buf, NULL, "me", "fred"));
 
 	/* add an arg that doesn't already exist, starting from non-empty */
-	ut_asserteq(11, cmdline_set_arg(buf, 11, "arg=123", "me",
-					BOOTFLOWCL_EMPTY));
-	ut_asserteq_str("arg=123 me", buf);
-	ut_asserteq(-E2BIG, cmdline_set_arg(buf, 10, "arg=123", "me",
-					BOOTFLOWCL_EMPTY));
-
-	ut_asserteq(12, cmdline_set_arg(buf, 12, "arg=123", "me", ""));
-	ut_asserteq_str("arg=123 me=", buf);
-	ut_asserteq(-E2BIG, cmdline_set_arg(buf, 11, "arg=123", "me", ""));
-
-	ut_asserteq(16, cmdline_set_arg(buf, 16, "arg=123", "me", "fred"));
-	ut_asserteq_str("arg=123 me=fred", buf);
-	ut_asserteq(-E2BIG, cmdline_set_arg(buf, 15, "arg=123", "me", "fred"));
+	ut_assertok(check_arg(uts, 11, "arg=123 me", buf, "arg=123", "me",
+			      BOOTFLOWCL_EMPTY));
+	ut_assertok(check_arg(uts, 12, "arg=123 me=", buf, "arg=123", "me",
+			      ""));
+	ut_assertok(check_arg(uts, 16, "arg=123 me=fred", buf, "arg=123", "me",
+			      "fred"));
 
 	/* update an arg at the start */
-	ut_asserteq(1, cmdline_set_arg(buf, 1, "arg=123", "arg", NULL));
-	ut_asserteq_str("", buf);
-	ut_asserteq(-E2BIG, cmdline_set_arg(buf, 0, "arg=123", "arg", NULL));
+	ut_assertok(check_arg(uts, 1, "", buf, "arg=123", "arg", NULL));
+	ut_assertok(check_arg(uts, 4, "arg", buf, "arg=123", "arg",
+			      BOOTFLOWCL_EMPTY));
+	ut_assertok(check_arg(uts, 5, "arg=", buf, "arg=123", "arg", ""));
+	ut_assertok(check_arg(uts, 6, "arg=1", buf, "arg=123", "arg", "1"));
+	ut_assertok(check_arg(uts, 9, "arg=1234", buf, "arg=123", "arg",
+			      "1234"));
 
-	ut_asserteq(4, cmdline_set_arg(buf, 4, "arg=123", "arg",
-				       BOOTFLOWCL_EMPTY));
-	ut_asserteq_str("arg", buf);
-	ut_asserteq(-E2BIG, cmdline_set_arg(buf, 3, "arg=123", "arg",
-				       BOOTFLOWCL_EMPTY));
-
-	ut_asserteq(5, cmdline_set_arg(buf, 5, "arg=123", "arg", ""));
-	ut_asserteq_str("arg=", buf);
-	ut_asserteq(-E2BIG, cmdline_set_arg(buf, 4, "arg=123", "arg", ""));
-
-	ut_asserteq(6, cmdline_set_arg(buf, 6, "arg=123", "arg", "1"));
-	ut_asserteq_str("arg=1", buf);
-	ut_asserteq(-E2BIG, cmdline_set_arg(buf, 5, "arg=123", "arg", "1"));
-
-	ut_asserteq(9, cmdline_set_arg(buf, 9, "arg=123", "arg", "1234"));
-	ut_asserteq_str("arg=1234", buf);
-	ut_asserteq(-E2BIG, cmdline_set_arg(buf, 8, "arg=123", "arg", "1234"));
-
+// TODO from here
 	/* update an arg at the end */
 	ut_asserteq(5, cmdline_set_arg(buf, size, "mary arg=123", "arg", NULL));
 	ut_asserteq_str("mary", buf);
