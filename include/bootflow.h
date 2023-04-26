@@ -457,6 +457,9 @@ int bootflow_cmdline_set(const char *value);
 /**
  * cmdline_set_arg() - Update an argument in a cmdline string
  *
+ * Args with embedded spaces must have quotes, both in @from and @new_val
+ *
+ * Consecutive spaces are squashed as are spaces at the end
  * Return:
  *	length of new buffer (including \0 terminator) on success, -ENOENT if
  *	@new_val is NULL and @set_arg does not exist in @from, -EINVAL if a

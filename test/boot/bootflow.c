@@ -688,7 +688,7 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 {
 	char buf[200];
 	const int size = sizeof(buf);
-
+//buffer too small
 	/* add an arg that doesn't already exist, starting from empty */
 	ut_asserteq(-ENOENT, cmdline_set_arg(buf, size, NULL, "me", NULL));
 
@@ -826,6 +826,16 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	/* handling of spaces */
 	ut_asserteq(8, cmdline_set_arg(buf, size, " ", "arg", "123"));
 	ut_asserteq_str("arg=123", buf);
+	ut_asserteq(8, cmdline_set_arg(buf, size, "   ", "arg", "123"));
+	ut_asserteq_str("arg=123", buf);
+	ut_asserteq(13, cmdline_set_arg(buf, size, " john  ", "arg", "123"));
+	ut_asserteq_str("john arg=123", buf);
+	ut_asserteq(13, cmdline_set_arg(buf, size, " john  arg=123  ",
+					"arg", "123"));
+	ut_asserteq_str("john arg=123", buf);
+	ut_asserteq(18, cmdline_set_arg(buf, size, " john  arg=123 mary ",
+					"arg", "123"));
+	ut_asserteq_str("john arg=123 mary", buf);
 
 	return 0;
 }

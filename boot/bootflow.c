@@ -665,11 +665,8 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 
 		if (to >= end)
 			return -E2BIG;
-		while (*from == ' ') {
-			if (to >= end)
-				return -E2BIG;
-			*to++ = *from++;
-		}
+		while (*from == ' ')
+			from++;
 
 		/* find the end of this arg */
 		val = NULL;
@@ -697,6 +694,12 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 		printf("from %s arg_end %ld val %ld val_end %ld\n", from,
 		       arg_end - from, val - from, val_end - from);
 
+		if (to != buf) {
+			if (to + 1 >= end)
+				return -E2BIG;
+			*to++ = ' ';
+		}
+
 		/* if this is the target arg, update it */
 		if (!strncmp(from, set_arg, set_arg_len)) {
 			found_arg = true;
@@ -704,6 +707,8 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 				/* delete this arg */
 				from = val_end + (*val_end == ' ');
 				printf("delete from: %s\n", from);
+				if (to != buf)
+					to--; /* drop the space we added */
 				continue;
 			}
 
