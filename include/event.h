@@ -37,7 +37,15 @@ enum event_t {
 	/* To be called once, before calling main_loop() */
 	EVT_MAIN_LOOP,
 
+	/* Obtain the boot arguments for a device */
+	EVT_GET_BOOTARGS,
+
 	EVT_COUNT
+};
+
+enum evt_bootargs_t {
+	EVTBT_EARLYPRINTK,	/* earlyprintk argument */
+	EVTBT_CONSOLE,		/* console argument */
 };
 
 union event_data {
@@ -69,6 +77,25 @@ union event_data {
 		oftree tree;
 		struct bootm_headers *images;
 	} ft_fixup;
+
+	/**
+	 * struct event_get_bootargs - get bootargs value for a device
+	 *
+	 * This provides a string for passing to the OS, e.g. for a serial
+	 * device it might pass EVTBT_EARLYPRINTK and obtain
+	 * "uart8250-32bit,0xff690000"
+	 *
+	 * @type: Type of value to request
+	 * @dev: Target device to send to
+	 * @val: Place to put the value
+	 * @maxsize: Number of bytes available at @val
+	 */
+	struct event_get_bootargs {
+		enum evt_bootargs_t type;
+		struct udevice *dev;
+		char *val;
+		int maxsize;
+	} get_bootargs;
 };
 
 /**

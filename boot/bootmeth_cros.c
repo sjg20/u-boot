@@ -41,7 +41,7 @@ static int cros_check(struct udevice *dev, struct bootflow_iter *iter)
 	return 0;
 }
 
-int copy_cmdline(const char *from, const char *uuid, char **bufp)
+static int copy_cmdline(const char *from, const char *uuid, char **bufp)
 {
 	const int maxlen = 2048;
 	char buf[maxlen];
@@ -56,7 +56,7 @@ int copy_cmdline(const char *from, const char *uuid, char **bufp)
 	log_debug("uuid %d %s\n", uuid ? (int)strlen(uuid) : 0, uuid);
 	for (to = buf, end = buf + maxlen - UUID_STR_LEN - 1; *from; from++) {
 		if (to >= end)
-			return E2BIG;
+			return -E2BIG;
 		if (from[0] == '%' && from[1] == 'U' && uuid &&
 		    strlen(uuid) == UUID_STR_LEN) {
 			strcpy(to, uuid);
@@ -71,6 +71,7 @@ int copy_cmdline(const char *from, const char *uuid, char **bufp)
 	cmd = strdup(buf);
 	if (!cmd)
 		return -ENOMEM;
+	free(*bufp);
 	*bufp = cmd;
 
 	return 0;

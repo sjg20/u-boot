@@ -487,6 +487,24 @@ static int ns16550_serial_getinfo(struct udevice *dev,
 	return 0;
 }
 
+#if 0
+static int ns16550_serial_get_bootargs(void *ctx, struct event *event)
+{
+	struct ns16550_plat *plat = com_port->plat;
+
+	if (event->type == EVT_GET_BOOTARGS) {
+		struct event_get_bootargs *data = &event->data.get_bootargs;
+
+		switch (data->type) {
+		case EVTBT_EARLYPRINTK:
+			snprintf("uart8250-32bit,%*x",
+			break;
+		}
+	}
+}
+EVENT_SPY(EVT_GET_BOOTARGS, ns16550_serial_get_bootargs);
+#endif
+
 static int ns16550_serial_assign_base(struct ns16550_plat *plat, fdt_addr_t base)
 {
 	if (base == FDT_ADDR_T_NONE)

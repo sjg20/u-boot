@@ -567,12 +567,12 @@ static int on_bootargs(const char *name, const char *value, enum env_op op,
 	switch (op) {
 	case env_op_create:
 	case env_op_overwrite:
-		ret = bootflow_set_cmdline(value);
+		ret = bootflow_cmdline_set(value);
 		if (ret && ret != ENOENT)
 			return 1;
 		return 0;
 	case env_op_delete:
-		bootflow_set_cmdline(NULL);
+		bootflow_cmdline_set(NULL);
 		fallthrough;
 	default:
 		return 0;
@@ -581,7 +581,7 @@ static int on_bootargs(const char *name, const char *value, enum env_op op,
 U_BOOT_ENV_CALLBACK(bootargs, on_bootargs);
 #endif
 
-int bootflow_set_cmdline(const char *value)
+int bootflow_cmdline_set(const char *value)
 {
 	struct bootstd_priv *std;
 	struct bootflow *bflow;
@@ -602,6 +602,90 @@ int bootflow_set_cmdline(const char *value)
 
 	free(bflow->cmdline);
 	bflow->cmdline = cmdline;
+
+	return 0;
+}
+
+int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
+			     const char *new_val)
+{
+	const int maxlen = 2048;
+	char buf[maxlen];
+	const char *from;
+	char *to, *end, *cmd;
+	int set_arg_len;
+	char empty = '\0';
+
+	set_arg_len = strlen(set_arg);
+	from = bflow->cmdline ?: &empty;
+	for (to = buf, end = buf + maxlen - 1; *from;) {
+		const char *val, *arg_end, *val_end, *p;
+		int len;
+
+		if (to >= end)
+			return -E2BIG;
+		while (*from == ' ') {
+			if (to >= end)
+				return -E2BIG;
+			*to++ = *from++;
+		}
+
+		/* find the end of this arg */
+		val = NULL;
+		arg_end = NULL;
+		val_end = NULL;
+		for (p = from;; p++) {
+			if (*p == '=') {
+				arg_end = p;
+				val = p + 1;
+			} else if (!p || *p == ' ') {
+				val_end = p;
+				break;
+			}
+		}
+		printf("from=%s, arg_end=%s, val_end=%s\n", from, arg_end,
+		       val_end);
+		len = val_end - from;
+		if (strncmp(from, set_arg, set_arg_len)) {
+			if (!new_val) {
+				/* delete this arg */
+				from = val_end;
+				continue;
+			}
+
+			/* copy the arg name */
+			if (to + len >= end)
+				return -E2BIG;
+			memcpy(to, from, len);
+			to += len;
+
+			if (new_val == (void *)1) {
+				/* no value */
+			} else {
+				len = strlen(new_val);
+
+				if (to + 1 + len >= end)
+					return -E2BIG;
+				*to++ = '=';
+				memcpy(to, new_val, len);
+				to += len;
+			}
+		} else {
+			/* copy the arg unchanged */
+			if (to + len >= end)
+				return -E2BIG;
+			memcpy(to, from, len);
+		}
+		from = val_end;
+	}
+	if (to >= end)
+		return -E2BIG;
+	*to = '\0';
+	cmd = strdup(buf);
+	if (!cmd)
+		return -ENOMEM;
+	free(bflow->cmdline);
+	bflow->cmdline = cmd;
 
 	return 0;
 }
