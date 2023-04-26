@@ -700,9 +700,11 @@ static int check_arg(struct unit_test_state *uts, int expect_ret,
 		     const char *expect_str, char *buf, const char *from,
 		     const char *arg, const char *val)
 {
+	buf[expect_ret] = '[';
 	ut_asserteq(expect_ret,
 		    cmdline_set_arg(buf, expect_ret, from, arg, val));
 	ut_asserteq_str(expect_str, buf);
+	ut_asserteq('[', buf[expect_ret]);
 
 	/* do the test again but with one less byte in the buffer */
 	ut_asserteq(-E2BIG, cmdline_set_arg(buf, expect_ret - 1, from, arg,
@@ -746,61 +748,42 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	ut_assertok(check_arg(uts, 9, "arg=1234", buf, "arg=123", "arg",
 			      "1234"));
 
-// TODO from here
 	/* update an arg at the end */
-	ut_asserteq(5, cmdline_set_arg(buf, size, "mary arg=123", "arg", NULL));
-	ut_asserteq_str("mary", buf);
-
-	ut_asserteq(9, cmdline_set_arg(buf, size, "mary arg=123", "arg",
-				       BOOTFLOWCL_EMPTY));
-	ut_asserteq_str("mary arg", buf);
-
-	ut_asserteq(10, cmdline_set_arg(buf, size, "mary arg=123", "arg", ""));
-	ut_asserteq_str("mary arg=", buf);
-
-	ut_asserteq(11, cmdline_set_arg(buf, size, "mary arg=123", "arg", "1"));
-	ut_asserteq_str("mary arg=1", buf);
-
-	ut_asserteq(14, cmdline_set_arg(buf, size, "mary arg=123", "arg",
-					"1234"));
-	ut_asserteq_str("mary arg=1234", buf);
+	ut_assertok(check_arg(uts, 5, "mary", buf, "mary arg=123", "arg",
+			      NULL));
+	ut_assertok(check_arg(uts, 9, "mary arg", buf, "mary arg=123", "arg",
+			      BOOTFLOWCL_EMPTY));
+	ut_assertok(check_arg(uts, 10, "mary arg=", buf, "mary arg=123", "arg",
+			      ""));
+	ut_assertok(check_arg(uts, 11, "mary arg=1", buf, "mary arg=123", "arg",
+			      "1"));
+	ut_assertok(check_arg(uts, 14, "mary arg=1234", buf, "mary arg=123",
+			      "arg", "1234"));
 
 	/* update an arg in the middle */
-	ut_asserteq(16, cmdline_set_arg(buf, size, "mary=abc arg=123 john=2",
-					"arg", NULL));
-	ut_asserteq_str("mary=abc john=2", buf);
-
-	ut_asserteq(20, cmdline_set_arg(buf, size, "mary=abc arg=123 john=2",
-					"arg", BOOTFLOWCL_EMPTY));
-	ut_asserteq_str("mary=abc arg john=2", buf);
-
-	ut_asserteq(21, cmdline_set_arg(buf, size, "mary=abc arg=123 john=2",
-					"arg", ""));
-	ut_asserteq_str("mary=abc arg= john=2", buf);
-
-	ut_asserteq(22, cmdline_set_arg(buf, size, "mary=abc arg=123 john=2",
-					"arg", "1"));
-	ut_asserteq_str("mary=abc arg=1 john=2", buf);
-
-	ut_asserteq(25, cmdline_set_arg(buf, size, "mary=abc arg=123 john=2",
-					"arg", "1234"));
-	ut_asserteq_str("mary=abc arg=1234 john=2", buf);
+	ut_assertok(check_arg(uts, 16, "mary=abc john=2", buf,
+			      "mary=abc arg=123 john=2", "arg", NULL));
+	ut_assertok(check_arg(uts, 20, "mary=abc arg john=2", buf,
+			      "mary=abc arg=123 john=2", "arg",
+		              BOOTFLOWCL_EMPTY));
+	ut_assertok(check_arg(uts, 21, "mary=abc arg= john=2", buf,
+			      "mary=abc arg=123 john=2", "arg", ""));
+	ut_assertok(check_arg(uts, 22, "mary=abc arg=1 john=2", buf,
+			      "mary=abc arg=123 john=2", "arg", "1"));
+	ut_assertok(check_arg(uts, 25, "mary=abc arg=1234 john=2", buf,
+			      "mary=abc arg=123 john=2", "arg", "1234"));
 
 	/* handle existing args with quotes */
-	ut_asserteq(16, cmdline_set_arg(buf, size, "mary=\"abc\" arg=123 john",
-					"arg", NULL));
-	ut_asserteq_str("mary=\"abc\" john", buf);
+	ut_assertok(check_arg(uts, 16, "mary=\"abc\" john", buf,
+			      "mary=\"abc\" arg=123 john", "arg", NULL));
 
 	/* handle existing args with quoted spaces */
-	ut_asserteq(20, cmdline_set_arg(buf, size,
-					"mary=\"abc def\" arg=123 john",
-					"arg", NULL));
-	ut_asserteq_str("mary=\"abc def\" john", buf);
+	ut_assertok(check_arg(uts, 20, "mary=\"abc def\" john", buf,
+			      "mary=\"abc def\" arg=123 john", "arg", NULL));
 
-	ut_asserteq(34, cmdline_set_arg(buf, size,
-					"mary=\"abc def\" arg=123 john",
-					"def", "4"));
-	ut_asserteq_str("mary=\"abc def\" arg=123 john def=4", buf);
+	ut_assertok(check_arg(uts, 34, "mary=\"abc def\" arg=123 john def=4",
+			      buf, "mary=\"abc def\" arg=123 john", "def",
+			      "4"));
 
 	/* handle updating a quoted arg, but quotes are missing in arg */
 	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
@@ -823,30 +806,28 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 					"arg", "\"4 \"5 6\""));
 
 	/* handle updating a quoted arg */
-	ut_asserteq(27, cmdline_set_arg(buf, size,
-					"mary=\"abc def\" arg=\"123 456\"",
-					"arg", "\"4 5 6\""));
-	ut_asserteq_str("mary=\"abc def\" arg=\"4 5 6\"", buf);
+	ut_assertok(check_arg(uts, 27, "mary=\"abc def\" arg=\"4 5 6\"", buf,
+			      "mary=\"abc def\" arg=\"123 456\"", "arg",
+			      "\"4 5 6\""));
 
 	/* changing a quoted arg to a non-quoted arg */
-	ut_asserteq(23, cmdline_set_arg(buf, size,
-					"mary=\"abc def\" arg=\"123 456\"",
-					"arg", "789"));
-	ut_asserteq_str("mary=\"abc def\" arg=789", buf);
+	ut_assertok(check_arg(uts, 23, "mary=\"abc def\" arg=789", buf,
+			      "mary=\"abc def\" arg=\"123 456\"", "arg",
+			      "789"));
 
 	/* changing a non-quoted arg to a quoted arg */
-	ut_asserteq(29, cmdline_set_arg(buf, size,
-					"mary=\"abc def\" arg=123",
-					"arg", "\"456 789\""));
-	ut_asserteq_str("mary=\"abc def\" arg=\"456 789\"", buf);
+	ut_assertok(check_arg(uts, 29, "mary=\"abc def\" arg=\"456 789\"", buf,
+			      "mary=\"abc def\" arg=123", "arg","\"456 789\""));
 
 	/* handling of spaces */
-	ut_asserteq(8, cmdline_set_arg(buf, size, " ", "arg", "123"));
-	ut_asserteq_str("arg=123", buf);
-	ut_asserteq(8, cmdline_set_arg(buf, size, "   ", "arg", "123"));
-	ut_asserteq_str("arg=123", buf);
-	ut_asserteq(13, cmdline_set_arg(buf, size, " john  ", "arg", "123"));
-	ut_asserteq_str("john arg=123", buf);
+	ut_assertok(check_arg(uts, 8, "arg=123", buf, " ", "arg", "123"));
+	ut_assertok(check_arg(uts, 8, "arg=123", buf, "   ", "arg", "123"));
+	ut_assertok(check_arg(uts, 13, "john arg=123", buf, " john  ", "arg",
+			      "123"));
+	printf("\n");
+	ut_assertok(check_arg(uts, 13, "john arg=123", buf, " john  arg=123  ",
+			      "arg", "123"));
+
 	ut_asserteq(13, cmdline_set_arg(buf, size, " john  arg=123  ",
 					"arg", "123"));
 	ut_asserteq_str("john arg=123", buf);
