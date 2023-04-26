@@ -675,6 +675,7 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 		if (!strncmp(from, set_arg, set_arg_len)) {
 			if (!new_val) {
 				/* delete this arg */
+				from = val_end + (*val_end == ' ');
 				continue;
 			}
 
