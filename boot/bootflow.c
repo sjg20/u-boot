@@ -692,7 +692,8 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 			}
 		}
 		printf("from %s arg_end %ld val %ld val_end %ld\n", from,
-		       arg_end - from, val - from, val_end - from);
+		       (long)(arg_end - from), (long)(val - from),
+		       (long)(val_end - from));
 
 		if (to != buf) {
 			if (to >= end)
