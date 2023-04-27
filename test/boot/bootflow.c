@@ -867,22 +867,34 @@ static int bootflow_cmdline_get(struct unit_test_state *uts)
 {
 	int pos;
 
+	/* empty string */
 	ut_asserteq(-ENOENT, cmdline_get_arg("", "fred", &pos));
+
+	/* arg with empty value */
+	ut_asserteq(0, cmdline_get_arg("fred= mary", "fred", &pos));
+	ut_asserteq(5, pos);
+
+	/* arg with a value */
 	ut_asserteq(2, cmdline_get_arg("fred=23", "fred", &pos));
 	ut_asserteq(5, pos);
 
-	ut_asserteq(-ENOENT, cmdline_get_arg("", "fred", &pos));
+	/* arg with a value */
 	ut_asserteq(3, cmdline_get_arg("mary=1 fred=234", "fred", &pos));
 	ut_asserteq(12, pos);
 
-	ut_asserteq(-ENOENT, cmdline_get_arg("", "fred", &pos));
+	/* arg with a value, after quoted arg */
 	ut_asserteq(3, cmdline_get_arg("mary=\"1 2\" fred=234", "fred", &pos));
 	ut_asserteq(16, pos);
 
-	ut_asserteq(-ENOENT, cmdline_get_arg("", "fred", &pos));
+	/* arg in the middle */
 	ut_asserteq(0, cmdline_get_arg("mary=\"1 2\" fred john=23", "fred",
 				       &pos));
 	ut_asserteq(15, pos);
+
+	/* quoted arg */
+	ut_asserteq(5, cmdline_get_arg("mary=\"1 2\" fred=\"3 4\" john=23",
+				       "fred", &pos));
+	ut_asserteq(16, pos);
 
 	return 0;
 }

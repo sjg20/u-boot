@@ -469,9 +469,11 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 		ret = bootflow_cmdline_set_arg(bflow, arg, val);
 		break;
 	case 'g':	/* get */
-// 		ret = bootflow_cmdline_get_arg(bflow, arg, &val, &len);
-// 		if (!ret)
-// 			printf("%.*s\n", len, val);
+		ret = bootflow_cmdline_get_arg(bflow, arg, &val);
+		if (ret)
+			printf("Cannot read arg (err %dE)\n", ret);
+		else
+			printf("%.*s\n", ret, val);
 		break;
 	case 'a':	/* auto */
 // 		ret = bootflow_cmdline_auto(bflow, arg);

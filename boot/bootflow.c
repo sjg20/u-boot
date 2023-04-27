@@ -813,12 +813,17 @@ int cmdline_get_arg(const char *cmdline, const char *arg, int *posp)
 
 	return ret;
 }
-/*
-int bootflow_cmdline_get_arg(struct bootflow *bflow, const char *arg,
-			     char *const *val, int *lenp)
-{
-	ret = cmdline_set_arg(NULL, 0, bflow->, const char *from,
-		    const char *set_arg, const char *new_val)
 
+int bootflow_cmdline_get_arg(struct bootflow *bflow, const char *arg,
+			     const char **val)
+{
+	int ret;
+	int pos;
+
+	ret = cmdline_get_arg(bflow->cmdline, arg, &pos);
+	if (ret < 0)
+		return ret;
+	*val = bflow->cmdline + pos;
+
+	return ret;
 }
-*/
