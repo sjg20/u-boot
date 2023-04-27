@@ -788,9 +788,9 @@ static int test_bootflow_cmdline_set(struct unit_test_state *uts)
 			      "4"));
 
 	/* handle updating a quoted arg, but quotes are missing in arg */
-	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
-					"mary=\"abc def\" arg=\"123 456\"",
-					"arg", "4 5 6", NULL));
+	ut_assertok(check_arg(uts, 23, "mary=\"abc def\" arg=\"4 5 6\"",
+			      buf, "mary=\"abc def\" arg=\"123 456\"", "arg",
+			      "4 5 6"));
 
 	/* quote only at the start */
 	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,

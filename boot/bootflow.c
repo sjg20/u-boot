@@ -620,6 +620,7 @@ static int copy_in(char *buf, char *end, const char *arg, int len,
 	if (new_val == BOOTFLOWCL_EMPTY) {
 		/* no value */
 	} else {
+		bool has_space = strchr(new_val, ' ');
 		len = strlen(new_val);
 
 		if (to + 1 + len >= end)
@@ -644,18 +645,8 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
 
 	from = cmdline ?: &empty;
 
-	/* check that a value with spaces has quoting */
+	/* check if the value has spaces so needs quotes */
 	if (new_val && new_val != BOOTFLOWCL_EMPTY) {
-		bool has_space = strchr(new_val, ' ');
-
-		if (has_space) {
-			int len = strlen(new_val);
-
-			if (*new_val != '"' || new_val[len - 1] != '"')
-				return -EBADF;
-			if (strchr(new_val + 1, '"') != &new_val[len - 1])
-				return -EBADF;
-		}
 	}
 
 	set_arg_len = strlen(set_arg);
