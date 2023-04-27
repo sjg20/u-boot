@@ -620,14 +620,19 @@ static int copy_in(char *buf, char *end, const char *arg, int len,
 	if (new_val == BOOTFLOWCL_EMPTY) {
 		/* no value */
 	} else {
-		bool has_space = strchr(new_val, ' ');
+		bool need_quote = strchr(new_val, ' ');
 		len = strlen(new_val);
 
-		if (to + 1 + len >= end)
+		/* need space for value, equals sign and maybe two quotes */
+		if (to + 1 + 2 * need_quote + len >= end)
 			return -E2BIG;
 		*to++ = '=';
+		if (need_quote)
+			*to++ = '"';
 		memcpy(to, new_val, len);
 		to += len;
+		if (need_quote)
+			*to++ = '"';
 	}
 
 	return to - buf;
@@ -645,9 +650,9 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
 
 	from = cmdline ?: &empty;
 
-	/* check if the value has spaces so needs quotes */
-	if (new_val && new_val != BOOTFLOWCL_EMPTY) {
-	}
+	/* check if the value has quotes inside */
+	if (new_val && new_val != BOOTFLOWCL_EMPTY && strchr(new_val, '"'))
+		return -EBADF;
 
 	set_arg_len = strlen(set_arg);
 	for (to = buf, end = buf + maxlen; *from;) {
@@ -711,10 +716,16 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
 		/* if this is the target arg, update it */
 		if (!strncmp(from, set_arg, set_arg_len)) {
 			if (!buf) {
+				bool has_quote = val_end[-1] == '"';
+
+				/*
+				 * exclude any start/end quotes from
+				 * calculations
+				 */
 				if (!val)
 					val = val_end;
-				*posp = val - cmdline;
-				return val_end - val;
+				*posp = val - cmdline + has_quote;
+				return val_end - val - 2 * has_quote;
 			}
 			found_arg = true;
 			if (!new_val) {
