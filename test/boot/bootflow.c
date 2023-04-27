@@ -826,6 +826,13 @@ static int test_bootflow_cmdline_set(struct unit_test_state *uts)
 	ut_assertok(check_arg(uts, 18, "john arg=123 mary", buf,
 			      " john  arg=123 mary ", "arg", "123"));
 
+	/* unchanged arg */
+	ut_assertok(check_arg(uts, 3, "me", buf, "me", "me", BOOTFLOWCL_EMPTY));
+
+	/* arg which starts with the same name */
+	ut_assertok(check_arg(uts, 28, "mary=abc johnathon=2 john=3", buf,
+			      "mary=abc johnathon=2 john=1", "john", "3"));
+
 	return 0;
 }
 BOOTSTD_TEST(test_bootflow_cmdline_set, 0);
@@ -890,6 +897,11 @@ static int bootflow_cmdline_get(struct unit_test_state *uts)
 	ut_asserteq(3, cmdline_get_arg("mary=\"1 2\" fred=\"3 4\" john=23",
 				       "fred", &pos));
 	ut_asserteq(17, pos);
+
+	/* args starting with the same prefix */
+	ut_asserteq(1, cmdline_get_arg("mary=abc johnathon=3 john=1", "john",
+					&pos));
+	ut_asserteq(26, pos);
 
 	return 0;
 }

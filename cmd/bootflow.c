@@ -462,7 +462,7 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	switch (*op) {
 	case 'c':	/* clear */
-		val = "";
+		val = NULL;
 		fallthrough;
 	case 's':	/* set */
 	case 'd':	/* delete */
@@ -470,7 +470,7 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 		break;
 	case 'g':	/* get */
 		ret = bootflow_cmdline_get_arg(bflow, arg, &val);
-		if (ret)
+		if (ret < 0)
 			printf("Cannot read arg (err %dE)\n", ret);
 		else
 			printf("%.*s\n", ret, val);
@@ -479,7 +479,7 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 // 		ret = bootflow_cmdline_auto(bflow, arg);
 		break;
 	}
-	if (ret) {
+	if (ret < 0) {
 		printf("Operation failed\n");
 		return CMD_RET_FAILURE;
 	}

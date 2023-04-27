@@ -686,14 +686,15 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
 				in_quote = true;
 			} else if (!*p || *p == ' ') {
 				val_end = p;
+				if (!arg_end)
+					arg_end = p;
 				break;
 			}
 		}
 		/*
 		 * At this point val_end points to the end of the value, or the
 		 * last char after the arg name, if there is no label.
-		 * arg_end is the char after the arg name, or NULL if there is
-		 * no value
+		 * arg_end is the char after the arg name
 		 * val points to the value, or NULL if there is none
 		 * char after the value.
 		 *
@@ -714,7 +715,7 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
 		}
 
 		/* if this is the target arg, update it */
-		if (!strncmp(from, set_arg, set_arg_len)) {
+		if (!strncmp(from, set_arg, arg_end - from)) {
 			if (!buf) {
 				bool has_quote = val_end[-1] == '"';
 
