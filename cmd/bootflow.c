@@ -476,7 +476,7 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 			printf("%.*s\n", ret, val);
 		break;
 	case 'a':	/* auto */
-// 		ret = bootflow_cmdline_auto(bflow, arg);
+		ret = bootflow_cmdline_auto(bflow, arg);
 		break;
 	}
 	if (ret < 0) {
