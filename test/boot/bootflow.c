@@ -703,19 +703,19 @@ static int check_arg(struct unit_test_state *uts, int expect_ret,
 	/* check for writing outside the reported bounds */
 	buf[expect_ret] = '[';
 	ut_asserteq(expect_ret,
-		    cmdline_set_arg(buf, expect_ret, from, arg, val));
+		    cmdline_set_arg(buf, expect_ret, from, arg, val, NULL));
 	ut_asserteq_str(expect_str, buf);
 	ut_asserteq('[', buf[expect_ret]);
 
 	/* do the test again but with one less byte in the buffer */
 	ut_asserteq(-E2BIG, cmdline_set_arg(buf, expect_ret - 1, from, arg,
-					    val));
+					    val, NULL));
 
 	return 0;
 }
 
 /* Test of bootflow_cmdline_set_arg() */
-static int bootflow_cmdline(struct unit_test_state *uts)
+static int test_bootflow_cmdline_set(struct unit_test_state *uts)
 {
 	char buf[50];
 	const int size = sizeof(buf);
@@ -726,7 +726,8 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	 */
 
 	/* add an arg that doesn't already exist, starting from empty */
-	ut_asserteq(-ENOENT, cmdline_set_arg(buf, size, NULL, "me", NULL));
+	ut_asserteq(-ENOENT, cmdline_set_arg(buf, size, NULL, "me", NULL,
+					     NULL));
 
 	ut_assertok(check_arg(uts, 3, "me", buf, NULL, "me", BOOTFLOWCL_EMPTY));
 	ut_assertok(check_arg(uts, 4, "me=", buf, NULL, "me", ""));
@@ -789,22 +790,22 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	/* handle updating a quoted arg, but quotes are missing in arg */
 	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
 					"mary=\"abc def\" arg=\"123 456\"",
-					"arg", "4 5 6"));
+					"arg", "4 5 6", NULL));
 
 	/* quote only at the start */
 	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
 					"mary=\"abc def\" arg=\"123 456\"",
-					"arg", "\"4 5 6"));
+					"arg", "\"4 5 6", NULL));
 
 	/* quote only at the end */
 	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
 					"mary=\"abc def\" arg=\"123 456\"",
-					"arg", "4 5 6\""));
+					"arg", "4 5 6\"", NULL));
 
 	/* quote in the middle */
 	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
 					"mary=\"abc def\" arg=\"123 456\"",
-					"arg", "\"4 \"5 6\""));
+					"arg", "\"4 \"5 6\"", NULL));
 
 	/* handle updating a quoted arg */
 	ut_assertok(check_arg(uts, 27, "mary=\"abc def\" arg=\"4 5 6\"", buf,
@@ -832,7 +833,7 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 
 	return 0;
 }
-BOOTSTD_TEST(bootflow_cmdline, 0);
+BOOTSTD_TEST(test_bootflow_cmdline_set, 0);
 
 /* Test of bootflow_cmdline_set_arg() */
 static int bootflow_set_arg(struct unit_test_state *uts)
@@ -860,3 +861,29 @@ static int bootflow_set_arg(struct unit_test_state *uts)
 	return 0;
 }
 BOOTSTD_TEST(bootflow_set_arg, 0);
+
+/* Test of bootflow_cmdline_get_arg() */
+static int bootflow_cmdline_get(struct unit_test_state *uts)
+{
+	int pos;
+
+	ut_asserteq(-ENOENT, cmdline_get_arg("", "fred", &pos));
+	ut_asserteq(2, cmdline_get_arg("fred=23", "fred", &pos));
+	ut_asserteq(5, pos);
+
+	ut_asserteq(-ENOENT, cmdline_get_arg("", "fred", &pos));
+	ut_asserteq(3, cmdline_get_arg("mary=1 fred=234", "fred", &pos));
+	ut_asserteq(12, pos);
+
+	ut_asserteq(-ENOENT, cmdline_get_arg("", "fred", &pos));
+	ut_asserteq(3, cmdline_get_arg("mary=\"1 2\" fred=234", "fred", &pos));
+	ut_asserteq(16, pos);
+
+	ut_asserteq(-ENOENT, cmdline_get_arg("", "fred", &pos));
+	ut_asserteq(0, cmdline_get_arg("mary=\"1 2\" fred john=23", "fred",
+				       &pos));
+	ut_asserteq(15, pos);
+
+	return 0;
+}
+BOOTSTD_TEST(bootflow_cmdline_get, 0);

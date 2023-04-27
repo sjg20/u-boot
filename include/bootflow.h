@@ -467,8 +467,8 @@ int bootflow_cmdline_set(const char *value);
  *	@new_val has spaces but does not start and end with quotes (or it has
  *	quotes in the middle of the string), -E2BIG if @maxlen is too small
  */
-int cmdline_set_arg(char *buf, int maxlen, const char *from,
-		    const char *set_arg, const char *new_val);
+int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
+		    const char *set_arg, const char *new_val, int *posp);
 
 /**
  * bootflow_cmdline_set_arg() - Set a single argument for a bootflow
@@ -483,5 +483,7 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
  */
 int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *arg,
 			     const char *val);
+
+int cmdline_get_arg(const char *cmdline, const char *arg, int *lenp);
 
 #endif

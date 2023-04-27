@@ -632,17 +632,17 @@ static int copy_in(char *buf, char *end, const char *arg, int len,
 	return to - buf;
 }
 
-int cmdline_set_arg(char *buf, int maxlen, const char *from,
-		    const char *set_arg, const char *new_val)
+int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
+		    const char *set_arg, const char *new_val, int *posp)
 {
 	bool found_arg = false;
+	const char *from;
 	char *to, *end;
 	int set_arg_len;
 	char empty = '\0';
 	int ret;
 
-	if (!from)
-		from = &empty;
+	from = cmdline ?: &empty;
 
 	/* check that a value with spaces has quoting */
 	if (new_val && new_val != BOOTFLOWCL_EMPTY) {
@@ -693,6 +693,20 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 				break;
 			}
 		}
+		/*
+		 * At this point val_end points to the end of the value, or the
+		 * last char after the arg name, if there is no label.
+		 * arg_end is the char after the arg name, or NULL if there is
+		 * no value
+		 * val points to the value, or NULL if there is none
+		 * char after the value.
+		 *
+		 *        fred=1234
+		 *        ^   ^^   ^
+		 *      from  ||   |
+		 *           / \    \
+		 *    arg_end  val   val_end
+		 */
 		log_debug("from %s arg_end %ld val %ld val_end %ld\n", from,
 			  (long)(arg_end - from), (long)(val - from),
 			  (long)(val_end - from));
@@ -705,6 +719,12 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 
 		/* if this is the target arg, update it */
 		if (!strncmp(from, set_arg, set_arg_len)) {
+			if (!buf) {
+				if (!val)
+					val = val_end;
+				*posp = val - cmdline;
+				return val_end - val;
+			}
 			found_arg = true;
 			if (!new_val) {
 				/* delete this arg */
@@ -721,7 +741,7 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 			to += ret;
 
 		/* if not the target arg, copy it unchanged */
-		} else {
+		} else if (to) {
 			int len;
 
 			len = val_end - from;
@@ -736,7 +756,7 @@ int cmdline_set_arg(char *buf, int maxlen, const char *from,
 	/* If we didn't find the arg, add it */
 	if (!found_arg) {
 		/* trying to delete something that is not there */
-		if (!new_val)
+		if (!new_val || !buf)
 			return -ENOENT;
 		if (to >= end)
 			return -E2BIG;
@@ -771,7 +791,7 @@ int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
 	int ret;
 
 	ret = cmdline_set_arg(buf, sizeof(buf), bflow->cmdline, set_arg,
-			      new_val);
+			      new_val, NULL);
 	if (ret < 0)
 		return ret;
 	if (*buf) {
@@ -784,3 +804,21 @@ int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
 
 	return 0;
 }
+
+int cmdline_get_arg(const char *cmdline, const char *arg, int *posp)
+{
+	int ret;
+
+	ret = cmdline_set_arg(NULL, 1, cmdline, arg, NULL, posp);
+
+	return ret;
+}
+/*
+int bootflow_cmdline_get_arg(struct bootflow *bflow, const char *arg,
+			     char *const *val, int *lenp)
+{
+	ret = cmdline_set_arg(NULL, 0, bflow->, const char *from,
+		    const char *set_arg, const char *new_val)
+
+}
+*/
