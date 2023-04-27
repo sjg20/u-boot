@@ -444,14 +444,6 @@ int bootflow_menu_apply_theme(struct expo *exp, ofnode node);
 int bootflow_menu_run(struct bootstd_priv *std, bool text_mode,
 		      struct bootflow **bflowp);
 
-/**
- * bootflow_cmdline_set() - Set the command line for the current bootflow
- *
- * @value: New command-line string
- * Returns 0 if OK, -ENOENT if no current bootflow, -ENOMEM if out of memory
- */
-int bootflow_cmdline_set(const char *value);
-
 #define BOOTFLOWCL_EMPTY	((void *)1)
 
 /**

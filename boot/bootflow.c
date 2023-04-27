@@ -555,6 +555,28 @@ int bootflow_iter_check_system(const struct bootflow_iter *iter)
 	return -ENOTSUPP;
 }
 
+/**
+ * bootflow_cmdline_set() - Set the command line for a bootflow
+ *
+ * @value: New command-line string
+ * Returns 0 if OK, -ENOENT if no current bootflow, -ENOMEM if out of memory
+ */
+int bootflow_cmdline_set(struct bootflow *bflow, const char *value)
+{
+	char *cmdline = NULL;
+
+	if (value) {
+		cmdline = strdup(value);
+		if (!cmdline)
+			return -ENOMEM;
+	}
+
+	free(bflow->cmdline);
+	bflow->cmdline = cmdline;
+
+	return 0;
+}
+
 #ifdef CONFIG_BOOTSTD_FULL
 /**
  * on_bootargs() - Update the cmdline of a bootflow
@@ -562,17 +584,26 @@ int bootflow_iter_check_system(const struct bootflow_iter *iter)
 static int on_bootargs(const char *name, const char *value, enum env_op op,
 			int flags)
 {
+	struct bootstd_priv *std;
+	struct bootflow *bflow;
 	int ret;
+
+	ret = bootstd_get_priv(&std);
+	if (ret)
+		return 0;
+	bflow = std->cur_bootflow;
+	if (!bflow)
+		return 0;
 
 	switch (op) {
 	case env_op_create:
 	case env_op_overwrite:
-		ret = bootflow_cmdline_set(value);
+		ret = bootflow_cmdline_set(bflow, value);
 		if (ret && ret != ENOENT)
 			return 1;
 		return 0;
 	case env_op_delete:
-		bootflow_cmdline_set(NULL);
+		bootflow_cmdline_set(bflow, NULL);
 		fallthrough;
 	default:
 		return 0;
@@ -580,31 +611,6 @@ static int on_bootargs(const char *name, const char *value, enum env_op op,
 }
 U_BOOT_ENV_CALLBACK(bootargs, on_bootargs);
 #endif
-
-int bootflow_cmdline_set(const char *value)
-{
-	struct bootstd_priv *std;
-	struct bootflow *bflow;
-	char *cmdline;
-	int ret;
-
-	ret = bootstd_get_priv(&std);
-	if (ret)
-		return -ENOENT;
-
-	bflow = std->cur_bootflow;
-	if (!bflow)
-		return -ENOENT;
-
-	cmdline = strdup(value);
-	if (!cmdline)
-		return -ENOMEM;
-
-	free(bflow->cmdline);
-	bflow->cmdline = cmdline;
-
-	return 0;
-}
 
 static int copy_in(char *buf, char *end, const char *arg, int len,
 		   const char *new_val)
@@ -797,6 +803,8 @@ int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
 			      new_val, NULL);
 	if (ret < 0)
 		return ret;
+
+	ret = bootflow_cmdline_set(bflow, buf);
 	if (*buf) {
 		cmd = strdup(buf);
 		if (!cmd)
@@ -804,6 +812,12 @@ int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
 	}
 	free(bflow->cmdline);
 	bflow->cmdline = cmd;
+
+	if (IS_ENABLED(CONFIG_BOOTSTD_FULL)) {
+		ret = env_set("bootargs", bflow->cmdline);
+		if (ret)
+			return ret;
+	}
 
 	return 0;
 }
