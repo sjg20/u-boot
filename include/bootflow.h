@@ -525,4 +525,6 @@ int cmdline_get_arg(const char *cmdline, const char *arg, int *posp);
 int bootflow_cmdline_get_arg(struct bootflow *bflow, const char *arg,
 			     const char **val);
 
+int bootflow_cmdline_auto(struct bootflow *bflow, const char *arg);
+
 #endif

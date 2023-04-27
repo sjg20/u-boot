@@ -861,9 +861,9 @@ int bootflow_cmdline_auto(struct bootflow *bflow, const char *arg)
 		snprintf(buf, sizeof(buf),
 			 "uart8250,mmio32,%#lx,%dn8", info.addr,
 			 info.baudrate);
-	} else if (strcmp("console", arg)) {
+	} else if (!strcmp("console", arg)) {
 		snprintf(buf, sizeof(buf),
-			 "console=ttyS0,%dn8", info.baudrate);
+			 "ttyS0,%dn8", info.baudrate);
 	}
 
 	if (!*buf) {
