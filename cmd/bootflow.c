@@ -476,6 +476,9 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 		else
 			printf("%.*s\n", ret, val);
 		break;
+	case 'a':	/* auto */
+		ret = bootflow_cmdline_auto(bflow, arg);
+		break;
 	}
 	if (ret < 0) {
 		printf("Operation failed\n");
@@ -495,7 +498,7 @@ static char bootflow_help_text[] =
 	"bootflow info [-d]             - show info on current bootflow (-d dump bootflow)\n"
 	"bootflow boot                  - boot current bootflow (or first available if none selected)\n"
 	"bootflow menu [-t]             - show a menu of available bootflows\n"
-	"bootflow cmdline [set|get|clear|delete] <param> [<value>] - update cmdline";
+	"bootflow cmdline [set|get|clear|delete|auto] <param> [<value>] - update cmdline";
 #else
 	"scan - boot first available bootflow\n";
 #endif
