@@ -91,7 +91,12 @@ find ${dest} -name __pycache__ -type f -exec rm {} \;
 find ${dest} -depth -name __pycache__ -exec rmdir 112 \;
 
 # Remove test files
-rm -rf ${dest}/*test*
+for path in ${dest}/*test*; do
+	echo ${path}
+	if ! [[ "${path}" =~ .*test_util.* ]]; then
+		rm -rf ${path}
+	fi
+done
 
 mkdir ${dir}/tests
 cd ${dir}
