@@ -160,6 +160,14 @@ static struct legacy_img_hdr *image_get_kernel(ulong img_addr, int verify)
 
 /**
  * boot_get_kernel - find kernel image
+ * @img_spec_str: string indicating the kernel to get:
+ *   NULL: Use the default load address
+ *   [<addr>]#<conf": Address of FIT (or default load address) and config name
+ *			to use
+ *   [<addr>]:<subimage>: Address of FIT (or default load address) and image
+ *			name to use
+ *   <addr>: Kernel address
+ * @cmd_name: Name of the command which invoked this (e.g. "bootm")
  * @os_data: pointer to a ulong variable, will hold os data start address
  * @os_len: pointer to a ulong variable, will hold os data length
  *
@@ -170,8 +178,9 @@ static struct legacy_img_hdr *image_get_kernel(ulong img_addr, int verify)
  *     pointer to image header if valid image was found, plus kernel start
  *     address and length, otherwise NULL
  */
-static const void *boot_get_kernel(struct cmd_tbl *cmdtp, int flag, int argc,
-				   char *const argv[], struct bootm_headers *images,
+static const void *boot_get_kernel(char *const img_spec_str,
+				   const char *cmd_name,
+				   struct bootm_headers *images,
 				   ulong *os_data, ulong *os_len)
 {
 #if CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)
@@ -189,7 +198,7 @@ static const void *boot_get_kernel(struct cmd_tbl *cmdtp, int flag, int argc,
 	const void *boot_img;
 	const void *vendor_boot_img;
 #endif
-	img_addr = genimg_get_kernel_addr_fit(argc < 1 ? NULL : argv[0],
+	img_addr = genimg_get_kernel_addr_fit(img_spec_str,
 					      &fit_uname_config,
 					      &fit_uname_kernel);
 
@@ -226,8 +235,7 @@ static const void *boot_get_kernel(struct cmd_tbl *cmdtp, int flag, int argc,
 			*os_len = image_get_data_size(hdr);
 			break;
 		default:
-			printf("Wrong Image Type for %s command\n",
-			       cmdtp->name);
+			printf("Wrong Image Type for %s command\n", cmd_name);
 			bootstage_error(BOOTSTAGE_ID_CHECK_IMAGETYPE);
 			return NULL;
 		}
@@ -281,7 +289,7 @@ static const void *boot_get_kernel(struct cmd_tbl *cmdtp, int flag, int argc,
 		break;
 #endif
 	default:
-		printf("Wrong Image Format for %s command\n", cmdtp->name);
+		printf("Wrong Image Format for %s command\n", cmd_name);
 		bootstage_error(BOOTSTAGE_ID_FIT_KERNEL_INFO);
 		return NULL;
 	}
@@ -304,7 +312,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 	int ret;
 
 	/* get kernel image header, start address and length */
-	os_hdr = boot_get_kernel(cmdtp, flag, argc, argv,
+	os_hdr = boot_get_kernel(argc < 1 ? NULL : argv[0], cmdtp->name,
 			&images, &images.os.image_start, &images.os.image_len);
 	if (images.os.image_len == 0) {
 		puts("ERROR: can't get kernel image!\n");
