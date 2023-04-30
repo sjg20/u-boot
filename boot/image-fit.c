@@ -522,7 +522,7 @@ void fit_image_print(const void *fit, int image_noffset, const char *p)
 		} else {
 			void *vdata = (void *)data;
 
-			printf("0x%08lx\n", (ulong)map_to_sysmem(vdata));
+			printf("%08lx\n", (ulong)map_to_sysmem(vdata));
 		}
 	}
 
@@ -554,12 +554,12 @@ void fit_image_print(const void *fit, int image_noffset, const char *p)
 		if (ret)
 			printf("unavailable\n");
 		else
-			printf("0x%08lx\n", load);
+			printf("%08lx\n", load);
 	}
 
 	/* optional load address for FDT */
 	if (type == IH_TYPE_FLATDT && !fit_image_get_load(fit, image_noffset, &load))
-		printf("%s  Load Address: 0x%08lx\n", p, load);
+		printf("%s  Load Address: %08lx\n", p, load);
 
 	if ((type == IH_TYPE_KERNEL) || (type == IH_TYPE_STANDALONE) ||
 	    (type == IH_TYPE_RAMDISK)) {
@@ -568,7 +568,7 @@ void fit_image_print(const void *fit, int image_noffset, const char *p)
 		if (ret)
 			printf("unavailable\n");
 		else
-			printf("0x%08lx\n", entry);
+			printf("%08lx\n", entry);
 	}
 
 	/* Process all hash subnodes of the component image node */
