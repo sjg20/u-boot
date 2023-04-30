@@ -12,6 +12,7 @@
 #include <blk.h>
 #include <bootdev.h>
 #include <bootflow.h>
+#include <bootm.h>
 #include <bootmeth.h>
 #include <dm.h>
 #include <malloc.h>
@@ -121,9 +122,12 @@ static int cros_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	log_debug("Kernel header at %p, version major %x, minor %x\n", kern,
 		  kern->header_version_major, kern->header_version_minor);
 
-	start = *(u32 *)(hdr + KERN_START);
-	size = ALIGN(*(u32 *)(hdr + KERN_SIZE), desc->blksz);
-	log_debug("Reading start %lx size %lx\n", start, size);
+	start = (ulong)kern->bootloader_address;
+	log_debug("Keyblock data_size %x\n", kern->body_signature.data_size);
+	size = kern->body_signature.data_size;
+	log_debug("Reading start %lx size %lx, bootloader addr %lx size %lx\n",
+		  start, size, (ulong)kern->bootloader_address,
+		  (ulong)kern->bootloader_size);
 	bflow->size = size;
 
 	buf = memalign(SZ_1K, size);
@@ -137,21 +141,31 @@ static int cros_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 		return log_msg_ret("inf", ret);
 	base = map_to_sysmem(buf);
 
-	setup = base + start - OFFSET_BASE - SETUP_OFFSET;
 	cmdline = base + start - OFFSET_BASE - CMDLINE_OFFSET;
-	kern_base = base + start - OFFSET_BASE + SZ_16K;
+	kern_base = 0;
+	setup = 0;
+
+	if (kern->header_version_minor >= 1 && kern->vmlinuz_header_size) {
+		log_debug("x86 addr %lx size %x\n",
+			  (ulong)kern->vmlinuz_header_address,
+			  kern->vmlinuz_header_size);
+		setup = base + start - OFFSET_BASE - SETUP_OFFSET;
+		kern_base = base + start - OFFSET_BASE + SZ_16K;
+	}
+
 	log_debug("base %lx setup %lx, cmdline %lx, kern_base %lx\n", base,
 		  setup, cmdline, kern_base);
 
-#ifdef CONFIG_X86
-	const char *version;
+	if (IS_ENABLED(CONFIG_X86)) {
+		const char *version;
 
-	version = zimage_get_kernel_version(map_sysmem(setup, 0),
-					    map_sysmem(kern_base, 0));
-	log_debug("version %s\n", version);
-	if (version)
-		bflow->name = strdup(version);
-#endif
+		version = zimage_get_kernel_version(map_sysmem(setup, 0),
+						    map_sysmem(kern_base, 0));
+		log_debug("version %s\n", version);
+		if (version)
+			bflow->name = strdup(version);
+		bflow->x86_setup = map_sysmem(setup, 0);
+	}
 	if (!bflow->name)
 		bflow->name = strdup("ChromeOS");
 	if (!bflow->name)
@@ -169,7 +183,6 @@ static int cros_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 
 	bflow->state = BOOTFLOWST_READY;
 	bflow->buf = buf;
-	bflow->x86_setup = map_sysmem(setup, 0);
 
 	return 0;
 }
@@ -182,11 +195,11 @@ static int cros_read_file(struct udevice *dev, struct bootflow *bflow,
 
 static int cros_boot(struct udevice *dev, struct bootflow *bflow)
 {
-#ifdef CONFIG_X86
-	zboot_start(map_to_sysmem(bflow->buf), bflow->size, 0, 0,
-		    map_to_sysmem(bflow->x86_setup),
-		    bflow->cmdline);
-#endif
+	if (IS_ENABLED(CONFIG_X86)) {
+		zboot_start(map_to_sysmem(bflow->buf), bflow->size, 0, 0,
+			    map_to_sysmem(bflow->x86_setup),
+			    bflow->cmdline);
+	}
 
 	return log_msg_ret("go", -EFAULT);
 }
