@@ -77,7 +77,7 @@ struct zboot_state {
 	ulong initrd_size;
 	ulong load_address;
 	struct boot_params *base_ptr;
-	char *cmdline;
+	const char *cmdline;
 } state;
 
 enum {
@@ -561,7 +561,7 @@ static int do_zboot_go(struct cmd_tbl *cmdtp, int flag, int argc,
 }
 
 int zboot_start(ulong addr, ulong size, ulong initrd, ulong initrd_size,
-		ulong base, char *cmdline)
+		ulong base, const char *cmdline)
 {
 	int ret;
 

@@ -8,6 +8,7 @@
  */
 
 #include <common.h>
+#include <bootm.h>
 #include <bootstage.h>
 #include <command.h>
 #include <efi.h>

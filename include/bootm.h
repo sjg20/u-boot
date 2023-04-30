@@ -140,7 +140,7 @@ int bootm_process_cmdline_env(int flags);
  * Return: -EFAULT on error (normally it does not return)
  */
 int zboot_start(ulong addr, ulong size, ulong initrd, ulong initrd_size,
-		ulong base, char *cmdline);
+		ulong base, const char *cmdline);
 
 /*
  * zimage_get_kernel_version() - Get the version string from a kernel
@@ -151,5 +151,13 @@ int zboot_start(ulong addr, ulong size, ulong initrd, ulong initrd_size,
  */
 const char *zimage_get_kernel_version(struct boot_params *params,
 				      void *kernel_base);
+
+/**
+ * boom_start() - Boot an image at the given address
+ *
+ * @addr: Image address
+ * @cmdline: Command line to set
+ */
+int boom_start(ulong addr, const char *cmdline);
 
 #endif

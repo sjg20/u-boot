@@ -199,6 +199,8 @@ static int cros_boot(struct udevice *dev, struct bootflow *bflow)
 		zboot_start(map_to_sysmem(bflow->buf), bflow->size, 0, 0,
 			    map_to_sysmem(bflow->x86_setup),
 			    bflow->cmdline);
+	} else {
+		boom_start(map_to_sysmem(bflow->buf), bflow->cmdline);
 	}
 
 	return log_msg_ret("go", -EFAULT);

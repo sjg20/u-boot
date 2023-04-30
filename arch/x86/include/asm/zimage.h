@@ -44,4 +44,32 @@
 struct boot_params *load_zimage(char *image, unsigned long kernel_size,
 				ulong *load_addressp);
 
+/**
+ * setup_zimage() - Set up a loaded zImage or bzImage ready for booting
+ *
+ * @setup_base: Pointer to the boot parameters, typically at address
+ *	DEFAULT_SETUP_BASE
+ * @cmd_line: Place to put the command line, or NULL to use the one in the setup
+ *	block
+ * @initrd_addr: Address of the initial ramdisk, or 0 if none
+ * @initrd_size: Size of the initial ramdisk, or 0 if none
+ * @load_address: Address where the bzImage is moved before booting, either
+ *	BZIMAGE_LOAD_ADDR or ZIMAGE_LOAD_ADDR
+ * @cmdline_force: Address of 'override' command line, or 0 to use the one in
+ *	the *	setup block
+ * Return: 0 (always)
+ */
+int setup_zimage(struct boot_params *setup_base, char *cmd_line, int auto_boot,
+		 ulong initrd_addr, ulong initrd_size, ulong cmdline_force);
+
+/**
+ * zimage_dump() - Dump the metadata of a zimage
+ *
+ * This shows all available information in a zimage that has been loaded.
+ *
+ * @base_ptr: Pointer to the boot parameters, typically at address
+ *	DEFAULT_SETUP_BASE
+ */
+void zimage_dump(struct boot_params *base_ptr);
+
 #endif
