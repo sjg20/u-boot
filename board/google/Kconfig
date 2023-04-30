@@ -19,6 +19,7 @@ config TARGET_CHROMEBOOK_CORAL
 	bool "Chromebook coral"
 	select BIOSEMU
 	select EVENT
+	imply CHROMEOS
 	help
 	  This is a range of Intel-based laptops released in 2018. They use an
 	  Intel Apollo Lake SoC. The design supports WiFi, 4GB to 16GB of
@@ -34,6 +35,7 @@ config TARGET_CHROMEBOOK_CORAL
 config TARGET_CHROMEBOOK_LINK
 	bool "Chromebook link"
 	select BIOSEMU
+	imply CHROMEOS
 	help
 	  This is the Chromebook Pixel released in 2013. It uses an Intel
 	  i5 Ivybridge which is a die-shrink of Sandybridge, with 4GB of
@@ -47,6 +49,7 @@ config TARGET_CHROMEBOOK_LINK
 config TARGET_CHROMEBOOK_LINK64
 	bool "Chromebook link 64-bit"
 	select BIOSEMU
+	imply CHROMEOS
 	help
 	  This is the Chromebook Pixel released in 2013. With this config
 	  U-Boot is built as a 64-bit binary. This allows testing while this
@@ -55,6 +58,7 @@ config TARGET_CHROMEBOOK_LINK64
 config TARGET_CHROMEBOX_PANTHER
 	bool "Chromebox panther (not available)"
 	select BIOSEMU
+	imply CHROMEOS
 	help
 	  Note: At present this must be used with coreboot. See README.x86
 	  for instructions.
@@ -68,6 +72,7 @@ config TARGET_CHROMEBOX_PANTHER
 
 config TARGET_CHROMEBOOK_SAMUS
 	bool "Chromebook samus"
+	imply CHROMEOS
 	help
 	  This is the Chromebook Pixel released in 2015. It uses an Intel
 	  Broadwell U Core i5 or Core i7 CPU with either 8GB or 16GB of
@@ -80,6 +85,7 @@ config TARGET_CHROMEBOOK_SAMUS
 
 config TARGET_CHROMEBOOK_SAMUS_TPL
 	bool "Chromebook samus booting from TPL"
+	imply CHROMEOS
 	help
 	  This is a version of Samus which boots into TPL, then to SPL and
 	  U-Boot proper. This is useful where verified boot must select
