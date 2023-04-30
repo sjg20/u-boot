@@ -64,6 +64,7 @@ static int booti_start(struct cmd_tbl *cmdtp, int flag, int argc,
 		debug("kernel image compression type %d size = 0x%08lx address = 0x%08lx\n",
 			ctype, comp_len, (ulong)dest);
 		decomp_len = comp_len * 10;
+		printf("booti decomp\n");
 		ret = image_decomp(ctype, 0, ld, IH_TYPE_KERNEL,
 				 (void *)dest, (void *)ld, comp_len,
 				 decomp_len, &dest_end);

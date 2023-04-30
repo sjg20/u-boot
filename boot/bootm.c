@@ -201,6 +201,7 @@ static const void *boot_get_kernel(char *const img_spec_str,
 	img_addr = genimg_get_kernel_addr_fit(img_spec_str,
 					      &fit_uname_config,
 					      &fit_uname_kernel);
+	printf("img_addr=%lx\n", img_addr);
 
 	if (IS_ENABLED(CONFIG_CMD_BOOTM_PRE_LOAD))
 		img_addr += image_load_offset;
@@ -439,7 +440,8 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (images.os.type == IH_TYPE_KERNEL_NOLOAD) {
 	printf("at %d\n", __LINE__);
 		if (IS_ENABLED(CONFIG_CMD_BOOTI) &&
-		    images.os.arch == IH_ARCH_ARM64) {
+		    images.os.arch == IH_ARCH_ARM64 &&
+		    images.os.comp == IH_COMP_NONE) {
 			ulong image_addr;
 			ulong image_size;
 
@@ -596,17 +598,11 @@ static int handle_decomp_error(int comp_type, size_t uncomp_size,
 	else
 		printf("%s: uncompress error %d\n", name, ret);
 
-	/*
-	 * The decompression routines are now safe, so will not write beyond
-	 * their bounds. Probably it is not necessary to reset, but maintain
-	 * the current behaviour for now.
-	 */
-	printf("Must RESET board to recover\n");
 #ifndef USE_HOSTCC
 	bootstage_error(BOOTSTAGE_ID_DECOMP_IMAGE);
 #endif
 
-	return BOOTM_ERR_RESET;
+	return BOOTM_ERR_DECOMP;
 }
 #endif
 
@@ -627,6 +623,7 @@ static int bootm_load_os(struct bootm_headers *images, int boot_progress)
 
 	load_buf = map_sysmem(load, 0);
 	image_buf = map_sysmem(os.image_start, image_len);
+	printf("load=%lx\n", load);
 	err = image_decomp(os.comp, load, os.image_start, os.type,
 			   load_buf, image_buf, image_len,
 			   CONFIG_SYS_BOOTM_LEN, &load_end);
@@ -1051,7 +1048,7 @@ void __weak switch_to_non_secure_mode(void)
 int bootm_boot_start(ulong addr, const char *cmdline)
 {
 	char addr_str[20];
-	char *argv[] = {"bootm", addr_str, NULL};
+	char *argv[] = {addr_str, NULL};
 	int states;
 	int ret;
 
@@ -1116,6 +1113,11 @@ static int bootm_host_load_image(const void *fit, int req_image_type,
 	/* Allow the image to expand by a factor of 4, should be safe */
 	buf_size = (1 << 20) + len * 4;
 	load_buf = malloc(buf_size);
+	if (!load_buf) {
+		printf("Failed to allocate memory (%lx)\n", buf_size);
+		return -ENOMEM;
+	}
+
 	ret = image_decomp(image_comp, 0, data, image_type, load_buf,
 			   (void *)data, len, buf_size, &load_end);
 	free(load_buf);

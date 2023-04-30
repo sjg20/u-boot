@@ -470,15 +470,6 @@ config SYS_NONCACHED_MEMORY
 	  Size of non-cached memory area. This area of memory will be typically
 	  located right below the malloc() area and mapped uncached in the MMU.
 
-config CHROMEOS
-	bool "Device runs ChromeOS"
-	imply BOOTMETH_CROS
-	imply BOOTSTD_FULL
-	help
-	  Select this if the device runs ChromeOS. This enables various features
-	  to allow it to boot into ChromeOS. Note that this does not include
-	  full support for verified boot.
-
 source "arch/arc/Kconfig"
 source "arch/arm/Kconfig"
 source "arch/m68k/Kconfig"

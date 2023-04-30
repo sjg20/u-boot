@@ -502,6 +502,8 @@ int image_decomp(int comp, ulong load, ulong image_start, int type,
 		if (!tools_build() && CONFIG_IS_ENABLED(LZ4)) {
 			size_t size = unc_len;
 
+			printf("lz4 %p %lx %p %zx\n", image_buf, image_len,
+			       load_buf, size);
 			ret = ulz4fn(image_buf, image_len, load_buf, &size);
 			image_len = size;
 		}

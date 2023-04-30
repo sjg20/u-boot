@@ -17,6 +17,9 @@ static int do_unlz4(struct cmd_tbl *cmdtp, int flag, int argc,
 	int ret;
 
 	switch (argc) {
+	case 5:
+		src_len = hextoul(argv[4], NULL);
+		fallthrough;
 	case 4:
 		src = hextoul(argv[1], NULL);
 		dst = hextoul(argv[2], NULL);
@@ -38,7 +41,7 @@ static int do_unlz4(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
-U_BOOT_CMD(unlz4, 4, 1, do_unlz4,
+U_BOOT_CMD(unlz4, 5, 1, do_unlz4,
 	   "lz4 uncompress a memory region",
 	   "srcaddr dstaddr dstsize\n"
 	   "NOTE: Specify the destination size that is sufficiently larger\n"

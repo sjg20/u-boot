@@ -2270,6 +2270,11 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 		ulong max_decomp_len = len * 20;
 		if (load == data) {
 			loadbuf = malloc(max_decomp_len);
+			if (!loadbuf) {
+				printf("Failed to allocate memory (%lx)\n",
+				       max_decomp_len);
+				return -ENOMEM;
+			}
 			load = map_to_sysmem(loadbuf);
 		} else {
 			loadbuf = map_sysmem(load, max_decomp_len);

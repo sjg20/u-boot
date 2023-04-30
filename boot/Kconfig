@@ -781,6 +781,9 @@ config ARCH_FIXUP_FDT_MEMORY
 
 config CHROMEOS
 	bool "Support booting Chrome OS"
+	imply BOOTMETH_CROS
+	imply BOOTSTD_FULL
+	imply FIT
 	help
 	  Chrome OS requires U-Boot to set up a table indicating the boot mode
 	  (e.g. Developer mode) and a few other things. Enable this if you are
