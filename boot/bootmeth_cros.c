@@ -21,6 +21,7 @@
 #include <asm/zimage.h>
 #endif
 #include <linux/sizes.h>
+#include "bootmeth_cros.h"
 
 enum {
 	/* Offsets in the kernel-partition header */
@@ -31,6 +32,7 @@ enum {
 	CMDLINE_OFFSET	= 0x2000,	/* bytes before base */
 	OFFSET_BASE	= 0x100000,	/* assumed kernel load-address */
 };
+
 
 static int cros_check(struct udevice *dev, struct bootflow_iter *iter)
 {
@@ -81,9 +83,11 @@ static int cros_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 {
 	struct blk_desc *desc = dev_get_uclass_plat(bflow->blk);
 	ulong base, start, size, setup, cmdline, num_blks, kern_base;
+	const struct vb2_kernel_preamble *kern;
+	struct vb2_keyblock *hdr;
 	struct disk_partition info;
 	const char *uuid = NULL;
-	void *buf, *hdr;
+	void *buf;
 	int ret;
 
 	log_debug("starting, part=%d\n", bflow->part);
@@ -108,10 +112,15 @@ static int cros_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	if (ret != num_blks)
 		return log_msg_ret("inf", ret);
 
-	if (memcmp("CHROMEOS", hdr, 8))
+	if (memcmp(VB2_KEYBLOCK_MAGIC, hdr->magic, VB2_KEYBLOCK_MAGIC_SIZE))
 		return -ENOENT;
 
-	log_info("Header at %lx\n", (ulong)map_to_sysmem(hdr));
+	log_info("Header at %lx size %x\n", (ulong)map_to_sysmem(hdr),
+		 hdr->keyblock_size);
+	kern = (struct vb2_kernel_preamble *)((void *)hdr + hdr->keyblock_size);
+	log_debug("Kernel header at %p, version major %x, minor %x\n", kern,
+		  kern->header_version_major, kern->header_version_minor);
+
 	start = *(u32 *)(hdr + KERN_START);
 	size = ALIGN(*(u32 *)(hdr + KERN_SIZE), desc->blksz);
 	log_debug("Reading start %lx size %lx\n", start, size);
