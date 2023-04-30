@@ -153,11 +153,11 @@ const char *zimage_get_kernel_version(struct boot_params *params,
 				      void *kernel_base);
 
 /**
- * boom_start() - Boot an image at the given address
+ * bootm_boot_start() - Boot an image at the given address
  *
  * @addr: Image address
  * @cmdline: Command line to set
  */
-int boom_start(ulong addr, const char *cmdline);
+int bootm_boot_start(ulong addr, const char *cmdline);
 
 #endif

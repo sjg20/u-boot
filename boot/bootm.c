@@ -311,6 +311,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 	bool ep_found = false;
 	int ret;
 
+	printf("at %d\n", __LINE__);
 	/* get kernel image header, start address and length */
 	os_hdr = boot_get_kernel(argc < 1 ? NULL : argv[0],
 				 cmdtp ? cmdtp->name : "bootm",
@@ -320,6 +321,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 		puts("ERROR: can't get kernel image!\n");
 		return 1;
 	}
+	printf("at %d\n", __LINE__);
 
 	/* get image parameters */
 	switch (genimg_get_format(os_hdr)) {
@@ -336,6 +338,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 #endif
 #if CONFIG_IS_ENABLED(FIT)
 	case IMAGE_FORMAT_FIT:
+	printf("at %d\n", __LINE__);
 		if (fit_image_get_type(images.fit_hdr_os,
 				       images.fit_noffset_os,
 				       &images.os.type)) {
@@ -401,6 +404,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 		puts("ERROR: unknown image format type!\n");
 		return 1;
 	}
+	printf("at %d\n", __LINE__);
 
 	/* If we have a valid setup.bin, we will use that for entry (x86) */
 	if (images.os.arch == IH_ARCH_I386 ||
@@ -430,13 +434,16 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 		puts("Could not find kernel entry point!\n");
 		return 1;
 	}
+	printf("at %d\n", __LINE__);
 
 	if (images.os.type == IH_TYPE_KERNEL_NOLOAD) {
+	printf("at %d\n", __LINE__);
 		if (IS_ENABLED(CONFIG_CMD_BOOTI) &&
 		    images.os.arch == IH_ARCH_ARM64) {
 			ulong image_addr;
 			ulong image_size;
 
+	printf("at %d\n", __LINE__);
 			ret = booti_setup(images.os.image_start, &image_addr,
 					  &image_size, true);
 			if (ret != 0)
@@ -452,6 +459,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 
 	images.os.start = map_to_sysmem(os_hdr);
+	printf("at %d\n", __LINE__);
 
 	return 0;
 }
@@ -898,24 +906,30 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 	ulong iflag = 0;
 	int ret = 0, need_boot_fn;
 
+	printf("start\n");
 	images->state |= states;
 
 	/*
 	 * Work through the states and see how far we get. We stop on
 	 * any error.
 	 */
+	printf("at %d\n", __LINE__);
 	if (states & BOOTM_STATE_START)
 		ret = bootm_start(cmdtp, flag, argc, argv);
 
+	printf("at %d\n", __LINE__);
 	if (!ret && (states & BOOTM_STATE_PRE_LOAD))
 		ret = bootm_pre_load(cmdtp, flag, argc, argv);
 
+	printf("at %d\n", __LINE__);
 	if (!ret && (states & BOOTM_STATE_FINDOS))
 		ret = bootm_find_os(cmdtp, flag, argc, argv);
 
+	printf("at %d\n", __LINE__);
 	if (!ret && (states & BOOTM_STATE_FINDOTHER))
 		ret = bootm_find_other(cmdtp, flag, argc, argv);
 
+	printf("at %d\n", __LINE__);
 	/* Load the OS */
 	if (!ret && (states & BOOTM_STATE_LOADOS)) {
 		iflag = bootm_disable_interrupts();
@@ -925,6 +939,7 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 		else if (ret == BOOTM_ERR_OVERLAP)
 			ret = 0;
 	}
+	printf("at %d\n", __LINE__);
 
 	/* Relocate the ramdisk */
 #ifdef CONFIG_SYS_BOOT_RAMDISK_HIGH
@@ -939,6 +954,7 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 		}
 	}
 #endif
+	printf("at %d\n", __LINE__);
 #if CONFIG_IS_ENABLED(OF_LIBFDT) && defined(CONFIG_LMB)
 	if (!ret && (states & BOOTM_STATE_FDT)) {
 		boot_fdt_add_mem_rsv_regions(&images->lmb, images->ft_addr);
@@ -946,6 +962,7 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 					&images->ft_len);
 	}
 #endif
+	printf("at %d\n", __LINE__);
 
 	/* From now on, we need the OS boot function */
 	if (ret)
@@ -962,13 +979,16 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 		bootstage_error(BOOTSTAGE_ID_CHECK_BOOT_OS);
 		return 1;
 	}
+	printf("at %d\n", __LINE__);
 
 
 	/* Call various other states that are not generally used */
 	if (!ret && (states & BOOTM_STATE_OS_CMDLINE))
 		ret = boot_fn(BOOTM_STATE_OS_CMDLINE, argc, argv, images);
+	printf("at %d\n", __LINE__);
 	if (!ret && (states & BOOTM_STATE_OS_BD_T))
 		ret = boot_fn(BOOTM_STATE_OS_BD_T, argc, argv, images);
+	printf("at %d\n", __LINE__);
 	if (!ret && (states & BOOTM_STATE_OS_PREP)) {
 		ret = bootm_process_cmdline_env(images->os.os == IH_OS_LINUX);
 		if (ret) {
@@ -978,6 +998,7 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 		}
 		ret = boot_fn(BOOTM_STATE_OS_PREP, argc, argv, images);
 	}
+	printf("at %d\n", __LINE__);
 
 #ifdef CONFIG_TRACE
 	/* Pretend to run the OS, then run a user command */
@@ -990,17 +1011,20 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 			ret = run_command_list(cmd_list, -1, flag);
 	}
 #endif
+	printf("at %d\n", __LINE__);
 
 	/* Check for unsupported subcommand. */
 	if (ret) {
 		printf("subcommand failed (err=%d)\n", ret);
 		return ret;
 	}
+	printf("at %d\n", __LINE__);
 
 	/* Now run the OS! We hope this doesn't return */
 	if (!ret && (states & BOOTM_STATE_OS_GO))
 		ret = boot_selected_os(argc, argv, BOOTM_STATE_OS_GO,
 				images, boot_fn);
+	printf("at %d\n", __LINE__);
 
 	/* Deal with any fallout */
 err:
@@ -1022,6 +1046,38 @@ err:
  */
 void __weak switch_to_non_secure_mode(void)
 {
+}
+
+int bootm_boot_start(ulong addr, const char *cmdline)
+{
+	char addr_str[20];
+	char *argv[] = {"bootm", addr_str, NULL};
+	int states;
+	int ret;
+
+	/*
+	 * TODO(sjg@chromium.org): This uses the command-line interface, but
+	 * should not. To clean this up, the various bootm states need to be
+	 * passed an info structure instead of cmdline flags. Then this can
+	 * set up the required info and move through the states without needing
+	 * the command line.
+	 */
+	states = BOOTM_STATE_START | BOOTM_STATE_FINDOS | BOOTM_STATE_PRE_LOAD |
+		BOOTM_STATE_FINDOTHER | BOOTM_STATE_LOADOS |
+		BOOTM_STATE_OS_PREP | BOOTM_STATE_OS_FAKE_GO |
+		BOOTM_STATE_OS_GO;
+	if (IS_ENABLED(CONFIG_SYS_BOOT_RAMDISK_HIGH))
+		states |= BOOTM_STATE_RAMDISK;
+	if (IS_ENABLED(CONFIG_PPC) || IS_ENABLED(CONFIG_MIPS))
+		states |= BOOTM_STATE_OS_CMDLINE;
+	images.state |= states;
+
+	strcpy(addr_str, simple_xtoa(addr));
+
+	ret = do_bootm_states(NULL, 0, ARRAY_SIZE(argv) - 1, argv, states,
+			      &images, 1);
+
+	return ret;
 }
 
 #else /* USE_HOSTCC */
