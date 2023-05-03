@@ -10,6 +10,7 @@
  *
  * Copyright (C) 2001  Erik Mouw (J.A.K.Mouw@its.tudelft.nl)
  */
+#define LOG_DEBUG
 
 #include <common.h>
 #include <bootstage.h>

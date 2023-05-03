@@ -2,6 +2,7 @@
 /*
  * Copyright (C) 2013-2014 Synopsys, Inc. All rights reserved.
  */
+#define LOG_DEBUG
 
 #include <common.h>
 #include <bootstage.h>

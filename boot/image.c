@@ -446,6 +446,7 @@ int image_decomp(int comp, ulong load, ulong image_start, int type,
 	int ret = -ENOSYS;
 
 	*load_end = load;
+	printf("decomp load=%lx, start=%lx\n", load, image_start);
 	print_decomp_msg(comp, type, load == image_start);
 
 	/*
@@ -462,6 +463,8 @@ int image_decomp(int comp, ulong load, ulong image_start, int type,
 			memmove_wd(load_buf, image_buf, image_len, CHUNKSZ);
 		else
 			ret = -ENOSPC;
+		printf("copied to %p from %p len %lx\n", load_buf, image_buf,
+		       image_len);
 		break;
 	case IH_COMP_GZIP:
 		if (!tools_build() && CONFIG_IS_ENABLED(GZIP))

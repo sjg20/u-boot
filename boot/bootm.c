@@ -5,6 +5,8 @@
  */
 
 #ifndef USE_HOSTCC
+#define LOG_DEBUG
+
 #include <common.h>
 #include <bootstage.h>
 #include <cli.h>
@@ -313,6 +315,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 	int ret;
 
 	printf("at %d\n", __LINE__);
+
 	/* get kernel image header, start address and length */
 	os_hdr = boot_get_kernel(argc < 1 ? NULL : argv[0],
 				 cmdtp ? cmdtp->name : "bootm",
@@ -372,12 +375,14 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		images.os.end = fit_get_end(images.fit_hdr_os);
 
+		printf("get load address, now %lx\n", images.os.load);
 		if (fit_image_get_load(images.fit_hdr_os, images.fit_noffset_os,
 				       &images.os.load)) {
 			puts("Can't get image load address!\n");
 			bootstage_error(BOOTSTAGE_ID_FIT_LOADADDR);
 			return 1;
 		}
+		printf("   - done, load address now %lx\n", images.os.load);
 		break;
 #endif
 #ifdef CONFIG_ANDROID_BOOT_IMAGE
@@ -407,6 +412,9 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 	printf("at %d\n", __LINE__);
 
+	images.os.load = 0x2000000;
+	printf("set load address to %lx\n", images.os.load);
+
 	/* If we have a valid setup.bin, we will use that for entry (x86) */
 	if (images.os.arch == IH_ARCH_I386 ||
 	    images.os.arch == IH_ARCH_X86_64) {
@@ -426,6 +434,8 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		ret = fit_image_get_entry(images.fit_hdr_os,
 					  images.fit_noffset_os, &images.ep);
+		printf("at %d\n", __LINE__);
+		printf("ret = %d, entry = %lx\n", ret, images.ep);
 		if (ret) {
 			puts("Can't get entry point property!\n");
 			return 1;
@@ -435,9 +445,17 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 		puts("Could not find kernel entry point!\n");
 		return 1;
 	}
+	printf("os.load=%lx, image_start=%lx\n", images.os.load,
+	       images.os.image_start);
 	printf("at %d\n", __LINE__);
+	printf("images.fit_uname_os = %s\n", images.fit_uname_os);
+	images.os.load = 0x2000000;
+	images.ep = 0x2000000;
+	printf("os.load=%lx, image_start=%lx\n", images.os.load,
+	       images.os.image_start);
 
-	if (images.os.type == IH_TYPE_KERNEL_NOLOAD) {
+	if (images.os.type == IH_TYPE_KERNEL_NOLOAD &&
+	    !IS_ENABLED(CONFIG_CHROMEOS)) {
 	printf("at %d\n", __LINE__);
 		if (IS_ENABLED(CONFIG_CMD_BOOTI) &&
 		    images.os.arch == IH_ARCH_ARM64 &&
@@ -445,7 +463,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 			ulong image_addr;
 			ulong image_size;
 
-	printf("at %d\n", __LINE__);
+			printf("at %d\n", __LINE__);
 			ret = booti_setup(images.os.image_start, &image_addr,
 					  &image_size, true);
 			if (ret != 0)
@@ -462,6 +480,8 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	images.os.start = map_to_sysmem(os_hdr);
 	printf("at %d\n", __LINE__);
+	printf("os.load=%lx, image_start=%lx\n", images.os.load,
+	       images.os.image_start);
 
 	return 0;
 }
@@ -623,7 +643,7 @@ static int bootm_load_os(struct bootm_headers *images, int boot_progress)
 
 	load_buf = map_sysmem(load, 0);
 	image_buf = map_sysmem(os.image_start, image_len);
-	printf("load=%lx\n", load);
+	printf("load=%lx, image_size=%lx\n", load, os.image_start);
 	err = image_decomp(os.comp, load, os.image_start, os.type,
 			   load_buf, image_buf, image_len,
 			   CONFIG_SYS_BOOTM_LEN, &load_end);
@@ -911,22 +931,32 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 	 * any error.
 	 */
 	printf("at %d\n", __LINE__);
+	printf("os.load=%lx, image_start=%lx\n", images->os.load,
+	       images->os.image_start);
 	if (states & BOOTM_STATE_START)
 		ret = bootm_start(cmdtp, flag, argc, argv);
 
 	printf("at %d\n", __LINE__);
+	printf("os.load=%lx, image_start=%lx\n", images->os.load,
+	       images->os.image_start);
 	if (!ret && (states & BOOTM_STATE_PRE_LOAD))
 		ret = bootm_pre_load(cmdtp, flag, argc, argv);
 
 	printf("at %d\n", __LINE__);
+	printf("os.load=%lx, image_start=%lx\n", images->os.load,
+	       images->os.image_start);
 	if (!ret && (states & BOOTM_STATE_FINDOS))
 		ret = bootm_find_os(cmdtp, flag, argc, argv);
 
 	printf("at %d\n", __LINE__);
+	printf("os.load=%lx, image_start=%lx\n", images->os.load,
+	       images->os.image_start);
 	if (!ret && (states & BOOTM_STATE_FINDOTHER))
 		ret = bootm_find_other(cmdtp, flag, argc, argv);
 
 	printf("at %d\n", __LINE__);
+	printf("os.load=%lx, image_start=%lx\n", images->os.load,
+	       images->os.image_start);
 	/* Load the OS */
 	if (!ret && (states & BOOTM_STATE_LOADOS)) {
 		iflag = bootm_disable_interrupts();
@@ -1071,6 +1101,12 @@ int bootm_boot_start(ulong addr, const char *cmdline)
 
 	strcpy(addr_str, simple_xtoa(addr));
 
+	ret = env_set("bootargs", cmdline);
+	if (ret) {
+		printf("Failed to set cmdline\n");
+		return ret;
+	}
+	printf("bootargs: %s\n", env_get("bootargs"));
 	ret = do_bootm_states(NULL, 0, ARRAY_SIZE(argv) - 1, argv, states,
 			      &images, 1);
 

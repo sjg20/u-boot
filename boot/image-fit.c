@@ -548,7 +548,7 @@ void fit_image_print(const void *fit, int image_noffset, const char *p)
 
 	if ((type == IH_TYPE_KERNEL) || (type == IH_TYPE_STANDALONE) ||
 	    (type == IH_TYPE_FIRMWARE) || (type == IH_TYPE_RAMDISK) ||
-	    (type == IH_TYPE_FPGA)) {
+	    (type == IH_TYPE_FPGA) || IS_ENABLED(CONFIG_CHROMEOS)) {
 		ret = fit_image_get_load(fit, image_noffset, &load);
 		printf("%s  Load Address: ", p);
 		if (ret)
@@ -562,7 +562,7 @@ void fit_image_print(const void *fit, int image_noffset, const char *p)
 		printf("%s  Load Address: %08lx\n", p, load);
 
 	if ((type == IH_TYPE_KERNEL) || (type == IH_TYPE_STANDALONE) ||
-	    (type == IH_TYPE_RAMDISK)) {
+	    (type == IH_TYPE_RAMDISK) || IS_ENABLED(CONFIG_CHROMEOS)) {
 		ret = fit_image_get_entry(fit, image_noffset, &entry);
 		printf("%s  Entry Point:  ", p);
 		if (ret)
