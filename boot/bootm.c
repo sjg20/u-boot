@@ -11,6 +11,7 @@
 #include <bootstage.h>
 #include <cli.h>
 #include <cpu_func.h>
+#include <display_options.h>
 #include <env.h>
 #include <errno.h>
 #include <fdt_support.h>
@@ -412,8 +413,8 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 	printf("at %d\n", __LINE__);
 
-	images.os.load = 0x2000000;
-	printf("set load address to %lx\n", images.os.load);
+// 	images.os.load = 0x2000000;
+// 	printf("set load address to %lx\n", images.os.load);
 
 	/* If we have a valid setup.bin, we will use that for entry (x86) */
 	if (images.os.arch == IH_ARCH_I386 ||
@@ -449,8 +450,8 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 	       images.os.image_start);
 	printf("at %d\n", __LINE__);
 	printf("images.fit_uname_os = %s\n", images.fit_uname_os);
-	images.os.load = 0x2000000;
-	images.ep = 0x2000000;
+// 	images.os.load = 0x2000000;
+// 	images.ep = 0x2000000;
 	printf("os.load=%lx, image_start=%lx\n", images.os.load,
 	       images.os.image_start);
 
@@ -636,29 +637,51 @@ static int bootm_load_os(struct bootm_headers *images, int boot_progress)
 	ulong blob_end = os.end;
 	ulong image_start = os.image_start;
 	ulong image_len = os.image_len;
-	ulong flush_start = ALIGN_DOWN(load, ARCH_DMA_MINALIGN);
+	ulong flush_start;
 	bool no_overlap;
 	void *load_buf, *image_buf;
-	int err;
+	ulong relocated_addr;
+	ulong size;
+	int ret;
 
+	load = 0x8000000;
 	load_buf = map_sysmem(load, 0);
 	image_buf = map_sysmem(os.image_start, image_len);
-	printf("load=%lx, image_size=%lx\n", load, os.image_start);
-	err = image_decomp(os.comp, load, os.image_start, os.type,
+	printf("load=%lx, image_start=%lx\n", load, os.image_start);
+	ret = image_decomp(os.comp, load, os.image_start, os.type,
 			   load_buf, image_buf, image_len,
 			   CONFIG_SYS_BOOTM_LEN, &load_end);
-	if (err) {
-		err = handle_decomp_error(os.comp, load_end - load,
-					  CONFIG_SYS_BOOTM_LEN, err);
+	if (ret) {
+		ret = handle_decomp_error(os.comp, load_end - load,
+					  CONFIG_SYS_BOOTM_LEN, ret);
 		bootstage_error(BOOTSTAGE_ID_DECOMP_IMAGE);
-		return err;
+		return ret;
 	}
 	/* We need the decompressed image size in the next steps */
 	images->os.image_len = load_end - load;
 
-	flush_cache(flush_start, ALIGN(load_end, ARCH_DMA_MINALIGN) - flush_start);
+	ret = booti_setup(load, &relocated_addr, &size, true);
+	if (ret)
+		return BOOTM_ERR_INVALID_IMG;
+
+	if (relocated_addr != load) {
+		printf("Moving Image from %lx to %lx, end=%lx\n", load,
+		       relocated_addr, relocated_addr + size);
+		memmove((void *)relocated_addr, (void *)load, size);
+		images->os.type = IH_TYPE_KERNEL;
+		images->os.load = relocated_addr;
+		images->ep = relocated_addr;
+	}
+
+	load = images->os.load;
+	load_end = load + size;
+
+	flush_start = ALIGN_DOWN(load, ARCH_DMA_MINALIGN);
+	flush_cache(flush_start,
+		    ALIGN(load_end, ARCH_DMA_MINALIGN) - flush_start);
 
 	debug("   kernel loaded at 0x%08lx, end = 0x%08lx\n", load, load_end);
+	print_buffer(load, (void *)load, 1, 0x40, 0);
 	bootstage_mark(BOOTSTAGE_ID_KERNEL_LOADED);
 
 	no_overlap = (os.comp == IH_COMP_NONE && load == image_start);

@@ -16,6 +16,7 @@ struct cmd_tbl;
 #define BOOTM_ERR_OVERLAP		(-2)
 #define BOOTM_ERR_UNIMPLEMENTED	(-3)
 #define BOOTM_ERR_DECOMP	(-4)
+#define BOOTM_ERR_INVALID_IMG	(-5)
 
 /*
  *  Continue booting an OS image; caller already has:
