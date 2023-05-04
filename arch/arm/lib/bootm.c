@@ -80,7 +80,9 @@ static void announce_and_cleanup(int fake)
 	/* Remove all active vital devices next */
 	dm_remove_devices_flags(DM_REMOVE_ACTIVE_ALL);
 
+	printf("clean\n");
 	cleanup_before_linux();
+	printf("clean done\n");
 }
 
 static void setup_start_tag (struct bd_info *bd)
@@ -304,6 +306,7 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 	bootstage_mark(BOOTSTAGE_ID_RUN_OS);
 
 	announce_and_cleanup(fake);
+	printf("go\n");
 
 	if (!fake) {
 #ifdef CONFIG_ARMV8_PSCI
@@ -317,16 +320,25 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 		armv8_switch_to_el2((u64)images->ft_addr, 0, 0, 0,
 				    (u64)switch_to_el1, ES_TO_AARCH64);
 #else
+		printf("go\n");
+
+		int node = fdt_subnode_offset((void *)images->ft_addr, 0, "chosen");
+		printf("here: %s\n", fdt_getprop((void *)images->ft_addr, node,
+						 "bootargs", NULL));
+
 		if ((IH_ARCH_DEFAULT == IH_ARCH_ARM64) &&
-		    (images->os.arch == IH_ARCH_ARM))
+		    (images->os.arch == IH_ARCH_ARM)) {
+			printf("option 1\n");
 			armv8_switch_to_el2(0, (u64)gd->bd->bi_arch_number,
 					    (u64)images->ft_addr, 0,
 					    (u64)images->ep,
 					    ES_TO_AARCH32);
-		else
+		} else {
+			printf("option 2\n");
 			armv8_switch_to_el2((u64)images->ft_addr, 0, 0, 0,
 					    images->ep,
 					    ES_TO_AARCH64);
+		}
 #endif
 	}
 #else
@@ -368,7 +380,7 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 							  0, machid, r2);
 		} else
 #endif
-			kernel_entry(0, machid, r2);
+		kernel_entry(0, machid, r2);
 	}
 #endif
 }
