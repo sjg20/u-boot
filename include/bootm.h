@@ -159,7 +159,8 @@ const char *zimage_get_kernel_version(struct boot_params *params,
  *
  * @addr: Image address
  * @cmdline: Command line to set
+ * @cfg: FIT configuration name
  */
-int bootm_boot_start(ulong addr, const char *cmdline);
+int bootm_boot_start(ulong addr, const char *cmdline, const char *cfg);
 
 #endif

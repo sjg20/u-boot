@@ -323,7 +323,7 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 		printf("go\n");
 
 		int node = fdt_subnode_offset((void *)images->ft_addr, 0, "chosen");
-		printf("here: %s\n", fdt_getprop((void *)images->ft_addr, node,
+		printf("here: %s\n", (char *)fdt_getprop((void *)images->ft_addr, node,
 						 "bootargs", NULL));
 
 		if ((IH_ARCH_DEFAULT == IH_ARCH_ARM64) &&
@@ -334,7 +334,7 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 					    (u64)images->ep,
 					    ES_TO_AARCH32);
 		} else {
-			printf("option 2\n");
+			printf("option 2 %lx\n", images->ep);
 			armv8_switch_to_el2((u64)images->ft_addr, 0, 0, 0,
 					    images->ep,
 					    ES_TO_AARCH64);

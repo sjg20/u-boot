@@ -1098,9 +1098,10 @@ void __weak switch_to_non_secure_mode(void)
 {
 }
 
-int bootm_boot_start(ulong addr, const char *cmdline)
+int bootm_boot_start(ulong addr, const char *cmdline, const char *cfg)
 {
-	char addr_str[20];
+	char addr_str[30];
+// 	char cfg_str[20];
 	char *argv[] = {addr_str, NULL};
 	int states;
 	int ret;
@@ -1122,7 +1123,8 @@ int bootm_boot_start(ulong addr, const char *cmdline)
 		states |= BOOTM_STATE_OS_CMDLINE;
 	images.state |= states;
 
-	strcpy(addr_str, simple_xtoa(addr));
+// 	strcpy(addr_str, simple_xtoa(addr));
+	snprintf(addr_str, sizeof(addr_str), "%lx#%s", addr, cfg);
 
 	ret = env_set("bootargs", cmdline);
 	if (ret) {
@@ -1130,6 +1132,7 @@ int bootm_boot_start(ulong addr, const char *cmdline)
 		return ret;
 	}
 	printf("bootargs: %s\n", env_get("bootargs"));
+	printf("bootm %s %s\n", argv[0], argv[1]);
 	ret = do_bootm_states(NULL, 0, ARRAY_SIZE(argv) - 1, argv, states,
 			      &images, 1);
 

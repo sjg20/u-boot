@@ -200,7 +200,8 @@ static int cros_boot(struct udevice *dev, struct bootflow *bflow)
 			    map_to_sysmem(bflow->x86_setup),
 			    bflow->cmdline);
 	} else {
-		bootm_boot_start(map_to_sysmem(bflow->buf), bflow->cmdline);
+		bootm_boot_start(map_to_sysmem(bflow->buf), bflow->cmdline,
+				 "conf@6");
 	}
 
 	return log_msg_ret("go", -EFAULT);
