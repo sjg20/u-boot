@@ -194,7 +194,7 @@ static int distro_efi_read_bootflow_file(struct udevice *dev,
 
 	ret = efiload_read_file(desc, bflow);
 	if (ret)
-		return log_msg_ret("read", -EINVAL);
+		return log_msg_ret("read", ret);
 
 	distro_efi_get_fdt_name(fname, sizeof(fname));
 	bflow->fdt_fname = strdup(fname);
