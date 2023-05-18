@@ -17,6 +17,7 @@ struct build_info {
 	int str_count;
 };
 
+#if 0
 /**
  * lookup_str - Look up a string in the table
  *
@@ -82,28 +83,48 @@ int add_expo_str(void *ldtb, struct expo *exp, const char *find_name)
 
 	return ret;
 }
+#endif
 
 /**
  * add_txt_str - Add a string or lookup its ID, then add to expo
  *
+ * @info: Build information
  * @ldtb: Lookup DTB
+ * @node: Node describing scene
  * @scn: Scene to add to
  * @find_name: Name to look for (e.g. "title"). This will find a property called
  * "title" if it exists, else will look up the string for "title-id"
  * Return: Id of added string, or -ve on error
  */
-int add_txt_str(void *ldtb, struct scene *scn, const char *find_name, uint obj_id)
+int add_txt_str(struct build_info *info, void *ldtb, int node,
+		struct scene *scn, const char *find_name, uint obj_id)
 {
 	const char *text;
 	uint str_id;
 	int ret;
 
-	ret = lookup_str(ldtb, name, &text);
+	text = fdt_getprop(ldtb, node, find_name, NULL);
+	if (!text) {
+		char name[40];
+		int id;
+
+		snprintf(name, sizeof(name), "%s-id", find_name);
+		id = fdtdec_get_int(ldtb, node, name, -1);
+		if (id < 0)
+			return log_msg_ret("id", -ENOENT);
+		if (id >= info->str_count)
+			return log_msg_ret("id", -E2BIG);
+		text = info->str_for_id[id];
+		if (!text)
+			return log_msg_ret("id", -EINVAL);
+	}
+
+	ret = expo_str(scn->expo, find_name, 0, text);
 	if (ret < 0)
-		return log_msg_ret("lu", ret);
+		return log_msg_ret("add", ret);
 	str_id = ret;
 
-	ret = scene_txt_str(scn, name, obj_id, str_id, text, NULL);
+	ret = scene_txt_str(scn, find_name, obj_id, str_id, text, NULL);
 	if (ret < 0)
 		return log_msg_ret("add", ret);
 
@@ -160,6 +181,16 @@ static int read_strings(struct build_info *info, const void *ldtb)
 	return 0;
 }
 
+static void list_strings(struct build_info *info)
+{
+	int i;
+
+	for (i = 0; i < info->str_count; i++) {
+		if (info->str_for_id[i])
+			printf("%3d %s\n", i, info->str_for_id[i]);
+	}
+}
+
 int expo_build(void *ldtb, struct expo **expp)
 {
 	struct build_info info;
@@ -171,6 +202,7 @@ int expo_build(void *ldtb, struct expo **expp)
 	ret = read_strings(&info, ldtb);
 	if (ret)
 		return log_msg_ret("str", ret);
+	list_strings(&info);
 
 	ret = expo_new("name", NULL, &exp);
 	if (ret)
@@ -194,13 +226,13 @@ int expo_build(void *ldtb, struct expo **expp)
 		if (ret < 0)
 			return log_msg_ret("scn", ret);
 
-		ret = add_txt_str(ldtb, scn, "title", 0);
+		ret = add_txt_str(&info, ldtb, node, scn, "title", 0);
 		if (ret < 0)
-			return log_msg_ret("tit", -EINVAL);
+			return log_msg_ret("tit", ret);
 		title_id = ret;
 		scene_title_set(scn, title_id);
 
-		ret = add_txt_str(ldtb, scn, "prompt", 0);
+		ret = add_txt_str(&info, ldtb, node, scn, "prompt", 0);
 		if (ret < 0)
 			return log_msg_ret("pr", ret);
 	}
