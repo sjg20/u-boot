@@ -191,6 +191,36 @@ static void list_strings(struct build_info *info)
 	}
 }
 
+static int scene_build(struct build_info *info, void *ldtb, int node,
+		       struct expo *exp)
+{
+	const char *name;
+	struct scene *scn;
+	uint id, title_id;
+	int ret;
+
+	name = fdt_get_name(ldtb, node, NULL);
+	id = fdtdec_get_int(ldtb, node, "id", 0);
+	if (!id)
+		return log_msg_ret("id", -EINVAL);
+
+	ret = scene_new(exp, name, id, &scn);
+	if (ret < 0)
+		return log_msg_ret("scn", ret);
+
+	ret = add_txt_str(info, ldtb, node, scn, "title", 0);
+	if (ret < 0)
+		return log_msg_ret("tit", ret);
+	title_id = ret;
+	scene_title_set(scn, title_id);
+
+	ret = add_txt_str(info, ldtb, node, scn, "prompt", 0);
+	if (ret < 0)
+		return log_msg_ret("pr", ret);
+
+	return 0;
+}
+
 int expo_build(void *ldtb, struct expo **expp)
 {
 	struct build_info info;
@@ -210,31 +240,12 @@ int expo_build(void *ldtb, struct expo **expp)
 
 	scenes = fdt_subnode_offset(ldtb, 0, "scenes");
 	if (scenes < 0)
-		return log_msg_ret("scn", -EINVAL);
+		return log_msg_ret("sno", -EINVAL);
 
 	fdt_for_each_subnode(node, ldtb, scenes) {
-		const char *name;
-		struct scene *scn;
-		uint id, title_id;
-
-		name = fdt_get_name(ldtb, node, NULL);
-		id = fdtdec_get_int(ldtb, node, "id", 0);
-		if (!id)
-			return log_msg_ret("id", -EINVAL);
-
-		ret = scene_new(exp, name, id, &scn);
+		ret = scene_build(&info, ldtb, node, exp);
 		if (ret < 0)
 			return log_msg_ret("scn", ret);
-
-		ret = add_txt_str(&info, ldtb, node, scn, "title", 0);
-		if (ret < 0)
-			return log_msg_ret("tit", ret);
-		title_id = ret;
-		scene_title_set(scn, title_id);
-
-		ret = add_txt_str(&info, ldtb, node, scn, "prompt", 0);
-		if (ret < 0)
-			return log_msg_ret("pr", ret);
 	}
 #if 0
 	ret = scene_menu(scn, "main", OBJ_MENU, &menu);
