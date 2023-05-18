@@ -301,32 +301,6 @@ int bootmeth_try_file(struct bootflow *bflow, struct blk_desc *desc,
 	return 0;
 }
 
-static int alloc_file(const char *fname, uint size, void **bufp)
-{
-	loff_t bytes_read;
-	ulong addr;
-	char *buf;
-	int ret;
-
-	buf = malloc(size + 1);
-	if (!buf)
-		return log_msg_ret("buf", -ENOMEM);
-	addr = map_to_sysmem(buf);
-
-	ret = fs_read(fname, addr, 0, size, &bytes_read);
-	if (ret) {
-		free(buf);
-		return log_msg_ret("read", ret);
-	}
-	if (size != bytes_read)
-		return log_msg_ret("bread", -EIO);
-	buf[size] = '\0';
-
-	*bufp = buf;
-
-	return 0;
-}
-
 int bootmeth_alloc_file(struct bootflow *bflow, uint size_limit, uint align)
 {
 	void *buf;

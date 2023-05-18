@@ -9,6 +9,7 @@
 
 import argparse
 import collections
+import io
 import re
 import subprocess
 import sys
@@ -69,18 +70,32 @@ def run_expo(args):
     """Run the expo program"""
     ids = calc_ids(args.enum_fname)
 
-    data = tools.read_file(args.layout)
+    indata = tools.read_file(args.layout)
+
+    outf = io.BytesIO()
+    #print('outf', outf)
+
     for name, val in ids.items():
         #print(name, val)
         if isinstance(val, int):
-            val = b'%d' % val
+            outval = b'%d' % val
         else:
-            val = b'"%s"' % val
-        data = data.replace(tools.to_bytes(name), val)
+            outval = b'"%s"' % val
+        find_str = r'\b%s\b' % name
+        indata = re.sub(tools.to_bytes(find_str), outval, indata)
+        #print('%s %s' % (name.encode('utf-8'), outval))
+        #outf.write(b'#define %s %s' % (name.encode('utf-8'), outval))
 
-    #print(data)
+    outf.write(indata)
+    data = outf.getvalue()
+
+    with open('/tmp/asc', 'wb') as outf:
+        outf.write(data)
     proc = subprocess.run('dtc', input=data, capture_output=True)
     edtb = proc.stdout
+    if proc.stderr:
+        print(proc.stderr)
+        sys.exit(1)
     tools.write_file(args.outfile, edtb)
 
     #write_ids(

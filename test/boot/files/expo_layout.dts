@@ -5,43 +5,52 @@
 
 /dts-v1/;
 
+/*
+enum {
+	ID_TITLE,
+	ID_PROMPT,
+
+	ID_SCENE1,
+	ID_SCENE1_TITLE,
+	ID_CPU_SPEED_TITLE,
+	ID_CPU_SPEED_1,
+	ID_CPU_SPEED_2,
+	ID_CPU_SPEED_3,
+};
+*/
+
 / {
+	//title = "Test Configuration";
+	title-id = <ID_TITLE>;
+	prompt = "UP and DOWN to choose, ENTER to select";
+	prompt-id = <ID_PROMPT>;
 	scenes {
 		main {
-			scene-id = <SCENE1>;
-			title = "title";
-			prompt = "prompt";
+			id = <ID_SCENE1>;
+			title = "Title";
+			title-id = <ID_SCENE1_TITLE>;
 
 			cpu-speed {
 				type = "menu";
 				title = "Test menu";
+				title-id = <ID_CPU_SPEED_TITLE>;
 
 				items = "one", "two", "three";
+				item-ids = <ID_CPU_SPEED_1 ID_CPU_SPEED_2
+					ID_CPU_SPEED_3>;
 			};
 		};
 	};
 
 	strings {
-		title {
-			id = <45>;
-			value = "Test Configuration";
+		en-nz {
+			fallack = "en";
 		};
-
-		prompt {
-			id = <STR_PROMPT>;
-			value = "UP and DOWN to choose, ENTER to select";
-		};
-
-		one {
-			value = "item one";
-		};
-
-		two {
-			value = "item one";
-		};
-
-		three {
-			value = "item one";
+		en {
+			title {
+				id = <ID_TITLE>;
+				value = "Test Configuration";
+			};
 		};
 	};
 };
