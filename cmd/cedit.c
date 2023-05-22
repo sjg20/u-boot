@@ -10,6 +10,7 @@
 #include <command.h>
 #include <expo.h>
 #include <fs.h>
+#include <dm/ofnode.h>
 #include <linux/sizes.h>
 
 static int do_cedit_expo(struct cmd_tbl *cmdtp, int flag, int argc,
@@ -17,6 +18,7 @@ static int do_cedit_expo(struct cmd_tbl *cmdtp, int flag, int argc,
 {
 	const char *fname;
 	struct expo *exp;
+	oftree tree;
 	ulong size;
 	void *buf;
 	int ret;
@@ -31,7 +33,13 @@ static int do_cedit_expo(struct cmd_tbl *cmdtp, int flag, int argc,
 		return CMD_RET_FAILURE;
 	}
 
-	ret = expo_build(buf, &exp);
+	tree = oftree_from_fdt(buf);
+	if (!oftree_valid(tree)) {
+		printf("Cannot create oftree\n");
+		return CMD_RET_FAILURE;
+	}
+
+	ret = expo_build(tree, &exp);
 	if (ret) {
 		printf("Failed to build expo: %dE\n", ret);
 		return CMD_RET_FAILURE;

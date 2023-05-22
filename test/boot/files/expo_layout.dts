@@ -39,7 +39,6 @@ enum {
 		};
 	};
 
-
 	strings {
 		title {
 			id = <ID_SCENE1_TITLE>;

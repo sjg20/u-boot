@@ -7,6 +7,7 @@
 #ifndef __SCENE_H
 #define __SCENE_H
 
+#include <dm/ofnode_decl.h>
 #include <linux/list.h>
 
 struct udevice;
@@ -522,10 +523,10 @@ int expo_action_get(struct expo *exp, struct expo_action *act);
 /**
  * expo_build() - Build an expo from an FDT description
  *
- * @ldtb: Expo layout FDT blob
+ * @tree: oftree with expo layout
  * @expp: Returns the new expo
  * Return: 0 if OK, -ve on error
  */
-int expo_build(void *ldtb, struct expo **expp);
+int expo_build(oftree tree, struct expo **expp);
 
 #endif /*__SCENE_H */

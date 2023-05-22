@@ -10,6 +10,7 @@
 #include <expo.h>
 #include <fdtdec.h>
 #include <malloc.h>
+#include <dm/ofnode.h>
 #include <linux/libfdt.h>
 
 /**
@@ -19,12 +20,10 @@
  *	if there is nothing for this ID. Since ID 0 is never used, the first
  *	element of this array is always NULL
  * @str_count: Number of entries in @str_for_id
- * @ldtb: Lookup DTB
  */
 struct build_info {
 	const char **str_for_id;
 	int str_count;
-	const void *ldtb;
 };
 
 #if 0
@@ -105,23 +104,23 @@ int add_expo_str(void *ldtb, struct expo *exp, const char *find_name)
  * "title" if it exists, else will look up the string for "title-id"
  * Return: Id of added string, or -ve on error
  */
-int add_txt_str(struct build_info *info, int node, struct scene *scn,
+int add_txt_str(struct build_info *info, ofnode node, struct scene *scn,
 		const char *find_name, uint obj_id)
 {
-	const void *ldtb = info->ldtb;
 	const char *text;
 	uint str_id;
 	int ret;
 
-	text = fdt_getprop(ldtb, node, find_name, NULL);
+	text = ofnode_read_string(node, find_name);
 	if (!text) {
 		char name[40];
-		int id;
+		u32 id;
 
 		snprintf(name, sizeof(name), "%s-id", find_name);
-		id = fdtdec_get_int(ldtb, node, name, -1);
-		if (id < 0)
-			return log_msg_ret("id", -ENOENT);
+		ret = ofnode_read_u32(node, name, &id);
+		if (ret)
+			return log_msg_ret("id", -EINVAL);
+
 		if (id >= info->str_count)
 			return log_msg_ret("id", -E2BIG);
 		text = info->str_for_id[id];
@@ -151,23 +150,23 @@ int build_element(void *ldtb, int node, const char *label)
 	return 0;
 }
 
-static int read_strings(struct build_info *info, const void *ldtb)
+static int read_strings(struct build_info *info, oftree tree)
 {
-	int strings;
-	int node;
+	ofnode strings, node;
 
-	strings = fdt_subnode_offset(ldtb, 0, "strings");
-	if (strings < 0)
+	strings = oftree_path(tree, "/strings");
+	if (!ofnode_valid(strings))
 		return log_msg_ret("str", -EINVAL);
 
-	fdt_for_each_subnode(node, ldtb, strings) {
+	ofnode_for_each_subnode(node, oftree_root(tree)) {
 		const char *val;
-		int id;
+		int ret;
+		u32 id;
 
-		id = fdtdec_get_int(ldtb, node, "id", 0);
-		if (!id)
+		ret = ofnode_read_u32(node, "id", &id);
+		if (ret)
 			return log_msg_ret("id", -EINVAL);
-		val = fdt_getprop(ldtb, node, "value", NULL);
+		val = ofnode_read_string(node, "value");
 		if (!val)
 			return log_msg_ret("val", -EINVAL);
 
@@ -201,17 +200,17 @@ static void list_strings(struct build_info *info)
 	}
 }
 
-static int menu_build(struct build_info *info, int node, struct scene *scn)
+static int menu_build(struct build_info *info, ofnode node, struct scene *scn)
 {
-	const void *ldtb = info->ldtb;
 	struct scene_obj_menu *menu;
 	const char *name;
 	uint title_id, menu_id;
-	int id, ret;
+	u32 id;
+	int ret;
 
-	name = fdt_get_name(ldtb, node, NULL);
-	id = fdtdec_get_int(ldtb, node, "id", 0);
-	if (!id)
+	name = ofnode_get_name(node);
+	ret = ofnode_read_u32(node, "id", &id);
+	if (ret)
 		return log_msg_ret("id", -EINVAL);
 
 	ret = scene_menu(scn, name, id, &menu);
@@ -234,17 +233,17 @@ static int menu_build(struct build_info *info, int node, struct scene *scn)
 	return 0;
 }
 
-static int item_build(struct build_info *info, void *ldtb, int node,
-		      struct scene *scn)
+static int item_build(struct build_info *info, ofnode node, struct scene *scn)
 {
 	const char *type;
-	int id, ret;
+	u32 id;
+	int ret;
 
-	id = fdtdec_get_int(ldtb, node, "id", 0);
-	if (!id)
+	ret = ofnode_read_u32(node, "id", &id);
+	if (ret)
 		return log_msg_ret("id", -EINVAL);
 
-	type = fdt_getprop(ldtb, node, "type", NULL);
+	type = ofnode_read_string(node, "type");
 	if (!type)
 		return log_msg_ret("typ", -ENOENT);
 
@@ -259,18 +258,18 @@ static int item_build(struct build_info *info, void *ldtb, int node,
 	return 0;
 }
 
-static int scene_build(struct build_info *info, void *ldtb, int scn_node,
+static int scene_build(struct build_info *info, ofnode scn_node,
 		       struct expo *exp)
 {
 	const char *name;
 	struct scene *scn;
 	uint id, title_id;
-	int node;
+	ofnode node;
 	int ret;
 
-	name = fdt_get_name(ldtb, scn_node, NULL);
-	id = fdtdec_get_int(ldtb, scn_node, "id", 0);
-	if (!id)
+	name = ofnode_get_name(scn_node);
+	ret = ofnode_read_u32(scn_node, "id", &id);
+	if (ret)
 		return log_msg_ret("id", -EINVAL);
 
 	ret = scene_new(exp, name, id, &scn);
@@ -287,8 +286,8 @@ static int scene_build(struct build_info *info, void *ldtb, int scn_node,
 	if (ret < 0)
 		return log_msg_ret("pr", ret);
 
-	fdt_for_each_subnode(node, ldtb, scn_node) {
-		ret = item_build(info, ldtb, node, scn);
+	ofnode_for_each_subnode(node, scn_node) {
+		ret = item_build(info, node, scn);
 		if (ret < 0)
 			return log_msg_ret("itm", ret);
 	}
@@ -296,30 +295,29 @@ static int scene_build(struct build_info *info, void *ldtb, int scn_node,
 	return 0;
 }
 
-int expo_build(void *ldtb, struct expo **expp)
+int expo_build(oftree tree, struct expo **expp)
 {
 	struct build_info info;
 	struct expo *exp;
-	int scenes, node;
+	ofnode scenes, node;
 	int ret;
 
 	memset(&info, '\0', sizeof(info));
-	ret = read_strings(&info, ldtb);
+	ret = read_strings(&info, tree);
 	if (ret)
 		return log_msg_ret("str", ret);
 	list_strings(&info);
-	info.ldtb = ldtb;
 
 	ret = expo_new("name", NULL, &exp);
 	if (ret)
 		return log_msg_ret("exp", ret);
 
-	scenes = fdt_subnode_offset(ldtb, 0, "scenes");
-	if (scenes < 0)
+	scenes = oftree_path(tree, "/scenes");
+	if (!ofnode_valid(scenes))
 		return log_msg_ret("sno", -EINVAL);
 
-	fdt_for_each_subnode(node, ldtb, scenes) {
-		ret = scene_build(&info, ldtb, node, exp);
+	ofnode_for_each_subnode(node, scenes) {
+		ret = scene_build(&info, node, exp);
 		if (ret < 0)
 			return log_msg_ret("scn", ret);
 	}
