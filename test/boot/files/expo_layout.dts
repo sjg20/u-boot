@@ -11,6 +11,7 @@ enum {
 
 	ID_SCENE1,
 	ID_SCENE1_TITLE,
+	ID_CPU_SPEED,
 	ID_CPU_SPEED_TITLE,
 	ID_CPU_SPEED_1,
 	ID_CPU_SPEED_2,
@@ -27,6 +28,7 @@ enum {
 
 			cpu-speed {
 				type = "menu";
+				id = <ID_CPU_SPEED>;
 				title = "Test menu";
 				title-id = <ID_CPU_SPEED_TITLE>;
 
@@ -36,6 +38,7 @@ enum {
 			};
 		};
 	};
+
 
 	strings {
 		title {

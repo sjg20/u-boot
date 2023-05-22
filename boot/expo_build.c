@@ -12,9 +12,19 @@
 #include <malloc.h>
 #include <linux/libfdt.h>
 
+/**
+ * struct build_info - Information to use when building
+ *
+ * @str_for_id: String for each ID in use, NULL if empty. The string is NULL
+ *	if there is nothing for this ID. Since ID 0 is never used, the first
+ *	element of this array is always NULL
+ * @str_count: Number of entries in @str_for_id
+ * @ldtb: Lookup DTB
+ */
 struct build_info {
 	const char **str_for_id;
 	int str_count;
+	const void *ldtb;
 };
 
 #if 0
@@ -89,16 +99,16 @@ int add_expo_str(void *ldtb, struct expo *exp, const char *find_name)
  * add_txt_str - Add a string or lookup its ID, then add to expo
  *
  * @info: Build information
- * @ldtb: Lookup DTB
  * @node: Node describing scene
  * @scn: Scene to add to
  * @find_name: Name to look for (e.g. "title"). This will find a property called
  * "title" if it exists, else will look up the string for "title-id"
  * Return: Id of added string, or -ve on error
  */
-int add_txt_str(struct build_info *info, void *ldtb, int node,
-		struct scene *scn, const char *find_name, uint obj_id)
+int add_txt_str(struct build_info *info, int node, struct scene *scn,
+		const char *find_name, uint obj_id)
 {
+	const void *ldtb = info->ldtb;
 	const char *text;
 	uint str_id;
 	int ret;
@@ -191,16 +201,75 @@ static void list_strings(struct build_info *info)
 	}
 }
 
-static int scene_build(struct build_info *info, void *ldtb, int node,
+static int menu_build(struct build_info *info, int node, struct scene *scn)
+{
+	const void *ldtb = info->ldtb;
+	struct scene_obj_menu *menu;
+	const char *name;
+	uint title_id, menu_id;
+	int id, ret;
+
+	name = fdt_get_name(ldtb, node, NULL);
+	id = fdtdec_get_int(ldtb, node, "id", 0);
+	if (!id)
+		return log_msg_ret("id", -EINVAL);
+
+	ret = scene_menu(scn, name, id, &menu);
+	if (ret < 0)
+		return log_msg_ret("men", ret);
+	menu_id = ret;
+
+	/* Set the title */
+	ret = add_txt_str(info, node, scn, "title", 0);
+	if (ret < 0)
+		return log_msg_ret("tit", ret);
+	title_id = ret;
+	ret = scene_menu_set_title(scn, menu_id, title_id);
+
+
+
+// 	id = scene_menuitem(scn, menu_id, "linux", ITEM1, ITEM1_KEY,
+// 			    ITEM1_LABEL, ITEM1_DESC, ITEM1_PREVIEW, 0, &item);
+
+	return 0;
+}
+
+static int item_build(struct build_info *info, void *ldtb, int node,
+		      struct scene *scn)
+{
+	const char *type;
+	int id, ret;
+
+	id = fdtdec_get_int(ldtb, node, "id", 0);
+	if (!id)
+		return log_msg_ret("id", -EINVAL);
+
+	type = fdt_getprop(ldtb, node, "type", NULL);
+	if (!type)
+		return log_msg_ret("typ", -ENOENT);
+
+	if (!strcmp("menu", type)) {
+		ret = menu_build(info, node, scn);
+	} else {
+		ret = -EINVAL;
+	}
+	if (ret)
+		return log_msg_ret("typ", ret);
+
+	return 0;
+}
+
+static int scene_build(struct build_info *info, void *ldtb, int scn_node,
 		       struct expo *exp)
 {
 	const char *name;
 	struct scene *scn;
 	uint id, title_id;
+	int node;
 	int ret;
 
-	name = fdt_get_name(ldtb, node, NULL);
-	id = fdtdec_get_int(ldtb, node, "id", 0);
+	name = fdt_get_name(ldtb, scn_node, NULL);
+	id = fdtdec_get_int(ldtb, scn_node, "id", 0);
 	if (!id)
 		return log_msg_ret("id", -EINVAL);
 
@@ -208,15 +277,21 @@ static int scene_build(struct build_info *info, void *ldtb, int node,
 	if (ret < 0)
 		return log_msg_ret("scn", ret);
 
-	ret = add_txt_str(info, ldtb, node, scn, "title", 0);
+	ret = add_txt_str(info, scn_node, scn, "title", 0);
 	if (ret < 0)
 		return log_msg_ret("tit", ret);
 	title_id = ret;
 	scene_title_set(scn, title_id);
 
-	ret = add_txt_str(info, ldtb, node, scn, "prompt", 0);
+	ret = add_txt_str(info, scn_node, scn, "prompt", 0);
 	if (ret < 0)
 		return log_msg_ret("pr", ret);
+
+	fdt_for_each_subnode(node, ldtb, scn_node) {
+		ret = item_build(info, ldtb, node, scn);
+		if (ret < 0)
+			return log_msg_ret("itm", ret);
+	}
 
 	return 0;
 }
@@ -233,6 +308,7 @@ int expo_build(void *ldtb, struct expo **expp)
 	if (ret)
 		return log_msg_ret("str", ret);
 	list_strings(&info);
+	info.ldtb = ldtb;
 
 	ret = expo_new("name", NULL, &exp);
 	if (ret)
