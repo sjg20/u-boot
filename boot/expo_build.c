@@ -158,7 +158,7 @@ static int read_strings(struct build_info *info, oftree tree)
 	if (!ofnode_valid(strings))
 		return log_msg_ret("str", -EINVAL);
 
-	ofnode_for_each_subnode(node, oftree_root(tree)) {
+	ofnode_for_each_subnode(node, strings) {
 		const char *val;
 		int ret;
 		u32 id;

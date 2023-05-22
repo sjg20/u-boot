@@ -40,6 +40,7 @@ static int do_cedit_expo(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 
 	ret = expo_build(tree, &exp);
+	oftree_dispose(tree);
 	if (ret) {
 		printf("Failed to build expo: %dE\n", ret);
 		return CMD_RET_FAILURE;
