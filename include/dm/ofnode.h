@@ -15,7 +15,7 @@
 #include <phy_interface.h>
 
 /* Enable checks to protect against invalid calls */
-#undef OF_CHECKS
+#define OF_CHECKS
 
 struct resource;
 
