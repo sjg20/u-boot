@@ -16,6 +16,10 @@
 		stdout-path = "/serial";
 	};
 
+	cedit-theme {
+		font-size = <30>;
+	};
+
 	alarm_wdt: alarm-wdt {
 		compatible = "sandbox,alarm-wdt";
 		timeout-sec = <5>;

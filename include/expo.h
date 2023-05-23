@@ -237,6 +237,10 @@ struct scene_menitem {
 	struct list_head sibling;
 };
 
+struct expo_theme {
+	u32 font_size;
+};
+
 /**
  * expo_new() - create a new expo
  *
@@ -511,6 +515,15 @@ int scene_menuitem(struct scene *scn, uint menu_id, const char *name, uint id,
 int scene_arrange(struct scene *scn);
 
 /**
+ * scene_apply_theme() - Apply a theme to a scene
+ *
+ * @scn: Scene to update
+ * @theme: Theme to apply
+ * Returns: 0 if OK, -ve on error
+ */
+int scene_apply_theme(struct scene *scn, struct expo_theme *theme);
+
+/**
  * expo_send_key() - set a keypress to the expo
  *
  * @exp: Expo to receive the key
@@ -536,5 +549,7 @@ int expo_action_get(struct expo *exp, struct expo_action *act);
  * Return: 0 if OK, -ve on error
  */
 int expo_build(oftree tree, struct expo **expp);
+
+int expo_apply_theme(struct expo *exp, ofnode node);
 
 #endif /*__SCENE_H */

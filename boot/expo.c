@@ -180,3 +180,28 @@ int expo_action_get(struct expo *exp, struct expo_action *act)
 
 	return act->type == EXPOACT_NONE ? -EAGAIN : 0;
 }
+
+
+int expo_apply_theme(struct expo *exp, ofnode node)
+{
+	struct scene *scn;
+	struct expo_theme theme;
+	int ret;
+
+	log_debug("Applying theme %s\n", ofnode_get_name(node));
+
+	if (ofnode_read_u32(node, "font-size", &theme.font_size))
+		theme.font_size = 0;
+
+	list_for_each_entry(scn, &exp->scene_head, sibling) {
+		ret = scene_apply_theme(scn, &theme);
+		if (ret)
+			return log_msg_ret("app", ret);
+	}
+
+	ret = scene_arrange(scn);
+	if (ret)
+		return log_msg_ret("arr", ret);
+
+	return 0;
+}

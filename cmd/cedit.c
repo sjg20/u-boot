@@ -51,6 +51,7 @@ static int do_cedit_load(struct cmd_tbl *cmdtp, int flag, int argc,
 		printf("Failed to build expo: %dE\n", ret);
 		return CMD_RET_FAILURE;
 	}
+
 	cur_exp = exp;
 
 	return 0;
@@ -152,6 +153,7 @@ static int cedit_run(struct expo *exp)
 static int do_cedit_run(struct cmd_tbl *cmdtp, int flag, int argc,
 			char *const argv[])
 {
+	ofnode node;
 	int ret;
 
 	if (!cur_exp) {
@@ -159,7 +161,17 @@ static int do_cedit_run(struct cmd_tbl *cmdtp, int flag, int argc,
 		return CMD_RET_FAILURE;
 	}
 
+	node = ofnode_path("/cedit-theme");
+	if (ofnode_valid(node)) {
+		ret = expo_apply_theme(cur_exp, node);
+		if (ret)
+			return CMD_RET_FAILURE;
+	} else {
+		log_warning("No theme found\n");
+	}
 	ret = cedit_run(cur_exp);
+	if (ret)
+		return CMD_RET_FAILURE;
 
 	return 0;
 }
