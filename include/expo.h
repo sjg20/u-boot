@@ -295,6 +295,14 @@ int expo_set_display(struct expo *exp, struct udevice *dev);
 int expo_set_scene_id(struct expo *exp, uint scene_id);
 
 /**
+ * expo_first_scene_id() - Get the ID of the first scene
+ *
+ * @exp: Expo to check
+ * Returns: Scene ID of first scene, or -ENOENT if there are no scenes
+ */
+int expo_first_scene_id(struct expo *exp);
+
+/**
  * expo_render() - render the expo on the display / console
  *
  * @exp: Expo to render

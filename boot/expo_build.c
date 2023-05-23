@@ -282,12 +282,22 @@ static int menu_build(struct build_info *info, ofnode node, struct scene *scn)
 
 	for (i = 0; i < size; i++) {
 		struct scene_menitem *item;
-		uint key, label, desc;
+		uint label, key, desc;
 
 		ret = add_txt_str_list(info, node, scn, "item-label", i, 0);
 		if (ret && ret != -ENOENT)
 			return log_msg_ret("lab", ret);
 		label = max(0, ret);
+
+		ret = add_txt_str_list(info, node, scn, "key-label", i, 0);
+		if (ret && ret != -ENOENT)
+			return log_msg_ret("key", ret);
+		key = max(0, ret);
+
+		ret = add_txt_str_list(info, node, scn, "desc-label", i, 0);
+		if (ret && ret != -ENOENT)
+			return log_msg_ret("lab", ret);
+		desc = max(0, ret);
 
 		ret = scene_menuitem(scn, menu_id, simple_xtoa(index),
 				     item_ids[i], key, label, desc, 0, 0,
@@ -387,25 +397,7 @@ int expo_build(oftree tree, struct expo **expp)
 		if (ret < 0)
 			return log_msg_ret("scn", ret);
 	}
-#if 0
-	ret = scene_menu(scn, "main", OBJ_MENU, &menu);
-	ret |= scene_obj_set_pos(scn, OBJ_MENU, MARGIN_LEFT, 100);
-	ret |= scene_txt_str(scn, "title", OBJ_MENU_TITLE, STR_MENU_TITLE,
-			     "U-Boot - Boot Menu", NULL);
-	ret |= scene_menu_set_title(scn, OBJ_MENU, OBJ_PROMPT);
-
-	logo = video_get_u_boot_logo();
-	if (logo) {
-		ret |= scene_img(scn, "ulogo", OBJ_U_BOOT_LOGO, logo, NULL);
-		ret |= scene_obj_set_pos(scn, OBJ_U_BOOT_LOGO, -4, 4);
-	}
-
-	ret |= scene_txt_str(scn, "cur_item", OBJ_POINTER, STR_POINTER, ">",
-			     NULL);
-	ret |= scene_menu_set_pointer(scn, OBJ_MENU, OBJ_POINTER);
-	if (ret < 0)
-		return log_msg_ret("new", -EINVAL);
-#endif
+	*expp = exp;
 
 	return 0;
 }
