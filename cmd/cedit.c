@@ -62,6 +62,8 @@ static void cedit_arange(struct expo *exp, uint scene_id)
 	struct scene *scn;
 
 	scn = expo_lookup_scene_id(exp, scene_id);
+
+
 }
 
 static int cedit_run(struct expo *exp)
