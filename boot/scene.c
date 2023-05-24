@@ -224,7 +224,10 @@ int scene_obj_set_hide(struct scene *scn, uint id, bool hide)
 	obj = scene_obj_find(scn, id, SCENEOBJT_NONE);
 	if (!obj)
 		return log_msg_ret("find", -ENOENT);
-	obj->hide = hide;
+	if (hide)
+		obj->flags |= SCENEOF_HIDE;
+	else
+		obj->flags &= ~SCENEOF_HIDE;
 
 	return 0;
 }
@@ -374,7 +377,7 @@ int scene_render(struct scene *scn)
 	int ret;
 
 	list_for_each_entry(obj, &scn->obj_head, sibling) {
-		if (!obj->hide) {
+		if (!(obj->flags & SCENEOF_HIDE)) {
 			ret = scene_obj_render(obj, exp->text_mode);
 			if (ret && ret != -ENOTSUPP)
 				return log_msg_ret("ren", ret);
