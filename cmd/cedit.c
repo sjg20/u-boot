@@ -57,12 +57,18 @@ static int do_cedit_load(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
+static void cedit_arange(struct expo *exp, uint scene_id)
+{
+	struct scene *scn;
+
+	scn = expo_lookup_scene_id(exp, scene_id);
+}
 
 static int cedit_run(struct expo *exp)
 {
 	struct cli_ch_state s_cch, *cch = &s_cch;
 	struct udevice *dev;
-	uint sel_id;
+	uint sel_id, scene_id;
 	bool done;
 	int ret;
 
@@ -85,13 +91,16 @@ static int cedit_run(struct expo *exp)
 	ret = expo_first_scene_id(exp);
 	if (ret < 0)
 		return log_msg_ret("scn", ret);
+	scene_id = ret;
 
-	ret = expo_set_scene_id(exp, ret);
+	ret = expo_set_scene_id(exp, scene_id);
 	if (ret)
 		return log_msg_ret("scn", ret);
 
 // 	if (text_mode)
 // 		exp_set_text_mode(exp, text_mode);
+
+	cedit_arange(exp, scene_id);
 
 	done = false;
 	do {
