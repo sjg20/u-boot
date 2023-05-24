@@ -178,7 +178,8 @@ static int do_cedit_run(struct cmd_tbl *cmdtp, int flag, int argc,
 
 #ifdef CONFIG_SYS_LONGHELP
 static char cedit_help_text[] =
-	"load <interface> <dev[:part]> <filename>   - load expo";
+	"load <interface> <dev[:part]> <filename>   - load config editor\n"
+	"cedit run                                        - run config editor";
 #endif /* CONFIG_SYS_LONGHELP */
 
 U_BOOT_CMD_WITH_SUBCMDS(cedit, "Configuration editor", cedit_help_text,
