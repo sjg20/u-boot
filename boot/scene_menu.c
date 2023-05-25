@@ -43,12 +43,14 @@ static void menu_point_to_item(struct scene_obj_menu *menu, uint item_id)
 	menu->cur_item_id = item_id;
 }
 
-int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
+int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu,
+		       bool stack)
 {
 	struct scene_menitem *item;
-	int y, cur_y;
+	int x, y, cur_y;
 	int ret;
 
+	x = menu->obj.dim.x;
 	y = menu->obj.dim.y;
 	if (menu->title_id) {
 		ret = scene_obj_set_pos(scn, menu->title_id, menu->obj.dim.x, y);
@@ -59,7 +61,10 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		if (ret < 0)
 			return log_msg_ret("hei", ret);
 
-		y += ret * 2;
+		if (stack)
+			x += 200;
+		else
+			y += ret * 2;
 	}
 
 	/*
@@ -70,6 +75,7 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 	 */
 	cur_y = -1;
 	list_for_each_entry(item, &menu->item_head, sibling) {
+		bool selected;
 		int height;
 
 		ret = scene_obj_get_hw(scn, item->label_id, NULL);
@@ -84,31 +90,31 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		if (!menu->cur_item_id)
 			menu_point_to_item(menu, item->id);
 
+		selected = menu->cur_item_id == item->id;
+		if (selected)
+			cur_y = y;
+
 		/*
 		 * Put the label on the left, then leave a space for the
 		 * pointer, then the key and the description
 		 */
-		ret = scene_obj_set_pos(scn, item->label_id, menu->obj.dim.x,
-					y);
+		ret = scene_obj_set_pos(scn, item->label_id, x, y);
 		if (ret < 0)
 			return log_msg_ret("nam", ret);
+		if (stack)
+			scene_obj_set_hide(scn, item->label_id, !selected);
 
 		if (item->key_id) {
-			ret = scene_obj_set_pos(scn, item->key_id,
-						menu->obj.dim.x + 230, y);
+			ret = scene_obj_set_pos(scn, item->key_id, x + 230, y);
 			if (ret < 0)
 				return log_msg_ret("key", ret);
 		}
 
 		if (item->desc_id) {
-			ret = scene_obj_set_pos(scn, item->desc_id,
-						menu->obj.dim.x + 280, y);
+			ret = scene_obj_set_pos(scn, item->desc_id, x + 280, y);
 			if (ret < 0)
 				return log_msg_ret("des", ret);
 		}
-
-		if (menu->cur_item_id == item->id)
-			cur_y = y;
 
 		if (item->preview_id) {
 			bool hide;
@@ -127,7 +133,8 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 				return log_msg_ret("hid", ret);
 		}
 
-		y += height;
+		if (!stack)
+			y += height;
 	}
 
 	if (menu->pointer_id && cur_y != -1) {
@@ -160,7 +167,7 @@ int scene_menu(struct scene *scn, const char *name, uint id,
 		*menup = menu;
 	INIT_LIST_HEAD(&menu->item_head);
 
-	ret = scene_menu_arrange(scn, menu);
+	ret = scene_menu_arrange(scn, menu, false);
 	if (ret)
 		return log_msg_ret("pos", ret);
 
@@ -287,7 +294,7 @@ int scene_menuitem(struct scene *scn, uint menu_id, const char *name, uint id,
 	item->flags = flags;
 	list_add_tail(&item->sibling, &menu->item_head);
 
-	ret = scene_menu_arrange(scn, menu);
+	ret = scene_menu_arrange(scn, menu, false);
 	if (ret)
 		return log_msg_ret("pos", ret);
 

@@ -214,7 +214,7 @@ int scene_obj_set_pos(struct scene *scn, uint id, int x, int y)
 	obj->dim.x = x;
 	obj->dim.y = y;
 	if (obj->type == SCENEOBJT_MENU)
-		scene_menu_arrange(scn, (struct scene_obj_menu *)obj);
+		scene_menu_arrange(scn, (struct scene_obj_menu *)obj, false);
 
 	return 0;
 }
@@ -363,7 +363,7 @@ int scene_arrange(struct scene *scn)
 			struct scene_obj_menu *menu;
 
 			menu = (struct scene_obj_menu *)obj,
-			ret = scene_menu_arrange(scn, menu);
+			ret = scene_menu_arrange(scn, menu, false);
 			if (ret)
 				return log_msg_ret("arr", ret);
 		}
@@ -404,7 +404,7 @@ int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 				return log_msg_ret("key", ret);
 
 			/* only allow one menu */
-			ret = scene_menu_arrange(scn, menu);
+			ret = scene_menu_arrange(scn, menu, false);
 			if (ret)
 				return log_msg_ret("arr", ret);
 			break;

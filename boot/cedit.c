@@ -38,6 +38,8 @@ int cedit_arange(struct expo *exp, struct video_priv *vpriv, uint scene_id)
 	list_for_each_entry(obj, &scn->obj_head, sibling) {
 		if (obj->type == SCENEOBJT_MENU) {
 			scene_obj_set_pos(scn, obj->id, 50, y);
+			scene_menu_arrange(scn, (struct scene_obj_menu *)obj,
+					   true);
 			y += 50;
 		}
 	}

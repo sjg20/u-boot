@@ -71,8 +71,12 @@ int scene_obj_add(struct scene *scn, const char *name, uint id,
  *
  * @scn: Scene to update
  * @menu: Menu to process
+ * @stack: true to stack menu items on top of each other and only allow the
+ * current one to be visible
+ * Returns: 0 if OK, -ve on error
  */
-int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu);
+int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu,
+		       bool stack);
 
 /**
  * scene_menu_send_key() - Send a key to a menu for processing
