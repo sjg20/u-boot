@@ -57,18 +57,10 @@ static int do_cedit_load(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
-static void cedit_arange(struct expo *exp, uint scene_id)
-{
-	struct scene *scn;
-
-	scn = expo_lookup_scene_id(exp, scene_id);
-
-
-}
-
 static int cedit_run(struct expo *exp)
 {
 	struct cli_ch_state s_cch, *cch = &s_cch;
+	struct video_priv *vid_priv;
 	struct udevice *dev;
 	uint sel_id, scene_id;
 	bool done;
@@ -102,7 +94,8 @@ static int cedit_run(struct expo *exp)
 // 	if (text_mode)
 // 		exp_set_text_mode(exp, text_mode);
 
-	cedit_arange(exp, scene_id);
+	vid_priv = dev_get_uclass_priv(dev);
+	cedit_arange(exp, vid_priv, scene_id);
 
 	done = false;
 	do {

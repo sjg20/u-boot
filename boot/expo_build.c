@@ -98,7 +98,7 @@ int add_txt_str_list(struct build_info *info, ofnode node, struct scene *scn,
 		snprintf(name, sizeof(name), "%s-id", find_name);
 		ret = ofnode_read_u32_index(node, name, index, &id);
 		if (ret)
-			return log_msg_ret("id", -EINVAL);
+			return log_msg_ret("id", -ENOENT);
 
 		if (id >= info->str_count)
 			return log_msg_ret("id", -E2BIG);
@@ -182,10 +182,10 @@ static void list_strings(struct build_info *info)
 static int menu_build(struct build_info *info, ofnode node, struct scene *scn)
 {
 	struct scene_obj_menu *menu;
-	const char *name;
 	uint title_id, menu_id;
-	int ret, index, size, i;
 	const u32 *item_ids;
+	int ret, size, i;
+	const char *name;
 	u32 id;
 
 	name = ofnode_get_name(node);
@@ -216,22 +216,23 @@ static int menu_build(struct build_info *info, ofnode node, struct scene *scn)
 		struct scene_menitem *item;
 		uint label, key, desc;
 
+		printf("i=%d, size=%d\n", i, size);
 		ret = add_txt_str_list(info, node, scn, "item-label", i, 0);
-		if (ret && ret != -ENOENT)
+		if (ret < 0 && ret != -ENOENT)
 			return log_msg_ret("lab", ret);
 		label = max(0, ret);
 
 		ret = add_txt_str_list(info, node, scn, "key-label", i, 0);
-		if (ret && ret != -ENOENT)
+		if (ret < 0 && ret != -ENOENT)
 			return log_msg_ret("key", ret);
 		key = max(0, ret);
 
 		ret = add_txt_str_list(info, node, scn, "desc-label", i, 0);
-		if (ret && ret != -ENOENT)
+		if (ret < 0  && ret != -ENOENT)
 			return log_msg_ret("lab", ret);
 		desc = max(0, ret);
 
-		ret = scene_menuitem(scn, menu_id, simple_xtoa(index),
+		ret = scene_menuitem(scn, menu_id, simple_xtoa(i),
 				     item_ids[i], key, label, desc, 0, 0,
 				     &item);
 		if (ret < 0)
@@ -306,8 +307,9 @@ static int scene_build(struct build_info *info, ofnode scn_node,
 int expo_build(oftree tree, struct expo **expp)
 {
 	struct build_info info;
-	struct expo *exp;
 	ofnode scenes, node;
+	struct expo *exp;
+	u32 dyn_start;
 	int ret;
 
 	memset(&info, '\0', sizeof(info));
@@ -319,6 +321,9 @@ int expo_build(oftree tree, struct expo **expp)
 	ret = expo_new("name", NULL, &exp);
 	if (ret)
 		return log_msg_ret("exp", ret);
+
+	if (!ofnode_read_u32(oftree_root(tree), "dynamic-start", &dyn_start))
+		expo_set_dynamic_start(exp, dyn_start);
 
 	scenes = oftree_path(tree, "/scenes");
 	if (!ofnode_valid(scenes))

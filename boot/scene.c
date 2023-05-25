@@ -16,16 +16,6 @@
 #include <linux/input.h>
 #include "scene_internal.h"
 
-uint resolve_id(struct expo *exp, uint id)
-{
-	if (!id)
-		id = exp->next_id++;
-	else if (id >= exp->next_id)
-		exp->next_id = id + 1;
-
-	return id;
-}
-
 int scene_new(struct expo *exp, const char *name, uint id, struct scene **scnp)
 {
 	struct scene *scn;
@@ -93,6 +83,18 @@ void *scene_obj_find(struct scene *scn, uint id, enum scene_obj_t type)
 	list_for_each_entry(obj, &scn->obj_head, sibling) {
 		if (obj->id == id &&
 		    (type == SCENEOBJT_NONE || obj->type == type))
+			return obj;
+	}
+
+	return NULL;
+}
+
+void *scene_obj_find_by_name(struct scene *scn, const char *name)
+{
+	struct scene_obj *obj;
+
+	list_for_each_entry(obj, &scn->obj_head, sibling) {
+		if (!strcmp(name, obj->name))
 			return obj;
 	}
 

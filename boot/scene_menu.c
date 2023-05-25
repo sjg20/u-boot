@@ -72,7 +72,7 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 	list_for_each_entry(item, &menu->item_head, sibling) {
 		int height;
 
-		ret = scene_obj_get_hw(scn, item->desc_id, NULL);
+		ret = scene_obj_get_hw(scn, item->label_id, NULL);
 		if (ret < 0)
 			return log_msg_ret("get", ret);
 		height = ret;
@@ -88,22 +88,24 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		 * Put the label on the left, then leave a space for the
 		 * pointer, then the key and the description
 		 */
-		if (item->label_id) {
-			ret = scene_obj_set_pos(scn, item->label_id, menu->obj.dim.x,
-						y);
+		ret = scene_obj_set_pos(scn, item->label_id, menu->obj.dim.x,
+					y);
+		if (ret < 0)
+			return log_msg_ret("nam", ret);
+
+		if (item->key_id) {
+			ret = scene_obj_set_pos(scn, item->key_id,
+						menu->obj.dim.x + 230, y);
 			if (ret < 0)
-				return log_msg_ret("nam", ret);
+				return log_msg_ret("key", ret);
 		}
 
-		ret = scene_obj_set_pos(scn, item->key_id, menu->obj.dim.x + 230,
-					y);
-		if (ret < 0)
-			return log_msg_ret("key", ret);
-
-		ret = scene_obj_set_pos(scn, item->desc_id, menu->obj.dim.x + 280,
-					y);
-		if (ret < 0)
-			return log_msg_ret("des", ret);
+		if (item->desc_id) {
+			ret = scene_obj_set_pos(scn, item->desc_id,
+						menu->obj.dim.x + 280, y);
+			if (ret < 0)
+				return log_msg_ret("des", ret);
+		}
 
 		if (menu->cur_item_id == item->id)
 			cur_y = y;
@@ -265,7 +267,7 @@ int scene_menuitem(struct scene *scn, uint menu_id, const char *name, uint id,
 		return log_msg_ret("find", -ENOENT);
 
 	/* Check that the text ID is valid */
-	if (!scene_obj_find(scn, desc_id, SCENEOBJT_TEXT))
+	if (!scene_obj_find(scn, label_id, SCENEOBJT_TEXT))
 		return log_msg_ret("txt", -EINVAL);
 
 	item = calloc(1, sizeof(struct scene_obj_menu));

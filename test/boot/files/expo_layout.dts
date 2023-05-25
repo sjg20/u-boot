@@ -16,10 +16,14 @@ enum {
 	ID_CPU_SPEED_1,
 	ID_CPU_SPEED_2,
 	ID_CPU_SPEED_3,
+
+	ID_DYNAMIC_START,
 };
 */
 
 / {
+	dynamic-start = <ID_DYNAMIC_START>;
+
 	scenes {
 		main {
 			id = <ID_SCENE1>;
@@ -39,7 +43,7 @@ enum {
 				 * has both string and ID. The string is ignored
 				 * if the ID is present and points to a string
 				 */
-				title = "Test menu";
+				title = "CPU speed";
 				title-id = <ID_CPU_SPEED_TITLE>;
 
 				/* menu items as simple strings */

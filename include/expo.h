@@ -11,6 +11,7 @@
 #include <linux/list.h>
 
 struct udevice;
+struct video_priv;
 
 /**
  * enum expoact_type - types of actions reported by the expo
@@ -281,6 +282,8 @@ int expo_new(const char *name, void *priv, struct expo **expp);
  * @exp: Expo to destroy
  */
 void expo_destroy(struct expo *exp);
+
+void expo_set_dynamic_start(struct expo *exp, uint dyn_start);
 
 /**
  * expo_str() - add a new string to an expo
@@ -573,5 +576,7 @@ int expo_action_get(struct expo *exp, struct expo_action *act);
 int expo_build(oftree tree, struct expo **expp);
 
 int expo_apply_theme(struct expo *exp, ofnode node);
+
+int cedit_arange(struct expo *exp, struct video_priv *vid_priv, uint scene_id);
 
 #endif /*__SCENE_H */
