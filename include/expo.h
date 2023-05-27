@@ -57,6 +57,7 @@ struct expo_action {
  * @action: Action selected by user. At present only one is supported, with the
  * type set to EXPOACT_NONE if there is no action
  * @text_mode: true to use text mode for the menu (no vidconsole)
+ * @popup: true to use popup menus, instead of showing all items
  * @priv: Private data for the controller
  * @scene_head: List of scenes
  * @str_head: list of strings
@@ -68,6 +69,7 @@ struct expo {
 	uint next_id;
 	struct expo_action action;
 	bool text_mode;
+	bool popup;
 	void *priv;
 	struct list_head scene_head;
 	struct list_head str_head;

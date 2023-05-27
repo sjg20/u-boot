@@ -363,7 +363,7 @@ int scene_arrange(struct scene *scn)
 			struct scene_obj_menu *menu;
 
 			menu = (struct scene_obj_menu *)obj,
-			ret = scene_menu_arrange(scn, menu, false);
+			ret = scene_menu_arrange(scn, menu);
 			if (ret)
 				return log_msg_ret("arr", ret);
 		}

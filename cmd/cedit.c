@@ -91,6 +91,8 @@ static int cedit_run(struct expo *exp)
 	if (ret)
 		return log_msg_ret("scn", ret);
 
+	exp->popup = true;
+
 // 	if (text_mode)
 // 		exp_set_text_mode(exp, text_mode);
 

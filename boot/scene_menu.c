@@ -43,9 +43,9 @@ static void menu_point_to_item(struct scene_obj_menu *menu, uint item_id)
 	menu->cur_item_id = item_id;
 }
 
-int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu,
-		       bool stack)
+int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 {
+	const bool stack = scn->expo->popup;
 	struct scene_menitem *item;
 	int x, y, cur_y;
 	int ret;
