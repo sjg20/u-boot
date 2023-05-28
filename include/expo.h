@@ -144,27 +144,6 @@ struct scene_dim {
 };
 
 /**
- * struct scene_bbox - Bounding box of an objects
- *
- * These describe the bounding box of an object. The x0/y0 pair is inclusive;
- * the x1/y2 pair is exclusive, meaning that it is one pixel beyond the extent
- * of the object
- *
- * @valid: Values are valid (bounding box is known)
- * @x0: left x position, in pixels from left side
- * @y0: top y position, in pixels from top
- * @x1: right x position + 1
- * @y1: botton y position + 1
- */
-struct scene_bbox {
-	bool valid;
-	int x0;
-	int y0;
-	int x1;
-	int y1;
-};
-
-/**
  * enum scene_obj_flags_t - flags for objects
  *
  * @SCENEOF_HIDE: object should be hidden
@@ -513,6 +492,17 @@ int scene_txt_set_font(struct scene *scn, uint id, const char *font_name,
 int scene_obj_set_pos(struct scene *scn, uint id, int x, int y);
 
 /**
+ * scene_obj_set_size() - Set the size of an object
+ *
+ * @scn: Scene to update
+ * @id: ID of object to update
+ * @w: width in pixels
+ * @h: height in pixels
+ * Returns: 0 if OK, -ENOENT if @id is invalid
+ */
+int scene_obj_set_size(struct scene *scn, uint id, int w, int h);
+
+/**
  * scene_obj_set_hide() - Set whether an object is hidden
  *
  * The update happens when the expo is next rendered.
@@ -596,9 +586,10 @@ int scene_menuitem(struct scene *scn, uint menu_id, const char *name, uint id,
  * Updates the width and height of all objects based on their contents
  *
  * @scn: Scene to update
+ * @do_menus: true to calculate only menus, false to calculate everything else
  * Returns 0 if OK, -ENOTSUPP if there is no graphical console
  */
-int scene_calc_dims(struct scene *scn);
+int scene_calc_dims(struct scene *scn, bool do_menus);
 
 /**
  * scene_arrange() - Arrange the scene to deal with object sizes

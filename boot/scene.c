@@ -217,6 +217,19 @@ int scene_obj_set_pos(struct scene *scn, uint id, int x, int y)
 	return 0;
 }
 
+int scene_obj_set_size(struct scene *scn, uint id, int w, int h)
+{
+	struct scene_obj *obj;
+
+	obj = scene_obj_find(scn, id, SCENEOBJT_NONE);
+	if (!obj)
+		return log_msg_ret("find", -ENOENT);
+	obj->dim.w = w;
+	obj->dim.h = h;
+
+	return 0;
+}
+
 int scene_obj_set_hide(struct scene *scn, uint id, bool hide)
 {
 	int ret;
@@ -267,16 +280,30 @@ int scene_obj_get_hw(struct scene *scn, uint id, int *widthp)
 	case SCENEOBJT_TEXT: {
 		struct scene_obj_txt *txt = (struct scene_obj_txt *)obj;
 		struct expo *exp = scn->expo;
+		struct vidconsole_bbox bbox;
+		const char *str;
+		int len, ret;
 
+		str = expo_get_str(exp, txt->str_id);
+		if (!str)
+			return log_msg_ret("str", -ENOENT);
+		len = strlen(str);
+
+		/* if there is no console, make it up */
+		if (!exp->cons) {
+			if (widthp)
+				*widthp = 8 * len;
+			return 16;
+		}
+
+		ret = vidconsole_measure(scn->expo->cons, txt->font_name,
+					 txt->font_size, str, &bbox);
+		if (ret)
+			return log_msg_ret("mea", ret);
 		if (widthp)
-			*widthp = 16; /* fake value for now */
-		if (txt->font_size)
-			return txt->font_size;
-		if (exp->display)
-			return video_default_font_height(exp->display);
+			*widthp = bbox.x1;
 
-		/* use a sensible default */
-		return 16;
+		return bbox.y1;
 	}
 	}
 
@@ -430,7 +457,7 @@ int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 	return 0;
 }
 
-int scene_calc_dims(struct scene *scn)
+int scene_calc_dims(struct scene *scn, bool do_menus)
 {
 	struct scene_obj *obj;
 	int ret;
@@ -442,22 +469,25 @@ int scene_calc_dims(struct scene *scn)
 		case SCENEOBJT_IMAGE: {
 			int width;
 
-			ret = scene_obj_get_hw(scn, obj->id, &width);
-			if (ret < 0)
-				return log_msg_ret("get", ret);
-			obj->dim.w = width;
-			obj->dim.h = ret;
-
+			if (!do_menus) {
+				ret = scene_obj_get_hw(scn, obj->id, &width);
+				if (ret < 0)
+					return log_msg_ret("get", ret);
+				obj->dim.w = width;
+				obj->dim.h = ret;
+			}
 			break;
 		}
 		case SCENEOBJT_MENU:
 			struct scene_obj_menu *menu;
 
-			menu = (struct scene_obj_menu *)obj;
+			if (do_menus) {
+				menu = (struct scene_obj_menu *)obj;
 
-			ret = scene_menu_calc_dims(menu);
-			if (ret)
-				return log_msg_ret("men", ret);
+				ret = scene_menu_calc_dims(menu);
+				if (ret)
+					return log_msg_ret("men", ret);
+			}
 			break;
 		}
 	}

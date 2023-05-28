@@ -121,7 +121,14 @@ int expo_calc_dims(struct expo *exp)
 		return log_msg_ret("dim", -ENOTSUPP);
 
 	list_for_each_entry(scn, &exp->scene_head, sibling) {
-		ret = scene_calc_dims(scn);
+		/*
+		 * Do the menus last so that all the menus' text objects
+		 * are dimensioned
+		 */
+		ret = scene_calc_dims(scn, false);
+		if (ret)
+			return log_msg_ret("scn", ret);
+		ret = scene_calc_dims(scn, true);
 		if (ret)
 			return log_msg_ret("scn", ret);
 	}

@@ -98,7 +98,8 @@ static void menu_point_to_item(struct scene_obj_menu *menu, uint item_id)
 	update_pointers(menu, item_id, true);
 }
 
-static int scene_bbox_union(struct scene *scn, uint id, struct scene_bbox *bbox)
+static int scene_bbox_union(struct scene *scn, uint id,
+			    struct vidconsole_bbox *bbox)
 {
 	struct scene_obj *obj;
 
@@ -113,6 +114,8 @@ static int scene_bbox_union(struct scene *scn, uint id, struct scene_bbox *bbox)
 		bbox->x1 = max(bbox->x1, obj->dim.x + obj->dim.w);
 		bbox->y1 = max(bbox->y1, obj->dim.y + obj->dim.h);
 	} else {
+		printf("- add %d %d %d %d\n", obj->dim.x, obj->dim.y,
+		       obj->dim.w, obj->dim.h);
 		bbox->x0 = obj->dim.x;
 		bbox->y0 = obj->dim.y;
 		bbox->x1 = obj->dim.x + obj->dim.w;
@@ -126,16 +129,34 @@ static int scene_bbox_union(struct scene *scn, uint id, struct scene_bbox *bbox)
 int scene_menu_calc_dims(struct scene_obj_menu *menu)
 {
 	const struct scene_menitem *item;
-	struct scene_bbox bbox;
+	struct vidconsole_bbox bbox, label_bbox;
 
 	bbox.valid = false;
 	scene_bbox_union(menu->obj.scene, menu->title_id, &bbox);
+
+	label_bbox.valid = false;
 
 	list_for_each_entry(item, &menu->item_head, sibling) {
 		scene_bbox_union(menu->obj.scene, item->label_id, &bbox);
 		scene_bbox_union(menu->obj.scene, item->key_id, &bbox);
 		scene_bbox_union(menu->obj.scene, item->desc_id, &bbox);
 		scene_bbox_union(menu->obj.scene, item->preview_id, &bbox);
+
+		/* Get the bounding box of all labels */
+		scene_bbox_union(menu->obj.scene, item->label_id, &label_bbox);
+	}
+
+	/* Make all labels the same size */
+	if (label_bbox.valid) {
+		printf("all size %d %d\n", bbox.x1 - bbox.x0,
+		       bbox.y1 - bbox.y0);
+		list_for_each_entry(item, &menu->item_head, sibling) {
+			printf("size %d %d\n", label_bbox.x1 - label_bbox.x0,
+			       label_bbox.y1 - label_bbox.y0);
+			scene_obj_set_size(menu->obj.scene, item->label_id,
+					   label_bbox.x1 - label_bbox.x0,
+					   label_bbox.y1 - label_bbox.y0);
+		}
 	}
 
 	if (bbox.valid) {
