@@ -46,30 +46,40 @@ static struct scene_menitem *scene_menuitem_find(struct scene_obj_menu *menu,
 	return NULL;
 }
 
+/**
+ * update_pointers() - Update the pointer object and handle highlights
+ *
+ * @menu: Menu to update
+ * @id: ID of menu item to select/deselect
+ * @point: true if @id is being selected, false if it is being deselected
+ */
 static int update_pointers(struct scene_obj_menu *menu, uint id, bool point)
 {
+	struct scene *scn = menu->obj.scene;
+	const bool stack = scn->expo->popup;
+	const struct scene_menitem *item;
 	int ret;
 
-	if (menu->pointer_id && point) {
+	item = scene_menuitem_find(menu, id);
+	if (!item)
+		return log_msg_ret("itm", -ENOENT);
+
+	/* adjust the pointer object to point to the selected item */
+	if (menu->pointer_id && item && point) {
 		const struct scene_menitem *item;
 		struct scene_obj *label;
 
-		/*
-		 * put the pointer to the right of and level with the item it
-		 * points to
-		 */
-		item = scene_menuitem_find(menu, id);
-		if (item) {
-			label = scene_obj_find(menu->obj.scene, item->label_id,
-					       SCENEOBJT_NONE);
+		label = scene_obj_find(scn, item->label_id, SCENEOBJT_NONE);
 
-			ret = scene_obj_set_pos(menu->obj.scene,
-						menu->pointer_id,
-						menu->obj.dim.x + 200,
-						label->dim.y);
-			if (ret < 0)
-				return log_msg_ret("ptr", ret);
-		}
+		ret = scene_obj_set_pos(scn, menu->pointer_id,
+					menu->obj.dim.x + 200, label->dim.y);
+		if (ret < 0)
+			return log_msg_ret("ptr", ret);
+	}
+
+	if (stack) {
+		scene_obj_flag_clrset(scn, item->label_id, SCENEOF_POINT,
+				      point ? SCENEOF_POINT : 0);
 	}
 
 	return 0;

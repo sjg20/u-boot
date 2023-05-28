@@ -76,7 +76,7 @@ int scene_obj_count(struct scene *scn)
 	return count;
 }
 
-void *scene_obj_find(struct scene *scn, uint id, enum scene_obj_t type)
+void *scene_obj_find(const struct scene *scn, uint id, enum scene_obj_t type)
 {
 	struct scene_obj *obj;
 
@@ -219,15 +219,25 @@ int scene_obj_set_pos(struct scene *scn, uint id, int x, int y)
 
 int scene_obj_set_hide(struct scene *scn, uint id, bool hide)
 {
+	int ret;
+
+	ret = scene_obj_flag_clrset(scn, id, SCENEOF_HIDE,
+				    hide ? SCENEOF_HIDE : 0);
+	if (ret)
+		return log_msg_ret("flg", ret);
+
+	return 0;
+}
+
+int scene_obj_flag_clrset(struct scene *scn, uint id, uint clr, uint set)
+{
 	struct scene_obj *obj;
 
 	obj = scene_obj_find(scn, id, SCENEOBJT_NONE);
 	if (!obj)
 		return log_msg_ret("find", -ENOENT);
-	if (hide)
-		obj->flags |= SCENEOF_HIDE;
-	else
-		obj->flags &= ~SCENEOF_HIDE;
+	obj->flags &= ~clr;
+	obj->flags |= set;
 
 	return 0;
 }
@@ -328,9 +338,21 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 		str = expo_get_str(exp, txt->str_id);
 		if (str) {
 			struct vidconsole_colour old;
+			enum colour_idx fore, back;
 
-			if (obj->flags & SCENEOF_POINT)
-				vidconsole_push_colour(cons, VID_YELLOW, &old);
+			if (CONFIG_IS_ENABLED(SYS_WHITE_ON_BLACK)) {
+				fore = VID_BLACK;
+				back = VID_WHITE;
+			} else {
+				fore = VID_LIGHT_GRAY;
+				back = VID_BLACK;
+			}
+
+			if (obj->flags & SCENEOF_POINT) {
+				vidconsole_push_colour(cons, fore, back, &old);
+				vidconsole_clear(cons, x, y, obj->dim.w,
+						 obj->dim.h);
+			}
 			vidconsole_put_string(cons, str);
 			if (obj->flags & SCENEOF_POINT)
 				vidconsole_pop_colour(cons, &old);

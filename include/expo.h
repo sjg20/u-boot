@@ -483,6 +483,8 @@ int scene_obj_set_pos(struct scene *scn, uint id, int x, int y);
  */
 int scene_obj_set_hide(struct scene *scn, uint id, bool hide);
 
+int scene_obj_flag_clrset(struct scene *scn, uint id, uint clr, uint set);
+
 /**
  * scene_menu_set_title() - Set the title of a menu
  *

@@ -219,11 +219,12 @@ int vidconsole_select_font(struct udevice *dev, const char *name, uint size);
  * vidconsole_push_colour() - Temporarily change the font colour
  *
  * @dev:	Device to adjust
- * @colour:	Colour to select
+ * @fg:		Foreground colour to select
+ * @bg:		Background colour to select
  * @old:	Place to store the current colour, so it can be restored
  */
-void vidconsole_push_colour(struct udevice *dev, enum colour_idx colour,
-			    struct vidconsole_colour *old);
+void vidconsole_push_colour(struct udevice *dev, enum colour_idx fg,
+			    enum colour_idx bg, struct vidconsole_colour *old);
 
 /**
  * vidconsole_pop_colour() - Restore the original colour
@@ -313,6 +314,8 @@ int vidconsole_put_string(struct udevice *dev, const char *str);
  */
 void vidconsole_position_cursor(struct udevice *dev, unsigned col,
 				unsigned row);
+
+void vidconsole_clear(struct udevice *dev, int x, int y, int w, int h);
 
 /**
  * vidconsole_clear_and_reset() - Clear the console and reset the cursor
