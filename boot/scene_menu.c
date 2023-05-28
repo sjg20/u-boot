@@ -33,8 +33,8 @@ void scene_menu_destroy(struct scene_obj_menu *menu)
 		scene_menuitem_destroy(item);
 }
 
-#if 0
-static struct scene_menitem *scene_menuitem_find(uint id)
+static struct scene_menitem *scene_menuitem_find(struct scene_obj_menu *menu,
+						 int id)
 {
 	struct scene_menitem *item;
 
@@ -45,13 +45,34 @@ static struct scene_menitem *scene_menuitem_find(uint id)
 
 	return NULL;
 }
-#endif
 
-static void update_pointers(struct scene_obj_menu *menu, uint id, bool point)
+static int update_pointers(struct scene_obj_menu *menu, uint id, bool point)
 {
-// 	const struct scene_menitem *item;
+	int ret;
 
-// 	item = scene_menuitem_find(item_id);
+	if (menu->pointer_id && point) {
+		const struct scene_menitem *item;
+		struct scene_obj *label;
+
+		/*
+		 * put the pointer to the right of and level with the item it
+		 * points to
+		 */
+		item = scene_menuitem_find(menu, id);
+		if (item) {
+			label = scene_obj_find(menu->obj.scene, item->label_id,
+					       SCENEOBJT_NONE);
+
+			ret = scene_obj_set_pos(menu->obj.scene,
+						menu->pointer_id,
+						menu->obj.dim.x + 200,
+						label->dim.y);
+			if (ret < 0)
+				return log_msg_ret("ptr", ret);
+		}
+	}
+
+	return 0;
 }
 
 /**
@@ -81,7 +102,8 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 {
 	const bool stack = scn->expo->popup;
 	struct scene_menitem *item;
-	int x, y, cur_y;
+	uint sel_id;
+	int x, y;
 	int ret;
 
 	x = menu->obj.dim.x;
@@ -107,7 +129,7 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 	 * small. This can be updated once text measuring is supported in
 	 * vidconsole
 	 */
-	cur_y = -1;
+	sel_id = menu->cur_item_id;
 	list_for_each_entry(item, &menu->item_head, sibling) {
 		bool selected;
 		int height;
@@ -121,12 +143,10 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 			y += height;
 
 		/* select an item if not done already */
-		if (!menu->cur_item_id)
-			menu_point_to_item(menu, item->id);
+		if (!sel_id)
+			sel_id = item->id;
 
-		selected = menu->cur_item_id == item->id;
-		if (selected)
-			cur_y = y;
+		selected = sel_id == item->id;
 
 		/*
 		 * Put the label on the left, then leave a space for the
@@ -171,16 +191,8 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 			y += height;
 	}
 
-	if (menu->pointer_id && cur_y != -1) {
-		/*
-		 * put the pointer to the right of and level with the item it
-		 * points to
-		 */
-		ret = scene_obj_set_pos(scn, menu->pointer_id,
-					menu->obj.dim.x + 200, cur_y);
-		if (ret < 0)
-			return log_msg_ret("ptr", ret);
-	}
+	if (sel_id)
+		menu_point_to_item(menu, sel_id);
 
 	return 0;
 }
