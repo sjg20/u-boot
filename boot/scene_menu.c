@@ -201,10 +201,6 @@ int scene_menu(struct scene *scn, const char *name, uint id,
 		*menup = menu;
 	INIT_LIST_HEAD(&menu->item_head);
 
-	ret = scene_menu_arrange(scn, menu);
-	if (ret)
-		return log_msg_ret("pos", ret);
-
 	return menu->obj.id;
 }
 
@@ -301,7 +297,6 @@ int scene_menuitem(struct scene *scn, uint menu_id, const char *name, uint id,
 {
 	struct scene_obj_menu *menu;
 	struct scene_menitem *item;
-	int ret;
 
 	menu = scene_obj_find(scn, menu_id, SCENEOBJT_MENU);
 	if (!menu)
@@ -327,10 +322,6 @@ int scene_menuitem(struct scene *scn, uint menu_id, const char *name, uint id,
 	item->preview_id = preview_id;
 	item->flags = flags;
 	list_add_tail(&item->sibling, &menu->item_head);
-
-	ret = scene_menu_arrange(scn, menu);
-	if (ret)
-		return log_msg_ret("pos", ret);
 
 	if (itemp)
 		*itemp = item;
