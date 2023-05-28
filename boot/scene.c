@@ -6,11 +6,15 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_CATEGORY	UCLASS_BOOTSTD
+#define LOG_DEBUG
+
 #include <common.h>
 #include <dm.h>
 #include <expo.h>
 #include <malloc.h>
 #include <mapmem.h>
+#include <menu.h>
 #include <video.h>
 #include <video_console.h>
 #include <linux/input.h>
@@ -442,15 +446,62 @@ int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 	struct scene_obj *obj;
 	int ret;
 
-	list_for_each_entry(obj, &scn->obj_head, sibling) {
-		if (obj->type == SCENEOBJT_MENU) {
-			struct scene_obj_menu *menu;
+	event->type = EXPOACT_NONE;
+	if (scn->expo->popup) {
+		obj = NULL;
+		if (scn->highlight_id) {
+			obj = scene_obj_find(scn, scn->highlight_id,
+					     SCENEOBJT_NONE);
+		}
+		if (!obj)
+			return 0;
 
-			menu = (struct scene_obj_menu *)obj,
-			ret = scene_menu_send_key(scn, menu, key, event);
-			if (ret)
-				return log_msg_ret("key", ret);
+		switch (key) {
+		case BKEY_UP:
+			while (obj != list_first_entry(&scn->obj_head,
+						    struct scene_obj,
+					            sibling)) {
+				obj = list_entry(obj->sibling.prev,
+						 struct scene_obj, sibling);
+				if (obj->type == SCENEOBJT_MENU) {
+					event->type = EXPOACT_POINT_OBJ;
+					event->select.id = obj->id;
+					log_debug("up to obj %d\n",
+						  event->select.id);
+					break;
+				}
+			}
 			break;
+		case BKEY_DOWN:
+			while (!list_is_last(&obj->sibling, &scn->obj_head)) {
+				obj = list_entry(obj->sibling.next,
+						 struct scene_obj, sibling);
+				if (obj->type == SCENEOBJT_MENU) {
+					event->type = EXPOACT_POINT_OBJ;
+					event->select.id = obj->id;
+					log_debug("down to obj %d\n",
+						  event->select.id);
+					break;
+				}
+			}
+			break;
+		case BKEY_QUIT:
+			event->type = EXPOACT_QUIT;
+			log_debug("quit\n");
+			break;
+		}
+	} else {
+		list_for_each_entry(obj, &scn->obj_head, sibling) {
+			if (obj->type == SCENEOBJT_MENU) {
+				struct scene_obj_menu *menu;
+
+				menu = (struct scene_obj_menu *)obj,
+				ret = scene_menu_send_key(scn, menu, key,
+							  event);
+				if (ret)
+					return log_msg_ret("key", ret);
+				break;
+			}
 		}
 	}
 
@@ -523,6 +574,11 @@ int scene_apply_theme(struct scene *scn, struct expo_theme *theme)
 	return 0;
 }
 
+void scene_set_highlight_id(struct scene *scn, uint id)
+{
+	scn->highlight_id = id;
+}
+
 void scene_highlight_first(struct scene *scn)
 {
 	struct scene_obj *obj;
@@ -530,7 +586,7 @@ void scene_highlight_first(struct scene *scn)
 	list_for_each_entry(obj, &scn->obj_head, sibling) {
 		switch (obj->type) {
 		case SCENEOBJT_MENU:
-			scn->highlight_id = obj->id;
+			scene_set_highlight_id(scn, obj->id);
 			return;
 		default:
 			break;

@@ -91,14 +91,15 @@ int cedit_run(struct expo *exp)
 // 		exp_set_text_mode(exp, text_mode);
 
 	vid_priv = dev_get_uclass_priv(dev);
+
+	scn = expo_lookup_scene_id(exp, scene_id);
+	scene_highlight_first(scn);
+
 	cedit_arange(exp, vid_priv, scene_id);
 
 	ret = expo_calc_dims(exp);
 	if (ret)
 		return log_msg_ret("dim", ret);
-
-	scn = expo_lookup_scene_id(exp, scene_id);
-	scene_highlight_first(scn);
 
 	done = false;
 	do {
@@ -138,8 +139,14 @@ int cedit_run(struct expo *exp)
 		ret = expo_action_get(exp, &act);
 		if (!ret) {
 			switch (act.type) {
+			case EXPOACT_POINT_OBJ:
+				printf("point %d\n", act.select.id);
+				scene_set_highlight_id(scn, act.select.id);
+				cedit_arange(exp, vid_priv, scene_id);
+				break;
 			case EXPOACT_SELECT:
-				sel_id = act.select.id;
+// 				scene_highlight(scn->highlight_id = obj->id;
+// 				cedit_arange(exp, vid_priv, scene_id);
 				done = true;
 				break;
 			case EXPOACT_QUIT:
@@ -156,4 +163,3 @@ int cedit_run(struct expo *exp)
 
 	return 0;
 }
-

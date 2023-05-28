@@ -17,13 +17,15 @@ struct video_priv;
  * enum expoact_type - types of actions reported by the expo
  *
  * @EXPOACT_NONE: no action
- * @EXPOACT_POINT: menu item was highlighted (@id indicates which)
+ * @EXPOACT_POINT_OBJ: object was highlighted (@id indicates which)
+ * @EXPOACT_POINT_ITEM: menu item was highlighted (@id indicates which)
  * @EXPOACT_SELECT: menu item was selected (@id indicates which)
  * @EXPOACT_QUIT: request to exit the menu
  */
 enum expoact_type {
 	EXPOACT_NONE,
-	EXPOACT_POINT,
+	EXPOACT_POINT_OBJ,
+	EXPOACT_POINT_ITEM,
 	EXPOACT_SELECT,
 	EXPOACT_QUIT,
 };
@@ -32,7 +34,7 @@ enum expoact_type {
  * struct expo_action - an action report by the expo
  *
  * @type: Action type (EXPOACT_NONE if there is no action)
- * @select: Used for EXPOACT_POINT and EXPOACT_SELECT
+ * @select: Used for EXPOACT_POINT_ITEM and EXPOACT_SELECT
  * @id: ID number of the object affected.
  */
 struct expo_action {
@@ -399,6 +401,8 @@ struct scene *expo_lookup_scene_id(struct expo *exp, uint scene_id);
  * @scn: Scene to update
  */
 void scene_highlight_first(struct scene *scn);
+
+void scene_set_highlight_id(struct scene *scn, uint id);
 
 /**
  * scene_title_set() - set the scene title
