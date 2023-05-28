@@ -213,6 +213,8 @@ int scene_obj_set_pos(struct scene *scn, uint id, int x, int y)
 		return log_msg_ret("find", -ENOENT);
 	obj->dim.x = x;
 	obj->dim.y = y;
+	obj->dim.w = 100;
+	obj->dim.h = 50;
 
 	return 0;
 }
@@ -344,8 +346,8 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 
 			if (obj->flags & SCENEOF_POINT) {
 				vidconsole_push_colour(cons, fore, back, &old);
-				vidconsole_clear(cons, x, y, obj->dim.w,
-						 obj->dim.h);
+				video_fill_part(dev, x, y, x + obj->dim.w,
+						y + obj->dim.h, back);
 			}
 			vidconsole_put_string(cons, str);
 			if (obj->flags & SCENEOF_POINT)

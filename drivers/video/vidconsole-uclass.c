@@ -677,11 +677,6 @@ int vidconsole_memmove(struct udevice *dev, void *dst, const void *src,
 }
 #endif
 
-void vidconsole_clear(struct udevice *dev, int x, int y, int w, int h)
-{
-
-}
-
 int vidconsole_clear_and_reset(struct udevice *dev)
 {
 	int ret;
