@@ -596,6 +596,24 @@ int vidconsole_select_font(struct udevice *dev, const char *name, uint size)
 	return ops->select_font(dev, name, size);
 }
 
+void vidconsole_push_colour(struct udevice *dev, enum colour_idx colour,
+			    struct vidconsole_colour *old)
+{
+	struct video_priv *vid_priv = dev_get_uclass_priv(dev->parent);
+
+	old->colour_fg = vid_priv->colour_fg;
+	old->colour_bg = vid_priv->colour_bg;
+
+	vid_priv->colour_fg = video_index_to_colour(vid_priv, colour);
+}
+
+void vidconsole_pop_colour(struct udevice *dev, struct vidconsole_colour *old)
+{
+	struct video_priv *vid_priv = dev_get_uclass_priv(dev->parent);
+
+	vid_priv->colour_fg = old->colour_fg;
+}
+
 /* Set up the number of rows and colours (rotated drivers override this) */
 static int vidconsole_pre_probe(struct udevice *dev)
 {

@@ -97,6 +97,7 @@ struct expo_string {
  * @name: Name of the scene (allocated)
  * @id: ID number of the scene
  * @title_id: String ID of title of the scene (allocated)
+ * @highlight_id: ID of highlighted object, if any
  * @sibling: Node to link this scene to its siblings
  * @obj_head: List of objects in the scene
  */
@@ -105,6 +106,7 @@ struct scene {
 	char *name;
 	uint id;
 	uint title_id;
+	uint highlight_id;
 	struct list_head sibling;
 	struct list_head obj_head;
 };
@@ -143,9 +145,11 @@ struct scene_dim {
  * enum scene_obj_flags_t - flags for objects
  *
  * @SCENEOF_HIDE: object should be hidden
+ * @SCENEOF_POINT: object should be highlighted
  */
 enum scene_obj_flags_t {
 	SCENEOF_HIDE	= 1 << 0,
+	SCENEOF_POINT	= 1 << 1,
 };
 
 /**
@@ -374,6 +378,8 @@ int scene_new(struct expo *exp, const char *name, uint id, struct scene **scnp);
  */
 struct scene *expo_lookup_scene_id(struct expo *exp, uint scene_id);
 
+void scene_highlight_first(struct scene *scn);
+
 /**
  * scene_title_set() - set the scene title
  *
@@ -580,5 +586,7 @@ int expo_build(oftree tree, struct expo **expp);
 int expo_apply_theme(struct expo *exp, ofnode node);
 
 int cedit_arange(struct expo *exp, struct video_priv *vid_priv, uint scene_id);
+
+int cedit_run(struct expo *exp);
 
 #endif /*__SCENE_H */

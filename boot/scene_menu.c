@@ -33,6 +33,27 @@ void scene_menu_destroy(struct scene_obj_menu *menu)
 		scene_menuitem_destroy(item);
 }
 
+#if 0
+static struct scene_menitem *scene_menuitem_find(uint id)
+{
+	struct scene_menitem *item;
+
+	list_for_each_entry(item, &menu->item_head, sibling) {
+		if (item->id == id)
+			return item;
+	}
+
+	return NULL;
+}
+#endif
+
+static void update_pointers(struct scene_obj_menu *menu, uint id, bool point)
+{
+// 	const struct scene_menitem *item;
+
+// 	item = scene_menuitem_find(item_id);
+}
+
 /**
  * menu_point_to_item() - Point to a particular menu item
  *
@@ -40,9 +61,22 @@ void scene_menu_destroy(struct scene_obj_menu *menu)
  */
 static void menu_point_to_item(struct scene_obj_menu *menu, uint item_id)
 {
+	if (menu->cur_item_id)
+		update_pointers(menu, menu->cur_item_id, false);
 	menu->cur_item_id = item_id;
+	update_pointers(menu, item_id, true);
 }
+/*
+void scene_menu_highlight_first(struct scene_obj_menu *menu)
+{
+	struct scene_menitem *item;
 
+	list_for_each_entry(item, &menu->item_head, sibling) {
+		menu_point_to_item(menu, item->id);
+		return;
+	}
+}
+*/
 int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 {
 	const bool stack = scn->expo->popup;
@@ -167,7 +201,7 @@ int scene_menu(struct scene *scn, const char *name, uint id,
 		*menup = menu;
 	INIT_LIST_HEAD(&menu->item_head);
 
-	ret = scene_menu_arrange(scn, menu, false);
+	ret = scene_menu_arrange(scn, menu);
 	if (ret)
 		return log_msg_ret("pos", ret);
 
@@ -294,7 +328,7 @@ int scene_menuitem(struct scene *scn, uint menu_id, const char *name, uint id,
 	item->flags = flags;
 	list_add_tail(&item->sibling, &menu->item_head);
 
-	ret = scene_menu_arrange(scn, menu, false);
+	ret = scene_menu_arrange(scn, menu);
 	if (ret)
 		return log_msg_ret("pos", ret);
 

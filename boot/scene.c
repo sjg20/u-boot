@@ -214,7 +214,7 @@ int scene_obj_set_pos(struct scene *scn, uint id, int x, int y)
 	obj->dim.x = x;
 	obj->dim.y = y;
 	if (obj->type == SCENEOBJT_MENU)
-		scene_menu_arrange(scn, (struct scene_obj_menu *)obj, false);
+		scene_menu_arrange(scn, (struct scene_obj_menu *)obj);
 
 	return 0;
 }
@@ -328,8 +328,15 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 			return log_msg_ret("font", ret);
 		vidconsole_set_cursor_pos(cons, x, y);
 		str = expo_get_str(exp, txt->str_id);
-		if (str)
+		if (str) {
+			struct vidconsole_colour old;
+
+			if (obj->flags & SCENEOF_POINT)
+				vidconsole_push_colour(cons, VID_YELLOW, &old);
 			vidconsole_put_string(cons, str);
+			if (obj->flags & SCENEOF_POINT)
+				vidconsole_pop_colour(cons, &old);
+		}
 		break;
 	}
 	case SCENEOBJT_MENU: {
@@ -404,7 +411,7 @@ int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 				return log_msg_ret("key", ret);
 
 			/* only allow one menu */
-			ret = scene_menu_arrange(scn, menu, false);
+			ret = scene_menu_arrange(scn, menu);
 			if (ret)
 				return log_msg_ret("arr", ret);
 			break;
@@ -440,4 +447,19 @@ int scene_apply_theme(struct scene *scn, struct expo_theme *theme)
 		return log_msg_ret("arr", ret);
 
 	return 0;
+}
+
+void scene_highlight_first(struct scene *scn)
+{
+	struct scene_obj *obj;
+
+	list_for_each_entry(obj, &scn->obj_head, sibling) {
+		switch (obj->type) {
+		case SCENEOBJT_MENU:
+			scn->highlight_id = obj->id;
+			return;
+		default:
+			break;
+		}
+	}
 }

@@ -11,11 +11,17 @@ enum {
 
 	ID_SCENE1,
 	ID_SCENE1_TITLE,
+
 	ID_CPU_SPEED,
 	ID_CPU_SPEED_TITLE,
 	ID_CPU_SPEED_1,
 	ID_CPU_SPEED_2,
 	ID_CPU_SPEED_3,
+
+	ID_POWER_LOSS,
+	ID_AC_OFF,
+	ID_AC_ON,
+	ID_AC_MEMORY,
 
 	ID_DYNAMIC_START,
 };
@@ -52,6 +58,17 @@ enum {
 				/* IDs for the menu items */
 				item-id = <ID_CPU_SPEED_1 ID_CPU_SPEED_2
 					ID_CPU_SPEED_3>;
+			};
+
+			power-loss {
+				type = "menu";
+				id = <ID_POWER_LOSS>;
+
+				title = "AC Power";
+				item-label = "Always Off", "Always On",
+					"Memory";
+
+				item-id = <ID_AC_OFF ID_AC_ON ID_AC_MEMORY>;
 			};
 		};
 	};

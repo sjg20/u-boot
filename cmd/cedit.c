@@ -7,14 +7,10 @@
  */
 
 #include <common.h>
-#include <cli.h>
 #include <command.h>
-#include <dm.h>
 #include <expo.h>
 #include <fs.h>
-#include <menu.h>
 #include <dm/ofnode.h>
-#include <linux/delay.h>
 #include <linux/sizes.h>
 
 struct expo *cur_exp;
@@ -53,105 +49,6 @@ static int do_cedit_load(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 
 	cur_exp = exp;
-
-	return 0;
-}
-
-static int cedit_run(struct expo *exp)
-{
-	struct cli_ch_state s_cch, *cch = &s_cch;
-	struct video_priv *vid_priv;
-	struct udevice *dev;
-	uint sel_id, scene_id;
-	bool done;
-	int ret;
-
-	cli_ch_init(cch);
-/*
-	if (ofnode_valid(std->theme)) {
-		ret = bootflow_menu_apply_theme(exp, std->theme);
-		if (ret)
-			return log_msg_ret("thm", ret);
-	}
-*/
-	/* For now we only support a video console */
-	ret = uclass_first_device_err(UCLASS_VIDEO, &dev);
-	if (ret)
-		return log_msg_ret("vid", ret);
-	ret = expo_set_display(exp, dev);
-	if (ret)
-		return log_msg_ret("dis", ret);
-
-	ret = expo_first_scene_id(exp);
-	if (ret < 0)
-		return log_msg_ret("scn", ret);
-	scene_id = ret;
-
-	ret = expo_set_scene_id(exp, scene_id);
-	if (ret)
-		return log_msg_ret("scn", ret);
-
-	exp->popup = true;
-
-// 	if (text_mode)
-// 		exp_set_text_mode(exp, text_mode);
-
-	vid_priv = dev_get_uclass_priv(dev);
-	cedit_arange(exp, vid_priv, scene_id);
-
-	done = false;
-	do {
-		struct expo_action act;
-		int ichar, key;
-
-		ret = expo_render(exp);
-		if (ret)
-			break;
-
-		ichar = cli_ch_process(cch, 0);
-		if (!ichar) {
-			while (!ichar && !tstc()) {
-				schedule();
-				mdelay(2);
-				ichar = cli_ch_process(cch, -ETIMEDOUT);
-			}
-			if (!ichar) {
-				ichar = getchar();
-				ichar = cli_ch_process(cch, ichar);
-			}
-		}
-
-		key = 0;
-		if (ichar) {
-			key = bootmenu_conv_key(ichar);
-			if (key == BKEY_NONE)
-				key = ichar;
-		}
-		if (!key)
-			continue;
-
-		ret = expo_send_key(exp, key);
-		if (ret)
-			break;
-
-		ret = expo_action_get(exp, &act);
-		if (!ret) {
-			switch (act.type) {
-			case EXPOACT_SELECT:
-				sel_id = act.select.id;
-				done = true;
-				break;
-			case EXPOACT_QUIT:
-				done = true;
-				break;
-			default:
-				break;
-			}
-		}
-	} while (!done);
-
-	if (ret)
-		return log_msg_ret("end", ret);
 
 	return 0;
 }
