@@ -83,7 +83,7 @@ int cedit_run(struct expo *exp)
 
 	ret = expo_set_scene_id(exp, scene_id);
 	if (ret)
-		return log_msg_ret("scn", ret);
+		return log_msg_ret("sid", ret);
 
 	exp->popup = true;
 
@@ -92,6 +92,10 @@ int cedit_run(struct expo *exp)
 
 	vid_priv = dev_get_uclass_priv(dev);
 	cedit_arange(exp, vid_priv, scene_id);
+
+	ret = expo_calc_dims(exp);
+	if (ret)
+		return log_msg_ret("dim", ret);
 
 	scn = expo_lookup_scene_id(exp, scene_id);
 	scene_highlight_first(scn);

@@ -213,8 +213,6 @@ int scene_obj_set_pos(struct scene *scn, uint id, int x, int y)
 		return log_msg_ret("find", -ENOENT);
 	obj->dim.x = x;
 	obj->dim.y = y;
-	obj->dim.w = 100;
-	obj->dim.h = 30;
 
 	return 0;
 }
@@ -425,6 +423,41 @@ int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 			ret = scene_menu_send_key(scn, menu, key, event);
 			if (ret)
 				return log_msg_ret("key", ret);
+			break;
+		}
+	}
+
+	return 0;
+}
+
+int scene_calc_dims(struct scene *scn)
+{
+	struct scene_obj *obj;
+	int ret;
+
+	list_for_each_entry(obj, &scn->obj_head, sibling) {
+		switch (obj->type) {
+		case SCENEOBJT_NONE:
+		case SCENEOBJT_TEXT:
+		case SCENEOBJT_IMAGE: {
+			int width;
+
+			ret = scene_obj_get_hw(scn, obj->id, &width);
+			if (ret < 0)
+				return log_msg_ret("get", ret);
+			obj->dim.w = width;
+			obj->dim.h = ret;
+
+			break;
+		}
+		case SCENEOBJT_MENU:
+			struct scene_obj_menu *menu;
+
+			menu = (struct scene_obj_menu *)obj;
+
+			ret = scene_menu_calc_dims(menu);
+			if (ret)
+				return log_msg_ret("men", ret);
 			break;
 		}
 	}

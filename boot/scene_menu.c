@@ -97,17 +97,55 @@ static void menu_point_to_item(struct scene_obj_menu *menu, uint item_id)
 	menu->cur_item_id = item_id;
 	update_pointers(menu, item_id, true);
 }
-/*
-void scene_menu_highlight_first(struct scene_obj_menu *menu)
+
+static int scene_bbox_union(struct scene *scn, uint id, struct scene_bbox *bbox)
 {
-	struct scene_menitem *item;
+	struct scene_obj *obj;
+
+	if (!id)
+		return 0;
+	obj = scene_obj_find(scn, id, SCENEOBJT_NONE);
+	if (!obj)
+		return log_msg_ret("obj", -ENOENT);
+	if (bbox->valid) {
+		bbox->x0 = min(bbox->x0, obj->dim.x);
+		bbox->y0 = min(bbox->y0, obj->dim.y);
+		bbox->x1 = max(bbox->x1, obj->dim.x + obj->dim.w);
+		bbox->y1 = max(bbox->y1, obj->dim.y + obj->dim.h);
+	} else {
+		bbox->x0 = obj->dim.x;
+		bbox->y0 = obj->dim.y;
+		bbox->x1 = obj->dim.x + obj->dim.w;
+		bbox->y1 = obj->dim.y + obj->dim.h;
+		bbox->valid = true;
+	}
+
+	return 0;
+}
+
+int scene_menu_calc_dims(struct scene_obj_menu *menu)
+{
+	const struct scene_menitem *item;
+	struct scene_bbox bbox;
+
+	bbox.valid = false;
+	scene_bbox_union(menu->obj.scene, menu->title_id, &bbox);
 
 	list_for_each_entry(item, &menu->item_head, sibling) {
-		menu_point_to_item(menu, item->id);
-		return;
+		scene_bbox_union(menu->obj.scene, item->label_id, &bbox);
+		scene_bbox_union(menu->obj.scene, item->key_id, &bbox);
+		scene_bbox_union(menu->obj.scene, item->desc_id, &bbox);
+		scene_bbox_union(menu->obj.scene, item->preview_id, &bbox);
 	}
+
+	if (bbox.valid) {
+		menu->obj.dim.w = bbox.x1 - bbox.x0;
+		menu->obj.dim.h = bbox.y1 - bbox.y0;
+	}
+
+	return 0;
 }
-*/
+
 int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 {
 	const bool stack = scn->expo->popup;

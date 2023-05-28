@@ -144,6 +144,27 @@ struct scene_dim {
 };
 
 /**
+ * struct scene_bbox - Bounding box of an objects
+ *
+ * These describe the bounding box of an object. The x0/y0 pair is inclusive;
+ * the x1/y2 pair is exclusive, meaning that it is one pixel beyond the extent
+ * of the object
+ *
+ * @valid: Values are valid (bounding box is known)
+ * @x0: left x position, in pixels from left side
+ * @y0: top y position, in pixels from top
+ * @x1: right x position + 1
+ * @y1: botton y position + 1
+ */
+struct scene_bbox {
+	bool valid;
+	int x0;
+	int y0;
+	int x1;
+	int y1;
+};
+
+/**
  * enum scene_obj_flags_t - flags for objects
  *
  * @SCENEOF_HIDE: object should be hidden
@@ -323,6 +344,16 @@ const char *expo_get_str(struct expo *exp, uint id);
 int expo_set_display(struct expo *exp, struct udevice *dev);
 
 /**
+ * expo_calc_dims() - Calculate the dimensions of the objects
+ *
+ * Updates the width and height of all objects based on their contents
+ *
+ * @exp: Expo to update
+ * Returns 0 if OK, -ENOTSUPP if there is no graphical console
+ */
+int expo_calc_dims(struct expo *exp);
+
+/**
  * expo_set_scene_id() - Set the current scene ID
  *
  * @exp: Expo to update
@@ -350,12 +381,12 @@ int expo_first_scene_id(struct expo *exp);
 int expo_render(struct expo *exp);
 
 /**
- * exp_set_text_mode() - Controls whether the expo renders in text mode
+ * expo_set_text_mode() - Controls whether the expo renders in text mode
  *
  * @exp: Expo to update
  * @text_mode: true to use text mode, false to use the console
  */
-void exp_set_text_mode(struct expo *exp, bool text_mode);
+void expo_set_text_mode(struct expo *exp, bool text_mode);
 
 /**
  * scene_new() - create a new scene in a expo
@@ -380,6 +411,14 @@ int scene_new(struct expo *exp, const char *name, uint id, struct scene **scnp);
  */
 struct scene *expo_lookup_scene_id(struct expo *exp, uint scene_id);
 
+/**
+ * scene_highlight_first() - Highlight the first item in a scene
+ *
+ * This highlights the first item, so that the user can see that it is pointed
+ * to
+ *
+ * @scn: Scene to update
+ */
 void scene_highlight_first(struct scene *scn);
 
 /**
@@ -513,6 +552,16 @@ int scene_menu_set_title(struct scene *scn, uint id, uint title_id);
 int scene_menu_set_pointer(struct scene *scn, uint id, uint cur_item_id);
 
 /**
+ * scene_menu_calc_dims() - Calculate the dimensions of a menu
+ *
+ * Updates the width and height of the menu based based on its contents
+ *
+ * @menu: Menu to update
+ * Returns 0 if OK, -ENOTSUPP if there is no graphical console
+ */
+int scene_menu_calc_dims(struct scene_obj_menu *menu);
+
+/**
  * scene_obj_get_hw() - Get width and height of an object in a scene
  *
  * @scn: Scene to check
@@ -539,7 +588,17 @@ int scene_obj_get_hw(struct scene *scn, uint id, int *widthp);
  */
 int scene_menuitem(struct scene *scn, uint menu_id, const char *name, uint id,
 		   uint key_id, uint label_id, uint desc_id, uint preview_id,
+
 		   uint flags, struct scene_menitem **itemp);
+/**
+ * scene_calc_dims() - Calculate the dimensions of the scene objects
+ *
+ * Updates the width and height of all objects based on their contents
+ *
+ * @scn: Scene to update
+ * Returns 0 if OK, -ENOTSUPP if there is no graphical console
+ */
+int scene_calc_dims(struct scene *scn);
 
 /**
  * scene_arrange() - Arrange the scene to deal with object sizes
