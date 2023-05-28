@@ -214,7 +214,7 @@ int scene_obj_set_pos(struct scene *scn, uint id, int x, int y)
 	obj->dim.x = x;
 	obj->dim.y = y;
 	obj->dim.w = 100;
-	obj->dim.h = 50;
+	obj->dim.h = 30;
 
 	return 0;
 }
@@ -330,7 +330,6 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 		}
 		if (ret && ret != -ENOSYS)
 			return log_msg_ret("font", ret);
-		vidconsole_set_cursor_pos(cons, x, y);
 		str = expo_get_str(exp, txt->str_id);
 		if (str) {
 			struct vidconsole_colour old;
@@ -349,6 +348,7 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 				video_fill_part(dev, x, y, x + obj->dim.w,
 						y + obj->dim.h, back);
 			}
+			vidconsole_set_cursor_pos(cons, x, y);
 			vidconsole_put_string(cons, str);
 			if (obj->flags & SCENEOF_POINT)
 				vidconsole_pop_colour(cons, &old);
