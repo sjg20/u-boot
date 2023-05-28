@@ -291,15 +291,9 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 {
 	struct scene *scn = obj->scene;
 	struct expo *exp = scn->expo;
-	struct udevice *cons, *dev = exp->display;
+	struct udevice *dev = exp->display;
+	struct udevice *cons = exp->cons;
 	int x, y, ret;
-
-	cons = NULL;
-	if (!text_mode) {
-		ret = device_find_first_child_by_uclass(dev,
-							UCLASS_VIDEO_CONSOLE,
-							&cons);
-	}
 
 	x = obj->dim.x;
 	y = obj->dim.y;
