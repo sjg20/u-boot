@@ -140,7 +140,6 @@ int cedit_run(struct expo *exp)
 		if (!ret) {
 			switch (act.type) {
 			case EXPOACT_POINT_OBJ:
-				printf("point %d\n", act.select.id);
 				scene_set_highlight_id(scn, act.select.id);
 				cedit_arange(exp, vid_priv, scene_id);
 				break;
@@ -157,7 +156,7 @@ int cedit_run(struct expo *exp)
 				cedit_arange(exp, vid_priv, scene_id);
 				break;
 			case EXPOACT_QUIT:
-				printf("quitting\n");
+				log_debug("quitting\n");
 				done = true;
 				break;
 			default:

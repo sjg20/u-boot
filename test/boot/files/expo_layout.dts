@@ -53,7 +53,7 @@ enum {
 				title-id = <ID_CPU_SPEED_TITLE>;
 
 				/* menu items as simple strings */
-				item-label = "one", "two", "three";
+				item-label = "2 GHz", "2.5 GHz", "3 GHz";
 
 				/* IDs for the menu items */
 				item-id = <ID_CPU_SPEED_1 ID_CPU_SPEED_2
