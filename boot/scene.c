@@ -322,6 +322,7 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 {
 	struct scene *scn = obj->scene;
 	struct expo *exp = scn->expo;
+	const struct expo_theme *theme = &exp->theme;
 	struct udevice *dev = exp->display;
 	struct udevice *cons = exp->cons;
 	int x, y, ret;
@@ -376,8 +377,9 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 			vid_priv = dev_get_uclass_priv(dev);
 			if (obj->flags & SCENEOF_POINT) {
 				vidconsole_push_colour(cons, fore, back, &old);
-				video_fill_part(dev, x, y, x + obj->dim.w,
-						y + obj->dim.h - 1,
+				video_fill_part(dev, x - theme->menu_inset, y,
+						x + obj->dim.w,
+						y + obj->dim.h,
 						vid_priv->colour_bg);
 			}
 			vidconsole_set_cursor_pos(cons, x, y);
