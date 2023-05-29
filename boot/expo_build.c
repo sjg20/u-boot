@@ -216,7 +216,6 @@ static int menu_build(struct build_info *info, ofnode node, struct scene *scn)
 		struct scene_menitem *item;
 		uint label, key, desc;
 
-		printf("i=%d, size=%d\n", i, size);
 		ret = add_txt_str_list(info, node, scn, "item-label", i, 0);
 		if (ret < 0 && ret != -ENOENT)
 			return log_msg_ret("lab", ret);

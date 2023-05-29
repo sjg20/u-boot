@@ -6,6 +6,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY	LOGC_BOOT
 
 #include <common.h>
@@ -115,8 +116,6 @@ static int scene_bbox_union(struct scene *scn, uint id,
 		bbox->x1 = max(bbox->x1, obj->dim.x + obj->dim.w);
 		bbox->y1 = max(bbox->y1, obj->dim.y + obj->dim.h);
 	} else {
-		printf("- add %d %d %d %d\n", obj->dim.x, obj->dim.y,
-		       obj->dim.w, obj->dim.h);
 		bbox->x0 = obj->dim.x;
 		bbox->y0 = obj->dim.y;
 		bbox->x1 = obj->dim.x + obj->dim.w;
@@ -149,11 +148,7 @@ int scene_menu_calc_dims(struct scene_obj_menu *menu)
 
 	/* Make all labels the same size */
 	if (label_bbox.valid) {
-		printf("all size %d %d\n", bbox.x1 - bbox.x0,
-		       bbox.y1 - bbox.y0);
 		list_for_each_entry(item, &menu->item_head, sibling) {
-			printf("size %d %d\n", label_bbox.x1 - label_bbox.x0,
-			       label_bbox.y1 - label_bbox.y0);
 			scene_obj_set_size(menu->obj.scene, item->label_id,
 					   label_bbox.x1 - label_bbox.x0,
 					   label_bbox.y1 - label_bbox.y0);
@@ -170,6 +165,7 @@ int scene_menu_calc_dims(struct scene_obj_menu *menu)
 
 int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 {
+	const bool open = menu->obj.flags & SCENEOF_OPEN;
 	const bool stack = scn->expo->popup;
 	struct scene_menitem *item;
 	uint sel_id;
@@ -225,8 +221,8 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 		ret = scene_obj_set_pos(scn, item->label_id, x, y);
 		if (ret < 0)
 			return log_msg_ret("nam", ret);
-		if (stack)
-			scene_obj_set_hide(scn, item->label_id, !selected);
+		scene_obj_set_hide(scn, item->label_id, stack && !open &&
+			!selected);
 
 		if (item->key_id) {
 			ret = scene_obj_set_pos(scn, item->key_id, x + 230, y);
@@ -257,7 +253,7 @@ int scene_menu_arrange(struct scene *scn, struct scene_obj_menu *menu)
 				return log_msg_ret("hid", ret);
 		}
 
-		if (!stack)
+		if (!stack || open)
 			y += height;
 	}
 
@@ -312,6 +308,7 @@ static struct scene_menitem *scene_menu_find_key(struct scene *scn,
 int scene_menu_send_key(struct scene *scn, struct scene_obj_menu *menu, int key,
 			struct expo_action *event)
 {
+	const bool open = menu->obj.flags & SCENEOF_OPEN;
 	struct scene_menitem *item, *cur, *key_item;
 
 	cur = NULL;
@@ -356,8 +353,13 @@ int scene_menu_send_key(struct scene *scn, struct scene_obj_menu *menu, int key,
 		log_debug("select item %d\n", event->select.id);
 		break;
 	case BKEY_QUIT:
-		event->type = EXPOACT_QUIT;
-		log_debug("quit\n");
+		if (scn->expo->popup && open) {
+			event->type = EXPOACT_CLOSE;
+			event->select.id = menu->obj.id;
+		} else {
+			event->type = EXPOACT_QUIT;
+			log_debug("quit\n");
+		}
 		break;
 	case '0'...'9':
 		key_item = scene_menu_find_key(scn, menu, key);

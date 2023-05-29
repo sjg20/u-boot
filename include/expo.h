@@ -20,6 +20,9 @@ struct video_priv;
  * @EXPOACT_POINT_OBJ: object was highlighted (@id indicates which)
  * @EXPOACT_POINT_ITEM: menu item was highlighted (@id indicates which)
  * @EXPOACT_SELECT: menu item was selected (@id indicates which)
+ * @EXPOACT_OPEN: menu was opened, so an item can be selected (@id indicates
+ * which menu object)
+ * @EXPOACT_CLOSE: menu was closed (@id indicates which menu object)
  * @EXPOACT_QUIT: request to exit the menu
  */
 enum expoact_type {
@@ -27,6 +30,8 @@ enum expoact_type {
 	EXPOACT_POINT_OBJ,
 	EXPOACT_POINT_ITEM,
 	EXPOACT_SELECT,
+	EXPOACT_OPEN,
+	EXPOACT_CLOSE,
 	EXPOACT_QUIT,
 };
 
@@ -150,10 +155,13 @@ struct scene_dim {
  *
  * @SCENEOF_HIDE: object should be hidden
  * @SCENEOF_POINT: object should be highlighted
+ * @SCENEOF_OPEN: object should be opened (e.g. menu is opened so that an option
+ * can be selected)
  */
 enum scene_obj_flags_t {
 	SCENEOF_HIDE	= 1 << 0,
 	SCENEOF_POINT	= 1 << 1,
+	SCENEOF_OPEN	= 1 << 2,
 };
 
 /**
@@ -402,7 +410,25 @@ struct scene *expo_lookup_scene_id(struct expo *exp, uint scene_id);
  */
 void scene_highlight_first(struct scene *scn);
 
+/**
+ * scene_set_highlight_id() - Set the object which is highlighted
+ *
+ * Sets a new object to highlight in the scene
+ *
+ * @scn: Scene to update
+ * @id: ID of object to highlight
+ */
 void scene_set_highlight_id(struct scene *scn, uint id);
+
+/**
+ * scene_set_open() - Set whether an item is open or not
+ *
+ * @scn: Scene to update
+ * @id: ID of object to update
+ * @hide: true to open the object, false to close it
+ * Returns: 0 if OK, -ENOENT if @id is invalid
+ */
+int scene_set_open(struct scene *scn, uint id, bool open);
 
 /**
  * scene_title_set() - set the scene title

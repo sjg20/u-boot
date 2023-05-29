@@ -26,9 +26,9 @@ int cedit_arange(struct expo *exp, struct video_priv *vpriv, uint scene_id)
 	if (!scn)
 		return log_msg_ret("scn", -ENOENT);
 
-	list_for_each_entry(obj, &scn->obj_head, sibling) {
-		printf("%3d %s\n", obj->id, obj->name);
-	}
+// 	list_for_each_entry(obj, &scn->obj_head, sibling) {
+// 		printf("%3d %s\n", obj->id, obj->name);
+// 	}
 
 	txt = scene_obj_find_by_name(scn, "prompt");
 	if (txt)
@@ -54,7 +54,7 @@ int cedit_run(struct expo *exp)
 {
 	struct cli_ch_state s_cch, *cch = &s_cch;
 	struct video_priv *vid_priv;
-	uint sel_id, scene_id;
+	uint scene_id;
 	struct udevice *dev;
 	struct scene *scn;
 	bool done;
@@ -144,10 +144,17 @@ int cedit_run(struct expo *exp)
 				scene_set_highlight_id(scn, act.select.id);
 				cedit_arange(exp, vid_priv, scene_id);
 				break;
+			case EXPOACT_OPEN:
+				scene_set_open(scn, act.select.id, true);
+				cedit_arange(exp, vid_priv, scene_id);
+				break;
+			case EXPOACT_CLOSE:
+				scene_set_open(scn, act.select.id, false);
+				cedit_arange(exp, vid_priv, scene_id);
+				break;
 			case EXPOACT_SELECT:
-// 				scene_highlight(scn->highlight_id = obj->id;
-// 				cedit_arange(exp, vid_priv, scene_id);
-				done = true;
+				scene_set_open(scn, act.select.id, false);
+				cedit_arange(exp, vid_priv, scene_id);
 				break;
 			case EXPOACT_QUIT:
 				done = true;
