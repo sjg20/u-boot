@@ -153,10 +153,11 @@ int cedit_run(struct expo *exp)
 				cedit_arange(exp, vid_priv, scene_id);
 				break;
 			case EXPOACT_SELECT:
-				scene_set_open(scn, act.select.id, false);
+				scene_set_open(scn, scn->highlight_id, false);
 				cedit_arange(exp, vid_priv, scene_id);
 				break;
 			case EXPOACT_QUIT:
+				printf("quitting\n");
 				done = true;
 				break;
 			default:

@@ -486,8 +486,8 @@ static void send_key_obj(struct scene *scn, struct scene_obj *obj, int key,
 		}
 		break;
 	case BKEY_QUIT:
-		event->type = EXPOACT_CLOSE;
-		log_debug("quit\n");
+		event->type = EXPOACT_QUIT;
+		log_debug("obj quit\n");
 		break;
 	}
 }
@@ -519,7 +519,7 @@ int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 			return 0;
 		}
 
-		printf("not open\n");
+		printf("open\n");
 		menu = (struct scene_obj_menu *)obj,
 		ret = scene_menu_send_key(scn, menu, key, event);
 		if (ret)

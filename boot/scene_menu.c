@@ -358,7 +358,7 @@ int scene_menu_send_key(struct scene *scn, struct scene_obj_menu *menu, int key,
 			event->select.id = menu->obj.id;
 		} else {
 			event->type = EXPOACT_QUIT;
-			log_debug("quit\n");
+			log_debug("menu quit\n");
 		}
 		break;
 	case '0'...'9':

@@ -232,8 +232,8 @@ static int menu_build(struct build_info *info, ofnode node, struct scene *scn)
 		desc = max(0, ret);
 
 		ret = scene_menuitem(scn, menu_id, simple_xtoa(i),
-				     item_ids[i], key, label, desc, 0, 0,
-				     &item);
+				     fdt32_to_cpu(item_ids[i]), key, label,
+				     desc, 0, 0, &item);
 		if (ret < 0)
 			return log_msg_ret("mi", ret);
 	}
