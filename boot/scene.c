@@ -361,6 +361,7 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 			return log_msg_ret("font", ret);
 		str = expo_get_str(exp, txt->str_id);
 		if (str) {
+			struct video_priv *vid_priv;
 			struct vidconsole_colour old;
 			enum colour_idx fore, back;
 
@@ -372,10 +373,12 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 				back = VID_BLACK;
 			}
 
+			vid_priv = dev_get_uclass_priv(dev);
 			if (obj->flags & SCENEOF_POINT) {
 				vidconsole_push_colour(cons, fore, back, &old);
 				video_fill_part(dev, x, y, x + obj->dim.w,
-						y + obj->dim.h, back);
+						y + obj->dim.h,
+						vid_priv->colour_bg);
 			}
 			vidconsole_set_cursor_pos(cons, x, y);
 			vidconsole_put_string(cons, str);
@@ -386,6 +389,14 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 	}
 	case SCENEOBJT_MENU: {
 		struct scene_obj_menu *menu = (struct scene_obj_menu *)obj;
+
+		if (exp->popup && (obj->flags & SCENEOF_OPEN)) {
+			if (!cons)
+				return -ENOTSUPP;
+
+			/* draw a background behind the menu items */
+			scene_menu_render(menu);
+		}
 		/*
 		 * With a vidconsole, the text and item pointer are rendered as
 		 * normal objects so we don't need to do anything here. The menu

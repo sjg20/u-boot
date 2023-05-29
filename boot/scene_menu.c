@@ -126,25 +126,41 @@ static int scene_bbox_union(struct scene *scn, uint id,
 	return 0;
 }
 
-int scene_menu_calc_dims(struct scene_obj_menu *menu)
+/**
+ * scene_menu_calc_bbox() - Calculate bounding boxes for the menu
+ *
+ * @menu: Menu to process
+ * @bbox: Returns bounding box of menu including prompts
+ * @label_bbox: Returns bounding box of labels
+ */
+static void scene_menu_calc_bbox(struct scene_obj_menu *menu,
+				 struct vidconsole_bbox *bbox,
+				 struct vidconsole_bbox *label_bbox)
 {
 	const struct scene_menitem *item;
-	struct vidconsole_bbox bbox, label_bbox;
 
-	bbox.valid = false;
-	scene_bbox_union(menu->obj.scene, menu->title_id, &bbox);
+	bbox->valid = false;
+	scene_bbox_union(menu->obj.scene, menu->title_id, bbox);
 
-	label_bbox.valid = false;
+	label_bbox->valid = false;
 
 	list_for_each_entry(item, &menu->item_head, sibling) {
-		scene_bbox_union(menu->obj.scene, item->label_id, &bbox);
-		scene_bbox_union(menu->obj.scene, item->key_id, &bbox);
-		scene_bbox_union(menu->obj.scene, item->desc_id, &bbox);
-		scene_bbox_union(menu->obj.scene, item->preview_id, &bbox);
+		scene_bbox_union(menu->obj.scene, item->label_id, bbox);
+		scene_bbox_union(menu->obj.scene, item->key_id, bbox);
+		scene_bbox_union(menu->obj.scene, item->desc_id, bbox);
+		scene_bbox_union(menu->obj.scene, item->preview_id, bbox);
 
 		/* Get the bounding box of all labels */
-		scene_bbox_union(menu->obj.scene, item->label_id, &label_bbox);
+		scene_bbox_union(menu->obj.scene, item->label_id, label_bbox);
 	}
+}
+
+int scene_menu_calc_dims(struct scene_obj_menu *menu)
+{
+	struct vidconsole_bbox bbox, label_bbox;
+	const struct scene_menitem *item;
+
+	scene_menu_calc_bbox(menu, &bbox, &label_bbox);
 
 	/* Make all labels the same size */
 	if (label_bbox.valid) {
@@ -505,4 +521,34 @@ int scene_menu_display(struct scene_obj_menu *menu)
 	}
 
 	return -ENOTSUPP;
+}
+
+void scene_menu_render(struct scene_obj_menu *menu)
+{
+	struct expo *exp = menu->obj.scene->expo;
+	struct vidconsole_bbox bbox, label_bbox;
+	struct udevice *dev = exp->display;
+	struct video_priv *vid_priv;
+	struct udevice *cons = exp->cons;
+	struct vidconsole_colour old;
+	enum colour_idx fore, back;
+
+	printf("render\n");
+	if (CONFIG_IS_ENABLED(SYS_WHITE_ON_BLACK)) {
+		fore = VID_BLACK;
+		back = VID_WHITE;
+	} else {
+		fore = VID_LIGHT_GRAY;
+		back = VID_BLACK;
+	}
+
+	scene_menu_calc_bbox(menu, &bbox, &label_bbox);
+	vidconsole_push_colour(cons, fore, back, &old);
+// 	printf("bbox %d %d %d %d\n",
+// 	       label_bbox.x0, label_bbox.y0, label_bbox.x1,
+// 			label_bbox.y1);
+	vid_priv = dev_get_uclass_priv(dev);
+	video_fill_part(dev, label_bbox.x0, label_bbox.y0, label_bbox.x1,
+			label_bbox.y1, vid_priv->colour_fg);
+	vidconsole_pop_colour(cons, &old);
 }

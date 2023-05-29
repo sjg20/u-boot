@@ -715,9 +715,10 @@ int truetype_measure(struct udevice *dev, const char *name, uint size,
 // 	stbtt_GetCodepointHMetrics(font, ' ', &advance, &lsb);
 // 	xpos += advance * met->scale;
 
-// 	if (!stbtt_GetCodepointBox(font, last, &x0, &y0, &x1, &y1))
-// 		return log_msg_ret("cbp", -EINVAL);
-// 	xpos += x1 * met->scale;
+	if (!stbtt_GetCodepointBox(font, last, &x0, &y0, &x1, &y1))
+		return log_msg_ret("cbp", -EINVAL);
+	printf("%d %d %d %d\n", x0, y0, x1, y1);
+	xpos += (x1 - x0) * met->scale;
 
 	bbox->valid = true;
 	bbox->x0 = 0;

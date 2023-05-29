@@ -572,16 +572,6 @@ int scene_menu_set_title(struct scene *scn, uint id, uint title_id);
 int scene_menu_set_pointer(struct scene *scn, uint id, uint cur_item_id);
 
 /**
- * scene_menu_calc_dims() - Calculate the dimensions of a menu
- *
- * Updates the width and height of the menu based based on its contents
- *
- * @menu: Menu to update
- * Returns 0 if OK, -ENOTSUPP if there is no graphical console
- */
-int scene_menu_calc_dims(struct scene_obj_menu *menu);
-
-/**
  * scene_obj_get_hw() - Get width and height of an object in a scene
  *
  * @scn: Scene to check
