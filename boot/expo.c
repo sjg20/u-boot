@@ -191,9 +191,9 @@ int expo_render(struct expo *exp)
 	int ret;
 
 	colour = video_index_to_colour(vid_priv, VID_WHITE);
-// 	ret = video_fill(dev, colour);
-// 	if (ret)
-// 		return log_msg_ret("fill", ret);
+	ret = video_fill(dev, colour);
+	if (ret)
+		return log_msg_ret("fill", ret);
 
 	if (exp->scene_id) {
 		scn = expo_lookup_scene_id(exp, exp->scene_id);
@@ -245,16 +245,18 @@ int expo_action_get(struct expo *exp, struct expo_action *act)
 int expo_apply_theme(struct expo *exp, ofnode node)
 {
 	struct scene *scn;
-	struct expo_theme theme;
+	struct expo_theme *theme = &exp->theme;
 	int ret;
 
 	log_debug("Applying theme %s\n", ofnode_get_name(node));
 
-	if (ofnode_read_u32(node, "font-size", &theme.font_size))
-		theme.font_size = 0;
+	memset(theme, '\0', sizeof(struct expo_theme));
+	ofnode_read_u32(node, "font-size", &theme->font_size);
+	ofnode_read_u32(node, "menu-inset", &theme->menu_inset);
+	ofnode_read_u32(node, "menuitem-gap-y", &theme->menuitem_gap_y);
 
 	list_for_each_entry(scn, &exp->scene_head, sibling) {
-		ret = scene_apply_theme(scn, &theme);
+		ret = scene_apply_theme(scn, theme);
 		if (ret)
 			return log_msg_ret("app", ret);
 	}

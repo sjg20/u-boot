@@ -377,7 +377,7 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 			if (obj->flags & SCENEOF_POINT) {
 				vidconsole_push_colour(cons, fore, back, &old);
 				video_fill_part(dev, x, y, x + obj->dim.w,
-						y + obj->dim.h,
+						y + obj->dim.h - 1,
 						vid_priv->colour_bg);
 			}
 			vidconsole_set_cursor_pos(cons, x, y);
@@ -530,7 +530,6 @@ int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 			return 0;
 		}
 
-		printf("open\n");
 		menu = (struct scene_obj_menu *)obj,
 		ret = scene_menu_send_key(scn, menu, key, event);
 		if (ret)

@@ -52,6 +52,19 @@ struct expo_action {
 };
 
 /**
+ * struct expo_theme - theme for the expo
+ *
+ * @font_size: Default font size for all text
+ * @menu_inset: Inset width (on each side and top/bottom) for menu items
+ * @menuitem_gap_y: Gap between menu items in pixels
+ */
+struct expo_theme {
+	u32 font_size;
+	u32 menu_inset;
+	u32 menuitem_gap_y;
+};
+
+/**
  * struct expo - information about an expo
  *
  * A group of scenes which can be presented to the user, typically to obtain
@@ -80,6 +93,7 @@ struct expo {
 	bool text_mode;
 	bool popup;
 	void *priv;
+	struct expo_theme theme;
 	struct list_head scene_head;
 	struct list_head str_head;
 };
@@ -276,10 +290,6 @@ struct scene_menitem {
 	uint preview_id;
 	uint flags;
 	struct list_head sibling;
-};
-
-struct expo_theme {
-	u32 font_size;
 };
 
 /**
