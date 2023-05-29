@@ -65,7 +65,7 @@ enum {
 				id = <ID_POWER_LOSS>;
 
 				title = "AC Power";
-				item-label = "Always Off", "Always On",
+				item-label = "Always Off and Were it goes Wn for morW", "Always On",
 					"Memory";
 
 				item-id = <ID_AC_OFF ID_AC_ON ID_AC_MEMORY>;

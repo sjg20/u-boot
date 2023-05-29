@@ -191,9 +191,9 @@ int expo_render(struct expo *exp)
 	int ret;
 
 	colour = video_index_to_colour(vid_priv, VID_WHITE);
-	ret = video_fill(dev, colour);
-	if (ret)
-		return log_msg_ret("fill", ret);
+// 	ret = video_fill(dev, colour);
+// 	if (ret)
+// 		return log_msg_ret("fill", ret);
 
 	if (exp->scene_id) {
 		scn = expo_lookup_scene_id(exp, exp->scene_id);

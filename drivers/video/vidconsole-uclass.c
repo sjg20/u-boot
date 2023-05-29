@@ -497,16 +497,31 @@ int vidconsole_put_char(struct udevice *dev, char ch)
 	return 0;
 }
 
+extern bool tt_debug;
+extern int tt_width;
+
 int vidconsole_put_string(struct udevice *dev, const char *str)
 {
 	const char *s;
 	int ret;
 
+	tt_debug = !strncmp("Always Off", str, 10);
+	if (tt_debug) {
+		console_puts_select_stderr(true, "\noutput:  ");
+		tt_width = 0;
+	}
+// 	if (tt_debug)
+// 		printf("\nhere: ");
+
 	for (s = str; *s; s++) {
 		ret = vidconsole_put_char(dev, *s);
 		if (ret)
-			return ret;
+			break;
 	}
+	if (tt_debug)
+		console_puts_select_stderr(true, "done\n");
+
+	tt_debug = false;
 
 	return 0;
 }

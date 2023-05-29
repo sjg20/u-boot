@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <console.h>
 #include <dm.h>
 #include <log.h>
 #include <malloc.h>
@@ -62,10 +63,43 @@ static double tt_sqrt(double value)
 	return lo;
 }
 
+static double tt_fmod(double x, double y)
+{
+	double rem;
+
+	if (y == 0.0)
+		return 0.0;
+	rem = x - (x / y) * y;
+
+	return rem;
+}
+
+/* dummy implementation */
+static double tt_pow(double x, double y)
+{
+	return 0;
+}
+
+/* dummy implementation */
+static double tt_cos(double val)
+{
+	return 0;
+}
+
+/* dummy implementation */
+static double tt_acos(double val)
+{
+	return 0;
+}
+
 #define STBTT_ifloor		tt_floor
 #define STBTT_iceil		tt_ceil
 #define STBTT_fabs		tt_fabs
 #define STBTT_sqrt		tt_sqrt
+#define STBTT_pow		tt_pow
+#define STBTT_fmod		tt_fmod
+#define STBTT_cos		tt_cos
+#define STBTT_acos		tt_acos
 #define STBTT_malloc(size, u)	((void)(u), malloc(size))
 #define STBTT_free(size, u)	((void)(u), free(size))
 #define STBTT_assert(x)
@@ -216,6 +250,9 @@ static int console_truetype_move_rows(struct udevice *dev, uint rowdst,
 	return 0;
 }
 
+bool tt_debug;
+int tt_width;
+
 static int console_truetype_putc_xy(struct udevice *dev, uint x, uint y,
 				    char ch)
 {
@@ -256,7 +293,17 @@ static int console_truetype_putc_xy(struct udevice *dev, uint x, uint y,
 	 */
 	x_shift = xpos - (double)tt_floor(xpos);
 	xpos += advance * met->scale;
-	width_frac = (int)VID_TO_POS(xpos);
+	if (tt_debug) {
+		char str[100];
+
+		tt_width += advance;
+// 		sprintf(str, "%d ", (int)(tt_width * met->scale));
+// 		sprintf(str, "%d ", (int)xpos);
+		sprintf(str, "%d ", VID_TO_PIXEL(x) - 250);
+		console_puts_select_stderr(true, str);
+	}
+// 	width_frac = (int)VID_TO_POS(xpos);
+	width_frac = (int)VID_TO_POS(advance * met->scale);
 	if (x + width_frac >= vc_priv->xsize_frac)
 		return -EAGAIN;
 
@@ -677,13 +724,16 @@ int truetype_measure(struct udevice *dev, const char *name, uint size,
 		     const char *text, struct vidconsole_bbox *bbox)
 {
 	struct console_tt_metrics *met;
+	struct console_tt_priv *priv = dev_get_priv(dev);
 	stbtt_fontinfo *font;
-	int x0, y0, x1, y1;
+// 	int x0, y0, x1, y1;
 	int lsb, advance;
 	const char *s;
-	double xpos;
+	int width;
 	int last;
 	int ret;
+	int deb_x = 250;
+	int deb_y = 180;
 
 	ret = get_metrics(dev, name, size, &met);
 	if (ret)
@@ -694,8 +744,12 @@ int truetype_measure(struct udevice *dev, const char *name, uint size,
 		return 0;
 
 	font = &met->font;
-	xpos = 0;
+	width = 0;
 
+	bool debug = !strncmp("Always Off", text, 10);
+
+	if (debug)
+		console_puts_select_stderr(true, "\nmeasure: ");
 	for (last = 0, s = text; *s; s++) {
 		int ch = *s;
 
@@ -703,27 +757,42 @@ int truetype_measure(struct udevice *dev, const char *name, uint size,
 		stbtt_GetCodepointHMetrics(font, ch, &advance, &lsb);
 
 		/* Used kerning to fine-tune the position of this character */
-		if (last) {
-			xpos += met->scale *
-				stbtt_GetCodepointKernAdvance(font, last, ch);
+		if (last)
+			width += stbtt_GetCodepointKernAdvance(font, last, ch);
+		width += advance;
+		if (debug) {
+			char str[100];
+
+// 			sprintf(str, "%d ", (int)(advance * met->scale));
+			sprintf(str, "%d ", (int)(width * met->scale));
+			console_puts_select_stderr(true, str);
+			video_fill_part(dev->parent, deb_x, deb_y,
+					deb_x + tt_ceil((double)width * met->scale), deb_y + 1, 0);
+			deb_y += 2;
 		}
-		xpos += advance * met->scale;
 
 		last = ch;
 	}
 
+//	printf("%s %d\n", met->font_name, met->font_size);
+//	printf("here %p %p\n", met, priv->cur_met);
+
 // 	stbtt_GetCodepointHMetrics(font, ' ', &advance, &lsb);
 // 	xpos += advance * met->scale;
 
-	if (!stbtt_GetCodepointBox(font, last, &x0, &y0, &x1, &y1))
-		return log_msg_ret("cbp", -EINVAL);
-	printf("%d %d %d %d\n", x0, y0, x1, y1);
-	xpos += (x1 - x0) * met->scale;
+// 	if (!stbtt_GetCodepointBox(font, last, &x0, &y0, &x1, &y1))
+// 		return log_msg_ret("cbp", -EINVAL);
+// 	printf("%s %d %d %d %d %d\n", text, x0, y0, x1, y1,
+// 	       (int)(1 / met->scale));
+// 	if (debug)
+// 		printf(" end %c %s %d %d\n", last, text, (int)(advance * met->scale),
+// 		       (int)(x1 * met->scale));
+// 	xpos += x1 * met->scale;
 
 	bbox->valid = true;
 	bbox->x0 = 0;
 	bbox->y0 = 0;
-	bbox->x1 = tt_ceil(xpos);
+	bbox->x1 = tt_ceil((double)width * met->scale);
 	bbox->y1 = met->font_size;
 
 	return 0;
