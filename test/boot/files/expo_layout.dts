@@ -70,6 +70,12 @@ enum {
 
 				item-id = <ID_AC_OFF ID_AC_ON ID_AC_MEMORY>;
 			};
+
+			machine-name {
+				type = "text";
+				max-len = <20>;
+				title = "Machine name";
+			};
 		};
 	};
 
