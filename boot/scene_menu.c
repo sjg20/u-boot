@@ -559,8 +559,24 @@ void scene_menu_render(struct scene_obj_menu *menu)
 	vid_priv = dev_get_uclass_priv(dev);
 	video_fill_part(dev, label_bbox.x0 - theme->menu_inset,
 			label_bbox.y0 - theme->menu_inset,
-			label_bbox.x1,
-			label_bbox.y1 + theme->menu_inset,
-		 vid_priv->colour_fg);
+			label_bbox.x1, label_bbox.y1 + theme->menu_inset,
+			vid_priv->colour_fg);
 	vidconsole_pop_colour(cons, &old);
+}
+
+int scene_menu_render_deps(struct scene *scn, struct scene_obj_menu *menu)
+{
+	struct scene_menitem *item;
+
+	scene_render_deps(scn, menu->title_id);
+	scene_render_deps(scn, menu->cur_item_id);
+	scene_render_deps(scn, menu->pointer_id);
+
+	list_for_each_entry(item, &menu->item_head, sibling) {
+		scene_render_deps(scn, item->key_id);
+		scene_render_deps(scn, item->label_id);
+		scene_render_deps(scn, item->desc_id);
+	}
+
+	return 0;
 }
