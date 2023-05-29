@@ -112,14 +112,14 @@ static int scene_bbox_union(struct scene *scn, uint id, int inset,
 		return log_msg_ret("obj", -ENOENT);
 	if (bbox->valid) {
 		bbox->x0 = min(bbox->x0, obj->dim.x - inset);
-		bbox->y0 = min(bbox->y0, obj->dim.y - inset);
+		bbox->y0 = min(bbox->y0, obj->dim.y);
 		bbox->x1 = max(bbox->x1, obj->dim.x + obj->dim.w + inset);
-		bbox->y1 = max(bbox->y1, obj->dim.y + obj->dim.h + inset);
+		bbox->y1 = max(bbox->y1, obj->dim.y + obj->dim.h);
 	} else {
 		bbox->x0 = obj->dim.x - inset;
-		bbox->y0 = obj->dim.y - inset;
+		bbox->y0 = obj->dim.y;
 		bbox->x1 = obj->dim.x + obj->dim.w + inset;
-		bbox->y1 = obj->dim.y + obj->dim.h + inset;
+		bbox->y1 = obj->dim.y + obj->dim.h;
 		bbox->valid = true;
 	}
 
@@ -538,6 +538,7 @@ int scene_menu_display(struct scene_obj_menu *menu)
 void scene_menu_render(struct scene_obj_menu *menu)
 {
 	struct expo *exp = menu->obj.scene->expo;
+	const struct expo_theme *theme = &exp->theme;
 	struct vidconsole_bbox bbox, label_bbox;
 	struct udevice *dev = exp->display;
 	struct video_priv *vid_priv;
@@ -556,7 +557,10 @@ void scene_menu_render(struct scene_obj_menu *menu)
 	scene_menu_calc_bbox(menu, &bbox, &label_bbox);
 	vidconsole_push_colour(cons, fore, back, &old);
 	vid_priv = dev_get_uclass_priv(dev);
-	video_fill_part(dev, label_bbox.x0, label_bbox.y0, label_bbox.x1,
-			label_bbox.y1, vid_priv->colour_fg);
+	video_fill_part(dev, label_bbox.x0 - theme->menu_inset,
+			label_bbox.y0 - theme->menu_inset,
+			label_bbox.x1,
+			label_bbox.y1 + theme->menu_inset,
+		 vid_priv->colour_fg);
 	vidconsole_pop_colour(cons, &old);
 }
