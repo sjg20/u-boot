@@ -342,6 +342,7 @@ endif # FIT
 
 config PXE_UTILS
 	bool
+	depends on CMDLINE
 	select MENU
 	help
 	  Utilities for parsing PXE file formats.
@@ -357,7 +358,7 @@ config BOOT_DEFAULTS
 	select CMD_PART if PARTITIONS
 	select CMD_DHCP if CMD_NET
 	select CMD_PING if CMD_NET
-	select CMD_PXE if CMD_NET
+	select CMD_PXE if CMDLINE && CMD_NET
 	select SUPPORT_RAW_INITRD
 	select ENV_VARS_UBOOT_CONFIG
 	select CMD_BOOTI if ARM64
@@ -461,6 +462,7 @@ config BOOTMETH_GLOBAL
 
 config BOOTMETH_CROS
 	bool "Bootdev support for Chromium OS"
+	depends on CMDLINE
 	depends on X86 || ARM || SANDBOX
 	default y if !ARM
 	select EFI_PARTITION
@@ -475,6 +477,7 @@ config BOOTMETH_CROS
 
 config BOOTMETH_EXTLINUX
 	bool "Bootdev support for extlinux boot"
+	depends on CMDLINE
 	select PXE_UTILS
 	default y
 	help
@@ -490,7 +493,7 @@ config BOOTMETH_EXTLINUX
 
 config BOOTMETH_EXTLINUX_PXE
 	bool "Bootdev support for extlinux boot over network"
-	depends on CMD_PXE && CMD_NET && DM_ETH
+	depends on CMDLINE && CMD_PXE && CMD_NET && DM_ETH
 	default y
 	help
 	  Enables support for extlinux boot using bootdevs. This makes the
@@ -504,7 +507,7 @@ config BOOTMETH_EXTLINUX_PXE
 
 config BOOTMETH_EFILOADER
 	bool "Bootdev support for EFI boot"
-	depends on EFI_LOADER
+	depends on EFI_LOADER && CMDLINE
 	default y
 	help
 	  Enables support for EFI boot using bootdevs. This makes the
@@ -536,10 +539,10 @@ config BOOTMETH_VBE
 
 config BOOTMETH_DISTRO
 	bool  # Options needed to boot any distro
-	select BOOTMETH_SCRIPT  # E.g. Armbian uses scripts
-	select BOOTMETH_EXTLINUX  # E.g. Debian uses these
-	select BOOTMETH_EXTLINUX_PXE if CMD_PXE && CMD_NET && DM_ETH
-	select BOOTMETH_EFILOADER if EFI_LOADER # E.g. Ubuntu uses this
+	select BOOTMETH_SCRIPT if CMDLINE # E.g. Armbian uses scripts
+	select BOOTMETH_EXTLINUX if CMDLINE # E.g. Debian uses these
+	select BOOTMETH_EXTLINUX_PXE if CMDLINE && CMD_PXE && CMD_NET && DM_ETH
+	select BOOTMETH_EFILOADER if CMDLINE && EFI_LOADER # E.g. Ubuntu uses this
 
 config SPL_BOOTMETH_VBE
 	bool "Bootdev support for Verified Boot for Embedded (SPL)"
@@ -663,6 +666,7 @@ config BOOTMETH_SANDBOX
 
 config BOOTMETH_SCRIPT
 	bool "Bootdev support for U-Boot scripts"
+	depends on CMDLINE
 	default y if BOOTSTD_FULL
 	select HUSH_PARSER
 	help
@@ -777,6 +781,7 @@ endmenu		# Boot images
 
 config DISTRO_DEFAULTS
 	bool "(deprecated) Script-based booting of Linux distributions"
+	depends on CMDLINE
 	select BOOT_DEFAULTS
 	select AUTO_COMPLETE
 	select CMDLINE_EDITING
