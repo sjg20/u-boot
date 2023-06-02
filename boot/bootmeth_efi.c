@@ -130,6 +130,8 @@ static int efiload_read_file(struct blk_desc *desc, struct bootflow *bflow)
 	dev_name = device_get_uclass_id(media_dev) == UCLASS_MASS_STORAGE ?
 		 "usb" : dev_get_uclass_name(media_dev);
 	efi_set_bootdev(dev_name, devnum_str, bflow->fname, bflow->buf, size);
+	printf("set dev %s %s %s %p %x\n", dev_name, devnum_str, bflow->fname,
+	       bflow->buf, size);
 
 	return 0;
 }
@@ -192,10 +194,6 @@ static int distro_efi_read_bootflow_file(struct udevice *dev,
 	if (ret)
 		return log_msg_ret("try", ret);
 
-	ret = efiload_read_file(desc, bflow);
-	if (ret)
-		return log_msg_ret("read", ret);
-
 	distro_efi_get_fdt_name(fname, sizeof(fname));
 	bflow->fdt_fname = strdup(fname);
 	if (!bflow->fdt_fname)
@@ -220,6 +218,7 @@ static int distro_efi_read_bootflow_file(struct udevice *dev,
 	} else {
 		log_debug("No device tree available\n");
 	}
+	bflow->state = BOOTFLOWST_READY;
 
 	return 0;
 }
@@ -319,9 +318,24 @@ int distro_efi_boot(struct udevice *dev, struct bootflow *bflow)
 	ulong kernel, fdt;
 	char cmd[50];
 
-	/* A non-zero buffer indicates the kernel is there */
-	if (bflow->buf) {
+	/* A non-zero size indicates the kernel is there */
+	if (bflow->size) {
+		struct blk_desc *desc = NULL;
+		int ret;
+
+		if (bflow->blk)
+			desc = dev_get_uclass_plat(bflow->blk);
+
+		if (IS_ENABLED(CONFIG_BOOTSTD_FULL) && bflow->fs_type)
+			fs_set_type(bflow->fs_type);
+
+		printf("reading\n");
+		ret = efiload_read_file(desc, bflow);
+		if (ret)
+			return log_msg_ret("read", ret);
+
 		kernel = (ulong)map_to_sysmem(bflow->buf);
+		printf("kernel done\n");
 
 		/*
 		 * use the provided device tree if available, else fall back to
@@ -348,7 +362,8 @@ int distro_efi_boot(struct udevice *dev, struct bootflow *bflow)
 	 * At some point we can add a real interface to bootefi so we can call
 	 * this directly. For now, go through the CLI, like distro boot.
 	 */
-	snprintf(cmd, sizeof(cmd), "bootefi %lx %lx", kernel, fdt);
+	snprintf(cmd, sizeof(cmd), "bootefi %lx", kernel, fdt);
+	printf("running %s\n", cmd);
 	if (run_command(cmd, 0))
 		return log_msg_ret("run", -EINVAL);
 
