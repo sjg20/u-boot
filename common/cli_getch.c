@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <cli.h>
+#include <menu.h>
 
 /**
  * enum cli_esc_state_t - indicates what to do with an escape character
