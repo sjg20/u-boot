@@ -129,6 +129,7 @@ int run_command_list(const char *cmd, int len, int flag)
 	return rcode;
 }
 
+#ifdef CONFIG_CMDLINE
 int run_commandf(const char *fmt, ...)
 {
 	va_list args;
@@ -153,6 +154,7 @@ int run_commandf(const char *fmt, ...)
 	}
 	return run_command(console_buffer, 0);
 }
+#endif /* CMDLINE */
 
 /****************************************************************************/
 
