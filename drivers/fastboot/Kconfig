@@ -2,6 +2,7 @@ menu "Fastboot support"
 
 config FASTBOOT
 	bool
+	depends on CMDLINE
 	imply ANDROID_BOOT_IMAGE
 	imply CMD_FASTBOOT
 	help
