@@ -6,7 +6,8 @@
 
 / {
 	binman: binman {
-		multiple-images;
+		fdtmap {
+		};
 	};
 };
 
@@ -51,59 +52,62 @@
 };
 
 &binman {
-	 u-boot-spl-ddr {
-		filename = "u-boot-spl-ddr.bin";
-		pad-byte = <0xff>;
-		align-size = <4>;
-		align = <4>;
-
-		u-boot-spl {
-			align-end = <4>;
-		};
-
-		ddr-1d-imem-fw {
-			filename = "lpddr4_pmu_train_1d_imem_202006.bin";
-			type = "blob-ext";
-			align-end = <4>;
-		};
-
-		ddr-1d-dmem-fw {
-			filename = "lpddr4_pmu_train_1d_dmem_202006.bin";
-			type = "blob-ext";
-			align-end = <4>;
-		};
-
-		ddr-2d-imem-fw {
-			filename = "lpddr4_pmu_train_2d_imem_202006.bin";
-			type = "blob-ext";
-			align-end = <4>;
-		};
-
-		ddr-2d-dmem-fw {
-			filename = "lpddr4_pmu_train_2d_dmem_202006.bin";
-			type = "blob-ext";
-			align-end = <4>;
-		};
-		fdtmap {
-		};
-	};
-
-	spl {
-		filename = "spl.bin";
+	section {
+		filename = "flash.bin";
+		pad-byte = <0x00>;
 
 		mkimage {
-			args = "-n spl/u-boot-spl.cfgout -T imx8mimage -e 0x920000";
+			filename = "u-boot-spl-mkimage.bin";
+			/* FIXME: Why is the -n needed is unclear ... */
+			args = "-n nxp.imx8mimage.cfg.section.mkimage.nxp-imx8mimage-cfg -T imx8mimage";
 
-			blob {
-				filename = "u-boot-spl-ddr.bin";
+			nxp-imx8mimage-cfg {
+				filename = "u-boot-spl-cfg.bin";
+				nxp,boot-from = "sd";
+				nxp,rom-version = <2>;
+				nxp,loader-address = <0x970000>;
+
+				section {
+					filename = "u-boot-spl-ddr.bin";
+					pad-byte = <0xff>;
+					align-size = <4>;
+					align = <4>;
+
+					/*
+					 * FIXME: This is either not expanded,
+					 * or symbols are not updated here.
+					 * It is not clear why.
+					 */
+					u-boot-spl {
+						align-end = <4>;
+					};
+
+					ddr-1d-imem-fw {
+						filename = "lpddr4_pmu_train_1d_imem_202006.bin";
+						type = "blob-ext";
+						align-end = <4>;
+					};
+
+					ddr-1d-dmem-fw {
+						filename = "lpddr4_pmu_train_1d_dmem_202006.bin";
+						type = "blob-ext";
+						align-end = <4>;
+					};
+
+					ddr-2d-imem-fw {
+						filename = "lpddr4_pmu_train_2d_imem_202006.bin";
+						type = "blob-ext";
+						align-end = <4>;
+					};
+
+					ddr-2d-dmem-fw {
+						filename = "lpddr4_pmu_train_2d_dmem_202006.bin";
+						type = "blob-ext";
+						align-end = <4>;
+					};
+				};
 			};
 		};
-		fdtmap {
-		};
-	};
-
-	itb {
-		filename = "u-boot.itb";
 
 		fit {
 			description = "Configuration to load ATF before U-Boot";
@@ -112,6 +116,7 @@
 #endif
 			fit,fdt-list = "of-list";
 			#address-cells = <1>;
+			offset = <0x58000>;
 
 			images {
 				uboot {
@@ -165,25 +170,6 @@
 #endif
 				};
 			};
-		};
-		fdtmap {
-		};
-	};
-
-	imx-boot {
-		filename = "flash.bin";
-		pad-byte = <0x00>;
-
-		spl: blob-ext@1 {
-			filename = "spl.bin";
-			offset = <0x0>;
-		};
-
-		uboot: blob-ext@2 {
-			filename = "u-boot.itb";
-			offset = <0x58000>;
-		};
-		fdtmap {
 		};
 	};
 };
