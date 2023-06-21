@@ -84,6 +84,8 @@
 			type = "blob-ext";
 			align-end = <4>;
 		};
+		fdtmap {
+		};
 	};
 
 	spl {
@@ -95,6 +97,8 @@
 			blob {
 				filename = "u-boot-spl-ddr.bin";
 			};
+		};
+		fdtmap {
 		};
 	};
 
@@ -162,6 +166,8 @@
 				};
 			};
 		};
+		fdtmap {
+		};
 	};
 
 	imx-boot {
@@ -176,6 +182,8 @@
 		uboot: blob-ext@2 {
 			filename = "u-boot.itb";
 			offset = <0x58000>;
+		};
+		fdtmap {
 		};
 	};
 };
