@@ -3737,6 +3737,7 @@ class TestFunctional(unittest.TestCase):
 
     def testMkimage(self):
         """Test using mkimage to build an image"""
+        self._SetupSplElf()
         data = self._DoReadFile('156_mkimage.dts')
 
         # Just check that the data appears in the file somewhere
@@ -3744,6 +3745,7 @@ class TestFunctional(unittest.TestCase):
 
     def testMkimageMissing(self):
         """Test that binman still produces an image if mkimage is missing"""
+        self._SetupSplElf()
         with test_util.capture_sys_output() as (_, stderr):
             self._DoTestFile('156_mkimage.dts',
                              force_missing_bintools='mkimage')
@@ -5952,6 +5954,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageCollection(self):
         """Test using a collection referring to an entry in a mkimage entry"""
+        self._SetupSplElf()
         data = self._DoReadFile('247_mkimage_coll.dts')
         expect = U_BOOT_SPL_DATA + U_BOOT_DATA
         self.assertEqual(expect, data[:len(expect)])
@@ -6050,6 +6053,39 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
             expect += tools.get_bytes(0, align_pad)
         expect += U_BOOT_SPL_DATA
         self.assertEqual(expect, data[-len(expect):])
+
+    def testMkimageMultipleExpanded(self):
+        """Test passing multiple files to mkimage in a mkimage entry"""
+        self._SetupSplElf()
+        self._SetupTplElf()
+        entry_args = {
+            'spl-bss-pad': 'y',
+            'spl-dtb': 'y',
+        }
+        data = self._DoReadFileDtb('252_mkimage_mult_data.dts',
+                                   use_expanded=True, entry_args=entry_args)[0]
+        pad_len = 10
+        tpl_expect = U_BOOT_TPL_DATA
+        spl_expect = U_BOOT_SPL_NODTB_DATA + tools.get_bytes(0, pad_len)
+        spl_expect += U_BOOT_SPL_DTB_DATA
+
+        content = data[0x40:]
+        lens = struct.unpack('>III', content[:12])
+
+        # Size of files are packed in their 4B big-endian format
+        # Size info is always followed by a 4B zero value.
+        self.assertEqual(len(tpl_expect), lens[0])
+        self.assertEqual(len(spl_expect), lens[1])
+        self.assertEqual(0, lens[2])
+
+        rest = content[12:]
+        self.assertEqual(tpl_expect, rest[:len(tpl_expect)])
+
+        rest = rest[len(tpl_expect):]
+        align_pad = len(tpl_expect) % 4
+        self.assertEqual(tools.get_bytes(0, align_pad), rest[:align_pad])
+        rest = rest[align_pad:]
+        self.assertEqual(spl_expect, rest)
 
     def testMkimageMultipleNoContent(self):
         """Test passing multiple data files to mkimage with one data file having no content"""
@@ -6696,6 +6732,13 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
                           entry_args=entry_args, use_expanded=True,
                           no_write_symbols=True)
 
+    def testMkimageSpecial(self):
+        """Test mkimage ignores special hash-1 node"""
+        data = self._DoReadFile('283_mkimage_special.dts')
 
-if __name__ == "__main__":
+        # Just check that the data appears in the file somewhere
+        self.assertIn(U_BOOT_DATA, data)
+
+
+if __name__ == "_s_main__":
     unittest.main()
