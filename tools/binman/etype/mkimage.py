@@ -8,10 +8,11 @@
 from collections import OrderedDict
 
 from binman.entry import Entry
+from binman.etype.section import Entry_section
 from dtoc import fdt_util
 from u_boot_pylib import tools
 
-class Entry_mkimage(Entry):
+class Entry_mkimage(Entry_section):
     """Binary produced by mkimage
 
     Properties / Entry arguments:
@@ -122,7 +123,6 @@ class Entry_mkimage(Entry):
     def __init__(self, section, etype, node):
         super().__init__(section, etype, node)
         self._multiple_data_files = fdt_util.GetBool(self._node, 'multiple-data-files')
-        self._mkimage_entries = OrderedDict()
         self._imagename = None
         self._filename = fdt_util.GetString(self._node, 'filename')
         self.align_default = None
@@ -139,21 +139,26 @@ class Entry_mkimage(Entry):
     def ReadEntries(self):
         """Read the subnodes to find out what should go in this image"""
         for node in self._node.subnodes:
-            entry = Entry.Create(self, node)
+            if self.IsSpecialSubnode(node):
+                continue
+            entry = Entry.Create(self, node,
+                                 expanded=self.GetImage().use_expanded,
+                                 missing_etype=self.GetImage().missing_etype)
             entry.ReadNode()
+            entry.SetPrefix(self._name_prefix)
             if entry.name == 'imagename':
                 self._imagename = entry
             else:
-                self._mkimage_entries[entry.name] = entry
+                self._entries[entry.name] = entry
 
-    def ObtainContents(self):
+    def GetData(self, required=True):
         # Use a non-zero size for any fake files to keep mkimage happy
         # Note that testMkimageImagename() relies on this 'mkimage' parameter
         fake_size = 1024
         if self._multiple_data_files:
             fnames = []
             uniq = self.GetUniqueName()
-            for entry in self._mkimage_entries.values():
+            for entry in self._entries.values():
                 if not entry.ObtainContents(fake_size=fake_size):
                     return False
                 if entry._pathname:
@@ -161,7 +166,7 @@ class Entry_mkimage(Entry):
             input_fname = ":".join(fnames)
         else:
             data, input_fname, uniq = self.collect_contents_to_file(
-                self._mkimage_entries.values(), 'mkimage', fake_size)
+                self._entries.values(), 'mkimage', fake_size)
             if data is None:
                 return False
         if self._imagename:
@@ -189,14 +194,15 @@ class Entry_mkimage(Entry):
             self.SetContents(tools.read_file(output_fname))
         else:
             # Bintool is missing; just use the input data as the output
-            self.record_missing_bintool(self.mkimage)
-            self.SetContents(data)
+            #self.record_missing_bintool(self.mkimage)
+            #self.SetContents(data)
+            self.Raise("Fail")
 
-        return True
+        return tools.read_file(output_fname)
 
     def GetEntries(self):
         # Make a copy so we don't change the original
-        entries = OrderedDict(self._mkimage_entries)
+        entries = OrderedDict(self._entries)
         if self._imagename:
             entries['imagename'] = self._imagename
         return entries
@@ -208,7 +214,7 @@ class Entry_mkimage(Entry):
             allow_missing: True if allowed, False if not allowed
         """
         self.allow_missing = allow_missing
-        for entry in self._mkimage_entries.values():
+        for entry in self._entries.values():
             entry.SetAllowMissing(allow_missing)
         if self._imagename:
             self._imagename.SetAllowMissing(allow_missing)
@@ -219,7 +225,7 @@ class Entry_mkimage(Entry):
         Args:
             allow_fake: True if allowed, False if not allowed
         """
-        for entry in self._mkimage_entries.values():
+        for entry in self._entries.values():
             entry.SetAllowFakeBlob(allow_fake)
         if self._imagename:
             self._imagename.SetAllowFakeBlob(allow_fake)
@@ -233,7 +239,7 @@ class Entry_mkimage(Entry):
         Args:
             missing_list: List of Entry objects to be added to
         """
-        for entry in self._mkimage_entries.values():
+        for entry in self._entries.values():
             entry.CheckMissing(missing_list)
         if self._imagename:
             self._imagename.CheckMissing(missing_list)
@@ -246,7 +252,7 @@ class Entry_mkimage(Entry):
         Args:
             faked_blobs_list: List of Entry objects to be added to
         """
-        for entry in self._mkimage_entries.values():
+        for entry in self._entries.values():
             entry.CheckFakedBlobs(faked_blobs_list)
         if self._imagename:
             self._imagename.CheckFakedBlobs(faked_blobs_list)
