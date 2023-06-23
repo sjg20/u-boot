@@ -47,6 +47,7 @@ class Entry_collection(Entry):
         for entry_phandle in self.content:
             entry_data = self.section.GetContentsByPhandle(entry_phandle, self,
                                                            required)
+            print('entry_data', entry_data)
             if not required and entry_data is None:
                 self.Info('Contents not available yet')
                 # Data not available yet

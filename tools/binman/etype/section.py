@@ -556,6 +556,7 @@ class Entry_section(Entry):
         entry = self.FindEntryByNode(node)
         if not entry:
             source_entry.Raise("Cannot find entry for node '%s'" % node.name)
+        print('entry', entry._node.path)
         return entry.GetData(required)
 
     def LookupEntry(self, entries, sym_name, msg):

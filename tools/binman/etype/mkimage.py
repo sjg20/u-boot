@@ -149,6 +149,7 @@ class Entry_mkimage(Entry_section):
                 self._imagename = entry
             else:
                 self._entries[entry.name] = entry
+        print('read', self._imagename)
 
     def BuildSectionData(self, required):
         """Build mkimage entry contents
@@ -164,6 +165,7 @@ class Entry_mkimage(Entry_section):
         """
         # Use a non-zero size for any fake files to keep mkimage happy
         # Note that testMkimageImagename() relies on this 'mkimage' parameter
+        print('build')
         fake_size = 1024
         if self._multiple_data_files:
             fnames = []
@@ -179,6 +181,7 @@ class Entry_mkimage(Entry_section):
                 self._entries.values(), 'mkimage', fake_size)
             if data is None:
                 return False
+        print('collect imagename', self._imagename)
         if self._imagename:
             image_data, imagename_fname, _ = self.collect_contents_to_file(
                 [self._imagename], 'mkimage-n', 1024)

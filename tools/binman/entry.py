@@ -1308,9 +1308,11 @@ features to produce new behaviours.
                 str: Unique portion of filename (or None if no data)
         """
         data = b''
+        print('entries', entries)
         for entry in entries:
             # First get the input data and put it in a file. If not available,
             # try later.
+            print('collect', entry._node.path)
             if not entry.ObtainContents(fake_size=fake_size):
                 return None, None, None
             data += entry.GetData()
