@@ -122,19 +122,18 @@ class Entry_mkimage(Entry_section):
     """
     def __init__(self, section, etype, node):
         super().__init__(section, etype, node)
-        self._multiple_data_files = fdt_util.GetBool(self._node, 'multiple-data-files')
         self._imagename = None
-        self._filename = fdt_util.GetString(self._node, 'filename')
-        self.align_default = None
+        self._multiple_data_files = False
 
     def ReadNode(self):
         super().ReadNode()
+        self._multiple_data_files = fdt_util.GetBool(self._node,
+                                                     'multiple-data-files')
         self._args = fdt_util.GetArgs(self._node, 'args')
         self._data_to_imagename = fdt_util.GetBool(self._node,
                                                    'data-to-imagename')
         if self._data_to_imagename and self._node.FindNode('imagename'):
             self.Raise('Cannot use both imagename node and data-to-imagename')
-        self.ReadEntries()
 
     def ReadEntries(self):
         """Read the subnodes to find out what should go in this image"""
@@ -151,7 +150,18 @@ class Entry_mkimage(Entry_section):
             else:
                 self._entries[entry.name] = entry
 
-    def GetData(self, required=True):
+    def BuildSectionData(self, required):
+        """Build mkimage entry contents
+
+        Runs mkimage to build the entry contents
+
+        Args:
+            required (bool): True if the data must be present, False if it is OK
+                to return None
+
+        Returns:
+            bytes: Contents of the section
+        """
         # Use a non-zero size for any fake files to keep mkimage happy
         # Note that testMkimageImagename() relies on this 'mkimage' parameter
         fake_size = 1024

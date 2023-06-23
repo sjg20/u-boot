@@ -3732,6 +3732,7 @@ class TestFunctional(unittest.TestCase):
 
     def testMkimage(self):
         """Test using mkimage to build an image"""
+        self._SetupSplElf()
         data = self._DoReadFile('156_mkimage.dts')
 
         # Just check that the data appears in the file somewhere
@@ -5947,6 +5948,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageCollection(self):
         """Test using a collection referring to an entry in a mkimage entry"""
+        self._SetupSplElf()
         data = self._DoReadFile('247_mkimage_coll.dts')
         expect = U_BOOT_SPL_DATA + U_BOOT_DATA
         self.assertEqual(expect, data[:len(expect)])
