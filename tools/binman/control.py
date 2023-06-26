@@ -22,6 +22,7 @@ from binman import bintool
 from binman import cbfs_util
 from binman import elf
 from binman import entry
+from dtoc import fdt_util
 from u_boot_pylib import command
 from u_boot_pylib import tools
 from u_boot_pylib import tout
@@ -478,6 +479,12 @@ def SignEntries(image_fname, input_fname, privatekey_fname, algo, entry_paths,
 
     AfterReplace(image, allow_resize=True, write_map=write_map)
 
+def _ProcessTemplates(parent):
+    for node in parent.subnodes:
+        tmpl = fdt_util.GetPhandleList(node, 'insert-template')
+        if tmpl:
+            node.copy_subnodes_from_phandles(tmpl)
+
 def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt, use_expanded):
     """Prepare the images to be processed and select the device tree
 
@@ -519,6 +526,8 @@ def PrepareImagesAndDtbs(dtb_fname, select_images, update_fdt, use_expanded):
     if not node:
         raise ValueError("Device tree '%s' does not have a 'binman' "
                             "node" % dtb_fname)
+
+    _ProcessTemplates(node)
 
     images = _ReadImageDesc(node, use_expanded)
 
