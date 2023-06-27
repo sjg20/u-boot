@@ -306,6 +306,67 @@ class TestNode(unittest.TestCase):
         self.assertIn("Internal error, node '/spl-test' name mismatch 'i2c@0'",
                       str(exc.exception))
 
+    def test_copy_node(self):
+        """Test copy_node() function"""
+        def do_copy_checks(dtb, dst, expect_none):
+            self.assertEqual(
+                ['/spl-test3/i2c@0', '/spl-test3/first@0',
+                 '/spl-test3/existing'],
+                [n.path for n in dst.subnodes])
+
+            chk = dtb.GetNode('/spl-test3/i2c@0')
+            self.assertTrue(chk)
+            self.assertEqual(
+                {'compatible', 'bootph-all', '#address-cells', '#size-cells'},
+                chk.props.keys())
+
+            # Check the first property
+            prop = chk.props['bootph-all']
+            self.assertEqual('bootph-all', prop.name)
+            self.assertEqual(True, prop.value)
+            self.assertEqual(chk.path, prop._node.path)
+
+            # Check the second property
+            prop2 = chk.props['compatible']
+            self.assertEqual('compatible', prop2.name)
+            self.assertEqual('sandbox,i2c', prop2.value)
+            self.assertEqual(chk.path, prop2._node.path)
+
+            pmic = chk.FindNode('pmic@9')
+            self.assertTrue(chk)
+
+            first = dtb.GetNode('/spl-test3/i2c@0/first@0')
+            self.assertTrue(first)
+            pmic = dtb.GetNode('/spl-test3/i2c@0/pmic@9')
+            self.assertTrue(pmic)
+            self.assertEqual([first, pmic], chk.subnodes)
+            self.assertEqual(chk, pmic.parent)
+            self.assertEqual(
+                {'bootph-all', 'compatible', 'reg', 'low-power'},
+                pmic.props.keys())
+
+            if expect_none:
+                self.assertIsNone(prop._offset)
+                self.assertIsNone(prop2._offset)
+                self.assertIsNone(pmic._offset)
+            else:
+                self.assertTrue(prop._offset)
+                self.assertTrue(prop2._offset)
+                self.assertTrue(pmic._offset)
+
+        tmpl = self.dtb.GetNode('/i2c@0')
+        dst = self.dtb.GetNode('/spl-test3')
+        dst.copy_node(tmpl)
+
+        do_copy_checks(self.dtb, dst, expect_none=True)
+
+        self.dtb.Sync(auto_resize=True)
+
+        # Now check that the FDT looks correct
+        dtb = fdt.Fdt.FromData(self.dtb.GetContents())
+        dtb.Scan()
+        dst = dtb.GetNode('/spl-test3')
+        do_copy_checks(dtb, dst, expect_none=False)
 
 class TestProp(unittest.TestCase):
     """Test operation of the Prop class"""
