@@ -317,7 +317,8 @@ class TestNode(unittest.TestCase):
             chk = dtb.GetNode('/spl-test3/i2c@0')
             self.assertTrue(chk)
             self.assertEqual(
-                {'compatible', 'bootph-all', '#address-cells', '#size-cells'},
+                {'compatible', 'bootph-all', '#address-cells', '#size-cells',
+                 'phandle'},
                 chk.props.keys())
 
             # Check the first property
@@ -367,6 +368,30 @@ class TestNode(unittest.TestCase):
         dtb.Scan()
         dst = dtb.GetNode('/spl-test3')
         do_copy_checks(dtb, dst, expect_none=False)
+
+    def test_copy_subnodes_from_phandles(self):
+        """Test copy_node() function"""
+        pmic = self.dtb.GetNode('/spl-test3/i2c@0/pmic@9')
+        self.assertIsNone(pmic)
+
+        orig = self.dtb.GetNode('/orig-node')
+        node_list = fdt_util.GetPhandleList(orig, 'copy-list')
+
+        dst = self.dtb.GetNode('/spl-test3')
+        dst.copy_subnodes_from_phandles(node_list)
+
+        pmic = self.dtb.GetNode('/spl-test3/pmic@9')
+        self.assertTrue(pmic)
+
+        subn = self.dtb.GetNode('/spl-test3/subnode')
+        self.assertTrue(subn)
+        self.assertEqual({'a-prop'}, subn.props.keys())
+
+        self.assertEqual(
+            ['/spl-test3/pmic@9', '/spl-test3/first@0', '/spl-test3/subnode',
+             '/spl-test3/existing'],
+            [n.path for n in dst.subnodes])
+
 
 class TestProp(unittest.TestCase):
     """Test operation of the Prop class"""
