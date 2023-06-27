@@ -10,6 +10,7 @@
 / {
 	#address-cells = <1>;
 	#size-cells = <1>;
+	copy-list = <&another &base>;
 
 	dest {
 		bootph-all;
@@ -45,7 +46,7 @@
 		};
 	};
 
-	base {
+	base: base {
 		compatible = "sandbox,i2c";
 		bootph-all;
 		#address-cells = <1>;
@@ -70,6 +71,16 @@
 			second2 {
 				some-prop;
 			};
+		};
+	};
+
+	another: another {
+		earlier {
+			wibble = <2>;
+		};
+
+		later {
+			fibble = <3>;
 		};
 	};
 };
