@@ -306,6 +306,76 @@ class TestNode(unittest.TestCase):
         self.assertIn("Internal error, node '/spl-test' name mismatch 'i2c@0'",
                       str(exc.exception))
 
+    def test_copy_node(self):
+        """Test copy_node() function"""
+        def do_copy_checks(dtb, dst, expect_none):
+            self.assertEqual(
+                ['/dest/base', '/dest/first@0', '/dest/existing'],
+                [n.path for n in dst.subnodes])
+
+            chk = dtb.GetNode('/dest/base')
+            self.assertTrue(chk)
+            self.assertEqual(
+                {'compatible', 'bootph-all', '#address-cells', '#size-cells'},
+                chk.props.keys())
+
+            # Check the first property
+            prop = chk.props['bootph-all']
+            self.assertEqual('bootph-all', prop.name)
+            self.assertEqual(True, prop.value)
+            self.assertEqual(chk.path, prop._node.path)
+
+            # Check the second property
+            prop2 = chk.props['compatible']
+            self.assertEqual('compatible', prop2.name)
+            self.assertEqual('sandbox,i2c', prop2.value)
+            self.assertEqual(chk.path, prop2._node.path)
+
+            base = chk.FindNode('base')
+            self.assertTrue(chk)
+
+            first = dtb.GetNode('/dest/base/first@0')
+            self.assertTrue(first)
+            base = dtb.GetNode('/dest/base/over')
+            self.assertTrue(base)
+            second = dtb.GetNode('/dest/base/second')
+            self.assertTrue(second)
+            self.assertEqual([base.name, first.name, second.name],
+                             [n.name for n in chk.subnodes])
+            self.assertEqual(chk, base.parent)
+            self.assertEqual(
+                {'bootph-all', 'compatible', 'reg', 'low-power'},
+                base.props.keys())
+
+            if expect_none:
+                self.assertIsNone(prop._offset)
+                self.assertIsNone(prop2._offset)
+                self.assertIsNone(base._offset)
+            else:
+                self.assertTrue(prop._offset)
+                self.assertTrue(prop2._offset)
+                self.assertTrue(base._offset)
+
+            # Now check ordering of the subnodes
+            self.assertEqual(
+                ['second1', 'second2', 'second3', 'second4'],
+                [n.name for n in second.subnodes])
+
+        dtb = fdt.FdtScan(find_dtb_file('dtoc_test_copy.dts'))
+        tmpl = dtb.GetNode('/base')
+        dst = dtb.GetNode('/dest')
+        dst.copy_node(tmpl)
+
+        do_copy_checks(dtb, dst, expect_none=True)
+
+        dtb.Sync(auto_resize=True)
+
+        # Now check that the FDT looks correct
+        new_dtb = fdt.Fdt.FromData(dtb.GetContents())
+        new_dtb.Scan()
+        dst = new_dtb.GetNode('/dest')
+        do_copy_checks(new_dtb, dst, expect_none=False)
+
 
 class TestProp(unittest.TestCase):
     """Test operation of the Prop class"""
