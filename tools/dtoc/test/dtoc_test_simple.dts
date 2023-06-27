@@ -45,6 +45,14 @@
 		stringarray = "one";
 		longbytearray = [09 0a 0b 0c 0d 0e 0f 10];
 		maybe-empty-int = <1>;
+
+		first@0 {
+			a-prop = <456>;
+			b-prop = <1>;
+		};
+
+		existing {
+		};
 	};
 
 	i2c@0 {
@@ -57,6 +65,11 @@
 			bootph-all;
 			reg = <9>;
 			low-power;
+		};
+
+		first@0 {
+			reg = <0>;
+			a-prop = <123>;
 		};
 	};
 

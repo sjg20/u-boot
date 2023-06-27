@@ -13,6 +13,7 @@ from dtoc import fdt_util
 import libfdt
 from libfdt import QUIET_NOTFOUND
 from u_boot_pylib import tools
+from u_boot_pylib import tout
 
 # This deals with a device tree, presenting it as an assortment of Node and
 # Prop objects, representing nodes and properties, respectively. This file
@@ -264,6 +265,13 @@ class Prop:
                 fdt_obj.setprop(node.Offset(), self.name, self.bytes)
             self.dirty = False
 
+    def purge(self):
+        """Set a property offset to None
+
+        The property remains in the tree structure and will be recreated when
+        the FDT is synced
+        """
+        self._offset = None
 
 class Node:
     """A device tree node
@@ -534,8 +542,8 @@ class Node:
         """
         return self.AddData(prop_name, struct.pack('>I', val))
 
-    def AddSubnode(self, name):
-        """Add a new subnode to the node
+    def Subnode(self, name):
+        """Create new subnode for the node
 
         Args:
             name: name of node to add
@@ -544,9 +552,63 @@ class Node:
             New subnode that was created
         """
         path = self.path + '/' + name
-        subnode = Node(self._fdt, self, None, name, path)
+        return Node(self._fdt, self, None, name, path)
+
+    def AddSubnode(self, name):
+        """Add a new subnode to the node, after all other subnodes
+
+        Args:
+            name: name of node to add
+
+        Returns:
+            New subnode that was created
+        """
+        subnode = self.Subnode(name)
         self.subnodes.append(subnode)
         return subnode
+
+    def insert_subnode(self, name):
+        """Add a new subnode to the node, before all other subnodes
+
+        This deletes other subnodes and sets their offset to None, so that they
+        will be recreated after this one.
+
+        Args:
+            name: name of node to add
+
+        Returns:
+            New subnode that was created
+        """
+        for subnode in self.subnodes:
+            subnode.purge(True)
+        subnode = self.Subnode(name)
+        self.subnodes.insert(0, subnode)
+        return subnode
+
+    def purge(self, delete_it=False):
+        """Purge this node, setting offset to None and deleting from FDT"""
+        if self._offset is not None:
+            CheckErr(self._fdt._fdt_obj.del_node(self.Offset()),
+                 "Node '%s': delete" % self.path)
+            self._offset = None
+            self._fdt.Invalidate()
+
+        for prop in self.props.values():
+            prop.purge()
+
+        for subnode in self.subnodes:
+            subnode.purge(False)
+
+    def move_to_first(self):
+        self.purge(False)
+
+        parent = self.parent
+        new_subnodes = [self]
+        for subnode in parent.subnodes:
+            if subnode != self:
+                subnode.purge(False)
+                new_subnodes.append(subnode)
+        parent.subnodes = new_subnodes
 
     def Delete(self):
         """Delete a node
@@ -634,6 +696,30 @@ class Node:
         for prop in prop_list:
             prop.Sync(auto_resize)
         return added
+
+    def copy_node(self, src):
+        """Copy a node and all its subnodes into this node
+
+        Args:
+            src (Node): Node to copy
+
+        This works recursively.
+
+        The new node is put before all other nodes. If the node already
+        exists, just its subnodes and properties are copied, placing them before
+        any existing subnodes. Properties which exist in the destination node
+        already are not copied.
+        """
+        dst = self.FindNode(src.name)
+        if dst:
+            dst.move_to_first()
+        else:
+            dst = self.insert_subnode(src.name)
+        for name, src_prop in src.props.items():
+            if name not in dst.props:
+                dst.props[name] = Prop(dst, None, name, src_prop.bytes)
+        for node in src.subnodes:
+            dst.copy_node(node)
 
 
 class Fdt:
