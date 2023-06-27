@@ -55,7 +55,7 @@
 		};
 	};
 
-	i2c@0 {
+	i2c: i2c@0 {
 		compatible = "sandbox,i2c";
 		bootph-all;
 		#address-cells = <1>;
@@ -73,10 +73,16 @@
 		};
 	};
 
-	orig-node {
+	orig: orig-node {
 		orig = <1 23 4>;
 		args = "-n first", "second", "-p", "123,456", "-x";
 		args2 = "a space", "there";
 		args3 = "-n first second -p 123,456 -x";
+
+		copy-list = <&i2c &orig>;
+
+		subnode {
+			a-prop;
+		};
 	};
 };
