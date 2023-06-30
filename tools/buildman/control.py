@@ -289,6 +289,12 @@ def do_buildman(options, args, toolchains=None, make_func=None, brds=None,
             return 0 if okay else 2
         brds.read_boards(board_file)
 
+    if options.print_prefix:
+        err = show_toolchain_prefix(brds, toolchains)
+        if err:
+            sys.exit(col.build(col.RED, err))
+        return 0
+
     exclude = []
     if options.exclude:
         for arg in options.exclude:
@@ -305,12 +311,6 @@ def do_buildman(options, args, toolchains=None, make_func=None, brds=None,
     selected = brds.get_selected()
     if not selected:
         sys.exit(col.build(col.RED, 'No matching boards found'))
-
-    if options.print_prefix:
-        err = show_toolchain_prefix(brds, toolchains)
-        if err:
-            sys.exit(col.build(col.RED, err))
-        return 0
 
     # Work out how many commits to build. We want to build everything on the
     # branch. We also build the upstream commit as a control so we can see
