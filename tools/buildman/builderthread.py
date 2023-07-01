@@ -342,6 +342,68 @@ class BuilderThread(threading.Thread):
             commit = 'current'
         return commit
 
+    def _config_and_build(self, commit_upto, brd, work_dir, do_config,
+                          config_only, adjust_cfg, commit, out_dir, out_rel_dir,
+                          result):
+        """Do the build, configuring first if necessary
+
+        Args:
+            commit_upto: Commit number to build (0...n-1)
+            brd (Board): Board to create arguments for
+            work_dir: Directory to which the source will be checked out
+            do_config: True to run a make <board>_defconfig on the source
+            config_only: Only configure the source, do not build it
+            out_rel_dir (str): Output directory relatie to the current dir
+            adjust_cfg (list of str): List of changes to make to .config file
+                before building. Each is one of (where C is either CONFIG_xxx
+                or just xxx):
+                     C to enable C
+                     ~C to disable C
+                     C=val to set the value of C (val must have quotes if C is
+                         a string Kconfig
+            commit (Commit): Commit only being built
+            out_dir (str): Output directory for the build
+            out_rel_dir (str): Output directory relatie to the current dir
+            result (CommandResult): Previous result
+
+        Returns:
+            result (CommandResult): Result of the build
+        """
+        # Set up the environment and command line
+        env = self.toolchain.MakeEnvironment(self.builder.full_path)
+        mkdir(out_dir)
+
+        args, cwd, src_dir = self._build_args(brd, out_dir, out_rel_dir,
+                                                work_dir, commit_upto)
+        config_args = [f'{brd.target}_defconfig']
+        config_out = io.StringIO()
+
+        self._remove_old_outputs(out_dir)
+
+        # If we need to reconfigure, do that now
+        cfg_file = os.path.join(out_dir, '.config')
+        cmd_list = []
+        if do_config or adjust_cfg:
+            result = self._reconfigure(
+                commit, brd, cwd, args, env, config_args, config_out, cmd_list)
+            do_config = False   # No need to configure next time
+            if adjust_cfg:
+                cfgutil.adjust_cfg_file(cfg_file, adjust_cfg)
+
+        # Now do the build, if everything looks OK
+        if result.return_code == 0:
+            result = self._build(commit, brd, cwd, args, env, cmd_list,
+                                 config_only)
+            if adjust_cfg:
+                errs = cfgutil.check_cfg_file(cfg_file, adjust_cfg)
+                if errs:
+                    result.stderr += errs
+                    result.return_code = 1
+        result.stderr = result.stderr.replace(src_dir + '/', '')
+        if self.builder.verbose_build:
+            result.stdout = config_out.getvalue() + result.stdout
+        result.cmd_list = cmd_list
+        return result, do_config
 
     def run_commit(self, commit_upto, brd, work_dir, do_config, config_only,
                   force_build, force_build_failures, work_in_output,
@@ -399,42 +461,9 @@ class BuilderThread(threading.Thread):
 
             if self.toolchain:
                 commit = self._checkout(commit_upto, work_dir)
-
-                # Set up the environment and command line
-                env = self.toolchain.MakeEnvironment(self.builder.full_path)
-                mkdir(out_dir)
-
-                args, cwd, src_dir = self._build_args(brd, out_dir, out_rel_dir,
-                                                      work_dir, commit_upto)
-                config_args = [f'{brd.target}_defconfig']
-                config_out = io.StringIO()
-
-                self._remove_old_outputs(out_dir)
-
-                # If we need to reconfigure, do that now
-                cfg_file = os.path.join(out_dir, '.config')
-                cmd_list = []
-                if do_config or adjust_cfg:
-                    result = self._reconfigure(
-                        commit, brd, cwd, args, env, config_args, config_out,
-                        cmd_list)
-                    do_config = False   # No need to configure next time
-                    if adjust_cfg:
-                        cfgutil.adjust_cfg_file(cfg_file, adjust_cfg)
-
-                # Now do the build, if everything looks OK
-                if result.return_code == 0:
-                    result = self._build(commit, brd, cwd, args, env, cmd_list,
-                                         config_only)
-                    if adjust_cfg:
-                        errs = cfgutil.check_cfg_file(cfg_file, adjust_cfg)
-                        if errs:
-                            result.stderr += errs
-                            result.return_code = 1
-                result.stderr = result.stderr.replace(src_dir + '/', '')
-                if self.builder.verbose_build:
-                    result.stdout = config_out.getvalue() + result.stdout
-                result.cmd_list = cmd_list
+                result, do_config = self._config_and_build(
+                    commit_upto, brd, work_dir, do_config, config_only,
+                    adjust_cfg, commit, out_dir, out_rel_dir, result)
             else:
                 result.return_code = 1
                 result.stderr = f'No tool chain for {brd.arch}\n'
