@@ -61,8 +61,8 @@ def run_buildman():
     """
     options, args = cmdline.ParseArgs()
 
-    if not options.debug:
-        sys.tracebacklimit = 0
+    # if not options.debug:
+        # sys.tracebacklimit = 0
 
     # Run our meagre tests
     if cmdline.HAS_TESTS and options.test:
