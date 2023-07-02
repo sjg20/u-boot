@@ -843,3 +843,10 @@ CONFIG_LOCALVERSION=y
             os.remove(outfile)
         result = self._RunControl('-R', outfile, brds=None, get_builder=False)
         self.assertTrue(os.path.exists(outfile))
+
+    def test_print_prefix(self):
+        """Test that we can print the toolchain prefix"""
+        with test_util.capture_sys_output() as (stdout, stderr):
+            result = self._RunControl('-A', 'board0')
+        self.assertEqual('arm-\n', stdout.getvalue())
+        self.assertEqual('', stderr.getvalue())
