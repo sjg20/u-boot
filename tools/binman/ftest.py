@@ -1103,6 +1103,7 @@ class TestFunctional(unittest.TestCase):
 
     def testPackZeroOffset(self):
         """Test that an entry at offset 0 is not given a new offset"""
+        self._SetupSplElf()
         with self.assertRaises(ValueError) as e:
             self._DoTestFile('025_pack_zero_size.dts')
         self.assertIn("Node '/binman/u-boot-spl': Offset 0x0 (0) overlaps "
@@ -1116,6 +1117,7 @@ class TestFunctional(unittest.TestCase):
 
     def testPackX86RomNoSize(self):
         """Test that the end-at-4gb property requires a size property"""
+        self._SetupSplElf()
         with self.assertRaises(ValueError) as e:
             self._DoTestFile('027_pack_4gb_no_size.dts')
         self.assertIn("Image '/binman': Section size must be provided when "
@@ -1124,6 +1126,7 @@ class TestFunctional(unittest.TestCase):
     def test4gbAndSkipAtStartTogether(self):
         """Test that the end-at-4gb and skip-at-size property can't be used
         together"""
+        self._SetupSplElf()
         with self.assertRaises(ValueError) as e:
             self._DoTestFile('098_4gb_and_skip_at_start_together.dts')
         self.assertIn("Image '/binman': Provide either 'end-at-4gb' or "
@@ -1131,6 +1134,7 @@ class TestFunctional(unittest.TestCase):
 
     def testPackX86RomOutside(self):
         """Test that the end-at-4gb property checks for offset boundaries"""
+        self._SetupSplElf()
         with self.assertRaises(ValueError) as e:
             self._DoTestFile('028_pack_4gb_outside.dts')
         self.assertIn("Node '/binman/u-boot': Offset 0x0 (0) size 0x4 (4) "
@@ -1423,6 +1427,7 @@ class TestFunctional(unittest.TestCase):
 
     def testPackUbootSplMicrocode(self):
         """Test that x86 microcode can be handled correctly in SPL"""
+        self._SetupSplElf()
         self._PackUbootSplMicrocode('049_x86_ucode_spl.dts')
 
     def testPackUbootSplMicrocodeReorder(self):
@@ -1442,6 +1447,7 @@ class TestFunctional(unittest.TestCase):
 
     def testSplDtb(self):
         """Test that an image with spl/u-boot-spl.dtb can be created"""
+        self._SetupSplElf()
         data = self._DoReadFile('051_u_boot_spl_dtb.dts')
         self.assertEqual(U_BOOT_SPL_DTB_DATA, data[:len(U_BOOT_SPL_DTB_DATA)])
 
@@ -1962,6 +1968,8 @@ class TestFunctional(unittest.TestCase):
 
     def testUpdateFdtAll(self):
         """Test that all device trees are updated with offset/size info"""
+        self._SetupSplElf()
+        self._SetupTplElf()
         data = self._DoReadFileRealDtb('082_fdt_update_all.dts')
 
         base_expected = {
@@ -3284,6 +3292,8 @@ class TestFunctional(unittest.TestCase):
 
     def testUpdateFdtAllRepack(self):
         """Test that all device trees are updated with offset/size info"""
+        self._SetupSplElf()
+        self._SetupTplElf()
         data = self._DoReadFileRealDtb('134_fdt_update_all_repack.dts')
         SECTION_SIZE = 0x300
         DTB_SIZE = 602
@@ -3858,6 +3868,7 @@ class TestFunctional(unittest.TestCase):
 
     def testSimpleFit(self):
         """Test an image with a FIT inside"""
+        self._SetupSplElf()
         data = self._DoReadFile('161_fit.dts')
         self.assertEqual(U_BOOT_DATA, data[:len(U_BOOT_DATA)])
         self.assertEqual(U_BOOT_NODTB_DATA, data[-len(U_BOOT_NODTB_DATA):])
@@ -5377,6 +5388,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testFitSubentryHashSubnode(self):
         """Test an image with a FIT inside"""
+        self._SetupSplElf()
         data, _, _, out_dtb_name = self._DoReadFileDtb(
             '221_fit_subentry_hash.dts', use_real_dtb=True, update_dtb=True)
 
@@ -5895,6 +5907,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageImagename(self):
         """Test using mkimage with -n holding the data too"""
+        self._SetupSplElf()
         data = self._DoReadFile('242_mkimage_name.dts')
 
         # Check that the data appears in the file somewhere
@@ -5912,6 +5925,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageImage(self):
         """Test using mkimage with -n holding the data too"""
+        self._SetupSplElf()
         data = self._DoReadFile('243_mkimage_image.dts')
 
         # Check that the data appears in the file somewhere
@@ -5932,6 +5946,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageImageNoContent(self):
         """Test using mkimage with -n and no data"""
+        self._SetupSplElf()
         with self.assertRaises(ValueError) as exc:
             self._DoReadFile('244_mkimage_image_no_content.dts')
         self.assertIn('Could not complete processing of contents',
@@ -5939,6 +5954,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageImageBad(self):
         """Test using mkimage with imagename node and data-to-imagename"""
+        self._SetupSplElf()
         with self.assertRaises(ValueError) as exc:
             self._DoReadFile('245_mkimage_image_bad.dts')
         self.assertIn('Cannot use both imagename node and data-to-imagename',
@@ -6040,6 +6056,8 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageMultipleDataFiles(self):
         """Test passing multiple files to mkimage in a mkimage entry"""
+        self._SetupSplElf()
+        self._SetupTplElf()
         data = self._DoReadFile('252_mkimage_mult_data.dts')
         # Size of files are packed in their 4B big-endian format
         expect = struct.pack('>I', len(U_BOOT_TPL_DATA))
@@ -6089,6 +6107,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageMultipleNoContent(self):
         """Test passing multiple data files to mkimage with one data file having no content"""
+        self._SetupSplElf()
         with self.assertRaises(ValueError) as exc:
             self._DoReadFile('253_mkimage_mult_no_content.dts')
         self.assertIn('Could not complete processing of contents',
@@ -6096,6 +6115,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testMkimageFilename(self):
         """Test using mkimage to build a binary with a filename"""
+        self._SetupSplElf()
         retcode = self._DoTestFile('254_mkimage_filename.dts')
         self.assertEqual(0, retcode)
         fname = tools.get_output_filename('mkimage-test.bin')
@@ -6570,6 +6590,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testReplaceFitSibling(self):
         """Test an image with a FIT inside where we replace its sibling"""
+        self._SetupSplElf()
         fname = TestFunctional._MakeInputFile('once', b'available once')
         self._DoReadFileRealDtb('277_replace_fit_sibling.dts')
         os.remove(fname)
@@ -6644,7 +6665,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
                 Private key
                 DTB
         """
-
+        self._SetupSplElf()
         data = self._DoReadFileRealDtb(dts)
         updated_fname = tools.get_output_filename('image-updated.bin')
         tools.write_file(updated_fname, data)
@@ -6719,6 +6740,7 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
     def testSymbolNoWrite(self):
         """Test disabling of symbol writing"""
+        self._SetupSplElf()
         self.checkSymbols('282_symbols_disable.dts', U_BOOT_SPL_DATA, 0x1c,
                           no_write_symbols=True)
 
