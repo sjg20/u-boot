@@ -66,6 +66,7 @@
 				nxp,boot-from = "sd";
 				nxp,rom-version = <2>;
 				nxp,loader-address = <0x970000>;
+				args;	/* hack so we can subclass mkimage */
 
 				section {
 					filename = "u-boot-spl-ddr.bin";
