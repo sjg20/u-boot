@@ -6,8 +6,6 @@
 
 / {
 	binman: binman {
-		fdtmap {
-		};
 	};
 };
 
@@ -52,8 +50,8 @@
 };
 
 &binman {
+	filename = "flash.bin";
 	section {
-		filename = "flash.bin";
 		pad-byte = <0x00>;
 
 		mkimage {
@@ -172,5 +170,7 @@
 				};
 			};
 		};
+	};
+	fdtmap {
 	};
 };
