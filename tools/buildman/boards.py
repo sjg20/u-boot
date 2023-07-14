@@ -363,10 +363,15 @@ class MaintainersDatabase:
                         for fname in fnames:
                             path = os.path.join(dirpath, fname)
                             front, match, rear = path.partition('configs/')
-                            if not front and match:
-                                front, match, rear = rear.rpartition('_defconfig')
-                                if match and not rear:
-                                    targets.append(front)
+                            if front or not match:
+                                continue
+                            front, match, rear = rear.rpartition('_defconfig')
+
+                            # Use this entry if it matches the defconfig file
+                            # without the _defconfig suffix. For example
+                            # 'am335x.*' matches am335x_guardian_defconfig
+                            if match and not rear and re.fullmatch(rest, front):
+                                targets.append(front)
                 elif line == '\n':
                     for target in targets:
                         self.database[target] = (status, maintainers)
