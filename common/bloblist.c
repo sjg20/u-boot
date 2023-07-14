@@ -76,12 +76,14 @@ static struct bloblist_rec *bloblist_first_blob(struct bloblist_hdr *hdr)
 
 static inline uint rec_hdr_size(struct bloblist_rec *rec)
 {
-	return rec->hdr_size;
+	return (rec->tag_and_hdr_size & BLOBLISTR_HDR_SIZE_MASK) >>
+		BLOBLISTR_HDR_SIZE_SHIFT;
 }
 
 static inline uint rec_tag(struct bloblist_rec *rec)
 {
-	return rec->tag;
+	return (rec->tag_and_hdr_size & BLOBLISTR_TAG_MASK) >>
+		BLOBLISTR_TAG_SHIFT;
 }
 
 static ulong bloblist_blob_end_ofs(struct bloblist_hdr *hdr,
@@ -131,7 +133,7 @@ static int bloblist_addrec(uint tag, int size, int align_log2,
 {
 	struct bloblist_hdr *hdr = gd->bloblist;
 	struct bloblist_rec *rec;
-	int data_start, new_alloced;
+	int data_start, aligned_start, new_alloced;
 
 	if (!align_log2)
 		align_log2 = BLOBLIST_ALIGN_LOG2;
@@ -140,10 +142,25 @@ static int bloblist_addrec(uint tag, int size, int align_log2,
 	data_start = map_to_sysmem(hdr) + hdr->alloced + sizeof(*rec);
 
 	/* Align the address and then calculate the offset from ->alloced */
-	data_start = ALIGN(data_start, 1U << align_log2) - map_to_sysmem(hdr);
+	aligned_start = ALIGN(data_start, 1U << align_log2) - data_start;
+
+	/* If we need to create a dummy record, do so */
+	if (aligned_start) {
+		int void_size = aligned_start - sizeof(*rec);
+		struct bloblist_rec *vrec;
+		int ret;
+
+		ret = bloblist_addrec(BLOBLISTT_VOID, void_size, 0, &vrec);
+		if (ret)
+			return log_msg_ret("void", ret);
+
+		/* start the record after that */
+		data_start = map_to_sysmem(hdr) + hdr->alloced + sizeof(*vrec);
+	}
 
 	/* Calculate the new allocated total */
-	new_alloced = data_start + ALIGN(size, 1U << align_log2);
+	new_alloced = data_start - map_to_sysmem(hdr) +
+		ALIGN(size, 1U << align_log2);
 
 	if (new_alloced > hdr->size) {
 		log_err("Failed to allocate %x bytes size=%x, need size=%x\n",
@@ -152,10 +169,8 @@ static int bloblist_addrec(uint tag, int size, int align_log2,
 	}
 	rec = (void *)hdr + hdr->alloced;
 
-	rec->tag = tag;
-	rec->hdr_size = data_start - hdr->alloced;
+	rec->tag_and_hdr_size = tag | sizeof(*rec) << BLOBLISTR_HDR_SIZE_SHIFT;
 	rec->size = size;
-	rec->spare = 0;
 
 	/* Zero the record data */
 	memset((void *)rec + rec_hdr_size(rec), '\0', rec->size);

@@ -78,7 +78,7 @@ static int bloblist_test_init(struct unit_test_state *uts)
 	ut_asserteq(-EPROTONOSUPPORT, bloblist_check(TEST_ADDR,
 						     TEST_BLOBLIST_SIZE));
 
-	ut_asserteq(-ENOSPC, bloblist_new(TEST_ADDR, 0x10));
+	ut_asserteq(-ENOSPC, bloblist_new(TEST_ADDR, 0xc));
 	ut_asserteq(-EFAULT, bloblist_new(1, TEST_BLOBLIST_SIZE));
 	ut_assertok(bloblist_new(TEST_ADDR, TEST_BLOBLIST_SIZE));
 
@@ -111,9 +111,9 @@ static int bloblist_test_blob(struct unit_test_state *uts)
 	/* Add a record and check that we can find it */
 	data = bloblist_add(TEST_TAG, TEST_SIZE, 0);
 	rec = (void *)(hdr + 1);
-	ut_asserteq_addr(rec + 1, data);
+	ut_asserteq_addr((void *)rec + BLOBLIST_REC_HDR_SIZE, data);
 	data = bloblist_find(TEST_TAG, TEST_SIZE);
-	ut_asserteq_addr(rec + 1, data);
+	ut_asserteq_addr((void *)rec + BLOBLIST_REC_HDR_SIZE, data);
 
 	/* Check the data is zeroed */
 	ut_assertok(check_zero(data, TEST_SIZE));
@@ -126,7 +126,8 @@ static int bloblist_test_blob(struct unit_test_state *uts)
 
 	/* Check for a non-existent record */
 	ut_asserteq_addr(data, bloblist_ensure(TEST_TAG, TEST_SIZE));
-	ut_asserteq_addr(rec2 + 1, bloblist_ensure(TEST_TAG2, TEST_SIZE2));
+	ut_asserteq_addr((void *)rec2 + BLOBLIST_REC_HDR_SIZE,
+			 bloblist_ensure(TEST_TAG2, TEST_SIZE2));
 	ut_assertnull(bloblist_find(TEST_TAG_MISSING, 0));
 
 	return 0;
@@ -255,8 +256,8 @@ static int bloblist_test_cmd_info(struct unit_test_state *uts)
 	run_command("bloblist info", 0);
 	ut_assert_nextline("base:     %lx", (ulong)map_to_sysmem(hdr));
 	ut_assert_nextline("size:     400    1 KiB");
-	ut_assert_nextline("alloced:  70     112 Bytes");
-	ut_assert_nextline("free:     390    912 Bytes");
+	ut_assert_nextline("alloced:  48     72 Bytes");
+	ut_assert_nextline("free:     3b8    952 Bytes");
 	ut_assert_console_end();
 	ut_unsilence_console(uts);
 
