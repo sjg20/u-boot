@@ -1328,6 +1328,10 @@ Use the `--maintainer-check` option to check this::
 
 Buildman returns with an exit code of 2 if there area any warnings.
 
+An experimental `--full-check option` also checks for boards which don't have a
+CONFIG_TARGET_xxx where xxx corresponds to their defconfig filename. This is
+not strictly necessary, but may be useful information.
+
 
 Checking the command
 --------------------
