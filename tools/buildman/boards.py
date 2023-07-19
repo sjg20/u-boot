@@ -344,11 +344,13 @@ class MaintainersDatabase:
             str: Maintainers of the board.  If the board has two or more
             maintainers, they are separated with colons.
         """
-        if not target in self.database:
-            self.warnings.append(f"WARNING: no maintainers for '{target}'")
-            return ''
+        entry = self.database.get(target)
+        if entry:
+            if not entry[0].startswith('Orphan'):
+                return ':'.join(self.database[target][1])
 
-        return ':'.join(self.database[target][1])
+        self.warnings.append(f"WARNING: no maintainers for '{target}'")
+        return ''
 
     def parse_file(self, srcdir, fname):
         """Parse a MAINTAINERS file.
@@ -382,7 +384,7 @@ class MaintainersDatabase:
                 leaf = fname[len(srcdir) + 1:]
                 if leaf != 'MAINTAINERS':
                     self.warnings.append(
-                        f'WARNING: {leaf}: missing defconfig ending at line {linenum + 1}')
+                        f'WARNING: orphaned defconfig in {leaf} ending at line {linenum + 1}')
 
         targets = []
         maintainers = []
@@ -423,7 +425,7 @@ class MaintainersDatabase:
                             # Use this entry if it matches the defconfig file
                             # without the _defconfig suffix. For example
                             # 'am335x.*' matches am335x_guardian_defconfig
-                            if match and not rear and re.fullmatch(rest, front):
+                            if match and not rear and re.match(rest, front):
                                 targets.append(front)
                 elif line == '\n':
                     add_targets(linenum)
@@ -774,7 +776,7 @@ class Boards:
         """
         database = MaintainersDatabase()
         for (dirpath, _, filenames) in os.walk(srcdir):
-            if 'MAINTAINERS' in filenames:
+            if 'MAINTAINERS' in filenames and 'tools/buildman' not in dirpath:
                 database.parse_file(srcdir,
                                     os.path.join(dirpath, 'MAINTAINERS'))
 
@@ -787,7 +789,7 @@ class Boards:
             else:
                 params['status'] = '-'
             params_list[i] = params
-        return database.warnings
+        return sorted(database.warnings)
 
     @classmethod
     def format_and_output(cls, params_list, output):
