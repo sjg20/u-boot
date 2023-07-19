@@ -6887,6 +6887,14 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
             # Move to next
             spl_data = content[:0x18]
 
+    def testTemplatePhandle(self):
+        """Test using a template in a node containing a phandle"""
+        TestFunctional._MakeInputFile('vga2.bin', b'#' + VGA_DATA)
+        data = self._DoReadFile('291_template_phandle.dts')
+        first = U_BOOT_DATA + VGA_DATA + U_BOOT_DTB_DATA
+        second = U_BOOT_DATA + b'#' + VGA_DATA + U_BOOT_DTB_DATA
+        self.assertEqual(U_BOOT_IMG_DATA + first + second + first, data)
+
 
 if __name__ == "__main__":
     unittest.main()
