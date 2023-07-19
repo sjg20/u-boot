@@ -347,7 +347,9 @@ class MaintainersDatabase:
         entry = self.database.get(target)
         if entry:
             if not entry[0].startswith('Orphan'):
-                return ':'.join(self.database[target][1])
+                if len(entry[1]) > 1 or entry[1][0] != '-':
+                    print('entry', entry)
+                    return ':'.join(entry[1])
 
         self.warnings.append(f"WARNING: no maintainers for '{target}'")
         return ''
