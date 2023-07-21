@@ -150,7 +150,6 @@ enum bloblist_tag_t {
  * @version: BLOBLIST_VERSION
  * @hdr_size: Size of this header, normally sizeof(struct bloblist_hdr). The
  *	first bloblist_rec starts at this offset from the start of the header
- * @flags: Space for BLOBLISTF... flags (none yet)
  * @size: Total size of the bloblist (non-zero if valid) including this header.
  *	The bloblist extends for this many bytes from the start of this header.
  *	When adding new records, the bloblist can grow up to this size.
@@ -168,7 +167,7 @@ struct bloblist_hdr {
 	u32 magic;
 	u32 version;
 	u32 hdr_size;
-	u32 flags;
+	u32 _flags;
 
 	u32 size;
 	u32 alloced;
@@ -303,11 +302,10 @@ int bloblist_resize(uint tag, int new_size);
  *
  * @addr: Address of bloblist
  * @size: Initial size for bloblist
- * @flags: Flags to use for bloblist
  * Return: 0 if OK, -EFAULT if addr is not aligned correctly, -ENOSPC is the
  * area is not large enough
  */
-int bloblist_new(ulong addr, uint size, uint flags);
+int bloblist_new(ulong addr, uint size);
 
 /**
  * bloblist_check() - Check if a bloblist exists
