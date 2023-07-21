@@ -156,11 +156,10 @@ enum bloblist_tag_t {
  * @alloced: Total size allocated so far for this bloblist. This starts out as
  *	sizeof(bloblist_hdr) since we need at least that much space to store a
  *	valid bloblist
- * @chksum: CRC32 for the entire bloblist allocated area. Since any of the
+ * @chksum: checksum for the entire bloblist allocated area. Since any of the
  *	blobs can be altered after being created, this checksum is only valid
  *	when the bloblist is finalised before jumping to the next stage of boot.
- *	Note that chksum is last to make it easier to exclude it from the
- *	checksum calculation.
+ *	This is the value needed to make all checksummed bytes sum to 0
  */
 struct bloblist_hdr {
 	u32 magic;

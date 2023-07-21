@@ -13,6 +13,7 @@
 #include <malloc.h>
 #include <mapmem.h>
 #include <spl.h>
+#include <tables_csum.h>
 #include <asm/global_data.h>
 #include <u-boot/crc.h>
 
@@ -309,13 +310,14 @@ int bloblist_resize(uint tag, int new_size)
 static u32 bloblist_calc_chksum(struct bloblist_hdr *hdr)
 {
 	struct bloblist_rec *rec;
-	u32 chksum;
+	u8 chksum;
 
-	chksum = crc32(0, (unsigned char *)hdr,
-		       offsetof(struct bloblist_hdr, chksum));
+	chksum = table_compute_checksum(hdr, hdr->hdr_size);
+	chksum += hdr->chksum;
 	foreach_rec(rec, hdr) {
-		chksum = crc32(chksum, (void *)rec, rec_hdr_size(rec));
-		chksum = crc32(chksum, (void *)rec + rec_hdr_size(rec), rec->size);
+		chksum -= table_compute_checksum((void *)rec, rec_hdr_size(rec));
+		chksum -= table_compute_checksum((void *)rec + rec_hdr_size(rec),
+						 rec->size);
 	}
 
 	return chksum;
