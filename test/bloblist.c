@@ -202,10 +202,6 @@ static int bloblist_test_checksum(struct unit_test_state *uts)
 	ut_asserteq(-EFBIG, bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
 	hdr->size++;
 
-	hdr->spare++;
-	ut_asserteq(-EIO, bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
-	hdr->spare--;
-
 	hdr->chksum++;
 	ut_asserteq(-EIO, bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
 	hdr->chksum--;

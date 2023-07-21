@@ -156,7 +156,6 @@ enum bloblist_tag_t {
  * @alloced: Total size allocated so far for this bloblist. This starts out as
  *	sizeof(bloblist_hdr) since we need at least that much space to store a
  *	valid bloblist
- * @spare: Spare space (for future use)
  * @chksum: CRC32 for the entire bloblist allocated area. Since any of the
  *	blobs can be altered after being created, this checksum is only valid
  *	when the bloblist is finalised before jumping to the next stage of boot.
@@ -171,7 +170,7 @@ struct bloblist_hdr {
 
 	u32 size;
 	u32 alloced;
-	u32 spare;
+	u32 _spare;
 	u32 chksum;
 };
 
