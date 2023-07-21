@@ -84,6 +84,7 @@ static int fsp_video_probe(struct udevice *dev)
 	struct video_uc_plat *plat = dev_get_uclass_plat(dev);
 	struct video_priv *uc_priv = dev_get_uclass_priv(dev);
 	struct vesa_mode_info *vesa = &mode_info.vesa;
+	const ulong size = 256 << 20;
 	int ret;
 
 	if (!ll_boot_init())
@@ -112,7 +113,10 @@ static int fsp_video_probe(struct udevice *dev)
 
 	printf("graphics\n");
 	mtrr_list(10, 0);
-	mtrr_add_request(MTRR_TYPE_WRCOMB, vesa->phys_base_ptr, 256 << 20);
+	if (IS_ENABLED(CONFIG_FSP_VERSION2))
+		mtrr_add_request(MTRR_TYPE_WRCOMB, vesa->phys_base_ptr, size);
+	else
+		mtrr_set_next_var(MTRR_TYPE_WRCOMB, vesa->phys_base_ptr, size);
 	mtrr_commit(true);
 	mtrr_list(10, 0);
 	printf("graphics done\n");
