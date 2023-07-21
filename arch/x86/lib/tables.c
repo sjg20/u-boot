@@ -8,6 +8,7 @@
 #include <common.h>
 #include <bloblist.h>
 #include <log.h>
+#include <log2.h>
 #include <malloc.h>
 #include <smbios.h>
 #include <acpi/acpi_table.h>
@@ -101,7 +102,7 @@ int write_tables(void)
 			if (!gd->arch.table_end)
 				gd->arch.table_end = rom_addr;
 			rom_addr = (ulong)bloblist_add(table->tag, size,
-						       table->align);
+						       ilog2(table->align));
 			if (!rom_addr)
 				return log_msg_ret("bloblist", -ENOBUFS);
 
