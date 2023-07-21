@@ -74,7 +74,7 @@
 #include <mapmem.h>
 
 enum {
-	BLOBLIST_VERSION	= 0,
+	BLOBLIST_VERSION	= 1,
 	BLOBLIST_MAGIC		= 0x6ed0ff,
 
 	BLOBLIST_ALIGN_LOG2	= 4,
