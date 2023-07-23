@@ -13,9 +13,6 @@
 .globl _start
 .type _start, @function
 _start:
-#ifdef CONFIG_DEBUG_UART
-	call	debug_uart_init
-#endif
 	/* Set up memory using the existing stack */
 	mov	%rsp, %rdi
 	call	board_init_f_alloc_reserve

@@ -31,8 +31,7 @@ cpu_call64:
 	lgdt	gdt
 
 	/* Enable PAE mode */
-	movl	%cr4, %eax
-	orl	$X86_CR4_PAE, %eax
+	movl	$(X86_CR4_PAE), %eax
 	movl	%eax, %cr4
 
 	/* Enable the boot page tables */
@@ -48,7 +47,7 @@ cpu_call64:
 	/* After gdt is loaded */
 	xorl	%eax, %eax
 	lldt	%ax
-	movl    $0x20, %eax		/* __KERNEL_DS */
+	movl    $0x20, %eax
 	ltr	%ax
 
 	/*
@@ -63,7 +62,7 @@ cpu_call64:
 	 */
 	pop	%esi			/* setup_base */
 
-	pushl	$0x10			/* __KERNEL_CS */
+	pushl	$0x10
 	leal	lret_target, %eax
 	pushl	%eax
 
@@ -74,7 +73,6 @@ cpu_call64:
 	/* Jump from 32bit compatibility mode into 64bit mode. */
 	lret
 
-	.align	8
 code64:
 lret_target:
 	pop	%eax			/* target */
@@ -86,18 +84,14 @@ call64_stub_size:
 	.long	. - cpu_call64
 
 	.data
-	.balign	16
+	.align	16
 	.globl	gdt64
 gdt64:
-	.word	gdt_end - gdt - 1
-	.quad   gdt - gdt64
-	.balign	8
-
 gdt:
 	.word	gdt_end - gdt - 1
 	.long	gdt			/* Fixed up by code above */
 	.word	0
-	.quad	0x00cf9a000000ffff	/* __KERNEL32_CS */
+	.quad	0x0000000000000000	/* NULL descriptor */
 	.quad	0x00af9a000000ffff	/* __KERNEL_CS */
 	.quad	0x00cf92000000ffff	/* __KERNEL_DS */
 	.quad	0x0080890000000000	/* TS descriptor */
