@@ -419,7 +419,6 @@ static int reserve_video(void)
 		if (!ho)
 			return log_msg_ret("blf", -ENOENT);
 		video_reserve_from_bloblist(ho);
-		gd->relocaddr = ho->fb;
 	} else if (CONFIG_IS_ENABLED(VIDEO)) {
 		ulong addr;
 		int ret;
