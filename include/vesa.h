@@ -83,12 +83,14 @@ struct __packed vesa_mode_info {
 	u8 reserved[206];
 };
 
+#define VESA_MODE_INFO_SIZE	256
+
 struct vesa_state {
 	u16 video_mode;
 	bool valid;
 	union {
 		struct vesa_mode_info vesa;
-		u8 mode_info_block[256];
+		u8 mode_info_block[VESA_MODE_INFO_SIZE];
 	};
 };
 

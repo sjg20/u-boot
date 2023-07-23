@@ -204,7 +204,7 @@ static u8 vbe_get_mode_info(struct vesa_state *mi)
 
 	realmode_interrupt(0x10, VESA_GET_MODE_INFO, 0x0000, mi->video_mode,
 			   0x0000, buffer_seg, buffer_adr);
-	memcpy(mi->mode_info_block, buffer, sizeof(struct vesa_state));
+	memcpy(mi->mode_info_block, buffer, VESA_MODE_INFO_SIZE);
 	mi->valid = true;
 
 	return 0;
