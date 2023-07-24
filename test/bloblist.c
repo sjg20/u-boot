@@ -78,7 +78,7 @@ static int bloblist_test_init(struct unit_test_state *uts)
 	ut_asserteq(-EPROTONOSUPPORT, bloblist_check(TEST_ADDR,
 						     TEST_BLOBLIST_SIZE));
 
-	ut_asserteq(-ENOSPC, bloblist_new(TEST_ADDR, 0x10));
+	ut_asserteq(-ENOSPC, bloblist_new(TEST_ADDR, 0xc));
 	ut_asserteq(-EFAULT, bloblist_new(1, TEST_BLOBLIST_SIZE));
 	ut_assertok(bloblist_new(TEST_ADDR, TEST_BLOBLIST_SIZE));
 
@@ -261,8 +261,8 @@ static int bloblist_test_cmd_info(struct unit_test_state *uts)
 	run_command("bloblist info", 0);
 	ut_assert_nextline("base:     %lx", (ulong)map_to_sysmem(hdr));
 	ut_assert_nextline("size:     400    1 KiB");
-	ut_assert_nextline("alloced:  58     88 Bytes");
-	ut_assert_nextline("free:     3a8    936 Bytes");
+	ut_assert_nextline("alloced:  48     72 Bytes");
+	ut_assert_nextline("free:     3b8    952 Bytes");
 	ut_assert_console_end();
 	ut_unsilence_console(uts);
 

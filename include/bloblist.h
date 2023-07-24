@@ -155,30 +155,30 @@ enum bloblist_tag_t {
  * from the last.
  *
  * @magic: BLOBLIST_MAGIC
- * @version: BLOBLIST_VERSION
- * @hdr_size: Size of this header, normally sizeof(struct bloblist_hdr). The
- *	first bloblist_rec starts at this offset from the start of the header
- * @size: Total size of the bloblist (non-zero if valid) including this header.
- *	The bloblist extends for this many bytes from the start of this header.
- *	When adding new records, the bloblist can grow up to this size.
- * @alloced: Total size allocated so far for this bloblist. This starts out as
- *	sizeof(bloblist_hdr) since we need at least that much space to store a
- *	valid bloblist
  * @chksum: checksum for the entire bloblist allocated area. Since any of the
  *	blobs can be altered after being created, this checksum is only valid
  *	when the bloblist is finalised before jumping to the next stage of boot.
- *	This is the value needed to make all checksummed bytes sum to 0
+ *	This is the value needed to make all chechksummed bytes sum to 0
+ * @version: BLOBLIST_VERSION
+ * @hdr_size: Size of this header, normally sizeof(struct bloblist_hdr). The
+ *	first bloblist_rec starts at this offset from the start of the header
+ * @align_log2: Power of two of the maximum alignment required by this list
+ * @alloced: Total size allocated so far for this bloblist. This starts out as
+ *	sizeof(bloblist_hdr) since we need at least that much space to store a
+ *	valid bloblist
+ * @size: Total size of the bloblist (non-zero if valid) including this header.
+ *	The bloblist extends for this many bytes from the start of this header.
+ *	When adding new records, the bloblist can grow up to this size.
  */
 struct bloblist_hdr {
 	u32 magic;
-	u32 version;
-	u32 hdr_size;
-	u32 _flags;
+	u8 chksum;
+	u8 version;
+	u8 hdr_size;
+	u8 align_log2;
 
-	u32 size;
 	u32 alloced;
-	u32 _spare;
-	u32 chksum;
+	u32 size;
 };
 
 /**
