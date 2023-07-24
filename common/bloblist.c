@@ -132,7 +132,7 @@ static int bloblist_addrec(uint tag, int size, int align_log2,
 {
 	struct bloblist_hdr *hdr = gd->bloblist;
 	struct bloblist_rec *rec;
-	int data_start, new_alloced;
+	int data_start, aligned_start, new_alloced;
 	uint align;
 
 	if (!align_log2)
@@ -143,10 +143,25 @@ static int bloblist_addrec(uint tag, int size, int align_log2,
 	data_start = map_to_sysmem(hdr) + hdr->alloced + sizeof(*rec);
 
 	/* Align the address and then calculate the offset from ->alloced */
-	data_start = ALIGN(data_start, align) - map_to_sysmem(hdr);
+	aligned_start = ALIGN(data_start, align) - data_start;
+
+	/* If we need to create a dummy record, create it */
+	if (aligned_start) {
+		int void_size = aligned_start - sizeof(*rec);
+		struct bloblist_rec *vrec;
+		int ret;
+
+		ret = bloblist_addrec(BLOBLISTT_VOID, void_size, 0, &vrec);
+		if (ret)
+			return log_msg_ret("void", ret);
+
+		/* start the record after that */
+		data_start = map_to_sysmem(hdr) + hdr->alloced + sizeof(*vrec);
+	}
 
 	/* Calculate the new allocated total */
-	new_alloced = data_start + ALIGN(size, align);
+	new_alloced = data_start - map_to_sysmem(hdr) +
+		ALIGN(size, 1U << BLOBLIST_ALIGN_LOG2);
 
 	if (new_alloced > hdr->size) {
 		log_err("Failed to allocate %x bytes size=%x, need size=%x\n",
@@ -156,7 +171,7 @@ static int bloblist_addrec(uint tag, int size, int align_log2,
 	rec = (void *)hdr + hdr->alloced;
 
 	rec->tag = tag;
-	rec->hdr_size = data_start - hdr->alloced;
+	rec->hdr_size = sizeof(struct bloblist_rec);
 	rec->size = size;
 
 	/* Zero the record data */
