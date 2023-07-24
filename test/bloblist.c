@@ -73,6 +73,7 @@ static int bloblist_test_init(struct unit_test_state *uts)
 	ut_asserteq(-ENOENT, bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
 	ut_asserteq_ptr(NULL, bloblist_check_magic(TEST_ADDR));
 	ut_assertok(bloblist_new(TEST_ADDR, TEST_BLOBLIST_SIZE));
+	ut_asserteq(BLOBLIST_BLOB_ALIGN_LOG2, hdr->align_log2);
 	ut_asserteq_ptr(hdr, bloblist_check_magic(TEST_ADDR));
 	hdr->version++;
 	ut_asserteq(-EPROTONOSUPPORT, bloblist_check(TEST_ADDR,

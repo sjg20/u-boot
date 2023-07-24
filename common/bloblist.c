@@ -351,6 +351,7 @@ int bloblist_new(ulong addr, uint size)
 	hdr->magic = BLOBLIST_MAGIC;
 	hdr->size = size;
 	hdr->alloced = hdr->hdr_size;
+	hdr->align_log2 = BLOBLIST_BLOB_ALIGN_LOG2;
 	hdr->chksum = 0;
 	gd->bloblist = hdr;
 
