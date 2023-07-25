@@ -311,17 +311,10 @@ int bloblist_resize(uint tag, int new_size)
 
 static u32 bloblist_calc_chksum(struct bloblist_hdr *hdr)
 {
-	struct bloblist_rec *rec;
 	u8 chksum;
 
-	chksum = table_compute_checksum(hdr, hdr->hdr_size);
+	chksum = table_compute_checksum(hdr, hdr->alloced);
 	chksum += hdr->chksum;
-	foreach_rec(rec, hdr) {
-		chksum -= table_compute_checksum((void *)rec,
-						 rec_hdr_size(rec));
-		chksum -= table_compute_checksum((void *)rec +
-						 rec_hdr_size(rec), rec->size);
-	}
 
 	return chksum;
 }
