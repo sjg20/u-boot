@@ -50,6 +50,7 @@ int dram_init_banksize(void)
 	uint bank;
 	bool update_mtrr;
 
+	printf("dram\n");
 	/*
 	 * For FSP1, the system memory and reserved memory used by FSP are
 	 * already programmed in the MTRR by FSP. Also it is observed that
@@ -112,6 +113,7 @@ int dram_init_banksize(void)
 	 */
 	if (update_mtrr)
 		mtrr_add_request(MTRR_TYPE_WRBACK, 0, mtrr_top);
+	printf("dram done\n");
 
 	return 0;
 }

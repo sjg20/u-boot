@@ -110,8 +110,12 @@ static int fsp_video_probe(struct udevice *dev)
 	if (ret)
 		goto err;
 
+	printf("graphics\n");
+	mtrr_list(10, 0);
 	mtrr_add_request(MTRR_TYPE_WRCOMB, vesa->phys_base_ptr, 256 << 20);
 	mtrr_commit(true);
+	mtrr_list(10, 0);
+	printf("graphics done\n");
 
 	printf("%dx%dx%d @ %x\n", uc_priv->xsize, uc_priv->ysize,
 	       vesa->bits_per_pixel, vesa->phys_base_ptr);

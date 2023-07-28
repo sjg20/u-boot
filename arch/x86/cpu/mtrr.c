@@ -156,6 +156,7 @@ int mtrr_commit(bool do_caches)
 	int ret;
 	int i;
 
+	printf("commit, do_caches=%d\n", do_caches);
 	debug("%s: enabled=%d, count=%d\n", __func__, gd->arch.has_mtrr,
 	      gd->arch.mtrr_req_count);
 	if (!gd->arch.has_mtrr)
@@ -186,6 +187,7 @@ int mtrr_add_request(int type, uint64_t start, uint64_t size)
 	struct mtrr_request *req;
 	uint64_t mask;
 
+	printf("- add req\n");
 	debug("%s: count=%d\n", __func__, gd->arch.mtrr_req_count);
 	if (!gd->arch.has_mtrr)
 		return -ENOSYS;
@@ -245,7 +247,7 @@ int mtrr_set_next_var(uint type, uint64_t start, uint64_t size)
 		return mtrr;
 
 	set_var_mtrr(mtrr, type, start, size);
-	debug("MTRR %x: start=%x, size=%x\n", mtrr, (uint)start, (uint)size);
+	printf("MTRR %x: start=%x, size=%x\n", mtrr, (uint)start, (uint)size);
 
 	return 0;
 }

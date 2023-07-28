@@ -34,6 +34,7 @@ int init_cache_f_r(void)
 		!IS_ENABLED(CONFIG_FSP_VERSION1) &&
 		!IS_ENABLED(CONFIG_SYS_SLIMBOOTLOADER);
 
+	printf("do_mtrr %d\n", do_mtrr);
 	if (do_mtrr) {
 		ret = mtrr_commit(false);
 		/*
