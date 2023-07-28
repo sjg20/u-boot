@@ -84,7 +84,6 @@ class Entry_efi_capsule(Entry_section):
         self._entries = OrderedDict()
 
     def ReadNode(self):
-        self.ReadEntries()
         super().ReadNode()
 
         self.image_index = fdt_util.GetInt(self._node, 'image-index')
@@ -92,6 +91,9 @@ class Entry_efi_capsule(Entry_section):
         self.fw_version = fdt_util.GetInt(self._node, 'fw-version')
         self.hardware_instance = fdt_util.GetInt(self._node, 'hardware-instance')
         self.monotonic_count = fdt_util.GetInt(self._node, 'monotonic-count')
+
+        # We don't need this file, or at least it should not be specified by the
+        # user
         self.capsule_fname = fdt_util.GetString(self._node, 'capsule')
 
         self.private_key = fdt_util.GetString(self._node, 'private-key')
@@ -103,17 +105,8 @@ class Entry_efi_capsule(Entry_section):
         else:
             self.auth = 1
 
-    def ReadEntries(self):
-        """Read the subnode to get the payload for this capsule"""
-        # We can have a single payload per capsule
-        self.assertEqual(len(self._node.subnodes), 1)
-
-        for node in self._node.subnodes:
-            entry = Entry.Create(self, node)
-            entry.ReadNode()
-            self._entries[entry.name] = entry
-
     def _GenCapsule(self):
+        # this should return the data
         if self.auth:
             return self.mkeficapsule.cmdline_auth_capsule(self.image_index,
                                                           self.image_guid,
@@ -138,16 +131,15 @@ class Entry_efi_capsule(Entry_section):
         outfile = self.capsule_fname if self.capsule_fname else self._node.name
         self.capsule_fname = tools.get_output_filename(outfile)
         if self._GenCapsule() is not None:
+            # why are we removing a file?
             os.remove(self.payload)
             return tools.read_file(self.capsule_fname)
         else:
             return data
 
-    def ObtainContents(self):
-        ret = super().ObtainContents()
+    def BuildSectionData(self, required):
         data = self.GenerateCapsules()
-        self.SetContents(data)
-        return True
+        return data
 
     def AddBintools(self, btools):
         self.mkeficapsule = self.AddBintool(btools, 'mkeficapsule')

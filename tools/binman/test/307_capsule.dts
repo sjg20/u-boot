@@ -15,8 +15,10 @@
 			hardware-instance = <0x0>;
 			capsule = "test.capsule";
 
-			blob-ext {
-				filename = "efi_capsule_payload.bin";
+			u-boot {
+			};
+			intel-cmc {
+				filename = "cmc.bin";
 			};
 		};
 	};
