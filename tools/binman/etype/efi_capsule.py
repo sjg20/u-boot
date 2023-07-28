@@ -94,7 +94,7 @@ class Entry_efi_capsule(Entry_section):
 
         # We don't need this file, or at least it should not be specified by the
         # user
-        self.capsule_fname = fdt_util.GetString(self._node, 'capsule')
+        # self.capsule_fname = fdt_util.GetString(self._node, 'capsule')
 
         self.private_key = fdt_util.GetString(self._node, 'private-key')
         self.pub_key_cert = fdt_util.GetString(self._node, 'pub-key-cert')
@@ -105,7 +105,7 @@ class Entry_efi_capsule(Entry_section):
         else:
             self.auth = 1
 
-    def _GenCapsule(self):
+    def _GenCapsule(self, payload, outfile):
         # this should return the data
         if self.auth:
             return self.mkeficapsule.cmdline_auth_capsule(self.image_index,
@@ -114,26 +114,25 @@ class Entry_efi_capsule(Entry_section):
                                                           self.monotonic_count,
                                                           self.private_key,
                                                           self.pub_key_cert,
-                                                          self.payload,
-                                                          self.capsule_fname,
+                                                          payload,
+                                                          outfile,
                                                           self.fw_version)
         else:
             return self.mkeficapsule.cmdline_capsule(self.image_index,
                                                      self.image_guid,
                                                      self.hardware_instance,
-                                                     self.payload,
-                                                     self.capsule_fname,
+                                                     payload,
+                                                     outfile,
                                                      self.fw_version)
 
     def GenerateCapsules(self):
-        data, self.payload, _ = self.collect_contents_to_file(
+        data, payload, uniq = self.collect_contents_to_file(
             self._entries.values(), 'capsule_payload')
-        outfile = self.capsule_fname if self.capsule_fname else self._node.name
-        self.capsule_fname = tools.get_output_filename(outfile)
-        if self._GenCapsule() is not None:
-            # why are we removing a file?
-            os.remove(self.payload)
-            return tools.read_file(self.capsule_fname)
+        outfile = 'capsule-out.%s' % uniq
+        # outfile = self.capsule_fname if self.capsule_fname else self._node.name
+        # self.capsule_fname = tools.get_output_filename(outfile)
+        if self._GenCapsule(payload, outfile) is not None:
+            return tools.read_file(outfile)
         else:
             return data
 

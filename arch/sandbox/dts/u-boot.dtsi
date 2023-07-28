@@ -79,7 +79,7 @@
 		type = "efi-capsule";
 		image-index = <0x1>;
 		image-type-id = SANDBOX_UBOOT_IMAGE_GUID;
-		capsule = "Test01";
+		filename = "Test01";
 
 		blob-ext {
 			filename = UBOOT_BIN_IMAGE;
