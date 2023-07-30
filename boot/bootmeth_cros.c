@@ -395,13 +395,28 @@ static int cros_read_file(struct udevice *dev, struct bootflow *bflow,
 	return -ENOSYS;
 }
 
+static int cros_read_all(struct udevice *dev, struct bootflow *bflow)
+{
+	int ret;
+
+	if (bflow->buf)
+		return log_msg_ret("ld", -EALREADY);
+	ret = cros_read_kernel(bflow);
+	if (ret)
+		return log_msg_ret("rd", ret);
+
+	return 0;
+}
+
 static int cros_boot(struct udevice *dev, struct bootflow *bflow)
 {
 	int ret;
 
-	ret = cros_read_kernel(bflow);
-	if (ret)
-		return log_msg_ret("rd", ret);
+	if (!bflow->buf) {
+		ret = cros_read_kernel(bflow);
+		if (ret)
+			return log_msg_ret("rd", ret);
+	}
 #ifdef CONFIG_X86
 	zboot_start(map_to_sysmem(bflow->buf), bflow->size, 0, 0,
 		    map_to_sysmem(bflow->x86_setup),
@@ -425,6 +440,7 @@ static struct bootmeth_ops cros_bootmeth_ops = {
 	.read_bootflow	= cros_read_bootflow,
 	.read_file	= cros_read_file,
 	.boot		= cros_boot,
+	.read_all	= cros_read_all,
 };
 
 static const struct udevice_id cros_bootmeth_ids[] = {

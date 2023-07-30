@@ -121,6 +121,15 @@ struct bootmeth_ops {
 			 const char *file_path, ulong addr, ulong *sizep);
 
 	/**
+	 * readall() - read all files for a bootflow
+	 *
+	 * @dev:	Bootmethod device to boot
+	 * @bflow:	Bootflow to read
+	 * Return: 0 if OK, -EIO on I/O error, other -ve on other error
+	 */
+	int (*read_all)(struct udevice *dev, struct bootflow *bflow);
+
+	/**
 	 * boot() - boot a bootflow
 	 *
 	 * @dev:	Bootmethod device to boot
@@ -222,6 +231,20 @@ int bootmeth_set_bootflow(struct udevice *dev, struct bootflow *bflow,
  */
 int bootmeth_read_file(struct udevice *dev, struct bootflow *bflow,
 		       const char *file_path, ulong addr, ulong *sizep);
+
+/**
+ * bootmeth_read_all() - read all bootflow files
+ *
+ * Some bootmeths delay reading of large files until booting is requested. This
+ * causes those files to be read.
+ *
+ * @dev:	Bootmethod device to use
+ * @bflow:	Bootflow to read
+ * Return: does not return on success, since it should boot the
+ *	Operating Systemn. Returns -EFAULT if that fails, other -ve on
+ *	other error
+ */
+int bootmeth_read_all(struct udevice *dev, struct bootflow *bflow);
 
 /**
  * bootmeth_boot() - boot a bootflow
