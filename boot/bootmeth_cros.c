@@ -366,8 +366,8 @@ static int cros_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	}
 	bflow->bootmeth_priv = priv;
 
-	log_info("Selected partition %d, header at %lx\n", bflow->part,
-		 (ulong)map_to_sysmem(hdr));
+	log_debug("Selected partition %d, header at %lx\n", bflow->part,
+		  (ulong)map_to_sysmem(hdr));
 
 	/* Grab a few things from the preamble */
 	preamble = (void *)hdr + hdr->keyblock_size;
