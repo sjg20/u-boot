@@ -2777,7 +2777,7 @@ static int mmc_power_on(struct mmc *mmc)
 	if (mmc->vmmc_supply) {
 		int ret = regulator_set_enable(mmc->vmmc_supply, true);
 
-		if (ret && ret != -EACCES) {
+		if (ret && ret != -EACCES && ret != -EALREADY) {
 			printf("Error enabling VMMC supply : %d\n", ret);
 			return ret;
 		}
@@ -2793,7 +2793,7 @@ static int mmc_power_off(struct mmc *mmc)
 	if (mmc->vmmc_supply) {
 		int ret = regulator_set_enable(mmc->vmmc_supply, false);
 
-		if (ret && ret != -EACCES) {
+		if (ret && ret != -EACCES && ret != -EALREADY) {
 			pr_debug("Error disabling VMMC supply : %d\n", ret);
 			return ret;
 		}
