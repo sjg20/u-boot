@@ -6,6 +6,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_BOOTSTD
 
 #include <common.h>
@@ -16,16 +17,21 @@
 #include <bootmeth.h>
 #include <display_options.h>
 #include <dm.h>
+#include <efi.h>
 #include <malloc.h>
 #include <mapmem.h>
 #include <part.h>
 #include <linux/sizes.h>
 #include "bootmeth_cros.h"
 
+const efi_guid_t cros_kern_type =
+	EFI_GUID(0xfe3a2a5d, 0x4f32, 0x41a7, \
+		 0xb7, 0x25, 0xac, 0xcc, 0x32, 0x85, 0xa3, 0x09);
+
 /*
  * Layout of the ChromeOS kernel
  *
- * Partitions 2 and 4 contain kernels
+ * Partitions 2 and 4 contain kernels with type GUID_CROS_KERNEL
  *
  * Contents are:
  *
@@ -340,24 +346,22 @@ static int cros_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	struct vb2_keyblock *hdr;
 	const char *uuid = NULL;
 	struct cros_priv *priv;
-	int part, ret;
+	struct uuid part_type;
+	int ret;
 
-	log_debug("starting, part=%d\n", bflow->part);
+	log_debug("starting, part=%x\n", bflow->part);
 
-	/* We consider the whole disk, not any one partition */
-	if (bflow->part)
+	/* We look for individual partitions */
+	if (!bflow->part)
 		return log_msg_ret("max", -ENOENT);
 
-	/* Check partition 2 then 4 */
-	part = 2;
-	ret = scan_part(bflow->blk, part, &info, &hdr);
-	if (ret) {
-		part = 4;
-		ret = scan_part(bflow->blk, part, &info, &hdr);
-		if (ret)
-			return log_msg_ret("scan", ret);
-	}
-	bflow->part = part;
+	/* Check for kernel partitions */
+	ret = scan_part(bflow->blk, bflow->part, &info, &hdr);
+	log_debug("part %d: type=%s\n", bflow->part, info.type_guid);
+	if (uuid_str_to_bin(info.type_guid, (u8 *)&part_type,
+			    UUID_STR_FORMAT_GUID) ||
+	    memcmp(&cros_kern_type, &part_type, sizeof(part_type)))
+		return log_msg_ret("typ", -ENOENT);
 
 	priv = malloc(sizeof(struct cros_priv));
 	if (!priv) {
