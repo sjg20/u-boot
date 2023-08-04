@@ -13,7 +13,7 @@
 			image-type-id = "09D7CF52-0720-4710-91D1-08469B7FE9C8";
 			hardware-instance = <0x0>;
 
-			blob-ext {
+			blob {
 				filename = "efi_capsule_payload.bin";
 			};
 		};

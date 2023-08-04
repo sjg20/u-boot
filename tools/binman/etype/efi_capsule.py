@@ -142,12 +142,6 @@ class Entry_efi_capsule(Entry_section):
             os.remove(self.payload)
             return tools.read_file(self.capsule_fname)
 
-    def ProcessContents(self):
-        ok = super().ProcessContents()
-        data = self.BuildSectionData(True)
-        ok2 = self.ProcessContentsUpdate(data)
-        return ok and ok2
-
     def SetImagePos(self, image_pos):
         upto = 0
         for entry in self.GetEntries().values():
