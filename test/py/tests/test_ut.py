@@ -5,6 +5,7 @@ import getpass
 import gzip
 import os
 import os.path
+from parted import device, disk, constraint
 import pytest
 
 import u_boot_utils
@@ -282,6 +283,34 @@ label Fedora-Workstation-armhfp-31-1.9 (5.3.7-301.fc31.armv7hl)
         copy_prepared_image(cons, mmc_dev, fname)
 
 
+def setup_cros_image(cons):
+    """Create a 20MB disk image with ChromiumOS partitions"""
+    print('\n\nsetting up')
+    mmc_dev = 5
+    art_type = 0x83
+    fname = os.path.join(cons.config.source_dir, f'mmc{mmc_dev}.img')
+    #mnt = os.path.join(cons.config.persistent_data_dir, 'mnt')
+    #mkdir_cond(mnt)
+
+    dev = device.Device(fname)
+    dev.open()
+    #dsk = dev.read_table()
+    dev.clobber()
+    dsk = dev.new_table(disk.DiskType.WNT.GPT)
+    #part = disk.Partition.new(dsk, disk.PartitionType.NORMAL,
+                              #filesys.FileSystemType.WNT.ext4, 2048, 4095)
+    #dsk.add_partition(part, constraint.Constraint.any())
+    print('sector_size', dev.sector_size)
+    dsk.commit_to_dev()
+
+
+    spec = 'mklabel gpt mkpart primary 1iB 2MB print'
+
+    #u_boot_utils.run_and_log(cons, 'qemu-img create %s 20M' % fname)
+    #u_boot_utils.run_and_log(cons, f'parted --script {fname} {spec}')
+    return fname
+
+
 def setup_cedit_file(cons):
     infname = os.path.join(cons.config.source_dir,
                            'test/boot/files/expo_layout.dts')
@@ -327,6 +356,7 @@ def test_ut_dm_init_bootstd(u_boot_console):
     setup_bootflow_image(u_boot_console)
     setup_bootmenu_image(u_boot_console)
     setup_cedit_file(u_boot_console)
+    setup_cros_image(u_boot_console)
 
     # Restart so that the new mmc1.img is picked up
     u_boot_console.restart_uboot()
