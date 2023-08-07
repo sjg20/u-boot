@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-2.0
+7# SPDX-License-Identifier: GPL-2.0
 # Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
 
 import getpass
@@ -293,54 +293,50 @@ def setup_cros_image(cons):
     u_boot_utils.run_and_log(cons, 'qemu-img create %s 20M' % fname)
     #mnt = os.path.join(cons.config.persistent_data_dir, 'mnt')
     #mkdir_cond(mnt)
+    fname = 'mmc5.img'
+    u_boot_utils.run_and_log(cons, f'cgpt create {fname}')
 
-    dev = parted.getDevice(fname)
-    disk = parted.freshDisk(dev, "gpt")
+    uuid_state = 'ebd0a0a2-b9e5-4433-87c0-68b6b72699c7'
+    uuid_kern = 'fe3a2a5d-4f32-41a7-b725-accc3285a309'
+    uuid_root = '3cb8e202-3b7e-47dd-8a3c-7ff2a13cfcec'
+    uuid_rwfw = 'cab6e88e-abf3-4102-a07a-d4bb9be3c1d3'
+    uuid_reserved = '2e0a753d-9e48-43b0-8337-b15192cb1b5e'
+    uuid_efi = 'c12a7328-f81f-11d2-ba4b-00a0c93ec93b'
 
-    sects_1mb = (1 << 20) // dev.sectorSize
-    free_space_regions = disk.getFreeSpaceRegions()
-    print('len', len(free_space_regions))
-    geom = free_space_regions[0]
-    print('geom', geom.start, geom.end)
-    ptr = geom.start
+    ptr = 40
 
-    geometry = parted.Geometry(device=dev, start=ptr, length=sects_1mb)
-    filesystem = parted.FileSystem(type="ext4", geometry=geometry)
+    # Number of sectors in 1MB
+    sect_1mb = (1 << 20) // 512
 
-    part = parted.Partition(disk=disk, type=parted.PARTITION_NORMAL,
-                            fs=filesystem, geometry=geometry)
-    disk.addPartition(partition=part, constraint=parted.Constraint(device=dev))
+    parts = [
+        {'num': 0xb, 'label':'RWFW', 'type': uuid_rwfw, 'size': '1'},
+        {'num': 6, 'label':'KERN_C', 'type': uuid_kern, 'size': '1'},
+        {'num': 7, 'label':'ROOT_C', 'type': uuid_root, 'size': '1'},
+        {'num': 9, 'label':'reserved', 'type': uuid_reserved, 'size': '1'},
+        {'num': 0xa, 'label':'reserved', 'type': uuid_reserved, 'size': '1'},
 
-    #disk.addPartition(
-    part.set_type_uuid(b'1234567890123456')
+        {'num': 2, 'label':'KERN_A', 'type': uuid_kern, 'size': '1M'},
+        {'num': 4, 'label':'KERN_B', 'type': uuid_kern, 'size': '1M'},
 
-    print('uuid', part.get_type_uuid())
-    ptr = geometry.end + 1
+        {'num': 8, 'label':'OEM', 'type': uuid_state, 'size': '1M'},
+        {'num': 0xc, 'label':'EFI-SYSTEM', 'type': uuid_efi, 'size': '1M'},
 
-    #disk = parted.newDisk(dev)
+        {'num': 5, 'label':'ROOT_B', 'type': uuid_root, 'size': '1'},
+        {'num': 3, 'label':'ROOT_A', 'type': uuid_root, 'size': '1'},
+        {'num': 1, 'label':'STATE', 'type': uuid_state, 'size': '1M'},
+        ]
 
-    #new_partition = parted.Partition(
-    #disk=disk, type=parted.PARTITION_NORMAL, fs=filesystem, geometry=geometry
-    #)
-    #dev.open()
-    ##dsk = dev.read_table()
-    #dev.clobber()
-    #sect_size = dev.sector_size
-    #sects_1mb = (1 << 20) // sect_size
-    #wkt = filesys.FileSystemType.WNT.ext4
-    #part_type = disk.PartitionType.NORMAL
-    #con = constraint.Constraint.any(dev)
+    for part in parts:
+        size_str = part['size']
+        if 'M' in size_str:
+            size = int(size_str[:-1]) * sect_1mb
+        else:
+            size = int(size_str)
+        u_boot_utils.run_and_log(
+            cons,
+            f"cgpt add -i {part['num']} -b {ptr} -s {size} -t {part['type']} {fname}")
+        ptr += size
 
-    #dsk = dev.new_table(disk.DiskType.WNT.GPT)
-    #part = dsk.create_partition(part_type, wkt, 0, sects_1mb - 1, con)
-    #dsk.add_partition(part, constraint.Constraint.any())
-    #dsk.commit_to_dev()
-
-
-    spec = 'mklabel gpt mkpart primary 1iB 2MB print'
-
-    #u_boot_utils.run_and_log(cons, 'qemu-img create %s 20M' % fname)
-    #u_boot_utils.run_and_log(cons, f'parted --script {fname} {spec}')
     return fname
 
 
