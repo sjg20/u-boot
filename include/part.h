@@ -13,6 +13,8 @@
 #include <linux/errno.h>
 #include <linux/list.h>
 
+struct part_driver;
+
 struct block_drvr {
 	char *name;
 	int (*select_hwpart)(int dev_num, int hwpart);
@@ -104,6 +106,19 @@ struct disk_part {
 struct blk_desc *blk_get_dev(const char *ifname, int dev);
 
 struct blk_desc *mg_disk_get_dev(int dev);
+
+/**
+ * part_check_table() - Check if a descriptor has a given partition table
+ *
+ * @desc: Descriptor to check
+ * @part_type: Partition type to check (PART_TYPE_...). Use PART_TYPE_UNKNOWN to
+ * detect the type
+ * @drvp: Place to put a pointer to the driver, on success; NULL for none
+ * Return: 0 on success, -EPROTONOSUPPORT if the descriptor does not have the
+ * given partition type (or any type, if part_type i PART_TYPE_UNKNOWN)
+ */
+int part_check_table(struct blk_desc *desc, int part_type,
+		     struct part_driver **drvp);
 
 /**
  * part_get_info_by_type() - Get partitions from a block device using a specific

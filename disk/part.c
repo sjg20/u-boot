@@ -367,40 +367,46 @@ void part_print(struct blk_desc *desc)
 		drv->print(desc);
 }
 
+int part_check_table(struct blk_desc *desc, int part_type,
+		     struct part_driver **drvp)
+{
+	struct part_driver *drv;
+
+	if (!blk_enabled())
+		return -ENOENT;
+
+	if (part_type == PART_TYPE_UNKNOWN)
+		drv = part_driver_lookup_type(desc);
+	else
+		drv = part_driver_get_type(part_type);
+	if (!drv) {
+		debug("## Unknown partition table type %x\n", desc->part_type);
+		return -EPROTONOSUPPORT;
+	}
+	if (drvp)
+		*drvp = drv;
+
+	return 0;
+}
+
 int part_get_info_by_type(struct blk_desc *desc, int part, int part_type,
 			  struct disk_partition *info)
 {
 	struct part_driver *drv;
+	int ret;
 
-	if (blk_enabled()) {
-#if CONFIG_IS_ENABLED(PARTITION_UUIDS)
-		/* The common case is no UUID support */
-		info->uuid[0] = 0;
-#endif
-#ifdef CONFIG_PARTITION_TYPE_GUID
-		info->type_guid[0] = 0;
-#endif
+	ret = part_check_table(desc, part_type, &drv);
+	if (ret)
+		return log_msg_ret("chk", ret);
 
-		if (part_type == PART_TYPE_UNKNOWN) {
-			drv = part_driver_lookup_type(desc);
-		} else {
-			drv = part_driver_get_type(part_type);
-		}
-
-		if (!drv) {
-			debug("## Unknown partition table type %x\n",
-			      desc->part_type);
-			return -EPROTONOSUPPORT;
-		}
-		if (!drv->get_info) {
+	if (!drv->get_info) {
 			PRINTF("## Driver %s does not have the get_info() method\n",
 			       drv->name);
 			return -ENOSYS;
-		}
-		if (drv->get_info(desc, part, info) == 0) {
-			PRINTF("## Valid %s partition found ##\n", drv->name);
-			return 0;
-		}
+	}
+	if (drv->get_info(desc, part, info) == 0) {
+		PRINTF("## Valid %s partition found ##\n", drv->name);
+		return 0;
 	}
 
 	return -ENOENT;
