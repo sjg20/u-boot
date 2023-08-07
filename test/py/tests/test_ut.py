@@ -288,7 +288,6 @@ def setup_cros_image(cons):
     """Create a 20MB disk image with ChromiumOS partitions"""
     print('\n\nsetting up')
     mmc_dev = 5
-    part_type = 0x83
     fname = os.path.join(cons.config.source_dir, f'mmc{mmc_dev}.img')
     u_boot_utils.run_and_log(cons, 'qemu-img create %s 20M' % fname)
     #mnt = os.path.join(cons.config.persistent_data_dir, 'mnt')

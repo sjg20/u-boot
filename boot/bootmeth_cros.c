@@ -154,7 +154,9 @@ static int scan_part(struct udevice *blk, int partnum,
 	ulong num_blks;
 	int ret;
 
-	ret = part_get_info(desc, partnum, info);
+	log_info("scanning\n");
+	ret = part_get_info_by_type(desc, partnum, PART_TYPE_EFI, info);
+	log_info("ret=%d\n", ret);
 	if (ret)
 		return log_msg_ret("part", ret);
 

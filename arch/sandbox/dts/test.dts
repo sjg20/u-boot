@@ -84,7 +84,10 @@
 		compatible = "u-boot,boot-std";
 
 		filename-prefixes = "/", "/boot/";
-		bootdev-order = "mmc2", "mmc1";
+
+		cros {
+			compatible = "u-boot,cros";
+		};
 
 		extlinux {
 			compatible = "u-boot,extlinux";
@@ -1057,7 +1060,6 @@
 
 	/* This is used for ChromiumOS tests */
 	mmc5 {
-		status = "disabled";
 		compatible = "sandbox,mmc";
 		filename = "mmc5.img";
 	};

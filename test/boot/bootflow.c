@@ -961,3 +961,13 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	return 0;
 }
 BOOTSTD_TEST(bootflow_cmdline, 0);
+
+/* Test ChromiumOS bootmeth */
+static int bootflow_cros(struct unit_test_state *uts)
+{
+	ut_assertok(prep_mmc_bootdev(uts, "mmc5"));
+	ut_assertok(run_command("bootflow list", 0));
+
+	return 0;
+}
+BOOTSTD_TEST(bootflow_cros, 0);
