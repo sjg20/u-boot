@@ -5,7 +5,8 @@ import getpass
 import gzip
 import os
 import os.path
-from parted import device, disk, constraint
+import parted
+#from parted import constraint, device, disk, filesys
 import pytest
 
 import u_boot_utils
@@ -280,28 +281,60 @@ label Fedora-Workstation-armhfp-31-1.9 (5.3.7-301.fc31.armv7hl)
             u_boot_utils.run_and_log(cons, 'sudo losetup -d %s' % loop)
 
     if not complete:
-        copy_prepared_image(cons, mmc_dev, fname)
+        copy_prepared_image(cons, mmc_dev, f^name)
 
 
 def setup_cros_image(cons):
     """Create a 20MB disk image with ChromiumOS partitions"""
     print('\n\nsetting up')
     mmc_dev = 5
-    art_type = 0x83
+    part_type = 0x83
     fname = os.path.join(cons.config.source_dir, f'mmc{mmc_dev}.img')
+    u_boot_utils.run_and_log(cons, 'qemu-img create %s 20M' % fname)
     #mnt = os.path.join(cons.config.persistent_data_dir, 'mnt')
     #mkdir_cond(mnt)
 
-    dev = device.Device(fname)
-    dev.open()
-    #dsk = dev.read_table()
-    dev.clobber()
-    dsk = dev.new_table(disk.DiskType.WNT.GPT)
-    #part = disk.Partition.new(dsk, disk.PartitionType.NORMAL,
-                              #filesys.FileSystemType.WNT.ext4, 2048, 4095)
+    dev = parted.getDevice(fname)
+    disk = parted.freshDisk(dev, "gpt")
+
+    sects_1mb = (1 << 20) // dev.sectorSize
+    free_space_regions = disk.getFreeSpaceRegions()
+    print('len', len(free_space_regions))
+    geom = free_space_regions[0]
+    print('geom', geom.start, geom.end)
+    ptr = geom.start
+
+    geometry = parted.Geometry(device=dev, start=ptr, length=sects_1mb)
+    filesystem = parted.FileSystem(type="ext4", geometry=geometry)
+
+    part = parted.Partition(disk=disk, type=parted.PARTITION_NORMAL,
+                            fs=filesystem, geometry=geometry)
+    disk.addPartition(partition=part, constraint=parted.Constraint(device=dev))
+
+    #disk.addPartition(
+    part.set_type_uuid(b'1234567890123456')
+
+    print('uuid', part.get_type_uuid())
+    ptr = geometry.end + 1
+
+    #disk = parted.newDisk(dev)
+
+    #new_partition = parted.Partition(
+    #disk=disk, type=parted.PARTITION_NORMAL, fs=filesystem, geometry=geometry
+    #)
+    #dev.open()
+    ##dsk = dev.read_table()
+    #dev.clobber()
+    #sect_size = dev.sector_size
+    #sects_1mb = (1 << 20) // sect_size
+    #wkt = filesys.FileSystemType.WNT.ext4
+    #part_type = disk.PartitionType.NORMAL
+    #con = constraint.Constraint.any(dev)
+
+    #dsk = dev.new_table(disk.DiskType.WNT.GPT)
+    #part = dsk.create_partition(part_type, wkt, 0, sects_1mb - 1, con)
     #dsk.add_partition(part, constraint.Constraint.any())
-    print('sector_size', dev.sector_size)
-    dsk.commit_to_dev()
+    #dsk.commit_to_dev()
 
 
     spec = 'mklabel gpt mkpart primary 1iB 2MB print'
