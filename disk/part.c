@@ -375,10 +375,19 @@ int part_check_table(struct blk_desc *desc, int part_type,
 	if (!blk_enabled())
 		return -ENOENT;
 
-	if (part_type == PART_TYPE_UNKNOWN)
+	if (part_type == PART_TYPE_UNKNOWN) {
+		desc->part_type = PART_TYPE_UNKNOWN;
 		drv = part_driver_lookup_type(desc);
-	else
+	} else {
+		int ret;
+
 		drv = part_driver_get_type(part_type);
+		ret = drv->test(desc);
+		if (!ret)
+			desc->part_type = part_type;
+		else
+			drv = NULL;
+	}
 	if (!drv) {
 		debug("## Unknown partition table type %x\n", desc->part_type);
 		return -EPROTONOSUPPORT;

@@ -155,8 +155,11 @@ static int scan_part(struct udevice *blk, int partnum,
 	int ret;
 
 	log_info("scanning\n");
+
+	/* check if there are no more partitions */
+	if (desc->part_type != PART_TYPE_EFI)
+		return log_msg_ret("efi", -ESHUTDOWN);
 	ret = part_get_info_by_type(desc, partnum, PART_TYPE_EFI, info);
-	log_info("ret=%d\n", ret);
 	if (ret)
 		return log_msg_ret("part", ret);
 
@@ -354,12 +357,23 @@ static int cros_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	log_debug("starting, part=%x\n", bflow->part);
 
 	/* We look for individual partitions */
-	if (!bflow->part)
+	if (!bflow->part) {
+		/*
+		 * Try to find an EFI partition, even if there is also a DOS
+		 * partition
+		 */
+// 		if (!part_check_table(desc, PART_TYPE_EFI, NULL))
+// 	iter->max_part = MAX_PART_PER_BOOTDEV;
+
 		return log_msg_ret("max", -ENOENT);
+	}
 
 	/* Check for kernel partitions */
 	ret = scan_part(bflow->blk, bflow->part, &info, &hdr);
-	log_debug("part %d: type=%s\n", bflow->part, info.type_guid);
+	if (ret)
+		return log_msg_ret("scan", ret);
+
+	log_debug("part %x: type=%s\n", bflow->part, info.type_guid);
 	if (uuid_str_to_bin(info.type_guid, (u8 *)&part_type,
 			    UUID_STR_FORMAT_GUID) ||
 	    memcmp(&cros_kern_type, &part_type, sizeof(part_type)))

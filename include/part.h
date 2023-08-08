@@ -110,6 +110,12 @@ struct blk_desc *mg_disk_get_dev(int dev);
 /**
  * part_check_table() - Check if a descriptor has a given partition table
  *
+ * If part_type is PART_TYPE_UNKNOWN, this checks each parition driver
+ * against the blk device to see if there is a valid partition table acceptable
+ * to that driver.
+ *
+ * On success it sets @desc->part_type to the partition type found
+ *
  * @desc: Descriptor to check
  * @part_type: Partition type to check (PART_TYPE_...). Use PART_TYPE_UNKNOWN to
  * detect the type

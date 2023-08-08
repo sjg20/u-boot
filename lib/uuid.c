@@ -57,6 +57,10 @@ static const struct {
 	{"swap",	PARTITION_LINUX_SWAP_GUID},
 	{"lvm",		PARTITION_LINUX_LVM_GUID},
 	{"u-boot-env",	PARTITION_U_BOOT_ENVIRONMENT},
+	{"cros-kern",	PARTITION_CROS_KERNEL},
+	{"cros-root",	PARTITION_CROS_ROOT},
+	{"cros-fw",	PARTITION_CROS_FIRMWARE},
+	{"cros-rsrv",	PARTITION_CROS_RESERVED},
 #endif
 #if defined(CONFIG_CMD_EFIDEBUG) || defined(CONFIG_EFI)
 	{
