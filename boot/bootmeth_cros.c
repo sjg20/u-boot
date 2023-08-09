@@ -24,9 +24,9 @@
 #include <linux/sizes.h>
 #include "bootmeth_cros.h"
 
-const efi_guid_t cros_kern_type =
-	EFI_GUID(0xfe3a2a5d, 0x4f32, 0x41a7, \
-		 0xb7, 0x25, 0xac, 0xcc, 0x32, 0x85, 0xa3, 0x09);
+static const efi_guid_t cros_kern_type = PARTITION_CROS_KERNEL;
+
+// static efi_guid_t
 
 /*
  * Layout of the ChromeOS kernel
@@ -151,17 +151,16 @@ static int scan_part(struct udevice *blk, int partnum,
 {
 	struct blk_desc *desc = dev_get_uclass_plat(blk);
 	struct vb2_keyblock *hdr;
+	struct uuid type;
 	ulong num_blks;
 	int ret;
 
 	if (!partnum) {
 		int part_type;
 
-		log_debug("check\n");
 		part_type = part_check_table(desc, PART_TYPE_EFI, NULL);
-		log_debug("part_type %d\n", part_type);
 		if (part_type != PART_TYPE_EFI) {
-			printf("not efi\n");
+			printf("not efi: %d\n", part_type);
 			return log_msg_ret("efi", -ENOENT);
 		}
 		return log_msg_ret("efi", -ENOENT);
@@ -170,9 +169,17 @@ static int scan_part(struct udevice *blk, int partnum,
 	log_info("scanning\n");
 
 	/* check if there are no more partitions */
-	ret = part_get_info_by_type(desc, partnum, PART_TYPE_EFI, info);
+	ret = part_get_info(desc, partnum, info);
 	if (ret)
 		return log_msg_ret("part", ret);
+
+	/* Check for kernel partition type */
+	log_debug("part %x: type=%s\n", partnum, info->type_guid);
+	if (uuid_str_to_bin(info->type_guid, (u8 *)&type, UUID_STR_FORMAT_GUID))
+		return log_msg_ret("typ", -EINVAL);
+
+	if (memcmp(&cros_kern_type, &type, sizeof(type)))
+		return log_msg_ret("typ", -ENOEXEC);
 
 	/* Make a buffer for the header information */
 	num_blks = PROBE_SIZE >> desc->log2blksz;
@@ -189,6 +196,7 @@ static int scan_part(struct udevice *blk, int partnum,
 
 	if (memcmp(VB2_KEYBLOCK_MAGIC, hdr->magic, VB2_KEYBLOCK_MAGIC_SIZE)) {
 		free(hdr);
+		log_debug("no magic\n");
 		return -ENOENT;
 	}
 
@@ -362,21 +370,16 @@ static int cros_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 	struct vb2_keyblock *hdr;
 	const char *uuid = NULL;
 	struct cros_priv *priv;
-	struct uuid part_type;
 	int ret;
 
 	log_debug("starting, part=%x\n", bflow->part);
 
 	/* Check for kernel partitions */
 	ret = scan_part(bflow->blk, bflow->part, &info, &hdr);
-	if (ret)
+	if (ret) {
+		log_debug("- scan failed: err=%d\n", ret);
 		return log_msg_ret("scan", ret);
-
-	log_debug("part %x: type=%s\n", bflow->part, info.type_guid);
-	if (uuid_str_to_bin(info.type_guid, (u8 *)&part_type,
-			    UUID_STR_FORMAT_GUID) ||
-	    memcmp(&cros_kern_type, &part_type, sizeof(part_type)))
-		return log_msg_ret("typ", -ENOENT);
+	}
 
 	priv = malloc(sizeof(struct cros_priv));
 	if (!priv) {

@@ -3,6 +3,9 @@
  * Copyright 2011 Calxeda, Inc.
  */
 
+#define LOG_DEBUG
+#define LOG_CATEGOT LOGC_CORE
+
 #include <common.h>
 #include <command.h>
 #include <efi_api.h>
@@ -258,6 +261,7 @@ int uuid_str_to_bin(const char *uuid_str, unsigned char *uuid_bin,
 	uint64_t tmp64;
 
 	if (!uuid_str_valid(uuid_str)) {
+		log_debug("not valid\n");
 #ifdef CONFIG_PARTITION_TYPE_GUID
 		if (!uuid_guid_get_bin(uuid_str, uuid_bin))
 			return 0;
