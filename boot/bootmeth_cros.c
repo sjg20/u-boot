@@ -155,10 +155,14 @@ static int scan_part(struct udevice *blk, int partnum,
 	int ret;
 
 	if (!partnum) {
-		if (part_check_table(desc, PART_TYPE_EFI, NULL) !=
-			PART_TYPE_EFI) {
+		int part_type;
+
+		log_debug("check\n");
+		part_type = part_check_table(desc, PART_TYPE_EFI, NULL);
+		log_debug("part_type %d\n", part_type);
+		if (part_type != PART_TYPE_EFI) {
 			printf("not efi\n");
-			return log_msg_ret("efi", -ESHUTDOWN);
+			return log_msg_ret("efi", -ENOENT);
 		}
 		return log_msg_ret("efi", -ENOENT);
 	}

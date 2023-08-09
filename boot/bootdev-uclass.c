@@ -112,6 +112,7 @@ int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
 			struct bootflow_iter *iter, struct bootflow *bflow)
 {
 	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(bflow->method);
+	bool allow_any_part = plat->flags & BOOTMETHF_ANY_PART;
 	struct blk_desc *desc = dev_get_uclass_plat(blk);
 	struct disk_partition info;
 	char partstr[20];
@@ -143,6 +144,7 @@ int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
 	 * us whether there is valid media there
 	 */
 	ret = part_get_info(desc, iter->part, &info);
+	log_debug("part_get_info() returned %d\n", ret);
 	if (!iter->part && ret == -ENOENT)
 		ret = 0;
 
@@ -155,7 +157,7 @@ int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
 		ret = -ESHUTDOWN;
 	else
 		bflow->state = BOOTFLOWST_MEDIA;
-	if (ret) {
+	if (ret && !allow_any_part) {
 		/* allow partition 1 to be missing */
 		if (iter->part == 1) {
 			iter->max_part = 3;
@@ -183,7 +185,7 @@ int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
 		log_debug("checking bootable=%d\n", iter->first_bootable);
 
 	/* allow any partition to be scanned */
-	} else if (plat->flags & BOOTMETHF_ANY_PART) {
+	} else if (allow_any_part) {
 
 	/* if there are bootable partitions, scan only those */
 	} else if (iter->first_bootable >= 0 &&

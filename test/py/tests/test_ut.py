@@ -336,6 +336,8 @@ def setup_cros_image(cons):
             f"cgpt add -i {part['num']} -b {ptr} -s {size} -t {part['type']} {fname}")
         ptr += size
 
+    u_boot_utils.run_and_log(cons, f'cgpt boot -p {fname}')
+
     return fname
 
 

@@ -383,6 +383,7 @@ int part_check_table(struct blk_desc *desc, int part_type,
 
 		drv = part_driver_get_type(part_type);
 		ret = drv->test(desc);
+		log_debug("part_type=%d, ret=%d\n", part_type, ret);
 		if (!ret)
 			desc->part_type = part_type;
 		else
@@ -395,7 +396,7 @@ int part_check_table(struct blk_desc *desc, int part_type,
 	if (drvp)
 		*drvp = drv;
 	desc->part_type = drv->part_type;
-	printf("found\n");
+	log_debug("found type %d\n", drv->part_type);
 
 	return drv->part_type;
 }
