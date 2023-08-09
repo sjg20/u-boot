@@ -120,8 +120,9 @@ struct blk_desc *mg_disk_get_dev(int dev);
  * @part_type: Partition type to check (PART_TYPE_...). Use PART_TYPE_UNKNOWN to
  * detect the type
  * @drvp: Place to put a pointer to the driver, on success; NULL for none
- * Return: 0 on success, -EPROTONOSUPPORT if the descriptor does not have the
- * given partition type (or any type, if part_type i PART_TYPE_UNKNOWN)
+ * Return: partition type on success, -EPROTONOSUPPORT if the descriptor does
+ * not have the given partition type (or any type, if part_type is
+ * PART_TYPE_UNKNOWN)
  */
 int part_check_table(struct blk_desc *desc, int part_type,
 		     struct part_driver **drvp);

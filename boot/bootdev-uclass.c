@@ -111,6 +111,7 @@ int bootdev_bind(struct udevice *parent, const char *drv_name, const char *name,
 int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
 			struct bootflow_iter *iter, struct bootflow *bflow)
 {
+	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(bflow->method);
 	struct blk_desc *desc = dev_get_uclass_plat(blk);
 	struct disk_partition info;
 	char partstr[20];
@@ -170,13 +171,23 @@ int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
 	 */
 	iter->max_part = MAX_PART_PER_BOOTDEV;
 
-	/* If this is the whole disk, check if we have bootable partitions */
+	/*
+	 * If this is the whole disk, check if we have bootable partitions.
+	 * This is ignored with EFI partitions since they
+	 */
 	if (!iter->part) {
 		iter->first_bootable = part_get_bootable(desc);
+		if (desc->part_type == PART_TYPE_EFI)
+			iter->first_bootable = -1;
+
 		log_debug("checking bootable=%d\n", iter->first_bootable);
 
+	/* allow any partition to be scanned */
+	} else if (plat->flags & BOOTMETHF_ANY_PART) {
+
 	/* if there are bootable partitions, scan only those */
-	} else if (iter->first_bootable ? !info.bootable : iter->part != 1) {
+	} else if (iter->first_bootable >= 0 &&
+		   (iter->first_bootable ? !info.bootable : iter->part != 1)) {
 		return log_msg_ret("boot", -EINVAL);
 	} else {
 		ret = fs_set_blk_dev_with_part(desc, bflow->part);
@@ -194,6 +205,7 @@ int bootdev_find_in_blk(struct udevice *dev, struct udevice *blk,
 		bflow->state = BOOTFLOWST_FS;
 	}
 
+	log_debug("method %s\n", bflow->method->name);
 	ret = bootmeth_read_bootflow(bflow->method, bflow);
 	if (ret)
 		return log_msg_ret("method", ret);
@@ -556,7 +568,8 @@ int bootdev_get_bootflow(struct udevice *dev, struct bootflow_iter *iter,
 {
 	const struct bootdev_ops *ops = bootdev_get_ops(dev);
 
-	log_debug("->get_bootflow %s=%p\n", dev->name, ops->get_bootflow);
+	log_debug("->get_bootflow %s,%x=%p\n", dev->name, iter->part,
+		  ops->get_bootflow);
 	bootflow_init(bflow, dev, iter->method);
 	if (!ops->get_bootflow)
 		return default_get_bootflow(dev, iter, bflow);

@@ -394,8 +394,10 @@ int part_check_table(struct blk_desc *desc, int part_type,
 	}
 	if (drvp)
 		*drvp = drv;
+	desc->part_type = drv->part_type;
+	printf("found\n");
 
-	return 0;
+	return drv->part_type;
 }
 
 int part_get_info_by_type(struct blk_desc *desc, int part, int part_type,
@@ -405,7 +407,7 @@ int part_get_info_by_type(struct blk_desc *desc, int part, int part_type,
 	int ret;
 
 	ret = part_check_table(desc, part_type, &drv);
-	if (ret)
+	if (ret < 0)
 		return log_msg_ret("chk", ret);
 
 	if (!drv->get_info) {

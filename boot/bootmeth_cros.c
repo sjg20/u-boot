@@ -154,11 +154,18 @@ static int scan_part(struct udevice *blk, int partnum,
 	ulong num_blks;
 	int ret;
 
+	if (!partnum) {
+		if (part_check_table(desc, PART_TYPE_EFI, NULL) !=
+			PART_TYPE_EFI) {
+			printf("not efi\n");
+			return log_msg_ret("efi", -ESHUTDOWN);
+		}
+		return log_msg_ret("efi", -ENOENT);
+	}
+
 	log_info("scanning\n");
 
 	/* check if there are no more partitions */
-	if (desc->part_type != PART_TYPE_EFI)
-		return log_msg_ret("efi", -ESHUTDOWN);
 	ret = part_get_info_by_type(desc, partnum, PART_TYPE_EFI, info);
 	if (ret)
 		return log_msg_ret("part", ret);
@@ -356,18 +363,6 @@ static int cros_read_bootflow(struct udevice *dev, struct bootflow *bflow)
 
 	log_debug("starting, part=%x\n", bflow->part);
 
-	/* We look for individual partitions */
-	if (!bflow->part) {
-		/*
-		 * Try to find an EFI partition, even if there is also a DOS
-		 * partition
-		 */
-// 		if (!part_check_table(desc, PART_TYPE_EFI, NULL))
-// 	iter->max_part = MAX_PART_PER_BOOTDEV;
-
-		return log_msg_ret("max", -ENOENT);
-	}
-
 	/* Check for kernel partitions */
 	ret = scan_part(bflow->blk, bflow->part, &info, &hdr);
 	if (ret)
@@ -455,6 +450,7 @@ static int cros_bootmeth_bind(struct udevice *dev)
 	struct bootmeth_uc_plat *plat = dev_get_uclass_plat(dev);
 
 	plat->desc = "ChromiumOS boot";
+	plat->flags = BOOTMETHF_ANY_PART;
 
 	return 0;
 }
