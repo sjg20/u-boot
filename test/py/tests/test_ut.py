@@ -336,7 +336,23 @@ def setup_cros_image(cons):
             f"cgpt add -i {part['num']} -b {ptr} -s {size} -t {part['type']} {fname}")
         ptr += size
 
+    dummy = os.path.join(cons.config.result_dir, 'dummy.txt')
+    with open(dummy, 'wb') as outf:
+        outf.write(b'dummy\n')
+
+    kern = os.path.join(cons.config.result_dir, 'kern.bin')
+    with open(kern, 'wb') as outf:
+        outf.write(b'kernel\n')
+    kern_part = os.path.join(cons.config.result_dir, 'part.bin')
+
     u_boot_utils.run_and_log(cons, f'cgpt boot -p {fname}')
+    u_boot_utils.run_and_log(
+        cons,
+        f'futility vbutil_kernel --pack {kern_part} '
+        '--keyblock doc/chromium/files/devkeys/kernel.keyblock '
+        '--signprivate doc/chromium/files/devkeys/kernel_data_key.vbprivk '
+        f'--version 1  --config {dummy} --bootloader {dummy} '
+        f'--vmlinuz {kern}')
 
     return fname
 
