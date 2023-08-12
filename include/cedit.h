@@ -64,7 +64,7 @@ int cedit_prepare(struct expo *exp, struct video_priv **vid_privp,
  * Sets up an FDT with the settings
  *
  * @exp: Expo to write settings from
- * @buf: Returns abuf containing the settings FDT
+ * @buf: Returns abuf containing the settings FDT (inited by this function)
  * Return: 0 if OK, -ve on error
  */
 int cedit_write_settings(struct expo *exp, struct abuf *buf);
@@ -74,7 +74,7 @@ int cedit_write_settings(struct expo *exp, struct abuf *buf);
  *
  * Read an FDT with the settings
  *
- * @exp: Expo to write settings from
+ * @exp: Expo to read settings into
  * @tree: Tree to read from
  * Return: 0 if OK, -ve on error
  */
@@ -88,5 +88,13 @@ int cedit_read_settings(struct expo *exp, oftree tree);
  * Return: 0 if OK, -ve on error
  */
 int cedit_write_settings_env(struct expo *exp, bool verbose);
+
+/*
+ * cedit_read_settings_env() - Read settings from the environment
+ *
+ * @exp: Expo to read settings into
+ * @verbose: true to print each var before it is read
+ */
+int cedit_read_settings_env(struct expo *exp, bool verbose);
 
 #endif /* __CEDIT_H */
