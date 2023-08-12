@@ -3,6 +3,8 @@
  * Copyright 2011 Calxeda, Inc.
  */
 
+#define LOG_CATEGOT LOGC_CORE
+
 #include <common.h>
 #include <command.h>
 #include <efi_api.h>
@@ -57,6 +59,10 @@ static const struct {
 	{"swap",	PARTITION_LINUX_SWAP_GUID},
 	{"lvm",		PARTITION_LINUX_LVM_GUID},
 	{"u-boot-env",	PARTITION_U_BOOT_ENVIRONMENT},
+	{"cros-kern",	PARTITION_CROS_KERNEL},
+	{"cros-root",	PARTITION_CROS_ROOT},
+	{"cros-fw",	PARTITION_CROS_FIRMWARE},
+	{"cros-rsrv",	PARTITION_CROS_RESERVED},
 #endif
 #if defined(CONFIG_CMD_EFIDEBUG) || defined(CONFIG_EFI)
 	{
@@ -254,6 +260,7 @@ int uuid_str_to_bin(const char *uuid_str, unsigned char *uuid_bin,
 	uint64_t tmp64;
 
 	if (!uuid_str_valid(uuid_str)) {
+		log_debug("not valid\n");
 #ifdef CONFIG_PARTITION_TYPE_GUID
 		if (!uuid_guid_get_bin(uuid_str, uuid_bin))
 			return 0;
