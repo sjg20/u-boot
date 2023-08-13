@@ -364,14 +364,6 @@ part_get_info_by_dev_and_name_or_num(const char *dev_iface,
 }
 #endif
 
-/**
- * part_get_bootable() - Find the first bootable partition
- *
- * @desc: Block-device descriptor
- * @return first bootable partition, or 0 if there is none
- */
-int part_get_bootable(struct blk_desc *desc);
-
 struct udevice;
 /**
  * part_create_block_devices - Create block devices for disk partitions
@@ -666,12 +658,24 @@ static inline struct part_driver *part_driver_get_first(void)
  */
 int part_get_type_by_name(const char *name);
 
+/**
+ * part_get_bootable() - Find the first bootable partition
+ *
+ * @desc: Block-device descriptor
+ * @return first bootable partition, or 0 if there is none
+ */
+int part_get_bootable(struct blk_desc *desc);
+
 #else
 static inline int part_driver_get_count(void)
 { return 0; }
 
 static inline struct part_driver *part_driver_get_first(void)
 { return NULL; }
+
+static inline bool part_get_bootable(struct blk_desc *desc)
+{ return false; }
+
 #endif /* CONFIG_PARTITIONS */
 
 #endif /* _PART_H */
