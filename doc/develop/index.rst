@@ -37,6 +37,7 @@ Implementation
    driver-model/index
    environment
    expo
+   cedit
    event
    global_data
    logging
