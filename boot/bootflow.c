@@ -157,13 +157,93 @@ static void bootflow_iter_set_dev(struct bootflow_iter *iter,
 }
 
 /**
+ * iter_inc_dev() - Handle iterating to the next device
+ *
+ * Handles:
+ * - setting up initial iteration (when @inc_dev is false)
+ * - moving to the next bootdev in the same uclass (BOOTFLOWIF_SINGLE_UCLASS)
+ * - moving to the next bootdev in the same media dev (BOOTFLOWIF_SINGLE_MEDIA)
+ * - moving to the next label in the label list
+ *
+ * On success, bootflow_iter_set_dev() is called with the new bootdev device,
+ *	returns 0
+ * On failure, bootflow_iter_set_dev() is called with the NULL bootdev device,
+ *	returns an error code
+ *
+ * @iter: Iteration information
+ * @inc_dev: false to set up the interation the first time
+ * Return: 0 on success, -ve on error
+ */
+static int iter_inc_dev(struct bootflow_iter *iter, bool inc_dev)
+{
+	struct udevice *dev;
+	int method_flags;
+	int ret = 0;
+
+	dev = iter->dev;
+	log_debug("inc_dev=%d\n", inc_dev);
+	if (!inc_dev) {
+		ret = bootdev_setup_iter(iter, NULL, &dev, &method_flags);
+	} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
+		   (iter->flags & BOOTFLOWIF_SINGLE_UCLASS)) {
+		/* Move to the next bootdev in this uclass */
+		uclass_find_next_device(&dev);
+		if (!dev) {
+			log_debug("finished uclass %s\n",
+				  dev_get_uclass_name(dev));
+			ret = -ENODEV;
+		}
+	} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
+		   (iter->flags & BOOTFLOWIF_SINGLE_MEDIA)) {
+		log_debug("next in single\n");
+		method_flags = 0;
+		do {
+			/*
+			 * Move to the next bootdev child of this media device.
+			 * This ensures that we cover all the available SCSI IDs
+			 * and LUNs.
+			 */
+			device_find_next_child(&dev);
+			log_debug("- next %s\n", dev ? dev->name : "(none)");
+		} while (dev && device_get_uclass_id(dev) != UCLASS_BOOTDEV);
+		if (!dev) {
+			log_debug("finished uclass %s\n",
+				  dev_get_uclass_name(dev));
+			ret = -ENODEV;
+		}
+	} else {
+		log_debug("labels %p\n", iter->labels);
+		if (iter->labels) {
+			ret = bootdev_next_label(iter, &dev, &method_flags);
+		} else {
+			ret = bootdev_next_prio(iter, &dev);
+			method_flags = 0;
+		}
+	}
+	log_debug("ret=%d, dev=%p %s\n", ret, dev, dev ? dev->name : "none");
+	if (ret) {
+		bootflow_iter_set_dev(iter, NULL, 0);
+	} else {
+		/*
+		 * Probe the bootdev. This does not probe any attached block
+		 * device, since they are siblings
+		 */
+		ret = device_probe(dev);
+		log_debug("probe %s %d\n", dev->name, ret);
+		if (!log_msg_ret("probe", ret))
+			bootflow_iter_set_dev(iter, dev, method_flags);
+	}
+
+	return ret;
+}
+
+/**
  * iter_incr() - Move to the next item (method, part, bootdev)
  *
  * Return: 0 if OK, BF_NO_MORE_DEVICES if there are no more bootdevs
  */
 static int iter_incr(struct bootflow_iter *iter)
 {
-	struct udevice *dev;
 	bool inc_dev = true;
 	bool global;
 	int ret;
@@ -221,67 +301,7 @@ static int iter_incr(struct bootflow_iter *iter)
 	if (iter->flags & BOOTFLOWIF_SINGLE_DEV) {
 		ret = -ENOENT;
 	} else {
-		int method_flags;
-
-		ret = 0;
-		dev = iter->dev;
-		log_debug("inc_dev=%d\n", inc_dev);
-		if (!inc_dev) {
-			ret = bootdev_setup_iter(iter, NULL, &dev,
-						 &method_flags);
-		} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
-			   (iter->flags & BOOTFLOWIF_SINGLE_UCLASS)) {
-			/* Move to the next bootdev in this uclass */
-			uclass_find_next_device(&dev);
-			if (!dev) {
-				log_debug("finished uclass %s\n",
-					  dev_get_uclass_name(dev));
-				ret = -ENODEV;
-			}
-		} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
-			   iter->flags & BOOTFLOWIF_SINGLE_MEDIA) {
-			log_debug("next in single\n");
-			method_flags = 0;
-			do {
-				/*
-				 * Move to the next bootdev child of this media
-				 * device. This ensures that we cover all the
-				 * available SCSI IDs and LUNs.
-				 */
-				device_find_next_child(&dev);
-				log_debug("- next %s\n",
-					dev ? dev->name : "(none)");
-			} while (dev && device_get_uclass_id(dev) !=
-				UCLASS_BOOTDEV);
-			if (!dev) {
-				log_debug("finished uclass %s\n",
-					  dev_get_uclass_name(dev));
-				ret = -ENODEV;
-			}
-		} else {
-			log_debug("labels %p\n", iter->labels);
-			if (iter->labels) {
-				ret = bootdev_next_label(iter, &dev,
-							 &method_flags);
-			} else {
-				ret = bootdev_next_prio(iter, &dev);
-				method_flags = 0;
-			}
-		}
-		log_debug("ret=%d, dev=%p %s\n", ret, dev,
-			  dev ? dev->name : "none");
-		if (ret) {
-			bootflow_iter_set_dev(iter, NULL, 0);
-		} else {
-			/*
-			 * Probe the bootdev. This does not probe any attached
-			 * block device, since they are siblings
-			 */
-			ret = device_probe(dev);
-			log_debug("probe %s %d\n", dev->name, ret);
-			if (!log_msg_ret("probe", ret))
-				bootflow_iter_set_dev(iter, dev, method_flags);
-		}
+		ret = iter_inc_dev(iter, inc_dev);
 	}
 
 	/* if there are no more bootdevs, give up */
