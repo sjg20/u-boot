@@ -129,7 +129,7 @@ static int do_cedit_read_fdt(struct cmd_tbl *cmdtp, int flag, int argc,
 	ret = cedit_read_settings(cur_exp, tree);
 	oftree_dispose(tree);
 	if (ret) {
-		printf("Failed to read settings (err=%dE)\n", ret);
+		printf("Failed to read settings: %dE\n", ret);
 		return CMD_RET_FAILURE;
 	}
 
@@ -140,14 +140,16 @@ static int do_cedit_write_env(struct cmd_tbl *cmdtp, int flag, int argc,
 			      char *const argv[])
 {
 	bool verbose;
+	int ret;
 
 	if (check_cur_expo())
 		return CMD_RET_FAILURE;
 
 	verbose = argc > 1 && !strcmp(argv[1], "-v");;
 
-	if (cedit_write_settings_env(cur_exp, verbose)) {
-		printf("Failed to write settings\n");
+	ret = cedit_write_settings_env(cur_exp, verbose);
+	if (ret) {
+		printf("Failed to write settings to environment: %dE\n", ret);
 		return CMD_RET_FAILURE;
 	}
 
@@ -158,14 +160,16 @@ static int do_cedit_read_env(struct cmd_tbl *cmdtp, int flag, int argc,
 			      char *const argv[])
 {
 	bool verbose;
+	int ret;
 
 	if (check_cur_expo())
 		return CMD_RET_FAILURE;
 
 	verbose = argc > 1 && !strcmp(argv[1], "-v");
 
-	if (cedit_read_settings_env(cur_exp, verbose)) {
-		printf("Failed to read settings\n");
+	ret = cedit_read_settings_env(cur_exp, verbose);
+	if (ret) {
+		printf("Failed to read settings from environment: %dE\n", ret);
 		return CMD_RET_FAILURE;
 	}
 
@@ -197,6 +201,38 @@ static int do_cedit_write_cmos(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 
 	if (cedit_write_settings_cmos(cur_exp, dev, verbose)) {
+		printf("Failed to write settings to CMOS\n");
+		return CMD_RET_FAILURE;
+	}
+
+	return 0;
+}
+
+static int do_cedit_read_cmos(struct cmd_tbl *cmdtp, int flag, int argc,
+			      char *const argv[])
+{
+	struct udevice *dev;
+	bool verbose;
+	int ret;
+
+	if (check_cur_expo())
+		return CMD_RET_FAILURE;
+
+	if (argc > 1 && !strcmp(argv[1], "-v")) {
+		verbose = true;
+		argc--;
+		argv++;
+	}
+
+	if (argc > 1)
+		ret = uclass_get_device_by_name(UCLASS_RTC, argv[1], &dev);
+	else
+		ret = uclass_first_device_err(UCLASS_RTC, &dev);
+	if (ret) {
+		printf("Failed to get RTC device: %dE\n", ret);
+	}
+
+	if (cedit_read_settings_cmos(cur_exp, dev, verbose)) {
 		printf("Failed to read settings\n");
 		return CMD_RET_FAILURE;
 	}
@@ -235,9 +271,10 @@ static char cedit_help_text[] =
 	"load <interface> <dev[:part]> <filename>   - load config editor\n"
 	"cedit read_fdt <i/f> <dev[:part]> <filename>     - read settings\n"
 	"cedit write_fdt <i/f> <dev[:part]> <filename>    - write settings\n"
-	"cedit read_env [-v]                              - write settings to env vars\n"
+	"cedit read_env [-v]                              - read settings from env vars\n"
 	"cedit write_env [-v]                             - write settings to env vars\n"
-	"cedit write_cmos                                 - write settings to CMOS RAM\n"
+	"cedit read_cmos [-v]                             - read settings from CMOS RAM\n"
+	"cedit write_cmos [-v]                            - write settings to CMOS RAM\n"
 	"cedit run                                        - run config editor";
 #endif /* CONFIG_SYS_LONGHELP */
 
@@ -247,6 +284,7 @@ U_BOOT_CMD_WITH_SUBCMDS(cedit, "Configuration editor", cedit_help_text,
 	U_BOOT_SUBCMD_MKENT(write_fdt, 5, 1, do_cedit_write_fdt),
 	U_BOOT_SUBCMD_MKENT(read_env, 2, 1, do_cedit_read_env),
 	U_BOOT_SUBCMD_MKENT(write_env, 2, 1, do_cedit_write_env),
+	U_BOOT_SUBCMD_MKENT(read_cmos, 2, 1, do_cedit_read_cmos),
 	U_BOOT_SUBCMD_MKENT(write_cmos, 2, 1, do_cedit_write_cmos),
 	U_BOOT_SUBCMD_MKENT(run, 1, 1, do_cedit_run),
 );
