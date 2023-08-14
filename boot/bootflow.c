@@ -185,15 +185,6 @@ static int iter_inc_dev(struct bootflow_iter *iter, bool inc_dev)
 	if (!inc_dev) {
 		ret = bootdev_setup_iter(iter, NULL, &dev, &method_flags);
 	} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
-		   (iter->flags & BOOTFLOWIF_SINGLE_UCLASS)) {
-		/* Move to the next bootdev in this uclass */
-		log_debug("next in uclass %s\n", dev_get_uclass_name(dev));
-		uclass_find_next_device(&dev);
-		if (!dev) {
-			log_debug("- finished uclass\n");
-			ret = -ENODEV;
-		}
-	} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
 		   (iter->flags & BOOTFLOWIF_SINGLE_MEDIA)) {
 		log_debug("next in single\n");
 		method_flags = 0;
@@ -209,6 +200,15 @@ static int iter_inc_dev(struct bootflow_iter *iter, bool inc_dev)
 		if (!dev) {
 			log_debug("- finished uclass %s\n",
 				  dev_get_uclass_name(dev));
+			ret = -ENODEV;
+		}
+	} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
+		   (iter->flags & BOOTFLOWIF_SINGLE_UCLASS)) {
+		/* Move to the next bootdev in this uclass */
+		log_debug("next in uclass %s\n", dev_get_uclass_name(dev));
+		uclass_find_next_device(&dev);
+		if (!dev) {
+			log_debug("- finished uclass\n");
 			ret = -ENODEV;
 		}
 	} else {
