@@ -806,7 +806,7 @@ int bootdev_hunt(const char *spec, bool show)
 		const char *name = uclass_get_name(info->uclass);
 		int ret;
 
-		log_debug("looking at %.*s for %s\n",
+		log_debug("- looking at %.*s for %s\n",
 			  (int)max(strlen(name), len), spec, name);
 		if (spec && strncmp(spec, name, max(strlen(name), len))) {
 			if (info->uclass != UCLASS_ETH ||

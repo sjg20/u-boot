@@ -181,16 +181,16 @@ static int iter_inc_dev(struct bootflow_iter *iter, bool inc_dev)
 	int ret = 0;
 
 	dev = iter->dev;
-	log_debug("inc_dev=%d\n", inc_dev);
+	log_debug("dev=%s, inc_dev=%d\n", dev ? dev->name : "(none)", inc_dev);
 	if (!inc_dev) {
 		ret = bootdev_setup_iter(iter, NULL, &dev, &method_flags);
 	} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
 		   (iter->flags & BOOTFLOWIF_SINGLE_UCLASS)) {
 		/* Move to the next bootdev in this uclass */
+		log_debug("next in uclass %s\n", dev_get_uclass_name(dev));
 		uclass_find_next_device(&dev);
 		if (!dev) {
-			log_debug("finished uclass %s\n",
-				  dev_get_uclass_name(dev));
+			log_debug("- finished uclass\n");
 			ret = -ENODEV;
 		}
 	} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
@@ -207,7 +207,7 @@ static int iter_inc_dev(struct bootflow_iter *iter, bool inc_dev)
 			log_debug("- next %s\n", dev ? dev->name : "(none)");
 		} while (dev && device_get_uclass_id(dev) != UCLASS_BOOTDEV);
 		if (!dev) {
-			log_debug("finished uclass %s\n",
+			log_debug("- finished uclass %s\n",
 				  dev_get_uclass_name(dev));
 			ret = -ENODEV;
 		}
