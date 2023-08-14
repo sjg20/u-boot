@@ -184,8 +184,10 @@ static int iter_inc_dev(struct bootflow_iter *iter, bool inc_dev)
 	log_debug("dev=%s, inc_dev=%d\n", dev ? dev->name : "(none)", inc_dev);
 	if (!inc_dev) {
 		ret = bootdev_setup_iter(iter, NULL, &dev, &method_flags);
-	} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
-		   (iter->flags & BOOTFLOWIF_SINGLE_MEDIA)) {
+		goto done;
+	}
+
+	if (1) {
 		log_debug("next in single\n");
 		method_flags = 0;
 		do {
@@ -197,21 +199,42 @@ static int iter_inc_dev(struct bootflow_iter *iter, bool inc_dev)
 			device_find_next_child(&dev);
 			log_debug("- next %s\n", dev ? dev->name : "(none)");
 		} while (dev && device_get_uclass_id(dev) != UCLASS_BOOTDEV);
-		if (!dev) {
+		if (IS_ENABLED(CONFIG_BOOTSTD_FULL) && !dev &&
+		    (iter->flags & BOOTFLOWIF_SINGLE_MEDIA)) {
 			log_debug("- finished uclass %s\n",
 				  dev_get_uclass_name(dev));
 			ret = -ENODEV;
 		}
-	} else if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
-		   (iter->flags & BOOTFLOWIF_SINGLE_UCLASS)) {
+		if (dev || ret)
+			goto done;
+		dev = iter->dev;
+	}
+
+	if (1) {
+		struct udevice *media;
+
 		/* Move to the next bootdev in this uclass */
-		log_debug("next in uclass %s\n", dev_get_uclass_name(dev));
-		uclass_find_next_device(&dev);
-		if (!dev) {
-			log_debug("- finished uclass\n");
-			ret = -ENODEV;
+		media = dev_get_parent(dev);
+		log_debug("next in uclass %s\n", dev_get_uclass_name(media));
+		uclass_find_next_device(&media);
+		if (!media) {
+			if (IS_ENABLED(CONFIG_BOOTSTD_FULL) &&
+			    (iter->flags & BOOTFLOWIF_SINGLE_UCLASS)) {
+				log_debug("- finished uclass\n");
+				ret = -ENODEV;
+				goto done;
+			}
+		} else {
+			ret = device_find_first_child_by_uclass(media,
+								UCLASS_BOOTDEV,
+								&dev);
+			if (!ret)
+				goto done;
 		}
-	} else {
+		dev = iter->dev;
+	}
+
+	if (1) {
 		log_debug("labels %p\n", iter->labels);
 		if (iter->labels) {
 			ret = bootdev_next_label(iter, &dev, &method_flags);
@@ -220,6 +243,8 @@ static int iter_inc_dev(struct bootflow_iter *iter, bool inc_dev)
 			method_flags = 0;
 		}
 	}
+	/* we have either got a bootdev (ret==0) or gave up trying (ret != 0) */
+done:
 	log_debug("ret=%d, dev=%p %s\n", ret, dev, dev ? dev->name : "none");
 	if (ret) {
 		bootflow_iter_set_dev(iter, NULL, 0);
