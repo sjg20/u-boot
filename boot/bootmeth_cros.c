@@ -406,7 +406,7 @@ static int cros_read_file(struct udevice *dev, struct bootflow *bflow,
 	return -ENOSYS;
 }
 
-#if CONFIG_IS_ENABLED(BOOSTD_FULL)
+#if CONFIG_IS_ENABLED(BOOTSTD_FULL)
 static int cros_read_all(struct udevice *dev, struct bootflow *bflow)
 {
 	int ret;
@@ -458,7 +458,7 @@ static struct bootmeth_ops cros_bootmeth_ops = {
 	.read_bootflow	= cros_read_bootflow,
 	.read_file	= cros_read_file,
 	.boot		= cros_boot,
-#if CONFIG_IS_ENABLED(BOOSTD_FULL)
+#if CONFIG_IS_ENABLED(BOOTSTD_FULL)
 	.read_all	= cros_read_all,
 #endif /* BOOSTD_FULL */
 };
