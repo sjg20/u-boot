@@ -427,7 +427,7 @@ VPL (Verifying Program Loader)
 Sandbox provides an example build of vpl called `sandbox_vpl`. This can be run
 using::
 
-   /path/to/sandbox_vpl/tpl/u-boot-tpl -D
+   /path/to/sandbox_vpl/tpl/u-boot-tpl -d /tmp/b/sandbox_vpl/u-boot.dtb
 
 It starts up TPL (first-stage init), then VPL, then runs SPL and finally U-Boot
 proper, following the normal flow for a verified boot. At present, no
