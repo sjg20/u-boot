@@ -2575,10 +2575,17 @@ efi_status_t EFIAPI efi_locate_handle_buffer(
 			const efi_guid_t *protocol, void *search_key,
 			efi_uintn_t *no_handles, efi_handle_t **buffer)
 {
+	static const char *search_typestr[] = {
+		"all_handles",
+		"by_register_notify",
+		"by_protocol",
+	};
 	efi_status_t r;
 
 	EFI_ENTRY("%d, %pUs, %p, %p, %p", search_type, protocol, search_key,
 		  no_handles, buffer);
+	if (search_type < ARRAY_SIZE(search_typestr))
+		EFI_PRINT("- search_type %s\n", search_typestr[search_type]);
 
 	r = efi_locate_handle_buffer_int(search_type, protocol, search_key,
 					 no_handles, buffer);
