@@ -1,0 +1,370 @@
+=> bootfl scan -l usb
+Scanning for bootflows with label 'usb'
+Seq  Method       State   Uclass    Part  Name                      Filename
+---  -----------  ------  --------  ----  ------------------------  ----------------
+Scanning bootdev 'usb_mass_storage.lun0.bootdev':
+  0  efi          ready   usb_mass_    2  usb_mass_storage.lun0.boo efi/boot/bootx64.efi
+No more bootdevs
+---  -----------  ------  --------  ----  ------------------------  ----------------
+(1 bootflow, 1 valid)
+=> bootfl sel 0
+=> bootfl b
+** Booting bootflow 'usb_mass_storage.lun0.bootdev.part_2' with efi
+2955-      mmc_start_init() MMC: no card present
+522-       efi_run_image() Booting /efi\boot\bootx64.efi
+2069-      efi_load_image() EFI: Entry efi_load_image(0, 000000007434a1a0, /VenHw(e61d73b9-a384-4acc-aeab-82e828f3628b,0000000000000000)/VenHw(e61d73b9-a384-4acc-aeab-82e828f3628b,5200000000000000)/VenHw(e61d73b9-a384-4acc-aeab-82e828f3628b,7800000001000000)/USB(0x0,0x0)/USB(0xd,0x0)/Ctrl(0x0)/HD(2,GPT,a0891d7e-b930-4513-94db-f629dbd637b2,0x92b094,0x2754)/efi\boot\bootx64.efi, 0000000001000000, 960472, 0000000074345e10)
+2107-      efi_load_image() EFI: Exit: efi_load_image: 0
+3172-     efi_start_image() EFI: Entry efi_start_image(00000000743a4250, 0000000074345dd0, 0000000074345dd8)
+3184-     efi_start_image()   EFI: Call: efi_open_protocol(image_handle, &efi_guid_loaded_image, &info, NULL, NULL, EFI_OPEN_PROTOCOL_GET_PROTOCOL)
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(00000000743a4250, 5b1b31a1-9562-11d2-8e3f-00a0c969723b, 0000000074345d20, 0000000000000000, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+3184-     efi_start_image()   EFI: 0 returned by efi_open_protocol(image_handle, &efi_guid_loaded_image, &info, NULL, NULL, EFI_OPEN_PROTOCOL_GET_PROTOCOL)
+3239-     efi_start_image()   EFI: Jumping into 0x0000000073267000
+3240-     efi_start_image()   EFI: Call: image_obj->entry(image_handle, &systab)
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(00000000743a4250, 5b1b31a1-9562-11d2-8e3f-00a0c969723b, 0000000074345c38, 000000007434a1a0, 0000000000000000, 0x1)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 100, 0000000074345b88)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345b48)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 1d85cd7f-f43d-11d2-9a0c-0090273fc14d, 0000000000000000, 0000000074345b88, 0000000073243040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345b58)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f42f7782-012e-4c12-9956-49f94304f721, 0000000000000000, 0000000074345b98, 0000000073243040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 28, 0000000074345b48)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 100, 0000000074345938)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 4096, 00000000743459d8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 1096, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073241040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345858)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 96751a3d-72f4-41a6-a794-ed5d0e67ae6b, 0000000000000000, 0000000074345898, 0000000073241040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073241040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 00000000743457f8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 607f766c-7455-42be-930b-e4d76db2720f, 0000000000000000, 0000000074345838, 0000000073241040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073241040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 00000000743457f8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f541796d-a62e-4954-a775-9584f61b9cdd, 0000000000000000, 0000000074345838, 0000000073241040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073241040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 100, 0000000074345938)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073241040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 76, 0000000074345998)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 48, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073240040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345858)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 96751a3d-72f4-41a6-a794-ed5d0e67ae6b, 0000000000000000, 0000000074345898, 0000000073240040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073240040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 00000000743457f8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 607f766c-7455-42be-930b-e4d76db2720f, 0000000000000000, 0000000074345838, 0000000073240040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073240040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 00000000743457f8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f541796d-a62e-4954-a775-9584f61b9cdd, 0000000000000000, 0000000074345838, 0000000073240040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073240040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 100, 0000000074345938)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073240040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 28, 0000000074345978)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 100, 0000000074345938)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007323f040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 75, 0000000074345968)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345818)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 96751a3d-72f4-41a6-a794-ed5d0e67ae6b, 0000000000000000, 0000000074345858, 000000007323e040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007323e040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 00000000743457b8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 607f766c-7455-42be-930b-e4d76db2720f, 0000000000000000, 00000000743457f8, 000000007323e040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007323e040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 00000000743457b8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f541796d-a62e-4954-a775-9584f61b9cdd, 0000000000000000, 00000000743457f8, 000000007323e040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007323e040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007323f040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 32, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 20, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 16, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 25, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 4, 00000000743459d8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 100, 0000000074345938)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007323a040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345858)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 96751a3d-72f4-41a6-a794-ed5d0e67ae6b, 0000000000000000, 0000000074345898, 000000007323a040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007323a040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 00000000743457f8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 607f766c-7455-42be-930b-e4d76db2720f, 0000000000000000, 0000000074345838, 000000007323a040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007323a040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 00000000743457f8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f541796d-a62e-4954-a775-9584f61b9cdd, 0000000000000000, 0000000074345838, 000000007323a040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007323a040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 100, 0000000074345938)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007323a040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+403-efi_allocate_pages_ext()     EFI: Entry efi_allocate_pages_ext(0, 6, 0x1, 0000000074345b10)
+405-efi_allocate_pages_ext()     EFI: Exit: efi_allocate_pages_ext: 0
+1740-efi_install_configuration_table_ext()     EFI: Entry efi_install_configuration_table_ext(c451ed2b-9694-45d3-baba-ed9f8988a389, 000000007323a000)
+1741-efi_install_configuration_table_ext()     EFI: Exit: efi_install_configuration_table_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 4096, 00000000743459d8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 1096, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073237040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073242040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(00000000743a4250, 5b1b31a1-9562-11d2-8e3f-00a0c969723b, 0000000074345c38, 000000007434a1a0, 0000000000000000, 0x1)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 52, 0000000074345b58)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 442, 0000000074345718)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 42, 0000000074345b78)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073242040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345b58)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 605dab50-e046-4300-abb6-3dd810dd8b23, 0000000000000000, 0000000074345b98, 0000000073243040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+1205-efi_install_protocol_interface()     EFI: Entry efi_install_protocol_interface(00000000732f7ef0, 605dab50-e046-4300-abb6-3dd810dd8b23, 0, 00000000732f7f00)
+1219-efi_install_protocol_interface()       EFI: new handle 00000000743a2090
+1226-efi_install_protocol_interface()     EFI: Exit: efi_install_protocol_interface: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(00000000743a4250, 5b1b31a1-9562-11d2-8e3f-00a0c969723b, 0000000074345c20, 000000007434a1a0, 0000000000000000, 0x1)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 52, 0000000074345b48)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 442, 0000000074345708)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 42, 0000000074345b68)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073242040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439d8d0, 964e5b22-6459-11d2-8e39-00a0c969723b, 0000000074345c28, 000000007434a1a0, 0000000000000000, 0x1)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(00000000743a4250, 5b1b31a1-9562-11d2-8e3f-00a0c969723b, 00000000732f7f80, 000000007434a1a0, 0000000000000000, 0x1)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 52, 0000000074345a58)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 442, 0000000074345618)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 42, 0000000074345a78)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073242040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 44, 0000000074345af8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439d8d0, 03c4e603-ac28-11d3-9a2d-0090273fc14d, 00000000732f8010, 000000007434a1a0, 0000000000000000, 0x1)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 3
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439d8d0, 09576e91-6d3f-11d2-8e39-00a0c969723b, 0000000074345ae8, 000000007434a1a0, 0000000000000000, 0x1)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 156, 0000000074345a98)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439d8d0, 964e5b22-6459-11d2-8e39-00a0c969723b, 0000000074345b70, 000000007434a1a0, 0000000000000000, 0x1)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 88, 0000000074345b38)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 104, 0000000074345b38)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 2275208, 0000000074345b38)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073243040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 50, 0000000074345b68)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 112, 00000000743459e8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 96, 00000000743459e8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 200, 00000000743459c8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000073009040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007300a040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007300b040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 82, 0000000074345a28)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 00000000743458d8)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 96751a3d-72f4-41a6-a794-ed5d0e67ae6b, 0000000000000000, 0000000074345918, 000000007300a040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007300a040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345878)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 607f766c-7455-42be-930b-e4d76db2720f, 0000000000000000, 00000000743458b8, 000000007300a040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007300a040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345878)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f541796d-a62e-4954-a775-9584f61b9cdd, 0000000000000000, 00000000743458b8, 000000007300a040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007300a040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(000000007300b040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+403-efi_allocate_pages_ext()     EFI: Entry efi_allocate_pages_ext(0, 1, 0x22c, 0000000074345be0)
+405-efi_allocate_pages_ext()     EFI: Exit: efi_allocate_pages_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f4560cf6-40ec-4b4a-a192-bf1d57d0b189, 0000000000000000, 00000000743459c8, 0000000072ddf040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000072ddf040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f4560cf6-40ec-4b4a-a192-bf1d57d0b189, 0000000000000000, 00000000743459c8, 0000000072ddf040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000072ddf040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f4560cf6-40ec-4b4a-a192-bf1d57d0b189, 0000000000000000, 00000000743459c8, 0000000072ddf040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000072ddf040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f4560cf6-40ec-4b4a-a192-bf1d57d0b189, 0000000000000000, 00000000743459c8, 0000000072ddf040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000072ddf040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f4560cf6-40ec-4b4a-a192-bf1d57d0b189, 0000000000000000, 00000000743459c8, 0000000072ddf040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000072ddf040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 400, 0000000074345988)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, f4560cf6-40ec-4b4a-a192-bf1d57d0b189, 0000000000000000, 00000000743459c8, 0000000072ddf040)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 14
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000072ddf040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(00000000743a4250, 5b1b31a1-9562-11d2-8e3f-00a0c969723b, 0000000074345ae8, 00000000743a4250, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007434a1a0, dd9e7534-7762-4698-8c14-f58517a625aa, 0000000074345ae8, 00000000743a4250, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+403-efi_allocate_pages_ext()     EFI: Entry efi_allocate_pages_ext(1, 2, 0x6, 0000000074345a38)
+405-efi_allocate_pages_ext()     EFI: Exit: efi_allocate_pages_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 24, 0000000074345a48)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+455-efi_get_memory_map_ext()     EFI: Entry efi_get_memory_map_ext(0000000074345aa8, 0000000072dda000, 0000000074345a50, 0000000074345ab0, 0000000074345a4c)
+459-efi_get_memory_map_ext()     EFI: Exit: efi_get_memory_map_ext: 0
+403-efi_allocate_pages_ext()     EFI: Entry efi_allocate_pages_ext(2, 1, 0x2000, 0000000074345a38)
+405-efi_allocate_pages_ext()     EFI: Exit: efi_allocate_pages_ext: 0
+481-efi_allocate_pool_ext()     EFI: Entry efi_allocate_pool_ext(2, 24, 0000000074345a48)
+483-efi_allocate_pool_ext()     EFI: Exit: efi_allocate_pool_ext: 0
+425-  efi_free_pages_ext()     EFI: Entry efi_free_pages_ext(72dda000, 0x6)
+427-  efi_free_pages_ext()     EFI: Exit: efi_free_pages_ext: 0
+501-   efi_free_pool_ext()     EFI: Entry efi_free_pool_ext(0000000072dd9040)
+503-   efi_free_pool_ext()     EFI: Exit: efi_free_pool_ext: 0
+2315-efi_set_watchdog_timer()     EFI: Entry efi_set_watchdog_timer(0, 0x0, 0, 0000000000000000)
+2317-efi_set_watchdog_timer()     EFI: Exit: efi_set_watchdog_timer: 0
+1642-efi_locate_handle_ext()     EFI: Entry efi_locate_handle_ext(2, 964e5b21-6459-11d2-8e39-00a0c969723b, 0000000000000000, 0000000074345a58, 0000000072dd8fc0)
+1645-efi_locate_handle_ext()     EFI: Exit: efi_locate_handle_ext: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439d400, 09576e91-6d3f-11d2-8e39-00a0c969723b, 0000000074345a88, 00000000743a4250, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439d400, 964e5b21-6459-11d2-8e39-00a0c969723b, 0000000074345a88, 00000000743a4250, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439d540, 09576e91-6d3f-11d2-8e39-00a0c969723b, 0000000074345a88, 00000000743a4250, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439d540, 964e5b21-6459-11d2-8e39-00a0c969723b, 0000000074345a88, 00000000743a4250, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439d8d0, 09576e91-6d3f-11d2-8e39-00a0c969723b, 0000000074345a88, 00000000743a4250, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439d8d0, 964e5b21-6459-11d2-8e39-00a0c969723b, 0000000074345a88, 00000000743a4250, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439e160, 09576e91-6d3f-11d2-8e39-00a0c969723b, 0000000074345a88, 00000000743a4250, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+3096-   efi_open_protocol()     EFI: Entry efi_open_protocol(000000007439e160, 964e5b21-6459-11d2-8e39-00a0c969723b, 0000000074345a88, 00000000743a4250, 0000000000000000, 0x2)
+3144-   efi_open_protocol()     EFI: Exit: efi_open_protocol: 0
+
+
