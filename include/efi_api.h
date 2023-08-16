@@ -62,6 +62,29 @@ struct efi_event;
 #define EFI_OS_INDICATIONS_START_PLATFORM_RECOVERY	    0x0000000000000040
 #define EFI_OS_INDICATIONS_JSON_CONFIG_DATA_REFRESH	    0x0000000000000080
 
+/* common protocols */
+/* GUID used by the root node */
+#define U_BOOT_GUID \
+	EFI_GUID(0xe61d73b9, 0xa384, 0x4acc, \
+		 0xae, 0xab, 0x82, 0xe8, 0x28, 0xf3, 0x62, 0x8b)
+/* GUID used as root for blkmap devices */
+#define U_BOOT_BLKMAP_DEV_GUID \
+	EFI_GUID(0x4cad859d, 0xd644, 0x42ff,	\
+		 0x87, 0x0b, 0xc0, 0x2e, 0xac, 0x05, 0x58, 0x63)
+/* GUID used as host device on sandbox */
+#define U_BOOT_HOST_DEV_GUID \
+	EFI_GUID(0xbbe4e671, 0x5773, 0x4ea1, \
+		 0x9a, 0xab, 0x3a, 0x7d, 0xbf, 0x40, 0xc4, 0x82)
+/* GUID used as root for virtio devices */
+#define U_BOOT_VIRTIO_DEV_GUID \
+	EFI_GUID(0x63293792, 0xadf5, 0x9325, \
+		 0xb9, 0x9f, 0x4e, 0x0e, 0x45, 0x5c, 0x1b, 0x1e)
+
+/* GUID for the auto generated boot menu entry */
+#define EFICONFIG_AUTO_GENERATED_ENTRY_GUID \
+	EFI_GUID(0x38c1acc1, 0x9fc0, 0x41f0, \
+		 0xb9, 0x01, 0xfa, 0x74, 0xd6, 0xd6, 0xe4, 0xde)
+
 /* EFI Boot Services table */
 #define EFI_BOOT_SERVICES_SIGNATURE 0x56524553544f4f42
 struct efi_boot_services {

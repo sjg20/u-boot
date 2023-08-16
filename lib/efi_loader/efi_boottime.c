@@ -4,6 +4,7 @@
  *
  * Copyright (c) 2016 Alexander Graf
  */
+#define LOG_DEBUG
 
 #include <common.h>
 #include <bootm.h>
@@ -226,8 +227,7 @@ static void efi_process_event_queue(void)
 		/* Events must be executed at the event's TPL */
 		old_tpl = efi_tpl;
 		efi_tpl = event->notify_tpl;
-		EFI_CALL_VOID(event->notify_function(event,
-						     event->notify_context));
+		event->notify_function(event, event->notify_context);
 		efi_tpl = old_tpl;
 		if (event->type == EVT_NOTIFY_SIGNAL)
 			event->is_signaled = 0;
@@ -397,10 +397,20 @@ static efi_status_t EFIAPI efi_allocate_pages_ext(int type, int memory_type,
 						  efi_uintn_t pages,
 						  uint64_t *memory)
 {
+	static const char *typestr[] = {
+		"any_pages",
+		"max_address",
+		"address",
+	};
 	efi_status_t r;
 
 	EFI_ENTRY("%d, %d, 0x%zx, %p", type, memory_type, pages, memory);
+	if (type < ARRAY_SIZE(typestr))
+		EFI_PRINT("- type %s\n", typestr[type]);
+	if (type == EFI_ALLOCATE_ADDRESS)
+		EFI_PRINT("- address %llx\n", *memory);
 	r = efi_allocate_pages(type, memory_type, pages, memory);
+	EFI_PRINT("- returning memory %llx\n", *memory);
 	return EFI_EXIT(r);
 }
 
@@ -3132,6 +3142,7 @@ static efi_status_t EFIAPI efi_open_protocol
 		break;
 	case EFI_NOT_FOUND:
 		r = EFI_UNSUPPORTED;
+		printf("Unsupported protocol\n");
 		goto out;
 	default:
 		goto out;

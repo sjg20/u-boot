@@ -228,6 +228,7 @@ static const struct {
 		"EFI Conformance Profiles Table",
 		EFI_CONFORMANCE_PROFILES_TABLE_GUID,
 	},
+	{ "U-Boot", U_BOOT_GUID },
 #ifdef CONFIG_EFI_RISCV_BOOT_PROTOCOL
 	{
 		"RISC-V Boot",

@@ -165,7 +165,7 @@ enum efi_allocate_type {
 	EFI_ALLOCATE_MAX_ADDRESS,
 	/**
 	 * @EFI_ALLOCATE_ADDRESS:
-	 * Allocate a memory block starting at the indicatged adress.
+	 * Allocate a memory block starting at the indicated adress.
 	 */
 	EFI_ALLOCATE_ADDRESS,
 	/**
