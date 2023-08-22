@@ -53,8 +53,8 @@ void lmb_dump_all(struct lmb *lmb)
 #endif
 }
 
-static long lmb_addrs_overlap(phys_addr_t base1, phys_size_t size1,
-			      phys_addr_t base2, phys_size_t size2)
+static int lmb_addrs_overlap(phys_addr_t base1, phys_size_t size1,
+			     phys_addr_t base2, phys_size_t size2)
 {
 	const phys_addr_t base1_end = base1 + size1 - 1;
 	const phys_addr_t base2_end = base2 + size2 - 1;
@@ -62,8 +62,8 @@ static long lmb_addrs_overlap(phys_addr_t base1, phys_size_t size1,
 	return base1 <= base2_end && base2 <= base1_end;
 }
 
-static long lmb_addrs_adjacent(phys_addr_t base1, phys_size_t size1,
-			       phys_addr_t base2, phys_size_t size2)
+static int lmb_addrs_adjacent(phys_addr_t base1, phys_size_t size1,
+			      phys_addr_t base2, phys_size_t size2)
 {
 	if (base2 == base1 + size1)
 		return 1;
@@ -73,8 +73,7 @@ static long lmb_addrs_adjacent(phys_addr_t base1, phys_size_t size1,
 	return 0;
 }
 
-static long lmb_regions_adjacent(struct lmb_region *rgn, unsigned long r1,
-				 unsigned long r2)
+static int lmb_regions_adjacent(struct lmb_region *rgn, ulong r1, ulong r2)
 {
 	phys_addr_t base1 = rgn->region[r1].base;
 	phys_size_t size1 = rgn->region[r1].size;
@@ -86,7 +85,7 @@ static long lmb_regions_adjacent(struct lmb_region *rgn, unsigned long r1,
 
 static void lmb_remove_region(struct lmb_region *rgn, unsigned long r)
 {
-	unsigned long i;
+	uint i;
 
 	for (i = r; i < rgn->cnt - 1; i++)
 		rgn->region[i] = rgn->region[i + 1];
@@ -223,11 +222,11 @@ void lmb_init_and_reserve_range(struct lmb *lmb, phys_addr_t base,
 }
 
 /* This routine called with relocation disabled. */
-static long lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
-				 phys_size_t size, enum lmb_flags flags)
+static int lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
+				phys_size_t size, enum lmb_flags flags)
 {
-	unsigned long coalesced = 0;
-	long adjacent, i;
+	uint coalesced = 0;
+	int adjacent, i;
 
 	if (rgn->cnt == 0) {
 		rgn->region[0].base = base;
@@ -310,8 +309,8 @@ static long lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
 	return 0;
 }
 
-static long lmb_add_region(struct lmb_region *rgn, phys_addr_t base,
-			   phys_size_t size)
+static int lmb_add_region(struct lmb_region *rgn, phys_addr_t base,
+			  phys_size_t size)
 {
 	return lmb_add_region_flags(rgn, base, size, LMB_NONE);
 }
@@ -388,10 +387,10 @@ long lmb_reserve(struct lmb *lmb, phys_addr_t base, phys_size_t size)
 	return lmb_reserve_flags(lmb, base, size, LMB_NONE);
 }
 
-static long lmb_overlaps_region(struct lmb_region *rgn, phys_addr_t base,
-				phys_size_t size)
+static int lmb_overlaps_region(struct lmb_region *rgn, phys_addr_t base,
+			       phys_size_t size)
 {
-	unsigned long i;
+	uint i;
 
 	for (i = 0; i < rgn->cnt; i++) {
 		phys_addr_t rgnbase = rgn->region[i].base;
@@ -430,7 +429,7 @@ static phys_addr_t lmb_align_down(phys_addr_t addr, phys_size_t size)
 phys_addr_t __lmb_alloc_base(struct lmb *lmb, phys_size_t size, ulong align,
 			     phys_addr_t max_addr)
 {
-	long i, rgn;
+	int i, rgn;
 	phys_addr_t base = 0;
 	phys_addr_t res_base;
 
@@ -500,8 +499,7 @@ phys_addr_t lmb_alloc_addr(struct lmb *lmb, phys_addr_t base, phys_size_t size)
 /* Return number of bytes from a given address that are free */
 phys_size_t lmb_get_free_size(struct lmb *lmb, phys_addr_t addr)
 {
-	int i;
-	long rgn;
+	int i, rgn;
 
 	/* check if the requested address is in the memory regions */
 	rgn = lmb_overlaps_region(&lmb->memory, addr, 1);
