@@ -316,14 +316,14 @@ static int lmb_add_region(struct lmb_region *rgn, phys_addr_t base,
 }
 
 /* This routine may be called with relocation disabled. */
-long lmb_add(struct lmb *lmb, phys_addr_t base, phys_size_t size)
+int lmb_add(struct lmb *lmb, phys_addr_t base, phys_size_t size)
 {
 	struct lmb_region *_rgn = &(lmb->memory);
 
 	return lmb_add_region(_rgn, base, size);
 }
 
-long lmb_free(struct lmb *lmb, phys_addr_t base, phys_size_t size)
+int lmb_free(struct lmb *lmb, phys_addr_t base, phys_size_t size)
 {
 	struct lmb_region *rgn = &(lmb->reserved);
 	phys_addr_t rgnbegin, rgnend;
@@ -374,15 +374,15 @@ long lmb_free(struct lmb *lmb, phys_addr_t base, phys_size_t size)
 				    rgn->region[i].flags);
 }
 
-long lmb_reserve_flags(struct lmb *lmb, phys_addr_t base, phys_size_t size,
-		       enum lmb_flags flags)
+int lmb_reserve_flags(struct lmb *lmb, phys_addr_t base, phys_size_t size,
+		      enum lmb_flags flags)
 {
 	struct lmb_region *_rgn = &(lmb->reserved);
 
 	return lmb_add_region_flags(_rgn, base, size, flags);
 }
 
-long lmb_reserve(struct lmb *lmb, phys_addr_t base, phys_size_t size)
+int lmb_reserve(struct lmb *lmb, phys_addr_t base, phys_size_t size)
 {
 	return lmb_reserve_flags(lmb, base, size, LMB_NONE);
 }

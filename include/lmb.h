@@ -96,8 +96,8 @@ void lmb_init(struct lmb *lmb);
 void lmb_init_and_reserve(struct lmb *lmb, struct bd_info *bd, void *fdt_blob);
 void lmb_init_and_reserve_range(struct lmb *lmb, phys_addr_t base,
 				phys_size_t size, void *fdt_blob);
-long lmb_add(struct lmb *lmb, phys_addr_t base, phys_size_t size);
-long lmb_reserve(struct lmb *lmb, phys_addr_t base, phys_size_t size);
+int lmb_add(struct lmb *lmb, phys_addr_t base, phys_size_t size);
+int lmb_reserve(struct lmb *lmb, phys_addr_t base, phys_size_t size);
 /**
  * lmb_reserve_flags - Reserve one region with a specific flags bitfield.
  *
@@ -107,8 +107,8 @@ long lmb_reserve(struct lmb *lmb, phys_addr_t base, phys_size_t size);
  * @flags:	flags for the memory region
  * Return:	0 if OK, > 0 for coalesced region or a negative error code.
  */
-long lmb_reserve_flags(struct lmb *lmb, phys_addr_t base,
-		       phys_size_t size, enum lmb_flags flags);
+int lmb_reserve_flags(struct lmb *lmb, phys_addr_t base, phys_size_t size,
+		      enum lmb_flags flags);
 phys_addr_t lmb_alloc(struct lmb *lmb, phys_size_t size, ulong align);
 phys_addr_t lmb_alloc_base(struct lmb *lmb, phys_size_t size, ulong align,
 			   phys_addr_t max_addr);
@@ -126,7 +126,7 @@ int lmb_is_reserved(struct lmb *lmb, phys_addr_t addr);
  * Return:	if not reserved or reserved without the requested flag else 1
  */
 int lmb_is_reserved_flags(struct lmb *lmb, phys_addr_t addr, int flags);
-long lmb_free(struct lmb *lmb, phys_addr_t base, phys_size_t size);
+int lmb_free(struct lmb *lmb, phys_addr_t base, phys_size_t size);
 
 void lmb_dump_all(struct lmb *lmb);
 void lmb_dump_all_force(struct lmb *lmb);
