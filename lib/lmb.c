@@ -53,8 +53,17 @@ void lmb_dump_all(struct lmb *lmb)
 #endif
 }
 
-static int lmb_addrs_overlap(phys_addr_t base1, phys_size_t size1,
-			     phys_addr_t base2, phys_size_t size2)
+/**
+ * lmb_addrs_overlap() - Compare two address ranges for overlap
+ *
+ * @base1:	base address of region 1
+ * @size1:	size of the region 1
+ * @base2:	base address of region 2
+ * @size2:	size of the region 2
+ * Returns: true if the regions overlap, else false
+ */
+static bool lmb_addrs_overlap(phys_addr_t base1, phys_size_t size1,
+			      phys_addr_t base2, phys_size_t size2)
 {
 	const phys_addr_t base1_end = base1 + size1 - 1;
 	const phys_addr_t base2_end = base2 + size2 - 1;
@@ -62,6 +71,17 @@ static int lmb_addrs_overlap(phys_addr_t base1, phys_size_t size1,
 	return base1 <= base2_end && base2 <= base1_end;
 }
 
+/**
+ * lmb_addrs_adjacent() - Compare two address ranges for adjacency
+ *
+ * @base1:	base address of region 1
+ * @size1:	size of the region 1
+ * @base2:	base address of region 2
+ * @size2:	size of the region 2
+ * Returns: 1 if region 2 start at the end of region 1,
+ *	-1 if region 1 starts at the end of region 2,
+ *	else 0
+ */
 static int lmb_addrs_adjacent(phys_addr_t base1, phys_size_t size1,
 			      phys_addr_t base2, phys_size_t size2)
 {
@@ -221,7 +241,22 @@ void lmb_init_and_reserve_range(struct lmb *lmb, phys_addr_t base,
 	lmb_reserve_common(lmb, fdt_blob);
 }
 
-/* This routine called with relocation disabled. */
+/**
+ * lmb_add_region_flags() - Add a region or coalesce with another similar one
+ *
+ * This will coalesce with an existing regions so long as @flags is the same.
+ *
+ * This routine is called with relocation disabled.
+ *
+ * @rgn:	Region to process
+ * @base:	base address of the memory region to add
+ * @size:	size of the memory region to add
+ * @flags:	flags for this new memory region
+ * Returns: 0 if OK, -EBUSY if an existing enveloping region has different
+ * flags, -EPERM if there is an existing non-adjacent region, -ENOSPC if there
+ * is no more room in the list of regions, ekse region number that was coalesced
+ * with this one
+ **/
 static int lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
 				phys_size_t size, enum lmb_flags flags)
 {
@@ -251,7 +286,7 @@ static int lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
 				/* Already have this region, so we're done */
 				return 0;
 			else
-				return -1; /* regions with new flags */
+				return -EBUSY; /* regions with new flags */
 		}
 
 		adjacent = lmb_addrs_adjacent(base, size, rgnbase, rgnsize);
@@ -270,7 +305,7 @@ static int lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
 			break;
 		} else if (lmb_addrs_overlap(base, size, rgnbase, rgnsize)) {
 			/* regions overlap */
-			return -1;
+			return -EPERM;
 		}
 	}
 
@@ -284,7 +319,7 @@ static int lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
 	if (coalesced)
 		return coalesced;
 	if (rgn->cnt >= rgn->max)
-		return -1;
+		return -ENOSPC;
 
 	/* Couldn't coalesce the LMB, so add it to the sorted table. */
 	for (i = rgn->cnt-1; i >= 0; i--) {
