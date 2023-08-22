@@ -23,20 +23,19 @@ DECLARE_GLOBAL_DATA_PTR;
 
 static void lmb_dump_region(struct lmb_region *rgn, char *name)
 {
-	unsigned long long base, size, end;
-	enum lmb_flags flags;
 	int i;
 
 	printf(" %s.cnt = 0x%lx / max = 0x%lx\n", name, rgn->cnt, rgn->max);
 
 	for (i = 0; i < rgn->cnt; i++) {
-		base = rgn->region[i].base;
-		size = rgn->region[i].size;
-		end = base + size - 1;
-		flags = rgn->region[i].flags;
+		struct lmb_property *prop = &rgn->region[i];
+		unsigned long long end;
+
+		end = prop->base + prop->size - 1;
 
 		printf(" %s[%d]\t[0x%llx-0x%llx], 0x%08llx bytes flags: %x\n",
-		       name, i, base, end, size, flags);
+		       name, i, (unsigned long long)prop->base, end,
+		       (unsigned long long)prop->size, prop->flags);
 	}
 }
 
@@ -89,11 +88,8 @@ static void lmb_remove_region(struct lmb_region *rgn, unsigned long r)
 {
 	unsigned long i;
 
-	for (i = r; i < rgn->cnt - 1; i++) {
-		rgn->region[i].base = rgn->region[i + 1].base;
-		rgn->region[i].size = rgn->region[i + 1].size;
-		rgn->region[i].flags = rgn->region[i + 1].flags;
-	}
+	for (i = r; i < rgn->cnt - 1; i++)
+		rgn->region[i] = rgn->region[i + 1];
 	rgn->cnt--;
 }
 
@@ -122,6 +118,7 @@ void lmb_init(struct lmb *lmb)
 
 void arch_lmb_reserve_generic(struct lmb *lmb, ulong sp, ulong end, ulong align)
 {
+	struct bd_info *bd = gd->bd;
 	ulong bank_end;
 	int bank;
 
@@ -135,12 +132,10 @@ void arch_lmb_reserve_generic(struct lmb *lmb, ulong sp, ulong end, ulong align)
 	/* adjust sp by 4K to be safe */
 	sp -= align;
 	for (bank = 0; bank < CONFIG_NR_DRAM_BANKS; bank++) {
-		if (!gd->bd->bi_dram[bank].size ||
-		    sp < gd->bd->bi_dram[bank].start)
+		if (!bd->bi_dram[bank].size || sp < bd->bi_dram[bank].start)
 			continue;
 		/* Watch out for RAM at end of address space! */
-		bank_end = gd->bd->bi_dram[bank].start +
-			gd->bd->bi_dram[bank].size - 1;
+		bank_end = bd->bi_dram[bank].start + bd->bi_dram[bank].size - 1;
 		if (sp > bank_end)
 			continue;
 		if (bank_end > end)
@@ -244,9 +239,11 @@ static long lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
 
 	/* First try and coalesce this LMB with another. */
 	for (i = 0; i < rgn->cnt; i++) {
-		phys_addr_t rgnbase = rgn->region[i].base;
-		phys_size_t rgnsize = rgn->region[i].size;
-		phys_size_t rgnflags = rgn->region[i].flags;
+		struct lmb_property *prop = &rgn->region[i];
+
+		phys_addr_t rgnbase = prop->base;
+		phys_size_t rgnsize = prop->size;
+		phys_size_t rgnflags = prop->flags;
 		phys_addr_t end = base + size - 1;
 		phys_addr_t rgnend = rgnbase + rgnsize - 1;
 
@@ -262,14 +259,14 @@ static long lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
 		if (adjacent > 0) {
 			if (flags != rgnflags)
 				break;
-			rgn->region[i].base -= size;
-			rgn->region[i].size += size;
+			prop->base -= size;
+			prop->size += size;
 			coalesced++;
 			break;
 		} else if (adjacent < 0) {
 			if (flags != rgnflags)
 				break;
-			rgn->region[i].size += size;
+			prop->size += size;
 			coalesced++;
 			break;
 		} else if (lmb_addrs_overlap(base, size, rgnbase, rgnsize)) {
@@ -293,9 +290,7 @@ static long lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
 	/* Couldn't coalesce the LMB, so add it to the sorted table. */
 	for (i = rgn->cnt-1; i >= 0; i--) {
 		if (base < rgn->region[i].base) {
-			rgn->region[i + 1].base = rgn->region[i].base;
-			rgn->region[i + 1].size = rgn->region[i].size;
-			rgn->region[i + 1].flags = rgn->region[i].flags;
+			rgn->region[i + 1] = rgn->region[i];
 		} else {
 			rgn->region[i + 1].base = base;
 			rgn->region[i + 1].size = size;
@@ -535,10 +530,11 @@ int lmb_is_reserved_flags(struct lmb *lmb, phys_addr_t addr, int flags)
 	int i;
 
 	for (i = 0; i < lmb->reserved.cnt; i++) {
-		phys_addr_t upper = lmb->reserved.region[i].base +
-			lmb->reserved.region[i].size - 1;
-		if ((addr >= lmb->reserved.region[i].base) && (addr <= upper))
-			return (lmb->reserved.region[i].flags & flags) == flags;
+		struct lmb_property *prop = &lmb->reserved.region[i];
+		phys_addr_t upper = prop->base + prop->size - 1;
+
+		if (addr >= prop->base && addr <= upper)
+			return (prop->flags & flags) == flags;
 	}
 
 	return 0;
