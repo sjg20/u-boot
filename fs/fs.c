@@ -569,8 +569,13 @@ static int fs_read_lmb_check(const char *filename, ulong addr, loff_t offset,
 	lmb_init_and_reserve(&lmb, gd->bd, (void *)gd->fdt_blob);
 	lmb_dump_all(&lmb);
 
-	if (lmb_alloc_addr(&lmb, addr, read_len) == addr)
+	ret = lmb_alloc_addr(&lmb, addr, read_len, NULL);
+	if (!ret)
 		return 0;
+	if (ret == -E2BIG) {
+		log_warning("Reservation tables exhausted: see CONFIG_LMB_USE_MAX_REGIONS\n");
+		return 0;
+	}
 
 	log_err("** Reading file would overwrite reserved memory **\n");
 	return -ENOSPC;

@@ -497,22 +497,22 @@ static int test_alloc_addr(struct unit_test_state *uts, const phys_addr_t ram)
 		   alloc_addr_b, 0x10000, alloc_addr_c, 0x10000);
 
 	/* allocate blocks */
-	a = lmb_alloc_addr(&lmb, ram, alloc_addr_a - ram);
+	ut_assertok(lmb_alloc_addr(&lmb, ram, alloc_addr_a - ram, &a));
 	ut_asserteq(a, ram);
 	ASSERT_LMB(&lmb, ram, ram_size, 3, ram, 0x8010000,
 		   alloc_addr_b, 0x10000, alloc_addr_c, 0x10000);
-	b = lmb_alloc_addr(&lmb, alloc_addr_a + 0x10000,
-			   alloc_addr_b - alloc_addr_a - 0x10000);
+	ut_assertok(lmb_alloc_addr(&lmb, alloc_addr_a + 0x10000,
+				   alloc_addr_b - alloc_addr_a - 0x10000, &b));
 	ut_asserteq(b, alloc_addr_a + 0x10000);
 	ASSERT_LMB(&lmb, ram, ram_size, 2, ram, 0x10010000,
 		   alloc_addr_c, 0x10000, 0, 0);
-	c = lmb_alloc_addr(&lmb, alloc_addr_b + 0x10000,
-			   alloc_addr_c - alloc_addr_b - 0x10000);
+	ut_assertok(lmb_alloc_addr(&lmb, alloc_addr_b + 0x10000,
+				   alloc_addr_c - alloc_addr_b - 0x10000, &c));
 	ut_asserteq(c, alloc_addr_b + 0x10000);
 	ASSERT_LMB(&lmb, ram, ram_size, 1, ram, 0x18010000,
 		   0, 0, 0, 0);
-	d = lmb_alloc_addr(&lmb, alloc_addr_c + 0x10000,
-			   ram_end - alloc_addr_c - 0x10000);
+	ut_assertok(lmb_alloc_addr(&lmb, alloc_addr_c + 0x10000,
+				   ram_end - alloc_addr_c - 0x10000, &d));
 	ut_asserteq(d, alloc_addr_c + 0x10000);
 	ASSERT_LMB(&lmb, ram, ram_size, 1, ram, ram_size,
 		   0, 0, 0, 0);
@@ -528,7 +528,7 @@ static int test_alloc_addr(struct unit_test_state *uts, const phys_addr_t ram)
 
 	/* allocate at 3 points in free range */
 
-	d = lmb_alloc_addr(&lmb, ram_end - 4, 4);
+	ut_assertok(lmb_alloc_addr(&lmb, ram_end - 4, 4, &d));
 	ut_asserteq(d, ram_end - 4);
 	ASSERT_LMB(&lmb, ram, ram_size, 2, ram, 0x18010000,
 		   d, 4, 0, 0);
@@ -537,7 +537,7 @@ static int test_alloc_addr(struct unit_test_state *uts, const phys_addr_t ram)
 	ASSERT_LMB(&lmb, ram, ram_size, 1, ram, 0x18010000,
 		   0, 0, 0, 0);
 
-	d = lmb_alloc_addr(&lmb, ram_end - 128, 4);
+	ut_assertok(lmb_alloc_addr(&lmb, ram_end - 128, 4, &d));
 	ut_asserteq(d, ram_end - 128);
 	ASSERT_LMB(&lmb, ram, ram_size, 2, ram, 0x18010000,
 		   d, 4, 0, 0);
@@ -546,7 +546,7 @@ static int test_alloc_addr(struct unit_test_state *uts, const phys_addr_t ram)
 	ASSERT_LMB(&lmb, ram, ram_size, 1, ram, 0x18010000,
 		   0, 0, 0, 0);
 
-	d = lmb_alloc_addr(&lmb, alloc_addr_c + 0x10000, 4);
+	ut_assertok(lmb_alloc_addr(&lmb, alloc_addr_c + 0x10000, 4, &d));
 	ut_asserteq(d, alloc_addr_c + 0x10000);
 	ASSERT_LMB(&lmb, ram, ram_size, 1, ram, 0x18010004,
 		   0, 0, 0, 0);
@@ -560,19 +560,19 @@ static int test_alloc_addr(struct unit_test_state *uts, const phys_addr_t ram)
 	ut_asserteq(ret, 0);
 	ASSERT_LMB(&lmb, ram, ram_size, 1, ram + 0x8000000, 0x10010000,
 		   0, 0, 0, 0);
-	d = lmb_alloc_addr(&lmb, ram, 4);
+	ut_assertok(lmb_alloc_addr(&lmb, ram, 4, &d));
 	ut_asserteq(d, ram);
 	ASSERT_LMB(&lmb, ram, ram_size, 2, d, 4,
 		   ram + 0x8000000, 0x10010000, 0, 0);
 
 	/* check that allocating outside memory fails */
 	if (ram_end != 0) {
-		ret = lmb_alloc_addr(&lmb, ram_end, 1);
-		ut_asserteq(ret, 0);
+		ut_assertok(lmb_alloc_addr(&lmb, ram_end, 1, &a));
+		ut_asserteq(0x40000000, a);
 	}
 	if (ram != 0) {
-		ret = lmb_alloc_addr(&lmb, ram - 1, 1);
-		ut_asserteq(ret, 0);
+		ut_assertok(lmb_alloc_addr(&lmb, ram - 1, 1, &a));
+		ut_asserteq(ram, a);
 	}
 
 	return 0;
@@ -588,7 +588,7 @@ static int lib_test_lmb_alloc_addr(struct unit_test_state *uts)
 		return ret;
 
 	/* simulate 512 MiB RAM beginning at 1.5GiB */
-	return test_alloc_addr(uts, 0xE0000000);
+	return test_alloc_addr(uts, 0xe0000000);
 }
 
 DM_TEST(lib_test_lmb_alloc_addr, UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
@@ -699,8 +699,7 @@ static int lib_test_lmb_max_regions(struct unit_test_state *uts)
 
 	/*  error for the (CONFIG_LMB_MAX_REGIONS + 1) memory regions */
 	offset = ram + 2 * (CONFIG_LMB_MAX_REGIONS + 1) * ram_size;
-	ret = lmb_add(&lmb, offset, ram_size);
-	ut_asserteq(ret, -1);
+	ut_asserteq(-E2BIG, lmb_add(&lmb, offset, ram_size));
 
 	ut_asserteq(lmb.memory.cnt, CONFIG_LMB_MAX_REGIONS);
 	ut_asserteq(lmb.reserved.cnt, 0);
@@ -717,8 +716,7 @@ static int lib_test_lmb_max_regions(struct unit_test_state *uts)
 
 	/*  error for the 9th reserved blocks */
 	offset = ram + 2 * (CONFIG_LMB_MAX_REGIONS + 1) * blk_size;
-	ret = lmb_reserve(&lmb, offset, blk_size);
-	ut_asserteq(ret, -1);
+	ut_asserteq(-E2BIG, lmb_reserve(&lmb, offset, blk_size));
 
 	ut_asserteq(lmb.memory.cnt, CONFIG_LMB_MAX_REGIONS);
 	ut_asserteq(lmb.reserved.cnt, CONFIG_LMB_MAX_REGIONS);
@@ -762,8 +760,8 @@ static int lib_test_lmb_flags(struct unit_test_state *uts)
 		   0, 0, 0, 0);
 
 	/* reserve again, new flag */
-	ret = lmb_reserve_flags(&lmb, 0x40010000, 0x10000, LMB_NONE);
-	ut_asserteq(ret, -1);
+	ut_asserteq(-EBUSY,
+		    lmb_reserve_flags(&lmb, 0x40010000, 0x10000, LMB_NONE));
 	ASSERT_LMB(&lmb, ram, ram_size, 1, 0x40010000, 0x10000,
 		   0, 0, 0, 0);
 

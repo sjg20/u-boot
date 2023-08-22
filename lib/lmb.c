@@ -253,7 +253,7 @@ void lmb_init_and_reserve_range(struct lmb *lmb, phys_addr_t base,
  * @size:	size of the memory region to add
  * @flags:	flags for this new memory region
  * Returns: 0 if OK, -EBUSY if an existing enveloping region has different
- * flags, -EPERM if there is an existing non-adjacent region, -ENOSPC if there
+ * flags, -EPERM if there is an existing non-adjacent region, -E2BIG if there
  * is no more room in the list of regions, ekse region number that was coalesced
  * with this one
  **/
@@ -319,7 +319,7 @@ static int lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
 	if (coalesced)
 		return coalesced;
 	if (rgn->cnt >= rgn->max)
-		return -ENOSPC;
+		return -E2BIG;
 
 	/* Couldn't coalesce the LMB, so add it to the sorted table. */
 	for (i = rgn->cnt-1; i >= 0; i--) {
@@ -511,11 +511,8 @@ phys_addr_t __lmb_alloc_base(struct lmb *lmb, phys_size_t size, ulong align,
 	return 0;
 }
 
-/*
- * Try to allocate a specific address range: must be in defined memory but not
- * reserved
- */
-phys_addr_t lmb_alloc_addr(struct lmb *lmb, phys_addr_t base, phys_size_t size)
+int lmb_alloc_addr(struct lmb *lmb, phys_addr_t base, phys_size_t size,
+		   phys_addr_t *addrp)
 {
 	long rgn;
 
@@ -529,9 +526,14 @@ phys_addr_t lmb_alloc_addr(struct lmb *lmb, phys_addr_t base, phys_size_t size)
 		if (lmb_addrs_overlap(lmb->memory.region[rgn].base,
 				      lmb->memory.region[rgn].size,
 				      base + size - 1, 1)) {
+			int ret;
+
 			/* ok, reserve the memory */
-			if (lmb_reserve(lmb, base, size) >= 0)
-				return base;
+			ret = lmb_reserve(lmb, base, size);
+			if (ret < 0)
+				return ret;
+			if (addrp)
+				*addrp = base;
 		}
 	}
 

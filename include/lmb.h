@@ -114,7 +114,24 @@ phys_addr_t lmb_alloc_base(struct lmb *lmb, phys_size_t size, ulong align,
 			   phys_addr_t max_addr);
 phys_addr_t __lmb_alloc_base(struct lmb *lmb, phys_size_t size, ulong align,
 			     phys_addr_t max_addr);
-phys_addr_t lmb_alloc_addr(struct lmb *lmb, phys_addr_t base, phys_size_t size);
+
+/**
+ * lmb_alloc_addr() - Allocate memory within a region
+ *
+ * Try to allocate a specific address range: must be in defined memory but not
+ * reserved
+ *
+ * @lmb:	the logical memory block struct
+ * @base:	base address of the memory region
+ * @size:	size of the memory region
+ * @addrp:	if non-NULL, returns the allocated address, on success
+ * Return:	0 if OK, -EPERM if the memory is already allocated, -E2BIG if
+ * there is not enough room in the reservation tables, so
+ * CONFIG_LMB_USE_MAX_REGIONS should be increased
+ */
+int lmb_alloc_addr(struct lmb *lmb, phys_addr_t base, phys_size_t size,
+		   phys_addr_t *addrp);
+
 phys_size_t lmb_get_free_size(struct lmb *lmb, phys_addr_t addr);
 int lmb_is_reserved(struct lmb *lmb, phys_addr_t addr);
 /**
