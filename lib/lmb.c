@@ -60,7 +60,7 @@ static long lmb_addrs_overlap(phys_addr_t base1, phys_size_t size1,
 	const phys_addr_t base1_end = base1 + size1 - 1;
 	const phys_addr_t base2_end = base2 + size2 - 1;
 
-	return ((base1 <= base2_end) && (base2 <= base1_end));
+	return base1 <= base2_end && base2 <= base1_end;
 }
 
 static long lmb_addrs_adjacent(phys_addr_t base1, phys_size_t size1,
@@ -278,7 +278,7 @@ static long lmb_add_region_flags(struct lmb_region *rgn, phys_addr_t base,
 		}
 	}
 
-	if ((i < rgn->cnt - 1) && lmb_regions_adjacent(rgn, i, i + 1)) {
+	if (i < rgn->cnt - 1 && lmb_regions_adjacent(rgn, i, i + 1)) {
 		if (rgn->region[i].flags == rgn->region[i + 1].flags) {
 			lmb_coalesce_regions(rgn, i, i + 1);
 			coalesced++;
@@ -375,6 +375,7 @@ long lmb_free(struct lmb *lmb, phys_addr_t base, phys_size_t size)
 	 * beginging of the hole and add the region after hole.
 	 */
 	rgn->region[i].size = base - rgn->region[i].base;
+
 	return lmb_add_region_flags(rgn, end + 1, rgnend - end,
 				    rgn->region[i].flags);
 }
@@ -404,7 +405,7 @@ static long lmb_overlaps_region(struct lmb_region *rgn, phys_addr_t base,
 			break;
 	}
 
-	return (i < rgn->cnt) ? i : -1;
+	return i < rgn->cnt ? i : -1;
 }
 
 phys_addr_t lmb_alloc(struct lmb *lmb, phys_size_t size, ulong align)
@@ -412,7 +413,8 @@ phys_addr_t lmb_alloc(struct lmb *lmb, phys_size_t size, ulong align)
 	return lmb_alloc_base(lmb, size, align, LMB_ALLOC_ANYWHERE);
 }
 
-phys_addr_t lmb_alloc_base(struct lmb *lmb, phys_size_t size, ulong align, phys_addr_t max_addr)
+phys_addr_t lmb_alloc_base(struct lmb *lmb, phys_size_t size, ulong align,
+			   phys_addr_t max_addr)
 {
 	phys_addr_t alloc;
 
@@ -430,7 +432,8 @@ static phys_addr_t lmb_align_down(phys_addr_t addr, phys_size_t size)
 	return addr & ~(size - 1);
 }
 
-phys_addr_t __lmb_alloc_base(struct lmb *lmb, phys_size_t size, ulong align, phys_addr_t max_addr)
+phys_addr_t __lmb_alloc_base(struct lmb *lmb, phys_size_t size, ulong align,
+			     phys_addr_t max_addr)
 {
 	long i, rgn;
 	phys_addr_t base = 0;
@@ -468,6 +471,7 @@ phys_addr_t __lmb_alloc_base(struct lmb *lmb, phys_size_t size, ulong align, phy
 			base = lmb_align_down(res_base - size, align);
 		}
 	}
+
 	return 0;
 }
 
@@ -494,6 +498,7 @@ phys_addr_t lmb_alloc_addr(struct lmb *lmb, phys_addr_t base, phys_size_t size)
 				return base;
 		}
 	}
+
 	return 0;
 }
 
@@ -521,6 +526,7 @@ phys_size_t lmb_get_free_size(struct lmb *lmb, phys_addr_t addr)
 		return lmb->memory.region[lmb->memory.cnt - 1].base +
 		       lmb->memory.region[lmb->memory.cnt - 1].size - addr;
 	}
+
 	return 0;
 }
 
@@ -534,6 +540,7 @@ int lmb_is_reserved_flags(struct lmb *lmb, phys_addr_t addr, int flags)
 		if ((addr >= lmb->reserved.region[i].base) && (addr <= upper))
 			return (lmb->reserved.region[i].flags & flags) == flags;
 	}
+
 	return 0;
 }
 
