@@ -307,6 +307,8 @@ static int last_stage_init(void)
 	struct udevice *bus;
 	ofnode node;
 
+	if (!IS_ENABLED(CONFIG_DM_MDIO))
+		return 0;
 	if (!of_machine_is_compatible("globalscale,espressobin"))
 		return 0;
 
