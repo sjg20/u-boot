@@ -800,7 +800,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	    IS_ENABLED(CONFIG_SPL_ATF))
 		dram_init_banksize();
 
-	if (CONFIG_IS_ENABLED(PCI)) {
+	if (CONFIG_IS_ENABLED(PCI) && !IS_ENABLED(CONFIG_X86)) {
 		ret = pci_init();
 		if (ret)
 			puts(SPL_TPL_PROMPT "Cannot initialize PCI\n");
