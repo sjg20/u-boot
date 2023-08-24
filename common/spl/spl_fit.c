@@ -13,6 +13,7 @@
 #include <memalign.h>
 #include <mapmem.h>
 #include <spl.h>
+#include <upl.h>
 #include <sysinfo.h>
 #include <asm/cache.h>
 #include <asm/global_data.h>
@@ -43,7 +44,7 @@ static int find_node_from_desc(const void *fit, int node, const char *str)
 	for (child = fdt_first_subnode(fit, node); child >= 0;
 	     child = fdt_next_subnode(fit, child)) {
 		int len;
-		const char *desc = fdt_getprop(fit, child, "description", &len);
+		const char *desc = fdt_getprop(fit, child, FIT_DESC_PROP, &len);
 
 		if (!desc)
 			continue;
@@ -621,6 +622,8 @@ static int spl_fit_load_fpga(struct spl_fit_info *ctx,
 		printf("%s: Cannot load the FPGA: %i\n", __func__, ret);
 		return ret;
 	}
+	upl_add_image(node, fpga_image.load_addr, fpga_image.size,
+		      fdt_getprop(ctx->fit, node, FIT_DESC_PROP, NULL));
 
 	return spl_fit_upload_fpga(ctx, node, &fpga_image);
 }
@@ -745,6 +748,9 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	if (ret)
 		return ret;
 
+	upl_add_image(node, spl_image->load_addr, spl_image->size,
+		      fdt_getprop(ctx.fit, node, FIT_DESC_PROP, NULL));
+
 	/*
 	 * For backward compatibility, we treat the first node that is
 	 * as a U-Boot image, if no OS-type has been declared.
@@ -788,6 +794,8 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 			       __func__, index, ret);
 			return ret;
 		}
+		upl_add_image(node, image_info.load_addr, image_info.size,
+			      fdt_getprop(ctx.fit, node, FIT_DESC_PROP, NULL));
 
 		if (spl_fit_image_is_fpga(ctx.fit, node))
 			spl_fit_upload_fpga(&ctx, node, &image_info);
@@ -824,6 +832,8 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 		spl_image->entry_point = spl_image->load_addr;
 
 	spl_image->flags |= SPL_FIT_FOUND;
+	upl_set_fit_info(map_to_sysmem(ctx.fit), ctx.conf_node,
+			 spl_image->entry_point);
 
 	return 0;
 }

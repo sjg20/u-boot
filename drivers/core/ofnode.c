@@ -92,6 +92,22 @@ static oftree oftree_ensure(void *fdt)
 	return tree;
 }
 
+oftree oftree_new(void)
+{
+	oftree tree = oftree_null();
+
+	if (of_live_active()) {
+		struct device_node *root;
+
+		if (!of_live_create_empty(&root))
+			tree = oftree_from_np(root);
+	} else {
+		log_err("Cannot create new oftree without OF_LIVE\n");
+	}
+
+	return tree;
+}
+
 void oftree_dispose(oftree tree)
 {
 	if (of_live_active())
@@ -161,6 +177,23 @@ oftree oftree_from_fdt(void *fdt)
 	tree.fdt = fdt;
 
 	return tree;
+}
+
+int oftree_to_fdt(oftree tree, struct abuf *buf)
+{
+	int ret;
+
+	if (of_live_active()) {
+		ret = of_live_flatten(ofnode_to_np(oftree_root(tree)), buf);
+		if (ret)
+			return log_msg_ret("flt", ret);
+	} else {
+		void *fdt = oftree_lookup_fdt(tree);
+
+		abuf_set(buf, fdt, fdt_totalsize(fdt));
+	}
+
+	return 0;
 }
 
 /**
@@ -1166,7 +1199,8 @@ const uint8_t *ofnode_read_u8_array_ptr(ofnode node, const char *propname,
 }
 
 int ofnode_read_pci_addr(ofnode node, enum fdt_pci_space type,
-			 const char *propname, struct fdt_pci_addr *addr)
+			 const char *propname, struct fdt_pci_addr *addr,
+			 fdt_size_t *size)
 {
 	const fdt32_t *cell;
 	int len;
@@ -1194,14 +1228,18 @@ int ofnode_read_pci_addr(ofnode node, enum fdt_pci_space type,
 			      (ulong)fdt32_to_cpu(cell[1]),
 			      (ulong)fdt32_to_cpu(cell[2]));
 			if ((fdt32_to_cpu(*cell) & type) == type) {
+				const unaligned_fdt64_t *ptr;
+
 				addr->phys_hi = fdt32_to_cpu(cell[0]);
 				addr->phys_mid = fdt32_to_cpu(cell[1]);
 				addr->phys_lo = fdt32_to_cpu(cell[2]);
+				ptr = (const unaligned_fdt64_t *)(cell + 3);
+				if (size)
+					*size = fdt64_to_cpu(*ptr);
 				break;
 			}
 
-			cell += (FDT_PCI_ADDR_CELLS +
-				 FDT_PCI_SIZE_CELLS);
+			cell += FDT_PCI_ADDR_CELLS + FDT_PCI_SIZE_CELLS;
 		}
 
 		if (i == num) {
@@ -1517,7 +1555,46 @@ int ofnode_write_u32(ofnode node, const char *propname, u32 value)
 		return -ENOMEM;
 	*val = cpu_to_fdt32(value);
 
-	return ofnode_write_prop(node, propname, val, sizeof(value), false);
+	return ofnode_write_prop(node, propname, val, sizeof(value), true);
+}
+
+int ofnode_write_u64(ofnode node, const char *propname, u64 value)
+{
+	fdt64_t *val;
+
+	assert(ofnode_valid(node));
+
+	log_debug("%s = %llx", propname, (unsigned long long)value);
+	val = malloc(sizeof(*val));
+	if (!val)
+		return -ENOMEM;
+	*val = cpu_to_fdt64(value);
+
+	return ofnode_write_prop(node, propname, val, sizeof(value), true);
+}
+
+int ofnode_write_bool(ofnode node, const char *propname, bool value)
+{
+	if (value)
+		return ofnode_write_prop(node, propname, NULL, 0, false);
+	else
+		return ofnode_delete_prop(node, propname);
+}
+
+int ofnode_delete_prop(ofnode node, const char *propname)
+{
+	if (ofnode_is_np(node)) {
+		struct property *prop;
+		int len;
+
+		prop = of_find_property(ofnode_to_np(node), propname, &len);
+		if (prop)
+			return of_remove_property(ofnode_to_np(node), prop);
+		return 0;
+	} else {
+		return fdt_delprop(ofnode_to_fdt(node), ofnode_to_offset(node),
+				   propname);
+	}
 }
 
 int ofnode_set_enabled(ofnode node, bool value)
@@ -1642,7 +1719,30 @@ int ofnode_add_subnode(ofnode node, const char *name, ofnode *subnodep)
 	return ret;	/* 0 or -EEXIST */
 }
 
-int ofnode_copy_props(ofnode src, ofnode dst)
+int ofnode_delete(ofnode *nodep)
+{
+	ofnode node = *nodep;
+	int ret;
+
+	assert(ofnode_valid(node));
+	if (ofnode_is_np(node)) {
+		ret = of_remove_node(ofnode_to_np(node));
+	} else {
+		void *fdt = ofnode_to_fdt(node);
+		int offset = ofnode_to_offset(node);
+
+		ret = fdt_del_node(fdt, offset);
+		if (ret)
+			ret = -EFAULT;
+	}
+	if (ret)
+		return ret;
+	*nodep = ofnode_null();
+
+	return 0;
+}
+
+int ofnode_copy_props(ofnode dst, ofnode src)
 {
 	struct ofprop prop;
 
@@ -1662,6 +1762,26 @@ int ofnode_copy_props(ofnode src, ofnode dst)
 			return log_msg_ret("wr", -EINVAL);
 		}
 	}
+
+	return 0;
+}
+
+int ofnode_copy_node(ofnode dst_parent, const char *name, ofnode src,
+		     ofnode *nodep)
+{
+	ofnode node;
+	int ret;
+
+	ret = ofnode_add_subnode(dst_parent, name, &node);
+	if (ret) {
+		if (ret == -EEXIST)
+			*nodep = node;
+		return log_msg_ret("add", ret);
+	}
+	ret = ofnode_copy_props(node, src);
+	if (ret)
+		return log_msg_ret("cpy", ret);
+	*nodep = node;
 
 	return 0;
 }

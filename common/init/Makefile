@@ -6,3 +6,4 @@
 
 obj-y += board_init.o
 obj-$(CONFIG_$(SPL_TPL_)HANDOFF) += handoff.o
+obj-y += of_live.o

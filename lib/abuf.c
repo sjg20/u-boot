@@ -12,7 +12,7 @@
 #include <mapmem.h>
 #include <string.h>
 #endif
-
+#include <linux/kconfig.h>
 #include <abuf.h>
 
 void abuf_set(struct abuf *abuf, void *data, size_t size)
@@ -53,7 +53,13 @@ bool abuf_realloc(struct abuf *abuf, size_t new_size)
 		return true;
 	} else if (abuf->alloced) {
 		/* currently allocated, so need to reallocate */
-		ptr = realloc(abuf->data, new_size);
+		if (CONFIG_IS_ENABLED(SYS_MALLOC_SIMPLE)) {
+			ptr = malloc(new_size);
+			if (ptr)
+				memcpy(ptr, abuf->data, abuf->size);
+		} else {
+			ptr = realloc(abuf->data, new_size);
+		}
 		if (!ptr)
 			return false;
 		abuf->data = ptr;

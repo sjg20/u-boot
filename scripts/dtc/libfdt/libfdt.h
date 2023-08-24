@@ -1910,7 +1910,7 @@ int fdt_appendprop_addrrange(void *fdt, int parent, int nodeoffset,
  * @nodeoffset: offset of the node whose property to nop
  * @name: name of the property to nop
  *
- * fdt_del_property() will delete the given property.
+ * fdt_delprop() will delete the given property.
  *
  * This function will delete data from the blob, and will therefore
  * change the offsets of some existing nodes.

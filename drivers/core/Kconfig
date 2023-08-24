@@ -446,6 +446,13 @@ config OFNODE_MULTI_TREE_MAX
 	  ofnode interface when using flat trees (OF_LIVE). This is only
 	  available in U-Boot proper and only after relocation.
 
+config SPL_OFNODE_MULTI_TREE
+	bool "Allow the ofnode interface to access any tree in SPL"
+	help
+	  This enables OFNODE_MULTI_TREE for SPL. This is not normally needed
+	  even when SPL does use devicetree, unless some special feature needs
+	  to support multiple devicetrees, such as UPL.
+
 config ACPIGEN
 	bool "Support ACPI table generation in driver model"
 	depends on ACPI

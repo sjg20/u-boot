@@ -676,7 +676,60 @@ config BOOTMETH_SCRIPT
 	  This provides a way to try out standard boot on an existing boot flow.
 	  It is not enabled by default to save space.
 
-endif
+config UPL
+	bool "upl - Universal Payload Specification"
+	imply CMD_UPL
+	imply UPL_READ
+	imply UPL_WRITE
+	imply SPL_UPL if SPL
+	select OFNODE_MULTI_TREE
+	help
+	  Provides support for UPL payloads and handoff information. U-Boot
+	  supports generating and accepting handoff information. The mkimage
+	  tool will eventually support creating payloads.
+
+if UPL
+
+config UPL_READ
+	bool "upl - Support reading a Universal Payload handoff"
+	help
+	  Provides support for decoding a UPL-format payload and using it
+	  in U-Boot. This allows U-Boot to function as a payload in the meaning
+	  of the specification.
+
+config UPL_WRITE
+	bool "upl - Support writing a Universal Payload handoff"
+	help
+	  Provides support for encoding a UPL-format payload and passing it to
+	  the next firmware phase. This allows U-Boot to function as Platform
+	  Init in the meaning of the specification.
+
+if SPL
+
+config SPL_UPL
+	bool "Write a UPL handoff in SPL"
+	select SPL_OFNODE_MULTI_TREE
+	select SPL_BLOBLIST
+	select SPL_UPL_WRITE
+	help
+	  This tells SPL to write a UPL handoff and pass it to the next phase
+	  (e.g. to U-Boot or another program which SPL loads and runs). THis
+	  provides information to help that program run correctly and
+	  efficiently on the machine.
+
+config SPL_UPL_WRITE
+	bool # upl - Support writing a Universal Payload handoff in SPL
+	depends on UPL
+	help
+	  Provides support for encoding a UPL-format payload and passing it to
+	  the next firmware phase. This allows U-Boot to function as Platform
+	  Init in the meaning of the specification.
+
+endif  # SPL
+
+endif  # UPL
+
+endif  # BOOTSTD
 
 config LEGACY_IMAGE_FORMAT
 	bool "Enable support for the legacy image format"

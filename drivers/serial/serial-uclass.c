@@ -56,6 +56,9 @@ static int serial_check_stdout(const void *blob, struct udevice **devp)
 	if (!uclass_get_device_by_of_offset(UCLASS_SERIAL, node, devp))
 		return 0;
 
+	printf("node %d\n", node);
+	printf("name %s\n", fdt_get_name(blob, node, NULL));
+
 	/*
 	 * If the console is not marked to be bound before relocation, bind it
 	 * anyway.

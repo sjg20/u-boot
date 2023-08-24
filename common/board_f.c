@@ -854,7 +854,7 @@ static const init_fnc_t init_sequence_f[] = {
 	initf_bootstage,	/* uses its own timer, so does not need DM */
 	event_init,
 #ifdef CONFIG_BLOBLIST
-	bloblist_init,
+	bloblist_maybe_init,
 #endif
 	setup_spl_handoff,
 #if defined(CONFIG_CONSOLE_RECORD_INIT_F)
