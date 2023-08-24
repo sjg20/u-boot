@@ -382,6 +382,13 @@ void arch_print_bdinfo(void);
 
 int do_bdinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[]);
 
+/**
+ * initr_of_live() - Set up the live devicetree
+ *
+ * Return: 0 if OK, -ve on error
+ */
+int initr_of_live(void);
+
 #endif	/* __ASSEMBLY__ */
 /* Put only stuff here that the assembler can digest */
 

@@ -221,7 +221,8 @@ static void *unflatten_dt_node(const void *blob, void *mem, int *poffset,
 		if (!np->name)
 			np->name = "<NULL>";
 		if (!np->type)
-			np->type = "<NULL>";	}
+			np->type = "<NULL>";
+	}
 
 	old_depth = depth;
 	*poffset = fdt_next_node(blob, *poffset, &depth);

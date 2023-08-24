@@ -3,6 +3,8 @@
  * Copyright (c) 2011-2012 The Chromium OS Authors.
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <cli.h>
 #include <command.h>

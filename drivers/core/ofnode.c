@@ -1583,7 +1583,46 @@ int ofnode_write_u32(ofnode node, const char *propname, u32 value)
 		return -ENOMEM;
 	*val = cpu_to_fdt32(value);
 
-	return ofnode_write_prop(node, propname, val, sizeof(value), false);
+	return ofnode_write_prop(node, propname, val, sizeof(value), true);
+}
+
+int ofnode_write_u64(ofnode node, const char *propname, u64 value)
+{
+	fdt64_t *val;
+
+	assert(ofnode_valid(node));
+
+	log_debug("%s = %llx", propname, (unsigned long long)value);
+	val = malloc(sizeof(*val));
+	if (!val)
+		return -ENOMEM;
+	*val = cpu_to_fdt64(value);
+
+	return ofnode_write_prop(node, propname, val, sizeof(value), true);
+}
+
+int ofnode_write_bool(ofnode node, const char *propname, bool value)
+{
+	if (value)
+		return ofnode_write_prop(node, propname, NULL, 0, false);
+	else
+		return ofnode_delete_prop(node, propname);
+}
+
+int ofnode_delete_prop(ofnode node, const char *propname)
+{
+	if (ofnode_is_np(node)) {
+		struct property *prop;
+		int len;
+
+		prop = of_find_property(ofnode_to_np(node), propname, &len);
+		if (prop)
+			return of_remove_property(ofnode_to_np(node), prop);
+		return 0;
+	} else {
+		return fdt_delprop(ofnode_to_fdt(node), ofnode_to_offset(node),
+				   propname);
+	}
 }
 
 int ofnode_write_bool(ofnode node, const char *propname, bool value)

@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2011-2012 The Chromium OS Authors.
  */
+#define LOG_DEBUG
+#define LOG_CATEGORY	LOGC_BOARD
 
 #include <common.h>
 #include <autoboot.h>

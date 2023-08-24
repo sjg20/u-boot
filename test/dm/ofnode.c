@@ -228,6 +228,9 @@ static int dm_test_ofnode_read(struct unit_test_state *uts)
 	ofnode node;
 	int size;
 
+	node = oftree_path(oftree_default(), "/");
+	ut_assert(ofnode_valid(node));
+
 	node = ofnode_path("/a-test");
 	ut_assert(ofnode_valid(node));
 
@@ -246,7 +249,7 @@ static int dm_test_ofnode_read(struct unit_test_state *uts)
 
 	return 0;
 }
-DM_TEST(dm_test_ofnode_read, UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
+DM_TEST(dm_test_ofnode_read, 0);
 
 /* test ofnode_read_prop() with the 'other' tree */
 static int dm_test_ofnode_read_ot(struct unit_test_state *uts)
@@ -255,6 +258,9 @@ static int dm_test_ofnode_read_ot(struct unit_test_state *uts)
 	const char *val;
 	ofnode node;
 	int size;
+
+	node = oftree_path(otree, "/");
+	ut_assert(ofnode_valid(node));
 
 	node = oftree_path(otree, "/node/subnode");
 	ut_assert(ofnode_valid(node));
@@ -1338,6 +1344,28 @@ static int dm_test_oftree_new(struct unit_test_state *uts)
 }
 DM_TEST(dm_test_oftree_new, UT_TESTF_SCAN_FDT);
 
+static int dm_test_ofnode_delete(struct unit_test_state *uts)
+{
+	ofnode node;
+
+	node = ofnode_path("/buttons/btn1");
+	ut_assert(ofnode_valid(node));
+	ut_assertok(ofnode_delete(&node));
+	ut_assert(!ofnode_valid(node));
+	ut_assert(!ofnode_valid(ofnode_path("/buttons/btn1")));
+
+	node = ofnode_path("/buttons/btn2");
+	ut_assert(ofnode_valid(node));
+	ut_assertok(ofnode_delete(&node));
+	ut_assert(!ofnode_valid(node));
+	ut_assert(!ofnode_valid(ofnode_path("/buttons/btn2")));
+
+	ut_asserteq(0, ofnode_get_child_count(ofnode_path("/buttons")));
+
+	return 0;
+}
+DM_TEST(dm_test_ofnode_delete, UT_TESTF_SCAN_FDT);
+
 static int check_copy_node(struct unit_test_state *uts, ofnode dst, ofnode src,
 			   ofnode *nodep)
 {
@@ -1387,27 +1415,19 @@ static int dm_test_ofnode_copy_node(struct unit_test_state *uts)
 }
 DM_TEST(dm_test_ofnode_copy_node, UT_TESTF_SCAN_FDT);
 
-static int dm_test_ofnode_delete(struct unit_test_state *uts)
+/* test ofnode_copy_node() with the 'other' tree */
+static int dm_test_ofnode_copy_node_ot(struct unit_test_state *uts)
 {
-	ofnode node;
+	oftree otree = get_other_oftree(uts);
+	ofnode src, dst, node;
 
-	node = ofnode_path("/buttons/btn1");
-	ut_assert(ofnode_valid(node));
-	ut_assertok(ofnode_delete(&node));
-	ut_assert(!ofnode_valid(node));
-	ut_assert(!ofnode_valid(ofnode_path("/buttons/btn1")));
-
-	node = ofnode_path("/buttons/btn2");
-	ut_assert(ofnode_valid(node));
-	ut_assertok(ofnode_delete(&node));
-	ut_assert(!ofnode_valid(node));
-	ut_assert(!ofnode_valid(ofnode_path("/buttons/btn2")));
-
-	ut_asserteq(0, ofnode_get_child_count(ofnode_path("/buttons")));
+	src = ofnode_path("/b-test");
+	dst = oftree_path(otree, "/node/subnode2");
+	ut_assertok(check_copy_node(uts, dst, src, &node));
 
 	return 0;
 }
-DM_TEST(dm_test_ofnode_delete, UT_TESTF_SCAN_FDT);
+DM_TEST(dm_test_ofnode_copy_node_ot, UT_TESTF_SCAN_FDT | UT_TESTF_OTHER_FDT);
 
 static int dm_test_oftree_to_fdt(struct unit_test_state *uts)
 {

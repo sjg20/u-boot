@@ -301,6 +301,9 @@ static int spl_load_fit_image(struct spl_image_info *spl_image,
 	if (ret < 0)
 		return ret;
 
+	upl_add_image(ret, fw_data, fw_len,
+		      fdt_getprop((void *)header, ret, FIT_DESC_PROP, NULL));
+
 	spl_image->size = fw_len;
 	spl_image->entry_point = fw_data;
 	spl_image->load_addr = fw_data;
@@ -319,6 +322,9 @@ static int spl_load_fit_image(struct spl_image_info *spl_image,
 		       FIT_LOAD_OPTIONAL, &dt_data, &dt_len);
 	if (ret >= 0) {
 		spl_image->fdt_addr = (void *)dt_data;
+
+		upl_add_image(ret, dt_data, dt_len,
+		      fdt_getprop((void *)header, ret, FIT_DESC_PROP, NULL));
 
 		if (spl_image->os == IH_OS_U_BOOT) {
 			/* HACK: U-Boot expects FDT at a specific address */
@@ -350,6 +356,8 @@ static int spl_load_fit_image(struct spl_image_info *spl_image,
 				     &img_data, &img_len);
 		if (ret < 0)
 			return ret;
+		upl_add_image(ret, img_data, img_len,
+		      fdt_getprop((void *)header, ret, FIT_DESC_PROP, NULL));
 	}
 
 	return 0;
@@ -564,6 +572,11 @@ static int spl_common_init(bool setup_malloc)
 		}
 	}
 	if (CONFIG_IS_ENABLED(DM)) {
+		ret = initr_of_live();
+		if (ret) {
+			log_debug("Failed to init livetree (err=%d)\n", ret);
+			return ret;
+		}
 		bootstage_start(BOOTSTAGE_ID_ACCUM_DM_SPL,
 				spl_phase() == PHASE_TPL ? "dm tpl" : "dm_spl");
 		/* With CONFIG_SPL_OF_PLATDATA, bring in all devices */
@@ -748,13 +761,15 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 
 	spl_set_bd();
 
-	if (IS_ENABLED(CONFIG_SPL_SYS_MALLOC)) {
+	if (CONFIG_IS_ENABLED(SYS_MALLOC)) {
 		ulong size;
 
 		size = IF_ENABLED_INT(CONFIG_SPL_SYS_MALLOC,
 				      CONFIG_SPL_SYS_MALLOC_SIZE);
-		mem_malloc_init(SPL_SYS_MALLOC_START, size);
+		mem_malloc_init((ulong)map_sysmem(SPL_SYS_MALLOC_START, size),
+				size);
 		gd->flags |= GD_FLG_FULL_MALLOC_INIT;
+		printf("full malloc()\n");
 	}
 	if (!(gd->flags & GD_FLG_SPL_INIT)) {
 		if (spl_init())
@@ -829,18 +844,6 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	}
 
 	spl_perform_fixups(&spl_image);
-	if (CONFIG_IS_ENABLED(HANDOFF)) {
-		ret = write_spl_handoff();
-		if (ret)
-			printf(SPL_TPL_PROMPT
-			       "SPL hand-off write failed (err=%d)\n", ret);
-	}
-	if (CONFIG_IS_ENABLED(BLOBLIST)) {
-		ret = bloblist_finish();
-		if (ret)
-			printf("Warning: Failed to finish bloblist (ret=%d)\n",
-			       ret);
-	}
 
 	os = spl_image.os;
 	if (os == IH_OS_U_BOOT) {
@@ -891,6 +894,26 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 				printf("Cannot remove video device '%s' (err=%d)\n",
 				       dev->name, rc);
 		}
+	}
+	if (CONFIG_IS_ENABLED(HANDOFF)) {
+		ret = write_spl_handoff();
+		if (ret)
+			printf(SPL_TPL_PROMPT
+			       "SPL hand-off write failed (err=%d)\n", ret);
+	}
+	if (CONFIG_IS_ENABLED(UPL)) {
+		ret = spl_write_upl_handoff(&spl_image);
+		if (ret) {
+			printf(SPL_TPL_PROMPT
+			       "UPL hand-off write failed (err=%d)\n", ret);
+			hang();
+		}
+	}
+	if (CONFIG_IS_ENABLED(BLOBLIST)) {
+		ret = bloblist_finish();
+		if (ret)
+			printf("Warning: Failed to finish bloblist (ret=%d)\n",
+			       ret);
 	}
 
 	spl_board_prepare_for_boot();

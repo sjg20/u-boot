@@ -214,22 +214,6 @@ static int initr_malloc(void)
 	return 0;
 }
 
-static int initr_of_live(void)
-{
-	if (CONFIG_IS_ENABLED(OF_LIVE)) {
-		int ret;
-
-		bootstage_start(BOOTSTAGE_ID_ACCUM_OF_LIVE, "of_live");
-		ret = of_live_build(gd->fdt_blob,
-				    (struct device_node **)gd_of_root_ptr());
-		bootstage_accum(BOOTSTAGE_ID_ACCUM_OF_LIVE);
-		if (ret)
-			return ret;
-	}
-
-	return 0;
-}
-
 #ifdef CONFIG_DM
 static int initr_dm(void)
 {
