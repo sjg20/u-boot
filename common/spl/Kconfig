@@ -1067,6 +1067,7 @@ config SPL_SYS_ARGS_ADDR
 	hex "Address in memory to load 'args' file for Falcon Mode to"
 	depends on SPL_OS_BOOT
 	default 0x88000000 if ARCH_OMAP2PLUS
+	default 0
 	help
 	  Address in memory where the 'args' file, typically a device tree
 	  will be loaded in to memory.

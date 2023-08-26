@@ -814,9 +814,11 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	}
 
 	memset(&spl_image, '\0', sizeof(spl_image));
-#ifdef CONFIG_SPL_SYS_ARGS_ADDR
-	spl_image.arg = (void *)CONFIG_SPL_SYS_ARGS_ADDR;
-#endif
+	if (IS_ENABLED(CONFIG_SPL_SYS_ARGS_ADDR)) {
+		spl_image.arg =
+			map_sysmem(IF_ENABLED_INT(CONFIG_SPL_OS_BOOT,
+						  CONFIG_SPL_SYS_ARGS_ADDR), 0);
+	}
 	spl_image.boot_device = BOOT_DEVICE_NONE;
 	board_boot_order(spl_boot_list);
 
@@ -873,8 +875,16 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 #if CONFIG_IS_ENABLED(OS_BOOT)
 	case IH_OS_LINUX:
 		debug("Jumping to Linux\n");
+		if (IS_ENABLED(CONFIG_SPL_SYS_ARGS_ADDR)) {
+			ulong addr;
+
+			addr = IF_ENABLED_INT(CONFIG_SPL_OS_BOOT,
+					      CONFIG_SPL_SYS_ARGS_ADDR);
+			spl_fixup_fdt(map_sysmem(addr, 0));
+		}
+	}
+
 #if defined(CONFIG_SPL_SYS_ARGS_ADDR)
-		spl_fixup_fdt((void *)CONFIG_SPL_SYS_ARGS_ADDR);
 #endif
 		spl_board_prepare_for_linux();
 		jump_to_image_linux(&spl_image);
