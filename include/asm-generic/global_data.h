@@ -573,6 +573,13 @@ static_assert(sizeof(struct global_data) == GD_SIZE);
 #define gd_malloc_start()	0
 #define gd_set_malloc_start(val)
 #endif
+
+#if CONFIG_VAL(SYS_MALLOC_F_LEN)
+#define gd_malloc_ptr()		gd->malloc_ptr
+#else
+#define gd_malloc_ptr()		gd->malloc_ptr
+#endif
+
 /**
  * enum gd_flags - global data flags
  *
