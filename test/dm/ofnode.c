@@ -1430,3 +1430,20 @@ static int dm_test_oftree_to_fdt(struct unit_test_state *uts)
 	return 0;
 }
 DM_TEST(dm_test_oftree_to_fdt, UT_TESTF_SCAN_FDT);
+
+/* test ofnode_read_bool() and ofnode_write_bool() */
+static int dm_test_bool(struct unit_test_state *uts)
+{
+	ofnode node;
+
+	node = ofnode_path("/a-test");
+	ut_assert(ofnode_read_bool(node, "bool-value"));
+	ut_asserteq(false, ofnode_read_bool(node, "missing-bool-value"));
+
+	ut_assertok(ofnode_write_bool(node, "new-bool-value", true));
+	ut_asserteq(true, ofnode_read_bool(node, "new-bool-value"));
+	ut_assert(ofnode_read_bool(node, "bool-value"));
+
+	return 0;
+}
+DM_TEST(dm_test_bool, UT_TESTF_SCAN_FDT);

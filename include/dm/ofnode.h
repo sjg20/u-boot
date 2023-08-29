@@ -1442,6 +1442,27 @@ int ofnode_write_string(ofnode node, const char *propname, const char *value);
 int ofnode_write_u32(ofnode node, const char *propname, u32 value);
 
 /**
+ * ofnode_write_bool() - Set a boolean property of an ofnode
+ *
+ * This either adds or deleted a property with a zero-length value
+ *
+ * @node:	The node for whose string property should be set
+ * @propname:	The name of the string property to set
+ * @value:	The new value of the boolean property
+ * Return: 0 if successful, -ve on error
+ */
+int ofnode_write_bool(ofnode node, const char *propname, bool value);
+
+/**
+ * ofnode_delete_prop() - Delete a property
+ *
+ * @node:	Node containing the property to delete
+ * @propname:	Name of property to delete
+ * Return: 0 if successful, -ve on error
+ */
+int ofnode_delete_prop(ofnode node, const char *propname);
+
+/**
  * ofnode_set_enabled() - Enable or disable a device tree node given by its
  *			  ofnode
  *
