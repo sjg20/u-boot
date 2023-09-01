@@ -23,9 +23,27 @@
  */
 struct alist {
 	void **ptrs;
-	uint size;
-	uint alloc;
+	u16 size;
+	u16 alloc;
 };
+
+/**
+ * alist_add() - Add a new pointer the list
+ *
+ * @lst: List to update
+ * @ptr: Pointer to add
+ * Return: true if OK, false if out of memory
+ */
+bool alist_add(struct alist *lst, void *ptr);
+
+/**
+ * alist_set() - Set the value of a pointer
+ *
+ * @lst: alist to change
+ * @index: Index to udpate
+ * @ptr: New value to place at position @index
+ */
+bool alist_set(struct alist *lst, uint index, void *ptr);
 
 /**
  * alist_init() - Set up a new pointer list

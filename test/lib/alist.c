@@ -10,6 +10,11 @@
 #include <test/test.h>
 #include <test/ut.h>
 
+#define PTR0	(void *)0
+#define PTR1	(void *)1
+#define PTR2	(void *)2
+#define PTR3	(void *)3
+
 /* Test alist_init() */
 static int lib_test_alist_init(struct unit_test_state *uts)
 {
@@ -55,3 +60,85 @@ static int lib_test_alist_init(struct unit_test_state *uts)
 	return 0;
 }
 LIB_TEST(lib_test_alist_init, 0);
+
+/* Test alist_add() */
+static int lib_test_alist_add(struct unit_test_state *uts)
+{
+	struct alist lst;
+	ulong start;
+
+	start = ut_check_free();
+	ut_assert(alist_init(&lst, 0));
+	ut_assert(alist_add(&lst, PTR0));
+	ut_assert(alist_add(&lst, PTR1));
+	ut_assert(alist_add(&lst, PTR2));
+	ut_assert(alist_add(&lst, PTR3));
+	ut_assertnonnull(lst.ptrs);
+	ut_asserteq(4, lst.size);
+	ut_asserteq(4, lst.alloc);
+
+	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
+	ut_asserteq_ptr(PTR1, lst.ptrs[1]);
+	ut_asserteq_ptr(PTR2, lst.ptrs[2]);
+	ut_asserteq_ptr(PTR3, lst.ptrs[3]);
+
+	/* add another and check that things look right */
+	ut_assert(alist_add(&lst, PTR0));
+	ut_asserteq(5, lst.size);
+	ut_asserteq(8, lst.alloc);
+
+	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
+	ut_asserteq_ptr(PTR1, lst.ptrs[1]);
+	ut_asserteq_ptr(PTR2, lst.ptrs[2]);
+	ut_asserteq_ptr(PTR3, lst.ptrs[3]);
+
+	ut_asserteq_ptr(PTR0, lst.ptrs[4]);
+	ut_assertnull(lst.ptrs[5]);
+	ut_assertnull(lst.ptrs[6]);
+	ut_assertnull(lst.ptrs[7]);
+
+	/* add some more, checking handling of malloc() failure */
+	malloc_enable_testing(0);
+	ut_assert(alist_add(&lst, PTR1));
+	ut_assert(alist_add(&lst, PTR2));
+	ut_assert(alist_add(&lst, PTR3));
+	ut_asserteq(false, alist_add(&lst, PTR0));
+	malloc_disable_testing();
+
+	/* make sure nothing changed */
+	ut_asserteq(8, lst.size);
+	ut_asserteq(8, lst.alloc);
+	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
+	ut_asserteq_ptr(PTR1, lst.ptrs[1]);
+	ut_asserteq_ptr(PTR2, lst.ptrs[2]);
+	ut_asserteq_ptr(PTR3, lst.ptrs[3]);
+	ut_asserteq_ptr(PTR0, lst.ptrs[4]);
+	ut_asserteq_ptr(PTR1, lst.ptrs[5]);
+	ut_asserteq_ptr(PTR2, lst.ptrs[6]);
+	ut_asserteq_ptr(PTR3, lst.ptrs[7]);
+
+	alist_uninit(&lst);
+
+	/* Check for memory leaks */
+	ut_assertok(ut_check_delta(start));
+
+	return 0;
+}
+LIB_TEST(lib_test_alist_add, 0);
+
+/* Test alist_set() */
+static int lib_test_alist_set(struct unit_test_state *uts)
+{
+	struct alist lst;
+	ulong start;
+
+	start = ut_check_free();
+
+// 	ut_assertok(
+// 	ut_asserteq_ptr(PTR1, lst.ptrs[1]);
+
+	/* Check for memory leaks */
+	ut_assertok(ut_check_delta(start));
+
+	return 0;
+}
