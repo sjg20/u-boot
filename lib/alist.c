@@ -115,3 +115,16 @@ bool alist_set(struct alist *lst, uint index, void *ptr)
 
 	return true;
 }
+
+bool alist_valid(struct alist *lst, uint index)
+{
+	return index < lst->size;
+}
+
+void *alist_get(struct alist *lst, uint index)
+{
+	if (index >= lst->size)
+		return NULL;
+
+	return lst->ptrs[index];
+}

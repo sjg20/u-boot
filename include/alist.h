@@ -31,7 +31,7 @@ struct alist {
 /**
  * alist_add() - Add a new pointer the list
  *
- * @lst: List to update
+ * @lst: alist to update
  * @ptr: Pointer to add
  * Return: true if OK, false if out of memory
  */
@@ -47,9 +47,29 @@ bool alist_add(struct alist *lst, void *ptr);
 bool alist_set(struct alist *lst, uint index, void *ptr);
 
 /**
+ * alist_valid() - Check if an index is within the list range
+ *
+ * Checks if index is within the current alist size
+ *
+ * @lst: alist to check
+ * @index: Index to check
+ * Returns: true if value, else false
+ */
+bool alist_valid(struct alist *lst, uint index);
+
+/**
+ * alist_get() - Get the value of a pointer
+ *
+ * @lst: alist to check
+ * @index: Index to read from
+ * Returns: pointer, if present, else NULL
+ */
+void *alist_get(struct alist *lst, uint index);
+
+/**
  * alist_init() - Set up a new pointer list
  *
- * @lst: List to set up
+ * @lst: alist to set up
  * @alloc_size: Number of items to allow to start
  * Return: true if OK, false if out of memory
  */

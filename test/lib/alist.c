@@ -173,3 +173,42 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 	return 0;
 }
 LIB_TEST(lib_test_alist_set, 0);
+
+/* Test alist_get() */
+static int lib_test_alist_get(struct unit_test_state *uts)
+{
+	struct alist lst;
+
+	ut_assert(alist_init(&lst, 3));
+	ut_asserteq(0, lst.size);
+	ut_asserteq(3, lst.alloc);
+
+	ut_assert(alist_set(&lst, 1, PTR1));
+	ut_asserteq_ptr(PTR1, alist_get(&lst, 1));
+	ut_assertnull(alist_get(&lst, 3));
+
+	return 0;
+}
+LIB_TEST(lib_test_alist_get, 0);
+
+/* Test alist_valid() */
+static int lib_test_alist_valid(struct unit_test_state *uts)
+{
+	struct alist lst;
+
+	ut_assert(alist_init(&lst, 3));
+
+	ut_assert(!alist_valid(&lst, 0));
+	ut_assert(!alist_valid(&lst, 1));
+	ut_assert(!alist_valid(&lst, 2));
+	ut_assert(!alist_valid(&lst, 3));
+
+	ut_assert(alist_set(&lst, 1, PTR1));
+	ut_assert(alist_valid(&lst, 0));
+	ut_assert(alist_valid(&lst, 1));
+	ut_assert(!alist_valid(&lst, 2));
+	ut_assert(!alist_valid(&lst, 3));
+
+	return 0;
+}
+LIB_TEST(lib_test_alist_valid, 0);
