@@ -13,17 +13,20 @@
 #include <linux/types.h>
 
 /**
- * struct alist - point list that can be allocated and freed
+ * struct alist - pointer list that can be allocated and freed
  *
- * This is useful for a list of pointers which may need to change in size.
+ * Holds a list of objects, each of the same size. The object is typically a
+ * C struct. The array is represented by and can change in size.
  *
  * @ptrs: Array of pointers or NULL if not allocated. Array values default to
  * NULL if not assigned
+ * @struct_size: Size of each element in bytes
  * @len: Length of array
  * @alloc: allocated length of array, to which @len can grow
  */
 struct alist {
 	void **ptrs;
+	u32 struct_size;
 	u16 count;
 	u16 alloc;
 };
@@ -87,7 +90,10 @@ static inline void *alist_getd(struct alist *lst, uint index)
  * @alloc_size: Number of items to allow to start
  * Return: true if OK, false if out of memory
  */
-bool alist_init(struct alist *lst, uint alloc_size);
+bool alist_init(struct alist *lst, uint struct_size, uint alloc_size);
+
+#define alist_init_struct(_lst, _struct)	\
+	alist_init(_lst, sizeof(_struct), 0)
 
 /**
  * alist_uninit() - Free any memory used by an alist

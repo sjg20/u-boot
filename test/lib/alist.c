@@ -15,6 +15,15 @@
 #define PTR2	(void *)2
 #define PTR3	(void *)3
 
+struct test_struct {
+	uint test_val;
+	uint other_val;
+};
+
+enum {
+	STRUCT_SIZE	= 34,	/* can be any value */
+};
+
 /* Test alist_init() */
 static int lib_test_alist_init(struct unit_test_state *uts)
 {
@@ -25,7 +34,7 @@ static int lib_test_alist_init(struct unit_test_state *uts)
 
 	/* with a size of 0, the fields should be inited, with no memory used */
 	memset(&lst, '\xff', sizeof(lst));
-	ut_assert(alist_init(&lst, 0));
+	ut_assert(alist_init_struct(&lst, struct test_struct));
 	ut_asserteq_ptr(NULL, lst.ptrs);
 	ut_asserteq(0, lst.count);
 	ut_asserteq(0, lst.alloc);
@@ -36,13 +45,14 @@ static int lib_test_alist_init(struct unit_test_state *uts)
 	ut_asserteq(0, lst.alloc);
 
 	/* use an impossible size */
-	ut_asserteq(false, alist_init(&lst, CONFIG_SYS_MALLOC_LEN));
+	ut_asserteq(false, alist_init(&lst, STRUCT_SIZE,
+				      CONFIG_SYS_MALLOC_LEN));
 	ut_assertnull(lst.ptrs);
 	ut_asserteq(0, lst.count);
 	ut_asserteq(0, lst.alloc);
 
 	/* use a small size */
-	ut_assert(alist_init(&lst, 4));
+	ut_assert(alist_init(&lst, STRUCT_SIZE, 4));
 	ut_assertnonnull(lst.ptrs);
 	ut_asserteq(0, lst.count);
 	ut_asserteq(4, lst.alloc);
@@ -68,7 +78,7 @@ static int lib_test_alist_add(struct unit_test_state *uts)
 	ulong start;
 
 	start = ut_check_free();
-	ut_assert(alist_init(&lst, 0));
+	ut_assert(alist_init(&lst, STRUCT_SIZE, 0));
 	ut_assert(alist_add(&lst, PTR0));
 	ut_assert(alist_add(&lst, PTR1));
 	ut_assert(alist_add(&lst, PTR2));
@@ -135,7 +145,7 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 
 	start = ut_check_free();
 
-	ut_assert(alist_init(&lst, 0));
+	ut_assert(alist_init(&lst, STRUCT_SIZE, 0));
 	ut_assert(alist_set(&lst, 2, PTR2));
 	ut_asserteq(3, lst.count);
 	ut_asserteq(4, lst.alloc);
@@ -179,7 +189,7 @@ static int lib_test_alist_get(struct unit_test_state *uts)
 {
 	struct alist lst;
 
-	ut_assert(alist_init(&lst, 3));
+	ut_assert(alist_init(&lst, STRUCT_SIZE, 3));
 	ut_asserteq(0, lst.count);
 	ut_asserteq(3, lst.alloc);
 
@@ -197,7 +207,7 @@ static int lib_test_alist_valid(struct unit_test_state *uts)
 {
 	struct alist lst;
 
-	ut_assert(alist_init(&lst, 3));
+	ut_assert(alist_init(&lst, STRUCT_SIZE, 3));
 
 	ut_assert(!alist_valid(&lst, 0));
 	ut_assert(!alist_valid(&lst, 1));

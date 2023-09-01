@@ -14,13 +14,14 @@ enum {
 	ALIST_INITIAL_SIZE	= 4,	/* default size of unsized list */
 };
 
-bool alist_init(struct alist *lst, uint start_size)
+bool alist_init(struct alist *lst, uint struct_size, uint start_size)
 {
 	/* Avoid realloc for the initial size to help malloc_simple */
 	if (start_size) {
 		lst->ptrs = calloc(sizeof(void *), start_size);
 		if (!lst->ptrs)
 			return false;
+		lst->struct_size = struct_size;
 		lst->alloc = start_size;
 		lst->count = 0;
 	} else {
