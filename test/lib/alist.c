@@ -131,6 +131,7 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 {
 	struct alist lst;
 	ulong start;
+	int i;
 
 	start = ut_check_free();
 
@@ -138,10 +139,32 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 	ut_assert(alist_set(&lst, 2, PTR2));
 	ut_asserteq(3, lst.size);
 	ut_asserteq(4, lst.alloc);
+
+	/* all the pointers should be NULL except for the one we set */
 	ut_assertnull(lst.ptrs[0]);
 	ut_assertnull(lst.ptrs[1]);
 	ut_asserteq_ptr(PTR2, lst.ptrs[2]);
 	ut_assertnull(lst.ptrs[3]);
+
+	ut_assert(alist_set(&lst, 0, PTR0));
+	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
+	ut_assertnull(lst.ptrs[1]);
+	ut_asserteq_ptr(PTR2, lst.ptrs[2]);
+	ut_assertnull(lst.ptrs[3]);
+
+	/* set a pointer elsewhere */
+	ut_assert(alist_set(&lst, 59, PTR0));
+	ut_asserteq(60, lst.size);
+	ut_asserteq(64, lst.alloc);
+	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
+	ut_assertnull(lst.ptrs[1]);
+	ut_asserteq_ptr(PTR2, lst.ptrs[2]);
+	ut_asserteq_ptr(PTR0, lst.ptrs[59]);
+	for (i = 3; i < 59; i++)
+		ut_assertnull(lst.ptrs[i]);
+	for (i = 60; i < 64; i++)
+		ut_assertnull(lst.ptrs[i]);
+
 	alist_uninit(&lst);
 
 	/* Check for memory leaks */
