@@ -93,7 +93,7 @@ static bool alist_expand_min(struct alist *lst, uint min_alloc)
 	return alist_expand_to(lst, new_alloc);
 }
 
-bool alist_add(struct alist *lst, void *ptr)
+bool alist_addraw(struct alist *lst, void *ptr)
 {
 	if (lst->count == lst->alloc && !alist_expand_min(lst, lst->count + 1))
 		return false;
@@ -103,7 +103,7 @@ bool alist_add(struct alist *lst, void *ptr)
 	return true;
 }
 
-bool alist_set(struct alist *lst, uint index, void *ptr)
+bool alist_setraw(struct alist *lst, uint index, void *ptr)
 {
 	uint minsize = index + 1;
 

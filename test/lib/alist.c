@@ -71,18 +71,18 @@ static int lib_test_alist_init(struct unit_test_state *uts)
 }
 LIB_TEST(lib_test_alist_init, 0);
 
-/* Test alist_add() */
-static int lib_test_alist_add(struct unit_test_state *uts)
+/* Test alist_addraw() */
+static int lib_test_alist_addraw(struct unit_test_state *uts)
 {
 	struct alist lst;
 	ulong start;
 
 	start = ut_check_free();
 	ut_assert(alist_init(&lst, STRUCT_SIZE, 0));
-	ut_assert(alist_add(&lst, PTR0));
-	ut_assert(alist_add(&lst, PTR1));
-	ut_assert(alist_add(&lst, PTR2));
-	ut_assert(alist_add(&lst, PTR3));
+	ut_assert(alist_addraw(&lst, PTR0));
+	ut_assert(alist_addraw(&lst, PTR1));
+	ut_assert(alist_addraw(&lst, PTR2));
+	ut_assert(alist_addraw(&lst, PTR3));
 	ut_assertnonnull(lst.ptrs);
 	ut_asserteq(4, lst.count);
 	ut_asserteq(4, lst.alloc);
@@ -93,7 +93,7 @@ static int lib_test_alist_add(struct unit_test_state *uts)
 	ut_asserteq_ptr(PTR3, lst.ptrs[3]);
 
 	/* add another and check that things look right */
-	ut_assert(alist_add(&lst, PTR0));
+	ut_assert(alist_addraw(&lst, PTR0));
 	ut_asserteq(5, lst.count);
 	ut_asserteq(8, lst.alloc);
 
@@ -109,10 +109,10 @@ static int lib_test_alist_add(struct unit_test_state *uts)
 
 	/* add some more, checking handling of malloc() failure */
 	malloc_enable_testing(0);
-	ut_assert(alist_add(&lst, PTR1));
-	ut_assert(alist_add(&lst, PTR2));
-	ut_assert(alist_add(&lst, PTR3));
-	ut_asserteq(false, alist_add(&lst, PTR0));
+	ut_assert(alist_addraw(&lst, PTR1));
+	ut_assert(alist_addraw(&lst, PTR2));
+	ut_assert(alist_addraw(&lst, PTR3));
+	ut_asserteq(false, alist_addraw(&lst, PTR0));
 	malloc_disable_testing();
 
 	/* make sure nothing changed */
@@ -134,10 +134,10 @@ static int lib_test_alist_add(struct unit_test_state *uts)
 
 	return 0;
 }
-LIB_TEST(lib_test_alist_add, 0);
+LIB_TEST(lib_test_alist_addraw, 0);
 
-/* Test alist_set() */
-static int lib_test_alist_set(struct unit_test_state *uts)
+/* Test alist_setraw() */
+static int lib_test_alist_setraw(struct unit_test_state *uts)
 {
 	struct alist lst;
 	ulong start;
@@ -146,7 +146,7 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 	start = ut_check_free();
 
 	ut_assert(alist_init(&lst, STRUCT_SIZE, 0));
-	ut_assert(alist_set(&lst, 2, PTR2));
+	ut_assert(alist_setraw(&lst, 2, PTR2));
 	ut_asserteq(3, lst.count);
 	ut_asserteq(4, lst.alloc);
 
@@ -156,14 +156,14 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 	ut_asserteq_ptr(PTR2, lst.ptrs[2]);
 	ut_assertnull(lst.ptrs[3]);
 
-	ut_assert(alist_set(&lst, 0, PTR0));
+	ut_assert(alist_setraw(&lst, 0, PTR0));
 	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
 	ut_assertnull(lst.ptrs[1]);
 	ut_asserteq_ptr(PTR2, lst.ptrs[2]);
 	ut_assertnull(lst.ptrs[3]);
 
 	/* set a pointer elsewhere */
-	ut_assert(alist_set(&lst, 59, PTR0));
+	ut_assert(alist_setraw(&lst, 59, PTR0));
 	ut_asserteq(60, lst.count);
 	ut_asserteq(64, lst.alloc);
 	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
@@ -182,7 +182,7 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 
 	return 0;
 }
-LIB_TEST(lib_test_alist_set, 0);
+LIB_TEST(lib_test_alist_setraw, 0);
 
 /* Test alist_get() and alist_getd() */
 static int lib_test_alist_get(struct unit_test_state *uts)
@@ -193,7 +193,7 @@ static int lib_test_alist_get(struct unit_test_state *uts)
 	ut_asserteq(0, lst.count);
 	ut_asserteq(3, lst.alloc);
 
-	ut_assert(alist_set(&lst, 1, PTR1));
+	ut_assert(alist_setraw(&lst, 1, PTR1));
 	ut_asserteq_ptr(PTR1, alist_get(&lst, 1));
 	ut_asserteq_ptr(PTR1, alist_getd(&lst, 1));
 	ut_assertnull(alist_get(&lst, 3));
@@ -214,7 +214,7 @@ static int lib_test_alist_valid(struct unit_test_state *uts)
 	ut_assert(!alist_valid(&lst, 2));
 	ut_assert(!alist_valid(&lst, 3));
 
-	ut_assert(alist_set(&lst, 1, PTR1));
+	ut_assert(alist_setraw(&lst, 1, PTR1));
 	ut_assert(alist_valid(&lst, 0));
 	ut_assert(alist_valid(&lst, 1));
 	ut_assert(!alist_valid(&lst, 2));
