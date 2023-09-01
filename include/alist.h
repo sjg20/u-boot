@@ -67,6 +67,20 @@ bool alist_valid(struct alist *lst, uint index);
 void *alist_get(struct alist *lst, uint index);
 
 /**
+ * alist_getd() - Get the value of a pointer directly, with no checking
+ *
+ * This must only be called on index for which alist_valid() returns true
+ *
+ * @lst: alist to check
+ * @index: Index to read from
+ * Returns: pointer value (may be NULL)
+ */
+static inline void *alist_getd(struct alist *lst, uint index)
+{
+	return lst->ptrs[index];
+}
+
+/**
  * alist_init() - Set up a new pointer list
  *
  * @lst: alist to set up

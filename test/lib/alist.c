@@ -174,7 +174,7 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 }
 LIB_TEST(lib_test_alist_set, 0);
 
-/* Test alist_get() */
+/* Test alist_get() and alist_getd() */
 static int lib_test_alist_get(struct unit_test_state *uts)
 {
 	struct alist lst;
@@ -185,6 +185,7 @@ static int lib_test_alist_get(struct unit_test_state *uts)
 
 	ut_assert(alist_set(&lst, 1, PTR1));
 	ut_asserteq_ptr(PTR1, alist_get(&lst, 1));
+	ut_asserteq_ptr(PTR1, alist_getd(&lst, 1));
 	ut_assertnull(alist_get(&lst, 3));
 
 	return 0;
