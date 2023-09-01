@@ -122,10 +122,28 @@ bool alist_valid(struct alist *lst, uint index)
 	return index < lst->count;
 }
 
-void *alist_get(struct alist *lst, uint index)
+const void *alist_get(struct alist *lst, uint index)
 {
 	if (index >= lst->count)
 		return NULL;
 
 	return lst->ptrs[index];
+}
+
+void *alist_addr(struct alist *lst, uint index)
+{
+	void *ptr;
+
+	if (index > lst->alloc && !alist_expand_min(lst, index + 1))
+		return NULL;
+
+	ptr = lst->ptrs[index];
+	if (!ptr) {
+		ptr = calloc(1, lst->struct_size);
+		if (!ptr)
+			return NULL;
+		lst->ptrs[index] = ptr;
+	}
+
+	return ptr;
 }

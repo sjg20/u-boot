@@ -67,7 +67,20 @@ bool alist_valid(struct alist *lst, uint index);
  * @index: Index to read from
  * Returns: pointer, if present, else NULL
  */
-void *alist_get(struct alist *lst, uint index);
+const void *alist_get(struct alist *lst, uint index);
+
+/**
+ * alist_addr() - Address a struct
+ *
+ * This provides read/write access to an array element. If it does not exist,
+ * it is allocated, reading for the caller to store the struct into
+ *
+ * Allocates a struct at the given index if needed
+ * @lst: alist to check
+ * @index: Index to address
+ * Returns: pointer where struct can be read/written, or NULL if out of memory
+ */
+void *alist_addr(struct alist *lst, uint index);
 
 /**
  * alist_getd() - Get the value of a pointer directly, with no checking
@@ -78,7 +91,7 @@ void *alist_get(struct alist *lst, uint index);
  * @index: Index to read from
  * Returns: pointer value (may be NULL)
  */
-static inline void *alist_getd(struct alist *lst, uint index)
+static inline const void *alist_getd(struct alist *lst, uint index)
 {
 	return lst->ptrs[index];
 }
