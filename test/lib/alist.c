@@ -10,7 +10,7 @@
 #include <test/test.h>
 #include <test/ut.h>
 
-#define PTR0	(void *)0
+#define PTR0	(void *)10
 #define PTR1	(void *)1
 #define PTR2	(void *)2
 #define PTR3	(void *)3
@@ -134,8 +134,15 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 
 	start = ut_check_free();
 
-	ut_assert(alist_set(&lst, 3, PTR3));
-// 	ut_asserteq_ptr(PTR1, lst.ptrs[1]);
+	ut_assert(alist_init(&lst, 0));
+	ut_assert(alist_set(&lst, 2, PTR2));
+	ut_asserteq(3, lst.size);
+	ut_asserteq(4, lst.alloc);
+	ut_assertnull(lst.ptrs[0]);
+	ut_assertnull(lst.ptrs[1]);
+	ut_asserteq_ptr(PTR2, lst.ptrs[2]);
+	ut_assertnull(lst.ptrs[3]);
+	alist_uninit(&lst);
 
 	/* Check for memory leaks */
 	ut_assertok(ut_check_delta(start));

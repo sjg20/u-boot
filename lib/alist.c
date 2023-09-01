@@ -39,32 +39,62 @@ void alist_uninit(struct alist *lst)
 }
 
 /**
- * alist_expand() - Expand a list to at least the given size
+ * alist_expand_to() - Expand a list to the given size
  *
  * @lst: List to modify
- * @inc_by: Amount to expand by
+ * @inc_by: Amount to expand to
  * Return: true if OK, false if out of memory
  */
-bool alist_expand(struct alist *lst, uint inc_by)
+static bool alist_expand_to(struct alist *lst, uint new_alloc)
 {
-	uint new_alloc = lst->alloc + inc_by;
 	void *new_ptrs;
 
 	new_ptrs = realloc(lst->ptrs, sizeof(void *) * new_alloc);
 	if (!new_ptrs)
 		return false;
 	memset(new_ptrs + sizeof(void *) * lst->alloc, '\0',
-	       sizeof(void *) * inc_by);
+	       sizeof(void *) * (new_alloc - lst->alloc));
 	lst->alloc = new_alloc;
 	lst->ptrs = new_ptrs;
 
 	return true;
 }
 
+/**
+ * alist_expand_by() - Expand a list by the given amount
+ *
+ * @lst: alist to expand
+ * @inc_by: Amount to expand by
+ * Return: true if OK, false if out of memory
+ */
+bool alist_expand_by(struct alist *lst, uint inc_by)
+{
+	return alist_expand_to(lst, lst->alloc + inc_by);
+}
+
+/**
+ * alist_expand_min() - Expand to at least the provided size
+ *
+ * Expands to the lowest power of two which can incorporate the new size
+ *
+ * @lst: alist to expand
+ * @min_alloc: Minimum new allocated size; if 0 then ALIST_INITIAL_SIZE is used
+ * Return: true if OK, false if out of memory
+ */
+static bool alist_expand_min(struct alist *lst, uint min_alloc)
+{
+	uint new_alloc;
+
+	for (new_alloc = lst->alloc ?: ALIST_INITIAL_SIZE;
+	     new_alloc < min_alloc;)
+		new_alloc *= 2;
+
+	return alist_expand_to(lst, new_alloc);
+}
+
 bool alist_add(struct alist *lst, void *ptr)
 {
-	if (lst->size == lst->alloc &&
-	    !alist_expand(lst, lst->alloc ?: ALIST_INITIAL_SIZE))
+	if (lst->size == lst->alloc && !alist_expand_min(lst, lst->size + 1))
 		return false;
 
 	lst->ptrs[lst->size++] = ptr;
@@ -76,7 +106,7 @@ bool alist_set(struct alist *lst, uint index, void *ptr)
 {
 	uint minsize = index + 1;
 
-	if (minsize > lst->alloc && !alist_expand(lst, minsize))
+	if (minsize > lst->alloc && !alist_expand_min(lst, minsize))
 		return false;
 
 	lst->ptrs[index] = ptr;
