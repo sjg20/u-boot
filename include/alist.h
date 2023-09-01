@@ -36,4 +36,13 @@ struct alist {
  */
 bool alist_init(struct alist *lst, uint alloc_size);
 
+/**
+ * alist_uninit() - Free any memory used by an alist
+ *
+ * The alist must be inited before this can be called.
+ *
+ * @alist: alist to uninit
+ */
+void alist_uninit(struct alist *alist);
+
 #endif /* __ALIST_H */
