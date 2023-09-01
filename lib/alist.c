@@ -22,7 +22,7 @@ bool alist_init(struct alist *lst, uint start_size)
 		if (!lst->ptrs)
 			return false;
 		lst->alloc = start_size;
-		lst->size = 0;
+		lst->count = 0;
 	} else {
 		memset(lst, '\0', sizeof(struct alist));
 	}
@@ -94,10 +94,10 @@ static bool alist_expand_min(struct alist *lst, uint min_alloc)
 
 bool alist_add(struct alist *lst, void *ptr)
 {
-	if (lst->size == lst->alloc && !alist_expand_min(lst, lst->size + 1))
+	if (lst->count == lst->alloc && !alist_expand_min(lst, lst->count + 1))
 		return false;
 
-	lst->ptrs[lst->size++] = ptr;
+	lst->ptrs[lst->count++] = ptr;
 
 	return true;
 }
@@ -110,20 +110,20 @@ bool alist_set(struct alist *lst, uint index, void *ptr)
 		return false;
 
 	lst->ptrs[index] = ptr;
-	if (minsize >= lst->size)
-		lst->size = minsize;
+	if (minsize >= lst->count)
+		lst->count = minsize;
 
 	return true;
 }
 
 bool alist_valid(struct alist *lst, uint index)
 {
-	return index < lst->size;
+	return index < lst->count;
 }
 
 void *alist_get(struct alist *lst, uint index)
 {
-	if (index >= lst->size)
+	if (index >= lst->count)
 		return NULL;
 
 	return lst->ptrs[index];

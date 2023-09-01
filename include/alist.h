@@ -24,7 +24,7 @@
  */
 struct alist {
 	void **ptrs;
-	u16 size;
+	u16 count;
 	u16 alloc;
 };
 
@@ -49,7 +49,7 @@ bool alist_set(struct alist *lst, uint index, void *ptr);
 /**
  * alist_valid() - Check if an index is within the list range
  *
- * Checks if index is within the current alist size
+ * Checks if index is within the current alist count
  *
  * @lst: alist to check
  * @index: Index to check

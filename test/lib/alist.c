@@ -27,30 +27,30 @@ static int lib_test_alist_init(struct unit_test_state *uts)
 	memset(&lst, '\xff', sizeof(lst));
 	ut_assert(alist_init(&lst, 0));
 	ut_asserteq_ptr(NULL, lst.ptrs);
-	ut_asserteq(0, lst.size);
+	ut_asserteq(0, lst.count);
 	ut_asserteq(0, lst.alloc);
 	ut_assertok(ut_check_delta(start));
 	alist_uninit(&lst);
 	ut_asserteq_ptr(NULL, lst.ptrs);
-	ut_asserteq(0, lst.size);
+	ut_asserteq(0, lst.count);
 	ut_asserteq(0, lst.alloc);
 
 	/* use an impossible size */
 	ut_asserteq(false, alist_init(&lst, CONFIG_SYS_MALLOC_LEN));
 	ut_assertnull(lst.ptrs);
-	ut_asserteq(0, lst.size);
+	ut_asserteq(0, lst.count);
 	ut_asserteq(0, lst.alloc);
 
 	/* use a small size */
 	ut_assert(alist_init(&lst, 4));
 	ut_assertnonnull(lst.ptrs);
-	ut_asserteq(0, lst.size);
+	ut_asserteq(0, lst.count);
 	ut_asserteq(4, lst.alloc);
 
 	/* free it */
 	alist_uninit(&lst);
 	ut_asserteq_ptr(NULL, lst.ptrs);
-	ut_asserteq(0, lst.size);
+	ut_asserteq(0, lst.count);
 	ut_asserteq(0, lst.alloc);
 	ut_assertok(ut_check_delta(start));
 
@@ -74,7 +74,7 @@ static int lib_test_alist_add(struct unit_test_state *uts)
 	ut_assert(alist_add(&lst, PTR2));
 	ut_assert(alist_add(&lst, PTR3));
 	ut_assertnonnull(lst.ptrs);
-	ut_asserteq(4, lst.size);
+	ut_asserteq(4, lst.count);
 	ut_asserteq(4, lst.alloc);
 
 	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
@@ -84,7 +84,7 @@ static int lib_test_alist_add(struct unit_test_state *uts)
 
 	/* add another and check that things look right */
 	ut_assert(alist_add(&lst, PTR0));
-	ut_asserteq(5, lst.size);
+	ut_asserteq(5, lst.count);
 	ut_asserteq(8, lst.alloc);
 
 	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
@@ -106,7 +106,7 @@ static int lib_test_alist_add(struct unit_test_state *uts)
 	malloc_disable_testing();
 
 	/* make sure nothing changed */
-	ut_asserteq(8, lst.size);
+	ut_asserteq(8, lst.count);
 	ut_asserteq(8, lst.alloc);
 	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
 	ut_asserteq_ptr(PTR1, lst.ptrs[1]);
@@ -137,7 +137,7 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 
 	ut_assert(alist_init(&lst, 0));
 	ut_assert(alist_set(&lst, 2, PTR2));
-	ut_asserteq(3, lst.size);
+	ut_asserteq(3, lst.count);
 	ut_asserteq(4, lst.alloc);
 
 	/* all the pointers should be NULL except for the one we set */
@@ -154,7 +154,7 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 
 	/* set a pointer elsewhere */
 	ut_assert(alist_set(&lst, 59, PTR0));
-	ut_asserteq(60, lst.size);
+	ut_asserteq(60, lst.count);
 	ut_asserteq(64, lst.alloc);
 	ut_asserteq_ptr(PTR0, lst.ptrs[0]);
 	ut_assertnull(lst.ptrs[1]);
@@ -180,7 +180,7 @@ static int lib_test_alist_get(struct unit_test_state *uts)
 	struct alist lst;
 
 	ut_assert(alist_init(&lst, 3));
-	ut_asserteq(0, lst.size);
+	ut_asserteq(0, lst.count);
 	ut_asserteq(3, lst.alloc);
 
 	ut_assert(alist_set(&lst, 1, PTR1));
