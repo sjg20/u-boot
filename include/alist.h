@@ -17,7 +17,8 @@
  *
  * This is useful for a list of pointers which may need to change in size.
  *
- * @ptrs: Array of pointers
+ * @ptrs: Array of pointers or NULL if not allocated. Array values default to
+ * NULL if not assigned
  * @len: Length of array
  * @alloc: allocated length of array, to which @len can grow
  */

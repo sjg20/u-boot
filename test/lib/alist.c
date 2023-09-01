@@ -134,7 +134,7 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 
 	start = ut_check_free();
 
-// 	ut_assertok(
+	ut_assert(alist_set(&lst, 3, PTR3));
 // 	ut_asserteq_ptr(PTR1, lst.ptrs[1]);
 
 	/* Check for memory leaks */
@@ -142,3 +142,4 @@ static int lib_test_alist_set(struct unit_test_state *uts)
 
 	return 0;
 }
+LIB_TEST(lib_test_alist_set, 0);

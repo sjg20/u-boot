@@ -38,21 +38,34 @@ void alist_uninit(struct alist *lst)
 	memset(lst, '\0', sizeof(struct alist));
 }
 
+/**
+ * alist_expand() - Expand a list to at least the given size
+ *
+ * @lst: List to modify
+ * @inc_by: Amount to expand by
+ * Return: true if OK, false if out of memory
+ */
+bool alist_expand(struct alist *lst, uint inc_by)
+{
+	uint new_alloc = lst->alloc + inc_by;
+	void *new_ptrs;
+
+	new_ptrs = realloc(lst->ptrs, sizeof(void *) * new_alloc);
+	if (!new_ptrs)
+		return false;
+	memset(new_ptrs + sizeof(void *) * lst->alloc, '\0',
+	       sizeof(void *) * inc_by);
+	lst->alloc = new_alloc;
+	lst->ptrs = new_ptrs;
+
+	return true;
+}
+
 bool alist_add(struct alist *lst, void *ptr)
 {
-	if (lst->size == lst->alloc) {
-		uint inc_by = lst->alloc ?: ALIST_INITIAL_SIZE;
-		uint new_alloc = lst->alloc + inc_by;
-		void *new_ptrs;
-
-		new_ptrs = realloc(lst->ptrs, sizeof(void *) * new_alloc);
-		if (!new_ptrs)
-			return false;
-		memset(new_ptrs + sizeof(void *) * lst->alloc, '\0',
-		       sizeof(void *) * inc_by);
-		lst->alloc = new_alloc;
-		lst->ptrs = new_ptrs;
-	}
+	if (lst->size == lst->alloc &&
+	    !alist_expand(lst, lst->alloc ?: ALIST_INITIAL_SIZE))
+		return false;
 
 	lst->ptrs[lst->size++] = ptr;
 
@@ -61,5 +74,14 @@ bool alist_add(struct alist *lst, void *ptr)
 
 bool alist_set(struct alist *lst, uint index, void *ptr)
 {
-	return false;
+	uint minsize = index + 1;
+
+	if (minsize > lst->alloc && !alist_expand(lst, minsize))
+		return false;
+
+	lst->ptrs[index] = ptr;
+	if (minsize >= lst->size)
+		lst->size = minsize;
+
+	return true;
 }
