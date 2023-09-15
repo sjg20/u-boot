@@ -243,6 +243,8 @@ static int menu_build(struct build_info *info, ofnode node, struct scene *scn,
 		return log_msg_ret("tit", ret);
 	title_id = ret;
 	ret = scene_menu_set_title(scn, menu_id, title_id);
+	if (ret)
+		return log_msg_ret("set", ret);
 
 	item_ids = ofnode_read_prop(node, "item-id", &size);
 	if (!item_ids)
@@ -281,6 +283,37 @@ static int menu_build(struct build_info *info, ofnode node, struct scene *scn,
 	return 0;
 }
 
+static int textline_build(struct build_info *info, ofnode node,
+			  struct scene *scn, uint id, struct scene_obj **objp)
+{
+	struct scene_obj_textline *ted;
+	const char *name;
+	uint ted_id, title_id;
+	int ret;
+
+	name = ofnode_get_name(node);
+
+	ret = scene_textline(scn, name, id, &ted);
+	if (ret < 0)
+		return log_msg_ret("ted", ret);
+	ted_id = ret;
+
+	ret = ofnode_read_u32(node, "max-len", &id);
+	if (ret)
+		return log_msg_ret("max", -ENOENT);
+
+	/* Set the title */
+	ret = add_txt_str(info, node, scn, "title", 0);
+	if (ret < 0)
+		return log_msg_ret("tit", ret);
+	title_id = ret;
+	ret = scene_textline_set_title(scn, ted_id, title_id);
+	if (ret)
+		return log_msg_ret("set", ret);
+
+	return 0;
+}
+
 /**
  * obj_build() - Build an expo object and add it to a scene
  *
@@ -310,7 +343,9 @@ static int obj_build(struct build_info *info, ofnode node, struct scene *scn)
 
 	if (!strcmp("menu", type))
 		ret = menu_build(info, node, scn, id, &obj);
-	 else
+	else if (!strcmp("textline", type))
+		ret = textline_build(info, node, scn, id, &obj);
+	else
 		ret = -EOPNOTSUPP;
 	if (ret)
 		return log_msg_ret("bld", ret);

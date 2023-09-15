@@ -141,12 +141,14 @@ struct scene {
  * @SCENEOBJT_IMAGE: Image data to render
  * @SCENEOBJT_TEXT: Text line to render
  * @SCENEOBJT_MENU: Menu containing items the user can select
+ * @SCENEOBJT_TEXTLINE: Line of text the user can edit
  */
 enum scene_obj_t {
 	SCENEOBJT_NONE		= 0,
 	SCENEOBJT_IMAGE,
 	SCENEOBJT_TEXT,
 	SCENEOBJT_MENU,
+	SCENEOBJT_TEXTLINE,
 };
 
 /**
@@ -294,6 +296,21 @@ struct scene_menitem {
 	uint preview_id;
 	uint flags;
 	struct list_head sibling;
+};
+
+/**
+ * struct scene_obj_textline - information about a textline in a scene
+ *
+ * A textline has a prompt and a line of editable text
+ *
+ * @obj: Basic object information
+ * @title_id: ID of the title text, or 0 if none
+ * @edit_id: ID of the editable text
+ */
+struct scene_obj_textline {
+	struct scene_obj obj;
+	uint title_id;
+	uint edit_id;
 };
 
 /**
@@ -529,6 +546,28 @@ int scene_txt_str(struct scene *scn, const char *name, uint id, uint str_id,
  */
 int scene_menu(struct scene *scn, const char *name, uint id,
 	       struct scene_obj_menu **menup);
+
+/**
+ *  scene_textline() - create a textline
+ *
+ * @scn: Scene to update
+ * @name: Name to use (this is allocated by this call)
+ * @id: ID to use for the new object (0 to allocate one)
+ * @tlinep: If non-NULL, returns the new object
+ * Returns: ID number for the object (typically @id), or -ve on error
+ */
+int scene_textline(struct scene *scn, const char *name, uint id,
+		   struct scene_obj_textline **tlinep);
+
+/**
+ * scene_textline_set_title() - Set the title of a textline
+ *
+ * @scn: Scene to update
+ * @id: ID of textline object to update
+ * @title_id: ID of text object to use as the title
+ * Returns: 0 if OK, -ENOENT if @id is invalid, -EINVAL if @title_id is invalid
+ */
+int scene_textline_set_title(struct scene *scn, uint id, uint title_id);
 
 /**
  * scene_txt_set_font() - Set the font for an object
