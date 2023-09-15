@@ -269,6 +269,7 @@ int scene_obj_get_hw(struct scene *scn, uint id, int *widthp)
 	switch (obj->type) {
 	case SCENEOBJT_NONE:
 	case SCENEOBJT_MENU:
+	case SCENEOBJT_TEXTLINE:
 		break;
 	case SCENEOBJT_IMAGE: {
 		struct scene_obj_img *img = (struct scene_obj_img *)obj;
@@ -412,6 +413,8 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 
 		break;
 	}
+	case SCENEOBJT_TEXTLINE:
+		break;
 	}
 
 	return 0;
@@ -423,13 +426,29 @@ int scene_arrange(struct scene *scn)
 	int ret;
 
 	list_for_each_entry(obj, &scn->obj_head, sibling) {
-		if (obj->type == SCENEOBJT_MENU) {
+		switch (obj->type) {
+		case SCENEOBJT_NONE:
+		case SCENEOBJT_IMAGE:
+		case SCENEOBJT_TEXT:
+			break;
+		case SCENEOBJT_MENU: {
 			struct scene_obj_menu *menu;
 
 			menu = (struct scene_obj_menu *)obj,
 			ret = scene_menu_arrange(scn, menu);
 			if (ret)
 				return log_msg_ret("arr", ret);
+			break;
+		}
+		case SCENEOBJT_TEXTLINE: {
+			struct scene_obj_textline *tline;
+
+			tline = (struct scene_obj_textline *)obj,
+			ret = scene_textline_arrange(scn, tline);
+			if (ret)
+				return log_msg_ret("arr", ret);
+			break;
+		}
 		}
 	}
 
@@ -616,6 +635,16 @@ int scene_calc_dims(struct scene *scn, bool do_menus)
 			}
 			break;
 		}
+		case SCENEOBJT_TEXTLINE: {
+			struct scene_obj_textline *tline;
+
+			tline = (struct scene_obj_textline *)obj;
+			ret = scene_textline_calc_dims(tline);
+			if (ret)
+				return log_msg_ret("men", ret);
+
+			break;
+		}
 		}
 	}
 
@@ -635,6 +664,7 @@ int scene_apply_theme(struct scene *scn, struct expo_theme *theme)
 		case SCENEOBJT_NONE:
 		case SCENEOBJT_IMAGE:
 		case SCENEOBJT_MENU:
+		case SCENEOBJT_TEXTLINE:
 			break;
 		case SCENEOBJT_TEXT:
 			scene_txt_set_font(scn, obj->id, NULL,
@@ -693,6 +723,32 @@ int scene_iter_objs(struct scene *scn, expo_scene_obj_iterator iter,
 		ret = iter(obj, priv);
 		if (ret)
 			return log_msg_ret("itr", ret);
+	}
+
+	return 0;
+}
+
+int scene_bbox_union(struct scene *scn, uint id, int inset,
+		     struct vidconsole_bbox *bbox)
+{
+	struct scene_obj *obj;
+
+	if (!id)
+		return 0;
+	obj = scene_obj_find(scn, id, SCENEOBJT_NONE);
+	if (!obj)
+		return log_msg_ret("obj", -ENOENT);
+	if (bbox->valid) {
+		bbox->x0 = min(bbox->x0, obj->dim.x - inset);
+		bbox->y0 = min(bbox->y0, obj->dim.y);
+		bbox->x1 = max(bbox->x1, obj->dim.x + obj->dim.w + inset);
+		bbox->y1 = max(bbox->y1, obj->dim.y + obj->dim.h);
+	} else {
+		bbox->x0 = obj->dim.x - inset;
+		bbox->y0 = obj->dim.y;
+		bbox->x1 = obj->dim.x + obj->dim.w + inset;
+		bbox->y1 = obj->dim.y + obj->dim.h;
+		bbox->valid = true;
 	}
 
 	return 0;

@@ -287,8 +287,8 @@ static int textline_build(struct build_info *info, ofnode node,
 			  struct scene *scn, uint id, struct scene_obj **objp)
 {
 	struct scene_obj_textline *ted;
+	uint ted_id, title_id, edit_id;
 	const char *name;
-	uint ted_id, title_id;
 	int ret;
 
 	name = ofnode_get_name(node);
@@ -308,6 +308,15 @@ static int textline_build(struct build_info *info, ofnode node,
 		return log_msg_ret("tit", ret);
 	title_id = ret;
 	ret = scene_textline_set_title(scn, ted_id, title_id);
+	if (ret)
+		return log_msg_ret("set", ret);
+
+	/* Setup the editor */
+	ret = add_txt_str(info, node, scn, "edit", 0);
+	if (ret < 0)
+		return log_msg_ret("tit", ret);
+	edit_id = ret;
+	ret = scene_textline_set_edit(scn, ted_id, edit_id);
 	if (ret)
 		return log_msg_ret("set", ret);
 
