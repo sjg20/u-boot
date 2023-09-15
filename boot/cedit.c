@@ -273,12 +273,26 @@ static int h_write_settings(struct scene_obj *obj, void *vpriv)
 	case SCENEOBJT_IMAGE:
 	case SCENEOBJT_TEXT:
 		break;
+	case SCENEOBJT_TEXTLINE:
+#if 0
+		const struct scene_obj_textline *tline;
+
+		txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_TEXT);
+		if (!txt)
+			return log_msg_ret("txt", -ENOENT);
+
+		str = expo_get_str(scn->expo, tline->str_id);
+		if (!str)
+			return log_msg_ret("str", -ENOENT);
+#endif
+		break;
 	case SCENEOBJT_MENU: {
 		const struct scene_obj_menu *menu;
 		const char *str;
 		char name[80];
 		int ret, i;
 
+		/* write the ID of the current item */
 		menu = (struct scene_obj_menu *)obj;
 		ret = -EAGAIN;
 		for (i = 0; ret && i < 2; i++) {
@@ -298,6 +312,7 @@ static int h_write_settings(struct scene_obj *obj, void *vpriv)
 		if (ret)
 			return log_msg_ret("mis", ret);
 
+		/* write the text of the current item */
 		snprintf(name, sizeof(name), "%s-str", obj->name);
 		ret = -EAGAIN;
 		for (i = 0; ret && i < 2; i++) {
@@ -373,6 +388,9 @@ static int h_read_settings(struct scene_obj *obj, void *vpriv)
 	case SCENEOBJT_NONE:
 	case SCENEOBJT_IMAGE:
 	case SCENEOBJT_TEXT:
+		break;
+	case SCENEOBJT_TEXTLINE:
+		// TODO
 		break;
 	case SCENEOBJT_MENU: {
 		struct scene_obj_menu *menu;

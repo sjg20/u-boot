@@ -21,5 +21,7 @@ enum {
 	ID_AC_ON,
 	ID_AC_MEMORY,
 
+	ID_MACHINE_NAME,
+
 	ID_DYNAMIC_START,
 };
