@@ -17,7 +17,8 @@ int scene_textline(struct scene *scn, const char *name, uint id, uint max_chars,
 		   struct scene_obj_textline **tlinep)
 {
 	struct scene_obj_textline *tline;
-	int ret;
+	int ret, i;
+	char *buf;
 
 	ret = scene_obj_add(scn, name, id, SCENEOBJT_TEXTLINE,
 			    sizeof(struct scene_obj_textline),
@@ -27,6 +28,11 @@ int scene_textline(struct scene *scn, const char *name, uint id, uint max_chars,
 	abuf_init(&tline->buf);
 	if (!abuf_realloc(&tline->buf, max_chars + 1))
 		return log_msg_ret("buf", -ENOMEM);
+	buf = abuf_data(&tline->buf);
+	for (i = 0; i < max_chars; i++) {
+		buf[i] = 'a' + i;
+	}
+	buf[i] = '\0';
 
 	if (tlinep)
 		*tlinep = tline;
@@ -119,6 +125,11 @@ int scene_textline_arrange(struct scene *scn, struct scene_obj_textline *tline)
 	if (tline->title_id) {
 		ret = scene_obj_set_pos(scn, tline->title_id, tline->obj.dim.x,
 					y);
+		if (ret < 0)
+			return log_msg_ret("tit", ret);
+
+		ret = scene_obj_set_pos(scn, tline->edit_id,
+					tline->obj.dim.x + 200, y);
 		if (ret < 0)
 			return log_msg_ret("tit", ret);
 

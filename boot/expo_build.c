@@ -291,13 +291,14 @@ static int textline_build(struct build_info *info, ofnode node,
 			  struct scene *scn, uint id, struct scene_obj **objp)
 {
 	struct scene_obj_textline *ted;
-	uint ted_id, title_id, edit_id;
+	uint ted_id, edit_id;
 	const char *name;
 	u32 max_chars;
 	int ret;
 
 	name = ofnode_get_name(node);
 
+	info->err_prop = "max-chars";
 	ret = ofnode_read_u32(node, "max-chars", &max_chars);
 	if (ret)
 		return log_msg_ret("max", -ENOENT);
@@ -311,25 +312,20 @@ static int textline_build(struct build_info *info, ofnode node,
 	ret = add_txt_str(info, node, scn, "title", 0);
 	if (ret < 0)
 		return log_msg_ret("tit", ret);
-	title_id = ret;
-	ret = scene_textline_set_title(scn, ted_id, title_id);
-	if (ret)
-		return log_msg_ret("set", ret);
+	ted->title_id = ret;
 
 	/* Setup the editor */
+	info->err_prop = "edit-id";
 	ret = ofnode_read_u32(node, "edit-id", &id);
 	if (ret)
 		return log_msg_ret("id", -ENOENT);
 	edit_id = ret;
 
-	ret = scene_txt_str(scn, "edit", edit_id, ted_id, abuf_data(&ted->buf),
+	ret = scene_txt_str(scn, "edit", edit_id, 0, abuf_data(&ted->buf),
 			    NULL);
 	if (ret < 0)
 		return log_msg_ret("add", ret);
-
-	ret = scene_textline_set_edit(scn, ted_id, edit_id);
-	if (ret)
-		return log_msg_ret("set", ret);
+	ted->edit_id = ret;
 
 	return 0;
 }

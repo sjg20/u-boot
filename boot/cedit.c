@@ -71,10 +71,22 @@ int cedit_arange(struct expo *exp, struct video_priv *vpriv, uint scene_id)
 
 	y = 100;
 	list_for_each_entry(obj, &scn->obj_head, sibling) {
-		if (obj->type == SCENEOBJT_MENU) {
+		switch (obj->type) {
+		case SCENEOBJT_NONE:
+		case SCENEOBJT_IMAGE:
+		case SCENEOBJT_TEXT:
+			break;
+		case SCENEOBJT_MENU:
 			scene_obj_set_pos(scn, obj->id, 50, y);
 			scene_menu_arrange(scn, (struct scene_obj_menu *)obj);
 			y += 50;
+			break;
+		case SCENEOBJT_TEXTLINE:
+			scene_obj_set_pos(scn, obj->id, 50, y);
+			scene_textline_arrange(scn,
+					       (struct scene_obj_textline*)obj);
+			y += 50;
+			break;
 		}
 	}
 
