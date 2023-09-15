@@ -7,6 +7,7 @@
 #ifndef __EXPO_H
 #define __EXPO_H
 
+#include <abuf.h>
 #include <dm/ofnode_decl.h>
 #include <linux/list.h>
 
@@ -306,11 +307,13 @@ struct scene_menitem {
  * @obj: Basic object information
  * @title_id: ID of the title text, or 0 if none
  * @edit_id: ID of the editable text
+ * @abuf: Text buffer
  */
 struct scene_obj_textline {
 	struct scene_obj obj;
 	uint title_id;
 	uint edit_id;
+	struct abuf buf;
 };
 
 /**
@@ -553,10 +556,11 @@ int scene_menu(struct scene *scn, const char *name, uint id,
  * @scn: Scene to update
  * @name: Name to use (this is allocated by this call)
  * @id: ID to use for the new object (0 to allocate one)
+ * @max_chars: Maximum length of the textline in characters
  * @tlinep: If non-NULL, returns the new object
  * Returns: ID number for the object (typically @id), or -ve on error
  */
-int scene_textline(struct scene *scn, const char *name, uint id,
+int scene_textline(struct scene *scn, const char *name, uint id, uint max_chars,
 		   struct scene_obj_textline **tlinep);
 
 /**

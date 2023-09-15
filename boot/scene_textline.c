@@ -13,7 +13,7 @@
 #include <video_console.h>
 #include "scene_internal.h"
 
-int scene_textline(struct scene *scn, const char *name, uint id,
+int scene_textline(struct scene *scn, const char *name, uint id, uint max_chars,
 		   struct scene_obj_textline **tlinep)
 {
 	struct scene_obj_textline *tline;
@@ -24,6 +24,9 @@ int scene_textline(struct scene *scn, const char *name, uint id,
 			    (struct scene_obj **)&tline);
 	if (ret < 0)
 		return log_msg_ret("obj", -ENOMEM);
+	abuf_init(&tline->buf);
+	if (!abuf_realloc(&tline->buf, max_chars + 1))
+		return log_msg_ret("buf", -ENOMEM);
 
 	if (tlinep)
 		*tlinep = tline;

@@ -23,11 +23,14 @@
  *	if there is nothing for this ID. Since ID 0 is never used, the first
  *	element of this array is always NULL
  * @str_count: Number of entries in @str_for_id
+ * @err_node: Node being processed (for error reporting)
+ * @err_prop: Property being processed (for error reporting)
  */
 struct build_info {
 	const char **str_for_id;
 	int str_count;
 	ofnode err_node;
+	const char *err_prop;
 };
 
 /**
@@ -47,6 +50,7 @@ int add_txt_str(struct build_info *info, ofnode node, struct scene *scn,
 	uint str_id;
 	int ret;
 
+	info->err_prop = find_name;
 	text = ofnode_read_string(node, find_name);
 	if (!text) {
 		char name[40];
@@ -289,18 +293,19 @@ static int textline_build(struct build_info *info, ofnode node,
 	struct scene_obj_textline *ted;
 	uint ted_id, title_id, edit_id;
 	const char *name;
+	u32 max_chars;
 	int ret;
 
 	name = ofnode_get_name(node);
 
-	ret = scene_textline(scn, name, id, &ted);
+	ret = ofnode_read_u32(node, "max-chars", &max_chars);
+	if (ret)
+		return log_msg_ret("max", -ENOENT);
+
+	ret = scene_textline(scn, name, id, max_chars, &ted);
 	if (ret < 0)
 		return log_msg_ret("ted", ret);
 	ted_id = ret;
-
-	ret = ofnode_read_u32(node, "max-len", &id);
-	if (ret)
-		return log_msg_ret("max", -ENOENT);
 
 	/* Set the title */
 	ret = add_txt_str(info, node, scn, "title", 0);
@@ -312,10 +317,16 @@ static int textline_build(struct build_info *info, ofnode node,
 		return log_msg_ret("set", ret);
 
 	/* Setup the editor */
-	ret = add_txt_str(info, node, scn, "edit", 0);
-	if (ret < 0)
-		return log_msg_ret("tit", ret);
+	ret = ofnode_read_u32(node, "edit-id", &id);
+	if (ret)
+		return log_msg_ret("id", -ENOENT);
 	edit_id = ret;
+
+	ret = scene_txt_str(scn, "edit", edit_id, ted_id, abuf_data(&ted->buf),
+			    NULL);
+	if (ret < 0)
+		return log_msg_ret("add", ret);
+
 	ret = scene_textline_set_edit(scn, ted_id, edit_id);
 	if (ret)
 		return log_msg_ret("set", ret);
@@ -467,8 +478,10 @@ int expo_build(ofnode root, struct expo **expp)
 		int node_ret;
 
 		node_ret = ofnode_get_path(info.err_node, buf, sizeof(buf));
-		log_warning("Build failed at node %s\n",
-			    node_ret ? ofnode_get_name(info.err_node) : buf);
+		log_warning("Build failed at node %s, property %s\n",
+			    node_ret ? ofnode_get_name(info.err_node) : buf,
+			    info.err_prop);
+
 		return log_msg_ret("bui", ret);
 	}
 	*expp = exp;
