@@ -61,6 +61,7 @@
 				type = "textline";
 				max-len = <20>;
 				title = "Machine name";
+				edit-id = <ID_MACHINE_NAME_EDIT>;
 			};
 		};
 	};
