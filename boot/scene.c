@@ -316,7 +316,14 @@ int scene_obj_get_hw(struct scene *scn, uint id, int *widthp)
 	return 0;
 }
 
-static void scene_render_background(struct scene_obj *obj)
+/**
+ * scene_render_background() - Render the background for an object
+ *
+ * @obj: Object to render
+ * @box_only: true to show a box around the object, but keep the normal
+ * background colour inside
+ */
+static void scene_render_background(struct scene_obj *obj, bool box_only)
 {
 	struct expo *exp = obj->scene->expo;
 	const struct expo_theme *theme = &exp->theme;
@@ -326,6 +333,7 @@ static void scene_render_background(struct scene_obj *obj)
 	struct udevice *cons = exp->cons;
 	struct vidconsole_colour old;
 	enum colour_idx fore, back;
+	uint inset = theme->menu_inset;
 
 	/* draw a background for the object */
 	if (CONFIG_IS_ENABLED(SYS_WHITE_ON_BLACK)) {
@@ -342,11 +350,15 @@ static void scene_render_background(struct scene_obj *obj)
 
 	vidconsole_push_colour(cons, fore, back, &old);
 	vid_priv = dev_get_uclass_priv(dev);
-	video_fill_part(dev, label_bbox.x0 - theme->menu_inset,
-			label_bbox.y0 - theme->menu_inset,
-			label_bbox.x1, label_bbox.y1 + theme->menu_inset,
+	video_fill_part(dev, label_bbox.x0 - inset, label_bbox.y0 - inset,
+			label_bbox.x1 + inset, label_bbox.y1 + inset,
 			vid_priv->colour_fg);
 	vidconsole_pop_colour(cons, &old);
+	if (box_only) {
+		video_fill_part(dev, label_bbox.x0, label_bbox.y0,
+				label_bbox.x1, label_bbox.y1,
+				vid_priv->colour_bg);
+	}
 }
 
 /**
@@ -432,7 +444,7 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 				return -ENOTSUPP;
 
 			/* draw a background behind the menu items */
-			scene_render_background(obj);
+			scene_render_background(obj, false);
 		}
 		/*
 		 * With a vidconsole, the text and item pointer are rendered as
@@ -450,7 +462,7 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 	}
 	case SCENEOBJT_TEXTLINE:
 		if (obj->flags & SCENEOF_OPEN)
-			scene_render_background(obj);
+			scene_render_background(obj, true);
 		break;
 	}
 

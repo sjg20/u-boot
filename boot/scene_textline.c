@@ -34,6 +34,7 @@ int scene_textline(struct scene *scn, const char *name, uint id, uint max_chars,
 		buf[i] = 'a' + i;
 	}
 	buf[i] = '\0';
+	tline->pos = max_chars;
 
 	if (tlinep)
 		*tlinep = tline;
