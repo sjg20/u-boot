@@ -293,6 +293,7 @@ struct scene_menitem *scene_menuitem_find_seq(const struct scene_obj_menu *menu,
  * @id: Object id
  * @inset: Amount of inset to use for width
  * @bbox: Bounding box to update
+ * Return: 0 if OK, -ve on error
  */
 int scene_bbox_union(struct scene *scn, uint id, int inset,
 		     struct vidconsole_bbox *bbox);
@@ -313,6 +314,7 @@ int scene_textline_calc_dims(struct scene_obj_textline *tline);
  * @menu: Menu to process
  * @bbox: Returns bounding box of menu including prompts
  * @label_bbox: Returns bounding box of labels
+ * Return: 0 if OK, -ve on error
  */
 void scene_menu_calc_bbox(struct scene_obj_menu *menu,
 			  struct vidconsole_bbox *bbox,
@@ -324,6 +326,7 @@ void scene_menu_calc_bbox(struct scene_obj_menu *menu,
  * @textline: Menu to process
  * @bbox: Returns bounding box of textline including prompt
  * @edit_bbox: Returns bounding box of editable part
+ * Return: 0 if OK, -ve on error
  */
 void scene_textline_calc_bbox(struct scene_obj_textline *menu,
 			      struct vidconsole_bbox *bbox,
@@ -335,6 +338,7 @@ void scene_textline_calc_bbox(struct scene_obj_textline *menu,
  * @obj: Object to process
  * @bbox: Returns bounding box of object including prompts
  * @label_bbox: Returns bounding box of labels (active area)
+ * Return: 0 if OK, -ve on error
  */
 int scene_obj_calc_bbox(struct scene_obj *obj, struct vidconsole_bbox *bbox,
 			struct vidconsole_bbox *label_bbox);
@@ -346,7 +350,8 @@ int scene_obj_calc_bbox(struct scene_obj *obj, struct vidconsole_bbox *bbox,
  *
  * @scn: Scene containing the textline
  * @tline: textline object
+ * Return: 0 if OK, -ve on error
  */
-void scene_textline_open(struct scene *scn, struct scene_obj_textline *tline);
+int scene_textline_open(struct scene *scn, struct scene_obj_textline *tline);
 
 #endif /* __SCENE_INTERNAL_H */

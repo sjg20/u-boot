@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <abuf.h>
 #include <dm.h>
 #include <log.h>
 #include <malloc.h>
@@ -780,6 +781,34 @@ static int truetype_nominal(struct udevice *dev, const char *name, uint size,
 	return 0;
 }
 
+static int truetype_entry_save(struct udevice *dev, struct abuf *buf)
+{
+	struct console_tt_priv *priv = dev_get_priv(dev);
+	const uint size = sizeof(struct console_tt_priv);
+
+	/*
+	 * store the whole priv structure as it is simpler that picking out
+	 * what we need
+	 */
+	if (!abuf_realloc(buf, size))
+		return log_msg_ret("sav", -ENOMEM);
+
+	memcpy(abuf_data(buf), priv, size);
+
+	return 0;
+}
+
+static int truetype_entry_restore(struct udevice *dev, struct abuf *buf)
+{
+	struct console_tt_priv *from, *priv = dev_get_priv(dev);
+
+	from = abuf_data(buf);
+	priv->pos_ptr = from->pos_ptr;
+	memcpy(priv->pos, from->pos, from->pos_ptr * sizeof(struct pos_info));
+
+	return 0;
+}
+
 const char *console_truetype_get_font_size(struct udevice *dev, uint *sizep)
 {
 	struct console_tt_priv *priv = dev_get_priv(dev);
@@ -833,6 +862,8 @@ struct vidconsole_ops console_truetype_ops = {
 	.select_font	= truetype_select_font,
 	.measure	= truetype_measure,
 	.nominal	= truetype_nominal,
+	.entry_save	= truetype_entry_save,
+	.entry_restore	= truetype_entry_restore,
 };
 
 U_BOOT_DRIVER(vidconsole_truetype) = {

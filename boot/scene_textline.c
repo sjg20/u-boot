@@ -6,7 +6,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY	LOGC_EXPO
 
 #include <common.h>
@@ -158,9 +157,10 @@ int scene_textline_render_deps(struct scene *scn,
 	return 0;
 }
 
-void scene_textline_open(struct scene *scn, struct scene_obj_textline *tline)
+int scene_textline_open(struct scene *scn, struct scene_obj_textline *tline)
 {
 	struct udevice *cons = scn->expo->cons;
+	int ret;
 
 	memcpy(abuf_data(&scn->buf), abuf_data(&tline->buf),
 	       abuf_size(&scn->buf));
@@ -169,4 +169,9 @@ void scene_textline_open(struct scene *scn, struct scene_obj_textline *tline)
 	vidconsole_entry_start(cons);
 	cli_cread_init(&scn->cls, abuf_data(&tline->buf), tline->max_chars);
 	scn->cls.insert = true;
+	ret = vidconsole_entry_save(cons, &scn->entry_save);
+	if (ret)
+		return log_msg_ret("sav", ret);
+
+	return 0;
 }

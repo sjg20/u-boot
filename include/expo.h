@@ -126,6 +126,7 @@ struct expo_string {
  * @highlight_id: ID of highlighted object, if any
  * @cls: cread state to use for input
  * @buf: Buffer for input
+ * @entry_save: Buffer to hold vidconsole text-entry information
  * @sibling: Node to link this scene to its siblings
  * @obj_head: List of objects in the scene
  */
@@ -137,6 +138,7 @@ struct scene {
 	uint highlight_id;
 	struct cli_line_state cls;
 	struct abuf buf;
+	struct abuf entry_save;
 	struct list_head sibling;
 	struct list_head obj_head;
 };

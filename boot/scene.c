@@ -6,7 +6,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY	LOGC_EXPO
 
 #include <common.h>
@@ -39,6 +38,7 @@ int scene_new(struct expo *exp, const char *name, uint id, struct scene **scnp)
 		free(scn);
 		return log_msg_ret("buf", -ENOMEM);
 	}
+	abuf_init(&scn->entry_save);
 
 	INIT_LIST_HEAD(&scn->obj_head);
 	scn->id = resolve_id(exp, id);
@@ -809,8 +809,10 @@ void scene_highlight_first(struct scene *scn)
 	}
 }
 
-static void scene_obj_open(struct scene *scn, struct scene_obj *obj)
+static int scene_obj_open(struct scene *scn, struct scene_obj *obj)
 {
+	int ret;
+
 	switch (obj->type) {
 	case SCENEOBJT_NONE:
 	case SCENEOBJT_IMAGE:
@@ -818,9 +820,14 @@ static void scene_obj_open(struct scene *scn, struct scene_obj *obj)
 	case SCENEOBJT_TEXT:
 		break;
 	case SCENEOBJT_TEXTLINE:
-		scene_textline_open(scn, (struct scene_obj_textline *)obj);
+		ret = scene_textline_open(scn,
+					  (struct scene_obj_textline *)obj);
+		if (ret)
+			return log_msg_ret("op", ret);
 		break;
 	}
+
+	return 0;
 }
 
 int scene_set_open(struct scene *scn, uint id, bool open)
@@ -834,7 +841,9 @@ int scene_set_open(struct scene *scn, uint id, bool open)
 		if (!obj)
 			return log_msg_ret("find", -ENOENT);
 
-		scene_obj_open(scn, obj);
+		ret = scene_obj_open(scn, obj);
+		if (ret)
+			return log_msg_ret("op", ret);
 	}
 
 	ret = scene_obj_flag_clrset(scn, id, SCENEOF_OPEN,
