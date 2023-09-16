@@ -312,7 +312,7 @@ static int textline_build(struct build_info *info, ofnode node,
 	ret = add_txt_str(info, node, scn, "title", 0);
 	if (ret < 0)
 		return log_msg_ret("tit", ret);
-	ted->title_id = ret;
+	ted->label_id = ret;
 
 	/* Setup the editor */
 	info->err_prop = "edit-id";

@@ -41,48 +41,6 @@ int scene_textline(struct scene *scn, const char *name, uint id, uint max_chars,
 	return tline->obj.id;
 }
 
-int scene_textline_set_title(struct scene *scn, uint id, uint title_id)
-{
-	struct scene_obj_textline *tline;
-	struct scene_obj_txt *txt;
-
-	tline = scene_obj_find(scn, id, SCENEOBJT_TEXTLINE);
-	if (!tline)
-		return log_msg_ret("tline", -ENOENT);
-
-	/* Check that the ID is valid */
-	if (title_id) {
-		txt = scene_obj_find(scn, title_id, SCENEOBJT_TEXT);
-		if (!txt)
-			return log_msg_ret("txt", -EINVAL);
-	}
-
-	tline->title_id = title_id;
-
-	return 0;
-}
-
-int scene_textline_set_edit(struct scene *scn, uint id, uint edit_id)
-{
-	struct scene_obj_textline *tline;
-	struct scene_obj_txt *txt;
-
-	tline = scene_obj_find(scn, id, SCENEOBJT_TEXTLINE);
-	if (!tline)
-		return log_msg_ret("tline", -ENOENT);
-
-	/* Check that the ID is valid */
-	if (edit_id) {
-		txt = scene_obj_find(scn, edit_id, SCENEOBJT_TEXT);
-		if (!txt)
-			return log_msg_ret("txt", -EINVAL);
-	}
-
-	tline->edit_id = edit_id;
-
-	return 0;
-}
-
 void scene_textline_calc_bbox(struct scene_obj_textline *tline,
 			      struct vidconsole_bbox *bbox,
 			      struct vidconsole_bbox *edit_bbox)
@@ -90,7 +48,7 @@ void scene_textline_calc_bbox(struct scene_obj_textline *tline,
 	const struct expo_theme *theme = &tline->obj.scene->expo->theme;
 
 	bbox->valid = false;
-	scene_bbox_union(tline->obj.scene, tline->title_id, 0, bbox);
+	scene_bbox_union(tline->obj.scene, tline->label_id, 0, bbox);
 	scene_bbox_union(tline->obj.scene, tline->edit_id, 0, bbox);
 
 	edit_bbox->valid = false;
@@ -114,14 +72,15 @@ int scene_textline_calc_dims(struct scene_obj_textline *tline)
 
 int scene_textline_arrange(struct scene *scn, struct scene_obj_textline *tline)
 {
+	const bool open = tline->obj.flags & SCENEOF_OPEN;
 	bool point;
 	int x, y;
 	int ret;
 
 	x = tline->obj.dim.x;
 	y = tline->obj.dim.y;
-	if (tline->title_id) {
-		ret = scene_obj_set_pos(scn, tline->title_id, tline->obj.dim.x,
+	if (tline->label_id) {
+		ret = scene_obj_set_pos(scn, tline->label_id, tline->obj.dim.x,
 					y);
 		if (ret < 0)
 			return log_msg_ret("tit", ret);
@@ -131,7 +90,7 @@ int scene_textline_arrange(struct scene *scn, struct scene_obj_textline *tline)
 		if (ret < 0)
 			return log_msg_ret("tit", ret);
 
-		ret = scene_obj_get_hw(scn, tline->title_id, NULL);
+		ret = scene_obj_get_hw(scn, tline->label_id, NULL);
 		if (ret < 0)
 			return log_msg_ret("hei", ret);
 
@@ -139,6 +98,7 @@ int scene_textline_arrange(struct scene *scn, struct scene_obj_textline *tline)
 	}
 
 	point = scn->highlight_id == tline->obj.id;
+	point &= !open;
 	scene_obj_flag_clrset(scn, tline->edit_id, SCENEOF_POINT,
 			      point ? SCENEOF_POINT : 0);
 
@@ -168,7 +128,7 @@ int scene_textline_send_key(struct scene *scn, struct scene_obj_textline *tline,
 int scene_textline_render_deps(struct scene *scn,
 			       struct scene_obj_textline *tline)
 {
-	scene_render_deps(scn, tline->title_id);
+	scene_render_deps(scn, tline->label_id);
 	scene_render_deps(scn, tline->edit_id);
 
 	return 0;

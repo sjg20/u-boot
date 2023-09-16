@@ -312,15 +312,17 @@ struct scene_menitem {
  * A textline has a prompt and a line of editable text
  *
  * @obj: Basic object information
- * @title_id: ID of the title text, or 0 if none
+ * @label_id: ID of the label text, or 0 if none
  * @edit_id: ID of the editable text
  * @abuf: Text buffer
+ * @pos: Cursor position
  */
 struct scene_obj_textline {
 	struct scene_obj obj;
-	uint title_id;
+	uint label_id;
 	uint edit_id;
 	struct abuf buf;
+	uint pos;
 };
 
 /**
@@ -569,26 +571,6 @@ int scene_menu(struct scene *scn, const char *name, uint id,
  */
 int scene_textline(struct scene *scn, const char *name, uint id, uint max_chars,
 		   struct scene_obj_textline **tlinep);
-
-/**
- * scene_textline_set_title() - Set the title of a textline
- *
- * @scn: Scene to update
- * @id: ID of textline object to update
- * @title_id: ID of text object to use as the title
- * Returns: 0 if OK, -ENOENT if @id is invalid, -EINVAL if @title_id is invalid
- */
-int scene_textline_set_title(struct scene *scn, uint id, uint title_id);
-
-/**
- * scene_textline_set_edit() - Set the edit object of a textline
- *
- * @scn: Scene to update
- * @id: ID of textline object to update
- * @edit_id: ID of text object to use as the editor
- * Returns: 0 if OK, -ENOENT if @id is invalid, -EINVAL if @edit_id is invalid
- */
-int scene_textline_set_edit(struct scene *scn, uint id, uint edit_id);
 
 /**
  * scene_txt_set_font() - Set the font for an object
