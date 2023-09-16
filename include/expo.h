@@ -13,6 +13,8 @@
 
 struct udevice;
 
+#include <cli.h>
+
 /**
  * enum expoact_type - types of actions reported by the expo
  *
@@ -122,6 +124,8 @@ struct expo_string {
  * @id: ID number of the scene
  * @title_id: String ID of title of the scene (allocated)
  * @highlight_id: ID of highlighted object, if any
+ * @cls: cread state to use for input
+ * @buf: Buffer for input
  * @sibling: Node to link this scene to its siblings
  * @obj_head: List of objects in the scene
  */
@@ -131,6 +135,8 @@ struct scene {
 	uint id;
 	uint title_id;
 	uint highlight_id;
+	struct cli_line_state cls;
+	struct abuf buf;
 	struct list_head sibling;
 	struct list_head obj_head;
 };
@@ -181,6 +187,11 @@ enum scene_obj_flags_t {
 	SCENEOF_HIDE	= 1 << 0,
 	SCENEOF_POINT	= 1 << 1,
 	SCENEOF_OPEN	= 1 << 2,
+};
+
+enum {
+	/* Maximum number of characters allowed in an line editor */
+	EXPO_MAX_CHARS		= 250,
 };
 
 /**
@@ -314,16 +325,16 @@ struct scene_menitem {
  * @obj: Basic object information
  * @label_id: ID of the label text, or 0 if none
  * @edit_id: ID of the editable text
+ * @max_chars: Maximum number of characters allowed
  * @abuf: Text buffer containing current text
- * @working: Working text buffer, for use when editing
  * @pos: Cursor position
  */
 struct scene_obj_textline {
 	struct scene_obj obj;
 	uint label_id;
 	uint edit_id;
+	uint max_chars;
 	struct abuf buf;
-	struct abuf working;
 	uint pos;
 };
 

@@ -33,6 +33,13 @@ int scene_new(struct expo *exp, const char *name, uint id, struct scene **scnp)
 		return log_msg_ret("name", -ENOMEM);
 	}
 
+	abuf_init(&scn->buf);
+	if (!abuf_realloc(&scn->buf, EXPO_MAX_CHARS + 1)) {
+		free(scn->name);
+		free(scn);
+		return log_msg_ret("buf", -ENOMEM);
+	}
+
 	INIT_LIST_HEAD(&scn->obj_head);
 	scn->id = resolve_id(exp, id);
 	scn->expo = exp;

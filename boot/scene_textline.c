@@ -22,6 +22,9 @@ int scene_textline(struct scene *scn, const char *name, uint id, uint max_chars,
 	int ret, i;
 	char *buf;
 
+	if (max_chars >= EXPO_MAX_CHARS)
+		return log_msg_ret("chr", -E2BIG);
+
 	ret = scene_obj_add(scn, name, id, SCENEOBJT_TEXTLINE,
 			    sizeof(struct scene_obj_textline),
 			    (struct scene_obj **)&tline);
@@ -36,6 +39,7 @@ int scene_textline(struct scene *scn, const char *name, uint id, uint max_chars,
 	}
 	buf[i] = '\0';
 	tline->pos = max_chars;
+	tline->max_chars = max_chars;
 
 	if (tlinep)
 		*tlinep = tline;
@@ -139,6 +143,5 @@ int scene_textline_render_deps(struct scene *scn,
 
 void scene_textline_open(struct scene *scn, struct scene_obj_textline *tline)
 {
-	cli_cread_init(struct cli_line_state *cls, char *buf, uint buf_size);
-
+	cli_cread_init(&scn->cls, abuf_data(&scn->buf), tline->max_chars);
 }
