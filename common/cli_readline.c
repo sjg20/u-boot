@@ -428,7 +428,7 @@ void cli_cread_init(struct cli_line_state *cls, char *buf, uint buf_size)
 
 	if (init_len)
 		cread_add_str(buf, init_len, 1, &cls->num, &cls->eol_num, buf,
-			     buf_size);
+			      buf_size);
 }
 
 static int cread_line(const char *const prompt, char *buf, unsigned int *len,

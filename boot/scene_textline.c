@@ -34,7 +34,7 @@ int scene_textline(struct scene *scn, const char *name, uint id, uint max_chars,
 	if (!abuf_realloc(&tline->buf, max_chars + 1))
 		return log_msg_ret("buf", -ENOMEM);
 	buf = abuf_data(&tline->buf);
-	for (i = 0; i < max_chars; i++) {
+	for (i = 0; i < max_chars / 2; i++) {
 		buf[i] = 'a' + i;
 	}
 	buf[i] = '\0';
@@ -64,13 +64,26 @@ void scene_textline_calc_bbox(struct scene_obj_textline *tline,
 
 int scene_textline_calc_dims(struct scene_obj_textline *tline)
 {
-	struct vidconsole_bbox bbox, edit_bbox;
+	struct scene *scn = tline->obj.scene;
+	struct vidconsole_bbox bbox;
+	struct scene_obj_txt *txt;
+	int ret;
 
-	scene_textline_calc_bbox(tline, &bbox, &edit_bbox);
+	txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_NONE);
+	if (!txt)
+		return log_msg_ret("dim", -ENOENT);;
+
+	ret = vidconsole_nominal(scn->expo->cons, txt->font_name,
+				 txt->font_size, tline->max_chars, &bbox);
+	if (ret)
+		return log_msg_ret("nom", ret);
 
 	if (bbox.valid) {
 		tline->obj.dim.w = bbox.x1 - bbox.x0;
 		tline->obj.dim.h = bbox.y1 - bbox.y0;
+
+		scene_obj_set_size(scn, tline->edit_id, tline->obj.dim.w,
+				   tline->obj.dim.h);
 	}
 
 	return 0;
@@ -153,5 +166,7 @@ void scene_textline_open(struct scene *scn, struct scene_obj_textline *tline)
 	       abuf_size(&scn->buf));
 
 	vidconsole_set_cursor_pos(cons, tline->obj.dim.x, tline->obj.dim.y);
-	cli_cread_init(&scn->cls, abuf_data(&scn->buf), tline->max_chars);
+	vidconsole_entry_start(cons);
+	cli_cread_init(&scn->cls, abuf_data(&tline->buf), tline->max_chars);
+	scn->cls.insert = true;
 }

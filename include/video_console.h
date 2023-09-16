@@ -225,6 +225,21 @@ struct vidconsole_ops {
 	 */
 	int (*measure)(struct udevice *dev, const char *name, uint size,
 		       const char *text, struct vidconsole_bbox *bbox);
+
+	/**
+	 * nominal() - Measure the expected width of a line of text
+	 *
+	 * Uses an average font width and nominal height
+	 *
+	 * @dev: Console device to use
+	 * @name: Font name, NULL for default
+	 * @size: Font size, ignored if @name is NULL
+	 * @num_chars: Number of characters to use
+	 * @bbox: Returns nounding box of @num_chars characters
+	 * Returns: 0 if OK, -ve on error
+	 */
+	int (*nominal)(struct udevice *dev, const char *name, uint size,
+		       uint num_chars, struct vidconsole_bbox *bbox);
 };
 
 /* Get a pointer to the driver operations for a video console device */
@@ -263,6 +278,21 @@ int vidconsole_select_font(struct udevice *dev, const char *name, uint size);
  */
 int vidconsole_measure(struct udevice *dev, const char *name, uint size,
 		       const char *text, struct vidconsole_bbox *bbox);
+
+/**
+ * vidconsole_nominal() - Measure the expected width of a line of text
+ *
+ * Uses an average font width and nominal height
+ *
+ * @dev: Console device to use
+ * @name: Font name, NULL for default
+ * @size: Font size, ignored if @name is NULL
+ * @num_chars: Number of characters to use
+ * @bbox: Returns nounding box of @num_chars characters
+ * Returns: 0 if OK, -ve on error
+ */
+int vidconsole_nominal(struct udevice *dev, const char *name, uint size,
+		       uint num_chars, struct vidconsole_bbox *bbox);
 
 /**
  * vidconsole_push_colour() - Temporarily change the font colour
@@ -320,6 +350,15 @@ int vidconsole_move_rows(struct udevice *dev, uint rowdst, uint rowsrc,
  * Return: 0 if OK, -ve on error
  */
 int vidconsole_set_row(struct udevice *dev, uint row, int clr);
+
+/**
+ * vidconsole_entry_start() - Set the start position of a vidconsole line
+ *
+ * Marks the current cursor position as the start of a line
+ *
+ * @dev:	Device to adjust
+ */
+int vidconsole_entry_start(struct udevice *dev);
 
 /**
  * vidconsole_put_char() - Output a character to the current console position
