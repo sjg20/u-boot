@@ -115,6 +115,7 @@ int scene_textline_send_key(struct scene *scn, struct scene_obj_textline *tline,
 			    int key, struct expo_action *event)
 {
 	const bool open = tline->obj.flags & SCENEOF_OPEN;
+	int ret;
 
 	log_debug("key=%d\n", key);
 	switch (key) {
@@ -126,6 +127,9 @@ int scene_textline_send_key(struct scene *scn, struct scene_obj_textline *tline,
 			event->type = EXPOACT_QUIT;
 			log_debug("menu quit\n");
 		}
+		break;
+	default:
+		ret = cread_line_process_ch(&scn->cls, key);
 		break;
 	}
 
@@ -143,5 +147,11 @@ int scene_textline_render_deps(struct scene *scn,
 
 void scene_textline_open(struct scene *scn, struct scene_obj_textline *tline)
 {
+	struct udevice *cons = scn->expo->cons;
+
+	memcpy(abuf_data(&scn->buf), abuf_data(&tline->buf),
+	       abuf_size(&scn->buf));
+
+	vidconsole_set_cursor_pos(cons, tline->obj.dim.x, tline->obj.dim.y);
 	cli_cread_init(&scn->cls, abuf_data(&scn->buf), tline->max_chars);
 }
