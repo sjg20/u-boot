@@ -10,6 +10,7 @@
 
 #include <common.h>
 #include <expo.h>
+#include <menu.h>
 #include <video_console.h>
 #include "scene_internal.h"
 
@@ -117,6 +118,7 @@ int scene_textline_calc_dims(struct scene_obj_textline *tline)
 
 int scene_textline_arrange(struct scene *scn, struct scene_obj_textline *tline)
 {
+	bool point;
 	int x, y;
 	int ret;
 
@@ -138,6 +140,30 @@ int scene_textline_arrange(struct scene *scn, struct scene_obj_textline *tline)
 			return log_msg_ret("hei", ret);
 
 		y += ret * 2;
+	}
+
+	point = scn->highlight_id == tline->obj.id;
+	scene_obj_flag_clrset(scn, tline->edit_id, SCENEOF_POINT,
+			      point ? SCENEOF_POINT : 0);
+
+	return 0;
+}
+
+int scene_textline_send_key(struct scene *scn, struct scene_obj_textline *tline,
+			    int key, struct expo_action *event)
+{
+	const bool open = tline->obj.flags & SCENEOF_OPEN;
+
+	switch (key) {
+	case BKEY_QUIT:
+		if (open) {
+			event->type = EXPOACT_CLOSE;
+			event->select.id = tline->obj.id;
+		} else {
+			event->type = EXPOACT_QUIT;
+			log_debug("menu quit\n");
+		}
+		break;
 	}
 
 	return 0;

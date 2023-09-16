@@ -6,6 +6,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY	LOGC_EXPO
 
 #include <common.h>
@@ -521,7 +522,7 @@ static void send_key_obj(struct scene *scn, struct scene_obj *obj, int key,
 					       sibling)) {
 			obj = list_entry(obj->sibling.prev,
 					 struct scene_obj, sibling);
-			if (obj->type == SCENEOBJT_MENU) {
+			if (scene_obj_can_highlight(obj)) {
 				event->type = EXPOACT_POINT_OBJ;
 				event->select.id = obj->id;
 				log_debug("up to obj %d\n", event->select.id);
@@ -533,7 +534,7 @@ static void send_key_obj(struct scene *scn, struct scene_obj *obj, int key,
 		while (!list_is_last(&obj->sibling, &scn->obj_head)) {
 			obj = list_entry(obj->sibling.next, struct scene_obj,
 					 sibling);
-			if (obj->type == SCENEOBJT_MENU) {
+			if (scene_obj_can_highlight(obj)) {
 				event->type = EXPOACT_POINT_OBJ;
 				event->select.id = obj->id;
 				log_debug("down to obj %d\n", event->select.id);
@@ -542,7 +543,7 @@ static void send_key_obj(struct scene *scn, struct scene_obj *obj, int key,
 		}
 		break;
 	case BKEY_SELECT:
-		if (obj->type == SCENEOBJT_MENU) {
+		if (scene_obj_can_highlight(obj)) {
 			event->type = EXPOACT_OPEN;
 			event->select.id = obj->id;
 			log_debug("open obj %d\n", event->select.id);
@@ -557,7 +558,6 @@ static void send_key_obj(struct scene *scn, struct scene_obj *obj, int key,
 
 int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 {
-	struct scene_obj_menu *menu;
 	struct scene_obj *obj;
 	int ret;
 
@@ -581,10 +581,30 @@ int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 			return 0;
 		}
 
-		menu = (struct scene_obj_menu *)obj,
-		ret = scene_menu_send_key(scn, menu, key, event);
-		if (ret)
-			return log_msg_ret("key", ret);
+		switch (obj->type) {
+		case SCENEOBJT_NONE:
+		case SCENEOBJT_IMAGE:
+		case SCENEOBJT_TEXT:
+			break;
+		case SCENEOBJT_MENU: {
+			struct scene_obj_menu *menu;
+
+			menu = (struct scene_obj_menu *)obj,
+			ret = scene_menu_send_key(scn, menu, key, event);
+			if (ret)
+				return log_msg_ret("key", ret);
+			break;
+		}
+		case SCENEOBJT_TEXTLINE: {
+			struct scene_obj_textline *tline;
+
+			tline = (struct scene_obj_textline *)obj,
+			ret = scene_textline_send_key(scn, tline, key, event);
+			if (ret)
+				return log_msg_ret("key", ret);
+			break;
+		}
+		}
 		return 0;
 	}
 
@@ -691,12 +711,9 @@ void scene_highlight_first(struct scene *scn)
 	struct scene_obj *obj;
 
 	list_for_each_entry(obj, &scn->obj_head, sibling) {
-		switch (obj->type) {
-		case SCENEOBJT_MENU:
+		if (scene_obj_can_highlight(obj)) {
 			scene_set_highlight_id(scn, obj->id);
 			return;
-		default:
-			break;
 		}
 	}
 }

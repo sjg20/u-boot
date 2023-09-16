@@ -534,6 +534,7 @@ void scene_menu_render(struct scene_obj_menu *menu)
 	struct vidconsole_colour old;
 	enum colour_idx fore, back;
 
+	/* draw a background for the menu */
 	if (CONFIG_IS_ENABLED(SYS_WHITE_ON_BLACK)) {
 		fore = VID_BLACK;
 		back = VID_WHITE;
