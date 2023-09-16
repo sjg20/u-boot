@@ -6,6 +6,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY	LOGC_EXPO
 
 #include <common.h>
@@ -111,6 +112,7 @@ int scene_textline_send_key(struct scene *scn, struct scene_obj_textline *tline,
 {
 	const bool open = tline->obj.flags & SCENEOF_OPEN;
 
+	log_debug("key=%d\n", key);
 	switch (key) {
 	case BKEY_QUIT:
 		if (open) {
