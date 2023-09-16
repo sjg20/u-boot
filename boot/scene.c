@@ -802,9 +802,33 @@ void scene_highlight_first(struct scene *scn)
 	}
 }
 
+static void scene_obj_open(struct scene *scn, struct scene_obj *obj)
+{
+	switch (obj->type) {
+	case SCENEOBJT_NONE:
+	case SCENEOBJT_IMAGE:
+	case SCENEOBJT_MENU:
+	case SCENEOBJT_TEXT:
+		break;
+	case SCENEOBJT_TEXTLINE:
+		scene_textline_open(scn, (struct scene_obj_textline *)obj);
+		break;
+	}
+}
+
 int scene_set_open(struct scene *scn, uint id, bool open)
 {
 	int ret;
+
+	if (open) {
+		struct scene_obj *obj;
+
+		obj = scene_obj_find(scn, id, SCENEOBJT_NONE);
+		if (!obj)
+			return log_msg_ret("find", -ENOENT);
+
+		scene_obj_open(scn, obj);
+	}
 
 	ret = scene_obj_flag_clrset(scn, id, SCENEOF_OPEN,
 				    open ? SCENEOF_OPEN : 0);

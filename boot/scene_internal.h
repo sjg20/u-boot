@@ -339,4 +339,14 @@ void scene_textline_calc_bbox(struct scene_obj_textline *menu,
 int scene_obj_calc_bbox(struct scene_obj *obj, struct vidconsole_bbox *bbox,
 			struct vidconsole_bbox *label_bbox);
 
+/**
+ * scene_textline_open() - Open a textline object
+ *
+ * Set up the text editor ready for use
+ *
+ * @scn: Scene containing the textline
+ * @tline: textline object
+ */
+void scene_textline_open(struct scene *scn, struct scene_obj_textline *tline);
+
 #endif /* __SCENE_INTERNAL_H */

@@ -314,7 +314,8 @@ struct scene_menitem {
  * @obj: Basic object information
  * @label_id: ID of the label text, or 0 if none
  * @edit_id: ID of the editable text
- * @abuf: Text buffer
+ * @abuf: Text buffer containing current text
+ * @working: Working text buffer, for use when editing
  * @pos: Cursor position
  */
 struct scene_obj_textline {
@@ -322,6 +323,7 @@ struct scene_obj_textline {
 	uint label_id;
 	uint edit_id;
 	struct abuf buf;
+	struct abuf working;
 	uint pos;
 };
 

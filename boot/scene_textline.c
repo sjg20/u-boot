@@ -136,3 +136,9 @@ int scene_textline_render_deps(struct scene *scn,
 
 	return 0;
 }
+
+void scene_textline_open(struct scene *scn, struct scene_obj_textline *tline)
+{
+	cli_cread_init(struct cli_line_state *cls, char *buf, uint buf_size);
+
+}
