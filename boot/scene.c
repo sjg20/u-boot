@@ -336,7 +336,10 @@ static void scene_render_background(struct scene_obj *obj)
 		back = VID_BLACK;
 	}
 
-	scene_obj_calc_bbox(obj, &bbox, &label_bbox);
+	/* see if this object wants to render a background */
+	if (scene_obj_calc_bbox(obj, &bbox, &label_bbox))
+		return;
+
 	vidconsole_push_colour(cons, fore, back, &old);
 	vid_priv = dev_get_uclass_priv(dev);
 	video_fill_part(dev, label_bbox.x0 - theme->menu_inset,
@@ -446,6 +449,8 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 		break;
 	}
 	case SCENEOBJT_TEXTLINE:
+		if (obj->flags & SCENEOF_OPEN)
+			scene_render_background(obj);
 		break;
 	}
 
@@ -503,9 +508,20 @@ int scene_render_deps(struct scene *scn, uint id)
 		if (ret && ret != -ENOTSUPP)
 			return log_msg_ret("ren", ret);
 
-		if (obj->type == SCENEOBJT_MENU)
+		switch (obj->type) {
+		case SCENEOBJT_NONE:
+		case SCENEOBJT_IMAGE:
+		case SCENEOBJT_TEXT:
+			break;
+		case SCENEOBJT_MENU:
 			scene_menu_render_deps(scn,
 					       (struct scene_obj_menu *)obj);
+			break;
+		case SCENEOBJT_TEXTLINE:
+			scene_textline_render_deps(scn,
+					(struct scene_obj_textline *)obj);
+			break;
+		}
 	}
 
 	return 0;
@@ -667,8 +683,13 @@ int scene_obj_calc_bbox(struct scene_obj *obj, struct vidconsole_bbox *bbox,
 		scene_menu_calc_bbox(menu, bbox, label_bbox);
 		break;
 	}
-	case SCENEOBJT_TEXTLINE:
-		return -ENOSYS;
+	case SCENEOBJT_TEXTLINE: {
+		struct scene_obj_textline *tline;
+
+		tline = (struct scene_obj_textline *)obj;
+		scene_textline_calc_bbox(tline, bbox, label_bbox);
+		break;
+	}
 	}
 
 	return 0;

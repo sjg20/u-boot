@@ -211,10 +211,22 @@ int scene_render_deps(struct scene *scn, uint id);
  * Renders the menu and all of its attached objects
  *
  * @scn: Scene to render
- * @menu: Menu render
+ * @menu: Menu to render
  * Returns: 0 if OK, -ve on error
  */
 int scene_menu_render_deps(struct scene *scn, struct scene_obj_menu *menu);
+
+/**
+ * scene_textline_render_deps() - Render a textline and its dependencies
+ *
+ * Renders the textline and all of its attached objects
+ *
+ * @scn: Scene to render
+ * @tline: textline to render
+ * Returns: 0 if OK, -ve on error
+ */
+int scene_textline_render_deps(struct scene *scn,
+			       struct scene_obj_textline *tline);
 
 /**
  * scene_menu_calc_dims() - Calculate the dimensions of a menu
@@ -305,6 +317,17 @@ int scene_textline_calc_dims(struct scene_obj_textline *tline);
 void scene_menu_calc_bbox(struct scene_obj_menu *menu,
 			  struct vidconsole_bbox *bbox,
 			  struct vidconsole_bbox *label_bbox);
+
+/**
+ * scene_textline_calc_bbox() - Calculate bounding box for the textline
+ *
+ * @textline: Menu to process
+ * @bbox: Returns bounding box of textline including prompt
+ * @edit_bbox: Returns bounding box of editable part
+ */
+void scene_textline_calc_bbox(struct scene_obj_textline *menu,
+			      struct vidconsole_bbox *bbox,
+			      struct vidconsole_bbox *label_bbox);
 
 /**
  * scene_obj_calc_bbox() - Calculate bounding boxes for an object

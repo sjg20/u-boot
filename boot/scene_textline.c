@@ -83,23 +83,19 @@ int scene_textline_set_edit(struct scene *scn, uint id, uint edit_id)
 	return 0;
 }
 
-/**
- * scene_textline_calc_bbox() - Calculate bounding box for the textline
- *
- * @textline: Menu to process
- * @bbox: Returns bounding box of textline including prompt
- * @edit_bbox: Returns bounding box of editable part
- */
-static void scene_textline_calc_bbox(struct scene_obj_textline *tline,
-				     struct vidconsole_bbox *bbox,
-				     struct vidconsole_bbox *edit_bbox)
+void scene_textline_calc_bbox(struct scene_obj_textline *tline,
+			      struct vidconsole_bbox *bbox,
+			      struct vidconsole_bbox *edit_bbox)
 {
+	const struct expo_theme *theme = &tline->obj.scene->expo->theme;
+
 	bbox->valid = false;
 	scene_bbox_union(tline->obj.scene, tline->title_id, 0, bbox);
 	scene_bbox_union(tline->obj.scene, tline->edit_id, 0, bbox);
 
 	edit_bbox->valid = false;
-	scene_bbox_union(tline->obj.scene, tline->edit_id, 0, edit_bbox);
+	scene_bbox_union(tline->obj.scene, tline->edit_id, theme->menu_inset,
+			 edit_bbox);
 }
 
 int scene_textline_calc_dims(struct scene_obj_textline *tline)
@@ -165,6 +161,15 @@ int scene_textline_send_key(struct scene *scn, struct scene_obj_textline *tline,
 		}
 		break;
 	}
+
+	return 0;
+}
+
+int scene_textline_render_deps(struct scene *scn,
+			       struct scene_obj_textline *tline)
+{
+	scene_render_deps(scn, tline->title_id);
+	scene_render_deps(scn, tline->edit_id);
 
 	return 0;
 }
