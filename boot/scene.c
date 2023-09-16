@@ -316,6 +316,36 @@ int scene_obj_get_hw(struct scene *scn, uint id, int *widthp)
 	return 0;
 }
 
+static void scene_render_background(struct scene_obj *obj)
+{
+	struct expo *exp = obj->scene->expo;
+	const struct expo_theme *theme = &exp->theme;
+	struct vidconsole_bbox bbox, label_bbox;
+	struct udevice *dev = exp->display;
+	struct video_priv *vid_priv;
+	struct udevice *cons = exp->cons;
+	struct vidconsole_colour old;
+	enum colour_idx fore, back;
+
+	/* draw a background for the object */
+	if (CONFIG_IS_ENABLED(SYS_WHITE_ON_BLACK)) {
+		fore = VID_BLACK;
+		back = VID_WHITE;
+	} else {
+		fore = VID_LIGHT_GRAY;
+		back = VID_BLACK;
+	}
+
+	scene_obj_calc_bbox(obj, &bbox, &label_bbox);
+	vidconsole_push_colour(cons, fore, back, &old);
+	vid_priv = dev_get_uclass_priv(dev);
+	video_fill_part(dev, label_bbox.x0 - theme->menu_inset,
+			label_bbox.y0 - theme->menu_inset,
+			label_bbox.x1, label_bbox.y1 + theme->menu_inset,
+			vid_priv->colour_fg);
+	vidconsole_pop_colour(cons, &old);
+}
+
 /**
  * scene_obj_render() - Render an object
  *
@@ -399,7 +429,7 @@ static int scene_obj_render(struct scene_obj *obj, bool text_mode)
 				return -ENOTSUPP;
 
 			/* draw a background behind the menu items */
-			scene_menu_render(menu);
+			scene_render_background(obj);
 		}
 		/*
 		 * With a vidconsole, the text and item pointer are rendered as
@@ -618,6 +648,27 @@ int scene_send_key(struct scene *scn, int key, struct expo_action *event)
 				return log_msg_ret("key", ret);
 			break;
 		}
+	}
+
+	return 0;
+}
+
+int scene_obj_calc_bbox(struct scene_obj *obj, struct vidconsole_bbox *bbox,
+			struct vidconsole_bbox *label_bbox)
+{
+	switch (obj->type) {
+	case SCENEOBJT_NONE:
+	case SCENEOBJT_IMAGE:
+	case SCENEOBJT_TEXT:
+		return -ENOSYS;
+	case SCENEOBJT_MENU: {
+		struct scene_obj_menu *menu = (struct scene_obj_menu *)obj;
+
+		scene_menu_calc_bbox(menu, bbox, label_bbox);
+		break;
+	}
+	case SCENEOBJT_TEXTLINE:
+		return -ENOSYS;
 	}
 
 	return 0;

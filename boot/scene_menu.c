@@ -114,16 +114,9 @@ static void menu_point_to_item(struct scene_obj_menu *menu, uint item_id)
 	update_pointers(menu, item_id, true);
 }
 
-/**
- * scene_menu_calc_bbox() - Calculate bounding boxes for the menu
- *
- * @menu: Menu to process
- * @bbox: Returns bounding box of menu including prompts
- * @label_bbox: Returns bounding box of labels
- */
-static void scene_menu_calc_bbox(struct scene_obj_menu *menu,
-				 struct vidconsole_bbox *bbox,
-				 struct vidconsole_bbox *label_bbox)
+void scene_menu_calc_bbox(struct scene_obj_menu *menu,
+			  struct vidconsole_bbox *bbox,
+			  struct vidconsole_bbox *label_bbox)
 {
 	const struct expo_theme *theme = &menu->obj.scene->expo->theme;
 	const struct scene_menitem *item;
@@ -521,36 +514,6 @@ int scene_menu_display(struct scene_obj_menu *menu)
 	}
 
 	return -ENOTSUPP;
-}
-
-void scene_menu_render(struct scene_obj_menu *menu)
-{
-	struct expo *exp = menu->obj.scene->expo;
-	const struct expo_theme *theme = &exp->theme;
-	struct vidconsole_bbox bbox, label_bbox;
-	struct udevice *dev = exp->display;
-	struct video_priv *vid_priv;
-	struct udevice *cons = exp->cons;
-	struct vidconsole_colour old;
-	enum colour_idx fore, back;
-
-	/* draw a background for the menu */
-	if (CONFIG_IS_ENABLED(SYS_WHITE_ON_BLACK)) {
-		fore = VID_BLACK;
-		back = VID_WHITE;
-	} else {
-		fore = VID_LIGHT_GRAY;
-		back = VID_BLACK;
-	}
-
-	scene_menu_calc_bbox(menu, &bbox, &label_bbox);
-	vidconsole_push_colour(cons, fore, back, &old);
-	vid_priv = dev_get_uclass_priv(dev);
-	video_fill_part(dev, label_bbox.x0 - theme->menu_inset,
-			label_bbox.y0 - theme->menu_inset,
-			label_bbox.x1, label_bbox.y1 + theme->menu_inset,
-			vid_priv->colour_fg);
-	vidconsole_pop_colour(cons, &old);
 }
 
 int scene_menu_render_deps(struct scene *scn, struct scene_obj_menu *menu)

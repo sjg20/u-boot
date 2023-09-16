@@ -295,4 +295,25 @@ int scene_bbox_union(struct scene *scn, uint id, int inset,
  */
 int scene_textline_calc_dims(struct scene_obj_textline *tline);
 
+/**
+ * scene_menu_calc_bbox() - Calculate bounding boxes for the menu
+ *
+ * @menu: Menu to process
+ * @bbox: Returns bounding box of menu including prompts
+ * @label_bbox: Returns bounding box of labels
+ */
+void scene_menu_calc_bbox(struct scene_obj_menu *menu,
+			  struct vidconsole_bbox *bbox,
+			  struct vidconsole_bbox *label_bbox);
+
+/**
+ * scene_obj_calc_bbox() - Calculate bounding boxes for an object
+ *
+ * @obj: Object to process
+ * @bbox: Returns bounding box of object including prompts
+ * @label_bbox: Returns bounding box of labels (active area)
+ */
+int scene_obj_calc_bbox(struct scene_obj *obj, struct vidconsole_bbox *bbox,
+			struct vidconsole_bbox *label_bbox);
+
 #endif /* __SCENE_INTERNAL_H */
