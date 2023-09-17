@@ -275,10 +275,34 @@ static int get_cur_menuitem_text(const struct scene_obj_menu *menu,
 	return 0;
 }
 
+static int write_dt_string(struct abuf *buf, const char *name, const char *str)
+{
+	int ret, i;
+
+	/* write the text of the current item */
+	ret = -EAGAIN;
+	for (i = 0; ret && i < 2; i++) {
+		ret = fdt_property_string(abuf_data(buf), name, str);
+		if (!i) {
+			ret = check_space(ret, buf);
+			if (ret)
+				return log_msg_ret("rs2", -ENOMEM);
+		}
+	}
+
+	/* this should not happen */
+	if (ret)
+		return log_msg_ret("str", -EFAULT);
+
+	return 0;
+}
+
 static int h_write_settings(struct scene_obj *obj, void *vpriv)
 {
 	struct cedit_iter_priv *priv = vpriv;
+	struct scene *scn = obj->scene;
 	struct abuf *buf = priv->buf;
+	int ret;
 
 	switch (obj->type) {
 	case SCENEOBJT_NONE:
@@ -286,23 +310,29 @@ static int h_write_settings(struct scene_obj *obj, void *vpriv)
 	case SCENEOBJT_TEXT:
 		break;
 	case SCENEOBJT_TEXTLINE:
-#if 0
 		const struct scene_obj_textline *tline;
+		struct scene_obj_txt *txt;
+		const char *str;
 
+		tline = (struct scene_obj_textline *)obj;
 		txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_TEXT);
 		if (!txt)
 			return log_msg_ret("txt", -ENOENT);
 
-		str = expo_get_str(scn->expo, tline->str_id);
+		str = expo_get_str(scn->expo, txt->str_id);
 		if (!str)
 			return log_msg_ret("str", -ENOENT);
-#endif
+
+		ret = write_dt_string(buf, obj->name, str);
+		if (ret)
+			return log_msg_ret("wr2", ret);
+
 		break;
 	case SCENEOBJT_MENU: {
 		const struct scene_obj_menu *menu;
 		const char *str;
 		char name[80];
-		int ret, i;
+		int i;
 
 		/* write the ID of the current item */
 		menu = (struct scene_obj_menu *)obj;
@@ -326,19 +356,9 @@ static int h_write_settings(struct scene_obj *obj, void *vpriv)
 
 		/* write the text of the current item */
 		snprintf(name, sizeof(name), "%s-str", obj->name);
-		ret = -EAGAIN;
-		for (i = 0; ret && i < 2; i++) {
-			ret = fdt_property_string(abuf_data(buf), name, str);
-			if (!i) {
-				ret = check_space(ret, buf);
-				if (ret)
-					return log_msg_ret("rs2", -ENOMEM);
-			}
-		}
-
-		/* this should not happen */
+		ret = write_dt_string(buf, name, str);
 		if (ret)
-			return log_msg_ret("wr2", -EFAULT);
+			return log_msg_ret("wr2", ret);
 
 		break;
 	}
@@ -394,6 +414,7 @@ int cedit_write_settings(struct expo *exp, struct abuf *buf)
 static int h_read_settings(struct scene_obj *obj, void *vpriv)
 {
 	struct cedit_iter_priv *priv = vpriv;
+	struct scene *scn = obj->scene;
 	ofnode node = priv->node;
 
 	switch (obj->type) {
@@ -402,7 +423,25 @@ static int h_read_settings(struct scene_obj *obj, void *vpriv)
 	case SCENEOBJT_TEXT:
 		break;
 	case SCENEOBJT_TEXTLINE:
-		// TODO
+		const struct scene_obj_textline *tline;
+		struct scene_obj_txt *txt;
+		const char *val;
+		char *str;
+		int len;
+
+		tline = (struct scene_obj_textline *)obj;
+		txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_TEXT);
+		if (!txt)
+			return log_msg_ret("txt", -ENOENT);
+
+		str = (char *)expo_get_str(scn->expo, txt->str_id);
+		if (!str)
+			return log_msg_ret("str", -ENOENT);
+
+		val = ofnode_read_prop(node, obj->name, &len);
+		if (len >= tline->max_chars)
+			return log_msg_ret("str", -ENOSPC);
+		strcpy(str, val);
 		break;
 	case SCENEOBJT_MENU: {
 		struct scene_obj_menu *menu;
@@ -448,35 +487,60 @@ static int h_write_settings_env(struct scene_obj *obj, void *vpriv)
 {
 	const struct scene_obj_menu *menu;
 	struct cedit_iter_priv *priv = vpriv;
+	struct scene *scn = obj->scene;
 	char name[80], var[60];
 	const char *str;
 	int val, ret;
 
-	if (obj->type != SCENEOBJT_MENU)
-		return 0;
-
-	menu = (struct scene_obj_menu *)obj;
-	val = menu->cur_item_id;
 	snprintf(var, sizeof(var), "c.%s", obj->name);
 
-	if (priv->verbose)
-		printf("%s=%d\n", var, val);
+	switch (obj->type) {
+	case SCENEOBJT_NONE:
+	case SCENEOBJT_IMAGE:
+	case SCENEOBJT_TEXT:
+		break;
+	case SCENEOBJT_TEXTLINE:
+		const struct scene_obj_textline *tline;
+		struct scene_obj_txt *txt;
 
-	ret = env_set_ulong(var, val);
-	if (ret)
-		return log_msg_ret("set", ret);
+		tline = (struct scene_obj_textline *)obj;
+		txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_TEXT);
+		if (!txt)
+			return log_msg_ret("txt", -ENOENT);
 
-	ret = get_cur_menuitem_text(menu, &str);
-	if (ret)
-		return log_msg_ret("mis", ret);
+		str = expo_get_str(scn->expo, txt->str_id);
+		if (!str)
+			return log_msg_ret("str", -ENOENT);
 
-	snprintf(name, sizeof(name), "c.%s-str", obj->name);
-	if (priv->verbose)
-		printf("%s=%s\n", name, str);
+		ret = env_set_ulong(var, val);
+		if (ret)
+			return log_msg_ret("set", ret);
 
-	ret = env_set(name, str);
-	if (ret)
-		return log_msg_ret("st2", ret);
+		break;
+	case SCENEOBJT_MENU:
+		menu = (struct scene_obj_menu *)obj;
+		val = menu->cur_item_id;
+
+		if (priv->verbose)
+			printf("%s=%d\n", var, val);
+
+		ret = env_set_ulong(var, val);
+		if (ret)
+			return log_msg_ret("set", ret);
+
+		ret = get_cur_menuitem_text(menu, &str);
+		if (ret)
+			return log_msg_ret("mis", ret);
+
+		snprintf(name, sizeof(name), "c.%s-str", obj->name);
+		if (priv->verbose)
+			printf("%s=%s\n", name, str);
+
+		ret = env_set(name, str);
+		if (ret)
+			return log_msg_ret("st2", ret);
+		break;
+	}
 
 	return 0;
 }
@@ -500,28 +564,54 @@ int cedit_write_settings_env(struct expo *exp, bool verbose)
 static int h_read_settings_env(struct scene_obj *obj, void *vpriv)
 {
 	struct cedit_iter_priv *priv = vpriv;
+	struct scene *scn = obj->scene;
 	struct scene_obj_menu *menu;
 	char var[60];
 	int val;
 
-	if (obj->type != SCENEOBJT_MENU)
-		return 0;
-
-	menu = (struct scene_obj_menu *)obj;
-	val = menu->cur_item_id;
 	snprintf(var, sizeof(var), "c.%s", obj->name);
 
-	val = env_get_ulong(var, 10, 0);
-	if (priv->verbose)
-		printf("%s=%d\n", var, val);
-	if (!val)
-		return log_msg_ret("get", -ENOENT);
+	switch (obj->type) {
+	case SCENEOBJT_NONE:
+	case SCENEOBJT_IMAGE:
+	case SCENEOBJT_TEXT:
+		break;
+	case SCENEOBJT_TEXTLINE:
+		const struct scene_obj_textline *tline;
+		struct scene_obj_txt *txt;
+		const char *value;
+		char *str;
+		int len;
 
-	/*
-	 * note that no validation is done here, to make sure the ID is valid
-	 * and actually points to a menu item
-	 */
-	menu->cur_item_id = val;
+		tline = (struct scene_obj_textline *)obj;
+		txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_TEXT);
+		if (!txt)
+			return log_msg_ret("txt", -ENOENT);
+
+		str = (char *)expo_get_str(scn->expo, txt->str_id);
+		if (!str)
+			return log_msg_ret("str", -ENOENT);
+
+		value = env_get(var);
+		if (len >= tline->max_chars)
+			return log_msg_ret("str", -ENOSPC);
+		strcpy(str, value);
+		break;
+	case SCENEOBJT_MENU:
+		menu = (struct scene_obj_menu *)obj;
+		val = env_get_ulong(var, 10, 0);
+		if (priv->verbose)
+			printf("%s=%d\n", var, val);
+		if (!val)
+			return log_msg_ret("get", -ENOENT);
+
+		/*
+		 * note that no validation is done here, to make sure the ID is
+		 * valid * and actually points to a menu item
+		 */
+		menu->cur_item_id = val;
+		break;
+	}
 
 	return 0;
 }
