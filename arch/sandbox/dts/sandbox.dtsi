@@ -173,6 +173,7 @@
 		xres = <1366>;
 		yres = <768>;
 		log2-depth = <5>;
+		rotate = <0>;
 	};
 
 	leds {

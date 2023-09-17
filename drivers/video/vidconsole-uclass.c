@@ -791,11 +791,14 @@ void vidconsole_position_cursor(struct udevice *dev, unsigned col, unsigned row)
 	vidconsole_set_cursor_pos(dev, x, y);
 }
 
-int vidconsole_show_cursor(struct udevice *dev, uint x, uint y, uint index)
+int vidconsole_show_cursor(struct udevice *dev)
 {
+	struct vidconsole_priv *priv = dev_get_uclass_priv(dev);
 	int ret;
 
-	ret = vidconsole_set_cursor_visible(dev, true, x, y, index);
+	ret = vidconsole_set_cursor_visible(dev, true,
+					    VID_TO_PIXEL(priv->xcur_frac),
+					    priv->ycur, 0);
 	if (ret)
 		return ret;
 

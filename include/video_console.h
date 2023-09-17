@@ -381,15 +381,12 @@ int vidconsole_set_cursor_visible(struct udevice *dev, bool visible,
 /**
  * vidconsole_show_cursor() - Show the cursor
  *
- * Shows a cursor at a position
+ * Shows a cursor at the current position
  *
  * @dev: Console device to use
- * @x: X position in pixels
- * @y: Y position in pixels
- * @index: Character position (0 = at start)
  * Return: 0 if OK, -ve on error
  */
-int vidconsole_show_cursor(struct udevice *dev, uint x, uint y, uint index);
+int vidconsole_show_cursor(struct udevice *dev);
 
 /**
  * vidconsole_push_colour() - Temporarily change the font colour
