@@ -827,12 +827,13 @@ static int truetype_set_cursor_visible(struct udevice *dev, bool visible)
 	/* figure out where to place the cursor */
 	x = vc_priv->xcur_frac;
 	y = vc_priv->ycur;
-	width = 5;
 	height = met->font_size;
 	xoff = 0;
 
 	val = vid_priv->colour_bg ? 0 : 255;
 // 	val = 255 - 9;
+	width = 50;
+	height = 1000;
 
 	/* Figure out where to write the cursor in the frame buffer */
 	start = vid_priv->fb + y * vid_priv->line_length +
