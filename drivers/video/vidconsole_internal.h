@@ -92,6 +92,9 @@ int fill_char_vertically(uchar *pfont, void **line, struct video_priv *vid_priv,
 int fill_char_horizontally(uchar *pfont, void **line, struct video_priv *vid_priv,
 			   struct video_fontdata *fontdata, bool direction);
 
+int draw_cursor_vertically(void **line, struct video_priv *vid_priv,
+			   uint height, bool direction);
+
 /**
  * console probe function.
  *

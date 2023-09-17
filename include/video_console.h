@@ -16,6 +16,11 @@ struct video_priv;
 #define VID_TO_PIXEL(x)	((x) / VID_FRAC_DIV)
 #define VID_TO_POS(x)	((x) * VID_FRAC_DIV)
 
+enum {
+	/* cursor width in pixels */
+	VIDCONSOLE_CURSOR_WIDTH		= 2,
+};
+
 /**
  * struct vidconsole_priv - uclass-private data about a console device
  *

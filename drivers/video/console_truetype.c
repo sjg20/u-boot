@@ -847,20 +847,22 @@ static int truetype_set_cursor_visible(struct udevice *dev, bool visible,
 	if (!visible)
 		return 0;
 
-	/* figure out where to place the cursor */
-// 	printf("index=%d, priv->pos_ptr=%d\n", index, priv->pos_ptr);
+	/*
+	 * figure out where to place the cursor. This driver ignores the
+	 * passed-in values, since an entry_restore() must have been done before
+	 * calling this function.
+	 */
 	if (index < priv->pos_ptr)
 		x = VID_TO_PIXEL(priv->pos[index].xpos_frac);
 	else
 		x = VID_TO_PIXEL(vc_priv->xcur_frac);
 
-// 	x = vc_priv->xcur_frac;
 	y = vc_priv->ycur;
 	height = met->font_size;
 	xoff = 0;
 
 	val = vid_priv->colour_bg ? 0 : 255;
-	width = 2;
+	width = VIDCONSOLE_CURSOR_WIDTH;
 
 	/* Figure out where to write the cursor in the frame buffer */
 	start = vid_priv->fb + y * vid_priv->line_length +
