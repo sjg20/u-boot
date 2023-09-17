@@ -672,13 +672,14 @@ int vidconsole_entry_restore(struct udevice *dev, struct abuf *buf)
 	return 0;
 }
 
-int vidconsole_set_cursor_visible(struct udevice *dev, bool visible)
+int vidconsole_set_cursor_visible(struct udevice *dev, bool visible,
+				  uint x, uint y, uint index)
 {
 	struct vidconsole_ops *ops = vidconsole_get_ops(dev);
 	int ret;
 
 	if (ops->set_cursor_visible) {
-		ret = ops->set_cursor_visible(dev, visible);
+		ret = ops->set_cursor_visible(dev, visible, x, y, index);
 		if (ret != -ENOSYS)
 			return ret;
 	}
@@ -790,11 +791,11 @@ void vidconsole_position_cursor(struct udevice *dev, unsigned col, unsigned row)
 	vidconsole_set_cursor_pos(dev, x, y);
 }
 
-int vidconsole_show_cursor(struct udevice *dev)
+int vidconsole_show_cursor(struct udevice *dev, uint x, uint y, uint index)
 {
 	int ret;
 
-	ret = vidconsole_set_cursor_visible(dev, true);
+	ret = vidconsole_set_cursor_visible(dev, true, x, y, index);
 	if (ret)
 		return ret;
 

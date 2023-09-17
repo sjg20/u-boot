@@ -171,8 +171,36 @@ int scene_textline_send_key(struct scene *scn, struct scene_obj_textline *tline,
 int scene_textline_render_deps(struct scene *scn,
 			       struct scene_obj_textline *tline)
 {
+	const bool open = tline->obj.flags & SCENEOF_OPEN;
+	struct udevice *cons = scn->expo->cons;
+	struct scene_obj_txt *txt;
+	int ret;
+
 	scene_render_deps(scn, tline->label_id);
 	scene_render_deps(scn, tline->edit_id);
+
+	/* show the vidconsole cursor if open */
+	if (open) {
+		/* get the position within the field */
+		txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_NONE);
+		if (!txt)
+			return log_msg_ret("cur", -ENOENT);
+
+		if (txt->font_name || txt->font_size) {
+			ret = vidconsole_select_font(cons,
+						     txt->font_name,
+						     txt->font_size);
+		} else {
+			ret = vidconsole_select_font(cons, NULL, 0);
+		}
+
+		ret = vidconsole_entry_restore(cons, &scn->entry_save);
+		if (ret)
+			return log_msg_ret("sav", ret);
+
+		vidconsole_show_cursor(cons, txt->obj.dim.x, txt->obj.dim.y,
+				       scn->cls.num);
+	}
 
 	return 0;
 }
@@ -180,13 +208,19 @@ int scene_textline_render_deps(struct scene *scn,
 int scene_textline_open(struct scene *scn, struct scene_obj_textline *tline)
 {
 	struct udevice *cons = scn->expo->cons;
+	struct scene_obj_txt *txt;
 	int ret;
 
 	/* Copy the text into the scene buffer in case the edit is cancelled */
 	memcpy(abuf_data(&scn->buf), abuf_data(&tline->buf),
 	       abuf_size(&scn->buf));
 
-	vidconsole_set_cursor_pos(cons, tline->obj.dim.x, tline->obj.dim.y);
+	/* get the position of the editable */
+	txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_NONE);
+	if (!txt)
+		return log_msg_ret("cur", -ENOENT);
+
+	vidconsole_set_cursor_pos(cons, txt->obj.dim.x, txt->obj.dim.y);
 	vidconsole_entry_start(cons);
 	cli_cread_init(&scn->cls, abuf_data(&tline->buf), tline->max_chars);
 	scn->cls.insert = true;

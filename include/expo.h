@@ -136,6 +136,7 @@ struct scene {
 	uint id;
 	uint title_id;
 	uint highlight_id;
+	uint curs_x, curs_y;
 	struct cli_line_state cls;
 	struct abuf buf;
 	struct abuf entry_save;

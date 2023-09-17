@@ -176,6 +176,17 @@ struct console_tt_priv {
 	int pos_ptr;
 };
 
+/**
+ * struct console_tt_store - Format used for save/restore of entry information
+ *
+ * @priv: Private data
+ * @cur: Current cursor position
+ */
+struct console_tt_store {
+	struct console_tt_priv priv;
+	struct pos_info cur;
+};
+
 static int console_truetype_set_row(struct udevice *dev, uint row, int clr)
 {
 	struct video_priv *vid_priv = dev_get_uclass_priv(dev->parent);
@@ -783,8 +794,10 @@ static int truetype_nominal(struct udevice *dev, const char *name, uint size,
 
 static int truetype_entry_save(struct udevice *dev, struct abuf *buf)
 {
+	struct vidconsole_priv *vc_priv = dev_get_uclass_priv(dev);
 	struct console_tt_priv *priv = dev_get_priv(dev);
-	const uint size = sizeof(struct console_tt_priv);
+	struct console_tt_store store;
+	const uint size = sizeof(store);
 
 	/*
 	 * store the whole priv structure as it is simpler that picking out
@@ -793,30 +806,40 @@ static int truetype_entry_save(struct udevice *dev, struct abuf *buf)
 	if (!abuf_realloc(buf, size))
 		return log_msg_ret("sav", -ENOMEM);
 
-	memcpy(abuf_data(buf), priv, size);
+	store.priv = *priv;
+	store.cur.xpos_frac = vc_priv->xcur_frac;
+	store.cur.ypos  = vc_priv->ycur;
+	memcpy(abuf_data(buf), &store, size);
 
 	return 0;
 }
 
 static int truetype_entry_restore(struct udevice *dev, struct abuf *buf)
 {
-	struct console_tt_priv *from, *priv = dev_get_priv(dev);
+	struct vidconsole_priv *vc_priv = dev_get_uclass_priv(dev);
+	struct console_tt_priv *priv = dev_get_priv(dev);
+	struct console_tt_store store;
 
-	from = abuf_data(buf);
-	priv->pos_ptr = from->pos_ptr;
-	memcpy(priv->pos, from->pos, from->pos_ptr * sizeof(struct pos_info));
+	memcpy(&store, abuf_data(buf), sizeof(store));
+
+	vc_priv->xcur_frac = store.cur.xpos_frac ;
+	vc_priv->ycur = store.cur.ypos;
+	priv->pos_ptr = store.priv.pos_ptr;
+	memcpy(priv->pos, store.priv.pos,
+	       store.priv.pos_ptr * sizeof(struct pos_info));
 
 	return 0;
 }
 
-static int truetype_set_cursor_visible(struct udevice *dev, bool visible)
+static int truetype_set_cursor_visible(struct udevice *dev, bool visible,
+				       uint x, uint y, uint index)
 {
 	struct vidconsole_priv *vc_priv = dev_get_uclass_priv(dev);
 	struct udevice *vid = dev->parent;
 	struct video_priv *vid_priv = dev_get_uclass_priv(vid);
 	struct console_tt_priv *priv = dev_get_priv(dev);
 	struct console_tt_metrics *met = priv->cur_met;
-	uint x, y, row, width, height, xoff;
+	uint row, width, height, xoff;
 	void *start, *line;
 	uint out, val;
 	int ret;
@@ -825,22 +848,23 @@ static int truetype_set_cursor_visible(struct udevice *dev, bool visible)
 		return 0;
 
 	/* figure out where to place the cursor */
-	x = vc_priv->xcur_frac;
+// 	printf("index=%d, priv->pos_ptr=%d\n", index, priv->pos_ptr);
+	if (index < priv->pos_ptr)
+		x = VID_TO_PIXEL(priv->pos[index].xpos_frac);
+	else
+		x = VID_TO_PIXEL(vc_priv->xcur_frac);
+
+// 	x = vc_priv->xcur_frac;
 	y = vc_priv->ycur;
 	height = met->font_size;
 	xoff = 0;
 
-// 	console_truetype_putc_xy(dev, x, y, 'W');
-// 	return 0;
-
 	val = vid_priv->colour_bg ? 0 : 255;
-// 	val = 255 - val;
 	width = 2;
-// 	height = 1000;
 
 	/* Figure out where to write the cursor in the frame buffer */
 	start = vid_priv->fb + y * vid_priv->line_length +
-		VID_TO_PIXEL(x) * VNBYTES(vid_priv->bpix);
+		x * VNBYTES(vid_priv->bpix);
 	line = start;
 
 	/* draw a vertical bar in the correct position */

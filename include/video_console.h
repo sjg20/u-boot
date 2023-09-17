@@ -273,9 +273,13 @@ struct vidconsole_ops {
 	 *
 	 * @dev: Console device to use
 	 * @visible: true to show the cursor, false to hide it
+	 * @x: X position in pixels
+	 * @y: Y position in pixels
+	 * @index: Character position (0 = at start)
 	 * Return: 0 if OK, -ve on error
 	 */
-	int (*set_cursor_visible)(struct udevice *dev, bool visible);
+	int (*set_cursor_visible)(struct udevice *dev, bool visible,
+				  uint x, uint y, uint index);
 };
 
 /* Get a pointer to the driver operations for a video console device */
@@ -361,19 +365,26 @@ int vidconsole_entry_restore(struct udevice *dev, struct abuf *buf);
  *
  * @dev: Console device to use
  * @visible: true to show the cursor, false to hide it
+ * @x: X position in pixels
+ * @y: Y position in pixels
+ * @index: Character position (0 = at start)
  * Return: 0 if OK, -ve on error
  */
-int vidconsole_set_cursor_visible(struct udevice *dev, bool visible);
+int vidconsole_set_cursor_visible(struct udevice *dev, bool visible,
+				  uint x, uint y, uint index);
 
 /**
  * vidconsole_show_cursor() - Show the cursor
  *
- * Shows a cursor at the current position
+ * Shows a cursor at a position
  *
  * @dev: Console device to use
+ * @x: X position in pixels
+ * @y: Y position in pixels
+ * @index: Character position (0 = at start)
  * Return: 0 if OK, -ve on error
  */
-int vidconsole_show_cursor(struct udevice *dev);
+int vidconsole_show_cursor(struct udevice *dev, uint x, uint y, uint index);
 
 /**
  * vidconsole_push_colour() - Temporarily change the font colour

@@ -549,7 +549,6 @@ int scene_render_deps(struct scene *scn, uint id)
 int scene_render(struct scene *scn)
 {
 	struct expo *exp = scn->expo;
-	struct udevice *cons = exp->text_mode ? NULL : exp->cons;
 	struct scene_obj *obj;
 	int ret;
 
@@ -567,8 +566,6 @@ int scene_render(struct scene *scn)
 		if (ret && ret != -ENOTSUPP)
 			return log_msg_ret("dep", ret);
 	}
-	if (cons)
-		vidconsole_show_cursor(cons);
 
 	return 0;
 }
