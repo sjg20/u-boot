@@ -193,6 +193,7 @@ int scene_textline_open(struct scene *scn, struct scene_obj_textline *tline)
 	ret = vidconsole_entry_save(cons, &scn->entry_save);
 	if (ret)
 		return log_msg_ret("sav", ret);
+	vidconsole_show_cursor(cons);
 
 	return 0;
 }
