@@ -127,7 +127,6 @@ int scene_textline_send_key(struct scene *scn, struct scene_obj_textline *tline,
 			    int key, struct expo_action *event)
 {
 	const bool open = tline->obj.flags & SCENEOF_OPEN;
-	int ret;
 
 	log_debug("key=%d\n", key);
 	switch (key) {
@@ -140,9 +139,19 @@ int scene_textline_send_key(struct scene *scn, struct scene_obj_textline *tline,
 			log_debug("menu quit\n");
 		}
 		break;
-	default:
+	default: {
+		struct udevice *cons = scn->expo->cons;
+		int ret;
+
+		ret = vidconsole_entry_save(cons, &scn->entry_save);
+		if (ret)
+			return log_msg_ret("sav", ret);
 		ret = cread_line_process_ch(&scn->cls, key);
+		ret = vidconsole_entry_save(cons, &scn->entry_save);
+		if (ret)
+			return log_msg_ret("sav", ret);
 		break;
+	}
 	}
 
 	return 0;
@@ -172,6 +181,14 @@ int scene_textline_open(struct scene *scn, struct scene_obj_textline *tline)
 	ret = vidconsole_entry_save(cons, &scn->entry_save);
 	if (ret)
 		return log_msg_ret("sav", ret);
+
+	return 0;
+}
+
+int scene_textline_close(struct scene *scn, struct scene_obj_textline *tline)
+{
+	memcpy(abuf_data(&tline->buf), abuf_data(&scn->buf),
+	       abuf_size(&scn->buf));
 
 	return 0;
 }
