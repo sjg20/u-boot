@@ -264,6 +264,7 @@ int cread_line_process_ch(struct cli_line_state *cls, char ichar)
 	if (ichar == '\n') {
 		putc('\n');
 		buf[cls->eol_num] = '\0';	/* terminate the string */
+		printf("cls->eol_num %d\n", cls->eol_num);
 		return 0;
 	}
 
@@ -414,6 +415,12 @@ int cread_line_process_ch(struct cli_line_state *cls, char ichar)
 		break;
 	}
 
+	/*
+	 * keep the string terminated...if we added a char at the end then we
+	 * want a \0 after it
+	 */
+	buf[cls->eol_num] = '\0';
+
 	return -EAGAIN;
 }
 
@@ -427,7 +434,7 @@ void cli_cread_init(struct cli_line_state *cls, char *buf, uint buf_size)
 	cls->len = buf_size;
 
 	if (init_len)
-		cread_add_str(buf, init_len, 1, &cls->num, &cls->eol_num, buf,
+		cread_add_str(buf, init_len, 0, &cls->num, &cls->eol_num, buf,
 			      buf_size);
 }
 
