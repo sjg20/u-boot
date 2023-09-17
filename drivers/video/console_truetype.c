@@ -830,10 +830,13 @@ static int truetype_set_cursor_visible(struct udevice *dev, bool visible)
 	height = met->font_size;
 	xoff = 0;
 
+// 	console_truetype_putc_xy(dev, x, y, 'W');
+// 	return 0;
+
 	val = vid_priv->colour_bg ? 0 : 255;
-// 	val = 255 - 9;
-	width = 50;
-	height = 1000;
+// 	val = 255 - val;
+	width = 2;
+// 	height = 1000;
 
 	/* Figure out where to write the cursor in the frame buffer */
 	start = vid_priv->fb + y * vid_priv->line_length +
@@ -901,7 +904,7 @@ static int truetype_set_cursor_visible(struct udevice *dev, bool visible)
 	if (ret)
 		return ret;
 
-	return 0;
+	return video_sync(vid, true);
 }
 
 const char *console_truetype_get_font_size(struct udevice *dev, uint *sizep)

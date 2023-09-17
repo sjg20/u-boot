@@ -264,7 +264,6 @@ int cread_line_process_ch(struct cli_line_state *cls, char ichar)
 	if (ichar == '\n') {
 		putc('\n');
 		buf[cls->eol_num] = '\0';	/* terminate the string */
-		printf("cls->eol_num %d\n", cls->eol_num);
 		return 0;
 	}
 
