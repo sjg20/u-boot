@@ -14,7 +14,7 @@
 #include <test/suites.h>
 #include <test/ut.h>
 #include "bootstd_common.h"
-#include <test/cedit-test.h>
+#include <files/expo_ids.h>
 #include "../../boot/scene_internal.h"
 
 enum {

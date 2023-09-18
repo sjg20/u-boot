@@ -300,7 +300,6 @@ static int write_dt_string(struct abuf *buf, const char *name, const char *str)
 static int h_write_settings(struct scene_obj *obj, void *vpriv)
 {
 	struct cedit_iter_priv *priv = vpriv;
-	struct scene *scn = obj->scene;
 	struct abuf *buf = priv->buf;
 	int ret;
 
@@ -311,22 +310,11 @@ static int h_write_settings(struct scene_obj *obj, void *vpriv)
 		break;
 	case SCENEOBJT_TEXTLINE:
 		const struct scene_obj_textline *tline;
-		struct scene_obj_txt *txt;
-		const char *str;
 
 		tline = (struct scene_obj_textline *)obj;
-		txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_TEXT);
-		if (!txt)
-			return log_msg_ret("txt", -ENOENT);
-
-		str = expo_get_str(scn->expo, txt->str_id);
-		if (!str)
-			return log_msg_ret("str", -ENOENT);
-
-		ret = write_dt_string(buf, obj->name, str);
+		ret = write_dt_string(buf, obj->name, abuf_data(&tline->buf));
 		if (ret)
 			return log_msg_ret("wr2", ret);
-
 		break;
 	case SCENEOBJT_MENU: {
 		const struct scene_obj_menu *menu;
@@ -414,7 +402,6 @@ int cedit_write_settings(struct expo *exp, struct abuf *buf)
 static int h_read_settings(struct scene_obj *obj, void *vpriv)
 {
 	struct cedit_iter_priv *priv = vpriv;
-	struct scene *scn = obj->scene;
 	ofnode node = priv->node;
 
 	switch (obj->type) {
@@ -424,24 +411,15 @@ static int h_read_settings(struct scene_obj *obj, void *vpriv)
 		break;
 	case SCENEOBJT_TEXTLINE:
 		const struct scene_obj_textline *tline;
-		struct scene_obj_txt *txt;
 		const char *val;
-		char *str;
 		int len;
 
 		tline = (struct scene_obj_textline *)obj;
-		txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_TEXT);
-		if (!txt)
-			return log_msg_ret("txt", -ENOENT);
-
-		str = (char *)expo_get_str(scn->expo, txt->str_id);
-		if (!str)
-			return log_msg_ret("str", -ENOENT);
 
 		val = ofnode_read_prop(node, obj->name, &len);
 		if (len >= tline->max_chars)
 			return log_msg_ret("str", -ENOSPC);
-		strcpy(str, val);
+		strcpy(abuf_data(&tline->buf), val);
 		break;
 	case SCENEOBJT_MENU: {
 		struct scene_obj_menu *menu;
@@ -487,7 +465,6 @@ static int h_write_settings_env(struct scene_obj *obj, void *vpriv)
 {
 	const struct scene_obj_menu *menu;
 	struct cedit_iter_priv *priv = vpriv;
-	struct scene *scn = obj->scene;
 	char name[80], var[60];
 	const char *str;
 	int val, ret;
@@ -501,20 +478,15 @@ static int h_write_settings_env(struct scene_obj *obj, void *vpriv)
 		break;
 	case SCENEOBJT_TEXTLINE:
 		const struct scene_obj_textline *tline;
-		struct scene_obj_txt *txt;
 
 		tline = (struct scene_obj_textline *)obj;
-		txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_TEXT);
-		if (!txt)
-			return log_msg_ret("txt", -ENOENT);
-
-		str = expo_get_str(scn->expo, txt->str_id);
-		if (!str)
-			return log_msg_ret("str", -ENOENT);
-
-		ret = env_set_ulong(var, val);
+		str = abuf_data(&tline->buf);
+		ret = env_set(var, str);
 		if (ret)
 			return log_msg_ret("set", ret);
+
+		if (priv->verbose)
+			printf("%s=%s\n", var, str);
 
 		break;
 	case SCENEOBJT_MENU:
@@ -564,7 +536,6 @@ int cedit_write_settings_env(struct expo *exp, bool verbose)
 static int h_read_settings_env(struct scene_obj *obj, void *vpriv)
 {
 	struct cedit_iter_priv *priv = vpriv;
-	struct scene *scn = obj->scene;
 	struct scene_obj_menu *menu;
 	char var[60];
 	int val;
@@ -578,24 +549,16 @@ static int h_read_settings_env(struct scene_obj *obj, void *vpriv)
 		break;
 	case SCENEOBJT_TEXTLINE:
 		const struct scene_obj_textline *tline;
-		struct scene_obj_txt *txt;
 		const char *value;
-		char *str;
 		int len;
 
 		tline = (struct scene_obj_textline *)obj;
-		txt = scene_obj_find(scn, tline->edit_id, SCENEOBJT_TEXT);
-		if (!txt)
-			return log_msg_ret("txt", -ENOENT);
-
-		str = (char *)expo_get_str(scn->expo, txt->str_id);
-		if (!str)
-			return log_msg_ret("str", -ENOENT);
-
 		value = env_get(var);
 		if (len >= tline->max_chars)
 			return log_msg_ret("str", -ENOSPC);
-		strcpy(str, value);
+		if (priv->verbose)
+			printf("%s=%s\n", var, value);
+		strcpy(abuf_data(&tline->buf), value);
 		break;
 	case SCENEOBJT_MENU:
 		menu = (struct scene_obj_menu *)obj;

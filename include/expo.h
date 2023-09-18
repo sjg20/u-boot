@@ -329,7 +329,7 @@ struct scene_menitem {
  * @label_id: ID of the label text, or 0 if none
  * @edit_id: ID of the editable text
  * @max_chars: Maximum number of characters allowed
- * @abuf: Text buffer containing current text
+ * @buf: Text buffer containing current text
  * @pos: Cursor position
  */
 struct scene_obj_textline {
