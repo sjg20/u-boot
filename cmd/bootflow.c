@@ -459,10 +459,10 @@ static int do_bootflow_menu(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (ret) {
 		if (ret == -EAGAIN)
 			printf("Nothing chosen\n");
-		else {
+		else
 			printf("Menu failed (err=%d)\n", ret);
-			return CMD_RET_FAILURE;
-		}
+
+		return CMD_RET_FAILURE;
 	}
 
 	printf("Selected: %s\n", bflow->os_name ? bflow->os_name : bflow->name);
