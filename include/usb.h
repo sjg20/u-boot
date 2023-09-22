@@ -265,7 +265,26 @@ int usb_kbd_deregister(int force);
  */
 int usb_init(void);
 
-int usb_stop(void); /* stop the USB Controller */
+/**
+ * usb_stop() - stop the USB Controller and unbind all USB controllers/devices
+ *
+ * This unbinds all devices on the USB buses.
+ *
+ * Return: 0 if OK, -ve on error
+ */
+int usb_stop(void);
+
+/**
+ * usb_pause() - stop the USB Controller DMA, etc.
+ *
+ * Note that this does not unbind bus devices, so using usb_init() after this
+ * call is not permitted. This function is only useful just before booting, to
+ * ensure that devices are dormant.
+ *
+ * Return: 0 if OK, -ve on error
+ */
+int usb_pause(void);
+
 int usb_detect_change(void); /* detect if a USB device has been (un)plugged */
 
 

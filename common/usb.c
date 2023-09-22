@@ -144,6 +144,11 @@ int usb_stop(void)
 	return 0;
 }
 
+int usb_pause(void)
+{
+	return usb_stop();
+}
+
 /******************************************************************************
  * Detect if a USB device has been plugged or unplugged.
  */
