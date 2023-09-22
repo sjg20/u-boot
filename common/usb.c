@@ -126,7 +126,7 @@ int usb_init(void)
 /******************************************************************************
  * Stop USB this stops the LowLevel Part and deregisters USB devices.
  */
-int usb_stop(void)
+int usb_pause(void)
 {
 	int i;
 
@@ -142,6 +142,11 @@ int usb_stop(void)
 	}
 
 	return 0;
+}
+
+int usb_stop(void)
+{
+	return usb_pause();
 }
 
 /******************************************************************************
