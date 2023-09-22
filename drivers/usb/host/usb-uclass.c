@@ -173,7 +173,7 @@ int usb_get_max_xfer_size(struct usb_device *udev, size_t *size)
 	return ops->get_max_xfer_size(bus, size);
 }
 
-int usb_stop(void)
+static int usb_finish(bool unbind_all)
 {
 	struct udevice *bus;
 	struct udevice *rh;
@@ -195,7 +195,7 @@ int usb_stop(void)
 
 		/* Locate root hub device */
 		device_find_first_child(bus, &rh);
-		if (rh) {
+		if (rh && unbind_all) {
 			/*
 			 * All USB devices are children of root hub.
 			 * Unbinding root hub will unbind all of its children.
@@ -220,6 +220,16 @@ int usb_stop(void)
 	usb_started = 0;
 
 	return err;
+}
+
+int usb_stop(void)
+{
+	return usb_finish(true);
+}
+
+int usb_pause(void)
+{
+	return usb_finish(false);
 }
 
 static void usb_scan_bus(struct udevice *bus, bool recurse)
