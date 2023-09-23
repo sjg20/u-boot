@@ -1,7 +1,5 @@
-menu "Command line interface"
-
-config CMDLINE
-	bool "Support U-Boot commands"
+menuconfig CMDLINE
+	bool "Command line interface"
 	default y
 	select CLI_READLINE
 	help
@@ -12,9 +10,10 @@ config CMDLINE
 	  Depending on the number of commands enabled, this can add
 	  substantially to the size of U-Boot.
 
+if CMDLINE
+
 config HUSH_PARSER
 	bool "Use hush shell"
-	depends on CMDLINE
 	help
 	  This option enables the "hush" shell (from Busybox) as command line
 	  interpreter, thus enabling powerful command line syntax like
@@ -26,7 +25,6 @@ config HUSH_PARSER
 
 config CMDLINE_EDITING
 	bool "Enable command line editing"
-	depends on CMDLINE
 	default y
 	help
 	  Enable an editing function for interactive, command-line-input
@@ -52,15 +50,13 @@ config CMDLINE_PS_SUPPORT
 
 config AUTO_COMPLETE
 	bool "Enable auto complete using TAB"
-	depends on CMDLINE
 	default y
 	help
 	  Enable auto completion of commands using TAB.
 
 config SYS_LONGHELP
 	bool "Enable long help messages"
-	depends on CMDLINE
-	default y if CMDLINE
+	default y
 	help
 	  Defined when you want long help messages included
 	  Do not set this option when short of memory.
@@ -98,8 +94,7 @@ config SYS_CBSIZE
 
 config SYS_XTRACE
 	bool "Command execution tracer"
-	depends on CMDLINE
-	default y if CMDLINE
+	default y
 	help
 	  This option enables the possiblity to print all commands before
 	  executing them and after all variables are evaluated (similar
@@ -238,7 +233,6 @@ menu "Boot commands"
 
 config CMD_BOOTD
 	bool "bootd"
-	depends on CMDLINE
 	default y
 	help
 	  Run the command stored in the environment "bootcmd", i.e.
@@ -405,7 +399,7 @@ config SYS_BOOTM_LEN
 
 config CMD_BOOTEFI
 	bool "bootefi"
-	depends on EFI_LOADER && CMDLINE
+	depends on EFI_LOADER
 	default y
 	help
 	  Boot an EFI image from memory.
@@ -437,7 +431,6 @@ source lib/efi_selftest/Kconfig
 
 config CMD_BOOTMENU
 	bool "bootmenu"
-	depends on CMDLINE
 	select MENU
 	select CHARSET
 	help
@@ -504,7 +497,6 @@ config CMD_GO
 
 config CMD_RUN
 	bool "run"
-	depends on CMDLINE
 	default y
 	help
 	  Run the command in the given environment variable.
@@ -595,7 +587,6 @@ menu "Environment commands"
 
 config CMD_ASKENV
 	bool "ask for env variable"
-	depends on CMDLINE
 	help
 	  Ask for environment variable
 
@@ -1715,7 +1706,6 @@ if NET
 
 menuconfig CMD_NET
 	bool "Network commands"
-	depends on CMDLINE
 	default y
 	imply NETDEVICES
 
@@ -2019,7 +2009,6 @@ config CMD_ETHSW
 
 config CMD_PXE
 	bool "pxe"
-	depends on CMDLINE
 	select PXE_UTILS
 	help
 	  Boot image via network using PXE protocol
@@ -2154,7 +2143,6 @@ config CMD_EFICONFIG
 
 config CMD_EXCEPTION
 	bool "exception - raise exception"
-	depends on CMDLINE
 	depends on ARM || RISCV || SANDBOX || X86
 	help
 	  Enable the 'exception' command which allows to raise an exception.
@@ -2255,14 +2243,12 @@ config CMD_SOUND
 
 config CMD_SYSBOOT
 	bool "sysboot"
-	depends on CMDLINE
 	select PXE_UTILS
 	help
 	  Boot image via local extlinux.conf file
 
 config CMD_QFW
 	bool "qfw"
-	depends on CMDLINE
 	select QFW
 	help
 	  This provides access to the QEMU firmware interface.  The main
@@ -2911,4 +2897,5 @@ config CMD_MESON
 	default y
 	help
 	  Enable useful commands for the Meson Soc family developed by Amlogic Inc.
-endmenu
+
+endif # CMDLINE
