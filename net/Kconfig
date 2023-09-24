@@ -4,6 +4,7 @@
 
 menuconfig NET
 	bool "Networking support"
+	depends on CMDLINE
 	default y
 
 if NET

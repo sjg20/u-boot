@@ -1694,6 +1694,7 @@ if NET
 
 menuconfig CMD_NET
 	bool "Network commands"
+	depends on CMDLINE
 	default y
 	imply NETDEVICES
 
