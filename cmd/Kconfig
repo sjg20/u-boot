@@ -84,11 +84,6 @@ config SYS_CBSIZE
 	default 256 if M68K || PPC
 	default 1024
 
-config SYS_PBSIZE
-	int "Buffer size for console output"
-	default 1024 if ARCH_SUNXI
-	default 1044
-
 config SYS_XTRACE
 	bool "Command execution tracer"
 	depends on CMDLINE

@@ -52,6 +52,11 @@ config CONSOLE_RECORD_IN_SIZE
 	  The buffer is allocated immediately after the malloc() region is
 	  ready.
 
+config SYS_PBSIZE
+	int "Buffer size for console output"
+	default 1024 if ARCH_SUNXI
+	default 1044
+
 config DISABLE_CONSOLE
 	bool "Add functionality to disable console completely"
 	help
