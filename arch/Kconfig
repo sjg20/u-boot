@@ -134,7 +134,6 @@ config SANDBOX
 	select ARCH_SUPPORTS_LTO
 	select BOARD_LATE_INIT
 	select BZIP2
-	select CMD_POWEROFF
 	select DM
 	select DM_EVENT
 	select DM_FUZZING_ENGINE
@@ -152,10 +151,8 @@ config SANDBOX
 	select PCI_ENDPOINT
 	select SPI
 	select SUPPORT_OF_CONTROL
-	select SYSRESET_CMD_POWEROFF
 	select SYS_CACHE_SHIFT_4
 	select IRQ
-	select SUPPORT_EXTENSION_SCAN
 	select SUPPORT_ACPI
 	imply BITREVERSE
 	select BLOBLIST
@@ -167,6 +164,9 @@ config SANDBOX
 	imply CMD_IO
 	imply CMD_IOTRACE
 	imply CMD_LZMADEC
+	imply CMD_POWEROFF
+	imply SYSRESET_CMD_POWEROFF
+	imply SUPPORT_EXTENSION_SCAN
 	imply CMD_SF
 	imply CMD_SF_TEST
 	imply CRC32_VERIFY
