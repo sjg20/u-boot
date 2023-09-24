@@ -50,8 +50,6 @@ int bootm_host_load_images(const void *fit, int cfg_noffset);
 int boot_selected_os(int argc, char *const argv[], int state,
 		     struct bootm_headers *images, boot_os_fn *boot_fn);
 
-ulong bootm_disable_interrupts(void);
-
 /* This is a special function used by booti/bootz */
 int bootm_find_images(int flag, int argc, char *const argv[], ulong start,
 		      ulong size);
@@ -62,6 +60,15 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 
 void arch_preboot_os(void);
 
+#ifdef CONFIG_CMD_BOOTM
+/**
+ * bootm_disable_interrupts() - Disable interrupts, stop Ethernet and USB
+ *
+ * Return: interrupt flag (0 if interrupts were disabled, non-zero if they were
+ *	enabled)
+ */
+ulong bootm_disable_interrupts(void);
+
 /*
  * boards should define this to disable devices when EFI exits from boot
  * services.
@@ -69,6 +76,10 @@ void arch_preboot_os(void);
  * TODO(sjg@chromium.org>): Update this to use driver model's device_remove().
  */
 void board_quiesce_devices(void);
+#else
+static inline ulong bootm_disable_interrupts(void) { return 0; }
+static inline void board_quiesce_devices(void) {}
+#endif
 
 /**
  * switch_to_non_secure_mode() - switch to non-secure mode

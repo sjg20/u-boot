@@ -42,9 +42,11 @@ DECLARE_GLOBAL_DATA_PTR;
 
 static struct tag *params;
 
+#ifdef CONFIG_CMD_BOOTM
 __weak void board_quiesce_devices(void)
 {
 }
+#endif
 
 /**
  * announce_and_cleanup() - Print message and prepare for kernel boot

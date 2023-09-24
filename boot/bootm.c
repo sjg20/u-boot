@@ -47,9 +47,11 @@ static const void *boot_get_kernel(struct cmd_tbl *cmdtp, int flag, int argc,
 				   char *const argv[], struct bootm_headers *images,
 				   ulong *os_data, ulong *os_len);
 
+#ifdef CONFIG_CMD_BOOTM
 __weak void board_quiesce_devices(void)
 {
 }
+#endif
 
 #ifdef CONFIG_LMB
 static void boot_start_lmb(struct bootm_headers *images)
@@ -470,12 +472,7 @@ static int bootm_load_os(struct bootm_headers *images, int boot_progress)
 	return 0;
 }
 
-/**
- * bootm_disable_interrupts() - Disable interrupts in preparation for load/boot
- *
- * Return: interrupt flag (0 if interrupts were disabled, non-zero if they were
- *	enabled)
- */
+#ifdef CONFIG_CMD_BOOTM
 ulong bootm_disable_interrupts(void)
 {
 	ulong iflag;
@@ -505,6 +502,7 @@ ulong bootm_disable_interrupts(void)
 #endif
 	return iflag;
 }
+#endif
 
 #define CONSOLE_ARG		"console="
 #define NULL_CONSOLE		(CONSOLE_ARG "ttynull")
