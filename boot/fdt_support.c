@@ -23,6 +23,11 @@
 #include <fdtdec.h>
 #include <version.h>
 
+/*
+ * The working_fdt points to our working flattened device tree.
+ */
+struct fdt_header *working_fdt;
+
 /**
  * fdt_getprop_u32_default_node - Return a node's property or a default
  *

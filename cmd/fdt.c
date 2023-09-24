@@ -31,11 +31,6 @@ static int fdt_parse_prop(char *const*newval, int count, char *data, int *len);
 static int fdt_print(const char *pathp, char *prop, int depth);
 static int is_printable_string(const void *data, int len);
 
-/*
- * The working_fdt points to our working flattened device tree.
- */
-struct fdt_header *working_fdt;
-
 static void set_working_fdt_addr_quiet(ulong addr)
 {
 	void *buf;
