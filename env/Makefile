@@ -5,6 +5,7 @@
 
 obj-$(CONFIG_$(SPL_TPL_)ENV_SUPPORT) += common.o
 obj-$(CONFIG_$(SPL_TPL_)ENV_SUPPORT) += env.o
+obj-$(CONFIG_$(SPL_TPL_)ENV_SUPPORT) += env_set.o
 obj-$(CONFIG_$(SPL_TPL_)ENV_SUPPORT) += attr.o
 obj-$(CONFIG_$(SPL_TPL_)ENV_SUPPORT) += flags.o
 

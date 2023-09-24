@@ -260,6 +260,29 @@ const char *env_fat_get_intf(void);
  * Return: string of device and partition
  */
 char *env_fat_get_dev_part(void);
+
+/*
+ * _do_env_set() - Add / replace / delete an environment variable
+ *
+ * This implements the bulk of the 'env set' command:
+ *
+ *	env set [-f] name [value]
+ *
+ * Sets the value of variable <name>
+ * If <value> is NULL, it removes the variable
+ * Use the -f flag to overwrite read-only/write-once variables
+ *
+ * @flag: CMD_FLAG_... value
+ * @argc: Number of arguments
+ * @args: List of arguments
+ * @env_flag: H_... flags from search.h
+ * Return: 0 if OK, 1 on failure, or CMD_RET_USAGE for invalid flag
+ */
+int _do_env_set(int flag, int argc, char *const argv[], int env_flag);
+
+/** env_inc_id() - Increment the environment ID */
+void env_inc_id(void);
+
 #endif /* DO_DEPS_ONLY */
 
 #endif /* _ENV_INTERNAL_H_ */
