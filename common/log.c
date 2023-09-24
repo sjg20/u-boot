@@ -206,7 +206,7 @@ static bool log_passes_filters(struct log_device *ldev, struct log_rec *rec)
 static int log_dispatch(struct log_rec *rec, const char *fmt, va_list args)
 {
 	struct log_device *ldev;
-	char buf[CONFIG_SYS_CBSIZE];
+	char buf[CONFIG_SYS_PBSIZE];
 
 	/*
 	 * When a log driver writes messages (e.g. via the network stack) this
@@ -268,7 +268,7 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 		/* display dropped traces with console puts and DEBUG_UART */
 		if (rec.level <= CONFIG_LOG_DEFAULT_LEVEL ||
 		    rec.flags & LOGRECF_FORCE_DEBUG) {
-			char buf[CONFIG_SYS_CBSIZE];
+			char buf[CONFIG_SYS_PBSIZE];
 
 			va_start(args, fmt);
 			vsnprintf(buf, sizeof(buf), fmt, args);
