@@ -94,7 +94,7 @@ static void vidconsole_newline(struct udevice *dev)
 	priv->ycur += priv->y_charsize;
 
 	/* Check if we need to scroll the terminal */
-	if ((priv->ycur + priv->y_charsize) / priv->y_charsize > priv->rows) {
+	if (priv->ycur + priv->y_charsize >= vid_priv->ysize) {
 		vidconsole_move_rows(dev, 0, rows, priv->rows - rows);
 		for (i = 0; i < rows; i++)
 			vidconsole_set_row(dev, priv->rows - i - 1,
