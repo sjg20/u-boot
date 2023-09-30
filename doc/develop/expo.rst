@@ -417,8 +417,7 @@ strings are provided inline in the nodes where they are used.
     /* this comment is parsed by the expo.py tool to insert the values below
 
     enum {
-        ZERO,
-        ID_PROMPT,
+        ID_PROMPT = EXPOID_BASE_ID,
         ID_SCENE1,
         ID_SCENE1_TITLE,
 

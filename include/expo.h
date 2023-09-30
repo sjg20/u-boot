@@ -15,6 +15,25 @@ struct udevice;
 
 #include <cli.h>
 
+
+/**
+ * enum expo_id_t - standard expo IDs
+ *
+ * These are assumed to be in use at all times.
+ *
+ * @EXPOID_SAVE: User has requested that the expo data be saved
+ * @EXPOID_DISCARD: User has requested that the expo data be discarded
+ * @EXPOID_BASE_ID: First ID which can be used for expo objects
+ */
+enum expo_id_t {
+	EXPOID_NONE,
+
+	EXPOID_SAVE,
+	EXPOID_DISCARD,
+
+	EXPOID_BASE_ID = 5,
+};
+
 /**
  * enum expoact_type - types of actions reported by the expo
  *
