@@ -576,7 +576,7 @@ static int h_read_settings_env(struct scene_obj *obj, void *vpriv)
 
 		/*
 		 * note that no validation is done here, to make sure the ID is
-		 * valid * and actually points to a menu item
+		 * valid and actually points to a menu item
 		 */
 		menu->cur_item_id = val;
 		break;
@@ -615,34 +615,32 @@ int cedit_read_settings_env(struct expo *exp, bool verbose)
 }
 
 /**
- * get_cur_menuitem_seq() - Get the sequence number of a menu's current item
+ * get_cur_menuitem_val() - Get the value of a menu's current item
  *
- * Enumerates the items of a menu (0, 1, 2) and returns the sequence number of
+ * Obtains the value of the current item in the menu. If no value, then
+ * enumerates the items of a menu (0, 1, 2) and returns the sequence number of
  * the currently selected item. If the first item is selected, this returns 0;
  * if the second, 1; etc.
  *
  * @menu: Menu to check
- * Return: Sequence number on success, else -ve error value
+ * @valp: Returns current-item value / sequence number
+ * Return: 0 on success, else -ve error value
  */
-static int get_cur_menuitem_seq(const struct scene_obj_menu *menu)
+static int get_cur_menuitem_val(const struct scene_obj_menu *menu, int *valp)
 {
 	const struct scene_menitem *mi;
-	int seq, found;
+	int seq;
 
 	seq = 0;
-	found = -1;
 	list_for_each_entry(mi, &menu->item_head, sibling) {
 		if (mi->id == menu->cur_item_id) {
-			found = seq;
-			break;
+			*valp = mi->value == INT_MAX ? seq : mi->value;
+			return 0;
 		}
 		seq++;
 	}
 
-	if (found == -1)
-		return log_msg_ret("nf", -ENOENT);
-
-	return found;
+	return log_msg_ret("nf", -ENOENT);
 }
 
 static int h_write_settings_cmos(struct scene_obj *obj, void *vpriv)
@@ -650,7 +648,7 @@ static int h_write_settings_cmos(struct scene_obj *obj, void *vpriv)
 	const struct scene_obj_menu *menu;
 	struct cedit_iter_priv *priv = vpriv;
 	int val, ret;
-	uint i, seq;
+	uint i;
 
 	if (obj->type != SCENEOBJT_MENU)
 		return 0;
@@ -658,11 +656,10 @@ static int h_write_settings_cmos(struct scene_obj *obj, void *vpriv)
 	menu = (struct scene_obj_menu *)obj;
 	val = menu->cur_item_id;
 
-	ret = get_cur_menuitem_seq(menu);
+	ret = get_cur_menuitem_val(menu, &val);
 	if (ret < 0)
 		return log_msg_ret("cur", ret);
-	seq = ret;
-	log_debug("%s: seq=%d\n", menu->obj.name, seq);
+	log_debug("%s: val=%d\n", menu->obj.name, val);
 
 	/* figure out where to place this item */
 	if (!obj->bit_length)
@@ -670,11 +667,11 @@ static int h_write_settings_cmos(struct scene_obj *obj, void *vpriv)
 	if (obj->start_bit + obj->bit_length > CMOS_MAX_BITS)
 		return log_msg_ret("bit", -E2BIG);
 
-	for (i = 0; i < obj->bit_length; i++, seq >>= 1) {
+	for (i = 0; i < obj->bit_length; i++, val >>= 1) {
 		uint bitnum = obj->start_bit + i;
 
 		priv->mask[CMOS_BYTE(bitnum)] |= 1 << CMOS_BIT(bitnum);
-		if (seq & 1)
+		if (val & 1)
 			priv->value[CMOS_BYTE(bitnum)] |= BIT(CMOS_BIT(bitnum));
 		log_debug("bit %x %x %x\n", bitnum,
 			  priv->mask[CMOS_BYTE(bitnum)],
@@ -708,6 +705,7 @@ int cedit_write_settings_cmos(struct expo *exp, struct udevice *dev,
 	}
 
 	/* write the data to the RTC */
+	log_debug("Writing CMOS\n");
 	first = CMOS_MAX_BYTES;
 	last = -1;
 	for (i = 0, count = 0; i < CMOS_MAX_BYTES; i++) {
@@ -775,7 +773,8 @@ static int h_read_settings_cmos(struct scene_obj *obj, void *vpriv)
 	}
 
 	/* update the current item */
-	mi = scene_menuitem_find_seq(menu, val);
+	log_debug("look for menuitem value %d in menu %d\n", val, menu->obj.id);
+	mi = scene_menuitem_find_val(menu, val);
 	if (!mi)
 		return log_msg_ret("seq", -ENOENT);
 
@@ -809,7 +808,7 @@ int cedit_read_settings_cmos(struct expo *exp, struct udevice *dev,
 		goto done;
 	}
 
-	/* read the data to the RTC */
+	/* indicate what bytes were read from the RTC */
 	first = CMOS_MAX_BYTES;
 	last = -1;
 	for (i = 0, count = 0; i < CMOS_MAX_BYTES; i++) {
