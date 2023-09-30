@@ -227,7 +227,7 @@ enum {
  * @type: Type of this object
  * @dim: Dimensions for this object
  * @flags: Flags for this object
- * @bit_length: Number of bits used for this object in CMOS RAM
+ * @bit_length: Number of bits used for this object in CMOS RAM (0 = none)
  * @start_bit: Start bit to use for this object in CMOS RAM
  * @sibling: Node to link this object to its siblings
  */
@@ -540,15 +540,6 @@ void scene_set_highlight_id(struct scene *scn, uint id);
 int scene_set_open(struct scene *scn, uint id, bool open);
 
 /**
- * scene_title_set() - set the scene title
- *
- * @scn: Scene to update
- * @title_id: Title ID to set
- * Returns: 0 if OK
- */
-int scene_title_set(struct scene *scn, uint title_id);
-
-/**
  * scene_obj_count() - Count the number of objects in a scene
  *
  * @scn: Scene to check
@@ -769,5 +760,13 @@ int expo_apply_theme(struct expo *exp, ofnode node);
  * error, -ENOENT if there is a references to a non-existent string
  */
 int expo_build(ofnode root, struct expo **expp);
+
+/**
+ * cb_expo_build() - Build an expo for coreboot CMOS RAM
+ *
+ * @expp: Returns the expo created
+ * Return: 0 if OK, -ve on error
+ */
+int cb_expo_build(struct expo **expp);
 
 #endif /*__EXPO_H */

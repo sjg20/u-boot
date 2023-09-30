@@ -17,7 +17,9 @@ CONFIG_BOOTSTD_DEFAULTS=y
 CONFIG_SHOW_BOOT_PROGRESS=y
 CONFIG_USE_BOOTARGS=y
 CONFIG_BOOTARGS="root=/dev/sdb3 init=/sbin/init rootwait ro"
-CONFIG_BOOTCOMMAND="bootflow scan -l; if bootflow menu; then cls; bootflow boot; fi"
+#CONFIG_BOOTCOMMAND="bootflow scan -l; if bootflow menu; then cls; bootflow boot; fi"
+CONFIG_BOOTCOMMAND="cbcmos check; cedit cb; cedit read_cmos; if cedit run; then cedit write_cmos -v; fi; cbcmos check; cbcmos update"
+#CONFIG_BOOTCOMMAND="cbcmos check"
 CONFIG_PRE_CONSOLE_BUFFER=y
 CONFIG_SYS_CONSOLE_INFO_QUIET=y
 CONFIG_LOG=y
@@ -67,3 +69,5 @@ CONFIG_SPL_ACPI=y
 CONFIG_CMD_DHRYSTONE=y
 # CONFIG_GZIP is not set
 CONFIG_SMBIOS_PARSER=y
+CONFIG_CEDIT=y
+CONFIG_OFNODE_MULTI_TREE=y

@@ -9,6 +9,7 @@
 #define LOG_CATEGORY	LOGC_EXPO
 
 #include <common.h>
+#include <cedit.h>
 #include <expo.h>
 #include <fdtdec.h>
 #include <log.h>
@@ -47,7 +48,7 @@ int add_txt_str(struct build_info *info, ofnode node, struct scene *scn,
 		const char *find_name, uint obj_id)
 {
 	const char *text;
-	uint str_id;
+// 	uint str_id;
 	int ret;
 
 	info->err_prop = find_name;
@@ -68,12 +69,12 @@ int add_txt_str(struct build_info *info, ofnode node, struct scene *scn,
 			return log_msg_ret("id", -EINVAL);
 	}
 
-	ret = expo_str(scn->expo, find_name, 0, text);
-	if (ret < 0)
-		return log_msg_ret("add", ret);
-	str_id = ret;
+// 	ret = expo_str(scn->expo, find_name, 0, text);
+// 	if (ret < 0)
+// 		return log_msg_ret("add", ret);
+// 	str_id = ret;
 
-	ret = scene_txt_str(scn, find_name, obj_id, str_id, text, NULL);
+	ret = scene_txt_str(scn, find_name, obj_id, 0, text, NULL);
 	if (ret < 0)
 		return log_msg_ret("add", ret);
 
@@ -258,7 +259,6 @@ static int menu_build(struct build_info *info, ofnode node, struct scene *scn,
 	size /= sizeof(u32);
 
 	for (i = 0; i < size; i++) {
-		struct scene_menitem *item;
 		uint label, key, desc;
 
 		ret = add_txt_str_list(info, node, scn, "item-label", i, 0);
@@ -278,7 +278,7 @@ static int menu_build(struct build_info *info, ofnode node, struct scene *scn,
 
 		ret = scene_menuitem(scn, menu_id, simple_xtoa(i),
 				     fdt32_to_cpu(item_ids[i]), key, label,
-				     desc, 0, 0, &item);
+				     desc, 0, 0, NULL);
 		if (ret < 0)
 			return log_msg_ret("mi", ret);
 	}
@@ -409,7 +409,7 @@ static int scene_build(struct build_info *info, ofnode scn_node,
 	if (ret < 0)
 		return log_msg_ret("tit", ret);
 	title_id = ret;
-	scene_title_set(scn, title_id);
+	scn->title_id = title_id;
 
 	ret = add_txt_str(info, scn_node, scn, "prompt", 0);
 	if (ret < 0)
@@ -425,9 +425,8 @@ static int scene_build(struct build_info *info, ofnode scn_node,
 	return 0;
 }
 
-int build_it(struct build_info *info, ofnode root, struct expo **expp)
+static int build_it(struct build_info *info, ofnode root, struct expo **expp)
 {
-	;
 	ofnode scenes, node;
 	struct expo *exp;
 	u32 dyn_start;

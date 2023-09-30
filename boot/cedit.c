@@ -663,7 +663,7 @@ static int h_write_settings_cmos(struct scene_obj *obj, void *vpriv)
 
 	/* figure out where to place this item */
 	if (!obj->bit_length)
-		return log_msg_ret("len", -EINVAL);
+		return 0;
 	if (obj->start_bit + obj->bit_length > CMOS_MAX_BITS)
 		return log_msg_ret("bit", -E2BIG);
 
@@ -747,7 +747,7 @@ static int h_read_settings_cmos(struct scene_obj *obj, void *vpriv)
 
 	/* figure out where to place this item */
 	if (!obj->bit_length)
-		return log_msg_ret("len", -EINVAL);
+		return 0;
 	if (obj->start_bit + obj->bit_length > CMOS_MAX_BITS)
 		return log_msg_ret("bit", -E2BIG);
 
