@@ -40,6 +40,7 @@ Shell commands
    cmd/button
    cmd/bootz
    cmd/cat
+   cmd/cbcmos
    cmd/cbsysinfo
    cmd/cedit
    cmd/cls
