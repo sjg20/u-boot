@@ -384,6 +384,8 @@ static int ns16550_serial_putc(struct udevice *dev, const char ch)
 {
 	struct ns16550 *const com_port = dev_get_priv(dev);
 
+	if (com_port->plat->flags & NS16550_FLAG_DISABLE)
+		return 0;
 	if (!(serial_in(&com_port->lsr) & UART_LSR_THRE))
 		return -EAGAIN;
 	serial_out(ch, &com_port->thr);
@@ -404,6 +406,9 @@ static int ns16550_serial_pending(struct udevice *dev, bool input)
 {
 	struct ns16550 *const com_port = dev_get_priv(dev);
 
+	if (com_port->plat->flags & NS16550_FLAG_DISABLE)
+		return 0;
+
 	if (input)
 		return (serial_in(&com_port->lsr) & UART_LSR_DR) ? 1 : 0;
 	else
@@ -413,6 +418,9 @@ static int ns16550_serial_pending(struct udevice *dev, bool input)
 static int ns16550_serial_getc(struct udevice *dev)
 {
 	struct ns16550 *const com_port = dev_get_priv(dev);
+
+	if (com_port->plat->flags & NS16550_FLAG_DISABLE)
+		return 0;
 
 	if (!(serial_in(&com_port->lsr) & UART_LSR_DR))
 		return -EAGAIN;
@@ -428,7 +436,8 @@ static int ns16550_serial_setbrg(struct udevice *dev, int baudrate)
 
 	clock_divisor = ns16550_calc_divisor(com_port, plat->clock, baudrate);
 
-	ns16550_setbrg(com_port, clock_divisor);
+	if (!(plat->flags & NS16550_FLAG_DISABLE))
+		ns16550_setbrg(com_port, clock_divisor);
 
 	return 0;
 }
@@ -440,6 +449,9 @@ static int ns16550_serial_setconfig(struct udevice *dev, uint serial_config)
 	uint parity = SERIAL_GET_PARITY(serial_config);
 	uint bits = SERIAL_GET_BITS(serial_config);
 	uint stop = SERIAL_GET_STOP(serial_config);
+
+	if (com_port->plat->flags & NS16550_FLAG_DISABLE)
+		return 0;
 
 	/*
 	 * only parity config is implemented, check if other serial settings
@@ -525,7 +537,8 @@ int ns16550_serial_probe(struct udevice *dev)
 		reset_deassert_bulk(&reset_bulk);
 
 	com_port->plat = dev_get_plat(dev);
-	ns16550_init(com_port, -1);
+	if (!(plat->flags & NS16550_FLAG_DISABLE))
+		ns16550_init(com_port, -1);
 
 	return 0;
 }

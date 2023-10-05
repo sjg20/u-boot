@@ -120,6 +120,7 @@ static int coreboot_of_to_plat(struct udevice *dev)
 		 * there is no UART, which may panic. So stay silent and
 		 * pray that the video console will work.
 		 */
+		plat->flags |= NS16550_FLAG_DISABLE;
 		log_debug("Cannot detect UART\n");
 	}
 

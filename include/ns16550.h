@@ -52,6 +52,7 @@ enum ns16550_flags {
 	NS16550_FLAG_IO		= 1 << 0, /* Use I/O access (else mem-mapped) */
 	NS16550_FLAG_ENDIAN	= 1 << 1, /* Use out_le/be_32() */
 	NS16550_FLAG_BE		= 1 << 2, /* Big-endian access (else little) */
+	NS16550_FLAG_DISABLE	= BIT(3), /* No output or input */
 };
 
 /**
