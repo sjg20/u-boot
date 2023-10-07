@@ -25,6 +25,8 @@ obj-$(CONFIG_PANEL_HX8238D) += hx8238d.o
 obj-$(CONFIG_$(SPL_TPL_)SIMPLE_PANEL) += simple_panel.o
 
 obj-$(CONFIG_VIDEO_LOGO) += u_boot_logo.o
+obj-$(CONFIG_VIDEO_LOGO_COREBOOT) += coreboot_logo.o
+
 obj-$(CONFIG_$(SPL_TPL_)BMP) += bmp.o
 
 endif

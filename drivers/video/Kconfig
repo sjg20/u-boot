@@ -55,6 +55,16 @@ config VIDEO_LOGO
 	  tools/logos/u-boot_logo.bmp and looks best when the display has a
 	  black background.
 
+config VIDEO_LOGO_COREBOOT
+	bool "Show the coreboot logo on the display"
+	depends on VIDEO_LOGO && (SYS_COREBOOT || SANDBOX)
+	default y if SYS_COREBOOT
+	help
+	  This enables showing the coreboot logo on the display when a video
+	  device is probed. It appears at the top right, just below the U-Boot
+	  logo. The appearance of this logo indicates that coreboot provided
+	  the first-stage system setup.
+
 config BACKLIGHT
 	bool "Enable panel backlight uclass support"
 	default y

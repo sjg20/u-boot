@@ -508,12 +508,30 @@ void *video_get_u_boot_logo(void)
 	return SPLASH_START(u_boot_logo);
 }
 
+#ifdef CONFIG_VIDEO_LOGO_COREBOOT
+SPLASH_DECL(coreboot_logo);
+
+void *video_get_coreboot_logo(void)
+{
+	return SPLASH_START(coreboot_logo);
+}
+#else
+static inline void *video_get_coreboot_logo(void) { return NULL; }
+#endif
+
 static int show_splash(struct udevice *dev)
 {
 	u8 *data = SPLASH_START(u_boot_logo);
 	int ret;
 
 	ret = video_bmp_display(dev, map_to_sysmem(data), -4, 4, true);
+
+	if (IS_ENABLED(CONFIG_VIDEO_LOGO_COREBOOT)) {
+		void *data_cb = video_get_coreboot_logo();
+
+		ret = video_bmp_display(dev, map_to_sysmem(data_cb), -4, 200,
+					true);
+	}
 
 	return 0;
 }
