@@ -294,6 +294,7 @@ char *hist_prev(void);
  */
 char *hist_next(void);
 
+#ifdef CONFIG_CMDLINE_HISTORY
 /**
  * cread_add_to_hist() - Add a line to the history buffer
  *
@@ -304,10 +305,10 @@ char *hist_next(void);
  */
 void cread_add_to_hist(char *line);
 
-#ifdef CONFIG_CMDLINE_EDITING
 void hist_init(void);
 #else
 static inline void hist_init(void) {}
+static inline void cread_add_to_hist(char *line) {}
 #endif
 
 #endif

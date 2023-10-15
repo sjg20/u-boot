@@ -29,8 +29,19 @@ config CMDLINE_EDITING
 	depends on CMDLINE
 	default y
 	help
-	  Enable editing and History functions for interactive command line
-	  input operations
+	  Enable an editing function for interactive, command-line-input
+	  operations. This allows moving the cursor back and forth within
+	  the line, inserting and deleting characters, etc.
+
+config CMDLINE_HISTORY
+	bool "Enable command-line history"
+	depends on CMDLINE_EDITING
+	default y
+	help
+	  Enable a history function for interactive, command-line-input
+	  operations. This maintains a small buffer of previously entered
+	  commands, allowing the user to enter or edit old commands without
+	  having to retype them.
 
 config CMDLINE_PS_SUPPORT
 	bool "Enable support for changing the command prompt string at run-time"

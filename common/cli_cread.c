@@ -28,10 +28,11 @@ DECLARE_GLOBAL_DATA_PTR;
 #define CTL_BACKSPACE		('\b')
 #define DEL			((char)255)
 #define DEL7			((char)127)
-#define CREAD_HIST_CHAR		('!')
 
 #define getcmd_putch(ch)	putc(ch)
 #define getcmd_cbeep()		getcmd_putch('\a')
+
+#define CREAD_HIST_CHAR		('!')
 
 #ifdef CONFIG_SPL_BUILD
 #define HIST_MAX		3
@@ -41,14 +42,6 @@ DECLARE_GLOBAL_DATA_PTR;
 #define HIST_SIZE		CONFIG_SYS_CBSIZE
 #endif
 
-static int hist_max;
-static int hist_add_idx;
-static int hist_cur = -1;
-static uint hist_num;
-
-static char *hist_list[HIST_MAX];
-static char hist_lines[HIST_MAX][HIST_SIZE + 1];	/* Save room for NULL */
-
 static void getcmd_putchars(int count, int ch)
 {
 	int i;
@@ -56,6 +49,16 @@ static void getcmd_putchars(int count, int ch)
 	for (i = 0; i < count; i++)
 		getcmd_putch(ch);
 }
+
+#ifdef CONFIG_CMDLINE_HISTORY
+
+static int hist_max;
+static int hist_add_idx;
+static int hist_cur = -1;
+static uint hist_num;
+
+static char *hist_list[HIST_MAX];
+static char hist_lines[HIST_MAX][HIST_SIZE + 1];	/* Save room for NULL */
 
 void hist_init(void)
 {
@@ -150,6 +153,7 @@ void cread_print_hist_list(void)
 		i++;
 	}
 }
+#endif /* CMDLINE_HISTORY */
 
 #define BEGINNING_OF_LINE() {			\
 	while (cls->num) {			\
@@ -325,7 +329,7 @@ int cread_line_process_ch(struct cli_line_state *cls, char ichar)
 		break;
 	case CTL_CH('p'):
 	case CTL_CH('n'):
-		if (cls->history) {
+		if (IS_ENABLED(CONFIG_CMDLINE_HISTORY) && cls->history) {
 			char *hline;
 
 			if (ichar == CTL_CH('p'))
