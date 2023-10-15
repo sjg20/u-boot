@@ -280,4 +280,34 @@ void cli_cread_init(struct cli_line_state *cls, char *buf, uint buf_size);
 /** cread_print_hist_list() - Print the command-line history list */
 void cread_print_hist_list(void);
 
+/**
+ * hist_prev() - Get the previous line of history
+ *
+ * Returns: Previous history line, or NULL if none
+ */
+char *hist_prev(void);
+
+/**
+ * hist_next() - Get the next line of history
+ *
+ * Returns: Next history line, or NULL if none
+ */
+char *hist_next(void);
+
+/**
+ * cread_add_to_hist() - Add a line to the history buffer
+ *
+ * The line is added if it is non-empty and doesn't start with CREAD_HIST_CHAR
+ * This also sets hist_cur to hist_add_idx whether or not anything was added
+ *
+ * @line: Line to add
+ */
+void cread_add_to_hist(char *line);
+
+#ifdef CONFIG_CMDLINE_EDITING
+void hist_init(void);
+#else
+static inline void hist_init(void) {}
+#endif
+
 #endif

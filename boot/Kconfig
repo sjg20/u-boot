@@ -349,7 +349,8 @@ config PXE_UTILS
 
 config BOOT_DEFAULTS
 	bool  # Common defaults for standard boot and distroboot
-	imply USE_BOOTCOMMAND
+	depends on CMDLINE
+	imply USE_BOOTCOMMAND if !SANDBOX
 	select CMD_ENV_EXISTS
 	select CMD_EXT2
 	select CMD_EXT4

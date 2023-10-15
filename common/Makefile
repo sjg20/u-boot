@@ -38,6 +38,7 @@ obj-$(CONFIG_SPLASH_SOURCE) += splash_source.o
 obj-$(CONFIG_MENU) += menu.o
 obj-$(CONFIG_UPDATE_COMMON) += update.o
 obj-$(CONFIG_USB_KEYBOARD) += usb_kbd.o
+obj-$(CONFIG_CMDLINE_EDITING) += cli_cread.o
 obj-$(CONFIG_CMDLINE) += cli_readline.o cli_simple.o
 
 endif # !CONFIG_SPL_BUILD
@@ -90,8 +91,10 @@ obj-y += eeprom/eeprom_field.o eeprom/eeprom_layout.o
 endif
 
 obj-y += cli.o
-obj-$(CONFIG_FSL_DDR_INTERACTIVE) += cli_getch.o cli_simple.o cli_readline.o
-obj-$(CONFIG_STM32MP1_DDR_INTERACTIVE) += cli_getch.o cli_simple.o cli_readline.o
+obj-$(CONFIG_FSL_DDR_INTERACTIVE) += cli_getch.o cli_simple.o cli_readline.o \
+	cli_cread.o
+obj-$(CONFIG_STM32MP1_DDR_INTERACTIVE) += cli_getch.o cli_simple.o \
+	cli_readline.o cli_cread.o
 obj-$(CONFIG_DFU_OVER_USB) += dfu.o
 obj-y += command.o
 obj-$(CONFIG_$(SPL_TPL_)LOG) += log.o
