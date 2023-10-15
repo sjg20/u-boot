@@ -1164,3 +1164,10 @@ endif
 
 config IO_TRACE
 	bool
+
+config CLI_READLINE
+	bool
+	help
+	  Enables support for reading a line of text from the user, This
+	  feature is used by the command-line interpreter and also by expo,
+	  which needs to read text when textline objects are used.

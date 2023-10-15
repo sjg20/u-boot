@@ -649,6 +649,7 @@ config EXPO
 	bool "Support for expos - groups of scenes displaying a UI"
 	depends on VIDEO
 	default y if BOOTMETH_VBE
+	select CLI_READLINE
 	help
 	  An expo is a way of presenting and collecting information from the
 	  user. It consists of a collection of 'scenes' of which only one is

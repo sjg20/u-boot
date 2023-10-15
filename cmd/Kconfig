@@ -3,6 +3,7 @@ menu "Command line interface"
 config CMDLINE
 	bool "Support U-Boot commands"
 	default y
+	select CLI_READLINE
 	help
 	  Enable U-Boot's command-line functions. This provides a means
 	  to enter commands into U-Boot for a wide variety of purposes. It
