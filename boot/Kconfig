@@ -433,8 +433,8 @@ config BOOTSTD_FULL
 config BOOTSTD_DEFAULTS
 	bool "Select some common defaults for standard boot"
 	depends on BOOTSTD
-	imply USE_BOOTCOMMAND
-	select BOOT_DEFAULTS
+	imply USE_BOOTCOMMAND if !SANDBOX
+	select BOOT_DEFAULTS if CMDLINE
 	select BOOTMETH_DISTRO
 	help
 	  These are not required but are commonly needed to support a good
@@ -443,7 +443,7 @@ config BOOTSTD_DEFAULTS
 
 config BOOTSTD_BOOTCOMMAND
 	bool "Use bootstd to boot"
-	default y if !DISTRO_DEFAULTS
+	default y if !DISTRO_DEFAULTS && !SANDBOX
 	help
 	  Enable this to select a default boot-command suitable for booting
 	  with standard boot. This can be overridden by the board if needed,
