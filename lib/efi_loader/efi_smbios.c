@@ -61,6 +61,17 @@ static int install_smbios_table(void)
 		return log_msg_ret("mem", -ENOMEM);
 
 	addr = map_to_sysmem(buf);
+
+	/*
+	 * Deal with a fixed address if needed. For simplicity we assume that
+	 * the SMBIOS-table size is <64KB and that the malloc region does not
+	 * straddle the 4GB boundary.
+	 */
+	if (IS_ENABLED(CONFIG_SMBIOS_TABLE_FIXED) && addr >= SZ_4G - SZ_64K) {
+		addr = CONFIG_SMBIOS_TABLE_FIXED_ADDR;
+		log_warning("Forcing SMBIOS table to address %lx\n", addr);
+	}
+
 	if (!write_smbios_table(addr)) {
 		log_err("Failed to write SMBIOS table\n");
 		return log_msg_ret("smbios", -EINVAL);

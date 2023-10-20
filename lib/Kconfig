@@ -994,6 +994,22 @@ config GENERATE_SMBIOS_TABLE
 	  See also SMBIOS_SYSINFO which allows SMBIOS values to be provided in
 	  the devicetree.
 
+config SMBIOS_TABLE_FIXED
+	bool "Place the SMBIOS table at a special address"
+	depends on GENERATE_SMBIOS_TABLE && ARM64 && SMBIOS && EFI_LOADER
+	default y
+	help
+	  Use this option to place the SMBIOS table at a fixed address.
+
+	  U-Boot typically sets up its malloc() pool near the top of memory. On
+	  ARM64 systems this can result in an SMBIOS table above 4GB which is
+	  not supported by SMBIOSv2. This option works around this problem by
+	  chosing an address just below 4GB, if needed.
+
+config SMBIOS_TABLE_FIXED_ADDR
+	hex "Fixed address for use for SMBIOS table"
+	default 0xffff0000
+
 endmenu
 
 config LIB_RATIONAL
