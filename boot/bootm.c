@@ -173,8 +173,6 @@ static int boot_get_kernel(const char *addr_fit,
 			*os_len = image_get_data_size(hdr);
 			break;
 		default:
-			printf("Wrong Image Type for %s command\n",
-			       cmd_name);
 			bootstage_error(BOOTSTAGE_ID_CHECK_IMAGETYPE);
 			return -EPROTOTYPE;
 		}
@@ -232,7 +230,6 @@ static int boot_get_kernel(const char *addr_fit,
 	}
 #endif
 	default:
-		printf("Wrong Image Format for %s command\n", cmd_name);
 		bootstage_error(BOOTSTAGE_ID_CHECK_IMAGETYPE);
 		return -EPROTOTYPE;
 	}
@@ -322,9 +319,12 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 	int ret;
 
 	/* get kernel image header, start address and length */
-	ret = boot_get_kernel("bootm", argv[0], &images, &images.os.image_start,
+	ret = boot_get_kernel(argv[0], &images, &images.os.image_start,
 			      &images.os.image_len, &os_hdr);
 	if (ret) {
+		if (ret == -EPROTOTYPE)
+			printf("Wrong Image Type for bootm command\n");
+
 		printf("ERROR %dE: can't get kernel image!\n", ret);
 		return 1;
 	}
