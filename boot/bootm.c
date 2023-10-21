@@ -116,9 +116,10 @@ static struct legacy_img_hdr *image_get_kernel(ulong img_addr, int verify)
  * boot_get_kernel() tries to find a kernel image, verifies its integrity
  * and locates kernel data.
  *
- * Return: 0 on success, -ve on error
+ * Return: 0 on success, -ve on error. -EPROTOTYPE means that the image is in
+ * a wrong or unsupported format
  */
-static int boot_get_kernel(const char *cmd_name, const char *addr_fit,
+static int boot_get_kernel(const char *addr_fit,
 			   struct bootm_headers *images, ulong *os_data,
 			   ulong *os_len, const void **kernp)
 {
@@ -232,8 +233,8 @@ static int boot_get_kernel(const char *cmd_name, const char *addr_fit,
 #endif
 	default:
 		printf("Wrong Image Format for %s command\n", cmd_name);
-		bootstage_error(BOOTSTAGE_ID_FIT_KERNEL_INFO);
-		return -EBADF;
+		bootstage_error(BOOTSTAGE_ID_CHECK_IMAGETYPE);
+		return -EPROTOTYPE;
 	}
 
 	debug("   kernel data at 0x%08lx, len = 0x%08lx (%ld)\n",
