@@ -474,7 +474,6 @@ config BOOTMETH_GLOBAL
 
 config BOOTMETH_CROS
 	bool "Bootdev support for Chromium OS"
-	depends on CMDLINE
 	depends on X86 || ARM || SANDBOX
 	default y if !ARM
 	select EFI_PARTITION
