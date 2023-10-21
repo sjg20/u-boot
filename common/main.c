@@ -9,6 +9,7 @@
 #include <common.h>
 #include <autoboot.h>
 #include <bootstage.h>
+#include <bootstd.h>
 #include <cli.h>
 #include <command.h>
 #include <console.h>
@@ -67,6 +68,14 @@ void main_loop(void)
 
 	autoboot_command(s);
 
+	if (IS_ENABLED(CONFIG_BOOTSTD_PROG)) {
+		int ret;
+
+		ret = bootstd_prog_boot();
+		printf("Standard boot failed (err=%dE)\n", ret);
+	}
+
 	cli_loop();
+
 	panic("No CLI available");
 }
