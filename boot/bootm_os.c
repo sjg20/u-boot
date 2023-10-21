@@ -490,6 +490,7 @@ static int do_bootm_efi(int flag, int argc, char *const argv[],
 {
 	efi_status_t efi_ret;
 	void *image_buf;
+	ulong image_addr;
 
 	if (flag != BOOTM_STATE_OS_GO)
 		return 0;
