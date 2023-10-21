@@ -307,8 +307,13 @@ static int bootm_pre_load(const char *addr_str)
 	return ret;
 }
 
-static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
-			 char *const argv[])
+/**
+ * bootm_find_os(): Find the OS to boot
+ *
+ * @addr_fit: Address and/or FIT specifier (first arg of bootm command)
+ * Return: 0 on success, -ve on error
+ */
+static int bootm_find_os(const char *addr_fit)
 {
 	const void *os_hdr;
 #ifdef CONFIG_ANDROID_BOOT_IMAGE
@@ -319,7 +324,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 	int ret;
 
 	/* get kernel image header, start address and length */
-	ret = boot_get_kernel(argv[0], &images, &images.os.image_start,
+	ret = boot_get_kernel(addr_fit, &images, &images.os.image_start,
 			      &images.os.image_len, &os_hdr);
 	if (ret) {
 		if (ret == -EPROTOTYPE)
@@ -916,7 +921,7 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 		ret = bootm_pre_load(argv[0]);
 
 	if (!ret && (states & BOOTM_STATE_FINDOS))
-		ret = bootm_find_os(cmdtp, flag, argc, argv);
+		ret = bootm_find_os(argv[0]);
 
 	if (!ret && (states & BOOTM_STATE_FINDOTHER))
 		ret = bootm_find_other(cmdtp, flag, argc, argv);
