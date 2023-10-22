@@ -479,11 +479,6 @@ static int do_bootm_tee(int flag, int argc, char *const argv[],
 	if (ret)
 		return ret;
 
-	/* Locate FDT etc */
-	ret = bootm_find_images(flag, argc, argv, 0, 0);
-	if (ret)
-		return ret;
-
 	/* From here we can run the regular linux boot path */
 	return do_bootm_linux(flag, argc, argv, images);
 }
