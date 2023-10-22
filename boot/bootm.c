@@ -895,16 +895,14 @@ int bootm_process_cmdline_env(int flags)
  * @param argv		Arguments
  * @param states	Mask containing states to run (BOOTM_STATE_...)
  * @param images	Image header information
- * @param boot_progress 1 to show boot progress, 0 to not do this
  * Return: 0 if ok, something else on error. Some errors will cause this
  *	function to perform a reboot! If states contains BOOTM_STATE_OS_GO
  *	then the intent is to boot an OS, so this function will not return
  *	unless the image type is standalone.
  */
-int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
-		    char *const argv[], int states, struct bootm_headers *images,
-		    int boot_progress)
+int bootm_run_states(struct bootm_info *bmi, int states)
 {
+	struct bootm_headers *images = bmi->images;
 	boot_os_fn *boot_fn;
 	ulong iflag = 0;
 	int ret = 0, need_boot_fn;
@@ -919,17 +917,18 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 		ret = bootm_start();
 
 	if (!ret && (states & BOOTM_STATE_PRE_LOAD))
-		ret = bootm_pre_load(argv[0]);
+		ret = bootm_pre_load(bmi->addr_fit]);
 
 	if (!ret && (states & BOOTM_STATE_FINDOS))
-		ret = bootm_find_os(argv[0]);
+		ret = bootm_find_os(bmi->conf_ramdisk);
 
 	if (!ret && (states & BOOTM_STATE_FINDOTHER)) {
 		ulong img_addr;
 
-		img_addr = argc ? hextoul(argv[0], NULL) : image_load_addr;
-		ret = bootm_find_other(img_addr, argc > 1 ? argv[1] : NULL,
-				       argc > 2 ? argv[2] : NULL);
+		img_addr = bmi->addr_fit ? hextoul(bmi->addr_fit, NULL)
+			: image_load_addr;
+		ret = bootm_find_other(img_addr, bmi->conf_ramdisk,
+				       bmi->conf_fdt);
 	}
 
 	/* Load the OS */

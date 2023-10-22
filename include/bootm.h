@@ -16,6 +16,39 @@ struct cmd_tbl;
 #define BOOTM_ERR_OVERLAP		(-2)
 #define BOOTM_ERR_UNIMPLEMENTED	(-3)
 
+/**
+ * struct bootm_info() - information used when processing images to boot
+ *
+ * These mirror the first three arguments of the bootm command. They are
+ * designed to handle any type of image, but typically it is a FIT.
+ *
+ * @addr_fit: Address of image to bootm, as passed to
+ *	genimg_get_kernel_addr_fit() for processing:
+ *
+ *    NULL: Usees default load address, i.e. image_load_addr
+ *    <addr>: Uses hex address
+ *
+ * For FIT:
+ *    "[<addr>]#<conf>": Uses address (or image_load_addr) and also specifies
+ *	the FIT configuration to use
+ *    "[<addr>]:<subimage>": Uses address (or image_load_addr) and also
+ *	specifies the subimage name containing the OS
+ *
+ * @conf_ramdisk: Address (or with FIT, the name) of the ramdisk image, as
+ *	passed to boot_get_ramdisk() for processing, or NULL for none
+ * @conf_fdt: Address (or with FIT, the name) of the FDT image, as passed to
+ *	boot_get_fdt() for processing, or NULL for none
+ * @boot_progress: true to show boot progress
+ * @images: images information
+ */
+struct bootm_info {
+	const char *addr_fit;
+	const char *conf_ramdisk;
+	const char *conf_fdt;
+	bool boot_progress;
+	struct bootm_headers *images;
+};
+
 /*
  *  Continue booting an OS image; caller already has:
  *  - copied image header to global variable `header'
@@ -69,9 +102,7 @@ int boot_selected_os(int argc, struct bootm_headers *images,
 int bootm_find_images(ulong img_addr, const char *conf_ramdisk,
 		      const char *conf_fdt, ulong start, ulong size);
 
-int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
-		    char *const argv[], int states, struct bootm_headers *images,
-		    int boot_progress);
+int bootm_run_states(struct bootm_info *bmi, int states);
 
 void arch_preboot_os(void);
 

@@ -30,7 +30,9 @@ static int bootz_start(struct cmd_tbl *cmdtp, int flag, int argc,
 	int ret;
 	ulong zi_start, zi_end;
 
-	ret = do_bootm_states(cmdtp, flag, argc, argv, BOOTM_STATE_START,
+	memset(&bmi, '\0', sizeof(struct bootm_info));
+
+	ret = bootm_run_states(cmdtp, flag, argc, argv, BOOTM_STATE_START,
 			      images, 1);
 
 	/* Setup Linux kernel zImage entry point */
