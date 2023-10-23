@@ -32,11 +32,13 @@ def setup_fit(fsw):
     fsw.begin_node('images')
     with fsw.add_node('kernel'):
         fsw.property_string('description', 'dummy kernel')
-        fsw.property_string('type', 'kernel')
+        fsw.property_string('type', 'kernel_noload')
         fsw.property_string('arch', 'arm')
         fsw.property_string('os', 'Linux')
         fsw.property_string('compression', 'none')
         fsw.property_string('data', 'abcd')
+        fsw.property_u32('load', 0)
+        fsw.property_u32('entry', 0)
 
 def finish_fit(fsw, entries):
     fsw.end_node()
@@ -57,7 +59,7 @@ def output_dtb(fsw, seq, dtb_fname, data):
         model = fdt.getprop(0, 'model').as_str()
         compat = fdt.getprop(0, 'compatible')
         fsw.property_string('description', model)
-        fsw.property_string('type', 'flat_ft')
+        fsw.property_string('type', 'flat_dt')
         fsw.property_string('arch', 'arm')
         fsw.property_string('compression', 'lz4')
         fsw.property('compatible', bytes(compat))
@@ -85,6 +87,7 @@ def run_make_fit():
                     entries.append([model, compat])
 
     # Hack for testing on sandbox
+    model, compat = output_dtb(fsw, seq + 1, fname, data)
     entries.append(['U-Boot sandbox', b'sandbox\0'])
 
     finish_fit(fsw, entries)

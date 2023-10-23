@@ -8,7 +8,6 @@
  * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_BOOT
 
 #ifdef USE_HOSTCC
@@ -2100,11 +2099,13 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 		 * fit_conf_get_node() will try to find default config node
 		 */
 		bootstage_mark(bootstage_id + BOOTSTAGE_SUB_NO_UNIT_NAME);
+		bootstage_start(BOOTSTAGE_ID_ACCUM_DT_BEST_MATCH, "fdt_best");
 		if (IS_ENABLED(CONFIG_FIT_BEST_MATCH) && !fit_uname_config) {
 			cfg_noffset = fit_conf_find_compat(fit, gd_fdt_blob());
 		} else {
 			cfg_noffset = fit_conf_get_node(fit, fit_uname_config);
 		}
+		bootstage_accum(BOOTSTAGE_ID_ACCUM_DT_BEST_MATCH);
 		if (cfg_noffset < 0) {
 			puts("Could not find configuration node\n");
 			bootstage_error(bootstage_id +
