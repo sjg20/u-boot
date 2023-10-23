@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: GPL-2.0+
+# Copyright 2023 Google LLC
+#
+
+"""Build a FIT containing a lot of devicetree files"""
+import argparse
+import os
+import sys
+
+import libfdt
+import lz4.frame
+
+def parse_args():
+    epilog = 'Build a FIT from a directory tree containing .dtb files'
+    parser = argparse.ArgumentParser(epilog=epilog)
+    parser.add_argument('-f', '--fit', type=str, required=True,
+          help='Specifies the output file (.fit)')
+    parser.add_argument('srcdir', type=str, nargs='*',
+          help='Specifies the directory tree that contains .dtb files')
+
+    return parser.parse_args()
+
+def setup_fit(fsw):
+    fsw.INC_SIZE = 65536
+    fsw.finish_reservemap()
+    fsw.begin_node('')
+    fsw.begin_node('images')
+
+def finish_fit(fsw):
+    fsw.end_node()
+    with fsw.add_node('configurations'):
+        pass
+    fsw.end_node()
+
+def output_dtb(fsw, seq, dtb_fname, data):
+    with fsw.add_node(f'fdt-{seq}'):
+        fdt = libfdt.FdtRo(data)
+        model = fdt.getprop(0, 'model').as_str()
+        compat = fdt.getprop(0, 'compatible')
+        fsw.property_string('description', model)
+        fsw.property_string('type', 'flat_ft')
+        fsw.property_string('arch', 'arm')
+        fsw.property_string('compression', 'lz4')
+        fsw.property('compatible', bytes(compat))
+        compressed = lz4.frame.compress(data)
+        fsw.property('data', compressed)
+
+
+def run_make_fit():
+    args = parse_args()
+
+    fsw = libfdt.FdtSw()
+    setup_fit(fsw)
+    seq = 0
+    size = 0
+    for path in args.srcdir:
+        for dirpath, _, fnames in os.walk(path):
+            for fname in fnames:
+                with open(os.path.join(dirpath, fname), 'rb') as inf:
+                    seq += 1
+                    data = inf.read()
+                    size += len(data)
+                    output_dtb(fsw, seq, fname, data)
+
+    finish_fit(fsw)
+    fdt = fsw.as_fdt()
+    out_data = fdt.as_bytearray()
+    with open(args.fit, 'wb') as outf:
+        outf.write(out_data)
+    comp_size = len(out_data)
+    print(f'Fit size {comp_size:x} / {comp_size / 1024 / 1024:.1f} MB', end='')
+    print(f', {seq} files, uncompressed {size / 1024 / 1024:.1f} MB')
+
+
+if __name__ == "__main__":
+    sys.exit(run_make_fit())
