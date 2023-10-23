@@ -36,7 +36,7 @@ def setup_fit(fsw):
         fsw.property_string('arch', 'arm')
         fsw.property_string('os', 'Linux')
         fsw.property_string('compression', 'none')
-        fsw.property_string('data', 'abcd')
+        fsw.property_string('data', 'abcd' * 10)
         fsw.property_u32('load', 0)
         fsw.property_u32('entry', 0)
 
