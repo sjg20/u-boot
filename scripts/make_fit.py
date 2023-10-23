@@ -26,10 +26,16 @@ def setup_fit(fsw):
     fsw.begin_node('')
     fsw.begin_node('images')
 
-def finish_fit(fsw):
+def finish_fit(fsw, entries):
     fsw.end_node()
+    seq = 0
     with fsw.add_node('configurations'):
-        pass
+        for model, compat in entries:
+            seq += 1
+            with fsw.add_node(f'conf-{seq}'):
+                fsw.property('compatible', bytes(compat))
+                fsw.property_string('description', model)
+                fsw.property_string('fdt', f'fdt-{seq}')
     fsw.end_node()
 
 def output_dtb(fsw, seq, dtb_fname, data):
@@ -44,6 +50,7 @@ def output_dtb(fsw, seq, dtb_fname, data):
         fsw.property('compatible', bytes(compat))
         compressed = lz4.frame.compress(data)
         fsw.property('data', compressed)
+    return model, compat
 
 
 def run_make_fit():
@@ -53,6 +60,7 @@ def run_make_fit():
     setup_fit(fsw)
     seq = 0
     size = 0
+    entries = []
     for path in args.srcdir:
         for dirpath, _, fnames in os.walk(path):
             for fname in fnames:
@@ -60,9 +68,10 @@ def run_make_fit():
                     seq += 1
                     data = inf.read()
                     size += len(data)
-                    output_dtb(fsw, seq, fname, data)
+                    model, compat = output_dtb(fsw, seq, fname, data)
+                    entries.append([model, compat])
 
-    finish_fit(fsw)
+    finish_fit(fsw, entries)
     fdt = fsw.as_fdt()
     out_data = fdt.as_bytearray()
     with open(args.fit, 'wb') as outf:
