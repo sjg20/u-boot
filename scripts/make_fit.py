@@ -6,6 +6,7 @@
 import argparse
 import os
 import sys
+import time
 
 import libfdt
 import lz4.frame
@@ -24,7 +25,18 @@ def setup_fit(fsw):
     fsw.INC_SIZE = 65536
     fsw.finish_reservemap()
     fsw.begin_node('')
+    fsw.property_string('description', 'DTB set')
+    fsw.property_u32('#address-cells', 1)
+
+    fsw.property_u32('timestamp', int(time.time()))
     fsw.begin_node('images')
+    with fsw.add_node('kernel'):
+        fsw.property_string('description', 'dummy kernel')
+        fsw.property_string('type', 'kernel')
+        fsw.property_string('arch', 'arm')
+        fsw.property_string('os', 'Linux')
+        fsw.property_string('compression', 'none')
+        fsw.property_string('data', 'abcd')
 
 def finish_fit(fsw, entries):
     fsw.end_node()
@@ -36,6 +48,7 @@ def finish_fit(fsw, entries):
                 fsw.property('compatible', bytes(compat))
                 fsw.property_string('description', model)
                 fsw.property_string('fdt', f'fdt-{seq}')
+                fsw.property_string('kernel', 'kernel')
     fsw.end_node()
 
 def output_dtb(fsw, seq, dtb_fname, data):
@@ -70,6 +83,9 @@ def run_make_fit():
                     size += len(data)
                     model, compat = output_dtb(fsw, seq, fname, data)
                     entries.append([model, compat])
+
+    # Hack for testing on sandbox
+    entries.append(['U-Boot sandbox', b'sandbox\0'])
 
     finish_fit(fsw, entries)
     fdt = fsw.as_fdt()

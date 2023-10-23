@@ -8,6 +8,7 @@
  * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_BOOT
 
 #ifdef USE_HOSTCC
