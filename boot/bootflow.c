@@ -714,7 +714,7 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
 					in_quote = false;
 				continue;
 			}
-			if (*p == '=') {
+			if (*p == '=' && !arg_end) {
 				arg_end = p;
 				val = p + 1;
 			} else if (*p == '"') {
@@ -750,7 +750,8 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
 		}
 
 		/* if this is the target arg, update it */
-		if (!strncmp(from, set_arg, arg_end - from)) {
+		if (arg_end - from == set_arg_len &&
+		    !strncmp(from, set_arg, set_arg_len)) {
 			if (!buf) {
 				bool has_quote = val_end[-1] == '"';
 
