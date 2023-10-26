@@ -176,7 +176,13 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		images.os.end = fit_get_end(images.fit_hdr_os);
 
-		if (fit_image_get_load(images.fit_hdr_os, images.fit_noffset_os,
+		if (images.os.type == IH_TYPE_KERNEL_NOLOAD) {
+			ulong load;
+
+			load = env_get_hex("kernel_addr_r", -1UL);
+			printf("Using kernel load address %lx\n", load);
+			images.os.load = load;
+		} else if (fit_image_get_load(images.fit_hdr_os, images.fit_noffset_os,
 				       &images.os.load)) {
 			puts("Can't get image load address!\n");
 			bootstage_error(BOOTSTAGE_ID_FIT_LOADADDR);
@@ -229,7 +235,7 @@ static int bootm_find_os(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		ret = fit_image_get_entry(images.fit_hdr_os,
 					  images.fit_noffset_os, &images.ep);
-		if (ret) {
+		if (ret && images.os.type == IH_TYPE_KERNEL_NOLOAD) {
 			puts("Can't get entry point property!\n");
 			return 1;
 		}
