@@ -247,9 +247,12 @@ void *bloblist_find(uint tag, int size);
  *
  * Add a new blob to the bloblist
  *
- * This should only be called if you konw there is no existing blob for a
- * particular tag. It is typically safe to call in the first phase of U-Boot
- * (e.g. TPL or SPL). After that, bloblist_ensure() should be used instead.
+ * This function does not check for an existing blob with the same tag. For
+ * blobs which should only be present once in the bloblist, this function should
+ * only be called if you know there is no existing blob for a particular tag.
+ * It is typically safe to call in the first phase of U-Boot
+ * (e.g. TPL or SPL). After that, bloblist_ensure() can be used instead, to find
+ * an existing blob.
  *
  * @tag:	Tag to add (enum bloblist_tag_t)
  * @size:	Size of the blob

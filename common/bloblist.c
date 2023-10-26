@@ -21,12 +21,13 @@
  * A bloblist is a single contiguous chunk of memory with a header
  * (struct bloblist_hdr) and a number of blobs in it.
  *
- * Each blob starts on a BLOBLIST_ALIGN boundary relative to the start of the
- * bloblist and consists of a struct bloblist_rec, some padding to the required
- * alignment for the blog and then the actual data. The padding ensures that the
- * start address of the data in each blob is aligned as required. Note that
- * each blob's *data* is aligned to BLOBLIST_ALIGN regardless of the alignment
- * of the bloblist itself or the blob header.
+ * Each blob starts on a BLOBLIST_BLOB_ALIGN boundary relative to the start of
+ * the bloblist and consists of a struct bloblist_rec. Where a blob requires a
+ * particular alignment of its data, a dummy blob is added before it, to ensure
+ * that alignment. Note that it is the data which is aligned, not the blob
+ * header. Note that each blob's *data* is aligned to at least
+ * BLOBLIST_BLOB_ALIGN regardless of the alignment of the bloblist itself or the
+ * blob header.
  */
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -180,6 +181,7 @@ static int bloblist_addrec(uint tag, int size, int align_log2,
 	memset((void *)rec + rec_hdr_size(rec), '\0', rec->size);
 
 	hdr->alloced = new_alloced;
+	hdr->align_log2 = max((uint)hdr->align_log2, (uint)align_log2);
 	*recp = rec;
 
 	return 0;
@@ -328,10 +330,12 @@ int bloblist_resize(uint tag, int new_size)
 
 static u32 bloblist_calc_chksum(struct bloblist_hdr *hdr)
 {
+	const u8 *ptr, *end;
 	u8 chksum;
 
-	chksum = table_compute_checksum(hdr, hdr->alloced);
-	chksum += hdr->chksum;
+	chksum = 0;
+	for (ptr = (u8 *)hdr, end = ptr + hdr->alloced; ptr < end; ptr++)
+		chksum ^= *ptr;
 
 	return chksum;
 }
@@ -361,7 +365,7 @@ int bloblist_new(ulong addr, uint size)
 int bloblist_check(ulong addr, uint size)
 {
 	struct bloblist_hdr *hdr;
-	u32 chksum;
+	uint chksum;
 
 	hdr = map_sysmem(addr, sizeof(*hdr));
 	if (hdr->magic != BLOBLIST_MAGIC)
@@ -371,7 +375,7 @@ int bloblist_check(ulong addr, uint size)
 	if (size && hdr->size != size)
 		return log_msg_ret("Bad size", -EFBIG);
 	chksum = bloblist_calc_chksum(hdr);
-	if (hdr->chksum != chksum) {
+	if (chksum) {
 		log_err("Checksum %x != %x\n", hdr->chksum, chksum);
 		return log_msg_ret("Bad checksum", -EIO);
 	}
@@ -384,7 +388,10 @@ int bloblist_finish(void)
 {
 	struct bloblist_hdr *hdr = gd->bloblist;
 
+	hdr->chksum = 0;
 	hdr->chksum = bloblist_calc_chksum(hdr);
+	printf("chksum = %02x\n", hdr->chksum);
+	printf("check = %02x\n", bloblist_calc_chksum(hdr));
 	log_debug("Finished bloblist size %lx at %lx\n", (ulong)hdr->size,
 		  (ulong)map_to_sysmem(hdr));
 

@@ -236,9 +236,9 @@ static int bloblist_test_checksum(struct unit_test_state *uts)
 	data[TEST_SIZE]--;
 	ut_assertok(bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
 
-	data2[TEST_SIZE2]++;
+	data2[TEST_SIZE2] ^= 0xff;
 	ut_asserteq(-EIO, bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
-	data[TEST_SIZE]--;
+	data[TEST_SIZE] ^= 0xff;
 	ut_assertok(bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
 
 	return 0;
@@ -309,6 +309,7 @@ static int bloblist_test_align(struct unit_test_state *uts)
 	/* At the start there should be no records */
 	hdr = clear_bloblist();
 	ut_assertok(bloblist_new(TEST_ADDR, TEST_BLOBLIST_SIZE));
+	ut_asserteq(3, hdr->align_log2);
 	ut_assertnull(bloblist_find(TEST_TAG, TEST_BLOBLIST_SIZE));
 
 	/* Check the default alignment */
@@ -338,6 +339,7 @@ static int bloblist_test_align(struct unit_test_state *uts)
 		ut_assertnonnull(data);
 		addr = map_to_sysmem(data);
 		ut_asserteq(0, addr & (align - 1));
+		ut_asserteq(5, hdr->align_log2);
 	}
 
 	/* Check alignment with an bloblist starting on a smaller alignment */
@@ -346,11 +348,14 @@ static int bloblist_test_align(struct unit_test_state *uts)
 	memset(hdr, '\0', sizeof(*hdr));
 	ut_assertok(bloblist_new(TEST_ADDR + BLOBLIST_ALIGN,
 				 TEST_BLOBLIST_SIZE));
+	hdr = map_sysmem(TEST_ADDR + BLOBLIST_ALIGN, TEST_BLOBLIST_SIZE);
+	ut_asserteq(3, hdr->align_log2);
 
 	data = bloblist_add(1, 5, BLOBLIST_ALIGN_LOG2 + 1);
 	ut_assertnonnull(data);
 	addr = map_to_sysmem(data);
 	ut_asserteq(0, addr & (BLOBLIST_BLOB_ALIGN * 2 - 1));
+	ut_asserteq(5, hdr->align_log2);
 
 	return 0;
 }
