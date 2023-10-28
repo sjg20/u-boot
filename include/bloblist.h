@@ -75,7 +75,7 @@
 
 enum {
 	BLOBLIST_VERSION	= 1,
-	BLOBLIST_MAGIC		= 0x6ed0ff,
+	BLOBLIST_SIGNATURE	= 0x40ffb10b,
 
 	BLOBLIST_BLOB_ALIGN_LOG2 = 3,
 	BLOBLIST_BLOB_ALIGN	 = 1 << BLOBLIST_BLOB_ALIGN_LOG2,
@@ -155,31 +155,43 @@ enum bloblist_tag_t {
  * Each bloblist record is aligned to an 8-byte boundary and follows immediately
  * from the last.
  *
- * @magic: BLOBLIST_MAGIC
- * @chksum: checksum for the entire bloblist allocated area. Since any of the
+ * @signature: BLOBLIST_SIGNATURE
+ * @checksum: checksum for the entire bloblist allocated area. Since any of the
  *	blobs can be altered after being created, this checksum is only valid
  *	when the bloblist is finalised before jumping to the next stage of boot.
  *	This is the value needed to make all chechksummed bytes sum to 0
  * @version: BLOBLIST_VERSION
  * @hdr_size: Size of this header, normally sizeof(struct bloblist_hdr). The
  *	first bloblist_rec starts at this offset from the start of the header
- * @align_log2: Power of two of the maximum alignment required by this list
+ * @alignment: Power of two of the maximum alignment required by this list
  * @alloced: Total size allocated so far for this bloblist. This starts out as
  *	sizeof(bloblist_hdr) since we need at least that much space to store a
  *	valid bloblist
- * @size: Total size of the bloblist (non-zero if valid) including this header.
- *	The bloblist extends for this many bytes from the start of this header.
- *	When adding new records, the bloblist can grow up to this size.
+ * @max_size: Total size of the bloblist (non-zero if valid) including this
+ *	header. The bloblist extends for this many bytes from the start of this
+ *	header. When adding new records, the bloblist can grow up to this size.
+ * @flags: Flags word (see enum bloblist_flags_t)
  */
 struct bloblist_hdr {
-	u32 magic;
-	u8 chksum;
+	u32 signature;
+	u8 checksum;
 	u8 version;
 	u8 hdr_size;
-	u8 align_log2;
+	u8 alignment;
 
 	u32 alloced;
-	u32 size;
+	u32 max_size;
+	u32 flags;
+	u32 reserved;
+};
+
+/**
+ * enum bloblist_flags_t - Provides a place for flags which affect the bloblist
+ *
+ * @BLOBLISTF_HAS_CHECKSUM: indicates that the checksum field is used
+ */
+enum bloblist_flags_t {
+	BLOBLISTF_HAS_CHECKSUM	= 1 << 0,
 };
 
 /**
@@ -224,7 +236,7 @@ static inline void *bloblist_check_magic(ulong addr)
 	if (!addr)
 		return NULL;
 	ptr = map_sysmem(addr, 0);
-	if (*ptr != BLOBLIST_MAGIC)
+	if (*ptr != BLOBLIST_SIGNATURE)
 		return NULL;
 
 	return ptr;
@@ -366,11 +378,11 @@ void bloblist_get_stats(ulong *basep, ulong *sizep, ulong *allocedp);
 ulong bloblist_get_base(void);
 
 /**
- * bloblist_get_size() - Get the size of the bloblist
+ * bloblist_get_max_size() - Get the max size of the bloblist
  *
- * Return: the size in bytes
+ * Return: the maximum size that the bloblist can grow to, in bytes
  */
-ulong bloblist_get_size(void);
+ulong bloblist_get_max_size(void);
 
 /**
  * bloblist_show_stats() - Show information about the bloblist

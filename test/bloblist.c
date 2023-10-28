@@ -73,7 +73,7 @@ static int bloblist_test_init(struct unit_test_state *uts)
 	ut_asserteq(-ENOENT, bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
 	ut_asserteq_ptr(NULL, bloblist_check_magic(TEST_ADDR));
 	ut_assertok(bloblist_new(TEST_ADDR, TEST_BLOBLIST_SIZE));
-	ut_asserteq(BLOBLIST_BLOB_ALIGN_LOG2, hdr->align_log2);
+	ut_asserteq(BLOBLIST_BLOB_ALIGN_LOG2, hdr->alignment);
 	ut_asserteq_ptr(hdr, bloblist_check_magic(TEST_ADDR));
 	hdr->version++;
 	ut_asserteq(-EPROTONOSUPPORT, bloblist_check(TEST_ADDR,
@@ -87,9 +87,9 @@ static int bloblist_test_init(struct unit_test_state *uts)
 	ut_assertok(bloblist_finish());
 	ut_assertok(bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
 
-	hdr->magic++;
+	hdr->signature++;
 	ut_asserteq_ptr(NULL, bloblist_check_magic(TEST_ADDR));
-	hdr->magic--;
+	hdr->signature--;
 
 	return 1;
 }
@@ -105,7 +105,7 @@ static int bloblist_test_blob(struct unit_test_state *uts)
 	hdr = clear_bloblist();
 	ut_assertnull(bloblist_find(TEST_TAG, TEST_BLOBLIST_SIZE));
 	ut_assertok(bloblist_new(TEST_ADDR, TEST_BLOBLIST_SIZE));
-	ut_asserteq(TEST_BLOBLIST_SIZE, bloblist_get_size());
+	ut_asserteq(TEST_BLOBLIST_SIZE, bloblist_get_max_size());
 	ut_asserteq(TEST_ADDR, bloblist_get_base());
 	ut_asserteq(map_to_sysmem(hdr), TEST_ADDR);
 
@@ -199,13 +199,13 @@ static int bloblist_test_checksum(struct unit_test_state *uts)
 	 * change the size or alloced fields, since that will crash the code.
 	 * It has to rely on these being correct.
 	 */
-	hdr->size--;
+	hdr->max_size--;
 	ut_asserteq(-EFBIG, bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
-	hdr->size++;
+	hdr->max_size++;
 
-	hdr->chksum++;
+	hdr->checksum++;
 	ut_asserteq(-EIO, bloblist_check(TEST_ADDR, TEST_BLOBLIST_SIZE));
-	hdr->chksum--;
+	hdr->checksum--;
 
 	/* Make sure the checksum changes when we add blobs */
 	data = bloblist_add(TEST_TAG, TEST_SIZE, 0);
@@ -309,7 +309,7 @@ static int bloblist_test_align(struct unit_test_state *uts)
 	/* At the start there should be no records */
 	hdr = clear_bloblist();
 	ut_assertok(bloblist_new(TEST_ADDR, TEST_BLOBLIST_SIZE));
-	ut_asserteq(3, hdr->align_log2);
+	ut_asserteq(3, hdr->alignment);
 	ut_assertnull(bloblist_find(TEST_TAG, TEST_BLOBLIST_SIZE));
 
 	/* Check the default alignment */
@@ -339,7 +339,7 @@ static int bloblist_test_align(struct unit_test_state *uts)
 		ut_assertnonnull(data);
 		addr = map_to_sysmem(data);
 		ut_asserteq(0, addr & (align - 1));
-		ut_asserteq(5, hdr->align_log2);
+		ut_asserteq(5, hdr->alignment);
 	}
 
 	/* Check alignment with an bloblist starting on a smaller alignment */
@@ -349,13 +349,13 @@ static int bloblist_test_align(struct unit_test_state *uts)
 	ut_assertok(bloblist_new(TEST_ADDR + BLOBLIST_ALIGN,
 				 TEST_BLOBLIST_SIZE));
 	hdr = map_sysmem(TEST_ADDR + BLOBLIST_ALIGN, TEST_BLOBLIST_SIZE);
-	ut_asserteq(3, hdr->align_log2);
+	ut_asserteq(3, hdr->alignment);
 
 	data = bloblist_add(1, 5, BLOBLIST_ALIGN_LOG2 + 1);
 	ut_assertnonnull(data);
 	addr = map_to_sysmem(data);
 	ut_asserteq(0, addr & (BLOBLIST_BLOB_ALIGN * 2 - 1));
-	ut_asserteq(5, hdr->align_log2);
+	ut_asserteq(5, hdr->alignment);
 
 	return 0;
 }
@@ -527,7 +527,7 @@ static int bloblist_test_resize_fail(struct unit_test_state *uts)
 	/* Resize the first one, to check the boundary conditions */
 	ut_asserteq(-EINVAL, bloblist_resize(TEST_TAG, -1));
 
-	new_size = small_size + (hdr->size - hdr->alloced);
+	new_size = small_size + (hdr->max_size - hdr->alloced);
 	ut_asserteq(-ENOSPC, bloblist_resize(TEST_TAG, new_size + 1));
 	ut_assertok(bloblist_resize(TEST_TAG, new_size));
 

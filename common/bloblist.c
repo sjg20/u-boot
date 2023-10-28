@@ -166,9 +166,9 @@ static int bloblist_addrec(uint tag, int size, int align_log2,
 	new_alloced = data_start - map_to_sysmem(hdr) +
 		ALIGN(size, BLOBLIST_BLOB_ALIGN);
 
-	if (new_alloced > hdr->size) {
+	if (new_alloced > hdr->max_size) {
 		log_err("Failed to allocate %x bytes size=%x, need size=%x\n",
-			size, hdr->size, new_alloced);
+			size, hdr->max_size, new_alloced);
 		return log_msg_ret("bloblist add", -ENOSPC);
 	}
 	rec = (void *)hdr + hdr->alloced;
@@ -181,7 +181,7 @@ static int bloblist_addrec(uint tag, int size, int align_log2,
 	memset((void *)rec + rec_hdr_size(rec), '\0', rec->size);
 
 	hdr->alloced = new_alloced;
-	hdr->align_log2 = max((uint)hdr->align_log2, (uint)align_log2);
+	hdr->alignment = max((uint)hdr->alignment, (uint)align_log2);
 	*recp = rec;
 
 	return 0;
@@ -286,9 +286,9 @@ static int bloblist_resize_rec(struct bloblist_hdr *hdr,
 			  new_size);
 		return log_msg_ret("size", -EINVAL);
 	}
-	if (new_alloced > hdr->size) {
+	if (new_alloced > hdr->max_size) {
 		log_err("Failed to allocate %x bytes size=%x, need size=%x\n",
-			new_size, hdr->size, new_alloced);
+			new_size, hdr->max_size, new_alloced);
 		return log_msg_ret("alloc", -ENOSPC);
 	}
 
@@ -352,11 +352,11 @@ int bloblist_new(ulong addr, uint size)
 	memset(hdr, '\0', sizeof(*hdr));
 	hdr->version = BLOBLIST_VERSION;
 	hdr->hdr_size = sizeof(*hdr);
-	hdr->magic = BLOBLIST_MAGIC;
-	hdr->size = size;
+	hdr->signature = BLOBLIST_SIGNATURE;
+	hdr->max_size = size;
 	hdr->alloced = hdr->hdr_size;
-	hdr->align_log2 = BLOBLIST_BLOB_ALIGN_LOG2;
-	hdr->chksum = 0;
+	hdr->alignment = BLOBLIST_BLOB_ALIGN_LOG2;
+	hdr->checksum = 0;
 	gd->bloblist = hdr;
 
 	return 0;
@@ -368,15 +368,15 @@ int bloblist_check(ulong addr, uint size)
 	uint chksum;
 
 	hdr = map_sysmem(addr, sizeof(*hdr));
-	if (hdr->magic != BLOBLIST_MAGIC)
-		return log_msg_ret("Bad magic", -ENOENT);
+	if (hdr->signature != BLOBLIST_SIGNATURE)
+		return log_msg_ret("Bad signature", -ENOENT);
 	if (hdr->version != BLOBLIST_VERSION)
 		return log_msg_ret("Bad version", -EPROTONOSUPPORT);
-	if (size && hdr->size != size)
+	if (size && hdr->max_size != size)
 		return log_msg_ret("Bad size", -EFBIG);
 	chksum = bloblist_calc_chksum(hdr);
 	if (chksum) {
-		log_err("Checksum %x != %x\n", hdr->chksum, chksum);
+		log_err("Checksum %x != %x\n", hdr->checksum, chksum);
 		return log_msg_ret("Bad checksum", -EIO);
 	}
 	gd->bloblist = hdr;
@@ -388,11 +388,9 @@ int bloblist_finish(void)
 {
 	struct bloblist_hdr *hdr = gd->bloblist;
 
-	hdr->chksum = 0;
-	hdr->chksum = bloblist_calc_chksum(hdr);
-	printf("chksum = %02x\n", hdr->chksum);
-	printf("check = %02x\n", bloblist_calc_chksum(hdr));
-	log_debug("Finished bloblist size %lx at %lx\n", (ulong)hdr->size,
+	hdr->checksum = 0;
+	hdr->checksum = bloblist_calc_chksum(hdr);
+	log_debug("Finished bloblist size %lx at %lx\n", (ulong)hdr->max_size,
 		  (ulong)map_to_sysmem(hdr));
 
 	return 0;
@@ -403,11 +401,11 @@ ulong bloblist_get_base(void)
 	return map_to_sysmem(gd->bloblist);
 }
 
-ulong bloblist_get_size(void)
+ulong bloblist_get_max_size(void)
 {
 	struct bloblist_hdr *hdr = gd->bloblist;
 
-	return hdr->size;
+	return hdr->max_size;
 }
 
 void bloblist_get_stats(ulong *basep, ulong *sizep, ulong *allocedp)
@@ -415,7 +413,7 @@ void bloblist_get_stats(ulong *basep, ulong *sizep, ulong *allocedp)
 	struct bloblist_hdr *hdr = gd->bloblist;
 
 	*basep = map_to_sysmem(gd->bloblist);
-	*sizep = hdr->size;
+	*sizep = hdr->max_size;
 	*allocedp = hdr->alloced;
 }
 
@@ -457,7 +455,7 @@ void bloblist_reloc(void *to, uint to_size, void *from, uint from_size)
 
 	memcpy(to, from, from_size);
 	hdr = to;
-	hdr->size = to_size;
+	hdr->max_size = to_size;
 }
 
 int bloblist_init(void)
@@ -487,7 +485,7 @@ int bloblist_init(void)
 				    addr, ret);
 		} else {
 			/* Get the real size, if it is not what we expected */
-			size = gd->bloblist->size;
+			size = gd->bloblist->max_size;
 		}
 	}
 	if (ret) {
