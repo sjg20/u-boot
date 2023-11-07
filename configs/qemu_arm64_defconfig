@@ -69,6 +69,6 @@ CONFIG_USB_EHCI_HCD=y
 CONFIG_USB_EHCI_PCI=y
 CONFIG_SEMIHOSTING=y
 CONFIG_TPM=y
-CONFIG_BOOTCOMMAND="load virtio 1 ${loadaddr} try.fit; fdt addr -cs; print fdtaddr; bootm ${loadaddr}:#conf-1 - ${fdtaddr}"
+CONFIG_BOOTCOMMAND="load virtio 1 ${loadaddr} try.fit; fdt addr -cs; print fdtaddr; run start"
 CONFIG_CMD_EXT4_WRITE=y
 CONFIG_EXT4_WRITE=y
