@@ -238,6 +238,8 @@ static inline void *bloblist_check_magic(ulong addr)
  */
 void *bloblist_find(uint tag, int size);
 
+void *bloblist_find_size(uint tag, int *sizep);
+
 /**
  * bloblist_add() - Add a new blob
  *

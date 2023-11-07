@@ -194,6 +194,18 @@ void *bloblist_find(uint tag, int size)
 	return (void *)rec + rec->hdr_size;
 }
 
+void *bloblist_find_size(uint tag, int *sizep)
+{
+	struct bloblist_rec *rec;
+
+	rec = bloblist_findrec(tag);
+	if (!rec)
+		return NULL;
+	*sizep = rec->size;
+
+	return (void *)rec + rec->hdr_size;
+}
+
 void *bloblist_add(uint tag, int size, int align)
 {
 	struct bloblist_rec *rec;

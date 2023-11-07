@@ -10,6 +10,7 @@
 #define LOG_CATEGORY LOGC_BOOT
 
 #include <common.h>
+#include <bloblist.h>
 #include <dm.h>
 #include <event.h>
 #include <image.h>
@@ -93,6 +94,34 @@ static int vbe_req_efi_runtime_rand(ofnode node, struct vbe_result *result)
 	return handle_random_req(node, 4, result);
 }
 
+static int vbe_req_tcg2_log(ofnode node, struct vbe_result *result)
+{
+	void *ptr = NULL;
+	int size;
+	int ret = -ENOSYS;
+
+	if (IS_ENABLED(CONFIG_BLOBLIST)) {
+		ptr = bloblist_find_size(BLOBLISTT_TPM2_TCG_LOG, &size);
+		if (!ptr)
+			ret = -ENOENT;
+	}
+
+	if (!ptr) {
+		snprintf(result->err_str, VBE_ERR_STR_LEN,
+			 "No TCG2 log available (err=%d)", ret);
+		return log_msg_ret("wr", ret);
+	}
+
+	ret = ofnode_write_u64(node, "log-start", map_to_sysmem(ptr));
+	if (ret)
+		return log_msg_ret("st", -EINVAL);
+	ret = ofnode_write_u64(node, "log-size", size);
+	if (ret)
+		return log_msg_ret("sz", -EINVAL);
+
+	return 0;
+}
+
 static struct vbe_req {
 	const char *compat;
 	vbe_req_func func;
@@ -109,6 +138,8 @@ static struct vbe_req {
 	/* generate random data bytes to seed the OS's rand generator */
 	{ "random-seed", vbe_req_random_seed },
 
+	/* add the tcg2-log */
+	{ "tcg2-log", vbe_req_tcg2_log },
 };
 
 static int vbe_process_request(ofnode node, struct vbe_result *result)

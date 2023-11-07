@@ -16,6 +16,9 @@
 /*            data = /incbin/("/tmp/casper/vmlinuz"); */
 /*            data = /incbin/("/tmp/casper/asc"); */
             data = /incbin/("/tmp/kern/arch/arm64/boot/Image");
+            hash-1 {
+                algo = "sha256";
+            };
             random-seed {
                 compatible = "vbe,random-seed";
                 seed-size = <0x00000020>;
@@ -35,6 +38,9 @@
             os = "linux";
             compression = "none";
             data = /incbin/("/tmp/casper/initrd.raw");
+            hash-1 {
+                algo = "sha256";
+            };
         };
     };
     configurations {
