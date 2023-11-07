@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <bloblist.h>
 #include <dm.h>
 #include <dm/of_access.h>
 #include <tpm_api.h>
@@ -653,6 +654,20 @@ __weak int tcg2_platform_get_log(struct udevice *dev, void **addr, u32 *size)
 
 	*addr = NULL;
 	*size = 0;
+
+	if (IS_ENABLED(CONFIG_TPM_TCG2_LOG_BLOBLIST)) {
+		void *ptr;
+
+		*size = IF_ENABLED_INT(CONFIG_TPM_TCG2_LOG_BLOBLIST,
+				       CONFIG_TPM_TCG2_LOG_SIZE);
+
+		ptr = bloblist_ensure(BLOBLISTT_TPM2_TCG_LOG, *size);
+		if (!ptr)
+			return -ENOSPC;
+		*addr = ptr;
+
+		return 0;
+	}
 
 	addr_prop = dev_read_prop(dev, "tpm_event_log_addr", &asize);
 	if (!addr_prop)

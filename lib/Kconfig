@@ -477,6 +477,23 @@ config VPL_TPM
 	  for the low-level TPM interface, but only one TPM is supported at
 	  a time by the TPM library.
 
+config TPM_TCG2_LOG_BLOBLIST
+	bool "Put the TCG2 log into the bloblist"
+	depends on BLOBLIST
+	help
+	  Place the Trusted-Computing Group TPM2 (TCG2) log in the
+	  bloblist. U-Boot typically passes the log on to the operating
+	  system when booting it.
+
+config TPM_TCG2_LOG_SIZE
+	hex "Maximum size of TCG2 log in bloblist"
+	depends on TPM_TCG2_LOG_BLOBLIST
+	default 0x400
+	help
+	  Defines the maximum size of the Trusted-Computing Group TPM2 (TCG2)
+	  log in bytes. This needs to be large enough to hold all the
+	  measurements needing for booting.
+
 endmenu
 
 menu "Android Verified Boot"
