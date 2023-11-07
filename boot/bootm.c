@@ -708,6 +708,7 @@ int bootm_measure(struct bootm_headers *images)
 		u32 rd_len;
 		bool ign;
 
+		printf("Measuring\n");
 		elog.log_size = 0;
 		ign = IS_ENABLED(CONFIG_MEASURE_IGNORE_LOG);
 		ret = tcg2_measurement_init(&dev, &elog, ign);

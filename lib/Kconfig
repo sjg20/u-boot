@@ -488,7 +488,7 @@ config TPM_TCG2_LOG_BLOBLIST
 config TPM_TCG2_LOG_SIZE
 	hex "Maximum size of TCG2 log in bloblist"
 	depends on TPM_TCG2_LOG_BLOBLIST
-	default 0x400
+	default 0x1000
 	help
 	  Defines the maximum size of the Trusted-Computing Group TPM2 (TCG2)
 	  log in bytes. This needs to be large enough to hold all the

@@ -665,6 +665,7 @@ __weak int tcg2_platform_get_log(struct udevice *dev, void **addr, u32 *size)
 		if (!ptr)
 			return -ENOSPC;
 		*addr = ptr;
+		printf("TPM log in bloblist at %p size %x\n", *addr, *size);
 
 		return 0;
 	}
