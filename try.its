@@ -1,0 +1,48 @@
+/dts-v1/;
+
+/ {
+    description = "Linux with devicetree set";
+    #address-cells = <0x00000001>;
+    timestamp = <0x6547ba1d>;
+    images {
+        kernel {
+            description = "Linux";
+            type = "kernel_noload";
+            arch = "arm64";
+            os = "linux";
+            compression = "none";
+            load = <0x00000000>;
+            entry = <0x00000000>;
+/*            data = /incbin/("/tmp/casper/vmlinuz"); */
+/*            data = /incbin/("/tmp/casper/asc"); */
+            data = /incbin/("/tmp/kern/arch/arm64/boot/Image");
+            rand-seed {
+                compatible = "vbe,rand-seed";
+                rand-seed-size = <0x00000020>;
+            };
+            tcg2-log {
+                compatible = "vbe,tcg2-log";
+            };
+            kaslr-rand {
+                compatible = "vbe,kaslr-rand";
+                rand-seed-size = <0x00000004>;
+            };
+        };
+        initrd {
+            description = "Linux";
+            type = "ramdisk";
+            arch = "arm64";
+            os = "linux";
+            compression = "none";
+            data = /incbin/("/tmp/casper/initrd.raw");
+        };
+    };
+    configurations {
+        default = "conf-1";
+        conf-1 {
+            description = "Linux";
+            kernel = "kernel";
+            ramdisk = "initrd";
+        };
+    };
+};
