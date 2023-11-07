@@ -39,7 +39,7 @@ static int handle_random_req(ofnode node, int default_size,
 	if (!IS_ENABLED(CONFIG_DM_RNG))
 		return -ENOTSUPP;
 
-	if (ofnode_read_u32(node, "vbe,size", &size)) {
+	if (ofnode_read_u32(node, "seed-size", &size)) {
 		if (!default_size) {
 			snprintf(result->err_str, VBE_ERR_STR_LEN,
 				 "Missing vbe,size property");
@@ -97,16 +97,16 @@ static struct vbe_req {
 	vbe_req_func func;
 } vbe_reqs[] = {
 	/* address space layout randomization - move the OS in memory */
-	{ "aslr-move", vbe_req_aslr_move },
+	{ "kaslr-move", vbe_req_aslr_move },
 
 	/* provide random data for address space layout randomization */
-	{ "aslr-rand", vbe_req_aslr_rand },
+	{ "kaslr-random", vbe_req_aslr_rand },
 
 	/* provide random data for EFI-runtime-services address */
 	{ "efi-runtime-rand", vbe_req_efi_runtime_rand },
 
-	/* generate random data bytes to see the OS's rand generator */
-	{ "random-rand", vbe_req_random_seed },
+	/* generate random data bytes to seed the OS's rand generator */
+	{ "random-seed", vbe_req_random_seed },
 
 };
 
