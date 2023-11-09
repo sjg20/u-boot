@@ -4,6 +4,7 @@
  */
 
 #include <common.h>
+#include <bootm.h>
 #include <command.h>
 #include <dfu.h>
 #include <image.h>
@@ -131,6 +132,7 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
 		const void *uimage = (void *)data->uimage;
 		const void *dtb = (void *)data->dtb;
 		const void *initrd = (void *)data->initrd;
+		struct bootm_info bmi;
 
 		fdt_arg = dtb_addr;
 		if (!dtb)
@@ -153,9 +155,16 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
 		bootm_argv[2] = initrd_arg;
 		bootm_argv[3] = fdt_arg;
 
+		memset(&bmi, '\0', sizeof(bmi));
+		bmi.addr_fit = boot_addr_start;
+		bmi.conf_ramdisk = boot_addr_start;
+		bmi.conf_fdt = fdt_arg;
+		bmi.boot_progress = true;
+		bmi.images = &images;
+
 		/* Try bootm for legacy and FIT format image */
 		if (genimg_get_format(uimage) != IMAGE_FORMAT_INVALID)
-			do_bootm(cmdtp, 0, 4, bootm_argv);
+			bootm_run(&bmi);
 		else if (IS_ENABLED(CONFIG_CMD_BOOTZ))
 			do_bootz(cmdtp, 0, 4, bootm_argv);
 	}
