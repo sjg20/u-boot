@@ -126,9 +126,6 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
 		char dtb_addr[20];
 		char initrd_addr[40];
 		char *fdt_arg, *initrd_arg;
-		char *bootm_argv[5] = {
-			"bootm", boot_addr_start,
-		};
 		const void *uimage = (void *)data->uimage;
 		const void *dtb = (void *)data->dtb;
 		const void *initrd = (void *)data->initrd;
@@ -152,8 +149,6 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		printf("Booting kernel at %s %s %s...\n\n\n", boot_addr_start,
 		       initrd_arg, fdt_arg);
-		bootm_argv[2] = initrd_arg;
-		bootm_argv[3] = fdt_arg;
 
 		memset(&bmi, '\0', sizeof(bmi));
 		bmi.addr_fit = boot_addr_start;
@@ -166,7 +161,7 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
 		if (genimg_get_format(uimage) != IMAGE_FORMAT_INVALID)
 			bootm_run(&bmi);
 		else if (IS_ENABLED(CONFIG_CMD_BOOTZ))
-			do_bootz(cmdtp, 0, 4, bootm_argv);
+			bootz_run(&bmi);
 	}
 	if (data->script)
 		cmd_source_script(data->script, NULL, NULL);
