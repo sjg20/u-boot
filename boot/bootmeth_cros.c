@@ -6,7 +6,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_BOOTSTD
 
 #include <common.h>
@@ -424,6 +423,7 @@ static int cros_read_all(struct udevice *dev, struct bootflow *bflow)
 
 static int cros_boot(struct udevice *dev, struct bootflow *bflow)
 {
+	ulong addr;
 	int ret;
 
 	if (!bflow->buf) {
@@ -432,12 +432,24 @@ static int cros_boot(struct udevice *dev, struct bootflow *bflow)
 			return log_msg_ret("rd", ret);
 	}
 
+	addr = map_to_sysmem(bflow->buf);
 	if (IS_ENABLED(CONFIG_X86)) {
-		ret = zboot_start(map_to_sysmem(bflow->buf), bflow->size, 0, 0,
+		ret = zboot_start(addr, bflow->size, 0, 0,
 				  map_to_sysmem(bflow->x86_setup),
 				  bflow->cmdline);
+	} else if (IS_ENABLED(CONFIG_CMD_BOOTI)) {
+		char kern_str[17], fdt_str[17];
+		// char *argv[] = {"booti", kern_str, "-", fdt_str, NULL};
+		char *argv[] = {"bootefi", kern_str, "-", fdt_str, NULL};
+
+		/* hack */
+		strcpy(kern_str, simple_xtoa(addr));
+		strcpy(fdt_str, simple_xtoa(map_to_sysmem(gd->fdt_blob)));
+		// strcpy(fdt_str, "-");
+		ret = do_booti(NULL, 0, ARRAY_SIZE(argv) - 1, argv);
+
 	} else {
-		ret = bootm_boot_start(map_to_sysmem(bflow->buf),
+		ret = bootm_boot_start(addr,
 				       bflow->cmdline);
 	}
 

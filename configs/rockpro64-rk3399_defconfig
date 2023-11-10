@@ -114,6 +114,7 @@ CONFIG_DISPLAY_ROCKCHIP_HDMI=y
 CONFIG_SPL_TINY_MEMSET=y
 CONFIG_ERRNO_STR=y
 CONFIG_BOOTSTD_FULL=y
-CONFIG_BOOTCOMMAND="bootflow scan -l mmc1; bootfl sel 1; bootfl b"
+CONFIG_BOOTCOMMAND="pci; bootflow scan -l nvme; bootfl sel 0; bootfl read"
 CONFIG_BOOTMETH_CROS=y
 # CONFIG_USB_KEYBOARD is not set
+CONFIG_TFTP_TSIZE=y

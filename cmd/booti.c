@@ -107,6 +107,10 @@ int do_booti(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 
 	/* Consume 'booti' */
 	argc--; argv++;
+	printf("booti ");
+	for (int i = 0; i < argc; i++)
+		printf("%s ", argv[i]);
+	printf("\n");
 
 	if (booti_start(cmdtp, flag, argc, argv, &images))
 		return 1;
