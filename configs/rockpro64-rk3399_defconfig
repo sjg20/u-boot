@@ -115,7 +115,7 @@ CONFIG_SPL_TINY_MEMSET=y
 CONFIG_ERRNO_STR=y
 CONFIG_BOOTSTD_FULL=y
 # CONFIG_BOOTCOMMAND="pci; bootflow scan -l nvme; bootfl sel 0; bootfl read"
-CONFIG_BOOTCOMMAND="setenv stdout serial; setenv autoload n; bootp; setenv serverip 100.107.108.219; tftp image.fit; bootm"
+CONFIG_BOOTCOMMAND="setenv stdout serial; pci; bootflow scan -l nvme; bootfl sel 0; setenv autoload n; bootp; setenv serverip 100.107.108.219; tftp image.fit; #bootm"
 CONFIG_BOOTMETH_CROS=y
 # CONFIG_USB_KEYBOARD is not set
 CONFIG_TFTP_TSIZE=y
