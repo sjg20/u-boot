@@ -155,6 +155,7 @@ static int do_fdt(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 		unsigned long addr;
 		int control = 0;
 		int quiet = 0;
+		bool set_var = false;
 		struct fdt_header *blob;
 
 		/* Set the address [and length] of the fdt */
@@ -170,6 +171,9 @@ static int do_fdt(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 					break;
 				case 'q':
 					quiet = 1;
+					break;
+				case 's':
+					set_var = true;
 					break;
 				default:
 					return CMD_RET_USAGE;
@@ -189,6 +193,13 @@ static int do_fdt(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 			       control ? "Control" : "Working",
 			       control ? (ulong)map_to_sysmem(blob) :
 			       env_get_hex("fdtaddr", 0));
+
+			printf("control %d, set_var %d\n", control, set_var);
+			if (control && set_var) {
+				if (env_set_hex("fdtaddr",
+						(ulong)map_to_sysmem(blob)))
+					return CMD_RET_FAILURE;
+			}
 			return 0;
 		}
 
