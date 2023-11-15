@@ -43,9 +43,11 @@ enum bootflow_state_t {
  *	and it is using the prior-stage FDT, which is the U-Boot control FDT.
  *	This is only possible with the EFI bootmeth (distro-efi) and only when
  *	CONFIG_OF_HAS_PRIOR_STAGE is enabled
- */
+ * @BOOTFLOWF_STATIC_BUF: Indicates that @bflow->buf is statically set, rather
+ *	than being allocated by malloc(). */
 enum bootflow_flags_t {
 	BOOTFLOWF_USE_PRIOR_FDT	= 1 << 0,
+	BOOTFLOWF_STATIC_BUF	= 1 << 1,
 };
 
 /**

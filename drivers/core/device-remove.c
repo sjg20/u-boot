@@ -73,29 +73,38 @@ int device_unbind(struct udevice *dev)
 	const struct driver *drv;
 	int ret;
 
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 	if (!dev)
 		return log_msg_ret("dev", -EINVAL);
 
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 	if (dev_get_flags(dev) & DM_FLAG_ACTIVATED)
 		return log_msg_ret("active", -EINVAL);
 
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 	if (!(dev_get_flags(dev) & DM_FLAG_BOUND))
 		return log_msg_ret("not-bound", -EINVAL);
 
 	drv = dev->driver;
 	assert(drv);
 
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 	if (drv->unbind) {
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 		ret = drv->unbind(dev);
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 		if (ret)
 			return log_msg_ret("unbind", ret);
 	}
 
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 	ret = device_chld_unbind(dev, NULL);
 	if (ret)
 		return log_msg_ret("child unbind", ret);
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 
 	ret = uclass_pre_unbind_device(dev);
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 	if (ret)
 		return log_msg_ret("uc", ret);
 	if (dev_get_flags(dev) & DM_FLAG_ALLOC_PDATA) {
@@ -110,7 +119,9 @@ int device_unbind(struct udevice *dev)
 		free(dev_get_parent_plat(dev));
 		dev_set_parent_plat(dev, NULL);
 	}
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 	ret = uclass_unbind_device(dev);
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 	if (ret)
 		return log_msg_ret("uc", ret);
 
@@ -122,6 +133,7 @@ int device_unbind(struct udevice *dev)
 	if (dev_get_flags(dev) & DM_FLAG_NAME_ALLOCED)
 		free((char *)dev->name);
 	free(dev);
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 
 	return 0;
 }

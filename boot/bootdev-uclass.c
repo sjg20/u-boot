@@ -582,12 +582,15 @@ void bootdev_clear_bootflows(struct udevice *dev)
 {
 	struct bootdev_uc_plat *ucp = dev_get_uclass_plat(dev);
 
+	printf("LINE %d: %s\n", __LINE__, dev->name);
 	while (!list_empty(&ucp->bootflow_head)) {
 		struct bootflow *bflow;
 
 		bflow = list_first_entry(&ucp->bootflow_head, struct bootflow,
 					 bm_node);
+	printf("LINE %d %s\n", __LINE__, bflow->name);
 		bootflow_remove(bflow);
+	printf("LINE %d\n", __LINE__);
 	}
 }
 

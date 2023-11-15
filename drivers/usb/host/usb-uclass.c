@@ -181,41 +181,56 @@ int usb_stop(void)
 	struct usb_uclass_priv *uc_priv;
 	int err = 0, ret;
 
+	printf("LINE %d\n", __LINE__);
 	/* De-activate any devices that have been activated */
 	ret = uclass_get(UCLASS_USB, &uc);
 	if (ret)
 		return ret;
+	printf("LINE %d\n", __LINE__);
 
 	uc_priv = uclass_get_priv(uc);
+	printf("LINE %d\n", __LINE__);
 
 	uclass_foreach_dev(bus, uc) {
+		printf("LINE %d: %s\n", __LINE__, bus->name);
 		ret = device_remove(bus, DM_REMOVE_NORMAL);
+		printf("LINE %d: %s\n", __LINE__, bus->name);
 		if (ret && !err)
 			err = ret;
 
 		/* Locate root hub device */
 		device_find_first_child(bus, &rh);
+		printf("LINE %d: %s\n", __LINE__, bus->name);
 		if (rh) {
 			/*
 			 * All USB devices are children of root hub.
 			 * Unbinding root hub will unbind all of its children.
 			 */
+		printf("LINE %d: %s\n", __LINE__, bus->name);
 			ret = device_unbind(rh);
+		printf("LINE %d: %s\n", __LINE__, bus->name);
 			if (ret && !err)
 				err = ret;
 		}
+		printf("LINE %d: %s\n", __LINE__, bus->name);
 	}
 
+	printf("LINE %d\n", __LINE__);
 #ifdef CONFIG_USB_STORAGE
 	usb_stor_reset();
 #endif
+	printf("LINE %d\n", __LINE__);
 	if (CONFIG_IS_ENABLED(BOOTSTD)) {
 		int ret;
 
+		printf("LINE %d\n", __LINE__);
 		ret = bootdev_unhunt(UCLASS_USB);
+		printf("LINE %d\n", __LINE__);
 		if (IS_ENABLED(CONFIG_BOOTSTD_FULL) && ret && ret != -EALREADY)
 			printf("failed to unhunt USB (err=%dE)\n", ret);
+		printf("LINE %d\n", __LINE__);
 	}
+	printf("LINE %d\n", __LINE__);
 	uc_priv->companion_device_count = 0;
 	usb_started = 0;
 

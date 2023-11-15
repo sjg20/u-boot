@@ -426,23 +426,37 @@ void bootflow_init(struct bootflow *bflow, struct udevice *bootdev,
 
 void bootflow_free(struct bootflow *bflow)
 {
+	printf("LINE %d\n", __LINE__);
 	free(bflow->name);
+	printf("LINE %d\n", __LINE__);
 	free(bflow->subdir);
+	printf("LINE %d\n", __LINE__);
 	free(bflow->fname);
-	free(bflow->buf);
+	printf("LINE %d %p\n", __LINE__, bflow->buf);
+	if (!(bflow->flags & BOOTFLOWF_STATIC_BUF))
+		free(bflow->buf);
+	printf("LINE %d\n", __LINE__);
 	free(bflow->os_name);
+	printf("LINE %d\n", __LINE__);
 	free(bflow->fdt_fname);
+	printf("LINE %d\n", __LINE__);
 	free(bflow->bootmeth_priv);
+	printf("LINE %d\n", __LINE__);
 }
 
 void bootflow_remove(struct bootflow *bflow)
 {
+	printf("LINE %d\n", __LINE__);
 	if (bflow->dev)
 		list_del(&bflow->bm_node);
+	printf("LINE %d\n", __LINE__);
 	list_del(&bflow->glob_node);
+	printf("LINE %d\n", __LINE__);
 
 	bootflow_free(bflow);
+	printf("LINE %d\n", __LINE__);
 	free(bflow);
+	printf("LINE %d\n", __LINE__);
 }
 
 #if CONFIG_IS_ENABLED(BOOTSTD_FULL)

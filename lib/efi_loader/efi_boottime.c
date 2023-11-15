@@ -5,6 +5,8 @@
  * Copyright (c) 2016 Alexander Graf
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <bootm.h>
 #include <div64.h>
@@ -2152,16 +2154,19 @@ static efi_status_t EFIAPI efi_exit_boot_services(efi_handle_t image_handle,
 	efi_status_t ret = EFI_SUCCESS;
 
 	EFI_ENTRY("%p, %zx", image_handle, map_key);
+	printf("LINE %d\n", __LINE__);
 
 	/* Check that the caller has read the current memory map */
 	if (map_key != efi_memory_map_key) {
 		ret = EFI_INVALID_PARAMETER;
 		goto out;
 	}
+	printf("LINE %d\n", __LINE__);
 
 	/* Check if ExitBootServices has already been called */
 	if (!systab.boottime)
 		goto out;
+	printf("LINE %d\n", __LINE__);
 
 	/* Notify EFI_EVENT_GROUP_BEFORE_EXIT_BOOT_SERVICES event group. */
 	list_for_each_entry(evt, &efi_events, link) {
@@ -2172,15 +2177,18 @@ static efi_status_t EFIAPI efi_exit_boot_services(efi_handle_t image_handle,
 			break;
 		}
 	}
+	printf("LINE %d\n", __LINE__);
 
 	/* Stop all timer related activities */
 	timers_enabled = false;
+	printf("LINE %d\n", __LINE__);
 
 	/* Add related events to the event group */
 	list_for_each_entry(evt, &efi_events, link) {
 		if (evt->type == EVT_SIGNAL_EXIT_BOOT_SERVICES)
 			evt->group = &efi_guid_event_group_exit_boot_services;
 	}
+	printf("LINE %d\n", __LINE__);
 	/* Notify that ExitBootServices is invoked. */
 	list_for_each_entry(evt, &efi_events, link) {
 		if (evt->group &&
@@ -2190,32 +2198,44 @@ static efi_status_t EFIAPI efi_exit_boot_services(efi_handle_t image_handle,
 			break;
 		}
 	}
+	printf("LINE %d\n", __LINE__);
 
 	/* Make sure that notification functions are not called anymore */
 	efi_tpl = TPL_HIGH_LEVEL;
+	printf("LINE %d\n", __LINE__);
 
 	/* Notify variable services */
 	efi_variables_boot_exit_notify();
+	printf("LINE %d\n", __LINE__);
 
 	/* Remove all events except EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE */
 	list_for_each_entry_safe(evt, next_event, &efi_events, link) {
 		if (evt->type != EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE)
 			list_del(&evt->link);
 	}
+	printf("LINE %d\n", __LINE__);
 
 	if (!efi_st_keep_devices) {
+	printf("LINE %d\n", __LINE__);
 		bootm_disable_interrupts();
+	printf("LINE %d\n", __LINE__);
 		if (IS_ENABLED(CONFIG_USB_DEVICE))
 			udc_disconnect();
+		printf("LINE %d\n", __LINE__);
 		board_quiesce_devices();
+		printf("LINE %d\n", __LINE__);
 		dm_remove_devices_flags(DM_REMOVE_ACTIVE_ALL);
+		printf("LINE %d\n", __LINE__);
 	}
+	printf("LINE %d\n", __LINE__);
 
 	/* Patch out unsupported runtime function */
 	efi_runtime_detach();
+	printf("LINE %d\n", __LINE__);
 
 	/* Fix up caches for EFI payloads if necessary */
 	efi_exit_caches();
+	printf("LINE %d\n", __LINE__);
 
 	/* Disable boot time services */
 	systab.con_in_handle = NULL;
@@ -2225,18 +2245,24 @@ static efi_status_t EFIAPI efi_exit_boot_services(efi_handle_t image_handle,
 	systab.stderr_handle = NULL;
 	systab.std_err = NULL;
 	systab.boottime = NULL;
+	printf("LINE %d\n", __LINE__);
 
 	/* Recalculate CRC32 */
 	efi_update_table_header_crc32(&systab.hdr);
+	printf("LINE %d\n", __LINE__);
 
 	/* Give the payload some time to boot */
 	efi_set_watchdog(0);
+	printf("LINE %d\n", __LINE__);
 	schedule();
+	printf("LINE %d\n", __LINE__);
 out:
+	printf("LINE %d\n", __LINE__);
 	if (IS_ENABLED(CONFIG_EFI_TCG2_PROTOCOL)) {
 		if (ret != EFI_SUCCESS)
 			efi_tcg2_notify_exit_boot_services_failed();
 	}
+	printf("LINE %d\n", __LINE__);
 
 	return EFI_EXIT(ret);
 }
