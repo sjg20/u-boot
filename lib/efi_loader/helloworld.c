@@ -240,7 +240,18 @@ efi_status_t EFIAPI efi_main(efi_handle_t handle,
 		goto out;
 
 out:
-	boottime->exit(handle, ret, 0, NULL);
+	efi_uintn_t map_size = 0;
+	efi_uintn_t map_key;
+	efi_uintn_t desc_size;
+	u32 desc_version;
+
+	ret = boottime->get_memory_map(&map_size, NULL, &map_key, &desc_size,
+				       &desc_version);
+	con_out->output_string(con_out, u"Exiting boot sevices\n");
+
+	boottime->exit_boot_services(handle, map_key);
+
+	ret = boottime->exit(handle, ret, 0, NULL);
 
 	/* We should never arrive here */
 	return ret;
