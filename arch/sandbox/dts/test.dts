@@ -109,7 +109,7 @@
 		compatible = "u-boot,boot-std";
 
 		filename-prefixes = "/", "/boot/";
-		bootdev-order = "mmc2", "mmc1";
+		/*bootdev-order = "mmc2", "mmc1";*/
 
 		extlinux {
 			compatible = "u-boot,extlinux";
