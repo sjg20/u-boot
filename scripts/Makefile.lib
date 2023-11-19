@@ -402,7 +402,7 @@ $(obj)/%.S: $(src)/%.ttf
 # ---------------------------------------------------------------------------
 
 # Generate an assembly file to wrap the splash data
-quiet_cmd_S_splash= TTF     $@
+quiet_cmd_S_splash= BMP     $@
 # Modified for U-Boot
 cmd_S_splash=						\
 (							\
