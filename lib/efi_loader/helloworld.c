@@ -234,6 +234,9 @@ efi_status_t EFIAPI efi_main(efi_handle_t handle,
 			(con_out, u"Missing device path for device handle\r\n");
 		goto out;
 	}
+	con_out->output_string(con_out, u"Vendor: ");
+	con_out->output_string(con_out, systab->fw_vendor);
+	con_out->output_string(con_out, u"\n");
 	con_out->output_string(con_out, u"Boot device: ");
 	ret = print_device_path(device_path, device_path_to_text);
 	if (ret != EFI_SUCCESS)

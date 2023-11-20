@@ -476,9 +476,9 @@ def setup_efi_image(cons):
 
     loop = None
     mounted = False
-    complete = False
     try:
         loop = mount_image(cons, fname, mnt, 'ext4')
+        mounted = True
         efi_dir = os.path.join(mnt, 'efi')
         mkdir_cond(efi_dir)
         bootdir = os.path.join(efi_dir, 'boot')
@@ -489,6 +489,7 @@ def setup_efi_image(cons):
         with open(efi_src, 'rb') as inf:
             with open(efi_dst, 'wb') as outf:
                 outf.write(inf.read())
+
     finally:
         if mounted:
             u_boot_utils.run_and_log(cons, 'sudo umount --lazy %s' % mnt)

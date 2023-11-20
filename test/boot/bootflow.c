@@ -1059,3 +1059,32 @@ static int bootflow_cros(struct unit_test_state *uts)
 	return 0;
 }
 BOOTSTD_TEST(bootflow_cros, 0);
+
+/* Test EFI bootmeth */
+static int bootflow_efi(struct unit_test_state *uts)
+{
+	ut_assertok(scan_mmc_bootdev(uts, "mmc7", true));
+	ut_assertok(run_command("bootflow list", 0));
+
+	ut_assert_nextlinen("Showing all");
+	ut_assert_nextlinen("Seq");
+	ut_assert_nextlinen("---");
+	ut_assert_nextlinen("  0  extlinux");
+	ut_assert_nextlinen("  1  efi          ready   mmc          1  mmc7.bootdev.part_1       efi/boot/bootsbox.efi");
+	ut_assert_nextlinen("---");
+	ut_assert_skip_to_line("(2 bootflows, 2 valid)");
+	ut_assert_console_end();
+
+	ut_assertok(run_command("bootflow select 1", 0));
+	ut_assert_console_end();
+
+	ut_asserteq(1, run_command("bootflow boot", 0));
+	ut_assert_nextline(
+		"** Booting bootflow 'mmc7.bootdev.part_1' with efi");
+	ut_assert_console_end();
+
+	ut_assert_console_end();
+
+	return 0;
+}
+BOOTSTD_TEST(bootflow_efi, 0);

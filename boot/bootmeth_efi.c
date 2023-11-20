@@ -446,7 +446,6 @@ static int distro_efi_boot(struct udevice *dev, struct bootflow *bflow)
 	 * this directly. For now, go through the CLI, like distro boot.
 	 */
 	snprintf(cmd, sizeof(cmd), "bootefi %lx %lx", kernel, fdt);
-	printf("cmd %s\n", cmd);
 	if (run_command(cmd, 0))
 		return log_msg_ret("run", -EINVAL);
 
