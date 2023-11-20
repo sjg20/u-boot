@@ -182,7 +182,7 @@ static efi_status_t EFIAPI efi_cout_output_string(
 	}
 	pos = buf;
 	utf16_utf8_strcpy(&pos, string);
-	fputs(stdout, buf);
+	puts(buf);
 	free(buf);
 
 	/*
@@ -356,8 +356,12 @@ void efi_setup_console_size(bool allow_ansi)
 
 	if (IS_ENABLED(CONFIG_VIDEO))
 		ret = query_vidconsole(&rows, &cols);
-	if (ret && allow_ansi)
-		ret = query_console_serial(&rows, &cols);
+	if (ret) {
+		if (allow_ansi)
+			ret = query_console_serial(&rows, &cols);
+		else
+			ret = 0;
+	}
 	if (ret)
 		return;
 
