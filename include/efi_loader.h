@@ -527,8 +527,18 @@ efi_status_t efi_bootmgr_update_media_device_boot_option(void);
 efi_status_t efi_bootmgr_delete_boot_option(u16 boot_index);
 /* search the boot option index in BootOrder */
 bool efi_search_bootorder(u16 *bootorder, efi_uintn_t num, u32 target, u32 *index);
-/* Set up console modes */
-void efi_setup_console_size(void);
+
+/**
+ * efi_setup_console_size() - update the mode table.
+ *
+ * @allow_ansi: Allow emitting ANSI characters
+ *
+ * By default the only mode available is 80x25. If the console has at least 50
+ * lines, enable mode 80x50. If we can query the console size and it is neither
+ * 80x25 nor 80x50, set it as an additional mode.
+ */
+void efi_setup_console_size(bool allow_ansi);
+
 /* Install device tree */
 efi_status_t efi_install_fdt(void *fdt);
 /* Run loaded UEFI image */

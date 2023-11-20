@@ -230,7 +230,7 @@ efi_status_t efi_init_obj_list(void)
 		return efi_obj_list_initialized;
 
 	/* Set up console modes */
-	efi_setup_console_size();
+	efi_setup_console_size(false);
 
 	/*
 	 * Probe block devices to find the ESP.

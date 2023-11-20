@@ -349,21 +349,14 @@ static int __maybe_unused query_vidconsole(int *rows, int *cols)
 	return 0;
 }
 
-/**
- * efi_setup_console_size() - update the mode table.
- *
- * By default the only mode available is 80x25. If the console has at least 50
- * lines, enable mode 80x50. If we can query the console size and it is neither
- * 80x25 nor 80x50, set it as an additional mode.
- */
-void efi_setup_console_size(void)
+void efi_setup_console_size(bool allow_ansi)
 {
 	int rows = 25, cols = 80;
 	int ret = -ENODEV;
 
 	if (IS_ENABLED(CONFIG_VIDEO))
 		ret = query_vidconsole(&rows, &cols);
-	if (ret)
+	if (ret && allow_ansi)
 		ret = query_console_serial(&rows, &cols);
 	if (ret)
 		return;
