@@ -1187,10 +1187,12 @@ int bootm_boot_start(ulong addr, const char *cmdline)
 
 	snprintf(addr_str, sizeof(addr_str), "%lx", addr);
 
-	ret = env_set("bootargs", cmdline);
-	if (ret) {
-		printf("Failed to set cmdline\n");
-		return ret;
+	if (cmdline) {
+		ret = env_set("bootargs", cmdline);
+		if (ret) {
+			printf("Failed to set cmdline\n");
+			return ret;
+		}
 	}
 	memset(&bmi, '\0', sizeof(bmi));
 	bmi.addr_fit = addr_str;
