@@ -10,8 +10,7 @@
 #include <vsprintf.h>
 #include <asm/zimage.h>
 
-static int do_zboot_start(struct cmd_tbl *cmdtp, int flag, int argc,
-			  char *const argv[])
+static int zboot_start(int argc, char *const argv[])
 {
 	const char *s;
 
@@ -57,8 +56,13 @@ static int do_zboot_start(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
-static int do_zboot_load(struct cmd_tbl *cmdtp, int flag, int argc,
-			 char *const argv[])
+static int do_zboot_start(struct cmd_tbl *cmdtp, int flag, int argc,
+			  char *const argv[])
+{
+	return zboot_start(argc, argv);
+}
+
+static int _zboot_load(void)
 {
 	if (zboot_load())
 		return CMD_RET_FAILURE;
@@ -70,8 +74,13 @@ static int do_zboot_load(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
-static int do_zboot_setup(struct cmd_tbl *cmdtp, int flag, int argc,
-			  char *const argv[])
+static int do_zboot_load(struct cmd_tbl *cmdtp, int flag, int argc,
+			 char *const argv[])
+{
+	return _zboot_load();
+}
+
+static int _zboot_setup(void)
 {
 	struct boot_params *base_ptr = state.base_ptr;
 
@@ -87,8 +96,13 @@ static int do_zboot_setup(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
-static int do_zboot_info(struct cmd_tbl *cmdtp, int flag, int argc,
-			 char *const argv[])
+static int do_zboot_setup(struct cmd_tbl *cmdtp, int flag, int argc,
+			  char *const argv[])
+{
+	return _zboot_setup();
+}
+
+static int zboot_info(void)
 {
 	printf("Kernel loaded at %08lx, setup_base=%p\n",
 	       state.load_address, state.base_ptr);
@@ -96,8 +110,13 @@ static int do_zboot_info(struct cmd_tbl *cmdtp, int flag, int argc,
 	return 0;
 }
 
-static int do_zboot_go(struct cmd_tbl *cmdtp, int flag, int argc,
-		       char *const argv[])
+static int do_zboot_info(struct cmd_tbl *cmdtp, int flag, int argc,
+			 char *const argv[])
+{
+	return zboot_info();
+}
+
+static int _zboot_go(void)
 {
 	int ret;
 
@@ -105,6 +124,12 @@ static int do_zboot_go(struct cmd_tbl *cmdtp, int flag, int argc,
 	printf("Kernel returned! (err=%d)\n", ret);
 
 	return CMD_RET_FAILURE;
+}
+
+static int do_zboot_go(struct cmd_tbl *cmdtp, int flag, int argc,
+		       char *const argv[])
+{
+	return _zboot_go();
 }
 
 static int do_zboot_dump(struct cmd_tbl *cmdtp, int flag, int argc,
