@@ -10,26 +10,6 @@
 #include <vsprintf.h>
 #include <asm/zimage.h>
 
-static int zboot_start(ulong bzimage_addr, ulong bzimage_size,
-		       ulong initrd_addr, ulong initrd_size, ulong base_addr,
-		       const char *cmdline)
-{
-	memset(&state, '\0', sizeof(state));
-
-	state.bzimage_size = bzimage_size;
-	state.initrd_addr = initrd_addr;
-	state.initrd_size = initrd_size;
-	if (base_addr) {
-		state.base_ptr = map_sysmem(base_addr, 0);
-		state.load_address = bzimage_addr;
-	} else {
-		state.bzimage_addr = bzimage_addr;
-	}
-	state.cmdline = cmdline;
-
-	return 0;
-}
-
 static int do_zboot_start(struct cmd_tbl *cmdtp, int flag, int argc,
 			  char *const argv[])
 {
@@ -74,14 +54,6 @@ static int do_zboot_setup(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	if (zboot_setup())
 		return CMD_RET_FAILURE;
-
-	return 0;
-}
-
-static int zboot_info(void)
-{
-	printf("Kernel loaded at %08lx, setup_base=%p\n",
-	       state.load_address, state.base_ptr);
 
 	return 0;
 }
