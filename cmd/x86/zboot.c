@@ -103,7 +103,8 @@ static int do_zboot_info(struct cmd_tbl *cmdtp, int flag, int argc,
 	return zboot_info();
 }
 
-static int _zboot_go(void)
+static int do_zboot_go(struct cmd_tbl *cmdtp, int flag, int argc,
+		       char *const argv[])
 {
 	int ret;
 
@@ -111,12 +112,6 @@ static int _zboot_go(void)
 	printf("Kernel returned! (err=%d)\n", ret);
 
 	return CMD_RET_FAILURE;
-}
-
-static int do_zboot_go(struct cmd_tbl *cmdtp, int flag, int argc,
-		       char *const argv[])
-{
-	return _zboot_go();
 }
 
 static int do_zboot_dump(struct cmd_tbl *cmdtp, int flag, int argc,
