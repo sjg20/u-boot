@@ -62,22 +62,13 @@ static int do_zboot_start(struct cmd_tbl *cmdtp, int flag, int argc,
 	return zboot_start(argc, argv);
 }
 
-static int _zboot_load(void)
+static int do_zboot_load(struct cmd_tbl *cmdtp, int flag, int argc,
+			 char *const argv[])
 {
 	if (zboot_load())
 		return CMD_RET_FAILURE;
 
-	if (env_set_hex("zbootbase", map_to_sysmem(state.base_ptr)) ||
-	    env_set_hex("zbootaddr", state.load_address))
-		return CMD_RET_FAILURE;
-
 	return 0;
-}
-
-static int do_zboot_load(struct cmd_tbl *cmdtp, int flag, int argc,
-			 char *const argv[])
-{
-	return _zboot_load();
 }
 
 static int _zboot_setup(void)
