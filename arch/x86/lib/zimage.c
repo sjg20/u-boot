@@ -456,19 +456,9 @@ int zboot_run(ulong addr, ulong size, ulong initrd, ulong initrd_size,
 {
 	int ret;
 
-	memset(&state, '\0', sizeof(state));
-
-	if (base) {
-		state.base_ptr = map_sysmem(base, 0);
-		state.load_address = addr;
-	} else {
-		state.bzimage_addr = addr;
-	}
-	state.bzimage_size = size;
-	state.initrd_addr = initrd;
-	state.initrd_size = initrd_size;
-	state.cmdline = cmdline;
-
+	ret = zboot_start(addr, size, initrd, initrd_size, base, cmdline);
+	if (ret)
+		return log_msg_ret("sta", ret);
 	ret = zboot_load();
 	if (ret)
 		return log_msg_ret("ld", ret);
