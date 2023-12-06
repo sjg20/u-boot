@@ -506,7 +506,8 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 		fallthrough;
 	case 's':	/* set */
 	case 'd':	/* delete */
-		ret = bootflow_cmdline_set_arg(bflow, arg, val, true);
+		ret = bootflow_cmdline_set_arg(bflow, arg, val,
+					       BOOTFLOW_CMDF_SET_ENV);
 		break;
 	case 'g':	/* get */
 		ret = bootflow_cmdline_get_arg(bflow, arg, &val);

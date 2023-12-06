@@ -877,20 +877,21 @@ static int bootflow_set_arg(struct unit_test_state *uts)
 
 	/* Do a simple sanity check. Rely on bootflow_cmdline() for the rest */
 	bflow->cmdline = NULL;
-	ut_assertok(bootflow_cmdline_set_arg(bflow, "fred", "123", false));
+	ut_assertok(bootflow_cmdline_set_arg(bflow, "fred", "123", 0));
 	ut_asserteq_str(bflow->cmdline, "fred=123");
 
-	ut_assertok(bootflow_cmdline_set_arg(bflow, "mary", "and here", false));
+	ut_assertok(bootflow_cmdline_set_arg(bflow, "mary", "and here", 0));
 	ut_asserteq_str(bflow->cmdline, "fred=123 mary=\"and here\"");
 
-	ut_assertok(bootflow_cmdline_set_arg(bflow, "mary", NULL, false));
+	ut_assertok(bootflow_cmdline_set_arg(bflow, "mary", NULL, 0));
 	ut_asserteq_str(bflow->cmdline, "fred=123");
-	ut_assertok(bootflow_cmdline_set_arg(bflow, "fred", NULL, false));
+	ut_assertok(bootflow_cmdline_set_arg(bflow, "fred", NULL, 0));
 	ut_asserteq_ptr(bflow->cmdline, NULL);
 
 	ut_asserteq(0, ut_check_delta(mem_start));
 
-	ut_assertok(bootflow_cmdline_set_arg(bflow, "mary", "here", true));
+	ut_assertok(bootflow_cmdline_set_arg(bflow, "mary", "here",
+					     BOOTFLOW_CMDF_SET_ENV));
 	ut_asserteq_str("mary=here", env_get("bootargs"));
 	ut_assertok(env_set("bootargs", NULL));
 

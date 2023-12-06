@@ -461,9 +461,11 @@ int bootflow_menu_run(struct bootstd_priv *std, bool text_mode,
 
 /**
  * enum bootflow_cmd_flags - Flags for the cmdline functions
+ *
+ * @BOOTFLOW_CMDF_SET_ENV: Set the "bootargs" environment variable too
  */
 enum bootflow_cmd_flags {
-	NONE_YET
+	BOOTFLOW_CMDF_SET_ENV	= BIT(0),
 };
 
 /**
@@ -488,7 +490,7 @@ enum bootflow_cmd_flags {
  * command line. Use NULL to delete the argument from @cmdline, BOOTFLOWCL_EMPTY
  * to set it to an empty value (no '=' sign after arg), "" to add an '=' sign
  * but with an empty value. Use NULL when reading.
- * @flags: Flags controlling operation
+ * @flags: Flags controlling operation (BOOTFLOW_CMDF_SET_ENV is ignored)
  * @posp: Ignored when setting an argument; when getting an argument, returns
  * the start position of its value in @cmdline, after the first quote, if any
  *
@@ -516,12 +518,12 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
  * @val: Value to set (e.g. "ttyS2") or NULL to delete the argument if present,
  * "" to set it to an empty value (e.g. "console=") and BOOTFLOWCL_EMPTY to add
  * it without any value ("initrd")
- * @set_env: true to set the "bootargs" environment variable too
+ * @flags: Flags value (enum bootflow_cmd_flags)
  *
  * Return: 0 if OK, -ENOMEM if out of memory
  */
 int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *arg,
-			     const char *val, bool set_env);
+			     const char *val, int flags);
 
 /**
  * cmdline_get_arg() - Read an argument from a cmdline

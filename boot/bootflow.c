@@ -861,14 +861,14 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
 }
 
 int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
-			     const char *new_val, bool set_env)
+			     const char *new_val, int flags)
 {
 	char buf[2048];
 	char *cmd = NULL;
 	int ret;
 
 	ret = cmdline_set_arg(buf, sizeof(buf), bflow->cmdline, set_arg,
-			      new_val, 0, NULL);
+			      new_val, flags, NULL);
 	if (ret < 0)
 		return ret;
 
@@ -881,7 +881,7 @@ int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
 	free(bflow->cmdline);
 	bflow->cmdline = cmd;
 
-	if (set_env) {
+	if (flags & BOOTFLOW_CMDF_SET_ENV) {
 		ret = env_set("bootargs", bflow->cmdline);
 		if (ret)
 			return ret;
@@ -938,7 +938,7 @@ int bootflow_cmdline_auto(struct bootflow *bflow, const char *arg)
 		return -ENOENT;
 	}
 
-	ret = bootflow_cmdline_set_arg(bflow, arg, buf, true);
+	ret = bootflow_cmdline_set_arg(bflow, arg, buf, BOOTFLOW_CMDF_SET_ENV);
 	if (ret)
 		return ret;
 
