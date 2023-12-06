@@ -460,6 +460,13 @@ int bootflow_menu_run(struct bootstd_priv *std, bool text_mode,
 #define BOOTFLOWCL_EMPTY	((void *)1)
 
 /**
+ * enum bootflow_cmd_flags - Flags for the cmdline functions
+ */
+enum bootflow_cmd_flags {
+	NONE_YET
+};
+
+/**
  * cmdline_set_arg() - Update or read an argument in a cmdline string
  *
  * Handles updating a single arg in a cmdline string, returning it in a supplied
@@ -481,6 +488,7 @@ int bootflow_menu_run(struct bootstd_priv *std, bool text_mode,
  * command line. Use NULL to delete the argument from @cmdline, BOOTFLOWCL_EMPTY
  * to set it to an empty value (no '=' sign after arg), "" to add an '=' sign
  * but with an empty value. Use NULL when reading.
+ * @flags: Flags controlling operation
  * @posp: Ignored when setting an argument; when getting an argument, returns
  * the start position of its value in @cmdline, after the first quote, if any
  *
@@ -495,7 +503,8 @@ int bootflow_menu_run(struct bootstd_priv *std, bool text_mode,
  *	length of arg value (excluding quotes), -ENOENT if not found
  */
 int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
-		    const char *set_arg, const char *new_val, int *posp);
+		    const char *set_arg, const char *new_val, int flags,
+		    int *posp);
 
 /**
  * bootflow_cmdline_set_arg() - Set a single argument for a bootflow

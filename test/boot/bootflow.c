@@ -731,13 +731,13 @@ static int check_arg(struct unit_test_state *uts, int expect_ret,
 	/* check for writing outside the reported bounds */
 	buf[expect_ret] = '[';
 	ut_asserteq(expect_ret,
-		    cmdline_set_arg(buf, expect_ret, from, arg, val, NULL));
+		    cmdline_set_arg(buf, expect_ret, from, arg, val, 0, NULL));
 	ut_asserteq_str(expect_str, buf);
 	ut_asserteq('[', buf[expect_ret]);
 
 	/* do the test again but with one less byte in the buffer */
 	ut_asserteq(-E2BIG, cmdline_set_arg(buf, expect_ret - 1, from, arg,
-					    val, NULL));
+					    val, 0, NULL));
 
 	return 0;
 }
@@ -754,7 +754,7 @@ static int test_bootflow_cmdline_set(struct unit_test_state *uts)
 	 */
 
 	/* add an arg that doesn't already exist, starting from empty */
-	ut_asserteq(-ENOENT, cmdline_set_arg(buf, size, NULL, "me", NULL,
+	ut_asserteq(-ENOENT, cmdline_set_arg(buf, size, NULL, "me", NULL, 0,
 					     NULL));
 
 	ut_assertok(check_arg(uts, 3, "me", buf, NULL, "me", BOOTFLOWCL_EMPTY));
@@ -818,17 +818,17 @@ static int test_bootflow_cmdline_set(struct unit_test_state *uts)
 	/* quote at the start */
 	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
 					    "mary=\"abc def\" arg=\"123 456\"",
-					    "arg", "\"4 5 6", NULL));
+					    "arg", "\"4 5 6", 0, NULL));
 
 	/* quote at the end */
 	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
 					    "mary=\"abc def\" arg=\"123 456\"",
-					    "arg", "4 5 6\"", NULL));
+					    "arg", "4 5 6\"", 0, NULL));
 
 	/* quote in the middle */
 	ut_asserteq(-EBADF, cmdline_set_arg(buf, size,
 					    "mary=\"abc def\" arg=\"123 456\"",
-					    "arg", "\"4 \"5 6\"", NULL));
+					    "arg", "\"4 \"5 6\"", 0, NULL));
 
 	/* handle updating a quoted arg */
 	ut_assertok(check_arg(uts, 27, "mary=\"abc def\" arg=\"4 5 6\"", buf,

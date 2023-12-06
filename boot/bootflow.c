@@ -712,7 +712,8 @@ static int copy_in(char *buf, char *end, const char *arg, int len,
 }
 
 int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
-		    const char *set_arg, const char *new_val, int *posp)
+		    const char *set_arg, const char *new_val,
+		    int flags, int *posp)
 {
 	bool found_arg = false;
 	const char *from;
@@ -768,8 +769,9 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
 		 * At this point val_end points to the end of the value, or the
 		 * last char after the arg name, if there is no label.
 		 * arg_end is the char after the arg name
-		 * val points to the value, or NULL if there is none
-		 * char after the value.
+		 * val points to the value, or NULL if there is none (no '=')
+		 * val_end points to the char after the value, or arg_end if
+		 * there is no value
 		 *
 		 *        fred=1234
 		 *        ^   ^^   ^
@@ -866,7 +868,7 @@ int bootflow_cmdline_set_arg(struct bootflow *bflow, const char *set_arg,
 	int ret;
 
 	ret = cmdline_set_arg(buf, sizeof(buf), bflow->cmdline, set_arg,
-			      new_val, NULL);
+			      new_val, 0, NULL);
 	if (ret < 0)
 		return ret;
 
@@ -892,7 +894,7 @@ int cmdline_get_arg(const char *cmdline, const char *arg, int *posp)
 {
 	int ret;
 
-	ret = cmdline_set_arg(NULL, 1, cmdline, arg, NULL, posp);
+	ret = cmdline_set_arg(NULL, 1, cmdline, arg, NULL, 0, posp);
 
 	return ret;
 }
