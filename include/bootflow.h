@@ -463,9 +463,12 @@ int bootflow_menu_run(struct bootstd_priv *std, bool text_mode,
  * enum bootflow_cmd_flags - Flags for the cmdline functions
  *
  * @BOOTFLOW_CMDF_SET_ENV: Set the "bootargs" environment variable too
+ * @BOOTFLOW_CMDF_NO_REPLACE: Don't replace any existing argument with the same
+ * name; create a new arg instead
  */
 enum bootflow_cmd_flags {
-	BOOTFLOW_CMDF_SET_ENV	= BIT(0),
+	BOOTFLOW_CMDF_SET_ENV		= BIT(0),
+	BOOTFLOW_CMDF_NO_REPLACE	= BIT(1),
 };
 
 /**

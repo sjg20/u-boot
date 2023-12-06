@@ -861,6 +861,12 @@ static int test_bootflow_cmdline_set(struct unit_test_state *uts)
 	ut_assertok(check_arg(uts, 28, "mary=abc johnathon=2 john=3", buf,
 			      "mary=abc johnathon=2 john=1", "john", "3"));
 
+	/* adding a new arg with the same name */
+	ut_asserteq(18, cmdline_set_arg(buf, 28, "mary=abc",
+					"mary", "def", BOOTFLOW_CMDF_NO_REPLACE,
+					NULL));
+	ut_asserteq_str("mary=abc mary=def", buf);
+
 	return 0;
 }
 BOOTSTD_TEST(test_bootflow_cmdline_set, 0);
@@ -942,6 +948,7 @@ static int bootflow_cmdline_get(struct unit_test_state *uts)
 }
 BOOTSTD_TEST(bootflow_cmdline_get, 0);
 
+/* Test 'bootflow cmd' command */
 static int bootflow_cmdline(struct unit_test_state *uts)
 {
 	ut_assertok(run_command("bootflow scan mmc", 0));
@@ -959,6 +966,15 @@ static int bootflow_cmdline(struct unit_test_state *uts)
 	ut_asserteq(0, run_command("bootflow cmdline set mary abc", 0));
 	ut_asserteq(0, run_command("bootflow cmdline get mary", 0));
 	ut_assert_nextline("abc");
+
+	/* Add a duplicate value; the first one is returned... */
+	ut_asserteq(0, run_command("bootflow cmdline add mary def", 0));
+	ut_asserteq(0, run_command("bootflow cmdline get mary", 0));
+	ut_assert_nextline("abc");
+
+	/* ...but both are present */
+	ut_asserteq(0, run_command("print bootargs", 0));
+	ut_assert_nextline("bootargs=fred=123 mary=abc mary=def");
 
 	ut_asserteq(0, run_command("bootflow cmdline delete fred", 0));
 	ut_asserteq(1, run_command("bootflow cmdline get fred", 0));

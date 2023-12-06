@@ -476,8 +476,9 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 {
 	struct bootstd_priv *std;
 	struct bootflow *bflow;
-	const char *op, *arg, *val = NULL;
-	int ret;
+	const char *arg, *val = NULL;
+	int ret, op, flags = BOOTFLOW_CMDF_SET_ENV;
+	bool is_add;
 
 	if (argc < 3)
 		return CMD_RET_USAGE;
@@ -492,22 +493,26 @@ static int do_bootflow_cmdline(struct cmd_tbl *cmdtp, int flag, int argc,
 		return CMD_RET_FAILURE;
 	}
 
-	op = argv[1];
+	op = *argv[1];
 	arg = argv[2];
-	if (*op == 's') {
+	is_add = !strncmp("ad", argv[1], 2);
+	if (op == 's' || is_add) {
 		if (argc < 3)
 			return CMD_RET_USAGE;
 		val = argv[3] ?: (const char *)BOOTFLOWCL_EMPTY;
+		if (is_add) {
+			op = 's';
+			flags |= BOOTFLOW_CMDF_NO_REPLACE;
+		}
 	}
 
-	switch (*op) {
+	switch (op) {
 	case 'c':	/* clear */
 		val = "";
 		fallthrough;
 	case 's':	/* set */
 	case 'd':	/* delete */
-		ret = bootflow_cmdline_set_arg(bflow, arg, val,
-					       BOOTFLOW_CMDF_SET_ENV);
+		ret = bootflow_cmdline_set_arg(bflow, arg, val, flags);
 		break;
 	case 'g':	/* get */
 		ret = bootflow_cmdline_get_arg(bflow, arg, &val);
@@ -552,7 +557,7 @@ static char bootflow_help_text[] =
 	"bootflow read                  - read all current-bootflow files\n"
 	"bootflow boot                  - boot current bootflow\n"
 	"bootflow menu [-t]             - show a menu of available bootflows\n"
-	"bootflow cmdline [set|get|clear|delete|auto] <param> [<value>] - update cmdline";
+	"bootflow cmdline [set|add|get|clear|delete|auto] <param> [<value>] - update cmdline";
 #else
 	"scan - boot first available bootflow\n";
 #endif

@@ -790,7 +790,8 @@ int cmdline_set_arg(char *buf, int maxlen, const char *cmdline,
 		}
 
 		/* if this is the target arg, update it */
-		if (!strncmp(from, set_arg, arg_end - from)) {
+		if (!(flags & BOOTFLOW_CMDF_NO_REPLACE) &&
+		     !strncmp(from, set_arg, arg_end - from)) {
 			if (!buf) {
 				bool has_quote = val_end[-1] == '"';
 
