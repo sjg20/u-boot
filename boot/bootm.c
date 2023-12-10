@@ -1018,6 +1018,7 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 		    char *const argv[], int states, struct bootm_headers *images,
 		    int boot_progress)
 {
+	struct bootm_info bmi;
 	boot_os_fn *boot_fn;
 	ulong iflag = 0;
 	int ret = 0, need_boot_fn;
@@ -1097,11 +1098,14 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 
 
+	bmi.argc = argc;
+	bmi.argv = argv;
+
 	/* Call various other states that are not generally used */
 	if (!ret && (states & BOOTM_STATE_OS_CMDLINE))
-		ret = boot_fn(BOOTM_STATE_OS_CMDLINE, argc, argv, images);
+		ret = boot_fn(BOOTM_STATE_OS_CMDLINE, &bmi);
 	if (!ret && (states & BOOTM_STATE_OS_BD_T))
-		ret = boot_fn(BOOTM_STATE_OS_BD_T, argc, argv, images);
+		ret = boot_fn(BOOTM_STATE_OS_BD_T, &bmi);
 	if (!ret && (states & BOOTM_STATE_OS_PREP)) {
 		ret = bootm_process_cmdline_env(images->os.os == IH_OS_LINUX);
 		if (ret) {
@@ -1109,7 +1113,7 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
 			ret = CMD_RET_FAILURE;
 			goto err;
 		}
-		ret = boot_fn(BOOTM_STATE_OS_PREP, argc, argv, images);
+		ret = boot_fn(BOOTM_STATE_OS_PREP, &bmi);
 	}
 
 #ifdef CONFIG_TRACE
