@@ -116,7 +116,7 @@ CONFIG_ERRNO_STR=y
 CONFIG_BOOTSTD_FULL=y
 # CONFIG_BOOTCOMMAND="pci; bootflow scan -l nvme; bootfl sel 0; bootfl read"
 #CONFIG_BOOTCOMMAND="setenv stdout serial; pci; bootflow scan -l nvme; bootfl sel 0; setenv autoload n; bootp; setenv serverip 100.107.108.219; tftp image.fit; #bootm"
-CONFIG_BOOTCOMMAND="setenv stdout serial; pci; bootflow scan -l nvme; bootfl sel 0; setenv autoload n; bootp; setenv serverip 100.107.108.219; tftp 4000000 rk3399-rockpro64-v2.dtb; tftp 1000000 Image-6.1.62-08730-g9ece5ec05799-dirty; bootfl cmd set console ttyS2,1500000n8; echo booti 1000000 - 4000000; echo bootefi 1000000 4000000"
+CONFIG_BOOTCOMMAND="setenv stdout serial; pci; bootflow scan -l nvme; bootfl sel 0; setenv autoload n; bootp; setenv serverip 172.16.255.59; tftp 4000000 rk3399-rockpro64-v2.dtb; tftp 1000000 Image-6.1.62-08730-g9ece5ec05799-dirty; bootfl cmd set console ttyS2,1500000n8; echo booti 1000000 - 4000000; echo bootefi 1000000 4000000"
 
 
 CONFIG_BOOTMETH_CROS=y
