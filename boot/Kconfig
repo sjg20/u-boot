@@ -297,6 +297,11 @@ config VPL_FIT
 	select VPL_HASH
 	select VPL_OF_LIBFDT
 
+config VPL_LOAD_FIT
+	bool "Enable VPL loading U-Boot as a FIT (basic fitImage features)"
+	depends on VPL_FIT
+	default y
+
 config VPL_FIT_PRINT
 	bool "Support FIT printing within VPL"
 	depends on VPL_FIT
@@ -605,6 +610,9 @@ config SPL_BOOTMETH_VBE_REQUEST
 config BOOTMETH_VBE_SIMPLE
 	bool "Bootdev support for VBE 'simple' method"
 	default y
+	imply SPL_CRC8
+	imply VPL_CRC8
+	#imply BLOBLIST
 	help
 	  Enables support for VBE 'simple' boot. This allows updating a single
 	  firmware image in boot media such as MMC. It does not support any sort
