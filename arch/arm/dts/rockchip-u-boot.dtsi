@@ -41,6 +41,7 @@
 #ifdef CONFIG_VPL
 		u-boot-vpl {
 			offset = <0x200000>;
+			no-write-symbols;
 		};
 #endif
 
@@ -202,6 +203,7 @@
 #endif
 #ifdef CONFIG_VPL
 			u-boot-vpl {
+				no-write-symbols;
 			};
 #else
 			u-boot-spl {

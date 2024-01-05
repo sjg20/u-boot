@@ -86,7 +86,8 @@ static inline int _spl_load(struct spl_image_info *spl_image,
 	size = ALIGN(spl_image->size + overhead, spl_get_bl_len(info));
 
 	addr = spl_image->load_addr - overhead;
-	log_debug("loading body to %lx size %lx\n", addr, size);
+	log_debug("loading body from %lx to %lx size %lx, image_offset=%lx\n",
+		  offset + image_offset, addr, size, image_offset);
 	read = info->read(info, offset + image_offset, size,
 			  map_sysmem(addr, size));
 	return read < spl_image->size ? -EIO : 0;

@@ -24,7 +24,7 @@ SECTIONS
 
 	.text : {
 		. = ALIGN(8);
-		*(.__image_copy_start)
+		__image_copy_start = .;
 		CPUDIR/start.o (.text*)
 		*(.text*)
 	}
@@ -55,6 +55,7 @@ SECTIONS
 	}
 
 	_image_binary_end = .;
+	__image_copy_end = .;
 
 	.bss_start (NOLOAD) : {
 		. = ALIGN(8);

@@ -51,10 +51,12 @@ u32 *boot_params_ptr = NULL;
 
 #if CONFIG_IS_ENABLED(BINMAN_UBOOT_SYMBOLS)
 /* See spl.h for information about this */
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_TPL_BUILD) && !defined(CONFIG_VPL_BUILD)
 binman_sym_declare(ulong, u_boot_any, image_pos);
 binman_sym_declare(ulong, u_boot_any, size);
+#endif
 
-#ifdef CONFIG_TPL
+#if defined(CONFIG_TPL) && !defined(CONFIG_VPL)
 binman_sym_declare(ulong, u_boot_spl_any, image_pos);
 binman_sym_declare(ulong, u_boot_spl_any, size);
 #endif
@@ -155,16 +157,28 @@ void spl_fixup_fdt(void *fdt_blob)
 
 ulong spl_get_image_pos(void)
 {
-	if (!CONFIG_IS_ENABLED(BINMAN_UBOOT_SYMBOLS))
+	log_debug("spl_get_image_pos\n");
+	if (!CONFIG_IS_ENABLED(BINMAN_UBOOT_SYMBOLS)) {
+		log_debug("- not enabled\n");
 		return BINMAN_SYM_MISSING;
+	}
 
 #ifdef CONFIG_VPL
-	if (spl_next_phase() == PHASE_VPL)
+	if (spl_next_phase() == PHASE_VPL) {
+		log_debug(" - vpl %lx\n",
+			  binman_sym(ulong, u_boot_vpl_any, image_pos));
 		return binman_sym(ulong, u_boot_vpl_any, image_pos);
+	}
 #endif
-	return spl_next_phase() == PHASE_SPL ?
-		binman_sym(ulong, u_boot_spl_any, image_pos) :
-		binman_sym(ulong, u_boot_any, image_pos);
+#if defined(CONFIG_TPL) && !defined(CONFIG_VPL)
+	if (spl_next_phase() == PHASE_SPL)
+		return binman_sym(ulong, u_boot_spl_any, image_pos) :
+#endif
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_TPL_BUILD) && !defined(CONFIG_VPL_BUILD)
+	return binman_sym(ulong, u_boot_any, image_pos);
+#endif
+
+	return BINMAN_SYM_MISSING;
 }
 
 ulong spl_get_image_size(void)
@@ -252,6 +266,8 @@ void spl_set_header_raw_uboot(struct spl_image_info *spl_image)
 	} else {
 		spl_image->entry_point = CONFIG_SYS_UBOOT_START;
 		spl_image->load_addr = CONFIG_TEXT_BASE;
+		log_debug("Default load addr %x (u_boot_pos=%lx)\n",
+			  CONFIG_TEXT_BASE, u_boot_pos);
 	}
 	spl_image->os = IH_OS_U_BOOT;
 	spl_image->name = spl_phase_name(spl_next_phase());

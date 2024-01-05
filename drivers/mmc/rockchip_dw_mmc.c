@@ -96,7 +96,6 @@ static int rockchip_dwmmc_of_to_plat(struct udevice *dev)
 	if (dev_read_u32_array(dev, "clock-freq-min-max", priv->minmax, 2)) {
 		int val = dev_read_u32_default(dev, "max-frequency", -EINVAL);
 
-		printf("read %s: %d\n", dev->name, val);
 		if (val < 0)
 			return log_msg_ret("rkc", val);
 
