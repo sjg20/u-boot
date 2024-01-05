@@ -22,14 +22,17 @@
 			args = "-n", CONFIG_SYS_SOC, "-T", "rksd";
 			multiple-data-files;
 
-#ifdef CONFIG_ROCKCHIP_EXTERNAL_TPL
+#ifdef CONFIG_VPL
+			u-boot-vpl {
+			};
+#elif defined(CONFIG_ROCKCHIP_EXTERNAL_TPL)
 			rockchip-tpl {
 			};
 #elif defined(CONFIG_TPL)
 			u-boot-tpl {
 			};
 #endif
-			u-boot-spl {
+			u-boot-tpl {
 			};
 		};
 

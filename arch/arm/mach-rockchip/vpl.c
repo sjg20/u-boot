@@ -55,7 +55,7 @@ void board_init_f(ulong dummy)
 	struct udevice *dev;
 	int ret;
 
-#if defined(CONFIG_DEBUG_UART) && defined(CONFIG_TPL_SERIAL)
+#if defined(CONFIG_DEBUG_UART) && defined(CONFIG_VPL_SERIAL)
 	/*
 	 * Debug UART can be used from here if required:
 	 *
@@ -65,7 +65,7 @@ void board_init_f(ulong dummy)
 	 * printascii("string");
 	 */
 	debug_uart_init();
-#ifdef CONFIG_TPL_BANNER_PRINT
+#ifdef CONFIG_VPL_BANNER_PRINT
 	printascii("\nU-Boot TPL " PLAIN_VERSION " (" U_BOOT_DATE " - " \
 				U_BOOT_TIME ")\n");
 #endif

@@ -37,6 +37,7 @@ void board_init_f(ulong dummy)
 	 * printascii("string");
 	 */
 	debug_uart_init();
+	printch('a');
 #ifdef CONFIG_TPL_BANNER_PRINT
 	printascii("\nU-Boot TPL " PLAIN_VERSION " (" U_BOOT_DATE " - " \
 				U_BOOT_TIME ")\n");
