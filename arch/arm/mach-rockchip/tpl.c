@@ -10,6 +10,7 @@
 #include <hang.h>
 #include <init.h>
 #include <log.h>
+#include <mapmem.h>
 #include <ram.h>
 #include <spl.h>
 #include <version.h>
@@ -56,11 +57,15 @@ void board_init_f(ulong dummy)
 	if (IS_ENABLED(CONFIG_SYS_ARCH_TIMER))
 		timer_init();
 
-	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
-	if (ret) {
-		printf("DRAM init failed: %d\n", ret);
-		return;
+	if (CONFIG_IS_ENABLED(RAM)) {
+		ret = uclass_get_device(UCLASS_RAM, 0, &dev);
+		if (ret) {
+			printf("DRAM init failed: %d\n", ret);
+			return;
+		}
 	}
+
+	printf("booting\n");
 }
 
 int board_return_to_bootrom(struct spl_image_info *spl_image,
@@ -82,5 +87,10 @@ int board_return_to_bootrom(struct spl_image_info *spl_image,
 
 u32 spl_boot_device(void)
 {
-	return BOOT_DEVICE_BOOTROM;
+	return IS_ENABLED(CONFIG_VPL) ? BOOT_DEVICE_MMC1 : BOOT_DEVICE_BOOTROM;
+}
+
+__weak struct legacy_img_hdr *spl_get_load_buffer(ssize_t offset, size_t size)
+{
+	return map_sysmem(CONFIG_VPL_TEXT_BASE + offset, size);
 }

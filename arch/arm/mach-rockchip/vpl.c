@@ -52,7 +52,6 @@ __weak void rockchip_stimer_init(void)
 
 void board_init_f(ulong dummy)
 {
-	struct udevice *dev;
 	int ret;
 
 #if defined(CONFIG_DEBUG_UART) && defined(CONFIG_VPL_SERIAL)
@@ -82,12 +81,6 @@ void board_init_f(ulong dummy)
 	/* Init ARM arch timer */
 	if (IS_ENABLED(CONFIG_SYS_ARCH_TIMER))
 		timer_init();
-
-	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
-	if (ret) {
-		printf("DRAM init failed: %d\n", ret);
-		return;
-	}
 }
 
 int board_return_to_bootrom(struct spl_image_info *spl_image,

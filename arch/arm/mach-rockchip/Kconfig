@@ -236,6 +236,8 @@ config ROCKCHIP_RK3399
 	select SPL_SEPARATE_BSS
 	select SPL_SERIAL
 	select SPL_DRIVERS_MISC
+	select TPL_DM if VPL
+	select SPL_RAW_IMAGE_SUPPORT if VPL
 	select CLK
 	select FIT
 	select PINCTRL
@@ -260,7 +262,7 @@ config ROCKCHIP_RK3399
 	imply TPL_DM
 	imply TPL_REGMAP
 	imply TPL_SYSCON
-	imply TPL_RAM
+	imply TPL_RAM if !VPL
 	imply TPL_CLK
 	imply TPL_TINY_MEMSET
 	imply TPL_ROCKCHIP_COMMON_BOARD
@@ -520,6 +522,9 @@ config TPL_ROCKCHIP_EARLYRETURN_TO_BROM
 
 config SPL_MMC
 	default y if !SPL_ROCKCHIP_BACK_TO_BROM
+
+config TPL_MMC
+	default y if !TPL_ROCKCHIP_BACK_TO_BROM
 
 config ROCKCHIP_SPI_IMAGE
 	bool "Build a SPI image for rockchip"

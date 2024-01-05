@@ -22,19 +22,27 @@
 			args = "-n", CONFIG_SYS_SOC, "-T", "rksd";
 			multiple-data-files;
 
-#ifdef CONFIG_VPL
-			u-boot-vpl {
-			};
-#elif defined(CONFIG_ROCKCHIP_EXTERNAL_TPL)
+#if defined(CONFIG_ROCKCHIP_EXTERNAL_TPL)
 			rockchip-tpl {
 			};
 #elif defined(CONFIG_TPL)
 			u-boot-tpl {
 			};
 #endif
-			u-boot-tpl {
+#ifdef CONFIG_VPL
+// 			u-boot-vpl {
+// 			};
+#else
+			u-boot-spl {
 			};
+#endif
 		};
+
+#ifdef CONFIG_VPL
+		u-boot-vpl {
+			offset = <0x100000>;
+		};
+#endif
 
 #if defined(CONFIG_SPL_FIT) && (defined(CONFIG_ARM64) || defined(CONFIG_SPL_OPTEE_IMAGE))
 		fit: fit {
@@ -192,8 +200,13 @@
 			u-boot-tpl {
 			};
 #endif
+#ifdef CONFIG_VPL
+			u-boot-vpl {
+			};
+#else
 			u-boot-spl {
 			};
+#endif
 		};
 
 #if defined(CONFIG_ARM64) || defined(CONFIG_SPL_OPTEE_IMAGE)

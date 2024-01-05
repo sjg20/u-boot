@@ -81,7 +81,7 @@ static int rockchip_dwmmc_of_to_plat(struct udevice *dev)
 	priv->fifo_depth = dev_read_u32_default(dev, "fifo-depth", 0);
 
 	if (priv->fifo_depth < 0)
-		return -EINVAL;
+		return log_msg_ret("rkp", -EINVAL);
 	priv->fifo_mode = dev_read_bool(dev, "fifo-mode");
 
 #ifdef CONFIG_SPL_BUILD
@@ -96,8 +96,9 @@ static int rockchip_dwmmc_of_to_plat(struct udevice *dev)
 	if (dev_read_u32_array(dev, "clock-freq-min-max", priv->minmax, 2)) {
 		int val = dev_read_u32_default(dev, "max-frequency", -EINVAL);
 
+		printf("read %s: %d\n", dev->name, val);
 		if (val < 0)
-			return val;
+			return log_msg_ret("rkc", val);
 
 		priv->minmax[0] = 400000;  /* 400 kHz */
 		priv->minmax[1] = val;

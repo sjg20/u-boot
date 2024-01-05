@@ -5,6 +5,7 @@
  *
  * Aneesh V <aneesh@ti.com>
  */
+#define LOG_DEBUG
 
 #include <common.h>
 #include <bloblist.h>
@@ -867,7 +868,7 @@ __weak void spl_relocate_stack_check(void)
  */
 ulong spl_relocate_stack_gd(void)
 {
-#ifdef CONFIG_SPL_STACK_R
+#if CONFIG_IS_ENABLED(SPL_STACK_R)
 	gd_t *new_gd;
 	ulong ptr = CONFIG_SPL_STACK_R_ADDR;
 

@@ -2,6 +2,9 @@
 /*
  * Copyright (C) Sean Anderson <seanga2@gmail.com>
  */
+
+#define LOG_DEBUG
+
 #ifndef	_SPL_LOAD_H_
 #define	_SPL_LOAD_H_
 
@@ -20,6 +23,7 @@ static inline int _spl_load(struct spl_image_info *spl_image,
 	ulong base_offset, image_offset, overhead;
 	int read, ret;
 
+	log_debug("loading hdr to %p\n", header);
 	read = info->read(info, offset, ALIGN(sizeof(*header),
 					      spl_get_bl_len(info)), header);
 	if (read < sizeof(*header))
@@ -48,7 +52,7 @@ static inline int _spl_load(struct spl_image_info *spl_image,
 			return spl_parse_image_header(spl_image, bootdev, buf);
 		}
 
-		if (IS_ENABLED(CONFIG_SPL_LOAD_FIT))
+		if (CONFIG_IS_ENABLED(SPL_LOAD_FIT))
 			return spl_load_simple_fit(spl_image, info, offset,
 						   header);
 	}

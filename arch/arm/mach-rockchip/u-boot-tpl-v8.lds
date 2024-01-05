@@ -69,6 +69,7 @@ SECTIONS
 	.bss_end (NOLOAD) : {
 		KEEP(*(.__bss_end));
 	}
+	__bss_size = __bss_end - __bss_start;
 
 	/DISCARD/ : { *(.dynsym) }
 	/DISCARD/ : { *(.dynstr*) }

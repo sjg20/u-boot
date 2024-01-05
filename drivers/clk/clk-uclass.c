@@ -6,6 +6,7 @@
  * Copyright (c) 2018, Theobroma Systems Design und Consulting GmbH
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_CLK
 
 #include <common.h>
@@ -146,8 +147,12 @@ int clk_get_by_index_nodev(ofnode node, int index, struct clk *clk)
 	struct ofnode_phandle_args args;
 	int ret;
 
+	log_info("node: %s, index %d, clk->dev %p\n", ofnode_get_name(node), index,
+		 clk->dev);
+// 	log_info("- name %s\n", clk->dev->name);
 	ret = ofnode_parse_phandle_with_args(node, "clocks", "#clock-cells", 0,
 					     index, &args);
+	log_info("ret=%d\n", ret);
 
 	return clk_get_by_index_tail(ret, node, &args, "clocks",
 				     index, clk);
