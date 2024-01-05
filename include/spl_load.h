@@ -20,7 +20,7 @@ static inline int _spl_load(struct spl_image_info *spl_image,
 {
 	struct legacy_img_hdr *header =
 		spl_get_load_buffer(-sizeof(*header), sizeof(*header));
-	ulong base_offset, image_offset, overhead;
+	ulong base_offset, image_offset, overhead, addr;
 	int read, ret;
 
 	log_debug("loading hdr to %p\n", header);
@@ -85,8 +85,10 @@ static inline int _spl_load(struct spl_image_info *spl_image,
 	overhead = base_offset - image_offset;
 	size = ALIGN(spl_image->size + overhead, spl_get_bl_len(info));
 
+	addr = spl_image->load_addr - overhead;
+	log_debug("loading body to %lx size %lx\n", addr, size);
 	read = info->read(info, offset + image_offset, size,
-			  map_sysmem(spl_image->load_addr - overhead, size));
+			  map_sysmem(addr, size));
 	return read < spl_image->size ? -EIO : 0;
 }
 
