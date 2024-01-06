@@ -667,18 +667,6 @@ void board_init_f(ulong dummy)
 }
 #endif
 
-static void spl_show_layout(void)
-{
-	ulong fdt_end, fdt_size;
-	ulong sp;
-
-	sp = map_to_sysmem(&sp);
-	fdt_size = fdt_totalsize(gd->fdt_blob);
-	fdt_end = map_to_sysmem(gd->fdt_blob) + fdt_size;
-	log_info("stack %lx fdt_size %lx fdt_end %lx space %lx\n", sp, fdt_size,
-		 fdt_end, sp - fdt_end);
-}
-
 void board_init_r(gd_t *dummy1, ulong dummy2)
 {
 	u32 spl_boot_list[] = {
@@ -752,8 +740,6 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		dm_get_mem(&mem);
 		dm_dump_mem(&mem);
 	}
-
-	spl_show_layout();
 
 	memset(&spl_image, '\0', sizeof(spl_image));
 	if (IS_ENABLED(CONFIG_SPL_OS_BOOT))

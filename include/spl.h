@@ -1074,7 +1074,8 @@ static inline bool spl_decompression_enabled(void)
 
 typedef void __noreturn (*spl_jump_to_image_t)(struct spl_image_info *);
 
-void spl_reloc_prepare(struct spl_image_info *image, ulong *addrp);
+int spl_reloc_prepare(struct spl_image_info *image, ulong *addrp);
+
 void spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t func);
 
 #endif
