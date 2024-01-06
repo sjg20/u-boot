@@ -87,7 +87,6 @@ void rockchip_stimer_init(void)
 
 int arch_cpu_init(void)
 {
-
 #ifdef CONFIG_SPL_BUILD
 	struct rk3399_pmusgrf_regs *sgrf;
 	struct rk3399_grf_regs *grf;
@@ -108,6 +107,8 @@ int arch_cpu_init(void)
 
 	/* tzma_rosize = 0, all sram non-secure */
 	rk_clrreg(&sgrf->soc_con4, 0x3ff);
+
+	rk_setreg(&sgrf->pmu_slv_con0, 1);
 
 	/* emmc master secure */
 // 	rk_clrreg(&sgrf->soc_con7, 1 << 7 | 1 << 8);

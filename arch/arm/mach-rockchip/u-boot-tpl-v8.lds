@@ -28,7 +28,7 @@ SECTIONS
 		CPUDIR/start.o (.text*)
 
 		/* put relocation code all together */
-		. = . + 0xc0;
+		//. = . + 0xc0;
 		_rcode_start = .;
 		*(.text.rcode)
 		_rcode_end = .;
