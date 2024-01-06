@@ -42,7 +42,7 @@
 		u-boot-vpl {
 			offset = <0x200000>;
 			no-write-symbols;
-			compress = "lz4";
+			compress = "gzip";
 		};
 #endif
 
@@ -183,6 +183,8 @@
 			offset = <CONFIG_SPL_PAD_TO>;
 		};
 #endif
+		fdtmap {
+		};
 	};
 
 #ifdef CONFIG_ROCKCHIP_SPI_IMAGE
