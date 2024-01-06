@@ -7,6 +7,9 @@
 #ifndef _SPL_RELOC_H
 #define _SPL_RELOC_H
 
+#define LOG_DEBUG
+
+#include <log.h>
 #include <mapmem.h>
 #include <spl.h>
 #include <asm/global_data.h>
@@ -14,37 +17,65 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-static ulong spl_check_layout(ulong *sizep)
+static uint rcode_size = 0xe00;
+
+enum {
+	/* margin to allow for stack growth */
+	RELOC_STACK_MARGIN	= 0x800,
+
+	/* align base address for DMA controllers which require it */
+	BASE_ALIGN		= 0x200,
+};
+
+static int setup_layout(struct spl_image_info *image, ulong *addrp)
 {
-	ulong fdt_end, fdt_size;
-	ulong sp;
+	ulong base, fdt_size;
+	ulong limit;
+	int buf_size, margin;
 
-	sp = map_to_sysmem(&sp);
+	limit = map_to_sysmem(&limit) - RELOC_STACK_MARGIN;
 	fdt_size = fdt_totalsize(gd->fdt_blob);
-	fdt_end = map_to_sysmem(gd->fdt_blob) + fdt_size;
-	log_info("stack %lx fdt_size %lx fdt_end %lx space %lx\n", sp, fdt_size,
-		 fdt_end, sp - fdt_end);
-	*sizep = sp - fdt_end;
+	base = ALIGN(map_to_sysmem(gd->fdt_blob) + fdt_size + BASE_ALIGN - 1,
+		     BASE_ALIGN);
+	buf_size = limit - rcode_size - base;
+	margin = buf_size - image->size;
+	log_debug("limit %lx fdt_size %lx rcode_size %x base %lx avail %x need %x, margin%s%lx\n",
+		  limit, fdt_size, rcode_size, base, buf_size, image->size,
+		  margin >= 0 ? " " : " -", abs(margin));
+	if (margin < 0) {
+		log_err("Image size %x but buffer is only %x\n", image->size,
+			buf_size);
+		return -ENOSPC;
+	}
 
-	return ALIGN(fdt_end, 4);
+	image->buf = map_sysmem(base, image->size);
+	*addrp = base;
+
+	return 0;
 }
 
 int spl_reloc_prepare(struct spl_image_info *image, ulong *addrp)
 {
-	ulong buf_addr, buf_size;
+	int ret;
 
-	buf_addr = spl_check_layout(&buf_size);
-	if (buf_size < image->size) {
-		log_err("Image size %x but buffer is only %lx\n", image->size,
-			buf_size);
-		return -ENOSPC;
-	}
+	ret = setup_layout(image, addrp);
+	if (ret)
+		return ret;
 
 	return 0;
 }
 
 void spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t func)
 {
+	uint *src, *end, *dst;
+
+	log_debug("Copying image size %x from %lx to %lx\n",
+		  (ulong)map_to_sysmem(image->buf), image->size,
+		  image->load_addr);
+	for (dst = map_sysmem(image->load_addr, image->size),
+	     src = image->buf, end = src + ALIGN(image->size, sizeof(uint));
+	     src < end;)
+	     *dst++ = *src++;
 }
 
 #endif /* _SPL_RELOC_H */
