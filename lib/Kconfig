@@ -820,6 +820,15 @@ config SPL_LZ4
 	  fast compression and decompression speed. It belongs to the LZ77
 	  family of byte-oriented compression schemes.
 
+config TPL_LZ4
+	bool "Enable LZ4 decompression support in TPL"
+	depends on TPL
+	help
+	  This enables support for the LZ4 decompression algorithm in TPL. LZ4
+	  is a lossless data compression algorithm that is focused on
+	  fast compression and decompression speed. It belongs to the LZ77
+	  family of byte-oriented compression schemes.
+
 config SPL_LZMA
 	bool "Enable LZMA decompression support for SPL build"
 	depends on SPL
