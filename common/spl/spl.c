@@ -688,8 +688,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		BOOT_DEVICE_NONE,
 		BOOT_DEVICE_NONE,
 	};
-	typedef void __noreturn (*jump_to_image_t)(struct spl_image_info *);
-	jump_to_image_t jump_to_image = &jump_to_image_no_args;
+	spl_jump_to_image_t jump_to_image = &jump_to_image_no_args;
 	struct spl_image_info spl_image;
 	int ret, os;
 
@@ -834,6 +833,10 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	}
 
 	spl_board_prepare_for_boot();
+
+	if (CONFIG_IS_ENABLED(RELOC_LOADER))
+		spl_reloc_jump(&spl_image, jump_to_image);
+
 	jump_to_image(&spl_image);
 }
 

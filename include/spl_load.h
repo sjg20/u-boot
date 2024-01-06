@@ -86,6 +86,10 @@ static inline int _spl_load(struct spl_image_info *spl_image,
 	size = ALIGN(spl_image->size + overhead, spl_get_bl_len(info));
 
 	addr = spl_image->load_addr - overhead;
+
+	if (CONFIG_IS_ENABLED(RELOC_LOADER))
+		spl_reloc_prepare(spl_image, &addr);
+
 	log_debug("loading body from %lx to %lx size %lx, image_offset=%lx\n",
 		  offset + image_offset, addr, (ulong)size, image_offset);
 	read = info->read(info, offset + image_offset, size,

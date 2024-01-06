@@ -256,8 +256,8 @@ enum spl_sandbox_flags {
 struct spl_image_info {
 	const char *name;
 	u8 os;
-	uintptr_t load_addr;
-	uintptr_t entry_point;
+	ulong load_addr;
+	ulong entry_point;
 #if CONFIG_IS_ENABLED(LOAD_FIT) || CONFIG_IS_ENABLED(LOAD_FIT_FULL)
 	void *fdt_addr;
 #endif
@@ -270,6 +270,9 @@ struct spl_image_info {
 	ulong dcrc_data;
 	ulong dcrc_length;
 	ulong dcrc;
+#endif
+#if CONFIG_IS_ENABLED(RELOC_LOADER)
+	void *buf;
 #endif
 };
 
@@ -1068,4 +1071,10 @@ static inline bool spl_decompression_enabled(void)
 {
 	return IS_ENABLED(CONFIG_SPL_GZIP) || IS_ENABLED(CONFIG_SPL_LZMA);
 }
+
+typedef void __noreturn (*spl_jump_to_image_t)(struct spl_image_info *);
+
+void spl_reloc_prepare(struct spl_image_info *image, ulong *addrp);
+void spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t func);
+
 #endif
