@@ -67,7 +67,7 @@ obj-$(CONFIG_QFW_PIO) += qfw_pio.o
 obj-$(CONFIG_QFW_MMIO) += qfw_mmio.o
 obj-$(CONFIG_SANDBOX) += qfw_sandbox.o
 endif
-obj-$(CONFIG_ROCKCHIP_EFUSE) += rockchip-efuse.o
+obj-$(CONFIG_$(SPL_TPL_)ROCKCHIP_EFUSE) += rockchip-efuse.o
 obj-$(CONFIG_ROCKCHIP_OTP) += rockchip-otp.o
 obj-$(CONFIG_$(SPL_TPL_)ROCKCHIP_IODOMAIN) += rockchip-io-domain.o
 obj-$(CONFIG_SANDBOX) += syscon_sandbox.o misc_sandbox.o

@@ -42,6 +42,7 @@
 		u-boot-vpl {
 			offset = <0x200000>;
 			no-write-symbols;
+			compress = "lz4";
 		};
 #endif
 
