@@ -40,7 +40,7 @@
 
 #ifdef CONFIG_VPL
 		u-boot-vpl {
-			type = "u-boot-tpl";
+// 			type = "u-boot-tpl";
 			offset = <0x200000>;
 			no-write-symbols;
 			// compress = "gzip";

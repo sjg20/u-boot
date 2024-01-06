@@ -102,8 +102,15 @@ int arch_cpu_init(void)
 	 * located in this range.
 	 */
 	sgrf = syscon_get_first_range(ROCKCHIP_SYSCON_PMUSGRF);
+	printf("sgrf=%p\n", sgrf);
 	rk_clrsetreg(&sgrf->ddr_rgn_con[16], 0x1ff, 0);
-	rk_clrreg(&sgrf->slv_secure_con4, 0x2000);
+	rk_clrreg(&sgrf->slv_secure_con4, 0xffff);
+
+	/* tzma_rosize = 0, all sram non-secure */
+	rk_clrreg(&sgrf->soc_con4, 0x3ff);
+
+	/* emmc master secure */
+// 	rk_clrreg(&sgrf->soc_con7, 1 << 7 | 1 << 8);
 
 	/*  eMMC clock generator: disable the clock multipilier */
 	grf = syscon_get_first_range(ROCKCHIP_SYSCON_GRF);
@@ -194,6 +201,7 @@ const char *spl_decode_boot_device(u32 boot_device)
 	return NULL;
 }
 
+#if CONFIG_IS_ENABLED(LOAD_FIT) || CONFIG_IS_ENABLED(LOAD_FIT_FULL)
 void spl_perform_fixups(struct spl_image_info *spl_image)
 {
 	void *blob = spl_image->fdt_addr;
@@ -222,6 +230,7 @@ void spl_perform_fixups(struct spl_image_info *spl_image)
 	fdt_setprop_string(blob, chosen,
 			   "u-boot,spl-boot-device", boot_ofpath);
 }
+#endif
 
 static void rk3399_force_power_on_reset(void)
 {

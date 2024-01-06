@@ -64,6 +64,9 @@ extern char __text_start[];
 /* This marks the text region which must be relocated */
 extern char __image_copy_start[], __image_copy_end[];
 
+/* This marks the rcode region used for SPL relocation */
+extern char _rcode_start[], _rcode_end[];
+
 extern char __bss_end[];
 extern char __rel_dyn_start[], __rel_dyn_end[];
 extern char _image_binary_end[];

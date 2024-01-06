@@ -6,6 +6,7 @@
 #include <common.h>
 #include <bootstage.h>
 #include <debug_uart.h>
+#include <display_options.h>
 #include <dm.h>
 #include <hang.h>
 #include <init.h>
@@ -19,12 +20,18 @@
 #include <asm/arch-rockchip/timer.h>
 #include <linux/bitops.h>
 
+#include <syscon.h>
+#include <asm/arch-rockchip/clock.h>
+#include <asm/arch-rockchip/grf_rk3399.h>
+#include <asm/arch-rockchip/hardware.h>
+
 #if CONFIG_IS_ENABLED(BANNER_PRINT)
 #include <timestamp.h>
 #endif
 
 void board_init_f(ulong dummy)
 {
+	struct rk3399_pmusgrf_regs *sgrf;
 	struct udevice *dev;
 	int ret;
 
@@ -52,6 +59,16 @@ void board_init_f(ulong dummy)
 		debug("spl_early_init() failed: %d\n", ret);
 		hang();
 	}
+// 	arch_cpu_init();
+
+	sgrf = syscon_get_first_range(ROCKCHIP_SYSCON_PMUSGRF);
+	printf("sgrf=%p, sgrf->slv_secure_con4=%x\n", sgrf,
+	       readl(&sgrf->slv_secure_con4));
+
+	printf("SRAM check\n");
+	print_buffer(CONFIG_VAL(TEXT_BASE), (void *)CONFIG_VAL(TEXT_BASE), 4, 4, 0);
+	rk_clrreg(&sgrf->soc_con4, 0x3ff);
+	print_buffer(CONFIG_VAL(TEXT_BASE), (void *)CONFIG_VAL(TEXT_BASE), 4, 4, 0);
 
 	/* Init ARM arch timer */
 	if (IS_ENABLED(CONFIG_SYS_ARCH_TIMER))

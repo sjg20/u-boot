@@ -818,10 +818,15 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 			       ret);
 	}
 
+	printf("here 1\n");
 	spl_board_prepare_for_boot();
+	printf("here 2\n");
 
-	if (CONFIG_IS_ENABLED(RELOC_LOADER))
-		spl_reloc_jump(&spl_image, jump_to_image);
+	if (CONFIG_IS_ENABLED(RELOC_LOADER)) {
+		if (spl_reloc_jump(&spl_image, jump_to_image))
+			hang();
+	}
+	printf("bad\n");
 
 	jump_to_image(&spl_image);
 }

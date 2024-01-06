@@ -26,8 +26,17 @@ SECTIONS
 		. = ALIGN(8);
 		__image_copy_start = .;
 		CPUDIR/start.o (.text*)
+
+		/* put relocation code all together */
+		. = . + 0xc0;
+		_rcode_start = .;
+		*(.text.rcode)
+		_rcode_end = .;
+
 		*(.text*)
 	}
+
+	_rcode_size = _rcode_end - _rcode_start;
 
 	.rodata : {
 		. = ALIGN(8);

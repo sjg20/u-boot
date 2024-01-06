@@ -374,7 +374,7 @@ int sprintf(char *buf, const char *fmt, ...)
 	va_end(va);
 	*info.outstr = '\0';
 
-	return ret;
+	return info.outstr - buf;
 }
 
 #if CONFIG_IS_ENABLED(LOG)
@@ -389,7 +389,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list va)
 	ret = _vprintf(&info, fmt, va);
 	*info.outstr = '\0';
 
-	return ret;
+	return info.outstr - buf;
 }
 #endif
 
@@ -407,7 +407,7 @@ int snprintf(char *buf, size_t size, const char *fmt, ...)
 	va_end(va);
 	*info.outstr = '\0';
 
-	return ret;
+	return info.outstr - buf;
 }
 
 void print_grouped_ull(unsigned long long int_val, int digits)

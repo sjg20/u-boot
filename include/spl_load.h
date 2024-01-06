@@ -95,6 +95,8 @@ static inline int _spl_load(struct spl_image_info *spl_image,
 
 	log_debug("loading body from %lx to %lx size %lx, image_offset=%lx\n",
 		  offset + image_offset, addr, (ulong)size, image_offset);
+	memset(map_sysmem(addr, size), '\0', size);
+	read = spl_image->size;
 	read = info->read(info, offset + image_offset, size,
 			  map_sysmem(addr, size));
 	return read < spl_image->size ? -EIO : 0;

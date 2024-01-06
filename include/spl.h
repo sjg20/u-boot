@@ -273,6 +273,8 @@ struct spl_image_info {
 #endif
 #if CONFIG_IS_ENABLED(RELOC_LOADER)
 	void *buf;
+	uint *stack_prot;
+	ulong reloc_offset;
 #endif
 };
 
@@ -1074,8 +1076,14 @@ static inline bool spl_decompression_enabled(void)
 
 typedef void __noreturn (*spl_jump_to_image_t)(struct spl_image_info *);
 
+#if CONFIG_IS_ENABLED(RELOC_LOADER)
+#define __rcode __section(".text.rcode")
+#else
+#define __rcode
+#endif
+
 int spl_reloc_prepare(struct spl_image_info *image, ulong *addrp);
 
-void spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t func);
+int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t func);
 
 #endif
