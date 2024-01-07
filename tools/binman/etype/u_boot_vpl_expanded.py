@@ -42,4 +42,5 @@ class Entry_u_boot_vpl_expanded(Entry_blob_phase):
         tout.do_output(tout.INFO if val else tout.DETAIL,
                        "Node '%s': etype '%s': %s %sselected" %
                        (node.path, etype, new_etype, '' if val else 'not '))
+        print('useexpanded', val)
         return val
