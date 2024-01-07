@@ -18,6 +18,7 @@
 #include <asm/io.h>
 #include <asm/sections.h>
 #include <linux/types.h>
+#include <u-boot/crc.h>
 #include <u-boot/lz4.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -109,18 +110,17 @@ int spl_reloc_prepare(struct spl_image_info *image, ulong *addrp)
 	return 0;
 }
 
-typedef void __noreturn (*image_entry_noargs_t)(void);
+typedef void __noreturn (*image_entry_noargs_t)(uint crc);
 
 #define COMP	0
 
 __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 {
 	image_entry_noargs_t entry = (image_entry_noargs_t)image->entry_point;
-	uint *src, *end;
-	uint *dst;
+	u32 *dst;
 	ulong image_len;
 	size_t unc_len;
-	int ret;
+	int ret, crc;
 
 // 	log_debug("Copying image size %lx from %x to %lx\n",
 // 		  (ulong)map_to_sysmem(image->buf), image->size,
@@ -137,12 +137,15 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 		if (ret)
 			return ret;
 	} else {
-		for (src = image->buf, end = src + image->size / 4;
-		     src < end;)
-		     *dst++ = *src++;
+		u32 *src, *end, *ptr;
+
+		for (src = image->buf, end = (void *)src + image->size,
+		     ptr = dst; src < end;)
+			*ptr++ = *src++;
 	}
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
+	crc = crc8(0, (u8 *)dst, image->size);
 // 	printf("ret=%d\n", ret);
 
 #if 0
@@ -156,7 +159,7 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 #endif
 // 	return dst;
 
-	entry();
+	entry(crc);
 }
 
 int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)

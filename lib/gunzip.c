@@ -15,7 +15,7 @@
 #include <u-boot/crc.h>
 #include <watchdog.h>
 #include <u-boot/zlib.h>
-#include <spl.h>
+#include <asm/sections.h>
 
 #define HEADER0			'\x1f'
 #define HEADER1			'\x8b'

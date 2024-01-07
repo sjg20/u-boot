@@ -18,6 +18,7 @@
 
 .globl	_start
 _start:
+	bl printhex8
 #if defined(CONFIG_LINUX_KERNEL_IMAGE_HEADER)
 #include <asm/boot0-linux-kernel-header.h>
 #elif defined(CONFIG_ENABLE_ARM_SOC_BOOT0_HOOK)

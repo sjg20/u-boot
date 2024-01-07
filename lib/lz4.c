@@ -33,7 +33,7 @@
 #include <linux/bug.h>
 #include <asm/unaligned.h>
 #include <u-boot/lz4.h>
-#include <spl.h>
+#include <asm/sections.h>
 
 #define FORCE_INLINE inline __attribute__((always_inline))
 

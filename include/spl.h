@@ -1077,14 +1077,6 @@ static inline bool spl_decompression_enabled(void)
 
 typedef void __noreturn (*spl_jump_to_image_t)(struct spl_image_info *);
 
-#if CONFIG_IS_ENABLED(RELOC_LOADER)
-#define __rcode __section(".text.rcode")
-#define __rdata __section(".text.rdata")
-#else
-#define __rcode
-#define __rdata
-#endif
-
 int spl_reloc_prepare(struct spl_image_info *image, ulong *addrp);
 
 int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t func);
