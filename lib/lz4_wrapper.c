@@ -10,6 +10,7 @@
 #include <asm/unaligned.h>
 #include <u-boot/lz4.h>
 #include <spl.h>
+#include <display_options.h>
 
 /* lz4.c is unaltered (except removing unrelated code) from github.com/Cyan4973/lz4. */
 #include "lz4.c"	/* #include for inlining, do not link! */
@@ -33,8 +34,10 @@ __rcode int ulz4fn(const void *src, size_t srcn, void *dst, size_t *dstn)
 		if (srcn < sizeof(u32) + 3*sizeof(u8))
 			return -EINVAL;	/* input overrun */
 
+// 		print_buffer((ulong)in, in, 4, 4, 0);
 		magic = get_unaligned_le32(in);
 		in += sizeof(u32);
+// 		printf("read flags %p %x\n", in, *(u8 *)in);
 		flags = *(u8 *)in;
 		in += sizeof(u8);
 		block_desc = *(u8 *)in;
@@ -46,8 +49,10 @@ __rcode int ulz4fn(const void *src, size_t srcn, void *dst, size_t *dstn)
 		has_content_size = (flags >> 3) & 0x1;
 
 		/* We assume there's always only a single, standard frame. */
-		if (magic != LZ4F_MAGIC || version != 1)
+		if (magic != LZ4F_MAGIC || version != 1) {
+// 			printf("unknown version %d, flags %x\n", version, flags);
 			return -EPROTONOSUPPORT;	/* unknown format */
+		}
 		if ((flags & 0x03) || (block_desc & 0x8f))
 			return -EINVAL;	/* reserved bits must be zero */
 		if (!independent_blocks)

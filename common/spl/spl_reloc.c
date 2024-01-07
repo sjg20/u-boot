@@ -117,7 +117,7 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 // 	uint *src, *end;
 	uint *dst;
 	ulong image_len;
-	uint unc_len;
+	size_t unc_len;
 	int ret;
 
 // 	log_debug("Copying image size %lx from %x to %lx\n",
@@ -127,7 +127,8 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	unc_len = (void *)image->rcode_buf - (void *)dst;
 	image_len = image->size;
 // 	printf("gunzip %p %x %p %lx\n", dst, unc_len, image->buf, image_len);
-	ret = ulz4fn(dst, unc_len, image->buf, &image_len);
+// 	ret = gunzip(dst, unc_len, image->buf, &image_len);
+	ret = ulz4fn(image->buf, image_len, dst, &unc_len);
 	if (ret)
 		return ret;
 // 	printf("ret=%d\n", ret);

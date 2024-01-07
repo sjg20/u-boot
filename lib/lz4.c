@@ -113,6 +113,10 @@ typedef enum { decode_full_block = 0, partial_decode = 1 } earlyEnd_directive;
 #define assert(condition) ((void)0)
 #endif
 
+
+__rdata static const unsigned int inc32table[8] = {0, 1, 2, 1, 0, 4, 4, 4};
+__rdata static const int dec64table[8] = {0, 0, 0, -1, -4, 1, 2, 3};
+
 /*
  * LZ4_decompress_generic() :
  * This generic decompression function covers all use cases.
@@ -151,8 +155,6 @@ __rcode static FORCE_INLINE int LZ4_decompress_generic(
 	BYTE *cpy;
 
 	const BYTE * const dictEnd = (const BYTE *)dictStart + dictSize;
-	static const unsigned int inc32table[8] = {0, 1, 2, 1, 0, 4, 4, 4};
-	static const int dec64table[8] = {0, 0, 0, -1, -4, 1, 2, 3};
 
 	const int safeDecode = (endOnInput == endOnInputSize);
 	const int checkOffset = ((safeDecode) && (dictSize < (int)(64 * KB)));

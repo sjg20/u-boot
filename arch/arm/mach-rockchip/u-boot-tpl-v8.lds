@@ -31,6 +31,7 @@ SECTIONS
 		//. = . + 0xc0;
 		_rcode_start = .;
 		*(.text.rcode)
+		*(.text.rdata)
 		_rcode_end = .;
 
 		*(.text*)
