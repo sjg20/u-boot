@@ -53,16 +53,6 @@ _bss_end_ofs:
 	.quad	__bss_end - _start
 
 reset:
-#ifdef CONFIG_VPL_BUILD
-	#mov x0, x1
-	bl printhex8
-	mov x0, #0x2d
-	bl printch
-#endif
-#ifdef CONFIG_VPL_BUILD
-	#mov x0, #70
-	#bl printch
-#endif
 	/* Allow the board to save important registers */
 	b	save_boot_params
 .globl	save_boot_params_ret
@@ -203,10 +193,6 @@ slave_cpu:
 #endif /* CONFIG_ARMV8_MULTIENTRY */
 master_cpu:
 	msr	SPSel, #1		/* make sure we use SP_ELx */
-#ifdef CONFIG_VPL_BUILD
-	#mov x0, #66
-	#bl printch
-#endif
 	bl	_main
 
 /*-----------------------------------------------------------------------*/

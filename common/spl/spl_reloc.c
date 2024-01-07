@@ -7,8 +7,6 @@
 #ifndef _SPL_RELOC_H
 #define _SPL_RELOC_H
 
-#define LOG_DEBUG
-
 #include <display_options.h>
 #include <gzip.h>
 #include <image.h>
@@ -68,8 +66,8 @@ static int setup_layout(struct spl_image_info *image, ulong *addrp)
 
 	rcode_buf = map_sysmem(rcode_base, rcode_size);
 // 	print_buffer(0xff8c2000, (void *)0xff8c2000, 4, 0x100, 0);
-	printf("_rcode_start %p: %x -- func %p %x\n", _rcode_start,
-	       *(uint *)_rcode_start, setup_layout, *(uint *)setup_layout);
+	log_debug("_rcode_start %p: %x -- func %p %x\n", _rcode_start,
+		  *(uint *)_rcode_start, setup_layout, *(uint *)setup_layout);
 // 	print_buffer((ulong)_rcode_start, _rcode_start, 4, 4, 0);
 
 	image->reloc_offset = rcode_buf - _rcode_start;
@@ -185,7 +183,8 @@ int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)
 // 	print_buffer((ulong)loader, loader, 4, 4, 0);
 // 	print_buffer(map_to_sysmem(image->buf), image->buf, 4, 4, 0);
 
-	printf("unc_len %lx\n", image->rcode_buf - map_sysmem(image->load_addr, image->size));
+	log_debug("unc_len %lx\n",
+		  image->rcode_buf - map_sysmem(image->load_addr, image->size));
 // 	rcode_reloc_and_jump(image);
 	ret = loader(image);
 

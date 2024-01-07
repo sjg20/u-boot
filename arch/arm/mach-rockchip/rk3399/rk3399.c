@@ -101,7 +101,6 @@ int arch_cpu_init(void)
 	 * located in this range.
 	 */
 	sgrf = syscon_get_first_range(ROCKCHIP_SYSCON_PMUSGRF);
-	printf("sgrf=%p\n", sgrf);
 	rk_clrsetreg(&sgrf->ddr_rgn_con[16], 0x1ff, 0);
 	rk_clrreg(&sgrf->slv_secure_con4, 0xffff);
 

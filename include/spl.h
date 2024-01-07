@@ -1081,6 +1081,4 @@ int spl_reloc_prepare(struct spl_image_info *image, ulong *addrp);
 
 int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t func);
 
-void sram_check(const char *where);
-
 #endif

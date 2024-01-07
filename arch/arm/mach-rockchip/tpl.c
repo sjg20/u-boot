@@ -31,7 +31,6 @@
 
 void board_init_f(ulong dummy)
 {
-	struct rk3399_pmusgrf_regs *sgrf;
 	struct udevice *dev;
 	int ret;
 
@@ -45,7 +44,6 @@ void board_init_f(ulong dummy)
 	 * printascii("string");
 	 */
 	debug_uart_init();
-	printch('a');
 #ifdef CONFIG_TPL_BANNER_PRINT
 	printascii("\nU-Boot TPL " PLAIN_VERSION " (" U_BOOT_DATE " - " \
 				U_BOOT_TIME ")\n");
@@ -54,19 +52,12 @@ void board_init_f(ulong dummy)
 	/* Init secure timer */
 	rockchip_stimer_init();
 
-	sram_check("before spl_early_init()");
 	ret = spl_early_init();
 	if (ret) {
 		debug("spl_early_init() failed: %d\n", ret);
 		hang();
 	}
-	sram_check("after spl_early_init()");
 	arch_cpu_init();
-	sram_check("after arch_cpu_init()");
-
-	sgrf = syscon_get_first_range(ROCKCHIP_SYSCON_PMUSGRF);
-	printf("sgrf=%p, sgrf->slv_secure_con4=%x\n", sgrf,
-	       readl(&sgrf->slv_secure_con4));
 
 	/* Init ARM arch timer */
 	if (IS_ENABLED(CONFIG_SYS_ARCH_TIMER))
@@ -79,9 +70,6 @@ void board_init_f(ulong dummy)
 			return;
 		}
 	}
-
-	printf("booting\n");
-	sram_check("end of board_init_f()");
 }
 
 int board_return_to_bootrom(struct spl_image_info *spl_image,
