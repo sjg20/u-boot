@@ -54,11 +54,8 @@ _bss_end_ofs:
 	.quad	__bss_end - _start
 
 reset:
-	bl	_main
 #ifdef CONFIG_VPL_BUILD
-	adr x0, printhex8
-	bl printhex8
-	mov x0, #64
+	mov x0, #0x2d
 	bl printch
 #endif
 #ifdef CONFIG_VPL_BUILD

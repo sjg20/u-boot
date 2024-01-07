@@ -11,12 +11,14 @@
 
 #include <display_options.h>
 #include <gzip.h>
+#include <image.h>
 #include <log.h>
 #include <mapmem.h>
 #include <spl.h>
 #include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/sections.h>
+#include <asm/unaligned.h>
 #include <linux/types.h>
 #include <u-boot/crc.h>
 #include <u-boot/lz4.h>
@@ -112,8 +114,6 @@ int spl_reloc_prepare(struct spl_image_info *image, ulong *addrp)
 
 typedef void __noreturn (*image_entry_noargs_t)(uint crc);
 
-#define COMP	0
-
 __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 {
 	image_entry_noargs_t entry = (image_entry_noargs_t)image->entry_point;
@@ -121,6 +121,7 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	ulong image_len;
 	size_t unc_len;
 	int ret, crc;
+	uint magic;
 
 // 	log_debug("Copying image size %lx from %x to %lx\n",
 // 		  (ulong)map_to_sysmem(image->buf), image->size,
@@ -132,20 +133,22 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 // 	ret = gunzip(dst, unc_len, image->buf, &image_len);
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
-	if (COMP) {
+	magic = get_unaligned_le32(image->buf);
+	if (magic == LZ4F_MAGIC) {
 		ret = ulz4fn(image->buf, image_len, dst, &unc_len);
 		if (ret)
 			return ret;
 	} else {
 		u32 *src, *end, *ptr;
 
+		unc_len = image->size;
 		for (src = image->buf, end = (void *)src + image->size,
 		     ptr = dst; src < end;)
 			*ptr++ = *src++;
 	}
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
-	crc = crc8(0, (u8 *)dst, image->size);
+	crc = crc8(0, (u8 *)dst, unc_len);
 // 	printf("ret=%d\n", ret);
 
 #if 0
