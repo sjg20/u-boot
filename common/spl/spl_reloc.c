@@ -128,11 +128,13 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	image_len = image->size;
 // 	printf("gunzip %p %x %p %lx\n", dst, unc_len, image->buf, image_len);
 // 	ret = gunzip(dst, unc_len, image->buf, &image_len);
+	if (*image->stack_prot != STACK_PROT_VALUE)
+		return -EFAULT;
 	ret = ulz4fn(image->buf, image_len, dst, &unc_len);
 	if (ret)
 		return ret;
-// 	if (*image->stack_prot != STACK_PROT_VALUE)
-// 		return -EFAULT;
+	if (*image->stack_prot != STACK_PROT_VALUE)
+		return -EFAULT;
 // 	printf("ret=%d\n", ret);
 
 #if 0
