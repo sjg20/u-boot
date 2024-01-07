@@ -18,7 +18,6 @@
 
 .globl	_start
 _start:
-	bl printhex8
 #if defined(CONFIG_LINUX_KERNEL_IMAGE_HEADER)
 #include <asm/boot0-linux-kernel-header.h>
 #elif defined(CONFIG_ENABLE_ARM_SOC_BOOT0_HOOK)
@@ -55,6 +54,8 @@ _bss_end_ofs:
 
 reset:
 #ifdef CONFIG_VPL_BUILD
+	#mov x0, x1
+	bl printhex8
 	mov x0, #0x2d
 	bl printch
 #endif

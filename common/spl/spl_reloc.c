@@ -112,7 +112,7 @@ int spl_reloc_prepare(struct spl_image_info *image, ulong *addrp)
 	return 0;
 }
 
-typedef void __noreturn (*image_entry_noargs_t)(uint crc);
+typedef void __noreturn (*image_entry_noargs_t)(uint crc, uint unc_len);
 
 __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 {
@@ -162,7 +162,7 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 #endif
 // 	return dst;
 
-	entry(crc);
+	entry(crc, unc_len);
 }
 
 int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)
