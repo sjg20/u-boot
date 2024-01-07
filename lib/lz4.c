@@ -33,15 +33,16 @@
 #include <linux/bug.h>
 #include <asm/unaligned.h>
 #include <u-boot/lz4.h>
+#include <spl.h>
 
 #define FORCE_INLINE inline __attribute__((always_inline))
 
-static FORCE_INLINE u16 LZ4_readLE16(const void *src)
+__rcode static FORCE_INLINE u16 LZ4_readLE16(const void *src)
 {
 	return get_unaligned_le16(src);
 }
 
-static FORCE_INLINE void LZ4_copy8(void *dst, const void *src)
+__rcode static FORCE_INLINE void LZ4_copy8(void *dst, const void *src)
 {
 	put_unaligned(get_unaligned((const u64 *)src), (u64 *)dst);
 }
@@ -53,7 +54,7 @@ typedef  int32_t S32;
 typedef uint64_t U64;
 typedef uintptr_t uptrval;
 
-static FORCE_INLINE void LZ4_write32(void *memPtr, U32 value)
+__rcode static FORCE_INLINE void LZ4_write32(void *memPtr, U32 value)
 {
 	put_unaligned(value, (U32 *)memPtr);
 }
@@ -63,7 +64,7 @@ static FORCE_INLINE void LZ4_write32(void *memPtr, U32 value)
 **************************************/
 
 /* customized version of memcpy, which may overwrite up to 7 bytes beyond dstEnd */
-static void LZ4_wildCopy(void* dstPtr, const void* srcPtr, void* dstEnd)
+__rcode static void LZ4_wildCopy(void* dstPtr, const void* srcPtr, void* dstEnd)
 {
     BYTE* d = (BYTE*)dstPtr;
     const BYTE* s = (const BYTE*)srcPtr;
@@ -119,7 +120,7 @@ typedef enum { decode_full_block = 0, partial_decode = 1 } earlyEnd_directive;
  * Note that it is important for performance that this function really get inlined,
  * in order to remove useless branches during compilation optimization.
  */
-static FORCE_INLINE int LZ4_decompress_generic(
+__rcode static FORCE_INLINE int LZ4_decompress_generic(
 	 const char * const src,
 	 char * const dst,
 	 int srcSize,
@@ -515,7 +516,7 @@ _output_error:
 	return (int) (-(((const char *)ip) - src)) - 1;
 }
 
-int LZ4_decompress_safe(const char *source, char *dest,
+__rcode int LZ4_decompress_safe(const char *source, char *dest,
 	int compressedSize, int maxDecompressedSize)
 {
 	return LZ4_decompress_generic(source, dest,
@@ -524,7 +525,7 @@ int LZ4_decompress_safe(const char *source, char *dest,
 				      noDict, (BYTE *)dest, NULL, 0);
 }
 
-int LZ4_decompress_safe_partial(const char *src, char *dst,
+__rcode int LZ4_decompress_safe_partial(const char *src, char *dst,
 	int compressedSize, int targetOutputSize, int dstCapacity)
 {
 	dstCapacity = min(targetOutputSize, dstCapacity);

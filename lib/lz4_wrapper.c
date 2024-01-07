@@ -9,13 +9,14 @@
 #include <linux/types.h>
 #include <asm/unaligned.h>
 #include <u-boot/lz4.h>
+#include <spl.h>
 
 /* lz4.c is unaltered (except removing unrelated code) from github.com/Cyan4973/lz4. */
 #include "lz4.c"	/* #include for inlining, do not link! */
 
 #define LZ4F_BLOCKUNCOMPRESSED_FLAG 0x80000000U
 
-int ulz4fn(const void *src, size_t srcn, void *dst, size_t *dstn)
+__rcode int ulz4fn(const void *src, size_t srcn, void *dst, size_t *dstn)
 {
 	const void *end = dst + *dstn;
 	const void *in = src;

@@ -273,6 +273,7 @@ struct spl_image_info {
 #endif
 #if CONFIG_IS_ENABLED(RELOC_LOADER)
 	void *buf;
+	void *rcode_buf;
 	uint *stack_prot;
 	ulong reloc_offset;
 #endif
