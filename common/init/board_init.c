@@ -77,6 +77,9 @@ __weak void board_init_f_init_stack_protection(void)
 
 ulong board_init_f_alloc_reserve(ulong top)
 {
+#ifdef CONFIG_VPL_BUILD
+	printch('y');
+#endif
 	/* Reserve early malloc arena */
 #ifndef CFG_MALLOC_F_ADDR
 #if CONFIG_IS_ENABLED(SYS_MALLOC_F)

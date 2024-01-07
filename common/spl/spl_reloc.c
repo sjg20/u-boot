@@ -131,6 +131,8 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	ret = ulz4fn(image->buf, image_len, dst, &unc_len);
 	if (ret)
 		return ret;
+// 	if (*image->stack_prot != STACK_PROT_VALUE)
+// 		return -EFAULT;
 // 	printf("ret=%d\n", ret);
 
 #if 0

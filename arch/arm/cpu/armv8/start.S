@@ -19,8 +19,10 @@
 .globl	_start
 _start:
 #ifdef CONFIG_VPL_BUILD
-	mov x0, #65
-	bl printch
+	#mov x0, sp
+	#bl printhex8
+	#mov x0, #64
+	#bl printch
 #endif
 #if defined(CONFIG_LINUX_KERNEL_IMAGE_HEADER)
 #include <asm/boot0-linux-kernel-header.h>
@@ -57,6 +59,10 @@ _bss_end_ofs:
 	.quad	__bss_end - _start
 
 reset:
+#ifdef CONFIG_VPL_BUILD
+	#mov x0, #70
+	#bl printch
+#endif
 	/* Allow the board to save important registers */
 	b	save_boot_params
 .globl	save_boot_params_ret
@@ -198,8 +204,8 @@ slave_cpu:
 master_cpu:
 	msr	SPSel, #1		/* make sure we use SP_ELx */
 #ifdef CONFIG_VPL_BUILD
-	mov x0, #66
-	bl printch
+	#mov x0, #66
+	#bl printch
 #endif
 	bl	_main
 
