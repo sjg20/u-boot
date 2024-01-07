@@ -111,10 +111,12 @@ int spl_reloc_prepare(struct spl_image_info *image, ulong *addrp)
 
 typedef void __noreturn (*image_entry_noargs_t)(void);
 
+#define COMP	0
+
 __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 {
 	image_entry_noargs_t entry = (image_entry_noargs_t)image->entry_point;
-// 	uint *src, *end;
+	uint *src, *end;
 	uint *dst;
 	ulong image_len;
 	size_t unc_len;
@@ -130,9 +132,15 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 // 	ret = gunzip(dst, unc_len, image->buf, &image_len);
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
-	ret = ulz4fn(image->buf, image_len, dst, &unc_len);
-	if (ret)
-		return ret;
+	if (COMP) {
+		ret = ulz4fn(image->buf, image_len, dst, &unc_len);
+		if (ret)
+			return ret;
+	} else {
+		for (src = image->buf, end = src + image->size / 4;
+		     src < end;)
+		     *dst++ = *src++;
+	}
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
 // 	printf("ret=%d\n", ret);

@@ -43,7 +43,7 @@
 // 			type = "u-boot-tpl";
 			offset = <0x200000>;
 			no-write-symbols;
-			compress = "lz4";
+			//compress = "lz4";
 		};
 #endif
 
