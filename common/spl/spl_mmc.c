@@ -5,6 +5,9 @@
  *
  * Aneesh V <aneesh@ti.com>
  */
+
+#define LOG_DEBUG
+
 #include <common.h>
 #include <dm.h>
 #include <log.h>
@@ -93,6 +96,8 @@ static int spl_mmc_find_device(struct mmc **mmcp, int mmc_dev)
 		       mmc_dev, ret);
 		return ret;
 	}
+	log_debug("mmc %d: %s\n", mmc_dev,
+		  CONFIG_IS_ENABLED(DM_MMC) ? (*mmcp)->dev->name : "?");
 
 	return 0;
 }

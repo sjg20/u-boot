@@ -26,6 +26,21 @@
 			fit,align = <512>;
 			images {
 				u-boot-spl {
+					description = "U-Boot SPL";
+					type = "standalone";
+					os = "U-Boot";
+#ifdef CONFIG_ARM64
+					arch = "arm64";
+#else
+					arch = "arm";
+#endif
+					compression = "lz4";
+					load = <CONFIG_SPL_TEXT_BASE>;
+					entry = <CONFIG_SPL_TEXT_BASE>;
+					phase = "spl";
+					u-boot-spl {
+						compress = "lz4";
+					};
 				};
 
 				u-boot {
