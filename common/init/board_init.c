@@ -79,6 +79,7 @@ ulong board_init_f_alloc_reserve(ulong top)
 {
 #ifdef CONFIG_VPL_BUILD
 	printch('y');
+	printch('z');
 #endif
 	/* Reserve early malloc arena */
 #ifndef CFG_MALLOC_F_ADDR
