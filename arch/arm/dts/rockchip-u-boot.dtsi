@@ -13,42 +13,7 @@
 
 #ifdef CONFIG_SPL
 &binman {
-	simple-bin {
-		filename = "u-boot-rockchip.bin";
-		pad-byte = <0xff>;
-
-		mkimage {
-			filename = "idbloader.img";
-			args = "-n", CONFIG_SYS_SOC, "-T", "rksd";
-			multiple-data-files;
-
-#if defined(CONFIG_ROCKCHIP_EXTERNAL_TPL)
-			rockchip-tpl {
-			};
-#elif defined(CONFIG_TPL)
-			u-boot-tpl {
-			};
-#endif
-#ifdef CONFIG_VPL
-// 			u-boot-vpl {
-// 			};
-#else
-			u-boot-spl {
-			};
-#endif
-		};
-
-#ifdef CONFIG_VPL
-		u-boot-vpl {
-// 			type = "u-boot-tpl";
-			offset = <0x200000>;
-			no-write-symbols;
-			compress = "lz4";
-		};
-#endif
-
-#if defined(CONFIG_SPL_FIT) && (defined(CONFIG_ARM64) || defined(CONFIG_SPL_OPTEE_IMAGE))
-		fit: fit {
+		common_part: template-1 {
 #ifdef CONFIG_ARM64
 			description = "FIT image for U-Boot with bl31 (TF-A)";
 #else
@@ -59,8 +24,10 @@
 			filename = "u-boot.itb";
 			fit,external-offset = <CONFIG_FIT_EXTERNAL_OFFSET>;
 			fit,align = <512>;
-			offset = <CONFIG_SPL_PAD_TO>;
 			images {
+				u-boot-spl {
+				};
+
 				u-boot {
 					description = "U-Boot";
 					type = "standalone";
@@ -179,6 +146,59 @@
 				};
 			};
 		};
+
+	simple-bin {
+		filename = "u-boot-rockchip.bin";
+		pad-byte = <0xff>;
+
+		mkimage {
+			filename = "idbloader.img";
+			args = "-n", CONFIG_SYS_SOC, "-T", "rksd";
+			multiple-data-files;
+
+#if defined(CONFIG_ROCKCHIP_EXTERNAL_TPL)
+			rockchip-tpl {
+			};
+#elif defined(CONFIG_TPL)
+			u-boot-tpl {
+			};
+#endif
+#ifdef CONFIG_VPL
+// 			u-boot-vpl {
+// 			};
+#else
+			u-boot-spl {
+			};
+#endif
+		};
+
+#ifdef CONFIG_VPL
+		u-boot-vpl {
+// 			type = "u-boot-tpl";
+			offset = <0x200000>;
+			no-write-symbols;
+			compress = "lz4";
+		};
+#endif
+
+#if defined(CONFIG_SPL_FIT) && (defined(CONFIG_ARM64) || defined(CONFIG_SPL_OPTEE_IMAGE))
+#ifdef CONFIG_VPL
+		fit-a {
+			type = "fit";
+			offset = <CONFIG_SPL_PAD_TO>;
+			insert-template = <&common_part>;
+		};
+		fit-b {
+			type = "fit";
+			offset = <0xbf8000>;
+			insert-template = <&common_part>;
+		};
+#else
+		fit {
+			offset = <CONFIG_SPL_PAD_TO>;
+			insert-template = <&common_part>;
+		};
+#endif
 #else
 		u-boot-img {
 			offset = <CONFIG_SPL_PAD_TO>;
