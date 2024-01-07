@@ -11,6 +11,7 @@
 #include <bloblist.h>
 #include <binman_sym.h>
 #include <bootstage.h>
+#include <display_options.h>
 #include <dm.h>
 #include <handoff.h>
 #include <hang.h>
@@ -667,6 +668,16 @@ void board_init_f(ulong dummy)
 }
 #endif
 
+void sram_check(const char *where)
+{
+	ulong addr = 0xff8c2128;
+
+	return;
+	printf("SRAM check: %s\n", where);
+	print_buffer(CONFIG_VAL(TEXT_BASE), (void *)CONFIG_VAL(TEXT_BASE), 4, 4, 0);
+	print_buffer(addr, (void *)addr, 4, 4, 0);
+}
+
 void board_init_r(gd_t *dummy1, ulong dummy2)
 {
 	u32 spl_boot_list[] = {
@@ -681,6 +692,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	int ret, os;
 
 	debug(">>" SPL_TPL_PROMPT "board_init_r()\n");
+	sram_check("board_init_r()");
 
 	spl_set_bd();
 
@@ -714,8 +726,10 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		}
 	}
 
+	sram_check("before spl_board_init()");
 	if (CONFIG_IS_ENABLED(BOARD_INIT))
 		spl_board_init();
+	sram_check("after spl_board_init()");
 
 	if (IS_ENABLED(CONFIG_SPL_WATCHDOG) && CONFIG_IS_ENABLED(WDT))
 		initr_watchdog();
@@ -740,6 +754,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		dm_get_mem(&mem);
 		dm_dump_mem(&mem);
 	}
+	sram_check("after init");
 
 	memset(&spl_image, '\0', sizeof(spl_image));
 	if (IS_ENABLED(CONFIG_SPL_OS_BOOT))
@@ -757,6 +772,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 			puts(SPL_TPL_PROMPT "failed to boot from all boot devices\n");
 		hang();
 	}
+	sram_check("after boot_from_devices()");
 
 	spl_perform_fixups(&spl_image);
 
@@ -818,9 +834,9 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 			       ret);
 	}
 
-	printf("here 1\n");
+// 	printf("here 1\n");
 	spl_board_prepare_for_boot();
-	printf("here 2\n");
+// 	printf("here 2\n");
 
 	if (CONFIG_IS_ENABLED(RELOC_LOADER)) {
 		if (spl_reloc_jump(&spl_image, jump_to_image))

@@ -65,7 +65,7 @@ void board_init_f(ulong dummy)
 	 */
 	debug_uart_init();
 #ifdef CONFIG_VPL_BANNER_PRINT
-	printascii("\nU-Boot TPL " PLAIN_VERSION " (" U_BOOT_DATE " - " \
+	printascii("\nU-Boot VPL " PLAIN_VERSION " (" U_BOOT_DATE " - " \
 				U_BOOT_TIME ")\n");
 #endif
 #endif

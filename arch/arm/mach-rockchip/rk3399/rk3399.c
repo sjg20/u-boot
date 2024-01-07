@@ -91,6 +91,9 @@ int arch_cpu_init(void)
 	struct rk3399_pmusgrf_regs *sgrf;
 	struct rk3399_grf_regs *grf;
 
+	printf("\n\nno\n\n");
+	return 0;
+
 	/*
 	 * Disable DDR and SRAM security regions.
 	 *
@@ -111,7 +114,7 @@ int arch_cpu_init(void)
 	rk_setreg(&sgrf->pmu_slv_con0, 1);
 
 	/* emmc master secure */
-// 	rk_clrreg(&sgrf->soc_con7, 1 << 7 | 1 << 8);
+	rk_clrreg(&sgrf->soc_con7, 1 << 7 | 1 << 8);
 
 	/*  eMMC clock generator: disable the clock multipilier */
 	grf = syscon_get_first_range(ROCKCHIP_SYSCON_GRF);

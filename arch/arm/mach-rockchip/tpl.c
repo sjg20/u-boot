@@ -54,21 +54,19 @@ void board_init_f(ulong dummy)
 	/* Init secure timer */
 	rockchip_stimer_init();
 
+	sram_check("before spl_early_init()");
 	ret = spl_early_init();
 	if (ret) {
 		debug("spl_early_init() failed: %d\n", ret);
 		hang();
 	}
-// 	arch_cpu_init();
+	sram_check("after spl_early_init()");
+	arch_cpu_init();
+	sram_check("after arch_cpu_init()");
 
 	sgrf = syscon_get_first_range(ROCKCHIP_SYSCON_PMUSGRF);
 	printf("sgrf=%p, sgrf->slv_secure_con4=%x\n", sgrf,
 	       readl(&sgrf->slv_secure_con4));
-
-	printf("SRAM check\n");
-	print_buffer(CONFIG_VAL(TEXT_BASE), (void *)CONFIG_VAL(TEXT_BASE), 4, 4, 0);
-	rk_clrreg(&sgrf->soc_con4, 0x3ff);
-	print_buffer(CONFIG_VAL(TEXT_BASE), (void *)CONFIG_VAL(TEXT_BASE), 4, 4, 0);
 
 	/* Init ARM arch timer */
 	if (IS_ENABLED(CONFIG_SYS_ARCH_TIMER))
@@ -83,6 +81,7 @@ void board_init_f(ulong dummy)
 	}
 
 	printf("booting\n");
+	sram_check("end of board_init_f()");
 }
 
 int board_return_to_bootrom(struct spl_image_info *spl_image,

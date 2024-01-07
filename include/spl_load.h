@@ -11,6 +11,7 @@
 #include <image.h>
 #include <imx_container.h>
 #include <mapmem.h>
+#include <memalign.h>
 #include <spl.h>
 
 static inline int _spl_load(struct spl_image_info *spl_image,
@@ -18,12 +19,19 @@ static inline int _spl_load(struct spl_image_info *spl_image,
 			    struct spl_load_info *info, size_t size,
 			    size_t offset)
 {
-	struct legacy_img_hdr *header =
-		spl_get_load_buffer(-sizeof(*header), sizeof(*header));
+	ALLOC_ALIGN_BUFFER(u8, buf, MMC_MAX_BLOCK_LEN, 512);
+	struct legacy_img_hdr *header;
 	ulong base_offset, image_offset, overhead, addr;
 	int read, ret;
 
-	log_debug("loading hdr to %p\n", header);
+	if (CONFIG_IS_ENABLED(RELOC_LOADER)) {
+		header = (struct legacy_img_hdr *)buf;
+	} else {
+		header = spl_get_load_buffer(-sizeof(*header), sizeof(*header));
+	}
+
+	offset += 0x8000;
+	log_debug("\nloading hdr from %x to %p\n", (uint)offset, header);
 	read = info->read(info, offset, ALIGN(sizeof(*header),
 					      spl_get_bl_len(info)), header);
 	if (read < sizeof(*header))

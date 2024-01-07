@@ -30,8 +30,7 @@ enum {
 	STACK_PROT_VALUE	= 0x51ce4697,
 };
 
-typedef void (*rcode_func)(struct spl_image_info *image,
-			   spl_jump_to_image_t func);
+typedef uint * (*rcode_func)(struct spl_image_info *image);
 
 static int setup_layout(struct spl_image_info *image, ulong *addrp)
 {
@@ -107,41 +106,53 @@ int spl_reloc_prepare(struct spl_image_info *image, ulong *addrp)
 	return 0;
 }
 
-void __rcode rcode_reloc_and_jump(struct spl_image_info *image,
-				  spl_jump_to_image_t func)
+typedef void __noreturn (*image_entry_noargs_t)(void);
+
+__rcode uint *rcode_reloc_and_jump(struct spl_image_info *image)
 {
+	image_entry_noargs_t entry = (image_entry_noargs_t)image->entry_point;
 	uint *src, *end, *dst;
 
-	return;
-	log_debug("Copying image size %lx from %x to %lx\n",
-		  (ulong)map_to_sysmem(image->buf), image->size,
-		  image->load_addr);
+// 	log_debug("Copying image size %lx from %x to %lx\n",
+// 		  (ulong)map_to_sysmem(image->buf), image->size,
+// 		  image->load_addr);
 	for (dst = map_sysmem(image->load_addr, image->size),
 	     src = image->buf, end = src + image->size / 4;
-	     src < end;)
+	     src < end;) {
 	     *dst++ = *src++;
+// 		break;
+// 		dst++;
+// 		src++;
+	}
+
+// 	return dst;
+
+	entry();
 }
 
 int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)
 {
-	rcode_func func;
+	rcode_func loader;
+	uint *dst;
 
 	log_debug("reloc entry, stack_prot at %p\n", image->stack_prot);
 	if (*image->stack_prot != STACK_PROT_VALUE) {
 		log_err("stack busted, cannot continue\n");
 		return -EFAULT;
 	}
-	func = (rcode_func)(void *)rcode_reloc_and_jump + image->reloc_offset;
-	log_debug("Jumping to %p for %p\n", func, jump);
-// 	print_buffer((ulong)func, func, 4, 0x10, 0);
-	print_buffer(map_to_sysmem(image->buf), image->buf, 4, 0x10, 0);
+	loader = (rcode_func)(void *)rcode_reloc_and_jump + image->reloc_offset;
+	log_debug("Jumping via %p to %lx - image %p load %lx\n", loader,
+		  image->entry_point, image, image->load_addr);
+	print_buffer((ulong)loader, loader, 4, 4, 0);
+	print_buffer(map_to_sysmem(image->buf), image->buf, 4, 4, 0);
 
-	printf("\ndest:\n");
+	dst = loader(image);
+
+	printf("\ndest: %p\n", dst);
 	print_buffer(image->load_addr,
 		     map_sysmem(image->load_addr, image->size), 4, 0x10, 0);
 	printf("hanging\n");
 	while (1);
-// 	func(image, jump);
 
 	return 0;
 }

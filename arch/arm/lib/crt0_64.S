@@ -69,7 +69,13 @@ ENTRY(_main)
 /*
  * Set up initial C runtime environment and call board_init_f(0).
  */
-#if defined(CONFIG_TPL_BUILD) && defined(CONFIG_TPL_NEEDS_SEPARATE_STACK)
+#ifdef CONFIG_VPL_BUILD
+	mov x0, #67
+	bl printch
+#endif
+#if defined(CONFIG_VPL_BUILD)
+	mov	x0, sp
+#elif defined(CONFIG_TPL_BUILD) && defined(CONFIG_TPL_NEEDS_SEPARATE_STACK)
 	ldr	x0, =(CONFIG_TPL_STACK)
 #elif defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_STACK)
 	ldr	x0, =(CONFIG_SPL_STACK)
@@ -85,6 +91,10 @@ ENTRY(_main)
 	ldr	x0, =(SYS_INIT_SP_ADDR)
 #endif
 	bic	sp, x0, #0xf	/* 16-byte alignment for ABI compliance */
+#ifdef CONFIG_VPL_BUILD
+	mov x0, #68
+	bl printch
+#endif
 	mov	x0, sp
 	bl	board_init_f_alloc_reserve
 	mov	sp, x0
