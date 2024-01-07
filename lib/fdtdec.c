@@ -602,6 +602,9 @@ int fdtdec_get_chosen_node(const void *blob, const char *name)
  */
 static int fdtdec_prepare_fdt(const void *blob)
 {
+#ifdef CONFIG_VPL_BUILD
+	printf("blob %p\n", blob);
+#endif
 	if (!blob || ((uintptr_t)blob & 3) || fdt_check_header(blob)) {
 		if (spl_phase() <= PHASE_SPL) {
 			puts("Missing DTB\n");
@@ -1228,7 +1231,7 @@ static void *fdt_find_separate(void)
 
 #ifdef CONFIG_SPL_BUILD
 	/* FDT is at end of BSS unless it is in a different memory region */
-	if (CONFIG_IS_ENABLED(SPL_SEPARATE_BSS))
+	if (CONFIG_IS_ENABLED(SEPARATE_BSS))
 		fdt_blob = (ulong *)_image_binary_end;
 	else
 		fdt_blob = (ulong *)__bss_end;

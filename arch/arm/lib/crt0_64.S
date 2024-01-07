@@ -73,9 +73,8 @@ ENTRY(_main)
 	mov x0, #67
 	bl printch
 #endif
-#if defined(CONFIG_VPL_BUILD)
-	mov	x0, sp
-#elif defined(CONFIG_TPL_BUILD) && defined(CONFIG_TPL_NEEDS_SEPARATE_STACK)
+#if (defined(CONFIG_TPL_BUILD) || defined(CONFIG_VPL_BUILD)) && \
+	defined(CONFIG_TPL_NEEDS_SEPARATE_STACK)
 	ldr	x0, =(CONFIG_TPL_STACK)
 #elif defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_STACK)
 	ldr	x0, =(CONFIG_SPL_STACK)
