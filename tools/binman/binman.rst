@@ -1204,7 +1204,7 @@ Templates provide a simple way to handle this::
 
         spi-image {
             filename = "image-spi.bin";
-            insert-template = <&fit>;
+            insert-template = <&common_part>;
 
             /* things specific to SPI follow */
             footer {
@@ -1217,7 +1217,7 @@ Templates provide a simple way to handle this::
 
         mmc-image {
             filename = "image-mmc.bin";
-            insert-template = <&fit>;
+            insert-template = <&common_part>;
 
             /* things specific to MMC follow */
             footer {
