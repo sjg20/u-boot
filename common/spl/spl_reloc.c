@@ -70,7 +70,7 @@ static int setup_layout(struct spl_image_info *image, ulong *addrp)
 // 	print_buffer(0xff8c2000, (void *)0xff8c2000, 4, 0x100, 0);
 	printf("_rcode_start %p: %x -- func %p %x\n", _rcode_start,
 	       *(uint *)_rcode_start, setup_layout, *(uint *)setup_layout);
-	print_buffer((ulong)_rcode_start, _rcode_start, 4, 4, 0);
+// 	print_buffer((ulong)_rcode_start, _rcode_start, 4, 4, 0);
 
 	image->reloc_offset = rcode_buf - _rcode_start;
 	log_debug("_rcode start %lx base %lx size %x offset %lx\n",
@@ -78,7 +78,7 @@ static int setup_layout(struct spl_image_info *image, ulong *addrp)
 		  image->reloc_offset);
 
 	memcpy(rcode_buf, _rcode_start, rcode_size);
-	print_buffer(rcode_base, rcode_buf, 4, 4, 0);
+// 	print_buffer(rcode_base, rcode_buf, 4, 4, 0);
 
 	image->buf = map_sysmem(base, image->size);
 	image->rcode_buf = rcode_buf;
@@ -168,7 +168,7 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)
 {
 	rcode_func loader;
-	uint *dst;
+// 	uint *dst;
 	int ret;
 
 	debug("malloc usage %lx bytes (%ld KB of %d KB)\n", gd->malloc_ptr,
@@ -182,20 +182,20 @@ int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)
 	loader = (rcode_func)(void *)rcode_reloc_and_jump + image->reloc_offset;
 	log_debug("Jumping via %p to %lx - image %p load %lx\n", loader,
 		  image->entry_point, image, image->load_addr);
-	print_buffer((ulong)loader, loader, 4, 4, 0);
-	print_buffer(map_to_sysmem(image->buf), image->buf, 4, 4, 0);
+// 	print_buffer((ulong)loader, loader, 4, 4, 0);
+// 	print_buffer(map_to_sysmem(image->buf), image->buf, 4, 4, 0);
 
 	printf("unc_len %lx\n", image->rcode_buf - map_sysmem(image->load_addr, image->size));
 // 	rcode_reloc_and_jump(image);
 	ret = loader(image);
 
-	printf("\nret=%d, dest: %p\n", ret, dst);
-	print_buffer(image->load_addr,
-		     map_sysmem(image->load_addr, image->size), 4, 0x10, 0);
-	printf("hanging\n");
-	while (1);
+// 	printf("\nret=%d, dest: %p\n", ret, dst);
+// 	print_buffer(image->load_addr,
+// 		     map_sysmem(image->load_addr, image->size), 4, 0x10, 0);
+// 	printf("hanging\n");
+// 	while (1);
 
-	return 0;
+	return -EFAULT;
 }
 
 #endif /* _SPL_RELOC_H */

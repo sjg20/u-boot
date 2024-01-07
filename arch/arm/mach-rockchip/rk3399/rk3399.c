@@ -91,9 +91,6 @@ int arch_cpu_init(void)
 	struct rk3399_pmusgrf_regs *sgrf;
 	struct rk3399_grf_regs *grf;
 
-	printf("\n\nno\n\n");
-	return 0;
-
 	/*
 	 * Disable DDR and SRAM security regions.
 	 *
