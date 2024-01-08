@@ -76,14 +76,15 @@ int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 	if (size > priv->area_size)
 		return log_msg_ret("fdt", -E2BIG);
 	log_debug("FIT size %lx\n", size);
+	size = ALIGN(size, desc->blksz);
 
 	/*
 	 * Load the FIT into the SPL memory. This is typically a FIT with
 	 * external data, so this is quite small, perhaps a few KB.
 	 */
-	addr = CONFIG_VAL(TEXT_BASE);
-	buf = map_sysmem(addr, size);
-	num_blks = DIV_ROUND_UP(size, desc->blksz);
+	buf = malloc(size);
+	addr = map_to_sysmem(buf);
+	num_blks = size / desc->blksz;
 	log_debug("read %lx, %lx blocks to %lx / %p\n", size, num_blks, addr,
 		  buf);
 	ret = blk_read(blk, blknum, num_blks, buf);
@@ -106,6 +107,13 @@ int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 			     IH_ARCH_SANDBOX, image_ph(phase, IH_TYPE_FIRMWARE),
 			     BOOTSTAGE_ID_FIT_SPL_START, FIT_LOAD_IGNORED,
 			     &load_addr, &len);
+	if (ret == -ENOENT) {
+		ret = fit_image_load(&images, addr, &fit_uname,
+				     &fit_uname_config, IH_ARCH_SANDBOX,
+				     image_ph(phase, IH_TYPE_LOADABLE),
+				     BOOTSTAGE_ID_FIT_SPL_START,
+				     FIT_LOAD_IGNORED, &load_addr, &len);
+	}
 	if (ret < 0)
 		return log_msg_ret("ld", ret);
 	node = ret;
