@@ -349,6 +349,8 @@ int spl_mmc_load(struct spl_image_info *spl_image,
 
 	/* Perform peripheral init only once for an mmc device */
 	mmc_dev = spl_mmc_get_device_index(bootdev->boot_device);
+	log_debug("boot_device=%d, mmc_dev=%d\n", bootdev->boot_device,
+		  mmc_dev);
 	if (!mmc || spl_mmc_get_mmc_devnum(mmc) != mmc_dev) {
 		ret = spl_mmc_find_device(&mmc, mmc_dev);
 		if (ret)
