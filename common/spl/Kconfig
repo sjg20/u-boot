@@ -510,6 +510,13 @@ config SYS_MMCSD_RAW_MODE_U_BOOT_USE_PARTITION
 	help
 	  Use a partition for loading U-Boot when using MMC/SD in raw mode.
 
+config SYS_MMCSD_RAW_MODE_U_BOOT_USE_BINMAN
+	bool "MMC raw mode: use binman symbol"
+	select SPL_LOAD_BLOCK if SPL_MMC
+	help
+	  Use binman symbols to specify the MMC offset to read the next boot
+	  phase from.
+
 endchoice
 
 config SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR

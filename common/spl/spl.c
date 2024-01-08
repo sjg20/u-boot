@@ -165,7 +165,7 @@ ulong spl_get_image_pos(void)
 #endif
 #if defined(CONFIG_TPL) && !defined(CONFIG_VPL)
 	if (spl_next_phase() == PHASE_SPL)
-		return binman_sym(ulong, u_boot_spl_any, image_pos) :
+		return binman_sym(ulong, u_boot_spl_any, image_pos);
 #endif
 #if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_TPL_BUILD) && !defined(CONFIG_VPL_BUILD)
 	return binman_sym(ulong, u_boot_any, image_pos);
