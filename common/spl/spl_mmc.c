@@ -81,6 +81,12 @@ static int spl_mmc_find_device(struct mmc **mmcp, int mmc_dev)
 	int ret;
 
 #if CONFIG_IS_ENABLED(DM_MMC)
+	struct udevice *dev;
+	struct uclass *uc;
+
+	log_debug("Selecting MMC dev %d\n", mmc_dev);
+	uclass_id_foreach_dev(UCLASS_MMC, dev, uc)
+		printf("%d: %s\n", dev_seq(dev), dev->name);
 	ret = mmc_init_device(mmc_dev);
 #else
 	ret = mmc_initialize(NULL);
