@@ -53,9 +53,7 @@ int mmc_load_image_raw_sector(struct spl_image_info *spl_image,
 	load.read = h_spl_load_read;
 	ret = spl_load(spl_image, bootdev, &load, 0, sector << bd->log2blksz);
 	if (ret) {
-#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
 		puts("mmc_load_image_raw_sector: mmc block read error\n");
-#endif
 		return -1;
 	}
 
@@ -72,9 +70,7 @@ static int spl_mmc_get_device_index(u32 boot_device)
 		return 1;
 	}
 
-#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
 	printf("spl: unsupported mmc boot device.\n");
-#endif
 
 	return -ENODEV;
 }
@@ -93,18 +89,14 @@ static int spl_mmc_find_device(struct mmc **mmcp, u32 boot_device)
 	err = mmc_initialize(NULL);
 #endif /* DM_MMC */
 	if (err) {
-#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
 		printf("spl: could not initialize mmc. error: %d\n", err);
-#endif
 		return err;
 	}
 	*mmcp = find_mmc_device(mmc_dev);
 	err = *mmcp ? 0 : -ENODEV;
 	if (err) {
-#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
 		printf("spl: could not find mmc device %d. error: %d\n",
 		       mmc_dev, err);
-#endif
 		return err;
 	}
 
@@ -137,10 +129,8 @@ static int mmc_load_image_raw_partition(struct spl_image_info *spl_image,
 
 	err = part_get_info(mmc_get_blk_desc(mmc), partition, &info);
 	if (err) {
-#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
 		puts("spl: partition error\n");
-#endif
-		return -1;
+		return -err;
 	}
 
 #ifdef CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR
@@ -166,9 +156,7 @@ static int mmc_load_image_raw_os(struct spl_image_info *spl_image,
 		CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTORS,
 		(void *)CONFIG_SPL_PAYLOAD_ARGS_ADDR);
 	if (count != CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTORS) {
-#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
 		puts("mmc_load_image_raw_os: mmc block read error\n");
-#endif
 		return -1;
 	}
 #endif	/* CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR */
@@ -370,9 +358,7 @@ int spl_mmc_load(struct spl_image_info *spl_image,
 		err = mmc_init(mmc);
 		if (err) {
 			mmc = NULL;
-#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
 			printf("spl: mmc init failed with error: %d\n", err);
-#endif
 			return err;
 		}
 	}
@@ -389,9 +375,7 @@ int spl_mmc_load(struct spl_image_info *spl_image,
 			err = blk_dselect_hwpart(mmc_get_blk_desc(mmc), part);
 
 		if (err) {
-#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
 			puts("spl: mmc partition switch failed\n");
-#endif
 			return err;
 		}
 		/* Fall through */
@@ -430,10 +414,8 @@ int spl_mmc_load(struct spl_image_info *spl_image,
 
 		break;
 #endif
-#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
 	default:
 		puts("spl: mmc: wrong boot mode\n");
-#endif
 	}
 
 	return err;
