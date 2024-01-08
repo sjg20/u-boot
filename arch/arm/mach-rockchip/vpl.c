@@ -52,5 +52,5 @@ void board_init_f(ulong dummy)
 
 u32 spl_boot_device(void)
 {
-	return BOOT_DEVICE_MMC2;
+	return BOOT_DEVICE_VBE;
 }

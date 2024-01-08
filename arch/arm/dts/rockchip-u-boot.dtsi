@@ -9,6 +9,31 @@
 	binman: binman {
 		multiple-images;
 	};
+
+	bootstd {
+		bootph-verify;
+		compatible = "u-boot,boot-std";
+
+		/*
+		 * This is used for the VBE OS-request tests. A FAT filesystem
+		 * created in a partition with the VBE information appearing
+		 * before the partition starts.
+		 *
+		 * Offsets are aligned to the media block-size, typically 0x200
+		 */
+		firmware0 {
+			bootph-verify;
+			compatible = "fwupd,vbe-simple";
+			storage = "mmc1";
+			skip-offset = <0x8000>;
+			area-start = <CONFIG_SPL_PAD_TO>;
+			area-size = <0x400000>;
+			state-offset = <(CONFIG_SPL_PAD_TO - 0x400)>;
+			state-size = <0x40>;
+			version-offset = <(CONFIG_SPL_PAD_TO - 0x200)>;
+			version-size = <0x100>;
+		};
+	};
 };
 
 #ifdef CONFIG_SPL

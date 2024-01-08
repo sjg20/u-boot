@@ -6,6 +6,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_BOOT
 
 #include <common.h>
@@ -158,6 +159,7 @@ static int simple_load_from_image(struct spl_image_info *spl_image,
 	struct vbe_handoff *handoff;
 	int ret;
 
+	log_debug("here\n");
 	if (spl_phase() != PHASE_VPL && spl_phase() != PHASE_SPL)
 		return -ENOENT;
 
