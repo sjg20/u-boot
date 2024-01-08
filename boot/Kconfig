@@ -146,6 +146,12 @@ config SPL_FIT
 	select SPL_HASH
 	select SPL_OF_LIBFDT
 
+config VPL_FIT
+	bool "Support Flattened Image Tree within SPL"
+	depends on VPL
+	select VPL_HASH
+	select VPL_OF_LIBFDT
+
 config SPL_FIT_PRINT
 	bool "Support FIT printing within SPL"
 	depends on SPL_FIT
@@ -249,6 +255,27 @@ config SPL_LOAD_FIT_FULL
 	  of a FIT (Flat Image Tree) which provides more flexibility. In
 	  particular it can handle selecting from multiple device tree
 	  and passing the correct one to U-Boot.
+
+config VPL_LOAD_FIT
+	bool "Enable SPL loading U-Boot as a FIT (basic fitImage features)"
+	depends on VPL
+	help
+	  Normally with the SPL framework a legacy image is generated as part
+	  of the build. This contains U-Boot along with information as to
+	  where it should be loaded. This option instead enables generation
+	  of a FIT (Flat Image Tree) which provides more flexibility. In
+	  particular it can handle selecting from multiple device tree
+	  and passing the correct one to U-Boot.
+
+	  This path has the following limitations:
+
+	  1. "loadables" images, other than FDTs, which do not have a "load"
+	     property will not be loaded. This limitation also applies to FPGA
+	     images with the correct "compatible" string.
+	  2. For FPGA images, the supported "compatible" list is in the
+	     doc/uImage.FIT/source_file_format.txt.
+	  3. FDTs are only loaded for images with an "os" property of "u-boot".
+	     "linux" images are also supported with Falcon boot mode.
 
 config VPL_LOAD_FIT_FULL
 	bool "Enable SPL loading U-Boot as a FIT (full fitImage features)"
