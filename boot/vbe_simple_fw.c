@@ -102,6 +102,7 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 	log_debug("loaded to %lx\n", load_addr);
 
 	if (!USE_BOOTMETH && CONFIG_IS_ENABLED(RELOC_LOADER)) {
+		image->size = len;
 		ret = spl_reloc_prepare(image, &load_addr);
 		if (ret)
 			return log_msg_ret("spl", ret);

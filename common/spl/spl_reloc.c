@@ -7,6 +7,8 @@
 #ifndef _SPL_RELOC_H
 #define _SPL_RELOC_H
 
+#define LOG_DEBUG
+
 #include <display_options.h>
 #include <gzip.h>
 #include <image.h>
@@ -26,7 +28,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define DEBUG_JUMP	0
+#define DEBUG_JUMP	1
 
 enum {
 	/* margin to allow for stack growth */
@@ -160,7 +162,7 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
 	crc = crc8(0, (u8 *)dst, unc_len);
-	log_debug("ret=%d\n", ret);
+// 	log_debug("ret=%d\n", ret);
 
 #if 0
 	for (src = image->buf, end = src + image->size / 4;
@@ -198,15 +200,15 @@ int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)
 
 	log_debug("unc_len %lx\n",
 		  image->rcode_buf - map_sysmem(image->load_addr, image->size));
-	if (DEBUG_JUMP) {
+	if (DEBUG_JUMP && spl_phase() == PHASE_VPL) {
 		rcode_reloc_and_jump(image);
 	} else {
 		/*
 		 * Must disable LOG_DEBUG since the decompressor cannot call
 		 * log functions, printf(), etc.
 		 */
-		_Static_assert(!_DEBUG,
-			       "Cannot have debug output from decompressor");
+// 		_Static_assert(DEBUG_JUMP || !_DEBUG,
+// 			       "Cannot have debug output from decompressor");
 		ret = loader(image);
 	}
 
