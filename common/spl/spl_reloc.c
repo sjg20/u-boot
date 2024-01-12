@@ -18,10 +18,15 @@
 #include <asm/sections.h>
 #include <asm/unaligned.h>
 #include <linux/types.h>
+#include <lzma/LzmaTypes.h>
+#include <lzma/LzmaDec.h>
+#include <lzma/LzmaTools.h>
 #include <u-boot/crc.h>
 #include <u-boot/lz4.h>
 
 DECLARE_GLOBAL_DATA_PTR;
+
+#define DEBUG_JUMP	0
 
 enum {
 	/* margin to allow for stack growth */
@@ -132,7 +137,15 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
 	magic = get_unaligned_le32(image->buf);
-	if (magic == LZ4F_MAGIC) {
+	if (CONFIG_IS_ENABLED(LZMA)) {
+		SizeT lzma_len = unc_len;
+
+		ret = lzmaBuffToBuffDecompress((u8 *)dst, &lzma_len,
+					       image->buf, image_len);
+		unc_len = lzma_len;
+	} else if (CONFIG_IS_ENABLED(GZIP)) {
+		ret = gunzip(dst, unc_len, image->buf, &image_len);
+	} if (CONFIG_IS_ENABLED(LZ4) && magic == LZ4F_MAGIC) {
 		ret = ulz4fn(image->buf, image_len, dst, &unc_len);
 		if (ret)
 			return ret;
@@ -147,7 +160,7 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
 	crc = crc8(0, (u8 *)dst, unc_len);
-// 	printf("ret=%d\n", ret);
+	log_debug("ret=%d\n", ret);
 
 #if 0
 	for (src = image->buf, end = src + image->size / 4;
@@ -185,8 +198,17 @@ int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)
 
 	log_debug("unc_len %lx\n",
 		  image->rcode_buf - map_sysmem(image->load_addr, image->size));
-// 	rcode_reloc_and_jump(image);
-	ret = loader(image);
+	if (DEBUG_JUMP) {
+		rcode_reloc_and_jump(image);
+	} else {
+		/*
+		 * Must disable LOG_DEBUG since the decompressor cannot call
+		 * log functions, printf(), etc.
+		 */
+		_Static_assert(!_DEBUG,
+			       "Cannot have debug output from decompressor");
+		ret = loader(image);
+	}
 
 // 	printf("\nret=%d, dest: %p\n", ret, dst);
 // 	print_buffer(image->load_addr,

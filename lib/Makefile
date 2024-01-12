@@ -84,7 +84,7 @@ obj-$(CONFIG_$(SPL_TPL_)ZLIB) += zlib/
 obj-$(CONFIG_$(SPL_)ZSTD) += zstd/
 obj-$(CONFIG_$(SPL_TPL_)GZIP) += gunzip.o
 obj-$(CONFIG_$(SPL_)LZO) += lzo/
-obj-$(CONFIG_$(SPL_)LZMA) += lzma/
+obj-$(CONFIG_$(SPL_TPL_)LZMA) += lzma/
 obj-$(CONFIG_$(SPL_TPL_)LZ4) += lz4_wrapper.o
 
 obj-$(CONFIG_$(SPL_)LIB_RATIONAL) += rational.o

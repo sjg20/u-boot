@@ -844,6 +844,12 @@ config SPL_LZMA
 	help
 	  This enables support for LZMA compression algorithm for SPL boot.
 
+config TPL_LZMA
+	bool "Enable LZMA decompression support for TPL build"
+	depends on TPL
+	help
+	  This enables support for LZMA compression algorithm for TPL boot.
+
 config VPL_LZMA
 	bool "Enable LZMA decompression support for VPL build"
 	default y if LZMA
