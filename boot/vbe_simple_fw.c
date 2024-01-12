@@ -26,45 +26,27 @@
 #include <dm/device-internal.h>
 #include "vbe_simple.h"
 
-/**
- * vbe_simple_read_bootflow_fw() - Create a bootflow for firmware
- *
- * Locates and loads the firmware image (FIT) needed for the next phase. The FIT
- * should ideally use external data, to reduce the amount of it that needs to be
- * read.
- *
- * @bdev: bootdev device containing the firmwre
- * @meth: VBE simple bootmeth
- * @blow: Place to put the created bootflow, on success
- * @return 0 if OK, -ve on error
- */
-int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
+#define USE_BOOTMETH	false
+
+static int vbe_read_fit(struct udevice *blk, ulong area_offset,
+			ulong area_size, struct spl_image_info *image,
+			ulong *load_addrp, char **namep)
 {
 	ALLOC_CACHE_ALIGN_BUFFER(u8, sbuf, MMC_MAX_BLOCK_LEN);
-	struct udevice *media = dev_get_parent(bflow->dev);
-	struct udevice *meth = bflow->method;
-	struct simple_priv *priv = dev_get_priv(meth);
 	const char *fit_uname, *fit_uname_config;
 	struct bootm_headers images = {};
-	ulong offset, size, blknum, addr, len, load_addr, num_blks;
+	ulong size, blknum, addr, len, load_addr, num_blks;
 	enum image_phase_t phase;
 	struct blk_desc *desc;
-	struct udevice *blk;
 	int node, ret;
 	void *buf;
 
-	log_debug("media=%s\n", media->name);
-	ret = blk_get_from_parent(media, &blk);
-	if (ret)
-		return log_msg_ret("med", ret);
 	log_debug("blk=%s\n", blk->name);
 	desc = dev_get_uclass_plat(blk);
 
-	offset = priv->area_start + priv->skip_offset;
-
 	/* read in one block to find the FIT size */
-	blknum =  offset / desc->blksz;
-	log_debug("read at %lx, blknum %lx\n", offset, blknum);
+	blknum =  area_offset / desc->blksz;
+	log_debug("read at %lx, blknum %lx\n", area_offset, blknum);
 	ret = blk_read(blk, blknum, 1, sbuf);
 	if (ret < 0)
 		return log_msg_ret("rd", ret);
@@ -73,7 +55,7 @@ int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 	if (ret < 0)
 		return log_msg_ret("fdt", -EINVAL);
 	size = fdt_totalsize(sbuf);
-	if (size > priv->area_size)
+	if (size > area_size)
 		return log_msg_ret("fdt", -E2BIG);
 	log_debug("FIT size %lx\n", size);
 	size = ALIGN(size, desc->blksz);
@@ -119,6 +101,12 @@ int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 	node = ret;
 	log_debug("loaded to %lx\n", load_addr);
 
+	if (!USE_BOOTMETH && CONFIG_IS_ENABLED(RELOC_LOADER)) {
+		ret = spl_reloc_prepare(image, &load_addr);
+		if (ret)
+			return log_msg_ret("spl", ret);
+	}
+
 	/* For FIT external data, read in the external data */
 	if (load_addr + len > addr + size) {
 		ulong base, full_size;
@@ -137,7 +125,7 @@ int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 		 * Get the start block number, number of blocks and the address
 		 * to load to, then load the blocks
 		 */
-		blknum = (offset + base - addr) / desc->blksz;
+		blknum = (area_offset + base - addr) / desc->blksz;
 		num_blks = DIV_ROUND_UP(full_size, desc->blksz);
 		base_buf = map_sysmem(base, full_size);
 		ret = blk_read(blk, blknum, num_blks, base_buf);
@@ -146,11 +134,49 @@ int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 		if (ret < 0)
 			return log_msg_ret("rd", ret);
 	}
+	if (load_addrp)
+		*load_addrp = load_addr;
+	if (namep) {
+		*namep = strdup(fdt_get_name(buf, node, NULL));
+		if (!namep)
+			return log_msg_ret("nam", -ENOMEM);
+	}
+
+	return 0;
+}
+
+/**
+ * vbe_simple_read_bootflow_fw() - Create a bootflow for firmware
+ *
+ * Locates and loads the firmware image (FIT) needed for the next phase. The FIT
+ * should ideally use external data, to reduce the amount of it that needs to be
+ * read.
+ *
+ * @bdev: bootdev device containing the firmwre
+ * @meth: VBE simple bootmeth
+ * @blow: Place to put the created bootflow, on success
+ * @return 0 if OK, -ve on error
+ */
+int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
+{
+	struct udevice *media = dev_get_parent(bflow->dev);
+	struct udevice *meth = bflow->method;
+	struct simple_priv *priv = dev_get_priv(meth);
+	ulong len, load_addr;
+	struct udevice *blk;
+	int ret;
+
+	log_debug("media=%s\n", media->name);
+	ret = blk_get_from_parent(media, &blk);
+	if (ret)
+		return log_msg_ret("med", ret);
+
+	ret = vbe_read_fit(blk, priv->area_start + priv->skip_offset,
+			   priv->area_size, NULL, &load_addr, &bflow->name);
+	if (ret)
+		return log_msg_ret("vbe", ret);
 
 	/* set up the bootflow with the info we obtained */
-	bflow->name = strdup(fdt_get_name(buf, node, NULL));
-	if (!bflow->name)
-		return log_msg_ret("name", -ENOMEM);
 	bflow->blk = blk;
 	bflow->buf = map_sysmem(load_addr, len);
 	bflow->size = len;
@@ -158,12 +184,9 @@ int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 	return 0;
 }
 
-static int simple_load_from_image(struct spl_image_info *spl_image,
+static int simple_load_from_image(struct spl_image_info *image,
 				  struct spl_boot_device *bootdev)
 {
-	struct udevice *meth, *bdev;
-	struct simple_priv *priv;
-	struct bootflow bflow;
 	struct vbe_handoff *handoff;
 	int ret;
 
@@ -176,36 +199,55 @@ static int simple_load_from_image(struct spl_image_info *spl_image,
 	if (ret)
 		return log_msg_ret("ro", ret);
 
-	vbe_find_first_device(&meth);
-	if (!meth)
-		return log_msg_ret("vd", -ENODEV);
-	log_debug("vbe dev %s\n", meth->name);
-	ret = device_probe(meth);
-	if (ret)
-		return log_msg_ret("probe", ret);
+	if (USE_BOOTMETH) {
+		struct udevice *meth, *bdev;
+		struct simple_priv *priv;
+		struct bootflow bflow;
 
-	priv = dev_get_priv(meth);
-	log_debug("simple %s\n", priv->storage);
-	ret = bootdev_find_by_label(priv->storage, &bdev, NULL);
-	if (ret)
-		return log_msg_ret("bd", ret);
-	log_debug("bootdev %s\n", bdev->name);
+		vbe_find_first_device(&meth);
+		if (!meth)
+			return log_msg_ret("vd", -ENODEV);
+		log_debug("vbe dev %s\n", meth->name);
+		ret = device_probe(meth);
+		if (ret)
+			return log_msg_ret("probe", ret);
 
-	bootflow_init(&bflow, bdev, meth);
-	ret = bootmeth_read_bootflow(meth, &bflow);
-	log_debug("\nfw ret=%d\n", ret);
-	if (ret)
-		return log_msg_ret("rd", ret);
+		priv = dev_get_priv(meth);
+		log_debug("simple %s\n", priv->storage);
+		ret = bootdev_find_by_label(priv->storage, &bdev, NULL);
+		if (ret)
+			return log_msg_ret("bd", ret);
+		log_debug("bootdev %s\n", bdev->name);
 
-	/* jump to the image */
-	spl_image->flags = SPL_SANDBOXF_ARG_IS_BUF;
-	spl_image->arg = bflow.buf;
-	spl_image->size = bflow.size;
-	log_debug("Image: %s at %p size %x\n", bflow.name, bflow.buf,
-		  bflow.size);
+		bootflow_init(&bflow, bdev, meth);
+		ret = bootmeth_read_bootflow(meth, &bflow);
+		log_debug("\nfw ret=%d\n", ret);
+		if (ret)
+			return log_msg_ret("rd", ret);
 
-	/* this is not used from now on, so free it */
-	bootflow_free(&bflow);
+		/* jump to the image */
+		image->flags = SPL_SANDBOXF_ARG_IS_BUF;
+		image->arg = bflow.buf;
+		image->size = bflow.size;
+		log_debug("Image: %s at %p size %x\n", bflow.name, bflow.buf,
+			  bflow.size);
+
+		/* this is not used from now on, so free it */
+		bootflow_free(&bflow);
+	} else {
+		struct udevice *media, *blk;
+
+		ret = uclass_get_device_by_seq(UCLASS_MMC, 1, &media);
+		if (ret)
+			return log_msg_ret("vdv", ret);
+		ret = blk_get_from_parent(media, &blk);
+		if (ret)
+			return log_msg_ret("med", ret);
+		ret = vbe_read_fit(blk, 0x7f8000 + 0x8000, 0x400000, image,
+				   NULL, NULL);
+		if (ret)
+			return log_msg_ret("vbe", ret);
+	}
 
 	/* Record that VBE was used in this phase */
 	handoff->phases |= 1 << spl_phase();
