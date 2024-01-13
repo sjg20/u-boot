@@ -128,9 +128,11 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	int ret, crc;
 	uint magic;
 
-// 	log_debug("Copying image size %lx from %x to %lx\n",
-// 		  (ulong)map_to_sysmem(image->buf), image->size,
-// 		  image->load_addr);
+	if (spl_phase() == PHASE_VPL) {
+		log_debug("Copying image size %lx from %x to %lx\n",
+			  (ulong)map_to_sysmem(image->buf), image->size,
+			  image->load_addr);
+	}
 	dst = map_sysmem(image->load_addr, image->size);
 	unc_len = (void *)image->rcode_buf - (void *)dst;
 	image_len = image->size;
@@ -148,12 +150,16 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	} else if (CONFIG_IS_ENABLED(GZIP)) {
 		ret = gunzip(dst, unc_len, image->buf, &image_len);
 	} if (CONFIG_IS_ENABLED(LZ4) && magic == LZ4F_MAGIC) {
+		if (spl_phase() == PHASE_VPL)
+			log_debug("lz4\n");
 		ret = ulz4fn(image->buf, image_len, dst, &unc_len);
 		if (ret)
 			return ret;
 	} else {
 		u32 *src, *end, *ptr;
 
+		if (spl_phase() == PHASE_VPL)
+			log_debug("copy\n");
 		unc_len = image->size;
 		for (src = image->buf, end = (void *)src + image->size,
 		     ptr = dst; src < end;)
@@ -193,8 +199,8 @@ int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)
 		return -EFAULT;
 	}
 	loader = (rcode_func)(void *)rcode_reloc_and_jump + image->reloc_offset;
-	log_debug("Jumping via %p to %lx - image %p load %lx\n", loader,
-		  image->entry_point, image, image->load_addr);
+	log_debug("Jumping via %p to %lx - image %p size %x load %lx\n", loader,
+		  image->entry_point, image, image->size, image->load_addr);
 // 	print_buffer((ulong)loader, loader, 4, 4, 0);
 // 	print_buffer(map_to_sysmem(image->buf), image->buf, 4, 4, 0);
 

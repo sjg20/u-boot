@@ -35,10 +35,11 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 	ALLOC_CACHE_ALIGN_BUFFER(u8, sbuf, MMC_MAX_BLOCK_LEN);
 	const char *fit_uname, *fit_uname_config;
 	struct bootm_headers images = {};
-	ulong size, blknum, addr, len, load_addr, num_blks;
+	ulong size, blknum, addr, len, load_addr, num_blks, spl_load_addr;
 	enum image_phase_t phase;
 	struct blk_desc *desc;
 	int node, ret;
+	bool for_spl;
 	void *buf;
 
 	log_debug("blk=%s\n", blk->name);
@@ -101,14 +102,17 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 	node = ret;
 	log_debug("loaded to %lx\n", load_addr);
 
-	if (!USE_BOOTMETH && CONFIG_IS_ENABLED(RELOC_LOADER)) {
+	for_spl = !USE_BOOTMETH && CONFIG_IS_ENABLED(RELOC_LOADER);
+	if (for_spl) {
 		image->size = len;
-		ret = spl_reloc_prepare(image, &load_addr);
+		ret = spl_reloc_prepare(image, &spl_load_addr);
 		if (ret)
 			return log_msg_ret("spl", ret);
 	}
 
 	/* For FIT external data, read in the external data */
+	log_debug("load_addr %lx len %lx addr %lx size %lx\n", load_addr, len,
+		  addr, size);
 	if (load_addr + len > addr + size) {
 		ulong base, full_size;
 		void *base_buf;
@@ -128,9 +132,11 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 		 */
 		blknum = (area_offset + base - addr) / desc->blksz;
 		num_blks = DIV_ROUND_UP(full_size, desc->blksz);
+		if (for_spl)
+			base = spl_load_addr;
 		base_buf = map_sysmem(base, full_size);
 		ret = blk_read(blk, blknum, num_blks, base_buf);
-		log_debug("read %lx %lx, %lx blocks to %lx / %p: ret=%d\n",
+		log_debug("read blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
 			  blknum, full_size, num_blks, base, base_buf, ret);
 		if (ret < 0)
 			return log_msg_ret("rd", ret);
@@ -248,6 +254,8 @@ static int simple_load_from_image(struct spl_image_info *image,
 				   NULL, NULL);
 		if (ret)
 			return log_msg_ret("vbe", ret);
+		image->load_addr = spl_get_image_text_base();
+		image->entry_point = image->load_addr;
 	}
 
 	/* Record that VBE was used in this phase */
