@@ -132,13 +132,11 @@ static int rockchip_dwmmc_probe(struct udevice *dev)
 	priv->minmax[1] = dtplat->max_frequency;
 
 	ret = clk_get_by_phandle(dev, &dtplat->clocks[1], &priv->clk);
-	if (ret < 0)
-		return ret;
 #else
 	ret = clk_get_by_index(dev, 1, &priv->clk);
-	if (ret < 0)
-		return ret;
 #endif
+	if (ret < 0 && ret != -EALREADY)
+		return log_msg_ret("clk", ret);
 	host->fifoth_val = MSIZE(0x2) |
 		RX_WMARK(priv->fifo_depth / 2 - 1) |
 		TX_WMARK(priv->fifo_depth / 2);

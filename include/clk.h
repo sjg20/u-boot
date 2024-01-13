@@ -272,7 +272,7 @@ static inline int clk_get_by_phandle(struct udevice *dev, const
 static inline int clk_get_by_index(struct udevice *dev, int index,
 				   struct clk *clk)
 {
-	return -ENOSYS;
+	return -EALREADY;
 }
 
 static inline int clk_get_by_index_nodev(ofnode node, int index,
