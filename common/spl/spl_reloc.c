@@ -167,8 +167,9 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	}
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
-	crc = crc8(0, (u8 *)dst, unc_len);
-// 	log_debug("ret=%d\n", ret);
+// 	crc = crc8(0, (u8 *)dst, unc_len);
+	if (spl_phase() == PHASE_VPL)
+		log_debug("ret=%d\n", ret);
 
 #if 0
 	for (src = image->buf, end = src + image->size / 4;
@@ -190,10 +191,10 @@ int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)
 // 	uint *dst;
 	int ret;
 
-	debug("malloc usage %lx bytes (%ld KB of %d KB)\n", gd->malloc_ptr,
-	      gd->malloc_ptr / 1024, CONFIG_VAL(SYS_MALLOC_F_LEN) / 1024);
+// 	debug("malloc usage %lx bytes (%ld KB of %d KB)\n", gd->malloc_ptr,
+// 	      gd->malloc_ptr / 1024, CONFIG_VAL(SYS_MALLOC_F_LEN) / 1024);
 
-	log_debug("reloc entry, stack_prot at %p\n", image->stack_prot);
+// 	log_debug("reloc entry, stack_prot at %p\n", image->stack_prot);
 	if (*image->stack_prot != STACK_PROT_VALUE) {
 		log_err("stack busted, cannot continue\n");
 		return -EFAULT;

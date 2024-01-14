@@ -15,6 +15,7 @@
 #include <bootflow.h>
 #include <bootmeth.h>
 #include <bootstage.h>
+#include <display_options.h>
 #include <dm.h>
 #include <image.h>
 #include <log.h>
@@ -46,7 +47,7 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 	desc = dev_get_uclass_plat(blk);
 
 	/* read in one block to find the FIT size */
-	blknum =  area_offset / desc->blksz;
+	blknum = area_offset / desc->blksz;
 	log_debug("read at %lx, blknum %lx\n", area_offset, blknum);
 	ret = blk_read(blk, blknum, 1, sbuf);
 	if (ret < 0)
@@ -114,32 +115,42 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 	log_debug("load_addr %lx len %lx addr %lx size %lx\n", load_addr, len,
 		  addr, size);
 	if (load_addr + len > addr + size) {
-		ulong base, full_size;
+		ulong base, full_size, offset, extra;
 		void *base_buf;
 
 		/* Find the start address to load from */
 		base = ALIGN_DOWN(load_addr, desc->blksz);
 
+		offset = area_offset + load_addr - addr;
+		blknum = offset / desc->blksz;
+		extra = offset % desc->blksz;
+
 		/*
 		 * Get the total number of bytes to load, taking care of
 		 * block alignment
 		 */
-		full_size = load_addr + len - base;
+		full_size = load_addr + len - base + extra;
 
 		/*
 		 * Get the start block number, number of blocks and the address
 		 * to load to, then load the blocks
 		 */
-		blknum = (area_offset + base - addr) / desc->blksz;
 		num_blks = DIV_ROUND_UP(full_size, desc->blksz);
 		if (for_spl)
 			base = spl_load_addr;
 		base_buf = map_sysmem(base, full_size);
 		ret = blk_read(blk, blknum, num_blks, base_buf);
-		log_debug("read blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
-			  blknum, full_size, num_blks, base, base_buf, ret);
+		log_debug("read offset %lx blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
+			  offset, blknum, full_size, num_blks, base, base_buf,
+			  ret);
 		if (ret < 0)
 			return log_msg_ret("rd", ret);
+		if (extra) {
+			log_debug("move %p %p %lx\n", base_buf,
+				  base_buf + extra, len);
+			memmove(base_buf, base_buf + extra, len);
+// 			print_buffer(base, base_buf, 4, 4, 0);
+		}
 	}
 	if (load_addrp)
 		*load_addrp = load_addr;
