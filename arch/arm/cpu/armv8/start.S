@@ -17,7 +17,12 @@
  *************************************************************************/
 
 .globl	_start
-#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_TPL_BUILD)
+	bl printhex8
+	mov x0, #32
+	bl printch
+#endif
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_TPL_BUILD)
 	mov	x0, #65
 	bl	printch
 #endif

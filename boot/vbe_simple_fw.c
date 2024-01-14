@@ -129,7 +129,7 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 		 * Get the total number of bytes to load, taking care of
 		 * block alignment
 		 */
-		full_size = load_addr + len - base + extra;
+		full_size = len + extra;
 
 		/*
 		 * Get the start block number, number of blocks and the address
