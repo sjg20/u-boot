@@ -6,6 +6,10 @@
  * Marek Vasut <marex@denx.de>
  */
 
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
+#define LOG_DEBUG
+#endif
+
 #define LOG_CATEGORY LOGC_DM
 
 #include <common.h>

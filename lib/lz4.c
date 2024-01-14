@@ -516,7 +516,7 @@ _output_error:
 	return (int) (-(((const char *)ip) - src)) - 1;
 }
 
-#if 0
+#ifndef CONFIG_SPL_BUILD
 __rcode int LZ4_decompress_safe(const char *source, char *dest,
 	int compressedSize, int maxDecompressedSize)
 {

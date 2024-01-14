@@ -3,6 +3,8 @@
  * Copyright (c) 2013 The Chromium OS Authors.
  */
 
+#define LOG_DEBUG
+
 #include <efi.h>
 #include <initcall.h>
 #include <log.h>
@@ -54,6 +56,10 @@ int initcall_run_list(const init_fnc_t init_sequence[])
 	enum event_t type;
 	init_fnc_t func;
 	int ret = 0;
+
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
+	printch('c');
+#endif
 
 	for (ptr = init_sequence; func = *ptr, !ret && func; ptr++) {
 		type = initcall_is_event(func);

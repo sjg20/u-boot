@@ -17,6 +17,10 @@
  *************************************************************************/
 
 .globl	_start
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
+	mov	x0, #65
+	bl	printch
+#endif
 _start:
 #if defined(CONFIG_LINUX_KERNEL_IMAGE_HEADER)
 #include <asm/boot0-linux-kernel-header.h>
@@ -193,6 +197,10 @@ slave_cpu:
 #endif /* CONFIG_ARMV8_MULTIENTRY */
 master_cpu:
 	msr	SPSel, #1		/* make sure we use SP_ELx */
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
+	mov	x0, #67
+	bl	printch
+#endif
 	bl	_main
 
 /*-----------------------------------------------------------------------*/

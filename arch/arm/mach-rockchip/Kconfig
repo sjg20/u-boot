@@ -233,7 +233,7 @@ config ROCKCHIP_RK3399
 	select SPL_REGMAP if SPL
 	select SPL_SYSCON if SPL
 	select TPL_NEEDS_SEPARATE_STACK if TPL
-	select SPL_SEPARATE_BSS
+	select SPL_SEPARATE_BSS if !VPL
 	select SPL_SERIAL
 	select SPL_DRIVERS_MISC
 	select TPL_DM if VPL

@@ -33,3 +33,9 @@ __rcode unsigned int crc8(unsigned int crc, const unsigned char *vptr, int len)
 
 	return crc;
 }
+
+void crc8_wd_buf(const unsigned char *input, unsigned int len,
+		 unsigned char output[1], unsigned int chunk_sz)
+{
+	*output = crc8(0, input, len);
+}

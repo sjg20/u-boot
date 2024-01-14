@@ -7,7 +7,7 @@
 #ifndef _SPL_RELOC_H
 #define _SPL_RELOC_H
 
-#define LOG_DEBUG
+// #define LOG_DEBUG
 
 #include <display_options.h>
 #include <gzip.h>
@@ -28,7 +28,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define DEBUG_JUMP	1
+#define DEBUG_JUMP	0
 
 enum {
 	/* margin to allow for stack growth */
@@ -167,7 +167,7 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	}
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
-// 	crc = crc8(0, (u8 *)dst, unc_len);
+	crc = crc8(0, (u8 *)dst, unc_len);
 	if (spl_phase() == PHASE_VPL)
 		log_debug("ret=%d\n", ret);
 
