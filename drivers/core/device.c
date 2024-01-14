@@ -8,6 +8,10 @@
  * Pavel Herrmann <morpheus.ibis@gmail.com>
  */
 
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_TPL_BUILD)
+#define LOG_DEBUG
+#endif
+
 #include <common.h>
 #include <cpu_func.h>
 #include <event.h>
@@ -165,6 +169,7 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 		goto fail_uclass_bind;
 
 	/* if we fail to bind we remove device from successors and free it */
+	log_debug("bind %s\n", dev->name);
 	if (drv->bind) {
 		ret = drv->bind(dev);
 		if (ret)

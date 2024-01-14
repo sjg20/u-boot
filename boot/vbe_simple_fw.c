@@ -149,8 +149,11 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 			log_debug("move %p %p %lx\n", base_buf,
 				  base_buf + extra, len);
 			memmove(base_buf, base_buf + extra, len);
-// 			print_buffer(base, base_buf, 4, 4, 0);
 		}
+// 		print_buffer(0, base_buf, 1, 0x10, 0);
+// 		uint from = ALIGN_DOWN(len - 0x40, 0x10);
+// 		print_buffer(from, base_buf + from, 1, 0x50, 0);
+// 		print_buffer(0, base_buf, 1, len, 0);
 	}
 	if (load_addrp)
 		*load_addrp = load_addr;

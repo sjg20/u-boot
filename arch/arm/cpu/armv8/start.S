@@ -18,6 +18,12 @@
 
 .globl	_start
 #if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_TPL_BUILD)
+	mov x8, x1
+	bl printhex8
+	mov x0, #32
+	bl printch
+
+	mov x0, x8
 	bl printhex8
 	mov x0, #32
 	bl printch

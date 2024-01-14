@@ -62,7 +62,7 @@ static int setup_layout(struct spl_image_info *image, ulong *addrp)
 	rcode_base = limit - rcode_size;
 	buf_size = rcode_base - base;
 	margin = buf_size - image->size;
-	log_debug("limit %lx fdt_size %lx base %lx avail %x need %x, margin%s%lx\n",
+	log_info("limit %lx fdt_size %lx base %lx avail %x need %x, margin%s%lx\n",
 		  limit, fdt_size, base, buf_size, image->size,
 		  margin >= 0 ? " " : " -", abs(margin));
 	if (margin < 0) {
@@ -200,7 +200,7 @@ int spl_reloc_jump(struct spl_image_info *image, spl_jump_to_image_t jump)
 		return -EFAULT;
 	}
 	loader = (rcode_func)(void *)rcode_reloc_and_jump + image->reloc_offset;
-	log_debug("Jumping via %p to %lx - image %p size %x load %lx\n", loader,
+	log_info("Jumping via %p to %lx - image %p size %x load %lx\n", loader,
 		  image->entry_point, image, image->size, image->load_addr);
 // 	print_buffer((ulong)loader, loader, 4, 4, 0);
 // 	print_buffer(map_to_sysmem(image->buf), image->buf, 4, 4, 0);
