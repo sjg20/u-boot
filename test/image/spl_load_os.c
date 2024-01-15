@@ -50,9 +50,7 @@ static int spl_test_load(struct unit_test_state *uts)
 	int ret;
 	int fd;
 
-	memset(&load, '\0', sizeof(load));
-	spl_set_bl_len(&load, 512);
-	load.read = read_fit_image;
+	spl_load_init(&load, read_fit_image, &text_ctx, 512);
 
 	ret = sandbox_find_next_phase(fname, sizeof(fname), true);
 	if (ret)
@@ -64,8 +62,6 @@ static int spl_test_load(struct unit_test_state *uts)
 	ut_assert(fd >= 0);
 	ut_asserteq(512, os_read(fd, header, 512));
 	text_ctx.fd = fd;
-
-	load.priv = &text_ctx;
 
 	ut_assertok(spl_load_simple_fit(&image, &load, 0, header));
 
