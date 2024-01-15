@@ -274,7 +274,7 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 		overhead = get_aligned_image_overhead(info, offset);
 		size = get_aligned_image_size(info, length, offset);
 		log_debug("reading to %p: ", src_ptr);
-		print_buffer(map_to_sysmem(src_ptr), src_ptr, 1, 0x10, 0);
+// 		print_buffer(map_to_sysmem(src_ptr), src_ptr, 1, 0x10, 0);
 
 		if (info->read(info,
 			       fit_offset +
@@ -490,7 +490,8 @@ static int spl_fit_record_loadable(const struct spl_fit_info *ctx, int index,
 	const char *name;
 	int node;
 
-	if (CONFIG_IS_ENABLED(FIT_IMAGE_TINY))
+	if (CONFIG_IS_ENABLED(FIT_IMAGE_TINY) ||
+	    CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW))
 		return 0;
 
 	ret = spl_fit_get_image_name(ctx, "loadables", index, &name);
