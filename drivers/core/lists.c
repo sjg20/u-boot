@@ -6,9 +6,9 @@
  * Marek Vasut <marex@denx.de>
  */
 
-#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
-#define LOG_DEBUG
-#endif
+// #if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD) && !defined(CONFIG_VPL_BUILD)
+// #define LOG_DEBUG
+// #endif
 
 #define LOG_CATEGORY LOGC_DM
 
@@ -154,6 +154,7 @@ int device_bind_driver_to_node(struct udevice *parent, const char *drv_name,
 	}
 	ret = device_bind_with_driver_data(parent, drv, dev_name, 0 /* data */,
 					   node, devp);
+	log_debug("y ret=%d\n", ret);
 
 	return ret;
 }
@@ -257,6 +258,7 @@ int lists_bind_fdt(struct udevice *parent, ofnode node, struct udevice **devp,
 		ret = device_bind_with_driver_data(parent, entry, name,
 						   id ? id->data : 0, node,
 						   &dev);
+		log_debug("- ret %d\n", ret);
 		if (ret == -ENODEV) {
 			log_debug("Driver '%s' refuses to bind\n", entry->name);
 			continue;

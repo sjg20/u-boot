@@ -4,6 +4,10 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
+#define LOG_DEBUG
+#endif
+
 #define LOG_CATEGORY UCLASS_BLK
 
 #include <common.h>
@@ -712,6 +716,7 @@ int blk_create_device(struct udevice *parent, const char *drv_name,
 	if (devnum < 0)
 		return devnum;
 	ret = device_bind_driver(parent, drv_name, name, &dev);
+	log_debug("z ret=%d\n", ret);
 	if (ret)
 		return ret;
 	desc = dev_get_uclass_plat(dev);
@@ -723,6 +728,7 @@ int blk_create_device(struct udevice *parent, const char *drv_name,
 	desc->bdev = dev;
 	desc->devnum = devnum;
 	*devp = dev;
+	log_debug("bcd done\n");
 
 	return 0;
 }
@@ -756,7 +762,7 @@ int blk_probe_or_unbind(struct udevice *dev)
 
 	ret = device_probe(dev);
 	if (ret) {
-		log_debug("probing %s failed\n", dev->name);
+// 		log_debug("probing %s failed\n", dev->name);
 		device_unbind(dev);
 	}
 

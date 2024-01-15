@@ -8,9 +8,9 @@
  * Pavel Herrmann <morpheus.ibis@gmail.com>
  */
 
-#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_TPL_BUILD)
-#define LOG_DEBUG
-#endif
+// #if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD) && !defined(CONFIG_VPL_BUILD)
+// #define LOG_DEBUG
+// #endif
 
 #include <common.h>
 #include <cpu_func.h>
@@ -169,7 +169,7 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 		goto fail_uclass_bind;
 
 	/* if we fail to bind we remove device from successors and free it */
-	log_debug("bind %s\n", dev->name);
+	log_debug("bind %s: ", dev->name);
 	if (drv->bind) {
 		ret = drv->bind(dev);
 		if (ret)
@@ -192,6 +192,7 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 		*devp = dev;
 
 	dev_or_flags(dev, DM_FLAG_BOUND);
+	log_debug("done\n");
 
 	return 0;
 
@@ -247,8 +248,13 @@ int device_bind_with_driver_data(struct udevice *parent,
 				 ulong driver_data, ofnode node,
 				 struct udevice **devp)
 {
-	return device_bind_common(parent, drv, name, NULL, driver_data, node,
+	int ret;
+
+	ret = device_bind_common(parent, drv, name, NULL, driver_data, node,
 				  0, devp);
+	log_debug("x ret=%d\n", ret);
+
+	return ret;
 }
 
 int device_bind(struct udevice *parent, const struct driver *drv,

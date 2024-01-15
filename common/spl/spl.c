@@ -43,6 +43,8 @@
 #include <bootcount.h>
 #include <wdt.h>
 
+#include <ns16550.h>
+
 DECLARE_GLOBAL_DATA_PTR;
 DECLARE_BINMAN_MAGIC_SYM;
 
@@ -726,6 +728,10 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 
 	bootcount_inc();
 
+// 	printf("dev %s\n", gd->cur_serial_dev->name);
+// 	struct ns16550_plat *plat = dev_get_plat(gd->cur_serial_dev);
+// 	printf("clock %d\n", plat->clock);
+
 	/* Dump driver model states to aid analysis */
 	if (CONFIG_IS_ENABLED(DM_STATS)) {
 		struct dm_stats mem;
@@ -827,7 +833,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
  */
 void preloader_console_init(void)
 {
-#ifdef CONFIG_SPL_SERIAL
+#if CONFIG_IS_ENABLED(SERIAL)
 	gd->baudrate = CONFIG_BAUDRATE;
 
 	serial_init();		/* serial communications setup */

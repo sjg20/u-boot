@@ -5,6 +5,9 @@
  * (C) Copyright 2012
  * Pavel Herrmann <morpheus.ibis@gmail.com>
  */
+// #if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD) && !defined(CONFIG_VPL_BUILD)
+// #define LOG_DEBUG
+// #endif
 
 #define LOG_CATEGORY UCLASS_ROOT
 
@@ -201,6 +204,7 @@ static int dm_scan_fdt_node(struct udevice *parent, ofnode parent_node,
 	     node = ofnode_next_subnode(node)) {
 		const char *node_name = ofnode_get_name(node);
 
+		log_debug("node: %s\n", node_name);
 		if (!ofnode_is_enabled(node)) {
 			pr_debug("   - ignoring disabled device\n");
 			continue;
