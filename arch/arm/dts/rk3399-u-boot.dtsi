@@ -37,8 +37,8 @@
 
 	dmc: dmc {
 #ifdef CONFIG_VPL
-// 		bootph-pre-ram;
-		bootph-pre-sram;
+		bootph-pre-ram;
+// 		bootph-pre-sram;
 // 		bootph-all;
 #else
 		bootph-all;
