@@ -3,6 +3,8 @@
  * (C) Copyright 2019 Rockchip Electronics Co., Ltd
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <debug_uart.h>
 #include <dm.h>
@@ -52,6 +54,9 @@ const char *board_spl_was_booted_from(void)
 u32 spl_boot_device(void)
 {
 	u32 boot_device = BOOT_DEVICE_MMC1;
+
+	if (IS_ENABLED(CONFIG_VPL))
+		return BOOT_DEVICE_VBE;
 
 #if defined(CONFIG_TARGET_CHROMEBOOK_JERRY) || \
 		defined(CONFIG_TARGET_CHROMEBIT_MICKEY) || \
@@ -121,6 +126,7 @@ void board_init_f(ulong dummy)
 	}
 	gd->ram_top = gd->ram_base + get_effective_memsize();
 	gd->ram_top = board_get_usable_ram_top(gd->ram_size);
+	log_debug("ram_top %lx\n", (ulong)gd->ram_top);
 #endif
 	preloader_console_init();
 }

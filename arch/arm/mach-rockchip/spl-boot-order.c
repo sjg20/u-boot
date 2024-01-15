@@ -101,7 +101,8 @@ __weak const char *board_spl_was_booted_from(void)
 void board_boot_order(u32 *spl_boot_list)
 {
 	/* In case of no fdt (or only plat), use spl_boot_device() */
-	if (!CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)) {
+	if (IS_ENABLED(CONFIG_VPL) || !CONFIG_IS_ENABLED(OF_CONTROL) ||
+	    CONFIG_IS_ENABLED(OF_PLATDATA)) {
 		spl_boot_list[0] = spl_boot_device();
 		return;
 	}

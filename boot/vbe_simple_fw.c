@@ -88,12 +88,12 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 	fit_uname_config = NULL;
 	log_debug("loading FIT\n");
 	ret = fit_image_load(&images, addr, &fit_uname, &fit_uname_config,
-			     IH_ARCH_SANDBOX, image_ph(phase, IH_TYPE_FIRMWARE),
+			     IH_ARCH_DEFAULT, image_ph(phase, IH_TYPE_FIRMWARE),
 			     BOOTSTAGE_ID_FIT_SPL_START, FIT_LOAD_IGNORED,
 			     &load_addr, &len);
 	if (ret == -ENOENT) {
 		ret = fit_image_load(&images, addr, &fit_uname,
-				     &fit_uname_config, IH_ARCH_SANDBOX,
+				     &fit_uname_config, IH_ARCH_DEFAULT,
 				     image_ph(phase, IH_TYPE_LOADABLE),
 				     BOOTSTAGE_ID_FIT_SPL_START,
 				     FIT_LOAD_IGNORED, &load_addr, &len);

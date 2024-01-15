@@ -70,7 +70,7 @@ void board_init_f(ulong dummy)
 			return;
 		}
 	}
-	preloader_console_init();
+// 	preloader_console_init();
 }
 
 int board_return_to_bootrom(struct spl_image_info *spl_image,
