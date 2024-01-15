@@ -9,6 +9,8 @@
  * Copyright (C) 2017 Theobroma Systems Design und Consulting GmbH
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <atf_common.h>
 #include <cpu_func.h>
@@ -292,6 +294,9 @@ void __noreturn spl_invoke_atf(struct spl_image_info *spl_image)
 	 * We don't provide a BL3-2 entry yet, but this will be possible
 	 * using similar logic.
 	 */
+	log_debug("entry_point %lx, bl32_entry %lx bl33_entry %lx blob %lx\n",
+		  spl_image->entry_point, bl32_entry, bl33_entry,
+		  platform_param);
 	bl31_entry(spl_image->entry_point, bl32_entry,
 		   bl33_entry, platform_param);
 }

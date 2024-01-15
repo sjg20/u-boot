@@ -230,12 +230,13 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 
 		ret = fit_image_get_phase(fit, node, &phase);
 		/* if the image is for any phase, let's use it */
-		if (ret == -ENOENT || phase == sel_phase) {
+		if (ret == -ENOENT || phase == spl_get_phase(info)) {
 			log_debug("found\n");
 		} else if (ret < 0) {
 			log_debug("err=%d\n", ret);
 			return ret;
 		} else {
+			log_debug("- phase mismatch, skipping this image\n");
 			return -EPERM;
 		}
 	}
@@ -470,7 +471,9 @@ static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 			image_info.load_addr = (ulong)tmpbuffer;
 			ret = load_simple_fit(info, offset, ctx, node,
 					      &image_info);
-			if (ret < 0)
+			if (ret == -EPERM)
+				continue;
+			else if (ret < 0)
 				break;
 
 			/* Make room in FDT for changes from the overlay */
