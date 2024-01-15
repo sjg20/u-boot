@@ -9,7 +9,6 @@
  */
 
 #define LOG_CATEGORY LOGC_BOOT
-#define LOG_DEBUG
 
 #ifdef USE_HOSTCC
 #include "mkimage.h"
