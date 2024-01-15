@@ -32,14 +32,18 @@
 static ulong h_vbe_load_read(struct spl_load_info *load, ulong off,
 			     ulong size, void *buf)
 {
-	struct blk_desc *bd = load->priv;
-	lbaint_t sector = off >> bd->log2blksz;
-	lbaint_t count = size >> bd->log2blksz;
+	struct blk_desc *desc = load->priv;
+	lbaint_t sector = off >> desc->log2blksz;
+	lbaint_t count = size >> desc->log2blksz;
+	int ret;
 
-	log_debug("vbe read from %lx\n", off);
-	print_buffer(map_to_sysmem(buf), buf, 1, size, 0);
+	log_debug("vbe read log2blksz %x offset %lx sector %lx count %lx\n",
+		  desc->log2blksz, (ulong)off, (long)sector, (ulong)count);
+// 	print_buffer(0x000631f0, (void *)0x000631f0, 1, 0x200, 0);
 
-	return blk_dread(bd, sector, count, buf) << bd->log2blksz;
+	ret = blk_dread(desc, sector, count, buf) << desc->log2blksz;
+	log_debug("ret=%d\n", ret);
+	return ret;
 }
 
 static int vbe_read_fit(struct udevice *blk, ulong area_offset,
@@ -113,10 +117,10 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 
 		printf("RAM check %lx\n", *ptr);
 
-		spl_load_init(&info, h_vbe_load_read, blk, desc->blksz);
+		spl_load_init(&info, h_vbe_load_read, desc, desc->blksz);
 		spl_set_phase(&info, IH_PHASE_U_BOOT);
-		log_debug("doing SPL with area_offset %lx + fdt_size %lx\n",
-			  area_offset, ALIGN(size, 4));
+		log_debug("doing SPL from %s blksz %lx log2blksz %x area_offset %lx + fdt_size %lx\n",
+			  blk->name, desc->blksz, desc->log2blksz, area_offset, ALIGN(size, 4));
 // 		spl_set_ext_data_offset(&info, ext_data_offset);
 		ret = spl_load_simple_fit(image, &info, area_offset, buf);
 		printf("ret=%d\n", ret);
