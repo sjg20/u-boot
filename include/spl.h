@@ -14,6 +14,7 @@
 #include <asm/global_data.h>
 #include <asm/spl.h>
 #include <handoff.h>
+#include <image.h>
 #include <mmc.h>
 
 struct blk_desc;
@@ -315,7 +316,10 @@ struct spl_load_info {
 	spl_load_reader read;
 	void *priv;
 #if IS_ENABLED(CONFIG_SPL_LOAD_BLOCK)
-	int bl_len;
+	u16 bl_len;
+#endif
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
+	u8 phase;
 #endif
 };
 
@@ -338,6 +342,23 @@ static inline void spl_set_bl_len(struct spl_load_info *info, int bl_len)
 #endif
 }
 
+static inline void spl_set_phase(struct spl_load_info *info,
+				 enum image_phase_t phase)
+{
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
+	info->phase = phase;
+#endif
+}
+
+static inline enum image_phase_t spl_get_phase(struct spl_load_info *info)
+{
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
+	return info->phase;
+#else
+	return IH_PHASE_NONE;
+#endif
+}
+
 /**
  * spl_load_init() - Set up a new spl_load_info structure
  */
@@ -348,6 +369,7 @@ static inline void spl_load_init(struct spl_load_info *load,
 	load->read = h_read;
 	load->priv = priv;
 	spl_set_bl_len(load, bl_len);
+	spl_set_phase(load, IH_PHASE_NONE);
 }
 
 /*

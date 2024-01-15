@@ -102,8 +102,8 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 		struct spl_load_info info;
 
 		printf("doing SPL\n");
-		info.read = h_vbe_load_read;
-		info.priv = blk;
+		spl_load_init(&info, h_vbe_load_read, blk, desc->blksz);
+		spl_set_phase(&info, IH_PHASE_SPL);
 		ret = spl_load_simple_fit(image, &info, area_offset, buf);
 		printf("ret=%d\n", ret);
 
