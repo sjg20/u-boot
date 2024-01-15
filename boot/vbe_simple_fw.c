@@ -29,6 +29,16 @@
 
 #define USE_BOOTMETH	false
 
+static ulong h_vbe_load_read(struct spl_load_info *load, ulong off,
+			     ulong size, void *buf)
+{
+	struct blk_desc *bd = load->priv;
+	lbaint_t sector = off >> bd->log2blksz;
+	lbaint_t count = size >> bd->log2blksz;
+
+	return blk_dread(bd, sector, count, buf) << bd->log2blksz;
+}
+
 static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 			ulong area_size, struct spl_image_info *image,
 			ulong *load_addrp, char **namep)
@@ -87,6 +97,19 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 	fit_uname = NULL;
 	fit_uname_config = NULL;
 	log_debug("loading FIT\n");
+
+	if (spl_phase() == PHASE_SPL) {
+		struct spl_load_info info;
+
+		printf("doing SPL\n");
+		info.read = h_vbe_load_read;
+		info.priv = blk;
+		ret = spl_load_simple_fit(image, &info, area_offset, buf);
+		printf("ret=%d\n", ret);
+
+		return ret;
+	}
+
 	ret = fit_image_load(&images, addr, &fit_uname, &fit_uname_config,
 			     IH_ARCH_DEFAULT, image_ph(phase, IH_TYPE_FIRMWARE),
 			     BOOTSTAGE_ID_FIT_SPL_START, FIT_LOAD_IGNORED,

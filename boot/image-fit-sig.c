@@ -3,6 +3,8 @@
  * Copyright (c) 2013, Google Inc.
  */
 
+#define LOG_DEBUG
+
 #ifdef USE_HOSTCC
 #include "mkimage.h"
 #include <time.h>

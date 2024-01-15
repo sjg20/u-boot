@@ -4,6 +4,8 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <errno.h>
 #include <fpga.h>
@@ -218,6 +220,7 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 	const void *fit = ctx->fit;
 	bool external_data = false;
 
+	log_debug("starting\n");
 	if (IS_ENABLED(CONFIG_SPL_FPGA) ||
 	    (IS_ENABLED(CONFIG_SPL_OS_BOOT) && spl_decompression_enabled())) {
 		if (fit_image_get_type(fit, node, &type))
@@ -270,6 +273,8 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 
 		overhead = get_aligned_image_overhead(info, offset);
 		size = get_aligned_image_size(info, length, offset);
+		log_debug("reading to %p: ", src_ptr);
+		print_buffer(map_to_sysmem(src_ptr), src_ptr, 1, 0x10, 0);
 
 		if (info->read(info,
 			       fit_offset +
@@ -715,9 +720,13 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	int index = 0;
 	int firmware_node;
 
-	ret = spl_simple_fit_read(&ctx, info, offset, fit);
-	if (ret < 0)
-		return ret;
+	if (IS_ENABLED(CONFIG_VPL)) {
+		ctx.fit = fit;
+	} else {
+		ret = spl_simple_fit_read(&ctx, info, offset, fit);
+		if (ret < 0)
+			return ret;
+	}
 
 	/* skip further processing if requested to enable load-only use cases */
 	if (spl_load_simple_fit_skip_processing())
