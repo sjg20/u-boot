@@ -849,6 +849,8 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 		if (os_takes_devicetree(os_type)) {
 			spl_fit_append_fdt(&image_info, info, offset, &ctx);
 			spl_image->fdt_addr = image_info.fdt_addr;
+			log_debug("OS takes DT: fdt_addr %p\n",
+				  spl_image->fdt_addr);
 		}
 
 		/*

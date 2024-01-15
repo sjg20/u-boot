@@ -291,8 +291,10 @@ static int simple_load_from_image(struct spl_image_info *image,
 				   NULL, NULL);
 		if (ret)
 			return log_msg_ret("vbe", ret);
-		image->load_addr = spl_get_image_text_base();
-		image->entry_point = image->load_addr;
+		if (spl_phase() == PHASE_VPL) {
+			image->load_addr = spl_get_image_text_base();
+			image->entry_point = image->load_addr;
+		}
 	}
 
 	/* Record that VBE was used in this phase */
