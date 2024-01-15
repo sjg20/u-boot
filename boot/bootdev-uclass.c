@@ -17,6 +17,7 @@
 #include <malloc.h>
 #include <part.h>
 #include <sort.h>
+#include <spl.h>
 #include <dm/device-internal.h>
 #include <dm/lists.h>
 #include <dm/uclass-internal.h>
@@ -263,10 +264,14 @@ static int bootdev_get_suffix_start(struct udevice *dev, const char *suffix)
 {
 	int len, slen;
 
+	printch('0');
 	len = strlen(dev->name);
+	printch('1');
 	slen = strlen(suffix);
+	printch('2');
 	if (len > slen && !strcmp(suffix, dev->name + len - slen))
 		return len - slen;
+	printch('3');
 
 	return len;
 }
@@ -277,12 +282,21 @@ int bootdev_setup_for_sibling_blk(struct udevice *blk, const char *drv_name)
 	char dev_name[50];
 	int ret, len;
 
+	printch('a');
 	len = bootdev_get_suffix_start(blk, ".blk");
-	snprintf(dev_name, sizeof(dev_name), "%.*s.%s", len, blk->name,
-		 "bootdev");
+	printch('b');
+	if (spl_phase() < PHASE_BOARD_R) {
+		strcpy(dev_name, blk->name);
+		strcat(dev_name, ".sib");
+	} else {
+		snprintf(dev_name, sizeof(dev_name), "%.*s.%s", len, blk->name,
+			 "bootdev");
+	}
+	printch('c');
 
 	parent = dev_get_parent(blk);
 	ret = device_find_child_by_name(parent, dev_name, &dev);
+	printch('d');
 	if (ret) {
 		char *str;
 
@@ -293,14 +307,17 @@ int bootdev_setup_for_sibling_blk(struct udevice *blk, const char *drv_name)
 		str = strdup(dev_name);
 		if (!str)
 			return -ENOMEM;
+		printch('e');
 
 		ret = device_bind_driver(parent, drv_name, str, &dev);
+		printch('f');
 		if (ret) {
 			log_debug("Cannot create bootdev device\n");
 			return ret;
 		}
 		device_set_name_alloced(dev);
 	}
+	printch('g');
 
 	return 0;
 }
