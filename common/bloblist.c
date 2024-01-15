@@ -502,9 +502,8 @@ int bloblist_init(void)
 		addr = IF_ENABLED_INT(CONFIG_BLOBLIST_FIXED,
 				      CONFIG_BLOBLIST_ADDR);
 	if (spl_phase() == PHASE_BOARD_F) {
-		addr = 0;
+		addr = 0x100000;
 		printf("addr=%lx\n", addr);
-		return 0;
 	}
 	size = CONFIG_BLOBLIST_SIZE;
 	if (expected) {
