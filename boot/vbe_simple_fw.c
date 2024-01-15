@@ -108,6 +108,10 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 // 		ext_data_offset = ALIGN(area_offset + size, 4);
 // 		log_debug("doing SPL with area_offset %lx + fdt_size %lx = ext_data_offset %lx\n",
 // 			  area_offset, ALIGN(size, 4), ext_data_offset);
+		volatile ulong *ptr = 0;
+
+		printf("RAM check %lx\n", *ptr);
+
 		spl_load_init(&info, h_vbe_load_read, blk, desc->blksz);
 		spl_set_phase(&info, IH_PHASE_U_BOOT);
 		log_debug("doing SPL with area_offset %lx + fdt_size %lx\n",
