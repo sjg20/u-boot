@@ -37,6 +37,7 @@ static ulong h_vbe_load_read(struct spl_load_info *load, ulong off,
 	lbaint_t count = size >> bd->log2blksz;
 
 	log_debug("vbe read from %lx\n", off);
+	print_buffer(map_to_sysmem(buf), buf, 1, size, 0);
 
 	return blk_dread(bd, sector, count, buf) << bd->log2blksz;
 }
