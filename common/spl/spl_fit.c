@@ -293,7 +293,7 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 
 		overhead = get_aligned_image_overhead(info, offset);
 		size = get_aligned_image_size(info, length, offset);
-		log_debug("reading to %p: ", src_ptr);
+		log_debug("reading from offset %x to %p: ", offset, src_ptr);
 // 		print_buffer(map_to_sysmem(src_ptr), src_ptr, 1, 0x10, 0);
 
 		if (info->read(info,
