@@ -128,8 +128,8 @@ void board_init_f(ulong dummy)
 	gd->ram_top = board_get_usable_ram_top(gd->ram_size);
 	log_debug("ram_top %lx\n", (ulong)gd->ram_top);
 
-//	volatile ulong *ptr = 0;
-//	*ptr = 1234;
+	volatile ulong *ptr = 0;
+	*ptr = 1234;
 // 	printf("stopping here: *ptr=%lx", *ptr);
 // 	while (1);
 #endif
