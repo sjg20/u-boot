@@ -29,9 +29,10 @@
 #include <time.h>
 
 #define INIT_DRAM	\
+	CONFIG_IS_ENABLED(RAM) && \
 	(defined(CONFIG_TPL_BUILD) || \
-	(!defined(CONFIG_TPL) && defined(CONFIG_SPL_BUILD)) || \
-	(defined(CONFIG_VPL) && CONFIG_IS_ENABLED(RAM)))
+	 defined(CONFIG_SPL_BUILD) && \
+		 (!defined(CONFIG_TPL) || defined(CONFIG_VPL)))
 
 
 #define PRESET_SGRF_HOLD(n)	((0x1 << (6 + 16)) | ((n) << 6))

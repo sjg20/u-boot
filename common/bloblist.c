@@ -501,9 +501,16 @@ int bloblist_init(void)
 	if (fixed)
 		addr = IF_ENABLED_INT(CONFIG_BLOBLIST_FIXED,
 				      CONFIG_BLOBLIST_ADDR);
+	if (spl_phase() == PHASE_BOARD_F) {
+		addr = 0;
+		printf("addr=%lx\n", addr);
+		return 0;
+	}
 	size = CONFIG_BLOBLIST_SIZE;
 	if (expected) {
+		printf("expected\n");
 		ret = bloblist_check(addr, size);
+		printf("check %d\n", ret);
 		if (ret) {
 			log_warning("Expected bloblist at %lx not found (err=%d)\n",
 				    addr, ret);
@@ -532,6 +539,7 @@ int bloblist_init(void)
 	if (ret)
 		return log_msg_ret("ini", ret);
 	gd->flags |= GD_FLG_BLOBLIST_READY;
+	printf("ready\n");
 
 	return 0;
 }
