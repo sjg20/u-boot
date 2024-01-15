@@ -5,6 +5,8 @@
  * Adapted from coreboot.
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <clk.h>
 #include <dm.h>
@@ -3147,12 +3149,18 @@ static int rk3399_dmc_init(struct udevice *dev)
 
 static int rk3399_dmc_probe(struct udevice *dev)
 {
-#if INIT_DRAM
-	if (rk3399_dmc_init(dev))
-		return 0;
-#else
 	struct dram_info *priv = dev_get_priv(dev);
 
+#if INIT_DRAM
+	if (rk3399_dmc_init(dev)) {
+		log_debug("failed\n");
+		return 0;
+	}
+
+	priv->info.base = CFG_SYS_SDRAM_BASE;
+	priv->info.size =
+		rockchip_sdram_size((phys_addr_t)&priv->pmugrf->os_reg2);
+#else
 	priv->pmugrf = syscon_get_first_range(ROCKCHIP_SYSCON_PMUGRF);
 	debug("%s: pmugrf = %p\n", __func__, priv->pmugrf);
 	priv->info.base = CFG_SYS_SDRAM_BASE;
