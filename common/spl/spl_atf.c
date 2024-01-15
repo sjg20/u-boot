@@ -294,6 +294,7 @@ void __noreturn spl_invoke_atf(struct spl_image_info *spl_image)
 	 * We don't provide a BL3-2 entry yet, but this will be possible
 	 * using similar logic.
 	 */
+	bl32_entry = 0x30000000;
 	log_debug("entry_point %lx, bl32_entry %lx bl33_entry %lx blob %lx\n",
 		  spl_image->entry_point, bl32_entry, bl33_entry,
 		  platform_param);
