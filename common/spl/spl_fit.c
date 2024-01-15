@@ -7,6 +7,7 @@
 #define LOG_DEBUG
 
 #include <common.h>
+#include <display_options.h>
 #include <errno.h>
 #include <fpga.h>
 #include <gzip.h>
@@ -192,7 +193,7 @@ static int get_aligned_image_size(struct spl_load_info *info, int data_size,
 /**
  * load_simple_fit(): load the image described in a certain FIT node
  * @info:	points to information about the device to load data from
- * @sector:	the start sector of the FIT image on the device
+ * @fit_offset:	the offset of the FIT image on the device
  * @ctx:	points to the FIT context structure
  * @node:	offset of the DT node describing the image to load (relative
  *		to @fit)
@@ -266,11 +267,14 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 	if (!fit_image_get_data_position(fit, node, &offset)) {
 		external_data = true;
 	} else if (!fit_image_get_data_offset(fit, node, &offset)) {
+		log_debug("read offset %x = offset from fit %lx\n",
+			  offset, (ulong)offset + ctx->ext_data_offset);
 		offset += ctx->ext_data_offset;
 		external_data = true;
 	}
 
 	if (external_data) {
+		ulong read_offset;
 		void *src_ptr;
 
 		/* External data */
@@ -293,17 +297,19 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 
 		overhead = get_aligned_image_overhead(info, offset);
 		size = get_aligned_image_size(info, length, offset);
-		log_debug("reading from offset %x to %p: ", offset, src_ptr);
+		read_offset = fit_offset + get_aligned_image_offset(info,
+							    offset);
+		log_debug("reading from offset %x / %lx to %p: ", offset,
+			  read_offset, src_ptr);
+
 // 		print_buffer(map_to_sysmem(src_ptr), src_ptr, 1, 0x10, 0);
 
-		if (info->read(info,
-			       fit_offset +
-			       get_aligned_image_offset(info, offset), size,
-			       src_ptr) < length)
+		if (info->read(info, read_offset, size, src_ptr) < length)
 			return -EIO;
 
 		debug("External data: dst=%p, offset=%x, size=%lx\n",
 		      src_ptr, offset, (unsigned long)length);
+		print_buffer(map_to_sysmem(src_ptr), src_ptr, 1, 0x10, 0);
 		src = src_ptr + overhead;
 	} else {
 		/* Embedded data */
@@ -673,12 +679,10 @@ static int spl_fit_load_fpga(struct spl_fit_info *ctx,
 	return spl_fit_upload_fpga(ctx, node, &fpga_image);
 }
 
-static int spl_simple_fit_read(struct spl_fit_info *ctx,
-			       struct spl_load_info *info, ulong offset,
-			       const void *fit_header)
+static void set_ext_data_offset(struct spl_fit_info *ctx,
+				const void *fit_header)
 {
-	unsigned long count, size;
-	void *buf;
+	unsigned long size;
 
 	/*
 	 * For FIT with external data, figure out where the external images
@@ -688,6 +692,14 @@ static int spl_simple_fit_read(struct spl_fit_info *ctx,
 	size = ALIGN(fdt_totalsize(fit_header), 4);
 	size = board_spl_fit_size_align(size);
 	ctx->ext_data_offset = ALIGN(size, 4);
+	ctx->fit = fit_header;
+}
+
+static int spl_simple_fit_read(struct spl_fit_info *ctx,
+			       struct spl_load_info *info, ulong offset)
+{
+	unsigned long count, size;
+	void *buf;
 
 	/*
 	 * So far we only have one block of data from the FIT. Read the entire
@@ -743,13 +755,13 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	int index = 0;
 	int firmware_node;
 
-	if (IS_ENABLED(CONFIG_VPL)) {
-		ctx.fit = fit;
-	} else {
-		ret = spl_simple_fit_read(&ctx, info, offset, fit);
+	set_ext_data_offset(&ctx, fit);
+	if (!IS_ENABLED(CONFIG_VPL)) {
+		ret = spl_simple_fit_read(&ctx, info, offset);
 		if (ret < 0)
 			return ret;
 	}
+	log_debug("ext_data_offset %lx\n", ctx.ext_data_offset);
 
 	/* skip further processing if requested to enable load-only use cases */
 	if (spl_load_simple_fit_skip_processing())

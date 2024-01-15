@@ -36,6 +36,8 @@ static ulong h_vbe_load_read(struct spl_load_info *load, ulong off,
 	lbaint_t sector = off >> bd->log2blksz;
 	lbaint_t count = size >> bd->log2blksz;
 
+	log_debug("vbe read from %lx\n", off);
+
 	return blk_dread(bd, sector, count, buf) << bd->log2blksz;
 }
 
@@ -47,6 +49,7 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 	const char *fit_uname, *fit_uname_config;
 	struct bootm_headers images = {};
 	ulong size, blknum, addr, len, load_addr, num_blks, spl_load_addr;
+	ulong aligned_size;
 	enum image_phase_t phase;
 	struct blk_desc *desc;
 	int node, ret;
@@ -70,17 +73,17 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 	if (size > area_size)
 		return log_msg_ret("fdt", -E2BIG);
 	log_debug("FIT size %lx\n", size);
-	size = ALIGN(size, desc->blksz);
+	aligned_size = ALIGN(size, desc->blksz);
 
 	/*
 	 * Load the FIT into the SPL memory. This is typically a FIT with
 	 * external data, so this is quite small, perhaps a few KB.
 	 */
-	buf = malloc(size);
+	buf = malloc(aligned_size);
 	addr = map_to_sysmem(buf);
-	num_blks = size / desc->blksz;
-	log_debug("read %lx, %lx blocks to %lx / %p\n", size, num_blks, addr,
-		  buf);
+	num_blks = aligned_size / desc->blksz;
+	log_debug("read %lx, %lx blocks to %lx / %p\n", aligned_size, num_blks,
+		  addr, buf);
 	ret = blk_read(blk, blknum, num_blks, buf);
 	if (ret < 0)
 		return log_msg_ret("rd", ret);
@@ -100,10 +103,16 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 
 	if (spl_phase() == PHASE_SPL) {
 		struct spl_load_info info;
+// 		ulong ext_data_offset;
 
-		printf("doing SPL\n");
+// 		ext_data_offset = ALIGN(area_offset + size, 4);
+// 		log_debug("doing SPL with area_offset %lx + fdt_size %lx = ext_data_offset %lx\n",
+// 			  area_offset, ALIGN(size, 4), ext_data_offset);
 		spl_load_init(&info, h_vbe_load_read, blk, desc->blksz);
 		spl_set_phase(&info, IH_PHASE_U_BOOT);
+		log_debug("doing SPL with area_offset %lx + fdt_size %lx\n",
+			  area_offset, ALIGN(size, 4));
+// 		spl_set_ext_data_offset(&info, ext_data_offset);
 		ret = spl_load_simple_fit(image, &info, area_offset, buf);
 		printf("ret=%d\n", ret);
 
@@ -135,9 +144,9 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 	}
 
 	/* For FIT external data, read in the external data */
-	log_debug("load_addr %lx len %lx addr %lx size %lx\n", load_addr, len,
-		  addr, size);
-	if (load_addr + len > addr + size) {
+	log_debug("load_addr %lx len %lx addr %lx aligned_size %lx\n",
+		  load_addr, len, addr, aligned_size);
+	if (load_addr + len > addr + aligned_size) {
 		ulong base, full_size, offset, extra;
 		void *base_buf;
 

@@ -320,6 +320,7 @@ struct spl_load_info {
 #endif
 #if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
 	u8 phase;
+	ulong ext_data_offset;
 #endif
 };
 
@@ -356,6 +357,23 @@ static inline enum image_phase_t spl_get_phase(struct spl_load_info *info)
 	return info->phase;
 #else
 	return IH_PHASE_NONE;
+#endif
+}
+
+static inline void spl_set_ext_data_offset(struct spl_load_info *info,
+					   ulong ext_data_offset)
+{
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
+	info->ext_data_offset = ext_data_offset;
+#endif
+}
+
+static inline enum image_phase_t spl_get_ext_data_offset(struct spl_load_info *info)
+{
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
+	return info->ext_data_offset;
+#else
+	return 0;
 #endif
 }
 
