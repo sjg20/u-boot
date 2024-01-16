@@ -4,7 +4,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY	LOGC_BLOBLIST
 
 #include <common.h>
@@ -503,13 +502,11 @@ int bloblist_init(void)
 				      CONFIG_BLOBLIST_ADDR);
 	if (spl_phase() == PHASE_BOARD_F) {
 		addr = 0x100000;
-		printf("addr=%lx\n", addr);
+		log_debug("bloblist addr=%lx\n", addr);
 	}
 	size = CONFIG_BLOBLIST_SIZE;
 	if (expected) {
-		printf("expected\n");
 		ret = bloblist_check(addr, size);
-		printf("check %d\n", ret);
 		if (ret) {
 			log_warning("Expected bloblist at %lx not found (err=%d)\n",
 				    addr, ret);
@@ -538,7 +535,6 @@ int bloblist_init(void)
 	if (ret)
 		return log_msg_ret("ini", ret);
 	gd->flags |= GD_FLG_BLOBLIST_READY;
-	printf("ready\n");
 
 	return 0;
 }
