@@ -1259,9 +1259,6 @@ static void *fdt_find_separate(void)
 		}
 	}
 #endif
-#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
-	printhex8((ulong)fdt_blob);
-#endif
 
 	return fdt_blob;
 }

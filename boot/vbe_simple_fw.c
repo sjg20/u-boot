@@ -9,6 +9,7 @@
 #define LOG_CATEGORY LOGC_BOOT
 
 #include <common.h>
+#include <binman_sym.h>
 #include <bloblist.h>
 #include <bootdev.h>
 #include <bootflow.h>
@@ -27,6 +28,10 @@
 #include "vbe_simple.h"
 
 #define USE_BOOTMETH	false
+
+binman_sym_declare(ulong, vbe_a, image_pos);
+binman_sym_declare(ulong, vbe_b, size);
+binman_sym_declare(ulong, vbe_recovery, size);
 
 static ulong h_vbe_load_read(struct spl_load_info *load, ulong off,
 			     ulong size, void *buf)
@@ -294,6 +299,7 @@ static int simple_load_from_image(struct spl_image_info *image,
 		bootflow_free(&bflow);
 	} else {
 		struct udevice *media, *blk;
+		ulong offset;
 
 		ret = uclass_get_device_by_seq(UCLASS_MMC, 1, &media);
 		if (ret)
@@ -301,6 +307,9 @@ static int simple_load_from_image(struct spl_image_info *image,
 		ret = blk_get_from_parent(media, &blk);
 		if (ret)
 			return log_msg_ret("med", ret);
+		offset = binman_sym(ulong, vbe_a, image_pos);
+		printf("offset=%lx\n", offset);
+
 		ret = vbe_read_fit(blk, 0x7f8000 + 0x8000, 0x400000, image,
 				   NULL, NULL);
 		if (ret)

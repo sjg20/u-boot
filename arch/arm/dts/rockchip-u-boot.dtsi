@@ -194,6 +194,7 @@
 	simple-bin {
 		filename = "u-boot-rockchip.bin";
 		pad-byte = <0xff>;
+		skip-at-start = <0x8000>;
 
 		mkimage {
 			filename = "idbloader.img";
@@ -218,28 +219,27 @@
 
 #ifdef CONFIG_VPL
 		u-boot-vpl {
-// 			type = "u-boot-tpl";
-			offset = <0x200000>;
-			no-write-symbols;
-			compress = "lz4";
+			offset = <(CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR * 0x200 + 0x8000)>;
+// 			no-write-symbols;
+// 			compress = "lz4";
 		};
 #endif
 
 #if defined(CONFIG_SPL_FIT) && (defined(CONFIG_ARM64) || defined(CONFIG_SPL_OPTEE_IMAGE))
 #ifdef CONFIG_VPL
-		fit-a {
+		vbe-a {
 			type = "fit";
-			offset = <CONFIG_SPL_PAD_TO>;
+			offset = <(CONFIG_SPL_PAD_TO + 0x8000)>;
 			insert-template = <&common_part>;
 		};
-		fit-b {
+		vbe-b {
 			type = "fit";
-			offset = <0x9f8000>;
+			offset = <0xa00000>;
 			insert-template = <&common_part>;
 		};
-		recovery {
+		vbe-recovery {
 			type = "fit";
-			offset = <0xbf8000>;
+			offset = <0xc00000>;
 			insert-template = <&common_part>;
 		};
 #else
