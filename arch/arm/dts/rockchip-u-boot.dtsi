@@ -234,6 +234,11 @@
 		};
 		fit-b {
 			type = "fit";
+			offset = <0x9f8000>;
+			insert-template = <&common_part>;
+		};
+		recovery {
+			type = "fit";
 			offset = <0xbf8000>;
 			insert-template = <&common_part>;
 		};
