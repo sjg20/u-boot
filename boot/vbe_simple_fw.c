@@ -30,8 +30,8 @@
 #define USE_BOOTMETH	false
 
 binman_sym_declare(ulong, vbe_a, image_pos);
-binman_sym_declare(ulong, vbe_b, size);
-binman_sym_declare(ulong, vbe_recovery, size);
+binman_sym_declare(ulong, vbe_b, image_pos);
+binman_sym_declare(ulong, vbe_recovery, image_pos);
 
 static ulong h_vbe_load_read(struct spl_load_info *load, ulong off,
 			     ulong size, void *buf)
