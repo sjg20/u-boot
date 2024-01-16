@@ -820,8 +820,8 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	// relocate since ATF makes IRAM inaccessible
 	if (spl_phase() == PHASE_SPL) {
 		log_debug("Relocating bloblist\n");
-		bloblist_reloc(0, CONFIG_BLOBLIST_SIZE, gd->bloblist,
-			       CONFIG_BLOBLIST_SIZE);
+		bloblist_reloc((void *)0x100000, CONFIG_BLOBLIST_SIZE,
+			       gd->bloblist, CONFIG_BLOBLIST_SIZE);
 	}
 
 	spl_board_prepare_for_boot();
