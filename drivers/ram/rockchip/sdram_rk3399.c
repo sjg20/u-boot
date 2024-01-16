@@ -5,8 +5,6 @@
  * Adapted from coreboot.
  */
 
-#define LOG_DEBUG
-
 #include <common.h>
 #include <clk.h>
 #include <dm.h>

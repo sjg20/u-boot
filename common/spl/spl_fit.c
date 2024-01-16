@@ -4,8 +4,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
-
 #include <common.h>
 #include <display_options.h>
 #include <errno.h>
@@ -302,14 +300,11 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 		log_debug("reading from offset %x / %lx to %p: ", offset,
 			  read_offset, src_ptr);
 
-// 		print_buffer(map_to_sysmem(src_ptr), src_ptr, 1, 0x10, 0);
-
 		if (info->read(info, read_offset, size, src_ptr) < length)
 			return -EIO;
 
 		debug("External data: dst=%p, offset=%x, size=%lx\n",
 		      src_ptr, offset, (unsigned long)length);
-		print_buffer(map_to_sysmem(src_ptr), src_ptr, 1, 0x10, 0);
 		src = src_ptr + overhead;
 	} else {
 		/* Embedded data */

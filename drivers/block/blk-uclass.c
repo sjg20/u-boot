@@ -4,10 +4,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
-#define LOG_DEBUG
-#endif
-
 #define LOG_CATEGORY UCLASS_BLK
 
 #include <common.h>

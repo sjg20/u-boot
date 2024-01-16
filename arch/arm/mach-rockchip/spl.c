@@ -3,8 +3,6 @@
  * (C) Copyright 2019 Rockchip Electronics Co., Ltd
  */
 
-#define LOG_DEBUG
-
 #include <common.h>
 #include <debug_uart.h>
 #include <dm.h>
@@ -98,19 +96,15 @@ void board_init_f(ulong dummy)
 {
 	int ret;
 
-	printch('c');
 	board_early_init_f();
-	printch('d');
 
 	ret = spl_early_init();
 	if (ret) {
 		printf("spl_early_init() failed: %d\n", ret);
 		hang();
 	}
-	printch('e');
 	arch_cpu_init();
 	printch('f');
-
 // 	rockchip_stimer_init();
 
 #ifdef CONFIG_SYS_ARCH_TIMER
@@ -127,11 +121,6 @@ void board_init_f(ulong dummy)
 	gd->ram_top = gd->ram_base + get_effective_memsize();
 	gd->ram_top = board_get_usable_ram_top(gd->ram_size);
 	log_debug("ram_top %lx\n", (ulong)gd->ram_top);
-
-	volatile ulong *ptr = 0;
-	*ptr = 1234;
-// 	printf("stopping here: *ptr=%lx", *ptr);
-// 	while (1);
 #endif
 	preloader_console_init();
 }
