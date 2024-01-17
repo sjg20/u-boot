@@ -225,7 +225,7 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 	bool deferred_read = false;
 
 	log_debug("starting\n");
-	if (CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW) &&
+	if (CONFIG_IS_ENABLED(BOOTMETH_VBE) &&
 	    spl_get_phase(info) != IH_PHASE_NONE) {
 		enum image_phase_t phase;
 		int ret;
@@ -303,12 +303,12 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 		log_debug("reading from offset %x / %lx size %lx to %p: ",
 			  offset, read_offset, size, src_ptr);
 
-		if ((ulong)src_ptr >= 0xff8c0000) {
-			src_ptr = malloc(size);
-			log_debug("bad read - new ptr %p\n", src_ptr);
-			deferred_read = true;
-		}
-		if (info->read(info, read_offset, size, src_ptr) < length)
+// 		if ((ulong)src_ptr >= 0xff8c0000) {
+// 			src_ptr = malloc(size);
+// 			log_debug("bad read - new ptr %p\n", src_ptr);
+// 			deferred_read = true;
+// 		}
+		if (!deferred_read && info->read(info, read_offset, size, src_ptr) < length)
 			return -EIO;
 
 		debug("External data: dst=%p, offset=%x, size=%lx\n",
@@ -853,6 +853,7 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 
 		image_info.load_addr = 0;
 		ret = load_simple_fit(info, offset, &ctx, node, &image_info);
+		log_debug("ret=%d\n", ret);
 		if (ret < 0 && ret != -EPERM) {
 			printf("%s: can't load image loadables index %d (ret = %d)\n",
 			       __func__, index, ret);
@@ -866,6 +867,7 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 			debug("Loadable is %s\n", genimg_get_os_name(os_type));
 
 		if (os_takes_devicetree(os_type)) {
+			log_debug("?takes dt");
 			spl_fit_append_fdt(&image_info, info, offset, &ctx);
 			spl_image->fdt_addr = image_info.fdt_addr;
 			log_debug("OS takes DT: fdt_addr %p\n",

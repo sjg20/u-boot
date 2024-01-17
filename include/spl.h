@@ -318,7 +318,7 @@ struct spl_load_info {
 #if IS_ENABLED(CONFIG_SPL_LOAD_BLOCK)
 	u16 bl_len;
 #endif
-#if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE)
 	u8 phase;
 	ulong ext_data_offset;
 #endif
@@ -346,14 +346,14 @@ static inline void spl_set_bl_len(struct spl_load_info *info, int bl_len)
 static inline void spl_set_phase(struct spl_load_info *info,
 				 enum image_phase_t phase)
 {
-#if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE)
 	info->phase = phase;
 #endif
 }
 
 static inline enum image_phase_t spl_get_phase(struct spl_load_info *info)
 {
-#if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE)
 	return info->phase;
 #else
 	return IH_PHASE_NONE;
@@ -363,14 +363,14 @@ static inline enum image_phase_t spl_get_phase(struct spl_load_info *info)
 static inline void spl_set_ext_data_offset(struct spl_load_info *info,
 					   ulong ext_data_offset)
 {
-#if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE)
 	info->ext_data_offset = ext_data_offset;
 #endif
 }
 
 static inline enum image_phase_t spl_get_ext_data_offset(struct spl_load_info *info)
 {
-#if CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW)
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE)
 	return info->ext_data_offset;
 #else
 	return 0;
