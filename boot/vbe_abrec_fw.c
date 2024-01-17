@@ -76,8 +76,98 @@ int abrec_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 	return 0;
 }
 
+static int abrec_run_vpl(struct udevice *blk, struct spl_image_info *image,
+			 struct vbe_handoff *handoff)
+{
+	uint flags, tries, prev_result;
+	struct abrec_priv priv;
+	struct abrec_state state;
+	enum vbe_pick_t pick;
+	uint try_count;
+	ulong offset, size;
+	ofnode node;
+	int ret;
+
+	node = vbe_get_node();
+	if (!ofnode_valid(node))
+		return log_msg_ret("nod", -EINVAL);
+
+	ret = abrec_read_priv(node, &priv);
+	if (ret)
+		return log_msg_ret("pri", ret);
+
+	ret = abrec_read_nvdata(&priv, blk, &state);
+	if (ret)
+		return log_msg_ret("sta", ret);
+
+	prev_result = state.try_result;
+	try_count = state.try_count;
+
+	if (state.recovery) {
+		pick = VBEP_RECOVERY;
+
+	/* if we are trying B but ran out of tries, use A */
+	} else if ((prev_result == VBETR_TRYING) && !tries) {
+		pick = VBEP_A;
+		state.try_result = VBETR_BAD;
+
+	/* if requested, try B */
+	} else if (flags & VBEF_TRY_B) {
+		pick = VBEP_B;
+
+		/* decrement the try count if not already zero */
+		if (try_count)
+			try_count--;
+		state.try_result = VBETR_TRYING;
+	} else {
+		pick = VBEP_A;
+	}
+	state.try_count = try_count;
+
+	switch (pick) {
+	case VBEP_A:
+		offset = binman_sym(ulong, vbe_a, image_pos);
+		size = binman_sym(ulong, vbe_a, size);
+		break;
+	case VBEP_B:
+		offset = binman_sym(ulong, vbe_b, image_pos);
+		size = binman_sym(ulong, vbe_b, size);
+		break;
+	case VBEP_RECOVERY:
+		offset = binman_sym(ulong, vbe_recovery, image_pos);
+		size = binman_sym(ulong, vbe_recovery, size);
+		break;
+	}
+	log_debug("pick=%d, offset=%lx size=%lx\n", pick, offset, size);
+
+	ret = vbe_read_fit(blk, offset, size, image, NULL, NULL);
+	if (ret)
+		return log_msg_ret("vbe", ret);
+	handoff->offset = offset;
+	handoff->size = size;
+	image->load_addr = spl_get_image_text_base();
+	image->entry_point = image->load_addr;
+
+	return 0;
+}
+
+static int abrec_run_spl(struct udevice *blk, struct spl_image_info *image,
+			 struct vbe_handoff *handoff)
+{
+	int ret;
+
+	ret = vbe_read_fit(blk, handoff->offset, handoff->size, image, NULL,
+			   NULL);
+	if (ret)
+		return log_msg_ret("vbe", ret);
+	image->load_addr = spl_get_image_text_base();
+	image->entry_point = image->load_addr;
+
+	return 0;
+}
+
 static int abrec_load_from_image(struct spl_image_info *image,
-				  struct spl_boot_device *bootdev)
+				 struct spl_boot_device *bootdev)
 {
 	struct vbe_handoff *handoff;
 	int ret;
@@ -127,14 +217,8 @@ static int abrec_load_from_image(struct spl_image_info *image,
 		/* this is not used from now on, so free it */
 		bootflow_free(&bflow);
 	} else {
-		ALLOC_CACHE_ALIGN_BUFFER(u8, buf, MMC_MAX_BLOCK_LEN);
-		uint flags, tries, prev_result;
-		struct udevice *media, *blk;
-		struct abrec_priv priv;
-		struct abrec_state state;
-		enum vbe_pick_t pick;
-		ulong offset, size;
-		ofnode node;
+		struct udevice *media;
+		struct udevice *blk;
 
 		ret = uclass_get_device_by_seq(UCLASS_MMC, 1, &media);
 		if (ret)
@@ -143,67 +227,10 @@ static int abrec_load_from_image(struct spl_image_info *image,
 		if (ret)
 			return log_msg_ret("med", ret);
 
-		node = vbe_get_node();
-		if (!ofnode_valid(node))
-			return log_msg_ret("nod", -EINVAL);
-
-		ret = abrec_read_priv(node, &priv);
-		if (ret)
-			return log_msg_ret("pri", ret);
-
-		ret = abrec_read_state(&priv, blk, buf, &state);
-		if (ret)
-			return log_msg_ret("sta", ret);
-
-		flags = state.flags;
-		tries = flags & VBEF_TRY_COUNT_MASK;
-		prev_result = (flags & VBEF_RESULT_MASK) >> VBEF_RESULT_SHIFT;
-		flags &= ~(VBEF_TRY_COUNT_MASK | VBEF_RESULT_MASK);
-
-		if (state.flags & VBEF_RECOVERY) {
-			pick = VBEP_RECOVERY;
-
-		/* if we are trying B but ran out of tries, use A */
-		} else if ((prev_result == VBEF_RESULT_TRYING) && !tries) {
-			pick = VBEP_A;
-			flags |= VBEF_RESULT_BAD << VBEF_RESULT_SHIFT;
-
-		/* if requested, try B */
-		} else if (flags & VBEF_TRY_B) {
-			pick = VBEP_B;
-
-			/* decrement the try count if not already zero */
-			if (tries)
-				tries--;
-			flags |= VBEF_RESULT_TRYING << VBEF_RESULT_SHIFT;
-		} else {
-			pick = VBEP_A;
-		}
-		state.flags = flags | tries;
-
-		switch (pick) {
-		case VBEP_A:
-			offset = binman_sym(ulong, vbe_a, image_pos);
-			size = binman_sym(ulong, vbe_a, size);
-			break;
-		case VBEP_B:
-			offset = binman_sym(ulong, vbe_b, image_pos);
-			size = binman_sym(ulong, vbe_b, size);
-			break;
-		case VBEP_RECOVERY:
-			offset = binman_sym(ulong, vbe_recovery, image_pos);
-			size = binman_sym(ulong, vbe_recovery, size);
-			break;
-		}
-		log_debug("offset=%lx size=%lx\n", offset, size);
-
-		ret = vbe_read_fit(blk, offset, size, image, NULL, NULL);
-		if (ret)
-			return log_msg_ret("vbe", ret);
-		if (spl_phase() == PHASE_VPL) {
-			image->load_addr = spl_get_image_text_base();
-			image->entry_point = image->load_addr;
-		}
+		if (spl_phase() == PHASE_VPL)
+			ret = abrec_run_vpl(blk, image, handoff);
+		else
+			ret = abrec_run_spl(blk, image, handoff);
 	}
 
 	/* Record that VBE was used in this phase */

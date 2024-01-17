@@ -9,23 +9,10 @@
 #ifndef __VBE_ABREC_H
 #define __VBE_ABREC_H
 
+#include "vbe_common.h"
+
 struct bootflow;
 struct udevice;
-
-enum {
-	MAX_VERSION_LEN		= 256,
-
-	NVD_HDR_VER_SHIFT	= 0,
-	NVD_HDR_VER_MASK	= 0xf,
-	NVD_HDR_SIZE_SHIFT	= 4,
-	NVD_HDR_SIZE_MASK	= 0xf << NVD_HDR_SIZE_SHIFT,
-
-	/* Firmware key-version is in the top 16 bits of fw_ver */
-	FWVER_KEY_SHIFT		= 16,
-	FWVER_FW_MASK		= 0xffff,
-
-	NVD_HDR_VER_CUR		= 1,	/* current version */
-};
 
 /** struct abrec_priv - information read from the device tree */
 struct abrec_priv {
@@ -52,36 +39,18 @@ enum vbe_pick_t {
 	VBEP_RECOVERY,
 };
 
-/**
- * enum vbe_flags - flags controlling operation
- *
- * @VBEF_TRY_COUNT_MASK: mask for the 'try count' value
- * @VBEF_TRY_B: Try the B slot
- * @VBEF_RECOVERY: Use recovery slot
- */
-enum vbe_flags {
-	VBEF_TRY_COUNT_MASK	= 0x3,
-	VBEF_TRY_B	= BIT(2),
-	VBEF_RECOVERY	= BIT(3),
-
-	VBEF_RESULT_SHIFT	= 4,
-	VBEF_RESULT_MASK	= 3 << VBEF_RESULT_SHIFT,
-	VBEF_RESULT_UNKNOWN	= 0,
-	VBEF_RESULT_TRYING	= 1,
-	VBEF_RESULT_OK		= 2,
-	VBEF_RESULT_BAD		= 3,
-};
-
 /** struct abrec_state - state information read from media
  *
  * @fw_version: Firmware version string
  * @fw_vernum: Firmware version number
- * @flags: Flags controlling operation (enum vbe_flags)
  */
 struct abrec_state {
 	char fw_version[MAX_VERSION_LEN];
 	u32 fw_vernum;
-	u32 flags;
+	uint try_count;
+	bool try_b;
+	bool recovery;
+	enum vbe_try_result try_result;
 };
 
 /**
@@ -97,8 +66,10 @@ struct abrec_state {
  */
 int abrec_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow);
 
-int abrec_read_state(struct abrec_priv *priv, struct udevice *blk, void *buf,
-		     struct abrec_state *state);
+int abrec_read_state(struct udevice *dev, struct abrec_state *state);
+
+int abrec_read_nvdata(struct abrec_priv *priv, struct udevice *blk,
+		      struct abrec_state *state);
 
 int abrec_read_priv(ofnode node, struct abrec_priv *priv);
 

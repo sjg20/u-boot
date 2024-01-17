@@ -28,9 +28,13 @@ enum vbe_phase_t {
 /**
  * struct vbe_handoff - information about VBE progress
  *
+ * @offset: Offset of the FIT to use for SPL onwards
+ * @size: Size of the area containing the FIT
  * @phases: Indicates which phases used the VBE bootmeth (1 << PHASE_...)
  */
 struct vbe_handoff {
+	ulong offset;
+	ulong size;
 	u8 phases;
 };
 

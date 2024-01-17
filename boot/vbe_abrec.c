@@ -10,6 +10,8 @@
 #define LOG_CATEGORY LOGC_BOOT
 
 #include <common.h>
+#include <dm.h>
+#include <memalign.h>
 #include <mmc.h>
 #include <dm/ofnode.h>
 #include "vbe_abrec.h"
@@ -32,24 +34,52 @@ int abrec_read_priv(ofnode node, struct abrec_priv *priv)
 	return 0;
 }
 
-int abrec_read_state(struct abrec_priv *priv, struct udevice *blk, void *buf,
-		     struct abrec_state *state)
+int abrec_read_nvdata(struct abrec_priv *priv, struct udevice *blk,
+		      struct abrec_state *state)
 {
-	int start;
+	ALLOC_CACHE_ALIGN_BUFFER(u8, buf, MMC_MAX_BLOCK_LEN);
+	const struct vbe_nvdata *nvd = (struct vbe_nvdata *)buf;
+	uint flags;
+	int ret;
 
-	if (priv->version_size > MMC_MAX_BLOCK_LEN)
-		return log_msg_ret("ver", -E2BIG);
+	ret = vbe_read_nvdata(blk, priv->area_start + priv->state_offset,
+			      priv->state_size, buf);
+	if (ret == -EPERM) {
+		memset(state, '\0', sizeof(struct abrec_state));
+		log_warning("Starting with empty state\n");
+	} else if (ret) {
+		return log_msg_ret("nv", ret);
+	}
 
-	start = priv->area_start + priv->version_offset;
-	if (start & (MMC_MAX_BLOCK_LEN - 1))
-		return log_msg_ret("get", -EBADF);
-	start /= MMC_MAX_BLOCK_LEN;
+	state->fw_vernum = nvd->fw_vernum;
+	flags = nvd->flags;
+	state->try_count = flags & VBEF_TRY_COUNT_MASK;
+	state->try_b = flags & VBEF_TRY_B;
+	state->recovery = flags & VBEF_RECOVERY;
+	log_debug("version=%s\n", state->fw_version);
 
-	if (blk_read(blk, start, 1, buf) != 1)
-		return log_msg_ret("read", -EIO);
-	memcpy(state, buf, sizeof(struct abrec_state));
-	strlcpy(state->fw_version, buf, MAX_VERSION_LEN);
-	log_debug("version=%s flags=%x\n", state->fw_version, state->flags);
+	return 0;
+}
+
+int abrec_read_state(struct udevice *dev, struct abrec_state *state)
+{
+	struct abrec_priv *priv = dev_get_priv(dev);
+	struct udevice *blk;
+	int ret;
+
+	ret = vbe_get_blk(priv->storage, &blk);
+	if (ret)
+		return log_msg_ret("blk", ret);
+
+	ret = vbe_read_version(blk, priv->area_start + priv->version_offset,
+			       state->fw_version, MAX_VERSION_LEN);
+	if (ret)
+		return log_msg_ret("ver", ret);
+	log_debug("version=%s\n", state->fw_version);
+
+	ret = abrec_read_nvdata(priv, blk, state);
+	if (ret)
+		return log_msg_ret("nvd", ret);
 
 	return 0;
 }
