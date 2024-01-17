@@ -6,6 +6,8 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
+
 #include <bootstage.h>
 #include <dm.h>
 #include <spl.h>
@@ -79,7 +81,8 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 		return log_msg_ret("rd", ret);
 
 	/* figure out the phase to load */
-	phase = IS_ENABLED(CONFIG_VPL_BUILD) ? IH_PHASE_SPL : IH_PHASE_U_BOOT;
+	phase = IS_ENABLED(CONFIG_TPL_BUILD) ? IH_PHASE_NONE :
+		IS_ENABLED(CONFIG_VPL_BUILD) ? IH_PHASE_SPL : IH_PHASE_U_BOOT;
 
 	/*
 	 * Load the image from the FIT. We ignore any load-address information
@@ -133,6 +136,7 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 		if (ret)
 			return log_msg_ret("spl", ret);
 	}
+	image->os = IH_OS_U_BOOT;
 
 	/* For FIT external data, read in the external data */
 	log_debug("load_addr %lx len %lx addr %lx aligned_size %lx\n",

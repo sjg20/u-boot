@@ -85,7 +85,7 @@ static const table_entry_t uimage_arch[] = {
 	{	IH_ARCH_S390,		"s390",		"IBM S390",	},
 	{	IH_ARCH_SH,		"sh",		"SuperH",	},
 	{	IH_ARCH_SPARC,		"sparc",	"SPARC",	},
-// 	{	IH_ARCH_SPARC64,	"sparc64",	"SPARC 64 Bit",	},
+	{	IH_ARCH_SPARC64,	"sparc64",	"SPARC 64 Bit",	},
 	{	IH_ARCH_BLACKFIN,	"blackfin",	"Blackfin",	},
 	{	IH_ARCH_AVR32,		"avr32",	"AVR32",	},
 	{	IH_ARCH_NDS32,		"nds32",	"NDS32",	},

@@ -560,10 +560,12 @@ static int spl_fit_image_is_fpga(const void *fit, int node)
 
 static int spl_fit_image_get_os(const void *fit, int noffset, uint8_t *os)
 {
+	log_debug("looking\n");
 	if (!CONFIG_IS_ENABLED(FIT_IMAGE_TINY) || CONFIG_IS_ENABLED(OS_BOOT))
 		return fit_image_get_os(fit, noffset, os);
 
 	const char *name = fdt_getprop(fit, noffset, FIT_OS_PROP, NULL);
+	log_debug("name %s", name);
 	if (!name)
 		return -ENOENT;
 
@@ -827,6 +829,7 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 		debug("Image OS is %s\n", genimg_get_os_name(spl_image->os));
 	else if (!IS_ENABLED(CONFIG_SPL_OS_BOOT))
 		spl_image->os = IH_OS_U_BOOT;
+	log_debug("os1 %d\n", spl_image->os);
 
 	/*
 	 * Booting a next-stage U-Boot may require us to append the FDT.

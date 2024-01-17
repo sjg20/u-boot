@@ -31,9 +31,14 @@
 
 #ifdef CONFIG_BOOTMETH_VBE_SIMPLE
 binman_sym_extern(ulong, vbe_a, image_pos);
+binman_sym_extern(ulong, vbe_a, size);
 #else
 binman_sym_declare(ulong, vbe_a, image_pos);
+binman_sym_declare(ulong, vbe_a, size);
 #endif
+
+binman_sym_declare(ulong, vpl, image_pos);
+binman_sym_declare(ulong, vpl, size);
 
 /**
  * vbe_simple_read_bootflow_fw() - Create a bootflow for firmware
@@ -80,7 +85,8 @@ static int simple_load_from_image(struct spl_image_info *image,
 	struct vbe_handoff *handoff;
 	int ret;
 
-	if (spl_phase() != PHASE_VPL && spl_phase() != PHASE_SPL)
+	if (spl_phase() != PHASE_VPL && spl_phase() != PHASE_SPL &&
+		spl_phase() != PHASE_TPL)
 		return -ENOENT;
 
 	ret = bloblist_ensure_size(BLOBLISTT_VBE, sizeof(struct vbe_handoff),
@@ -125,7 +131,7 @@ static int simple_load_from_image(struct spl_image_info *image,
 		bootflow_free(&bflow);
 	} else {
 		struct udevice *media, *blk;
-		ulong offset;
+		ulong offset, size;
 
 		ret = uclass_get_device_by_seq(UCLASS_MMC, 1, &media);
 		if (ret)
@@ -133,14 +139,19 @@ static int simple_load_from_image(struct spl_image_info *image,
 		ret = blk_get_from_parent(media, &blk);
 		if (ret)
 			return log_msg_ret("med", ret);
-		offset = binman_sym(ulong, vbe_a, image_pos);
-		printf("offset=%lx\n", offset);
+		if (spl_phase() == PHASE_TPL) {
+			offset = binman_sym(ulong, vpl, image_pos);
+			size = binman_sym(ulong, vpl, size);
+		} else {
+			offset = binman_sym(ulong, vbe_a, image_pos);
+			size = binman_sym(ulong, vbe_a, size);
+			printf("offset=%lx\n", offset);
+		}
 
-		ret = vbe_read_fit(blk, 0x7f8000 + 0x8000, 0x400000, image,
-				   NULL, NULL);
+		ret = vbe_read_fit(blk, offset, size, image, NULL, NULL);
 		if (ret)
 			return log_msg_ret("vbe", ret);
-		if (spl_phase() == PHASE_VPL) {
+		if (spl_phase() == PHASE_VPL || spl_phase() == PHASE_TPL) {
 			image->load_addr = spl_get_image_text_base();
 			image->entry_point = image->load_addr;
 		}

@@ -59,7 +59,7 @@
 				spl {
 					description = "U-Boot SPL";
 					type = "firmware";
-					os = "U-Boot";
+					os = "u-boot";
 					arch = ARCH;
 					compression = "lz4";
 					load = <CONFIG_SPL_TEXT_BASE>;
@@ -73,7 +73,7 @@
 				u-boot {
 					description = "U-Boot";
 					type = "standalone";
-					os = "U-Boot";
+					os = "u-boot";
 					arch = ARCH;
 #if defined(CONFIG_SPL_GZIP)
 					compression = "gzip";
@@ -228,7 +228,7 @@
 				vpl {
 					description = "U-Boot VPL";
 					type = "firmware";
-					os = "U-Boot";
+					os = "u-boot";
 					arch = ARCH;
 					compression = "lz4";
 					load = <CONFIG_VPL_TEXT_BASE>;
@@ -306,6 +306,7 @@
 			};
 #elif defined(CONFIG_TPL)
 			u-boot-tpl {
+				no-write-symbols;
 			};
 #endif
 #ifdef CONFIG_VPL
