@@ -238,6 +238,11 @@
 						compress = "lz4";
 					};
 				};
+				@fdt-SEQ {
+					description = "fdt-NAME";
+					compression = "none";
+					type = "flat_dt";
+				};
 			};
 			configurations {
 				default = "@config-DEFAULT-SEQ";

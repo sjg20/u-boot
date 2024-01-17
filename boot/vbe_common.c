@@ -41,7 +41,7 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 	const char *fit_uname, *fit_uname_config;
 	struct bootm_headers images = {};
 	ulong size, blknum, addr, len, load_addr, num_blks, spl_load_addr;
-	ulong aligned_size;
+	ulong aligned_size, fdt_load_addr, fdt_len;
 	enum image_phase_t phase;
 	struct blk_desc *desc;
 	int node, ret;
@@ -127,7 +127,18 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 	if (ret < 0)
 		return log_msg_ret("ld", ret);
 	node = ret;
-	log_debug("loaded to %lx\n", load_addr);
+	log_debug("noload to %lx size %lx\n", load_addr, len);
+
+	if (spl_phase() == PHASE_TPL) {
+		/* allow use of a different image from the configuration node */
+		fit_uname = NULL;
+		ret = fit_image_load(&images, addr, &fit_uname, &fit_uname_config,
+			     IH_ARCH_DEFAULT, image_ph(phase, IH_TYPE_FLATDT),
+			     BOOTSTAGE_ID_FIT_SPL_START, FIT_LOAD_IGNORED,
+			     &fdt_load_addr, &fdt_len);
+		log_debug("FDT noload to %lx size %lx\n", fdt_load_addr,
+			  fdt_len);
+	}
 
 	for_spl = !USE_BOOTMETH && CONFIG_IS_ENABLED(RELOC_LOADER);
 	if (for_spl) {
