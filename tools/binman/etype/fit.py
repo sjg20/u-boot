@@ -353,8 +353,14 @@ class Entry_fit(Entry_section):
         self._fit_props = {}
         self._fdts = None
         self.mkimage = None
+        self.fdtgrep = None
         self._priv_entries = {}
         self._loadables = []
+        self._remove_props = []
+        props, = self.GetEntryArgsOrProps(
+            [EntryArg('of-spl-remove-props', str)], required=False)
+        if props:
+            self._remove_props = props.split()
 
     def ReadNode(self):
         super().ReadNode()
@@ -483,6 +489,10 @@ class Entry_fit(Entry_section):
         rel_path = node.path[len(self._node.path) + 1:]
         self.Raise(f"subnode '{rel_path}': {msg}")
 
+    def _run_fdtgrep(self, infile, phase, outfile):
+        return self.fdtgrep.create_for_phase(infile, phase, outfile,
+                                             self._remove_props)
+
     def _build_input(self):
         """Finish the FIT by adding the 'data' properties to it
 
@@ -584,6 +594,7 @@ class Entry_fit(Entry_section):
                 for seq, fdt_fname in enumerate(self._fdts):
                     node_name = node.name[1:].replace('SEQ', str(seq + 1))
                     fname = tools.get_input_filename(fdt_fname + '.dtb')
+                    fdt_phase = None
                     with fsw.add_node(node_name):
                         for pname, prop in node.props.items():
                             if pname == 'fit,firmware':
@@ -594,6 +605,8 @@ class Entry_fit(Entry_section):
                                 fsw.property('loadables', val.encode('utf-8'))
                             elif pname == 'fit,operation':
                                 pass
+                            elif pname == 'fit,fdt-phase':
+                                fdt_phase = fdt_util.GetString(node, pname)
                             elif pname.startswith('fit,'):
                                 self._raise_subnode(
                                     node, f"Unknown directive '{pname}'")
@@ -606,7 +619,15 @@ class Entry_fit(Entry_section):
 
                         # Add data for 'images' nodes (but not 'config')
                         if depth == 1 and in_images:
-                            fsw.property('data', tools.read_file(fname))
+                            if fdt_phase:
+                                phase_fname = tools.get_output_filename(
+                                    f'{fdt_fname}-{fdt_phase}.dtb')
+                                print('fdt_phase', fdt_phase)
+                                self._run_fdtgrep(fname, fdt_phase, phase_fname)
+                                data = tools.read_file(phase_fname)
+                            else:
+                                data = tools.read_file(fname)
+                            fsw.property('data', data)
 
                         for subnode in node.subnodes:
                             with fsw.add_node(subnode.name):
@@ -834,6 +855,7 @@ class Entry_fit(Entry_section):
     def AddBintools(self, btools):
         super().AddBintools(btools)
         self.mkimage = self.AddBintool(btools, 'mkimage')
+        self.fdtgrep = self.AddBintool(btools, 'fdtgrep')
 
     def CheckMissing(self, missing_list):
         # We must use our private entry list for this since generator nodes

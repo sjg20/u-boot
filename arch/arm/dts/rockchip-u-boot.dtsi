@@ -233,7 +233,6 @@
 					compression = "lz4";
 					load = <CONFIG_VPL_TEXT_BASE>;
 					entry = <CONFIG_VPL_TEXT_BASE>;
-					phase = "vpl";
 					u-boot-vpl {
 						compress = "lz4";
 					};
@@ -242,6 +241,7 @@
 					description = "fdt-NAME";
 					compression = "none";
 					type = "flat_dt";
+					fit,fdt-phase = "vpl";
 				};
 			};
 			configurations {
