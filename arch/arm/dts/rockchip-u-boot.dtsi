@@ -5,6 +5,12 @@
 
 #include <config.h>
 
+#ifdef CONFIG_ARM64
+#define ARCH	"arm64"
+#else
+#define ARCH	"arm"
+#endif
+
 / {
 	binman: binman {
 		multiple-images;
@@ -54,11 +60,7 @@
 					description = "U-Boot SPL";
 					type = "firmware";
 					os = "U-Boot";
-#ifdef CONFIG_ARM64
-					arch = "arm64";
-#else
-					arch = "arm";
-#endif
+					arch = ARCH;
 					compression = "lz4";
 					load = <CONFIG_SPL_TEXT_BASE>;
 					entry = <CONFIG_SPL_TEXT_BASE>;
@@ -72,11 +74,7 @@
 					description = "U-Boot";
 					type = "standalone";
 					os = "U-Boot";
-#ifdef CONFIG_ARM64
-					arch = "arm64";
-#else
-					arch = "arm";
-#endif
+					arch = ARCH;
 #if defined(CONFIG_SPL_GZIP)
 					compression = "gzip";
 #elif defined(CONFIG_SPL_LZMA)
@@ -218,8 +216,38 @@
 		};
 
 #ifdef CONFIG_VPL
-		u-boot-vpl {
+		vpl {
+			type = "fit";
 			offset = <(CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR * 0x200 + 0x8000)>;
+			description = "FIT image for U-Boot TPL";
+			#address-cells = <1>;
+			fit,fdt-list = "of-list";
+			fit,align = <512>;
+			fit,external-offset = <0>;
+			images {
+				vpl {
+					description = "U-Boot VPL";
+					type = "firmware";
+					os = "U-Boot";
+					arch = ARCH;
+					compression = "lz4";
+					load = <CONFIG_VPL_TEXT_BASE>;
+					entry = <CONFIG_VPL_TEXT_BASE>;
+					phase = "vpl";
+					u-boot-vpl {
+						compress = "lz4";
+					};
+				};
+			};
+			configurations {
+				default = "@config-DEFAULT-SEQ";
+				@config-SEQ {
+					description = "NAME.dtb";
+					fdt = "fdt-SEQ";
+					fit,firmware = "vpl";
+					fit,loadables;
+				};
+			};
 // 			no-write-symbols;
 // 			compress = "lz4";
 		};

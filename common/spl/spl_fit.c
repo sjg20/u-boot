@@ -4,6 +4,8 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <display_options.h>
 #include <errno.h>
@@ -684,10 +686,10 @@ static int spl_fit_load_fpga(struct spl_fit_info *ctx,
 	return spl_fit_upload_fpga(ctx, node, &fpga_image);
 }
 
-static void set_ext_data_offset(struct spl_fit_info *ctx,
-				const void *fit_header)
+static ulong set_ext_data_offset(struct spl_fit_info *ctx,
+				 const void *fit_header)
 {
-	unsigned long size;
+	ulong size;
 
 	/*
 	 * For FIT with external data, figure out where the external images
@@ -698,12 +700,15 @@ static void set_ext_data_offset(struct spl_fit_info *ctx,
 	size = board_spl_fit_size_align(size);
 	ctx->ext_data_offset = ALIGN(size, 4);
 	ctx->fit = fit_header;
+
+	return size;
 }
 
 static int spl_simple_fit_read(struct spl_fit_info *ctx,
-			       struct spl_load_info *info, ulong offset)
+			       struct spl_load_info *info, ulong offset,
+			       ulong size)
 {
-	unsigned long count, size;
+	unsigned long count;
 	void *buf;
 
 	/*
@@ -759,10 +764,11 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	int ret;
 	int index = 0;
 	int firmware_node;
+	ulong size;
 
-	set_ext_data_offset(&ctx, fit);
-	if (!IS_ENABLED(CONFIG_VPL)) {
-		ret = spl_simple_fit_read(&ctx, info, offset);
+	size = set_ext_data_offset(&ctx, fit);
+	if (!spl_get_fit_loaded(info)) {
+		ret = spl_simple_fit_read(&ctx, info, offset, size);
 		if (ret < 0)
 			return ret;
 	}

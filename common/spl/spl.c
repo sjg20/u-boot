@@ -6,6 +6,8 @@
  * Aneesh V <aneesh@ti.com>
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <bloblist.h>
 #include <binman_sym.h>

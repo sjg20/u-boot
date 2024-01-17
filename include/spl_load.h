@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
+ /* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright (C) Sean Anderson <seanga2@gmail.com>
  */
@@ -38,9 +38,11 @@ static inline int _spl_load(struct spl_image_info *spl_image,
 		return -EIO;
 
 	if (image_get_magic(header) == FDT_MAGIC) {
-		if (IS_ENABLED(CONFIG_SPL_LOAD_FIT_FULL)) {
+		log_debug("Found FIT\n");
+		if (CONFIG_IS_ENABLED(LOAD_FIT_FULL)) {
 			void *buf;
 
+			log_debug("Full loading\n");
 			/*
 			 * In order to support verifying images in the FIT, we
 			 * need to load the whole FIT into memory. Try and
@@ -60,9 +62,12 @@ static inline int _spl_load(struct spl_image_info *spl_image,
 			return spl_parse_image_header(spl_image, bootdev, buf);
 		}
 
-		if (CONFIG_IS_ENABLED(SPL_LOAD_FIT))
+		if (CONFIG_IS_ENABLED(LOAD_FIT)) {
+			log_debug("Simple loading\n");
 			return spl_load_simple_fit(spl_image, info, offset,
 						   header);
+		}
+		log_debug("No FIT support\n");
 	}
 
 	if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER) &&

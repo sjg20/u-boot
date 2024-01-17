@@ -311,6 +311,8 @@ typedef ulong (*spl_load_reader)(struct spl_load_info *load, ulong sector,
  * @read: Function to call to read from the device
  * @priv: Private data for the device
  * @bl_len: Block length for reading in bytes
+ * @phase: Image phase to load
+ * @fit_loaded: true if the FIT has been loaded, except for external data
  */
 struct spl_load_info {
 	spl_load_reader read;
@@ -320,7 +322,8 @@ struct spl_load_info {
 #endif
 #if CONFIG_IS_ENABLED(BOOTMETH_VBE)
 	u8 phase;
-	ulong ext_data_offset;
+	ulong ext_data_offset;   // delete
+	u8 fit_loaded;
 #endif
 };
 
@@ -360,6 +363,7 @@ static inline enum image_phase_t spl_get_phase(struct spl_load_info *info)
 #endif
 }
 
+#if 0
 static inline void spl_set_ext_data_offset(struct spl_load_info *info,
 					   ulong ext_data_offset)
 {
@@ -374,6 +378,16 @@ static inline enum image_phase_t spl_get_ext_data_offset(struct spl_load_info *i
 	return info->ext_data_offset;
 #else
 	return 0;
+#endif
+}
+#endif
+
+static inline bool spl_get_fit_loaded(struct spl_load_info *info)
+{
+#if CONFIG_IS_ENABLED(BOOTMETH_VBE)
+	return info->fit_loaded;
+#else
+	return false;
 #endif
 }
 
