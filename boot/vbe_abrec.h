@@ -40,14 +40,36 @@ struct abrec_priv {
 };
 
 /**
+ * enum vbe_pick_t- indicates which firmware is picked
+ *
+ * @VBEFT_A: Firmware A
+ * @VBEFT_B: Firmware B
+ * @VBEFT_RECOVERY: Recovery firmware
+ */
+enum vbe_pick_t {
+	VBEP_A,
+	VBEP_B,
+	VBEP_RECOVERY,
+};
+
+/**
  * enum vbe_flags - flags controlling operation
  *
+ * @VBEF_TRY_COUNT_MASK: mask for the 'try count' value
  * @VBEF_TRY_B: Try the B slot
  * @VBEF_RECOVERY: Use recovery slot
  */
 enum vbe_flags {
-	VBEF_TRY_B	= BIT(0),
-	VBEF_RECOVERY	= BIT(1),
+	VBEF_TRY_COUNT_MASK	= 0x3,
+	VBEF_TRY_B	= BIT(2),
+	VBEF_RECOVERY	= BIT(3),
+
+	VBEF_RESULT_SHIFT	= 4,
+	VBEF_RESULT_MASK	= 3 << VBEF_RESULT_SHIFT,
+	VBEF_RESULT_UNKNOWN	= 0,
+	VBEF_RESULT_TRYING	= 1,
+	VBEF_RESULT_OK		= 2,
+	VBEF_RESULT_BAD		= 3,
 };
 
 /** struct abrec_state - state information read from media
@@ -77,5 +99,7 @@ int abrec_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow);
 
 int abrec_read_state(struct abrec_priv *priv, struct udevice *blk, void *buf,
 		     struct abrec_state *state);
+
+int abrec_read_priv(ofnode node, struct abrec_priv *priv);
 
 #endif /* __VBE_ABREC_H */

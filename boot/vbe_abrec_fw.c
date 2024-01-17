@@ -128,10 +128,13 @@ static int abrec_load_from_image(struct spl_image_info *image,
 		bootflow_free(&bflow);
 	} else {
 		ALLOC_CACHE_ALIGN_BUFFER(u8, buf, MMC_MAX_BLOCK_LEN);
+		uint flags, tries, prev_result;
 		struct udevice *media, *blk;
 		struct abrec_priv priv;
 		struct abrec_state state;
+		enum vbe_pick_t pick;
 		ulong offset, size;
+		ofnode node;
 
 		ret = uclass_get_device_by_seq(UCLASS_MMC, 1, &media);
 		if (ret)
@@ -139,10 +142,59 @@ static int abrec_load_from_image(struct spl_image_info *image,
 		ret = blk_get_from_parent(media, &blk);
 		if (ret)
 			return log_msg_ret("med", ret);
-		ret = abrec_read_state(&priv, blk, buf, &state);
 
-		offset = binman_sym(ulong, vbe_a, image_pos);
-		size = binman_sym(ulong, vbe_a, size);
+		node = vbe_get_node();
+		if (!ofnode_valid(node))
+			return log_msg_ret("nod", -EINVAL);
+
+		ret = abrec_read_priv(node, &priv);
+		if (ret)
+			return log_msg_ret("pri", ret);
+
+		ret = abrec_read_state(&priv, blk, buf, &state);
+		if (ret)
+			return log_msg_ret("sta", ret);
+
+		flags = state.flags;
+		tries = flags & VBEF_TRY_COUNT_MASK;
+		prev_result = (flags & VBEF_RESULT_MASK) >> VBEF_RESULT_SHIFT;
+		flags &= ~(VBEF_TRY_COUNT_MASK | VBEF_RESULT_MASK);
+
+		if (state.flags & VBEF_RECOVERY) {
+			pick = VBEP_RECOVERY;
+
+		/* if we are trying B but ran out of tries, use A */
+		} else if ((prev_result == VBEF_RESULT_TRYING) && !tries) {
+			pick = VBEP_A;
+			flags |= VBEF_RESULT_BAD << VBEF_RESULT_SHIFT;
+
+		/* if requested, try B */
+		} else if (flags & VBEF_TRY_B) {
+			pick = VBEP_B;
+
+			/* decrement the try count if not already zero */
+			if (tries)
+				tries--;
+			flags |= VBEF_RESULT_TRYING << VBEF_RESULT_SHIFT;
+		} else {
+			pick = VBEP_A;
+		}
+		state.flags = flags | tries;
+
+		switch (pick) {
+		case VBEP_A:
+			offset = binman_sym(ulong, vbe_a, image_pos);
+			size = binman_sym(ulong, vbe_a, size);
+			break;
+		case VBEP_B:
+			offset = binman_sym(ulong, vbe_b, image_pos);
+			size = binman_sym(ulong, vbe_b, size);
+			break;
+		case VBEP_RECOVERY:
+			offset = binman_sym(ulong, vbe_recovery, image_pos);
+			size = binman_sym(ulong, vbe_recovery, size);
+			break;
+		}
 		log_debug("offset=%lx size=%lx\n", offset, size);
 
 		ret = vbe_read_fit(blk, offset, size, image, NULL, NULL);

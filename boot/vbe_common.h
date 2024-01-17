@@ -21,4 +21,6 @@ ulong h_vbe_load_read(struct spl_load_info *load, ulong off, ulong size,
 int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 		 struct spl_image_info *image, ulong *load_addrp, char **namep);
 
+ofnode vbe_get_node(void);
+
 #endif /* __VBE_ABREC_H */
