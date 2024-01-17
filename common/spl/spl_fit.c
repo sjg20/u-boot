@@ -161,7 +161,7 @@ static int spl_fit_get_image_node(const struct spl_fit_info *ctx,
 	if (err)
 		return err;
 
-	debug("%s: '%s'\n", type, str);
+	debug("get_image_node %s: '%s'\n", type, str);
 
 	node = fdt_subnode_offset(ctx->fit, ctx->images_node, str);
 	if (node < 0) {
@@ -222,6 +222,7 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 	const void *data;
 	const void *fit = ctx->fit;
 	bool external_data = false;
+	bool deferred_read = false;
 
 	log_debug("starting\n");
 	if (CONFIG_IS_ENABLED(BOOTMETH_VBE_SIMPLE_FW) &&
@@ -299,9 +300,14 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 		size = get_aligned_image_size(info, length, offset);
 		read_offset = fit_offset + get_aligned_image_offset(info,
 							    offset);
-		log_debug("reading from offset %x / %lx to %p: ", offset,
-			  read_offset, src_ptr);
+		log_debug("reading from offset %x / %lx size %lx to %p: ",
+			  offset, read_offset, size, src_ptr);
 
+		if ((ulong)src_ptr >= 0xff8c0000) {
+			src_ptr = malloc(size);
+			log_debug("bad read - new ptr %p\n", src_ptr);
+			deferred_read = true;
+		}
 		if (info->read(info, read_offset, size, src_ptr) < length)
 			return -EIO;
 
@@ -350,7 +356,10 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 		}
 		length = loadEnd - CONFIG_SYS_LOAD_ADDR;
 	} else {
-		memcpy(load_ptr, src, length);
+		if (deferred_read)
+			log_debug("deferred load %lx\n", load_addr);
+		else
+			memcpy(load_ptr, src, length);
 	}
 
 	if (image_info) {
@@ -364,6 +373,7 @@ static int load_simple_fit(struct spl_load_info *info, ulong fit_offset,
 		else
 			image_info->entry_point = FDT_ERROR;
 	}
+	log_debug("- done loading\n");
 
 	return 0;
 }
@@ -871,7 +881,7 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 			spl_image->entry_point = image_info.entry_point;
 
 		/* Record our loadables into the FDT */
-		if (spl_image->fdt_addr)
+		if (0 && spl_image->fdt_addr)
 			spl_fit_record_loadable(&ctx, index,
 						spl_image->fdt_addr,
 						&image_info);
