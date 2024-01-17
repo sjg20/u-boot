@@ -26,16 +26,31 @@ enum vbe_phase_t {
 };
 
 /**
+ * enum vbe_pick_t - indicates which firmware is picked
+ *
+ * @VBEFT_A: Firmware A
+ * @VBEFT_B: Firmware B
+ * @VBEFT_RECOVERY: Recovery firmware
+ */
+enum vbe_pick_t {
+	VBEP_A,
+	VBEP_B,
+	VBEP_RECOVERY,
+};
+
+/**
  * struct vbe_handoff - information about VBE progress
  *
  * @offset: Offset of the FIT to use for SPL onwards
  * @size: Size of the area containing the FIT
  * @phases: Indicates which phases used the VBE bootmeth (1 << PHASE_...)
+ * @pick: Indicates which firmware pick was used (enum vbe_pick_t)
  */
 struct vbe_handoff {
 	ulong offset;
 	ulong size;
 	u8 phases;
+	u8 pick;
 };
 
 /**

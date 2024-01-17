@@ -104,7 +104,6 @@ void board_init_f(ulong dummy)
 		hang();
 	}
 	arch_cpu_init();
-	printch('f');
 // 	rockchip_stimer_init();
 
 #ifdef CONFIG_SYS_ARCH_TIMER

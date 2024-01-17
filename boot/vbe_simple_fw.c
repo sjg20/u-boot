@@ -20,7 +20,6 @@
 #include <image.h>
 #include <log.h>
 #include <mapmem.h>
-#include <memalign.h>
 #include <mmc.h>
 #include <spl.h>
 #include <vbe.h>
@@ -81,7 +80,6 @@ static int simple_load_from_image(struct spl_image_info *image,
 	struct vbe_handoff *handoff;
 	int ret;
 
-	log_debug("here\n");
 	if (spl_phase() != PHASE_VPL && spl_phase() != PHASE_SPL)
 		return -ENOENT;
 

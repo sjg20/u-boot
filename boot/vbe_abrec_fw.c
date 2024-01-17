@@ -6,7 +6,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_BOOT
 
 #include <common.h>
@@ -36,6 +35,8 @@ binman_sym_declare(ulong, vbe_recovery, image_pos);
 binman_sym_declare(ulong, vbe_a, size);
 binman_sym_declare(ulong, vbe_b, size);
 binman_sym_declare(ulong, vbe_recovery, size);
+
+static const char *pick_names[] = {"A", "B", "Recovery"};
 
 /**
  * abrec_read_bootflow_fw() - Create a bootflow for firmware
@@ -139,12 +140,14 @@ static int abrec_run_vpl(struct udevice *blk, struct spl_image_info *image,
 		break;
 	}
 	log_debug("pick=%d, offset=%lx size=%lx\n", pick, offset, size);
+	log_info("VBE: Firmware pick %s at %lx\n", pick_names[pick], offset);
 
 	ret = vbe_read_fit(blk, offset, size, image, NULL, NULL);
 	if (ret)
 		return log_msg_ret("vbe", ret);
 	handoff->offset = offset;
 	handoff->size = size;
+	handoff->pick = pick;
 	image->load_addr = spl_get_image_text_base();
 	image->entry_point = image->load_addr;
 
@@ -156,6 +159,8 @@ static int abrec_run_spl(struct udevice *blk, struct spl_image_info *image,
 {
 	int ret;
 
+	log_info("VBE: Firmware pick %s at %lx\n", pick_names[handoff->pick],
+		 handoff->offset);
 	ret = vbe_read_fit(blk, handoff->offset, handoff->size, image, NULL,
 			   NULL);
 	if (ret)
@@ -172,7 +177,6 @@ static int abrec_load_from_image(struct spl_image_info *image,
 	struct vbe_handoff *handoff;
 	int ret;
 
-	log_debug("here\n");
 	if (spl_phase() != PHASE_VPL && spl_phase() != PHASE_SPL)
 		return -ENOENT;
 

@@ -9,6 +9,7 @@
 #ifndef __VBE_ABREC_H
 #define __VBE_ABREC_H
 
+#include <vbe.h>
 #include "vbe_common.h"
 
 struct bootflow;
@@ -26,19 +27,6 @@ struct abrec_priv {
 	const char *storage;
 };
 
-/**
- * enum vbe_pick_t- indicates which firmware is picked
- *
- * @VBEFT_A: Firmware A
- * @VBEFT_B: Firmware B
- * @VBEFT_RECOVERY: Recovery firmware
- */
-enum vbe_pick_t {
-	VBEP_A,
-	VBEP_B,
-	VBEP_RECOVERY,
-};
-
 /** struct abrec_state - state information read from media
  *
  * @fw_version: Firmware version string
@@ -51,6 +39,7 @@ struct abrec_state {
 	bool try_b;
 	bool recovery;
 	enum vbe_try_result try_result;
+	enum vbe_pick_t pick;
 };
 
 /**

@@ -95,14 +95,6 @@ ENTRY(_main)
 #if defined(CONFIG_DEBUG_UART) && CONFIG_IS_ENABLED(SERIAL)
 	bl	debug_uart_init
 #endif
-#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
-	mov	x0, #68
-	bl	printch
-#endif
-#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
-	mov	x0, #69
-	bl	printch
-#endif
 
 	mov	x0, #0
 	bl	board_init_f

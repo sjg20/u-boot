@@ -56,6 +56,7 @@ int abrec_read_nvdata(struct abrec_priv *priv, struct udevice *blk,
 	state->try_count = flags & VBEF_TRY_COUNT_MASK;
 	state->try_b = flags & VBEF_TRY_B;
 	state->recovery = flags & VBEF_RECOVERY;
+	state->pick = (flags & VBEF_PICK_MASK) >> VBEF_PICK_SHIFT;
 	log_debug("version=%s\n", state->fw_version);
 
 	return 0;

@@ -60,6 +60,9 @@ enum vbe_flags {
 
 	VBEF_RESULT_SHIFT	= 4,
 	VBEF_RESULT_MASK	= 3 << VBEF_RESULT_SHIFT,
+
+	VBEF_PICK_SHIFT		= 6,
+	VBEF_PICK_MASK		= 3 << VBEF_PICK_SHIFT,
 };
 
 /**

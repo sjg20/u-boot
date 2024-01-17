@@ -539,10 +539,6 @@ int ns16550_serial_probe(struct udevice *dev)
 
 	com_port->plat = dev_get_plat(dev);
 	ns16550_init(com_port, -1);
-#ifdef CONFIG_TPL_BUILD
-	printascii("testing ");
-	printhex8(plat->clock);
-#endif
 
 	return 0;
 }
