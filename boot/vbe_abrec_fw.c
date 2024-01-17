@@ -6,6 +6,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_BOOT
 
 #include <common.h>
@@ -25,28 +26,18 @@
 #include <spl.h>
 #include <vbe.h>
 #include <dm/device-internal.h>
-#include "vbe_simple.h"
+#include "vbe_abrec.h"
+#include "vbe_common.h"
 
 #define USE_BOOTMETH	false
 
-binman_sym_declare(ulong, vbe, image_pos);
+binman_sym_declare(ulong, vbe_a, image_pos);
+binman_sym_declare(ulong, vbe_b, image_pos);
+binman_sym_declare(ulong, vbe_recovery, image_pos);
 
-static ulong h_vbe_load_read(struct spl_load_info *load, ulong off,
-			     ulong size, void *buf)
-{
-	struct blk_desc *desc = load->priv;
-	lbaint_t sector = off >> desc->log2blksz;
-	lbaint_t count = size >> desc->log2blksz;
-	int ret;
-
-	log_debug("vbe read log2blksz %x offset %lx sector %lx count %lx\n",
-		  desc->log2blksz, (ulong)off, (long)sector, (ulong)count);
-// 	print_buffer(0x000631f0, (void *)0x000631f0, 1, 0x200, 0);
-
-	ret = blk_dread(desc, sector, count, buf) << desc->log2blksz;
-	log_debug("ret=%d\n", ret);
-	return ret;
-}
+binman_sym_declare(ulong, vbe_a, size);
+binman_sym_declare(ulong, vbe_b, size);
+binman_sym_declare(ulong, vbe_recovery, size);
 
 static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 			ulong area_size, struct spl_image_info *image,
@@ -122,7 +113,7 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 			  blk->name, desc->blksz, desc->log2blksz, area_offset, ALIGN(size, 4));
 // 		spl_set_ext_data_offset(&info, ext_data_offset);
 		ret = spl_load_simple_fit(image, &info, area_offset, buf);
-		log_debug("spl_load_simple_fit() ret=%d\n", ret);
+		log_debug("spl_load_abrec_fit() ret=%d\n", ret);
 
 		return ret;
 	}
@@ -207,22 +198,22 @@ static int vbe_read_fit(struct udevice *blk, ulong area_offset,
 }
 
 /**
- * vbe_simple_read_bootflow_fw() - Create a bootflow for firmware
+ * vbe_abrec_read_bootflow_fw() - Create a bootflow for firmware
  *
  * Locates and loads the firmware image (FIT) needed for the next phase. The FIT
  * should ideally use external data, to reduce the amount of it that needs to be
  * read.
  *
  * @bdev: bootdev device containing the firmwre
- * @meth: VBE simple bootmeth
+ * @meth: VBE abrec bootmeth
  * @blow: Place to put the created bootflow, on success
  * @return 0 if OK, -ve on error
  */
-int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
+int vbe_abrec_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 {
 	struct udevice *media = dev_get_parent(bflow->dev);
 	struct udevice *meth = bflow->method;
-	struct simple_priv *priv = dev_get_priv(meth);
+	struct abrec_priv *priv = dev_get_priv(meth);
 	ulong len, load_addr;
 	struct udevice *blk;
 	int ret;
@@ -245,7 +236,7 @@ int vbe_simple_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 	return 0;
 }
 
-static int simple_load_from_image(struct spl_image_info *image,
+static int abrec_load_from_image(struct spl_image_info *image,
 				  struct spl_boot_device *bootdev)
 {
 	struct vbe_handoff *handoff;
@@ -262,7 +253,7 @@ static int simple_load_from_image(struct spl_image_info *image,
 
 	if (USE_BOOTMETH) {
 		struct udevice *meth, *bdev;
-		struct simple_priv *priv;
+		struct abrec_priv *priv;
 		struct bootflow bflow;
 
 		vbe_find_first_device(&meth);
@@ -274,7 +265,7 @@ static int simple_load_from_image(struct spl_image_info *image,
 			return log_msg_ret("probe", ret);
 
 		priv = dev_get_priv(meth);
-		log_debug("simple %s\n", priv->storage);
+		log_debug("abrec %s\n", priv->storage);
 		ret = bootdev_find_by_label(priv->storage, &bdev, NULL);
 		if (ret)
 			return log_msg_ret("bd", ret);
@@ -297,7 +288,7 @@ static int simple_load_from_image(struct spl_image_info *image,
 		bootflow_free(&bflow);
 	} else {
 		struct udevice *media, *blk;
-		ulong offset;
+		ulong offset, size;
 
 		ret = uclass_get_device_by_seq(UCLASS_MMC, 1, &media);
 		if (ret)
@@ -305,11 +296,11 @@ static int simple_load_from_image(struct spl_image_info *image,
 		ret = blk_get_from_parent(media, &blk);
 		if (ret)
 			return log_msg_ret("med", ret);
-		offset = binman_sym(ulong, vbe, image_pos);
-		printf("offset=%lx\n", offset);
+		offset = binman_sym(ulong, vbe_a, image_pos);
+		size = binman_sym(ulong, vbe_a, size);
+		log_debug("offset=%lx size=%lx\n", offset, size);
 
-		ret = vbe_read_fit(blk, 0x7f8000 + 0x8000, 0x400000, image,
-				   NULL, NULL);
+		ret = vbe_read_fit(blk, offset, size, image, NULL, NULL);
 		if (ret)
 			return log_msg_ret("vbe", ret);
 		if (spl_phase() == PHASE_VPL) {
@@ -323,5 +314,5 @@ static int simple_load_from_image(struct spl_image_info *image,
 
 	return 0;
 }
-SPL_LOAD_IMAGE_METHOD("vbe_simple", 5, BOOT_DEVICE_VBE,
-		      simple_load_from_image);
+SPL_LOAD_IMAGE_METHOD("vbe_abrec", 5, BOOT_DEVICE_VBE,
+		      abrec_load_from_image);

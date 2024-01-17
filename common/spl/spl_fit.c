@@ -4,6 +4,8 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define LOG_DEBUG
+
 #include <common.h>
 #include <display_options.h>
 #include <errno.h>
