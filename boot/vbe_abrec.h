@@ -36,14 +36,27 @@ struct abrec_priv {
 	const char *storage;
 };
 
+/**
+ * enum vbe_flags - flags controlling operation
+ *
+ * @VBEF_TRY_B: Try the B slot
+ * @VBEF_RECOVERY: Use recovery slot
+ */
+enum vbe_flags {
+	VBEF_TRY_B	= BIT(0),
+	VBEF_RECOVERY	= BIT(1),
+};
+
 /** struct abrec_state - state information read from media
  *
  * @fw_version: Firmware version string
  * @fw_vernum: Firmware version number
+ * @flags: Flags controlling operation (enum vbe_flags)
  */
 struct abrec_state {
 	char fw_version[MAX_VERSION_LEN];
 	u32 fw_vernum;
+	u32 flags;
 };
 
 /**
