@@ -166,9 +166,6 @@ void board_init_f_init_reserve(ulong base)
 	memset((void *)base, '\0', CONFIG_VAL(SYS_MALLOC_F_LEN));
 #endif
 #endif
-#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_VPL_BUILD) && !defined(CONFIG_TPL_BUILD)
-	printch('a');
-#endif
 
 	if (CONFIG_IS_ENABLED(SYS_REPORT_STACK_F_USAGE))
 		board_init_f_init_stack_protection();

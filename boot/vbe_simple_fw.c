@@ -25,11 +25,16 @@
 #include <spl.h>
 #include <vbe.h>
 #include <dm/device-internal.h>
+#include "vbe_common.h"
 #include "vbe_simple.h"
 
 #define USE_BOOTMETH	false
 
-binman_sym_declare(ulong, vbe, image_pos);
+#ifdef CONFIG_BOOTMETH_VBE_SIMPLE
+binman_sym_extern(ulong, vbe_a, image_pos);
+#else
+binman_sym_declare(ulong, vbe_a, image_pos);
+#endif
 
 /**
  * vbe_simple_read_bootflow_fw() - Create a bootflow for firmware
@@ -130,7 +135,7 @@ static int simple_load_from_image(struct spl_image_info *image,
 		ret = blk_get_from_parent(media, &blk);
 		if (ret)
 			return log_msg_ret("med", ret);
-		offset = binman_sym(ulong, vbe, image_pos);
+		offset = binman_sym(ulong, vbe_a, image_pos);
 		printf("offset=%lx\n", offset);
 
 		ret = vbe_read_fit(blk, 0x7f8000 + 0x8000, 0x400000, image,

@@ -9,6 +9,9 @@
 #ifndef __VBE_ABREC_H
 #define __VBE_ABREC_H
 
+struct bootflow;
+struct udevice;
+
 enum {
 	MAX_VERSION_LEN		= 256,
 
@@ -60,7 +63,7 @@ struct abrec_state {
 };
 
 /**
- * vbe_abrec_read_fw_bootflow() - Read a bootflow for firmware
+ * abrec_read_fw_bootflow() - Read a bootflow for firmware
  *
  * Locates and loads the firmware image (FIT) needed for the next phase. The FIT
  * should ideally use external data, to reduce the amount of it that needs to be
@@ -70,15 +73,9 @@ struct abrec_state {
  * @blow: Place to put the created bootflow, on success
  * @return 0 if OK, -ve on error
  */
-int vbe_abrec_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow);
+int abrec_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow);
 
-/**
- * vbe_abrec_read_state() - Read the VBE abrec state information
- *
- * @dev: VBE bootmeth
- * @state: Place to put the state
- * @return 0 if OK, -ve on error
- */
-int vbe_abrec_read_state(struct udevice *dev, struct abrec_state *state);
+int abrec_read_state(struct abrec_priv *priv, struct udevice *blk, void *buf,
+		     struct abrec_state *state);
 
 #endif /* __VBE_ABREC_H */

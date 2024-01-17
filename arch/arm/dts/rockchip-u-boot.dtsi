@@ -226,7 +226,7 @@
 #endif
 
 #if defined(CONFIG_SPL_FIT) && (defined(CONFIG_ARM64) || defined(CONFIG_SPL_OPTEE_IMAGE))
-#ifdef CONFIG_VPL
+#ifdef CONFIG_BOOTMETH_VBE_ABREC
 		vbe-a {
 			type = "fit";
 			offset = <(CONFIG_SPL_PAD_TO + 0x8000)>;
@@ -240,6 +240,12 @@
 		vbe-recovery {
 			type = "fit";
 			offset = <0xc00000>;
+			insert-template = <&common_part>;
+		};
+#elif defined(CONFIG_BOOTMETH_VBE_SIMPLE)
+		vbe {
+			type = "fit";
+			offset = <(CONFIG_SPL_PAD_TO + 0x8000)>;
 			insert-template = <&common_part>;
 		};
 #else

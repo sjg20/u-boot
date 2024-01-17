@@ -21,6 +21,7 @@
 #include <image.h>
 #include <log.h>
 #include <mapmem.h>
+#include <memalign.h>
 #include <mmc.h>
 #include <spl.h>
 #include <vbe.h>
@@ -37,7 +38,7 @@ binman_sym_declare(ulong, vbe_b, size);
 binman_sym_declare(ulong, vbe_recovery, size);
 
 /**
- * vbe_abrec_read_bootflow_fw() - Create a bootflow for firmware
+ * abrec_read_bootflow_fw() - Create a bootflow for firmware
  *
  * Locates and loads the firmware image (FIT) needed for the next phase. The FIT
  * should ideally use external data, to reduce the amount of it that needs to be
@@ -48,7 +49,7 @@ binman_sym_declare(ulong, vbe_recovery, size);
  * @blow: Place to put the created bootflow, on success
  * @return 0 if OK, -ve on error
  */
-int vbe_abrec_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
+int abrec_read_bootflow_fw(struct udevice *dev, struct bootflow *bflow)
 {
 	struct udevice *media = dev_get_parent(bflow->dev);
 	struct udevice *meth = bflow->method;
@@ -126,7 +127,10 @@ static int abrec_load_from_image(struct spl_image_info *image,
 		/* this is not used from now on, so free it */
 		bootflow_free(&bflow);
 	} else {
+		ALLOC_CACHE_ALIGN_BUFFER(u8, buf, MMC_MAX_BLOCK_LEN);
 		struct udevice *media, *blk;
+		struct abrec_priv priv;
+		struct abrec_state state;
 		ulong offset, size;
 
 		ret = uclass_get_device_by_seq(UCLASS_MMC, 1, &media);
@@ -135,6 +139,8 @@ static int abrec_load_from_image(struct spl_image_info *image,
 		ret = blk_get_from_parent(media, &blk);
 		if (ret)
 			return log_msg_ret("med", ret);
+		ret = abrec_read_state(&priv, blk, buf, &state);
+
 		offset = binman_sym(ulong, vbe_a, image_pos);
 		size = binman_sym(ulong, vbe_a, size);
 		log_debug("offset=%lx size=%lx\n", offset, size);
