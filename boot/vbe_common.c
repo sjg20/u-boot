@@ -9,6 +9,7 @@
 #define LOG_DEBUG
 
 #include <bootstage.h>
+#include <display_options.h>
 #include <dm.h>
 #include <spl.h>
 #include <mapmem.h>
@@ -41,7 +42,7 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 	const char *fit_uname, *fit_uname_config;
 	struct bootm_headers images = {};
 	ulong size, blknum, addr, len, load_addr, num_blks, spl_load_addr;
-	ulong aligned_size, fdt_load_addr, fdt_len;
+	ulong aligned_size, fdt_load_addr, fdt_size;
 	enum image_phase_t phase;
 	struct blk_desc *desc;
 	int node, ret;
@@ -129,20 +130,24 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 	node = ret;
 	log_debug("noload to %lx size %lx\n", load_addr, len);
 
+	fdt_load_addr = 0;
+	fdt_size = 0;
 	if (spl_phase() == PHASE_TPL) {
 		/* allow use of a different image from the configuration node */
 		fit_uname = NULL;
 		ret = fit_image_load(&images, addr, &fit_uname, &fit_uname_config,
 			     IH_ARCH_DEFAULT, image_ph(phase, IH_TYPE_FLATDT),
 			     BOOTSTAGE_ID_FIT_SPL_START, FIT_LOAD_IGNORED,
-			     &fdt_load_addr, &fdt_len);
+			     &fdt_load_addr, &fdt_size);
+		fdt_size = ALIGN(fdt_size, desc->blksz);
 		log_debug("FDT noload to %lx size %lx\n", fdt_load_addr,
-			  fdt_len);
+			  fdt_size);
 	}
 
 	for_spl = !USE_BOOTMETH && CONFIG_IS_ENABLED(RELOC_LOADER);
 	if (for_spl) {
 		image->size = len;
+		image->fdt_size = fdt_size;
 		ret = spl_reloc_prepare(image, &spl_load_addr);
 		if (ret)
 			return log_msg_ret("spl", ret);
@@ -181,8 +186,8 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 		log_debug("read offset %lx blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
 			  offset, blknum, full_size, num_blks, base, base_buf,
 			  ret);
-		if (ret < 0)
-			return log_msg_ret("rd", ret);
+		if (ret != num_blks)
+			return log_msg_ret("rd", -EIO);
 		if (extra) {
 			log_debug("move %p %p %lx\n", base_buf,
 				  base_buf + extra, len);
@@ -192,6 +197,27 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 // 		uint from = ALIGN_DOWN(len - 0x40, 0x10);
 // 		print_buffer(from, base_buf + from, 1, 0x50, 0);
 // 		print_buffer(0, base_buf, 1, len, 0);
+
+		/* now the FDT */
+		offset = area_offset + fdt_load_addr - addr;
+		blknum = offset / desc->blksz;
+		extra = offset % desc->blksz;
+		full_size = fdt_size + extra;
+		num_blks = DIV_ROUND_UP(full_size, desc->blksz);
+		log_debug("fdt read offset %lx blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
+			  offset, blknum, full_size, num_blks, base + len,
+			  base_buf + len, ret);
+		ret = blk_read(blk, blknum, num_blks, base_buf + len);
+		if (ret != num_blks)
+			return log_msg_ret("rdf", -EIO);
+		print_buffer(base + len, base_buf + len, 1, 0x10, 0);
+		if (extra) {
+			log_debug("move %p %p %lx\n", base_buf + len,
+				  base_buf + len + extra, fdt_size);
+			memmove(base_buf + len, base_buf + len + extra,
+				fdt_size);
+// 			print_buffer(0, base_buf + len, 1, 0x10, 0);
+		}
 	}
 	if (load_addrp)
 		*load_addrp = load_addr;

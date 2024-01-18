@@ -61,12 +61,13 @@ static int setup_layout(struct spl_image_info *image, ulong *addrp)
 	rcode_size = _rcode_end - _rcode_start;
 	rcode_base = limit - rcode_size;
 	buf_size = rcode_base - base;
-	margin = buf_size - image->size;
-	log_info("limit %lx fdt_size %lx base %lx avail %x need %x, margin%s%lx\n",
-		  limit, fdt_size, base, buf_size, image->size,
-		  margin >= 0 ? " " : " -", abs(margin));
+	uint need_size = image->size + image->fdt_size;
+	margin = buf_size - need_size;
+	log_info("limit %lx fdt_size %lx base %lx avail %x image %x fdt %lx need %x, margin%s%lx\n",
+		  limit, fdt_size, base, buf_size, image->size, image->fdt_size,
+		  need_size, margin >= 0 ? " " : " -", abs(margin));
 	if (margin < 0) {
-		log_err("Image size %x but buffer is only %x\n", image->size,
+		log_err("Image size %x but buffer is only %x\n", need_size,
 			buf_size);
 		return -ENOSPC;
 	}
@@ -85,7 +86,8 @@ static int setup_layout(struct spl_image_info *image, ulong *addrp)
 	memcpy(rcode_buf, _rcode_start, rcode_size);
 // 	print_buffer(rcode_base, rcode_buf, 4, 4, 0);
 
-	image->buf = map_sysmem(base, image->size);
+	image->buf = map_sysmem(base, need_size);
+	image->fdt_buf = image->buf + image->size;
 	image->rcode_buf = rcode_buf;
 	*addrp = base;
 
@@ -167,6 +169,14 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 	}
 	if (*image->stack_prot != STACK_PROT_VALUE)
 		return -EFAULT;
+
+	/* copy in the FDT if needed */
+	if (image->fdt_size) {
+		void *fdt_start = image->buf + ALIGN(unc_len, 4);
+
+		memcpy(fdt_start, image->fdt_buf, image->fdt_size);
+	}
+
 	crc = crc8(0, (u8 *)dst, unc_len);
 	if (spl_phase() == PHASE_VPL)
 		log_debug("ret=%d\n", ret);

@@ -230,11 +230,15 @@
 					type = "firmware";
 					os = "u-boot";
 					arch = ARCH;
-					compression = "lz4";
+// 					compression = "lz4";
 					load = <CONFIG_VPL_TEXT_BASE>;
 					entry = <CONFIG_VPL_TEXT_BASE>;
-					u-boot-vpl {
+					section {
 						compress = "lz4";
+						u-boot-vpl-nodtb {
+						};
+						u-boot-vpl-bss-pad {
+						};
 					};
 				};
 				@fdt-SEQ {

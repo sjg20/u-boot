@@ -265,6 +265,7 @@ struct spl_image_info {
 	u32 boot_device;
 	u32 offset;
 	u32 size;
+	ulong fdt_size;
 	u32 flags;
 	void *arg;
 #ifdef CONFIG_SPL_LEGACY_IMAGE_CRC_CHECK
@@ -274,6 +275,7 @@ struct spl_image_info {
 #endif
 #if CONFIG_IS_ENABLED(RELOC_LOADER)
 	void *buf;
+	void *fdt_buf;
 	void *rcode_buf;
 	uint *stack_prot;
 	ulong reloc_offset;
