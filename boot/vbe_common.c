@@ -158,8 +158,9 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 	log_debug("load_addr %lx len %lx addr %lx aligned_size %lx\n",
 		  load_addr, len, addr, aligned_size);
 	if (load_addr + len > addr + aligned_size) {
-		ulong base, full_size, offset, extra;
-		void *base_buf;
+		ulong base, full_size, offset, extra, fdt_base, fdt_full_size;
+		ulong fdt_offset;
+		void *base_buf, *fdt_base_buf;
 
 		/* Find the start address to load from */
 		base = ALIGN_DOWN(load_addr, desc->blksz);
@@ -183,8 +184,8 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 			base = spl_load_addr;
 		base_buf = map_sysmem(base, full_size);
 		ret = blk_read(blk, blknum, num_blks, base_buf);
-		log_debug("read offset %lx blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
-			  offset, blknum, full_size, num_blks, base, base_buf,
+		log_debug("read foffset %lx blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
+			  offset - 0x8000, blknum, full_size, num_blks, base, base_buf,
 			  ret);
 		if (ret != num_blks)
 			return log_msg_ret("rd", -EIO);
@@ -193,30 +194,34 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 				  base_buf + extra, len);
 			memmove(base_buf, base_buf + extra, len);
 		}
-// 		print_buffer(0, base_buf, 1, 0x10, 0);
+		print_buffer(0, base_buf, 1, 0x10, 0);
 // 		uint from = ALIGN_DOWN(len - 0x40, 0x10);
 // 		print_buffer(from, base_buf + from, 1, 0x50, 0);
 // 		print_buffer(0, base_buf, 1, len, 0);
 
 		/* now the FDT */
-		offset = area_offset + fdt_load_addr - addr;
-		blknum = offset / desc->blksz;
-		extra = offset % desc->blksz;
-		full_size = fdt_size + extra;
-		num_blks = DIV_ROUND_UP(full_size, desc->blksz);
-		log_debug("fdt read offset %lx blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
-			  offset, blknum, full_size, num_blks, base + len,
-			  base_buf + len, ret);
-		ret = blk_read(blk, blknum, num_blks, base_buf + len);
+		fdt_offset = area_offset + fdt_load_addr - addr;
+		blknum = fdt_offset / desc->blksz;
+		extra = fdt_offset % desc->blksz;
+		fdt_full_size = fdt_size + extra;
+		num_blks = DIV_ROUND_UP(fdt_full_size, desc->blksz);
+		fdt_base = ALIGN(base + len, 4);
+		fdt_base_buf = map_sysmem(fdt_base, fdt_size);
+		*(ulong *)fdt_base_buf = 0x12345678;
+		print_buffer(fdt_base, fdt_base_buf, 1, 0x10, 0);
+		ret = blk_read(blk, blknum, num_blks, fdt_base_buf);
+		log_debug("fdt read foffset %lx blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
+			  fdt_offset - 0x8000, blknum, fdt_full_size, num_blks,
+			  fdt_base, fdt_base_buf, ret);
 		if (ret != num_blks)
 			return log_msg_ret("rdf", -EIO);
-		print_buffer(base + len, base_buf + len, 1, 0x10, 0);
+		print_buffer(fdt_base, fdt_base_buf, 1, 0x10, 0);
 		if (extra) {
-			log_debug("move %p %p %lx\n", base_buf + len,
-				  base_buf + len + extra, fdt_size);
-			memmove(base_buf + len, base_buf + len + extra,
+			log_debug("move %p %p %lx\n", fdt_base_buf,
+				  fdt_base_buf + extra, fdt_size);
+			memmove(fdt_base_buf, fdt_base_buf + extra,
 				fdt_size);
-// 			print_buffer(0, base_buf + len, 1, 0x10, 0);
+// 			print_buffer(0, fdt_base_buf, 1, 0x10, 0);
 		}
 	}
 	if (load_addrp)
