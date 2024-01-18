@@ -223,6 +223,9 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 				fdt_size);
 // 			print_buffer(0, fdt_base_buf, 1, 0x10, 0);
 		}
+#if CONFIG_IS_ENABLED(RELOC_LOADER)
+		image->fdt_buf = fdt_base_buf;
+#endif
 	}
 	if (load_addrp)
 		*load_addrp = load_addr;

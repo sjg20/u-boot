@@ -172,7 +172,8 @@ __rcode int rcode_reloc_and_jump(struct spl_image_info *image)
 
 	/* copy in the FDT if needed */
 	if (image->fdt_size) {
-		void *fdt_start = image->buf + ALIGN(unc_len, 4);
+// 		void *fdt_start = dst + ALIGN(unc_len, 4);
+		void *fdt_start = (void *)0xff8d6538;
 
 		memcpy(fdt_start, image->fdt_buf, image->fdt_size);
 	}

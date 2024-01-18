@@ -1259,6 +1259,7 @@ static void *fdt_find_separate(void)
 		}
 	}
 #endif
+	print_buffer((ulong)fdt_blob, fdt_blob, 1, 0x100, 0);
 
 	return fdt_blob;
 }
