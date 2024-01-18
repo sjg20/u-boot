@@ -234,7 +234,7 @@
 					load = <CONFIG_VPL_TEXT_BASE>;
 					entry = <CONFIG_VPL_TEXT_BASE>;
 					section {
-						compress = "lz4";
+// 						compress = "lz4";
 						u-boot-vpl-nodtb {
 						};
 						u-boot-vpl-bss-pad {

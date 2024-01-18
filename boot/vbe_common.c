@@ -18,6 +18,9 @@
 #include <u-boot/crc.h>
 #include "vbe_common.h"
 
+binman_sym_declare(ulong, u_boot_vpl_nodtb, size);
+binman_sym_declare(ulong, u_boot_vpl_bss_pad, size);
+
 ulong h_vbe_load_read(struct spl_load_info *load, ulong off, ulong size,
 		      void *buf)
 {
@@ -199,6 +202,11 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 // 		print_buffer(from, base_buf + from, 1, 0x50, 0);
 // 		print_buffer(0, base_buf, 1, len, 0);
 
+		if (spl_phase() == PHASE_VPL || spl_phase() == PHASE_TPL) {
+			image->load_addr = spl_get_image_text_base();
+			image->entry_point = image->load_addr;
+		}
+
 		/* now the FDT */
 		if (fdt_size) {
 			fdt_offset = area_offset + fdt_load_addr - addr;
@@ -226,6 +234,15 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 			}
 #if CONFIG_IS_ENABLED(RELOC_LOADER)
 			image->fdt_buf = fdt_base_buf;
+			ulong vpl_size = binman_sym(ulong, u_boot_vpl_nodtb, size);
+			ulong vpl_pad = binman_sym(ulong, u_boot_vpl_bss_pad, size);
+			ulong fdt_start;
+
+			fdt_start = image->load_addr + vpl_size + vpl_pad;
+			log_debug("load_addr %lx vpl_size %lx copy-to %lx\n",
+				  image->load_addr, vpl_size + vpl_pad,
+				  fdt_start);
+			image->fdt_start = map_sysmem(fdt_start, fdt_size);
 #endif
 		}
 	}
