@@ -607,6 +607,13 @@ class Entry_fit(Entry_section):
                                 pass
                             elif pname == 'fit,fdt-phase':
                                 fdt_phase = fdt_util.GetString(node, pname)
+                            elif pname == 'fit,compatible':
+                                fdt_phase = fdt_util.GetString(node, pname)
+                                data = tools.read_file(fname)
+                                fdt = Fdt.FromData(data)
+                                fdt.Scan()
+                                prop = fdt.GetRoot().props['compatible']
+                                fsw.property('compatible', prop.bytes)
                             elif pname.startswith('fit,'):
                                 self._raise_subnode(
                                     node, f"Unknown directive '{pname}'")
@@ -622,7 +629,6 @@ class Entry_fit(Entry_section):
                             if fdt_phase:
                                 phase_fname = tools.get_output_filename(
                                     f'{fdt_fname}-{fdt_phase}.dtb')
-                                print('fdt_phase', fdt_phase)
                                 self._run_fdtgrep(fname, fdt_phase, phase_fname)
                                 data = tools.read_file(phase_fname)
                             else:

@@ -255,6 +255,7 @@
 					fdt = "fdt-SEQ";
 					fit,firmware = "vpl";
 					fit,loadables;
+					fit,compatible;
 				};
 			};
 // 			no-write-symbols;
