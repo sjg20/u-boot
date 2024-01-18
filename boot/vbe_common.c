@@ -200,32 +200,34 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 // 		print_buffer(0, base_buf, 1, len, 0);
 
 		/* now the FDT */
-		fdt_offset = area_offset + fdt_load_addr - addr;
-		blknum = fdt_offset / desc->blksz;
-		extra = fdt_offset % desc->blksz;
-		fdt_full_size = fdt_size + extra;
-		num_blks = DIV_ROUND_UP(fdt_full_size, desc->blksz);
-		fdt_base = ALIGN(base + len, 4);
-		fdt_base_buf = map_sysmem(fdt_base, fdt_size);
-		*(ulong *)fdt_base_buf = 0x12345678;
-		print_buffer(fdt_base, fdt_base_buf, 1, 0x10, 0);
-		ret = blk_read(blk, blknum, num_blks, fdt_base_buf);
-		log_debug("fdt read foffset %lx blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
-			  fdt_offset - 0x8000, blknum, fdt_full_size, num_blks,
-			  fdt_base, fdt_base_buf, ret);
-		if (ret != num_blks)
-			return log_msg_ret("rdf", -EIO);
-		print_buffer(fdt_base, fdt_base_buf, 1, 0x10, 0);
-		if (extra) {
-			log_debug("move %p %p %lx\n", fdt_base_buf,
-				  fdt_base_buf + extra, fdt_size);
-			memmove(fdt_base_buf, fdt_base_buf + extra,
-				fdt_size);
-// 			print_buffer(0, fdt_base_buf, 1, 0x10, 0);
-		}
+		if (fdt_size) {
+			fdt_offset = area_offset + fdt_load_addr - addr;
+			blknum = fdt_offset / desc->blksz;
+			extra = fdt_offset % desc->blksz;
+			fdt_full_size = fdt_size + extra;
+			num_blks = DIV_ROUND_UP(fdt_full_size, desc->blksz);
+			fdt_base = ALIGN(base + len, 4);
+			fdt_base_buf = map_sysmem(fdt_base, fdt_size);
+			*(ulong *)fdt_base_buf = 0x12345678;
+			print_buffer(fdt_base, fdt_base_buf, 1, 0x10, 0);
+			ret = blk_read(blk, blknum, num_blks, fdt_base_buf);
+			log_debug("fdt read foffset %lx blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
+				  fdt_offset - 0x8000, blknum, fdt_full_size, num_blks,
+				  fdt_base, fdt_base_buf, ret);
+			if (ret != num_blks)
+				return log_msg_ret("rdf", -EIO);
+			print_buffer(fdt_base, fdt_base_buf, 1, 0x10, 0);
+			if (extra) {
+				log_debug("move %p %p %lx\n", fdt_base_buf,
+					  fdt_base_buf + extra, fdt_size);
+				memmove(fdt_base_buf, fdt_base_buf + extra,
+					fdt_size);
+	// 			print_buffer(0, fdt_base_buf, 1, 0x10, 0);
+			}
 #if CONFIG_IS_ENABLED(RELOC_LOADER)
-		image->fdt_buf = fdt_base_buf;
+			image->fdt_buf = fdt_base_buf;
 #endif
+		}
 	}
 	if (load_addrp)
 		*load_addrp = load_addr;
