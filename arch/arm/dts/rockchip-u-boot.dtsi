@@ -221,7 +221,8 @@
 			offset = <(CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR * 0x200 + 0x8000)>;
 			description = "FIT image for U-Boot TPL";
 			#address-cells = <1>;
-			fit,fdt-list = "of-list";
+// 			fit,fdt-list = "of-list";
+			fit,fdt-list-dir = "arch/arm/dts";
 			fit,align = <512>;
 			fit,external-offset = <0>;
 			images {
