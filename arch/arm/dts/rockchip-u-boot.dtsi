@@ -167,7 +167,7 @@
 					description = "fdt-NAME";
 					compression = "none";
 					type = "flat_dt";
-					fit,fdt-phase = "spl";
+// 					fit,fdt-phase = "spl";
 #ifdef CONFIG_SPL_FIT_SIGNATURE
 					hash {
 						algo = "sha256";
