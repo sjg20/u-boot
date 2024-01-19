@@ -36,6 +36,9 @@ binman_sym_declare(ulong, vbe_a, size);
 binman_sym_declare(ulong, vbe_b, size);
 binman_sym_declare(ulong, vbe_recovery, size);
 
+binman_sym_declare(ulong, vpl, image_pos);
+binman_sym_declare(ulong, vpl, size);
+
 static const char *pick_names[] = {"A", "B", "Recovery"};
 
 /**
@@ -177,7 +180,9 @@ static int abrec_load_from_image(struct spl_image_info *image,
 	struct vbe_handoff *handoff;
 	int ret;
 
-	if (spl_phase() != PHASE_VPL && spl_phase() != PHASE_SPL)
+	printf("load\n");
+	if (spl_phase() != PHASE_VPL && spl_phase() != PHASE_SPL &&
+		spl_phase() != PHASE_TPL)
 		return -ENOENT;
 
 	ret = bloblist_ensure_size(BLOBLISTT_VBE, sizeof(struct vbe_handoff),
@@ -231,7 +236,16 @@ static int abrec_load_from_image(struct spl_image_info *image,
 		if (ret)
 			return log_msg_ret("med", ret);
 
-		if (spl_phase() == PHASE_VPL)
+		if (spl_phase() == PHASE_TPL) {
+			ulong offset, size;
+
+			offset = binman_sym(ulong, vpl, image_pos);
+			size = binman_sym(ulong, vpl, size);
+			ret = vbe_read_fit(blk, offset, size, image, NULL,
+					   NULL);
+			if (ret)
+				return log_msg_ret("vbe", ret);
+		} else if (spl_phase() == PHASE_VPL)
 			ret = abrec_run_vpl(blk, image, handoff);
 		else
 			ret = abrec_run_spl(blk, image, handoff);

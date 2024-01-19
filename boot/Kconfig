@@ -757,6 +757,15 @@ config SPL_BOOTMETH_VBE_ABREC
 	  implementation simply loads U-Boot from the image selected by the
 	  VPL phase.
 
+config TPL_BOOTMETH_VBE_ABREC
+	bool "Bootdev support for VBE 'abrec' method (TPL)"
+	depends on TPL
+	select TPL_FIT
+	default y
+	help
+	  Enables support for VBE 'abrec' boot. The TPL part of this
+	  implementation simply jumps to VPL after device init is completed.
+
 config VPL_BOOTMETH_VBE_ABREC
 	bool "Bootdev support for VBE 'abrec' method (VPL)"
 	depends on VPL
@@ -774,6 +783,14 @@ config SPL_BOOTMETH_VBE_ABREC_FW
 	  Enables support for VBE 'abrec' boot. The SPL part of this
 	  implementation simply loads U-Boot from the image selected by the
 	  VPL phase.
+
+config TPL_BOOTMETH_VBE_ABREC_FW
+	bool "Bootdev support for VBE 'abrec' method firmware phase (TPL)"
+	depends on TPL
+	default y if VPL
+	help
+	  Enables support for VBE 'abrec' boot. The TPL part of this
+	  implementation simply jumps to VPL after device init is completed.
 
 config VPL_BOOTMETH_VBE_ABREC_FW
 	bool "Bootdev support for VBE 'abrec' method firmware phase (VPL)"
