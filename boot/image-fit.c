@@ -8,6 +8,7 @@
  * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
  */
 
+#define LOG_DEBUG
 #define LOG_CATEGORY LOGC_BOOT
 
 #ifdef USE_HOSTCC
@@ -1663,6 +1664,9 @@ int fit_check_format(const void *fit, ulong size)
 			  ret);
 		return -ENOEXEC;
 	}
+// 	if (!tools_build())
+// 		print_buffer((ulong)fit + fdt_off_dt_strings(fit),
+// 			     fit + fdt_off_dt_strings(fit), 1, 0x100, 0);
 
 	if (CONFIG_IS_ENABLED(FIT_FULL_CHECK)) {
 		/*

@@ -45,7 +45,7 @@ int abrec_read_nvdata(struct abrec_priv *priv, struct udevice *blk,
 	ret = vbe_read_nvdata(blk, priv->area_start + priv->state_offset,
 			      priv->state_size, buf);
 	if (ret == -EPERM) {
-		memset(state, '\0', sizeof(struct abrec_state));
+		memset(buf, '\0', MMC_MAX_BLOCK_LEN);
 		log_warning("Starting with empty state\n");
 	} else if (ret) {
 		return log_msg_ret("nv", ret);
@@ -57,7 +57,6 @@ int abrec_read_nvdata(struct abrec_priv *priv, struct udevice *blk,
 	state->try_b = flags & VBEF_TRY_B;
 	state->recovery = flags & VBEF_RECOVERY;
 	state->pick = (flags & VBEF_PICK_MASK) >> VBEF_PICK_SHIFT;
-	log_debug("version=%s\n", state->fw_version);
 
 	return 0;
 }

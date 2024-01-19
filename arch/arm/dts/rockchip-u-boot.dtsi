@@ -51,7 +51,8 @@
 			description = "FIT image with OP-TEE";
 #endif
 			#address-cells = <1>;
-			fit,fdt-list = "of-list";
+// 			fit,fdt-list = "of-list";
+			fit,fdt-list-dir = "arch/arm/dts";
 			filename = "u-boot.itb";
 			fit,external-offset = <CONFIG_FIT_EXTERNAL_OFFSET>;
 			fit,align = <512>;
@@ -166,6 +167,7 @@
 					description = "fdt-NAME";
 					compression = "none";
 					type = "flat_dt";
+					fit,fdt-phase = "spl";
 #ifdef CONFIG_SPL_FIT_SIGNATURE
 					hash {
 						algo = "sha256";
@@ -185,6 +187,7 @@
 					fit,firmware = "op-tee", "u-boot";
 #endif
 					fit,loadables;
+					fit,compatible;
 				};
 			};
 		};
@@ -273,12 +276,12 @@
 		};
 		vbe-b {
 			type = "fit";
-			offset = <0xa00000>;
+			offset = <0xc00000>;
 			insert-template = <&common_part>;
 		};
 		vbe-recovery {
 			type = "fit";
-			offset = <0xc00000>;
+			offset = <0x1000000>;
 			insert-template = <&common_part>;
 		};
 #elif defined(CONFIG_BOOTMETH_VBE_SIMPLE)

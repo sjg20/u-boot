@@ -83,6 +83,15 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 	ret = blk_read(blk, blknum, num_blks, buf);
 	if (ret < 0)
 		return log_msg_ret("rd", ret);
+	printf("check total size %x off_dt_strings %x\n", fdt_totalsize(buf),
+	       fdt_off_dt_strings(buf));
+
+	printf("malloc base %lx ptr %lx limit %lx top %lx\n", gd->malloc_base,
+	       gd->malloc_ptr, gd->malloc_limit,
+	       gd->malloc_base + gd->malloc_limit);
+
+// 	print_buffer((ulong)buf + fdt_off_dt_strings(buf),
+// 		     buf + fdt_off_dt_strings(buf), 1, 0x100, 0);
 
 	/* figure out the phase to load */
 	phase = IS_ENABLED(CONFIG_TPL_BUILD) ? IH_PHASE_NONE :
