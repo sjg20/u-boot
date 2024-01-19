@@ -659,7 +659,7 @@ void board_init_f(ulong dummy)
 
 		ret = spl_early_init();
 		if (ret) {
-			debug("spl_early_init() failed: %d\n", ret);
+			//printf("spl_early_init() failed: %d\n", ret);
 			hang();
 		}
 	}
@@ -692,8 +692,13 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		gd->flags |= GD_FLG_FULL_MALLOC_INIT;
 	}
 	if (!(gd->flags & GD_FLG_SPL_INIT)) {
-		if (spl_init())
+		int ret;
+
+		ret = spl_init();
+		if (ret) {
+			//printf("spl_init() failed: %d\n", ret);
 			hang();
+		}
 	}
 	timer_init();
 	if (CONFIG_IS_ENABLED(BLOBLIST)) {
@@ -833,8 +838,14 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	spl_board_prepare_for_boot();
 
 	if (CONFIG_IS_ENABLED(RELOC_LOADER)) {
-		if (spl_reloc_jump(&spl_image, jump_to_image))
+		int ret;
+
+		ret = spl_reloc_jump(&spl_image, jump_to_image);
+		if (ret) {
+			if (spl_phase() == PHASE_VPL)
+				printf("jump failed %d\n", ret);
 			hang();
+		}
 	}
 
 	jump_to_image(&spl_image);
