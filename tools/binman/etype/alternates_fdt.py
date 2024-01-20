@@ -33,11 +33,12 @@ class Entry_alternates_fdt(Entry_section):
         self.alternates = self._fdts
 
     def FdtContents(self, fdt_etype):
+        print('_cur_fdt', self._cur_fdt)
         if not self._cur_fdt:
             return self.section.FdtContents(fdt_etype)
         fname = tools.get_input_filename(os.path.join(self._fdt_dir,
                                                       f'{self._cur_fdt}.dtb'))
-        return tools.read_file(fname)
+        return fname, tools.read_file(fname)
         #print('alt', alt, fname)
 
     def SetFdt(self, alt):
