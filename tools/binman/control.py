@@ -735,7 +735,6 @@ def ProcessImage(image, update_fdt, write_map, get_contents=True,
 
     has_problems = CheckForProblems(image)
 
-    #if image.alternates:
     image.WriteAlternates()
 
     return has_problems

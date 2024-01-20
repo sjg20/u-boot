@@ -96,7 +96,6 @@ class Image(section.Entry_section):
         self.test_section_timeout = False
         self.bintools = {}
         self.generate = generate
-        self.alternates = None
         if not test:
             self.ReadNode()
 
@@ -204,9 +203,7 @@ class Image(section.Entry_section):
         if not alt_entry:
             return
 
-        print('alt_entry', alt_entry, alt_entry.alternates)
         for alt in alt_entry.alternates:
-            print(f'writing alt {alt}')
             alt_entry.SetFdt(alt)
             alt_entry.ProcessContents()
 

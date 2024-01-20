@@ -7472,7 +7472,6 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
                                    entry_args=entry_args)[0]
         self.assertEqual(U_BOOT_TPL_NODTB_DATA, data[:len(U_BOOT_TPL_NODTB_DATA)])
         rest = data[len(U_BOOT_TPL_NODTB_DATA):]
-        #print('dtb', dtb[:4], len(data))
         pad_len = 10
         self.assertEqual(tools.get_bytes(0, pad_len), rest[:pad_len])
 
@@ -7485,7 +7484,6 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
                          fdt_util.GetString(dtb.GetRoot(), 'compatible'))
 
         # Check the other output files
-        print('dtb_list', dtb_list)
         for fname in dtb_list:
             pathname = tools.get_output_filename(fname)
             print('pathname', pathname)
