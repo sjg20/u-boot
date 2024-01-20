@@ -241,25 +241,27 @@
 		pad-byte = <0xff>;
 		skip-at-start = <0x8000>;
 
-		mkimage {
-			filename = "idbloader.img";
-			args = "-n", CONFIG_SYS_SOC, "-T", "rksd";
-			multiple-data-files;
+		alternates-fdt {
+			fdt-list-dir = "arch/arm/dts";
+			filename-pattern = "NAME.bin";
+
+			mkimage {
+				filename = "idbloader.img";
+				args = "-n", CONFIG_SYS_SOC, "-T", "rksd";
+				multiple-data-files;
 
 #if defined(CONFIG_ROCKCHIP_EXTERNAL_TPL)
-			rockchip-tpl {
-			};
+				rockchip-tpl {
+				};
 #elif defined(CONFIG_TPL)
-			u-boot-tpl {
-			};
+				u-boot-tpl {
+				};
 #endif
-#ifdef CONFIG_VPL
-// 			u-boot-vpl {
-// 			};
-#else
-			u-boot-spl {
-			};
+#ifndef CONFIG_VPL
+				u-boot-spl {
+				};
 #endif
+			};
 		};
 
 #ifdef CONFIG_VPL

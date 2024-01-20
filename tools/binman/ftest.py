@@ -7,6 +7,7 @@
 #    python -m unittest func_test.TestFunctional.testHelp
 
 import collections
+import glob
 import gzip
 import hashlib
 from optparse import OptionParser
@@ -7453,6 +7454,18 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         """Test that both accept and revert capsule are not specified"""
         with self.assertRaises(ValueError) as e:
             self._DoReadFile('323_capsule_accept_revert_missing.dts')
+
+    def testAlternatesFdt(self):
+        """Test handling of alternates-fdt etype"""
+        self._SetupTplElf()
+        testdir = TestFunctional._MakeInputDir('dtb')
+        for fname in glob.glob(f'{self.TestFile("alt_dts")}/*.dts'):
+            tmp_fname = fdt_util.EnsureCompiled(fname, testdir)
+            dtb_fname = os.path.splitext(os.path.basename(fname))[0] + '.dtb'
+            shutil.move(tmp_fname, os.path.join(testdir, dtb_fname))
+
+        self._DoReadFile('326_alternates_fdt.dts')
+
 
 if __name__ == "__main__":
     unittest.main()
