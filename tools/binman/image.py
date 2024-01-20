@@ -193,7 +193,8 @@ class Image(section.Entry_section):
 
         # Avoid overwriting the existing file
         self._filename = None
-        return
+
+        alt_entry = self.FindEntryType('alternates-fdt')
         for alt in self.alternates:
             print(f'writing alt {alt}')
             self.cur_alternate = alt
@@ -201,7 +202,7 @@ class Image(section.Entry_section):
             fname = tools.get_output_filename(f'{alt}.bin')
             tout.info(f"Writing alternate '{alt}' to '{fname}'")
             with open(fname, 'wb') as fd:
-                data = self.GetPaddedData()
+                data = alt_entry.GetPaddedData()
                 fd.write(data)
             tout.info("Wrote %#x bytes" % len(data))
         self.cur_alternate = None
@@ -441,4 +442,5 @@ class Image(section.Entry_section):
 
     def OmitEntry(self):
         #print('self.cur_alternate', self.cur_alternate)
+        #return False
         return self.cur_alternate is not None
