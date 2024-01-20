@@ -97,7 +97,6 @@ class Image(section.Entry_section):
         self.bintools = {}
         self.generate = generate
         self.alternates = None
-        self.cur_alternate = None
         if not test:
             self.ReadNode()
 
@@ -210,7 +209,6 @@ class Image(section.Entry_section):
             print(f'writing alt {alt}')
             alt_entry.SetFdt(alt)
             alt_entry.ProcessContents()
-            self.cur_alternate = alt
 
             fname = tools.get_output_filename(f'{alt}.bin')
             tout.info(f"Writing alternate '{alt}' to '{fname}'")
@@ -218,7 +216,6 @@ class Image(section.Entry_section):
                 data = alt_entry.GetPaddedData()
                 fd.write(data)
             tout.info("Wrote %#x bytes" % len(data))
-        self.cur_alternate = None
 
     def WriteMap(self):
         """Write a map of the image to a .map file
@@ -452,11 +449,6 @@ class Image(section.Entry_section):
         super().AddBintools(bintools)
         self.bintools = bintools
         return bintools
-
-    def OmitEntry(self):
-        #print('self.cur_alternate', self.cur_alternate)
-        #return False
-        return self.cur_alternate is not None
 
     def FdtContents(self, fdt_etype):
         return state.GetFdtContents(fdt_etype)

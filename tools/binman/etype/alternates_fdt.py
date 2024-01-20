@@ -32,9 +32,6 @@ class Entry_alternates_fdt(Entry_section):
         self._fdts = [os.path.splitext(f)[0] for f in fdts]
         self.alternates = self._fdts
 
-    def OmitEntry(self):
-        return False
-
     def FdtContents(self, fdt_etype):
         if not self._cur_fdt:
             return self.section.FdtContents(fdt_etype)
