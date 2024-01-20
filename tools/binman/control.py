@@ -732,8 +732,13 @@ def ProcessImage(image, update_fdt, write_map, get_contents=True,
     image.BuildImage()
     if write_map:
         image.WriteMap()
-    return CheckForProblems(image)
 
+    has_problems = CheckForProblems(image)
+
+    if image.alternates:
+        image.WriteAlternates()
+
+    return has_problems
 
 def Binman(args):
     """The main control code for binman

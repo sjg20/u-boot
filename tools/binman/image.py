@@ -89,6 +89,8 @@ class Image(section.Entry_section):
         self.test_section_timeout = False
         self.bintools = {}
         self.generate = generate
+        self.alternates = None
+        self.cur_alternate = None
         if not test:
             self.ReadNode()
 
@@ -185,6 +187,18 @@ class Image(section.Entry_section):
             if os.path.islink(sname):
                 os.remove(sname)
             os.symlink(fname, sname)
+
+    def WriteAlternates(self):
+        for alt in self.alternates:
+            print(f'writing alt {alt}')
+            self.cur_alternate = alt
+
+            fname = tools.get_output_filename(f'{alt}.bin')
+            tout.info(f"Writing alternate '{alt}' to '{fname}'")
+            with open(fname, 'wb') as fd:
+                data = self.GetPaddedData()
+                fd.write(data)
+            tout.info("Wrote %#x bytes" % len(data))
 
     def WriteMap(self):
         """Write a map of the image to a .map file
