@@ -29,4 +29,7 @@ class Entry_alternates_fdt(Entry_section):
         fname = tools.get_input_filename(self._fdt_dir)
         fdts = glob.glob('*.dtb', root_dir=fname)
         self._fdts = [os.path.splitext(f)[0] for f in fdts]
+        self.GetImage().alternates = self._fdts
 
+    #def OmitEntry(self):
+        #return False

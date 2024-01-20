@@ -189,6 +189,8 @@ class Image(section.Entry_section):
             os.symlink(fname, sname)
 
     def WriteAlternates(self):
+        orig = tools.get_output_filename(self._filename)
+        self._filename = None
         for alt in self.alternates:
             print(f'writing alt {alt}')
             self.cur_alternate = alt
@@ -199,6 +201,7 @@ class Image(section.Entry_section):
                 data = self.GetPaddedData()
                 fd.write(data)
             tout.info("Wrote %#x bytes" % len(data))
+        self.cur_alternate = None
 
     def WriteMap(self):
         """Write a map of the image to a .map file
