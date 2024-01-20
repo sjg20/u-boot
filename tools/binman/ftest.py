@@ -7459,9 +7459,9 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         dtb_list = []
         for fname in glob.glob(f'{self.TestFile("alt_dts")}/*.dts'):
             tmp_fname = fdt_util.EnsureCompiled(fname, testdir)
-            dtb_fname = os.path.splitext(os.path.basename(fname))[0] + '.dtb'
-            dtb_list.append(dtb_fname)
-            shutil.move(tmp_fname, os.path.join(testdir, dtb_fname))
+            base = os.path.splitext(os.path.basename(fname))[0]
+            dtb_list.append(base + '.bin')
+            shutil.move(tmp_fname, os.path.join(testdir, base + '.dtb'))
 
         entry_args = {
             'tpl-dtb': '1',

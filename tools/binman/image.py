@@ -190,7 +190,10 @@ class Image(section.Entry_section):
 
     def WriteAlternates(self):
         orig = tools.get_output_filename(self._filename)
+
+        # Avoid overwriting the existing file
         self._filename = None
+        return
         for alt in self.alternates:
             print(f'writing alt {alt}')
             self.cur_alternate = alt
