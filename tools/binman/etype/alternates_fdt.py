@@ -33,3 +33,9 @@ class Entry_alternates_fdt(Entry_section):
 
     def OmitEntry(self):
         return False
+
+    def FdtContents(self, fdt_etype):
+        return self.section.FdtContents(fdt_etype)
+
+    def SetFdt(self, alt):
+        print('alt', alt)

@@ -1395,3 +1395,6 @@ features to produce new behaviours.
             True if the entry should be omitted, False if it should be included
         """
         return self.section.OmitEntry()
+
+    def FdtContents(self, fdt_etype):
+        return self.section.FdtContents(fdt_etype)

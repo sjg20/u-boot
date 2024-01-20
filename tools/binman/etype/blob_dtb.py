@@ -41,7 +41,7 @@ class Entry_blob_dtb(Entry_blob):
     def ObtainContents(self, fake_size=0):
         """Get the device-tree from the list held by the 'state' module"""
         self._filename = self.GetDefaultFilename()
-        self._pathname, _ = state.GetFdtContents(self.GetFdtEtype())
+        self._pathname, _ = self.FdtContents(self.GetFdtEtype()) #state.GetFdtContents(self.GetFdtEtype())
         return super().ReadBlobContents()
 
     def ProcessContents(self):
