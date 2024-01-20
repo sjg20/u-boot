@@ -63,7 +63,7 @@ static int setup_layout(struct spl_image_info *image, ulong *addrp)
 	buf_size = rcode_base - base;
 	uint need_size = image->size + image->fdt_size;
 	margin = buf_size - need_size;
-	log_info("limit %lx fdt_size %lx base %lx avail %x image %x fdt %lx need %x, margin%s%lx\n",
+	log_info("limit %lx fdt_size %lx base %lx avail %x image %x fdt %lx need %x margin%s%lx\n",
 		  limit, fdt_size, base, buf_size, image->size, image->fdt_size,
 		  need_size, margin >= 0 ? " " : " -", abs(margin));
 	if (margin < 0) {

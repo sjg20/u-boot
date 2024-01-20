@@ -28,13 +28,21 @@
 #include "vbe_abrec.h"
 #include "vbe_common.h"
 
-binman_sym_declare(ulong, vbe_a, image_pos);
-binman_sym_declare(ulong, vbe_b, image_pos);
-binman_sym_declare(ulong, vbe_recovery, image_pos);
+binman_sym_declare(ulong, spl_a, image_pos);
+binman_sym_declare(ulong, spl_b, image_pos);
+binman_sym_declare(ulong, spl_recovery, image_pos);
 
-binman_sym_declare(ulong, vbe_a, size);
-binman_sym_declare(ulong, vbe_b, size);
-binman_sym_declare(ulong, vbe_recovery, size);
+binman_sym_declare(ulong, spl_a, size);
+binman_sym_declare(ulong, spl_b, size);
+binman_sym_declare(ulong, spl_recovery, size);
+
+binman_sym_declare(ulong, u_boot_a, image_pos);
+binman_sym_declare(ulong, u_boot_b, image_pos);
+binman_sym_declare(ulong, u_boot_recovery, image_pos);
+
+binman_sym_declare(ulong, u_boot_a, size);
+binman_sym_declare(ulong, u_boot_b, size);
+binman_sym_declare(ulong, u_boot_recovery, size);
 
 binman_sym_declare(ulong, vpl, image_pos);
 binman_sym_declare(ulong, vpl, size);
@@ -89,6 +97,7 @@ static int abrec_run_vpl(struct udevice *blk, struct spl_image_info *image,
 	enum vbe_pick_t pick;
 	uint try_count;
 	ulong offset, size;
+	ulong ub_offset, ub_size;
 	ofnode node;
 	int ret;
 
@@ -130,16 +139,22 @@ static int abrec_run_vpl(struct udevice *blk, struct spl_image_info *image,
 
 	switch (pick) {
 	case VBEP_A:
-		offset = binman_sym(ulong, vbe_a, image_pos);
-		size = binman_sym(ulong, vbe_a, size);
+		offset = binman_sym(ulong, spl_a, image_pos);
+		size = binman_sym(ulong, spl_a, size);
+		ub_offset = binman_sym(ulong, u_boot_a, image_pos);
+		ub_size = binman_sym(ulong, u_boot_a, size);
 		break;
 	case VBEP_B:
-		offset = binman_sym(ulong, vbe_b, image_pos);
-		size = binman_sym(ulong, vbe_b, size);
+		offset = binman_sym(ulong, spl_b, image_pos);
+		size = binman_sym(ulong, spl_b, size);
+		ub_offset = binman_sym(ulong, u_boot_b, image_pos);
+		ub_size = binman_sym(ulong, u_boot_b, size);
 		break;
 	case VBEP_RECOVERY:
-		offset = binman_sym(ulong, vbe_recovery, image_pos);
-		size = binman_sym(ulong, vbe_recovery, size);
+		offset = binman_sym(ulong, spl_recovery, image_pos);
+		size = binman_sym(ulong, spl_recovery, size);
+		ub_offset = binman_sym(ulong, u_boot_recovery, image_pos);
+		ub_size = binman_sym(ulong, u_boot_recovery, size);
 		break;
 	}
 	log_debug("pick=%d, offset=%lx size=%lx\n", pick, offset, size);
@@ -148,8 +163,8 @@ static int abrec_run_vpl(struct udevice *blk, struct spl_image_info *image,
 	ret = vbe_read_fit(blk, offset, size, image, NULL, NULL);
 	if (ret)
 		return log_msg_ret("vbe", ret);
-	handoff->offset = offset;
-	handoff->size = size;
+	handoff->offset = ub_offset;
+	handoff->size = ub_size;
 	handoff->pick = pick;
 	image->load_addr = spl_get_image_text_base();
 	image->entry_point = image->load_addr;

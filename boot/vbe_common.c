@@ -20,6 +20,8 @@
 
 binman_sym_declare(ulong, u_boot_vpl_nodtb, size);
 binman_sym_declare(ulong, u_boot_vpl_bss_pad, size);
+binman_sym_declare(ulong, u_boot_spl_nodtb, size);
+binman_sym_declare(ulong, u_boot_spl_bss_pad, size);
 
 ulong h_vbe_load_read(struct spl_load_info *load, ulong off, ulong size,
 		      void *buf)
@@ -144,7 +146,7 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 
 	fdt_load_addr = 0;
 	fdt_size = 0;
-	if (spl_phase() == PHASE_TPL) {
+	if (spl_phase() == PHASE_TPL || spl_phase() == PHASE_VPL) {
 		/* allow use of a different image from the configuration node */
 		fit_uname = NULL;
 		ret = fit_image_load(&images, addr, &fit_uname, &fit_uname_config,
@@ -243,13 +245,21 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 			}
 #if CONFIG_IS_ENABLED(RELOC_LOADER)
 			image->fdt_buf = fdt_base_buf;
-			ulong vpl_size = binman_sym(ulong, u_boot_vpl_nodtb, size);
-			ulong vpl_pad = binman_sym(ulong, u_boot_vpl_bss_pad, size);
+
+			ulong xpl_size;
+			ulong xpl_pad;
 			ulong fdt_start;
 
-			fdt_start = image->load_addr + vpl_size + vpl_pad;
-			log_debug("load_addr %lx vpl_size %lx copy-to %lx\n",
-				  image->load_addr, vpl_size + vpl_pad,
+			if (spl_phase() == PHASE_TPL) {
+				xpl_size = binman_sym(ulong, u_boot_vpl_nodtb, size);
+				xpl_pad = binman_sym(ulong, u_boot_vpl_bss_pad, size);
+			} else {
+				xpl_size = binman_sym(ulong, u_boot_spl_nodtb, size);
+				xpl_pad = binman_sym(ulong, u_boot_spl_bss_pad, size);
+			}
+			fdt_start = image->load_addr + xpl_size + xpl_pad;
+			log_debug("load_addr %lx xpl_size %lx copy-to %lx\n",
+				  image->load_addr, xpl_size + xpl_pad,
 				  fdt_start);
 			image->fdt_start = map_sysmem(fdt_start, fdt_size);
 #endif

@@ -33,7 +33,7 @@
 			storage = "mmc1";
 			skip-offset = <0x8000>;
 			area-start = <CONFIG_SPL_PAD_TO>;
-			area-size = <0x400000>;
+			area-size = <0x800000>;
 			state-offset = <(CONFIG_SPL_PAD_TO - 0x400)>;
 			state-size = <0x40>;
 			version-offset = <(CONFIG_SPL_PAD_TO - 0x200)>;
@@ -45,6 +45,7 @@
 #ifdef CONFIG_SPL
 &binman {
 		common_part: template-1 {
+			type = "fit";
 #ifdef CONFIG_ARM64
 			description = "FIT image for U-Boot with bl31 (TF-A)";
 #else
@@ -66,8 +67,12 @@
 					load = <CONFIG_SPL_TEXT_BASE>;
 					entry = <CONFIG_SPL_TEXT_BASE>;
 					phase = "spl";
-					u-boot-spl {
+					section {
 						compress = "lz4";
+						u-boot-spl-nodtb {
+						};
+						u-boot-spl-bss-pad {
+						};
 					};
 				};
 
@@ -192,6 +197,49 @@
 			};
 		};
 
+	spl_template: template-2 {
+		type = "fit";
+		description = "FIT image for U-Boot SPL";
+		#address-cells = <1>;
+		fit,fdt-list-dir = "arch/arm/dts";
+		fit,align = <512>;
+		fit,external-offset = <0>;
+		images {
+			spl {
+				description = "U-Boot SPL";
+				type = "firmware";
+				os = "u-boot";
+				arch = ARCH;
+				compression = "lz4";
+				load = <CONFIG_SPL_TEXT_BASE>;
+				entry = <CONFIG_SPL_TEXT_BASE>;
+				section {
+					compress = "lz4";
+					u-boot-spl-nodtb {
+					};
+					u-boot-spl-bss-pad {
+					};
+				};
+			};
+			@fdt-SEQ {
+				description = "fdt-NAME";
+				compression = "none";
+				type = "flat_dt";
+				fit,fdt-phase = "spl";
+			};
+		};
+		configurations {
+			default = "@config-DEFAULT-SEQ";
+			@config-SEQ {
+				description = "NAME.dtb";
+				fdt = "fdt-SEQ";
+				fit,firmware = "spl";
+				fit,loadables;
+				fit,compatible;
+			};
+		};
+	};
+
 	simple-bin {
 		filename = "u-boot-rockchip.bin";
 		pad-byte = <0xff>;
@@ -270,19 +318,40 @@
 #if defined(CONFIG_SPL_FIT) && (defined(CONFIG_ARM64) || defined(CONFIG_SPL_OPTEE_IMAGE))
 #ifdef CONFIG_BOOTMETH_VBE_ABREC
 		vbe-a {
-			type = "fit";
+			type = "section";
 			offset = <(CONFIG_SPL_PAD_TO + 0x8000)>;
-			insert-template = <&common_part>;
+			spl-a {
+				insert-template = <&spl_template>;
+				size = <0x100000>;
+			};
+
+			u-boot-a {
+				insert-template = <&common_part>;
+			};
 		};
 		vbe-b {
-			type = "fit";
-			offset = <0xc00000>;
-			insert-template = <&common_part>;
+			type = "section";
+			offset = <(0x1000000)>;
+			spl-b {
+				insert-template = <&spl_template>;
+				size = <0x100000>;
+			};
+
+			u-boot-b {
+				insert-template = <&common_part>;
+			};
 		};
 		vbe-recovery {
-			type = "fit";
-			offset = <0x1000000>;
-			insert-template = <&common_part>;
+			type = "section";
+			offset = <0x1800000>;
+			spl-recovery {
+				insert-template = <&spl_template>;
+				size = <0x100000>;
+			};
+
+			u-boot-recovery {
+				insert-template = <&common_part>;
+			};
 		};
 #elif defined(CONFIG_BOOTMETH_VBE_SIMPLE)
 		vbe {

@@ -2032,8 +2032,10 @@ int fit_get_node_from_config(struct bootm_headers *images,
  * Return: the properly name where we expect to find the image in the
  * config node
  */
-static const char *fit_get_image_type_property(int type)
+static const char *fit_get_image_type_property(int ph_type)
 {
+	int type = image_ph_type(ph_type);
+
 	/*
 	 * This is sort-of available in the uimage_type[] table in image.c
 	 * but we don't have access to the short name, and "fdt" is different
@@ -2041,6 +2043,8 @@ static const char *fit_get_image_type_property(int type)
 	 */
 	switch (type) {
 	case IH_TYPE_FLATDT:
+// 		if (image_ph_phase(ph_type) == IH_PHASE_SPL)
+// 			return "fdt-spl";
 		return FIT_FDT_PROP;
 	case IH_TYPE_KERNEL:
 		return FIT_KERNEL_PROP;
@@ -2085,7 +2089,7 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 	fit_uname = fit_unamep ? *fit_unamep : NULL;
 	fit_uname_config = fit_uname_configp ? *fit_uname_configp : NULL;
 	fit_base_uname_config = NULL;
-	prop_name = fit_get_image_type_property(image_type);
+	prop_name = fit_get_image_type_property(ph_type);
 	printf("## Loading %s (%s) from FIT Image at %08lx ...\n",
 	       prop_name, genimg_get_phase_name(image_ph_phase(ph_type)), addr);
 
