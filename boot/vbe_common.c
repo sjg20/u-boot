@@ -6,8 +6,6 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
-#define LOG_DEBUG
-
 #include <bootstage.h>
 #include <display_options.h>
 #include <dm.h>
@@ -208,7 +206,7 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 				  base_buf + extra, len);
 			memmove(base_buf, base_buf + extra, len);
 		}
-		print_buffer(0, base_buf, 1, 0x10, 0);
+// 		print_buffer(0, base_buf, 1, 0x10, 0);
 // 		uint from = ALIGN_DOWN(len - 0x40, 0x10);
 // 		print_buffer(from, base_buf + from, 1, 0x50, 0);
 // 		print_buffer(0, base_buf, 1, len, 0);
@@ -228,14 +226,14 @@ int vbe_read_fit(struct udevice *blk, ulong area_offset, ulong area_size,
 			fdt_base = ALIGN(base + len, 4);
 			fdt_base_buf = map_sysmem(fdt_base, fdt_size);
 			*(ulong *)fdt_base_buf = 0x12345678;
-			print_buffer(fdt_base, fdt_base_buf, 1, 0x10, 0);
+// 			print_buffer(fdt_base, fdt_base_buf, 1, 0x10, 0);
 			ret = blk_read(blk, blknum, num_blks, fdt_base_buf);
 			log_debug("fdt read foffset %lx blknum %lx full_size %lx num_blks %lx to %lx / %p: ret=%d\n",
 				  fdt_offset - 0x8000, blknum, fdt_full_size, num_blks,
 				  fdt_base, fdt_base_buf, ret);
 			if (ret != num_blks)
 				return log_msg_ret("rdf", -EIO);
-			print_buffer(fdt_base, fdt_base_buf, 1, 0x10, 0);
+// 			print_buffer(fdt_base, fdt_base_buf, 1, 0x10, 0);
 			if (extra) {
 				log_debug("move %p %p %lx\n", fdt_base_buf,
 					  fdt_base_buf + extra, fdt_size);

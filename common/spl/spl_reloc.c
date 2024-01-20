@@ -7,8 +7,6 @@
 #ifndef _SPL_RELOC_H
 #define _SPL_RELOC_H
 
-// #define LOG_DEBUG
-
 #include <display_options.h>
 #include <gzip.h>
 #include <image.h>
