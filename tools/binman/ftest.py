@@ -7456,9 +7456,11 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         """Test handling of alternates-fdt etype"""
         self._SetupTplElf()
         testdir = TestFunctional._MakeInputDir('dtb')
+        dtb_list = []
         for fname in glob.glob(f'{self.TestFile("alt_dts")}/*.dts'):
             tmp_fname = fdt_util.EnsureCompiled(fname, testdir)
             dtb_fname = os.path.splitext(os.path.basename(fname))[0] + '.dtb'
+            dtb_list.append(dtb_fname)
             shutil.move(tmp_fname, os.path.join(testdir, dtb_fname))
 
         entry_args = {
@@ -7474,12 +7476,20 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         pad_len = 10
         self.assertEqual(tools.get_bytes(0, pad_len), rest[:pad_len])
 
-        # Check the dtb
+        # Check the dtb is using the test file
         dtb_data = rest[pad_len:]
         dtb = fdt.Fdt.FromData(dtb_data)
         dtb.Scan()
         fdt_size = dtb.GetFdtObj().totalsize()
-        print('dtb', fdt_util.GetString(dtb.GetRoot(), 'compatible'))
+        self.assertEqual('model-not-set',
+                         fdt_util.GetString(dtb.GetRoot(), 'compatible'))
+
+        # Check the other output files
+        print('dtb_list', dtb_list)
+        for fname in dtb_list:
+            pathname = tools.get_output_filename(fname)
+            print('pathname', pathname)
+            self.assertTrue(os.path.exists(pathname))
 
 
 if __name__ == "__main__":
