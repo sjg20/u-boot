@@ -547,7 +547,7 @@ class TestFunctional(unittest.TestCase):
             dtb_data = self._SetupDtb(fname)
 
             # For testing purposes, make a copy of the DT for SPL and TPL. Add
-            # a node indicating which it is, so aid verification.
+            # a node indicating which it is, to aid verification.
             for name in ['spl', 'tpl', 'vpl']:
                 dtb_fname = '%s/u-boot-%s.dtb' % (name, name)
                 outfile = os.path.join(self._indir, dtb_fname)
@@ -7170,27 +7170,24 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
 
 
     def testSplPubkeyDtb(self):
-         """Test u_boot_spl_pubkey_dtb etype"""
-         data = tools.read_file(self.TestFile("key.pem"))
-         self._MakeInputFile("key.crt", data)
-         self._DoReadFileRealDtb('306_spl_pubkey_dtb.dts')
-         image = control.images['image']
-         entries = image.GetEntries()
-         dtb_entry = entries['u-boot-spl-pubkey-dtb']
-         dtb_data = dtb_entry.GetData()
-         dtb = fdt.Fdt.FromData(dtb_data)
-         dtb.Scan()
+        """Test u_boot_spl_pubkey_dtb etype"""
+        data = tools.read_file(self.TestFile("key.pem"))
+        self._MakeInputFile("key.crt", data)
+        self._DoReadFileRealDtb('306_spl_pubkey_dtb.dts')
+        image = control.images['image']
+        entries = image.GetEntries()
+        dtb_entry = entries['u-boot-spl-pubkey-dtb']
+        dtb_data = dtb_entry.GetData()
+        dtb = fdt.Fdt.FromData(dtb_data)
+        dtb.Scan()
 
-         signature_node = dtb.GetNode('/signature')
-         self.assertIsNotNone(signature_node)
-         key_node = signature_node.FindNode("key-key")
-         self.assertIsNotNone(key_node)
-         self.assertEqual(fdt_util.GetString(key_node, "required"),
-                          "conf")
-         self.assertEqual(fdt_util.GetString(key_node, "algo"),
-                          "sha384,rsa4096")
-         self.assertEqual(fdt_util.GetString(key_node, "key-name-hint"),
-                          "key")
+        signature_node = dtb.GetNode('/signature')
+        self.assertIsNotNone(signature_node)
+        key_node = signature_node.FindNode("key-key")
+        self.assertIsNotNone(key_node)
+        self.assertEqual(fdt_util.GetString(key_node, "required"), "conf")
+        self.assertEqual(fdt_util.GetString(key_node, "algo"), "sha384,rsa4096")
+        self.assertEqual(fdt_util.GetString(key_node, "key-name-hint"), "key")
 
     def testXilinxBootgenSigning(self):
         """Test xilinx-bootgen etype"""
@@ -7464,7 +7461,25 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
             dtb_fname = os.path.splitext(os.path.basename(fname))[0] + '.dtb'
             shutil.move(tmp_fname, os.path.join(testdir, dtb_fname))
 
-        self._DoReadFile('326_alternates_fdt.dts')
+        entry_args = {
+            'tpl-dtb': '1',
+            'tpl-bss-pad': 'y',
+        }
+        data = self._DoReadFileDtb('326_alternates_fdt.dts', use_real_dtb=True,
+                                   update_dtb=True, use_expanded=True,
+                                   entry_args=entry_args)[0]
+        self.assertEqual(U_BOOT_TPL_NODTB_DATA, data[:len(U_BOOT_TPL_NODTB_DATA)])
+        rest = data[len(U_BOOT_TPL_NODTB_DATA):]
+        #print('dtb', dtb[:4], len(data))
+        pad_len = 10
+        self.assertEqual(tools.get_bytes(0, pad_len), rest[:pad_len])
+
+        # Check the dtb
+        dtb_data = rest[pad_len:]
+        dtb = fdt.Fdt.FromData(dtb_data)
+        dtb.Scan()
+        fdt_size = dtb.GetFdtObj().totalsize()
+        print('dtb', fdt_util.GetString(dtb.GetRoot(), 'compatible'))
 
 
 if __name__ == "__main__":
