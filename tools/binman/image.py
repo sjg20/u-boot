@@ -196,15 +196,20 @@ class Image(section.Entry_section):
             os.symlink(fname, sname)
 
     def WriteAlternates(self):
-        orig = tools.get_output_filename(self._filename)
+        #orig = tools.get_output_filename(self._filename)
 
         # Avoid overwriting the existing file
         self._filename = None
 
         alt_entry = self.FindEntryType('alternates-fdt')
-        for alt in self.alternates:
+        if not alt_entry:
+            return
+
+        print('alt_entry', alt_entry, alt_entry.alternates)
+        for alt in alt_entry.alternates:
             print(f'writing alt {alt}')
             alt_entry.SetFdt(alt)
+            alt_entry.ProcessContents()
             self.cur_alternate = alt
 
             fname = tools.get_output_filename(f'{alt}.bin')

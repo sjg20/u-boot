@@ -21,6 +21,7 @@ class Entry_alternates_fdt(Entry_section):
         self.fdt_list_dir = None
         self.filename_pattern = None
         self.required_props = ['fdt-list-dir']
+        self._cur_fdt = None
 
     def ReadNode(self):
         """Read properties from the node"""
@@ -29,13 +30,18 @@ class Entry_alternates_fdt(Entry_section):
         fname = tools.get_input_filename(self._fdt_dir)
         fdts = glob.glob('*.dtb', root_dir=fname)
         self._fdts = [os.path.splitext(f)[0] for f in fdts]
-        self.GetImage().alternates = self._fdts
+        self.alternates = self._fdts
 
     def OmitEntry(self):
         return False
 
     def FdtContents(self, fdt_etype):
-        return self.section.FdtContents(fdt_etype)
+        if not self._cur_fdt:
+            return self.section.FdtContents(fdt_etype)
+        fname = tools.get_input_filename(os.path.join(self._fdt_dir,
+                                                      f'{self._cur_fdt}.dtb'))
+        return tools.read_file(fname)
+        #print('alt', alt, fname)
 
     def SetFdt(self, alt):
-        print('alt', alt)
+        self._cur_fdt = alt
