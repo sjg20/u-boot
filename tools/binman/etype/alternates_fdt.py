@@ -39,5 +39,12 @@ class Entry_alternates_fdt(Entry_section):
                                                       f'{self._cur_fdt}.dtb'))
         return fname, tools.read_file(fname)
 
-    def SetFdt(self, alt):
-        self._cur_fdt = alt
+    def ProcessWithFdt(self, alt):
+        data = b''
+        try:
+            self._cur_fdt = alt
+            self.ProcessContents()
+            data = self.GetPaddedData()
+        finally:
+            self._cur_fdt = None
+        return data

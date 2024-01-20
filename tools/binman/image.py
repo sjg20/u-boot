@@ -194,24 +194,15 @@ class Image(section.Entry_section):
             os.symlink(fname, sname)
 
     def WriteAlternates(self):
-        #orig = tools.get_output_filename(self._filename)
-
-        # Avoid overwriting the existing file
-        self._filename = None
-
         alt_entry = self.FindEntryType('alternates-fdt')
         if not alt_entry:
             return
 
         for alt in alt_entry.alternates:
-            alt_entry.SetFdt(alt)
-            alt_entry.ProcessContents()
-
+            data = alt_entry.ProcessWithFdt(alt)
             fname = tools.get_output_filename(f'{alt}.bin')
             tout.info(f"Writing alternate '{alt}' to '{fname}'")
-            with open(fname, 'wb') as fd:
-                data = alt_entry.GetPaddedData()
-                fd.write(data)
+            tools.write_file(fname, data)
             tout.info("Wrote %#x bytes" % len(data))
 
     def WriteMap(self):
