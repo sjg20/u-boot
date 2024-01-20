@@ -1394,4 +1394,4 @@ features to produce new behaviours.
         Return:
             True if the entry should be omitted, False if it should be included
         """
-        return False
+        return self.section.OmitEntry()
