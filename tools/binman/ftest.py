@@ -7486,7 +7486,6 @@ fdt         fdtmap                Extract the devicetree blob from the fdtmap
         # Check the other output files
         for fname in dtb_list:
             pathname = tools.get_output_filename(fname)
-            print('pathname', pathname)
             self.assertTrue(os.path.exists(pathname))
 
 
