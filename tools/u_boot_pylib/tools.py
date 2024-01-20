@@ -477,7 +477,8 @@ def write_file(fname, data, binary=True):
         fname: path to filename to write
         data: data to write to file, as a string
     """
-    print("Write file '%s' size %d (%#0x)" % (fname, len(data), len(data)))
+    #self._out.Info("Write file '%s' size %d (%#0x)" %
+                   #(fname, len(data), len(data)))
     with open(filename(fname), binary and 'wb' or 'w') as fd:
         fd.write(data)
 

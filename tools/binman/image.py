@@ -440,5 +440,5 @@ class Image(section.Entry_section):
         return bintools
 
     def OmitEntry(self):
-        print('self.cur_alternate', self.cur_alternate)
+        #print('self.cur_alternate', self.cur_alternate)
         return self.cur_alternate is not None
