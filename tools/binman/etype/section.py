@@ -330,6 +330,8 @@ class Entry_section(Entry):
         section_data = bytearray()
 
         for entry in self._entries.values():
+            if self.OmitEntry():
+                continue
             entry_data = entry.GetData(required)
 
             # This can happen when this section is referenced from a collection

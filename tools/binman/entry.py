@@ -1385,3 +1385,13 @@ features to produce new behaviours.
 
     def UpdateSignatures(self, privatekey_fname, algo, input_fname):
         self.Raise('Updating signatures is not supported with this entry type')
+
+    def OmitEntry(self):
+        """Checks if an entry should be included in the image
+
+        This is used for alternates
+
+        Return:
+            True if the entry should be omitted, False if it should be included
+        """
+        return False
