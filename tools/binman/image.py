@@ -199,10 +199,10 @@ class Image(section.Entry_section):
             return
 
         for alt in alt_entry.alternates:
-            data = alt_entry.ProcessWithFdt(alt)
-            fname = tools.get_output_filename(f'{alt}.bin')
-            tout.info(f"Writing alternate '{alt}' to '{fname}'")
-            tools.write_file(fname, data)
+            fname, data = alt_entry.ProcessWithFdt(alt)
+            pathname = tools.get_output_filename(fname)
+            tout.info(f"Writing alternate '{alt}' to '{pathname}'")
+            tools.write_file(pathname, data)
             tout.info("Wrote %#x bytes" % len(data))
 
     def WriteMap(self):

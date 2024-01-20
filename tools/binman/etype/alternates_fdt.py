@@ -37,6 +37,8 @@ class Entry_alternates_fdt(Entry_section):
         self._fdt_phase = fdt_util.GetString(self._node, 'fdt-phase')
         self.alternates = self._fdts
 
+        self._fname_pattern = fdt_util.GetString(self._node, 'filename-pattern')
+
         self._remove_props = []
         props, = self.GetEntryArgsOrProps(
             [EntryArg('of-spl-remove-props', str)], required=False)
@@ -59,6 +61,9 @@ class Entry_alternates_fdt(Entry_section):
         return fname, tools.read_file(infile)
 
     def ProcessWithFdt(self, alt):
+        pattern = self._fname_pattern or 'NAME.bin'
+        fname = pattern.replace('NAME', alt)
+
         data = b''
         try:
             self._cur_fdt = alt
@@ -66,7 +71,7 @@ class Entry_alternates_fdt(Entry_section):
             data = self.GetPaddedData()
         finally:
             self._cur_fdt = None
-        return data
+        return fname, data
 
     def AddBintools(self, btools):
         super().AddBintools(btools)
