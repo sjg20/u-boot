@@ -11,6 +11,14 @@
 #define ARCH	"arm"
 #endif
 
+#if defined(CONFIG_SPL_GZIP)
+#define COMP	"gzip"
+#elif defined(CONFIG_SPL_LZMA)
+#define COMP	"lzma"
+#else
+#define COMP	"none"
+#endif
+
 / {
 	binman: binman {
 		multiple-images;
@@ -44,158 +52,146 @@
 
 #ifdef CONFIG_SPL
 &binman {
-		common_part: template-1 {
-			type = "fit";
+	common_part: template-1 {
+		type = "fit";
 #ifdef CONFIG_ARM64
-			description = "FIT image for U-Boot with bl31 (TF-A)";
+		description = "FIT image for U-Boot with bl31 (TF-A)";
 #else
-			description = "FIT image with OP-TEE";
+		description = "FIT image with OP-TEE";
 #endif
-			#address-cells = <1>;
-// 			fit,fdt-list = "of-list";
-			fit,fdt-list-dir = "arch/arm/dts";
-			filename = "u-boot.itb";
-			fit,external-offset = <CONFIG_FIT_EXTERNAL_OFFSET>;
-			fit,align = <512>;
-			images {
-				spl {
-					description = "U-Boot SPL";
-					type = "firmware";
-					os = "u-boot";
-					arch = ARCH;
-					compression = "lz4";
-					load = <CONFIG_SPL_TEXT_BASE>;
-					entry = <CONFIG_SPL_TEXT_BASE>;
-					phase = "spl";
-					section {
-						compress = "lz4";
-						u-boot-spl-nodtb {
-						};
-						u-boot-spl-bss-pad {
-						};
+		#address-cells = <1>;
+		fit,fdt-list-dir = "arch/arm/dts";
+		filename = "u-boot.itb";
+		fit,external-offset = <CONFIG_FIT_EXTERNAL_OFFSET>;
+		fit,align = <512>;
+		images {
+			spl {
+				description = "U-Boot SPL";
+				type = "firmware";
+				os = "u-boot";
+				arch = ARCH;
+				compression = "lz4";
+				load = <CONFIG_SPL_TEXT_BASE>;
+				entry = <CONFIG_SPL_TEXT_BASE>;
+				phase = "spl";
+				section {
+					compress = "lz4";
+					u-boot-spl-nodtb {
 					};
-				};
-
-				u-boot {
-					description = "U-Boot";
-					type = "standalone";
-					os = "u-boot";
-					arch = ARCH;
-#if defined(CONFIG_SPL_GZIP)
-					compression = "gzip";
-#elif defined(CONFIG_SPL_LZMA)
-					compression = "lzma";
-#else
-					compression = "none";
-#endif
-					load = <CONFIG_TEXT_BASE>;
-					entry = <CONFIG_TEXT_BASE>;
-					phase = "u-boot";
-					u-boot-nodtb {
-#if defined(CONFIG_SPL_GZIP)
-					compress = "gzip";
-#elif defined(CONFIG_SPL_LZMA)
-					compress = "lzma";
-#endif
+					u-boot-spl-bss-pad {
 					};
-#ifdef CONFIG_SPL_FIT_SIGNATURE
-					hash {
-						algo = "sha256";
-					};
-#endif
-				};
-
-#ifdef CONFIG_ARM64
-				@atf-SEQ {
-					fit,operation = "split-elf";
-					description = "ARM Trusted Firmware";
-					type = "firmware";
-					arch = "arm64";
-					os = "arm-trusted-firmware";
-					compression = "none";
-					phase = "u-boot";
-					fit,load;
-					fit,entry;
-					fit,data;
-
-					atf-bl31 {
-					};
-#ifdef CONFIG_SPL_FIT_SIGNATURE
-					hash {
-						algo = "sha256";
-					};
-#endif
-				};
-				@tee-SEQ {
-					fit,operation = "split-elf";
-					description = "TEE";
-					type = "tee";
-					arch = "arm64";
-					os = "tee";
-					compression = "none";
-					phase = "u-boot";
-					fit,load;
-					fit,entry;
-					fit,data;
-
-					tee-os {
-						optional;
-					};
-#ifdef CONFIG_SPL_FIT_SIGNATURE
-					hash {
-						algo = "sha256";
-					};
-#endif
-				};
-#else
-				op-tee {
-					description = "OP-TEE";
-					type = "tee";
-					arch = "arm";
-					os = "tee";
-					compression = "none";
-					load = <(CFG_SYS_SDRAM_BASE + 0x8400000)>;
-					entry = <(CFG_SYS_SDRAM_BASE + 0x8400000)>;
-					phase = "u-boot";
-
-					tee-os {
-					};
-#ifdef CONFIG_SPL_FIT_SIGNATURE
-					hash {
-						algo = "sha256";
-					};
-#endif
-				};
-#endif
-
-				@fdt-SEQ {
-					description = "fdt-NAME";
-					compression = "none";
-					type = "flat_dt";
-// 					fit,fdt-phase = "spl";
-#ifdef CONFIG_SPL_FIT_SIGNATURE
-					hash {
-						algo = "sha256";
-					};
-#endif
 				};
 			};
 
-			configurations {
-				default = "@config-DEFAULT-SEQ";
-				@config-SEQ {
-					description = "NAME.dtb";
-					fdt = "fdt-SEQ";
-#ifdef CONFIG_ARM64
-					fit,firmware = "atf-1", "u-boot", "spl";
-#else
-					fit,firmware = "op-tee", "u-boot";
+			u-boot {
+				description = "U-Boot";
+				type = "standalone";
+				os = "u-boot";
+				arch = ARCH;
+				compression = COMP;
+				load = <CONFIG_TEXT_BASE>;
+				entry = <CONFIG_TEXT_BASE>;
+				phase = "u-boot";
+				u-boot-nodtb {
+					compression = COMP;
+					};
+#ifdef CONFIG_SPL_FIT_SIGNATURE
+					hash {
+						algo = "sha256";
+					};
 #endif
-					fit,loadables;
-					fit,compatible;
 				};
+
+#ifdef CONFIG_ARM64
+			@atf-SEQ {
+				fit,operation = "split-elf";
+				description = "ARM Trusted Firmware";
+				type = "firmware";
+				arch = "arm64";
+				os = "arm-trusted-firmware";
+				compression = "none";
+				phase = "u-boot";
+				fit,load;
+				fit,entry;
+				fit,data;
+
+				atf-bl31 {
+				};
+#ifdef CONFIG_SPL_FIT_SIGNATURE
+				hash {
+					algo = "sha256";
+				};
+#endif
+			};
+			@tee-SEQ {
+				fit,operation = "split-elf";
+				description = "TEE";
+				type = "tee";
+				arch = "arm64";
+				os = "tee";
+				compression = "none";
+				phase = "u-boot";
+				fit,load;
+				fit,entry;
+				fit,data;
+
+				tee-os {
+					optional;
+				};
+#ifdef CONFIG_SPL_FIT_SIGNATURE
+				hash {
+					algo = "sha256";
+				};
+#endif
+			};
+#else
+			op-tee {
+				description = "OP-TEE";
+				type = "tee";
+				arch = "arm";
+				os = "tee";
+				compression = "none";
+				load = <(CFG_SYS_SDRAM_BASE + 0x8400000)>;
+				entry = <(CFG_SYS_SDRAM_BASE + 0x8400000)>;
+				phase = "u-boot";
+
+				tee-os {
+				};
+#ifdef CONFIG_SPL_FIT_SIGNATURE
+				hash {
+					algo = "sha256";
+				};
+#endif
+			};
+#endif
+
+			@fdt-SEQ {
+				description = "fdt-NAME";
+				compression = "none";
+				type = "flat_dt";
+#ifdef CONFIG_SPL_FIT_SIGNATURE
+				hash {
+					algo = "sha256";
+				};
+#endif
 			};
 		};
+
+		configurations {
+			default = "@config-DEFAULT-SEQ";
+			@config-SEQ {
+				description = "NAME.dtb";
+				fdt = "fdt-SEQ";
+#ifdef CONFIG_ARM64
+				fit,firmware = "atf-1", "u-boot", "spl";
+#else
+				fit,firmware = "op-tee", "u-boot";
+#endif
+				fit,loadables;
+				fit,compatible;
+			};
+		};
+	};
 
 	spl_template: template-2 {
 		type = "fit";
@@ -272,7 +268,6 @@
 			offset = <(CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR * 0x200 + 0x8000)>;
 			description = "FIT image for U-Boot TPL";
 			#address-cells = <1>;
-// 			fit,fdt-list = "of-list";
 			fit,fdt-list-dir = "arch/arm/dts";
 			fit,align = <512>;
 			fit,external-offset = <0>;
