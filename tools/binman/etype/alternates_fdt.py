@@ -7,6 +7,7 @@
 import glob
 import os
 
+from binman.entry import EntryArg
 from binman.etype.section import Entry_section
 from dtoc import fdt_util
 from u_boot_pylib import tools
@@ -22,6 +23,8 @@ class Entry_alternates_fdt(Entry_section):
         self.filename_pattern = None
         self.required_props = ['fdt-list-dir']
         self._cur_fdt = None
+        self._fdt_phase = None
+        self.fdtgrep = None
 
     def ReadNode(self):
         """Read properties from the node"""
@@ -30,14 +33,30 @@ class Entry_alternates_fdt(Entry_section):
         fname = tools.get_input_filename(self._fdt_dir)
         fdts = glob.glob('*.dtb', root_dir=fname)
         self._fdts = [os.path.splitext(f)[0] for f in fdts]
+
+        self._fdt_phase = fdt_util.GetString(self._node, 'fdt-phase')
         self.alternates = self._fdts
+
+        self._remove_props = []
+        props, = self.GetEntryArgsOrProps(
+            [EntryArg('of-spl-remove-props', str)], required=False)
+        if props:
+            self._remove_props = props.split()
 
     def FdtContents(self, fdt_etype):
         if not self._cur_fdt:
             return self.section.FdtContents(fdt_etype)
-        fname = tools.get_input_filename(os.path.join(self._fdt_dir,
-                                                      f'{self._cur_fdt}.dtb'))
-        return fname, tools.read_file(fname)
+
+        fname = os.path.join(self._fdt_dir, f'{self._cur_fdt}.dtb')
+        infile = tools.get_input_filename(fname)
+        if self._fdt_phase:
+            uniq = self.GetUniqueName()
+            outfile = tools.get_output_filename(
+                f'{uniq}.{self._cur_fdt}-{self._fdt_phase}.dtb')
+            self.fdtgrep.create_for_phase(infile, self._fdt_phase, outfile,
+                                          self._remove_props)
+            return outfile, tools.read_file(outfile)
+        return fname, tools.read_file(infile)
 
     def ProcessWithFdt(self, alt):
         data = b''
@@ -48,3 +67,8 @@ class Entry_alternates_fdt(Entry_section):
         finally:
             self._cur_fdt = None
         return data
+
+    def AddBintools(self, btools):
+        super().AddBintools(btools)
+        self.fdtgrep = self.AddBintool(btools, 'fdtgrep')
+

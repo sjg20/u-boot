@@ -243,7 +243,8 @@
 
 		alternates-fdt {
 			fdt-list-dir = "arch/arm/dts";
-			filename-pattern = "NAME.bin";
+// 			filename-pattern = "NAME.bin";
+			fdt-phase = "tpl";
 
 			mkimage {
 				filename = "idbloader.img";
