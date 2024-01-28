@@ -38,7 +38,7 @@
 		firmware0 {
 			bootph-verify;
 			compatible = "fwupd,vbe-simple";
-			storage = "mmc1";
+			storage = "mmc0";
 			skip-offset = <0x8000>;
 			area-start = <CONFIG_SPL_PAD_TO>;
 			area-size = <0x800000>;
