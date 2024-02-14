@@ -29,20 +29,20 @@
 #include "vbe_common.h"
 
 binman_sym_declare(ulong, spl_a, image_pos);
-binman_sym_declare(ulong, spl_b, image_pos);
-binman_sym_declare(ulong, spl_recovery, image_pos);
+// binman_sym_declare(ulong, spl_b, image_pos);
+// binman_sym_declare(ulong, spl_recovery, image_pos);
 
 binman_sym_declare(ulong, spl_a, size);
-binman_sym_declare(ulong, spl_b, size);
-binman_sym_declare(ulong, spl_recovery, size);
+// binman_sym_declare(ulong, spl_b, size);
+// binman_sym_declare(ulong, spl_recovery, size);
 
 binman_sym_declare(ulong, u_boot_a, image_pos);
-binman_sym_declare(ulong, u_boot_b, image_pos);
-binman_sym_declare(ulong, u_boot_recovery, image_pos);
+// binman_sym_declare(ulong, u_boot_b, image_pos);
+// binman_sym_declare(ulong, u_boot_recovery, image_pos);
 
 binman_sym_declare(ulong, u_boot_a, size);
-binman_sym_declare(ulong, u_boot_b, size);
-binman_sym_declare(ulong, u_boot_recovery, size);
+// binman_sym_declare(ulong, u_boot_b, size);
+// binman_sym_declare(ulong, u_boot_recovery, size);
 
 binman_sym_declare(ulong, vpl, image_pos);
 binman_sym_declare(ulong, vpl, size);
@@ -144,6 +144,7 @@ static int abrec_run_vpl(struct udevice *blk, struct spl_image_info *image,
 		ub_offset = binman_sym(ulong, u_boot_a, image_pos);
 		ub_size = binman_sym(ulong, u_boot_a, size);
 		break;
+	/*
 	case VBEP_B:
 		offset = binman_sym(ulong, spl_b, image_pos);
 		size = binman_sym(ulong, spl_b, size);
@@ -156,6 +157,7 @@ static int abrec_run_vpl(struct udevice *blk, struct spl_image_info *image,
 		ub_offset = binman_sym(ulong, u_boot_recovery, image_pos);
 		ub_size = binman_sym(ulong, u_boot_recovery, size);
 		break;
+	*/
 	}
 	log_debug("pick=%d, offset=%lx size=%lx\n", pick, offset, size);
 	log_info("VBE: Firmware pick %s at %lx\n", pick_names[pick], offset);

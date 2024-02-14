@@ -327,6 +327,7 @@
 				insert-template = <&common_part>;
 			};
 		};
+		/*
 		vbe-b {
 			type = "section";
 			offset = <(0x1000000)>;
@@ -351,6 +352,7 @@
 				insert-template = <&common_part>;
 			};
 		};
+		*/
 #elif defined(CONFIG_BOOTMETH_VBE_SIMPLE)
 		vbe {
 			type = "fit";
