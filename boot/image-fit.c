@@ -578,19 +578,6 @@ void fit_image_print(const void *fit, int image_noffset, const char *p)
 	}
 }
 
-/**
- * fit_get_desc - get node description property
- * @fit: pointer to the FIT format image header
- * @noffset: node offset
- * @desc: double pointer to the char, will hold pointer to the description
- *
- * fit_get_desc() reads description property from a given node, if
- * description is found pointer to it is returned in third call argument.
- *
- * returns:
- *     0, on success
- *     -1, on failure
- */
 int fit_get_desc(const void *fit, int noffset, char **desc)
 {
 	int len;
