@@ -1187,6 +1187,22 @@ static inline const char *fit_get_name(const void *fit_hdr,
 	return fdt_get_name(fit_hdr, noffset, len);
 }
 
+/**
+ * fit_get_desc() - Retrieve the description string from a FIT image node.
+ * @fit: A pointer to the FIT image data.
+ * @noffset: The node offset within the FIT image.
+ * @desc: A pointer to a character pointer, which will be updated by the
+ *        function to point to the description string.
+ *
+ * This function retrieves the description string associated with a specific
+ * node in a FIT (Flattened Image Tree) image. The description is typically
+ * found in the "description" property of the node.
+ *
+ * Important: The @desc parameter is updated to point to a string within the
+ * FIT image data itself. The caller should not attempt to free this string.
+ *
+ * Return: 0 on success, or a negative error code on failure.
+ */
 int fit_get_desc(const void *fit, int noffset, char **desc);
 int fit_get_timestamp(const void *fit, int noffset, time_t *timestamp);
 
