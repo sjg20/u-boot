@@ -292,6 +292,36 @@ def test_ulib_demo_rom_64(ubman):
     """Test the ulib demo ROM image under QEMU x86_64."""
     run_x86_rom_demo(ubman, 'qemu-system-x86_64')
 
+def run_x86_rom_rust_demo(ubman, qemu_binary):
+    """Boot the Rust demo ROM image under QEMU and check for expected output.
+
+    Locates rust-demo.rom in the build directory, launches the given QEMU
+    binary with it, and asserts that the expected demo output is present.
+
+    Args:
+        ubman (ConsoleBase): Test fixture providing build directory
+            etc.
+        qemu_binary (str): QEMU system binary
+            (e.g. 'qemu-system-x86_64')
+    """
+    build = ubman.config.build_dir
+    demo_rom = os.path.join(build, 'rust-demo.rom')
+
+    assert os.path.exists(demo_rom), \
+        'rust-demo.rom not found in build directory'
+    assert shutil.which(qemu_binary), f'{qemu_binary} not found'
+
+    cmd = [qemu_binary, '-bios', demo_rom, '-nographic', '-no-reboot']
+    out = run_qemu_demo(cmd)
+    assert_demo_output(out)
+
+@pytest.mark.localqemu
+@pytest.mark.boardspec('qemu-x86_64_nospl')
+@pytest.mark.buildconfigspec("rust_examples")
+def test_ulib_rust_demo_rom_64(ubman):
+    """Test the Rust ulib demo ROM image under QEMU x86_64."""
+    run_x86_rom_rust_demo(ubman, 'qemu-system-x86_64')
+
 def run_bios_demo(ubman, qemu_binary, extra_qemu_args=None):
     """Boot the demo.bin binary under QEMU and check for expected output.
 

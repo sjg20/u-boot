@@ -213,4 +213,22 @@
 	};
 }; };
 #endif
+
+#ifdef CONFIG_RUST_EXAMPLES
+/ { binman {
+	rust-demo-rom {
+		filename = "rust-demo.rom";
+		insert-template = <&rom_common>;
+
+		blob {
+			filename = "examples/ulib/rust-demo-nodtb.bin";
+			offset = <CONFIG_X86_OFFSET_U_BOOT>;
+		};
+		u-boot-dtb {
+		};
+		fdtmap {
+		};
+	};
+}; };
+#endif
 #endif

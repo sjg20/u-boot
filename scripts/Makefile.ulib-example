@@ -19,38 +19,76 @@ PHONY += examples_$(EXAMPLE_ARCH)
 
 ULIB_EXAMPLES := demo
 
+# --- Rust examples ---
+RUSTC := rustc
+RUST_TARGET_x86 := x86_64-unknown-none
+RUST_TARGET := $(RUST_TARGET_$(EXAMPLE_ARCH))
+
+ifeq ($(CONFIG_RUST_EXAMPLES),y)
+ULIB_EXAMPLES += rust-demo
+endif
+
 quiet_cmd_u-boot-example = LD      $@
       cmd_u-boot-example = $(call u-boot-link,$(example-objs),$@.map)
 
+quiet_cmd_rustc_obj = RUSTC   $@
+      cmd_rustc_obj = \
+	mkdir -p $(dir $@) && \
+	$(RUSTC) --edition 2021 --emit=obj -o $@ --target=$(RUST_TARGET) $<
+
+examples/ulib/rust_demo.o: examples/ulib/rust_demo.rs FORCE
+	$(call if_changed,rustc_obj)
+
 # Per-example object lists (matches examples/ulib/Kbuild)
 example-demo-objs := examples/ulib/demo.o examples/ulib/demo_helper.o
+example-rust-demo-objs := examples/ulib/rust_demo.o examples/ulib/demo_helper.o
 
-# Link each example ELF (depends on u-boot to ensure archives exist)
-examples/ulib/demo: $(example-demo-objs) u-boot FORCE
-	$(eval example-objs := $(example-demo-objs))
-	$(call if_changed,u-boot-example)
-	$(EXAMPLE_POST_LINK)
+# Generate link rule for each example
+define example_link_rule
+examples/ulib/$(1): $$(example-$(1)-objs) u-boot FORCE
+	$$(eval example-objs := $$(example-$(1)-objs))
+	$$(call if_changed,u-boot-example)
+	$$(EXAMPLE_POST_LINK)
+endef
+
+$(foreach e,$(ULIB_EXAMPLES),$(eval $(call example_link_rule,$(e))))
 
 ifeq ($(CONFIG_EFI_APP),y)
 # EFI: embed DTB and convert to PE binary
-OBJCOPYFLAGS_demo-app.efi := $(OBJCOPYFLAGS_EFI)
-examples/ulib/demo-app.efi: examples/ulib/demo dts/dt.dtb FORCE
-	$(if $(CONFIG_OF_SEPARATE),$(call if_changed,embeddtb))
-	$(call if_changed,zobjcopy)
+$(foreach e,$(ULIB_EXAMPLES),\
+  $(eval OBJCOPYFLAGS_$(e)-app.efi := $$(OBJCOPYFLAGS_EFI)))
+
+define example_efi_rule
+examples/ulib/$(1)-app.efi: examples/ulib/$(1) dts/dt.dtb FORCE
+	$$(if $$(CONFIG_OF_SEPARATE),$$(call if_changed,embeddtb))
+	$$(call if_changed,zobjcopy)
+endef
+
+$(foreach e,$(ULIB_EXAMPLES),$(eval $(call example_efi_rule,$(e))))
 
 examples_$(EXAMPLE_ARCH): \
 		$(foreach e,$(ULIB_EXAMPLES),examples/ulib/$(e)-app.efi) FORCE
 	@:
 else
 # Binary target (without DTB)
-OBJCOPYFLAGS_demo-nodtb.bin = $(OBJCOPYFLAGS_u-boot-nodtb.bin)
-examples/ulib/demo-nodtb.bin: examples/ulib/demo FORCE
-	$(call if_changed,objcopy)
+$(foreach e,$(ULIB_EXAMPLES),\
+  $(eval OBJCOPYFLAGS_$(e)-nodtb.bin = $$(OBJCOPYFLAGS_u-boot-nodtb.bin)))
+
+define example_nodtb_rule
+examples/ulib/$(1)-nodtb.bin: examples/ulib/$(1) FORCE
+	$$(call if_changed,objcopy)
+endef
+
+$(foreach e,$(ULIB_EXAMPLES),$(eval $(call example_nodtb_rule,$(e))))
 
 ifeq ($(EXAMPLE_APPEND_DTB),y)
 # Binary with DTB appended
-examples/ulib/demo.bin: examples/ulib/demo-nodtb.bin dts/dt.dtb FORCE
-	$(call if_changed,cat)
+define example_bin_rule
+examples/ulib/$(1).bin: examples/ulib/$(1)-nodtb.bin dts/dt.dtb FORCE
+	$$(call if_changed,cat)
+endef
+
+$(foreach e,$(ULIB_EXAMPLES),$(eval $(call example_bin_rule,$(e))))
 
 examples_$(EXAMPLE_ARCH): \
 		$(foreach e,$(ULIB_EXAMPLES),examples/ulib/$(e).bin) FORCE
