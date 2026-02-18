@@ -545,3 +545,13 @@ def test_ulib_demo_efi_riscv64(ubman):
                  '/usr/share/qemu-efi-riscv64/RISCV_VIRT_CODE.fd',
                  '/usr/share/qemu-efi-riscv64/RISCV_VIRT_VARS.fd',
                  ['--machine', 'virt'])
+
+@pytest.mark.localqemu
+@pytest.mark.boardspec('efi-riscv_app64')
+@pytest.mark.buildconfigspec("rust_examples")
+def test_ulib_rust_demo_efi_riscv64(ubman):
+    """Test the Rust ulib demo EFI app under QEMU RISC-V 64 with UEFI."""
+    run_efi_rust_demo(ubman, 'qemu-system-riscv64',
+                      '/usr/share/qemu-efi-riscv64/RISCV_VIRT_CODE.fd',
+                      '/usr/share/qemu-efi-riscv64/RISCV_VIRT_VARS.fd',
+                      ['--machine', 'virt'])
