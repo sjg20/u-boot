@@ -452,6 +452,54 @@ def run_efi_demo(ubman, qemu_binary, fw_code, fw_vars, extra_qemu_args=None):
     out = run_qemu_demo(cmd, timeout=15)
     assert_demo_output(out)
 
+def run_efi_rust_demo(ubman, qemu_binary, fw_code, fw_vars,
+                      extra_qemu_args=None):
+    """Run a Rust ulib demo EFI application under QEMU with UEFI firmware.
+
+    Writes a startup.nsh script next to rust-demo-app.efi in the build
+    directory, boots QEMU with the given firmware, and checks for
+    expected output.
+
+    Args:
+        ubman (ConsoleBase): Test fixture providing build directory
+            etc.
+        qemu_binary (str): QEMU system binary name
+            (e.g. 'qemu-system-x86_64')
+        fw_code (str): Path to UEFI firmware code file
+        fw_vars (str): Path to UEFI firmware variables file (or None)
+        extra_qemu_args (list): Additional QEMU arguments
+    """
+    build = ubman.config.build_dir
+    efi_dir = os.path.join(build, 'examples', 'ulib')
+    demo_efi = os.path.join(efi_dir, 'rust-demo-app.efi')
+
+    assert os.path.exists(demo_efi), \
+        'rust-demo-app.efi not found in build directory'
+    assert shutil.which(qemu_binary), f'{qemu_binary} not found'
+    assert os.path.exists(fw_code), f'UEFI firmware not found: {fw_code}'
+
+    with open(os.path.join(efi_dir, 'startup.nsh'), 'w',
+              encoding='utf-8') as nsh:
+        nsh.write('fs0:rust-demo-app.efi\n')
+
+    cmd = [qemu_binary]
+
+    # Set up firmware pflash drives
+    cmd += ['-drive', f'if=pflash,format=raw,file={fw_code},readonly=on']
+    if fw_vars:
+        vars_copy = os.path.join(efi_dir, 'vars.fd')
+        shutil.copy(fw_vars, vars_copy)
+        cmd += ['-drive', f'if=pflash,format=raw,file={vars_copy}']
+
+    if extra_qemu_args:
+        cmd += extra_qemu_args
+
+    # FAT drive with EFI binary and startup script
+    cmd += ['-drive', f'file=fat:rw:{efi_dir},format=raw',
+            '-nographic', '-no-reboot', '-nic', 'none']
+    out = run_qemu_demo(cmd, timeout=15)
+    assert_demo_output(out)
+
 @pytest.mark.localqemu
 @pytest.mark.boardspec('efi-x86_app64')
 @pytest.mark.buildconfigspec("examples")
@@ -460,6 +508,15 @@ def test_ulib_demo_efi_x86(ubman):
     run_efi_demo(ubman, 'qemu-system-x86_64',
                  '/usr/share/OVMF/OVMF_CODE_4M.fd',
                  '/usr/share/OVMF/OVMF_VARS_4M.fd')
+
+@pytest.mark.localqemu
+@pytest.mark.boardspec('efi-x86_app64')
+@pytest.mark.buildconfigspec("rust_examples")
+def test_ulib_rust_demo_efi_x86(ubman):
+    """Test the Rust ulib demo EFI app under QEMU x86_64 with OVMF."""
+    run_efi_rust_demo(ubman, 'qemu-system-x86_64',
+                      '/usr/share/OVMF/OVMF_CODE_4M.fd',
+                      '/usr/share/OVMF/OVMF_VARS_4M.fd')
 
 @pytest.mark.localqemu
 @pytest.mark.boardspec('efi-arm_app64')
