@@ -25,6 +25,31 @@ pub extern "C" fn ulib_has_main() -> bool {
     true
 }
 
+/// Call demo_add_numbers() matching the target's C calling convention.
+///
+/// On 32-bit x86, U-Boot compiles with -mregparm=3 so the first three
+/// integer arguments are passed in eax, edx, ecx.  Rust's extern "C"
+/// uses cdecl (all arguments on the stack), so we bridge via inline
+/// assembly.  Variadic functions (printf) and functions with no
+/// arguments are unaffected.
+#[cfg(target_arch = "x86")]
+unsafe fn call_demo_add_numbers(a: c_int, b: c_int) -> c_int {
+    let result: c_int;
+    core::arch::asm!(
+        "call {func}",
+        func = sym demo_add_numbers,
+        inout("eax") a => result,
+        in("edx") b,
+        out("ecx") _,
+    );
+    result
+}
+
+#[cfg(not(target_arch = "x86"))]
+unsafe fn call_demo_add_numbers(a: c_int, b: c_int) -> c_int {
+    demo_add_numbers(a, b)
+}
+
 fn demo_run() -> c_int {
     unsafe {
         demo_show_banner();
@@ -33,7 +58,7 @@ fn demo_run() -> c_int {
             &version_string as *const u8,
         );
         printf(b"\n\0".as_ptr());
-        demo_add_numbers(42, 13);
+        call_demo_add_numbers(42, 13);
         demo_show_footer();
     }
     0

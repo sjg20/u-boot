@@ -21,8 +21,18 @@ ULIB_EXAMPLES := demo
 
 # --- Rust examples ---
 RUSTC := rustc
-RUST_TARGET_x86 := x86_64-unknown-none
+RUST_TARGET_x86 := i686-unknown-linux-gnu
+RUST_TARGET_x86_64 := x86_64-unknown-none
+RUST_FLAGS_x86 := -C panic=abort -C relocation-model=static
+RUST_FLAGS_x86_64 :=
+
+ifdef CONFIG_X86_64
+RUST_TARGET := $(RUST_TARGET_$(EXAMPLE_ARCH)_64)
+RUST_FLAGS := $(RUST_FLAGS_$(EXAMPLE_ARCH)_64)
+else
 RUST_TARGET := $(RUST_TARGET_$(EXAMPLE_ARCH))
+RUST_FLAGS := $(RUST_FLAGS_$(EXAMPLE_ARCH))
+endif
 
 ifeq ($(CONFIG_RUST_EXAMPLES),y)
 ULIB_EXAMPLES += rust-demo
@@ -34,7 +44,8 @@ quiet_cmd_u-boot-example = LD      $@
 quiet_cmd_rustc_obj = RUSTC   $@
       cmd_rustc_obj = \
 	mkdir -p $(dir $@) && \
-	$(RUSTC) --edition 2021 --emit=obj -o $@ --target=$(RUST_TARGET) $<
+	$(RUSTC) --edition 2021 --emit=obj -o $@ \
+	--target=$(RUST_TARGET) $(RUST_FLAGS) $<
 
 examples/ulib/rust_demo.o: examples/ulib/rust_demo.rs FORCE
 	$(call if_changed,rustc_obj)
