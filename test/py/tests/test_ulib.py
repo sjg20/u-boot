@@ -528,6 +528,15 @@ def test_ulib_demo_efi_arm64(ubman):
                  ['--machine', 'virt', '-cpu', 'max'])
 
 @pytest.mark.localqemu
+@pytest.mark.boardspec('efi-arm_app64')
+@pytest.mark.buildconfigspec("rust_examples")
+def test_ulib_rust_demo_efi_arm64(ubman):
+    """Test the Rust ulib demo EFI app under QEMU aarch64 with UEFI."""
+    run_efi_rust_demo(ubman, 'qemu-system-aarch64',
+                      '/usr/share/qemu-efi-aarch64/QEMU_EFI.fd', None,
+                      ['--machine', 'virt', '-cpu', 'max'])
+
+@pytest.mark.localqemu
 @pytest.mark.boardspec('efi-riscv_app64')
 @pytest.mark.buildconfigspec("examples")
 def test_ulib_demo_efi_riscv64(ubman):
