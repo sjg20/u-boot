@@ -269,24 +269,30 @@ RUN git clone https://github.com/stefanberger/swtpm /tmp/swtpm && \
 	rm -rf /tmp/swtpm
 
 # Build trace-cmd
+# Pin to commits from Oct 2025 to avoid libtraceevent 1.9+ BTF dependency
+# which requires kernel headers newer than Jammy's 5.15
 RUN mkdir /tmp/trace && \
     git clone https://git.kernel.org/pub/scm/libs/libtrace/libtraceevent.git /tmp/trace/libtraceevent && \
     cd /tmp/trace/libtraceevent && \
+    git checkout b3f5849 && \
     make -j$(nproc) && \
-    sudo make install && \
-    git clone https://git.kernel.org/pub/scm/libs/libtrace/libtracefs.git /tmp/trace/libtracefs && \
+    sudo make install prefix=/usr && \
+    sudo ldconfig && \
+    git clone --branch libtracefs-1.8.1 --depth 1 https://git.kernel.org/pub/scm/libs/libtrace/libtracefs.git /tmp/trace/libtracefs && \
     cd /tmp/trace/libtracefs && \
     make -j$(nproc) && \
-    sudo make install && \
+    sudo make install prefix=/usr && \
+    sudo ldconfig && \
     git clone https://github.com/rostedt/trace-cmd.git /tmp/trace/trace-cmd && \
     cd /tmp/trace/trace-cmd && \
+    git checkout 364faec && \
     make -j$(nproc) && \
     sudo make install && \
     rm -rf /tmp/trace
 
 # Build coreboot
-RUN wget -O - https://coreboot.org/releases/coreboot-24.08.tar.xz | tar -C /tmp -xJ && \
-    cd /tmp/coreboot-24.08 && \
+RUN wget -O - https://coreboot.org/releases/coreboot-24.12.tar.xz | tar -C /tmp -xJ && \
+    cd /tmp/coreboot-24.12 && \
     make crossgcc-i386 CPUS=$(nproc) && \
     make -C payloads/coreinfo olddefconfig && \
     make -C payloads/coreinfo && \
