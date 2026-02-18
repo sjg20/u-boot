@@ -357,6 +357,34 @@ def run_bios_demo(ubman, qemu_binary, extra_qemu_args=None):
     out = run_qemu_demo(cmd)
     assert_demo_output(out)
 
+def run_bios_rust_demo(ubman, qemu_binary, extra_qemu_args=None):
+    """Boot the rust-demo.bin binary under QEMU and check expected output.
+
+    Locates rust-demo.bin in the build directory, launches the given QEMU
+    binary with it as -bios, and asserts that the expected demo output
+    is present.
+
+    Args:
+        ubman (ConsoleBase): Test fixture providing build directory
+            etc.
+        qemu_binary (str): QEMU system binary
+            (e.g. 'qemu-system-riscv64')
+        extra_qemu_args (list): Additional QEMU arguments
+    """
+    build = ubman.config.build_dir
+    demo_bin = os.path.join(build, 'examples', 'ulib', 'rust-demo.bin')
+
+    assert os.path.exists(demo_bin), \
+        'rust-demo.bin not found in build directory'
+    assert shutil.which(qemu_binary), f'{qemu_binary} not found'
+
+    cmd = [qemu_binary, '-machine', 'virt', '-nographic', '-no-reboot',
+           '-bios', demo_bin]
+    if extra_qemu_args:
+        cmd += extra_qemu_args
+    out = run_qemu_demo(cmd)
+    assert_demo_output(out)
+
 @pytest.mark.localqemu
 @pytest.mark.boardspec('qemu_arm64')
 @pytest.mark.buildconfigspec("examples")
@@ -370,6 +398,13 @@ def test_ulib_demo_arm64(ubman):
 def test_ulib_demo_riscv64(ubman):
     """Test the ulib demo binary under QEMU RISC-V 64."""
     run_bios_demo(ubman, 'qemu-system-riscv64')
+
+@pytest.mark.localqemu
+@pytest.mark.boardspec('qemu-riscv64')
+@pytest.mark.buildconfigspec("rust_examples")
+def test_ulib_rust_demo_riscv64(ubman):
+    """Test the Rust ulib demo binary under QEMU RISC-V 64."""
+    run_bios_rust_demo(ubman, 'qemu-system-riscv64')
 
 def run_efi_demo(ubman, qemu_binary, fw_code, fw_vars, extra_qemu_args=None):
     """Run a ulib demo EFI application under QEMU with UEFI firmware.
