@@ -25,6 +25,8 @@ RUST_TARGET_x86 := i686-unknown-linux-gnu
 RUST_TARGET_x86_64 := x86_64-unknown-none
 RUST_FLAGS_x86 := -C panic=abort -C relocation-model=static
 RUST_FLAGS_x86_64 :=
+RUST_TARGET_riscv := riscv64gc-unknown-none-elf
+RUST_FLAGS_riscv :=
 
 ifdef CONFIG_X86_64
 RUST_TARGET := $(RUST_TARGET_$(EXAMPLE_ARCH)_64)
