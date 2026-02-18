@@ -46,7 +46,7 @@ quiet_cmd_u-boot-example = LD      $@
 quiet_cmd_rustc_obj = RUSTC   $@
       cmd_rustc_obj = \
 	mkdir -p $(dir $@) && \
-	$(RUSTC) --edition 2021 --emit=obj -o $@ \
+	MAKEFLAGS= $(RUSTC) --edition 2021 --emit=obj -o $@ \
 	--target=$(RUST_TARGET) $(RUST_FLAGS) $<
 
 examples/ulib/rust_demo.o: examples/ulib/rust_demo.rs FORCE
