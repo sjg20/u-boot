@@ -316,6 +316,13 @@ def run_x86_rom_rust_demo(ubman, qemu_binary):
     assert_demo_output(out)
 
 @pytest.mark.localqemu
+@pytest.mark.boardspec('qemu-x86')
+@pytest.mark.buildconfigspec("rust_examples")
+def test_ulib_rust_demo_rom(ubman):
+    """Test the Rust ulib demo ROM image under QEMU x86."""
+    run_x86_rom_rust_demo(ubman, 'qemu-system-i386')
+
+@pytest.mark.localqemu
 @pytest.mark.boardspec('qemu-x86_64_nospl')
 @pytest.mark.buildconfigspec("rust_examples")
 def test_ulib_rust_demo_rom_64(ubman):
