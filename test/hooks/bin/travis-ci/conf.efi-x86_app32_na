@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: MIT
+
+console_impl=qemu
+qemu_machine="pc"
+qemu_binary="qemu-system-i386"
+qemu_extra_args="-m 1G -nographic -no-reboot -nic none"
+qemu_kernel_args=""
+qemu_helper_script="efi_app"
+efi_fw_code="/usr/share/OVMF/OVMF32_CODE_4M.fd"
+efi_fw_vars="/usr/share/OVMF/OVMF32_VARS_4M.fd"
+reset_impl=none
+flash_impl=none

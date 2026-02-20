@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: MIT
+
+console_impl=qemu
+qemu_machine="virt"
+qemu_binary="qemu-system-aarch64"
+qemu_extra_args="-m 1G -nographic -no-reboot -nic none -cpu max"
+qemu_kernel_args=""
+qemu_helper_script="efi_app"
+efi_fw_code="/usr/share/AAVMF/AAVMF_CODE.fd"
+efi_fw_vars="/usr/share/AAVMF/AAVMF_VARS.fd"
+reset_impl=none
+flash_impl=none
