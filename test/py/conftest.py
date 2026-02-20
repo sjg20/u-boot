@@ -530,6 +530,8 @@ def ubman(request):
     Returns:
         The fixture value.
     """
+    if request.node.get_closest_marker('localqemu'):
+        return ubman_fix
     if not ubconfig.connection_ok:
         pytest.skip('Cannot get target connection')
         return None

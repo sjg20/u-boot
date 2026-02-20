@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: MIT
+#
+# Helper script sourced by console.qemu for EFI-application boards.
+#
+# Sets up a staging directory with:
+#   - u-boot-app.efi copied from the build directory
+#   - startup.nsh that launches the EFI app
+#   - a writable copy of the UEFI firmware variables file
+#
+# Required variables (set by the board conf.*):
+#   efi_app_binary  - name of the EFI app (default: u-boot-app.efi)
+#   efi_fw_code     - path to UEFI firmware code (pflash, read-only)
+#   efi_fw_vars     - path to UEFI firmware vars (pflash template)
+#
+# Optional:
+#   efi_use_blockdev - set to "y" for machines that need blockdev-style
+#                      pflash (e.g. RISC-V virt)
+#   efi_virtio_blk   - set to "y" to use virtio-blk for the FAT drive
+
+efi_app_binary="${efi_app_binary:-u-boot-app.efi}"
+
+efi_stage="${U_BOOT_BUILD_DIR}/efi_stage"
+rm -rf "${efi_stage}"
+mkdir -p "${efi_stage}"
+
+cp "${U_BOOT_BUILD_DIR}/${efi_app_binary}" "${efi_stage}/"
+printf 'fs0:%s\n' "${efi_app_binary}" > "${efi_stage}/startup.nsh"
+cp "${efi_fw_vars}" "${efi_stage}/vars.fd"
+
+if [ "${efi_use_blockdev}" = "y" ]; then
+	ARGS+=" -blockdev node-name=pflash0,driver=file,read-only=on,filename=${efi_fw_code}"
+	ARGS+=" -blockdev node-name=pflash1,driver=file,filename=${efi_stage}/vars.fd"
+else
+	ARGS+=" -drive if=pflash,format=raw,file=${efi_fw_code},readonly=on"
+	ARGS+=" -drive if=pflash,format=raw,file=${efi_stage}/vars.fd"
+fi
+
+if [ "${efi_virtio_blk}" = "y" ]; then
+	ARGS+=" -device virtio-blk-device,drive=efi_fat"
+	ARGS+=" -drive id=efi_fat,file=fat:rw:${efi_stage},format=raw"
+else
+	ARGS+=" -drive file=fat:rw:${efi_stage},format=raw"
+fi
