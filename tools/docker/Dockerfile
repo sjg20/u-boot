@@ -118,10 +118,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 	net-tools \
 	ninja-build \
 	openssl \
+	ovmf \
 	picocom \
 	parted \
 	pkg-config \
 	python-is-python3 \
+	qemu-efi-aarch64 \
 	python2.7 \
 	python3 \
 	python3-dev \
@@ -145,6 +147,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 	xilinx-bootgen \
 	xxd \
 	zip
+
+# Install edk2 packages from Noble (not available or incomplete in Jammy)
+RUN for pkg in ovmf-ia32 qemu-efi-riscv64; do \
+	wget -O /tmp/${pkg}.deb \
+		http://security.ubuntu.com/ubuntu/pool/universe/e/edk2/${pkg}_2024.02-2ubuntu0.7_all.deb && \
+	dpkg-deb -x /tmp/${pkg}.deb / && \
+	rm /tmp/${pkg}.deb; \
+    done
 
 # Make kernels readable for libguestfs tools to work correctly
 RUN chmod +r /boot/vmlinu*
