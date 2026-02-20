@@ -550,6 +550,13 @@ qemu_arm64 test.py:
     TEST_PY_TEST_SPEC: "not sleep"
   <<: *buildman_and_testpy_dfn
 
+efi-arm_app64 test.py:
+  variables:
+    TEST_PY_BD: "efi-arm_app64"
+    TEST_PY_TEST_SPEC: "not sleep"
+    OVERRIDE: "-a ~CONSOLE_PAGER"
+  <<: *buildman_and_testpy_dfn
+
 qemu_arm64_lwip test.py:
   variables:
     TEST_PY_BD: "qemu_arm64_lwip"
@@ -628,6 +635,13 @@ qemu-riscv64 test.py:
     TEST_PY_TEST_SPEC: "not sleep"
   <<: *buildman_and_testpy_dfn
 
+efi-riscv_app64 test.py:
+  variables:
+    TEST_PY_BD: "efi-riscv_app64"
+    TEST_PY_TEST_SPEC: "not sleep and not cmd_smbios"
+    OVERRIDE: "-a ~CONSOLE_PAGER"
+  <<: *buildman_and_testpy_dfn
+
 qemu-riscv32_spl test.py:
   variables:
     TEST_PY_BD: "qemu-riscv32_spl"
@@ -656,6 +670,20 @@ qemu-x86 test.py:
   variables:
     TEST_PY_BD: "qemu-x86"
     TEST_PY_TEST_SPEC: "not sleep"
+  <<: *buildman_and_testpy_dfn
+
+efi-x86_app32 test.py:
+  variables:
+    TEST_PY_BD: "efi-x86_app32"
+    TEST_PY_TEST_SPEC: "not sleep"
+    OVERRIDE: "-a ~CONSOLE_PAGER"
+  <<: *buildman_and_testpy_dfn
+
+efi-x86_app64 test.py:
+  variables:
+    TEST_PY_BD: "efi-x86_app64"
+    TEST_PY_TEST_SPEC: "not sleep"
+    OVERRIDE: "-a ~CONSOLE_PAGER"
   <<: *buildman_and_testpy_dfn
 
 qemu-x86_64 test.py:
