@@ -279,6 +279,7 @@ def run_x86_rom_demo(ubman, qemu_binary):
     assert_demo_output(out)
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('qemu-x86')
 @pytest.mark.buildconfigspec("examples")
 def test_ulib_demo_rom(ubman):
@@ -286,6 +287,7 @@ def test_ulib_demo_rom(ubman):
     run_x86_rom_demo(ubman, 'qemu-system-i386')
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('qemu-x86_64_nospl')
 @pytest.mark.buildconfigspec("examples")
 def test_ulib_demo_rom_64(ubman):
@@ -316,6 +318,7 @@ def run_x86_rom_rust_demo(ubman, qemu_binary):
     assert_demo_output(out)
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('qemu-x86')
 @pytest.mark.buildconfigspec("rust_examples")
 def test_ulib_rust_demo_rom(ubman):
@@ -323,6 +326,7 @@ def test_ulib_rust_demo_rom(ubman):
     run_x86_rom_rust_demo(ubman, 'qemu-system-i386')
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('qemu-x86_64_nospl')
 @pytest.mark.buildconfigspec("rust_examples")
 def test_ulib_rust_demo_rom_64(ubman):
@@ -386,6 +390,7 @@ def run_bios_rust_demo(ubman, qemu_binary, extra_qemu_args=None):
     assert_demo_output(out)
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('qemu_arm64')
 @pytest.mark.buildconfigspec("examples")
 def test_ulib_demo_arm64(ubman):
@@ -393,6 +398,7 @@ def test_ulib_demo_arm64(ubman):
     run_bios_demo(ubman, 'qemu-system-aarch64', ['-cpu', 'cortex-a57'])
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('qemu_arm64')
 @pytest.mark.buildconfigspec("rust_examples")
 def test_ulib_rust_demo_arm64(ubman):
@@ -400,6 +406,7 @@ def test_ulib_rust_demo_arm64(ubman):
     run_bios_rust_demo(ubman, 'qemu-system-aarch64', ['-cpu', 'cortex-a57'])
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('qemu-riscv64')
 @pytest.mark.buildconfigspec("examples")
 def test_ulib_demo_riscv64(ubman):
@@ -407,6 +414,7 @@ def test_ulib_demo_riscv64(ubman):
     run_bios_demo(ubman, 'qemu-system-riscv64')
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('qemu-riscv64')
 @pytest.mark.buildconfigspec("rust_examples")
 def test_ulib_rust_demo_riscv64(ubman):
@@ -508,6 +516,7 @@ def run_efi_rust_demo(ubman, qemu_binary, fw_code, fw_vars,
     assert_demo_output(out)
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('efi-x86_app64')
 @pytest.mark.buildconfigspec("examples")
 def test_ulib_demo_efi_x86(ubman):
@@ -517,6 +526,7 @@ def test_ulib_demo_efi_x86(ubman):
                  '/usr/share/OVMF/OVMF_VARS_4M.fd')
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('efi-x86_app64')
 @pytest.mark.buildconfigspec("rust_examples")
 def test_ulib_rust_demo_efi_x86(ubman):
@@ -526,6 +536,7 @@ def test_ulib_rust_demo_efi_x86(ubman):
                       '/usr/share/OVMF/OVMF_VARS_4M.fd')
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('efi-arm_app64')
 @pytest.mark.buildconfigspec("examples")
 def test_ulib_demo_efi_arm64(ubman):
@@ -535,6 +546,7 @@ def test_ulib_demo_efi_arm64(ubman):
                  ['--machine', 'virt', '-cpu', 'max'])
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('efi-arm_app64')
 @pytest.mark.buildconfigspec("rust_examples")
 def test_ulib_rust_demo_efi_arm64(ubman):
@@ -544,6 +556,7 @@ def test_ulib_rust_demo_efi_arm64(ubman):
                       ['--machine', 'virt', '-cpu', 'max'])
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('efi-riscv_app64')
 @pytest.mark.buildconfigspec("examples")
 def test_ulib_demo_efi_riscv64(ubman):
@@ -554,6 +567,7 @@ def test_ulib_demo_efi_riscv64(ubman):
                  ['--machine', 'virt'])
 
 @pytest.mark.localqemu
+@pytest.mark.notbuildconfigspec('efi_app')
 @pytest.mark.boardspec('efi-riscv_app64')
 @pytest.mark.buildconfigspec("rust_examples")
 def test_ulib_rust_demo_efi_riscv64(ubman):
